@@ -1,4 +1,5 @@
-# JötunnModStub
+# Will update README soon!
+## For those wondering if I will remove the special items that I made for my friends, the awnser is yes I will. They will become a sperate mod Soon™!
 
 A Valheim mod stub project using [Jötunn](https://github.com/Valheim-Modding/Jotunn) including build tools and a basic Unity project stub. There is no actual plugin content included, just a bare minimum plugin class. 
 
