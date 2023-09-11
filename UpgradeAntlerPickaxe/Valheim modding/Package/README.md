@@ -15,6 +15,5 @@ The mod comes with a config, be sure to check wether the config has changed on f
 
  ## Roadmap
  There are still some features planned to be implemented:
-
   - ServerSync (Not sure if it already works, untested)
   - Update recipe ingame on config changes
