@@ -1,4 +1,4 @@
-Shader "JVLmock_Particles/Standard Unlit2" {
+Shader "Particles/Standard Unlit2" {
 	Properties {
 		_MainTex ("Albedo", 2D) = "white" {}
 		_Color ("Color", Vector) = (1,1,1,1)

@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: thorGlow
   m_Shader: {fileID: 4800000, guid: c51eab22b8359eb428238fa4a6646bac, type: 3}
-  m_ShaderKeywords: 
+  m_ShaderKeywords:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -20,7 +20,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 86961a3143a08664aabc20dd9fddd3c7, type: 3}
+        m_Texture: {fileID: 2800000, guid: 2ea9a818af50bd8428681a147eb02b94, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:

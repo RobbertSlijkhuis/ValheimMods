@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: fog
-  m_Shader: {fileID: 4800000, guid: 33e690d6121b6f241a5939f0a9596a06, type: 3}
+  m_Shader: {fileID: 32, guid: 0000000000000000f000000000000000, type: 0}
   m_ShaderKeywords: GEOM_TYPE_BRANCH GEOM_TYPE_FROND GEOM_TYPE_MESH _ALPHABLEND_ON
     _FADING_ON _NORMALMAP
   m_LightmapFlags: 0
@@ -29,7 +29,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 4f5118d4bb65f0e4ab145480709e45cf, type: 3}
+        m_Texture: {fileID: 2800000, guid: 20d0f12a78d8ed444b0a15edc044d54e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
@@ -74,6 +74,7 @@ Material:
     - _ShadowDensity: 1
     - _ShadowExtrude: 1
     - _ShadowsPerPixel: 1
+    - _Shininess: 0.078125
     - _SmoothnessTextureChannel: 0
     - _SoftParticlesEnabled: 1
     - _SoftParticlesFarFadeDistance: 1
@@ -92,5 +93,6 @@ Material:
     - _EmisColor: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SoftParticleFadeParams: {r: 0, g: 1, b: 0, a: 0}
+    - _SpecColor: {r: 0.5, g: 0.5, b: 0.5, a: 0}
     - _TintColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
   m_BuildTextureStacks: []

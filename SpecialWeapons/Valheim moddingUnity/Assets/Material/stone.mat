@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: stone
-  m_Shader: {fileID: 4800000, guid: 7898177a2f885a54da7f98d06042a064, type: 3}
+  m_Shader: {fileID: 54, guid: 0000000000000000f000000000000000, type: 0}
   m_ShaderKeywords: _ADDRAIN_ON _EMISSION _NORMALMAP
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 1
@@ -20,7 +20,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BumpMap:
-        m_Texture: {fileID: 2800000, guid: db4ebcae941a75043ad0869fb20ebed5, type: 3}
+        m_Texture: {fileID: 2800000, guid: 04dbc783f5c4d9c4ba5373dc94629d21, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissiveTex:
@@ -32,7 +32,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 2f497a21df2822946aa2d2e803e70789, type: 3}
+        m_Texture: {fileID: 2800000, guid: f557619dbc2bdf04d898eb67301256fe, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetalTex:
@@ -65,6 +65,7 @@ Material:
     - _Parallax: 0.02
     - _RippleDistance: 0
     - _RippleFreq: 1
+    - _Shininess: 0.078125
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
@@ -78,4 +79,5 @@ Material:
     - _Color: {r: 0.7794118, g: 0.7794118, b: 0.7794118, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _MossColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SpecColor: {r: 0.5, g: 0.5, b: 0.5, a: 0}
   m_BuildTextureStacks: []

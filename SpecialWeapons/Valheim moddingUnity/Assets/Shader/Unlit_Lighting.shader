@@ -1,4 +1,4 @@
-Shader "JVLmock_Unlit/Lighting" {
+Shader "Unlit/Lighting" {
 	Properties {
 		[HDR] _Color ("Color", Vector) = (1,1,1,1)
 		_MainTex ("Texture", 2D) = "white" {}

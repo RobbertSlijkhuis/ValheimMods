@@ -1,4 +1,4 @@
-Shader "JVLmock_Particles/Standard Surface2" {
+Shader "Particles/Standard Surface2" {
 	Properties {
 		_MainTex ("Albedo", 2D) = "white" {}
 		_Color ("Color", Vector) = (1,1,1,1)

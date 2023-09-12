@@ -1,16 +1,11 @@
 using BepInEx;
 using BepInEx.Configuration;
-using HarmonyLib;
-using Jotunn;
 using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
-using System.Linq;
+using SpecialWeapons;
 using UnityEngine;
-using static ItemDrop;
-using static ItemSets;
-using static MonoMod.InlineRT.MonoModRule;
 
 namespace ValheimModding
 {
@@ -27,33 +22,98 @@ namespace ValheimModding
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
         public static CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();
 
-        private ConfigEntry<bool> configLoadSpecials;
+        private AssetBundle specialWeaponsBundle;
+        private GameObject hammerPrefabHammer;
+        private GameObject hammerPrefabAtgeir;
+        private GameObject atgeirPrefabAtgeir;
+        private GameObject atgeirPrefabBattleAxe;
+        private GameObject swordPrefabLightning;
+        private GameObject swordPrefabFire;
+        private GameObject swordPrefabFrost;
 
-        // Variable BepInEx Shortcut backed by a config
-        private ConfigEntry<KeyboardShortcut> ShortcutConfig;
-        private ButtonConfig ShortcutButton;
+        private Sprite hammerHammerSprite;
+        private Sprite hammerAtgeirSprite;
+        private Sprite swordLightningSprite;
+        private Sprite swordFireSprite;
+        private Sprite swordFrostSprite;
 
-        private int weaponModeKimetsu = 0;
-        private CustomStatusEffect weaponModeEffect;
-        private AssetBundle marksHarkBundle;
+        private ConfigEntry<bool> configHammerEnable;
+        private ConfigEntry<string> configHammerName;
+        private ConfigEntry<string> configHammerDescription;
+        private ConfigEntry<string> configHammerCraftingStation;
+        private ConfigEntry<int> configHammerMinStationLevel;
+        private ConfigEntry<string> configHammerRecipe;
+        private ConfigEntry<string> configHammerRecipeUpgrade;
+        private ConfigEntry<int> configHammerRecipeMultiplier;
+        private ConfigEntry<int> configHammerMaxQuality;
+        private ConfigEntry<float> configHammerMovementSpeed;
+        private ConfigEntry<float> configHammerDamageMultiplier;
+        private ConfigEntry<int> configHammerBlockArmor;
+        private ConfigEntry<int> configHammerBlockForce;
+        private ConfigEntry<int> configHammerKnockBack;
+        private ConfigEntry<int> configHammerBackStab;
+        private ConfigEntry<int> configHammerUseStamina;
+        private ConfigEntry<int> configHammerUseStaminaHammer;
+        private ConfigEntry<int> configHammerUseStaminaAtgeir;
+
+        private ConfigEntry<bool> configAtgeirEnable;
+        private ConfigEntry<string> configAtgeirName;
+        private ConfigEntry<string> configAtgeirDescription;
+        private ConfigEntry<string> configAtgeirCraftingStation;
+        private ConfigEntry<int> configAtgeirMinStationLevel;
+        private ConfigEntry<string> configAtgeirRecipe;
+        private ConfigEntry<string> configAtgeirRecipeUpgrade;
+        private ConfigEntry<int> configAtgeirRecipeMultiplier;
+        private ConfigEntry<int> configAtgeirMaxQuality;
+        private ConfigEntry<float> configAtgeirMovementSpeed;
+        private ConfigEntry<float> configAtgeirDamageMultiplier;
+        private ConfigEntry<int> configAtgeirBlockArmor;
+        private ConfigEntry<int> configAtgeirBlockForce;
+        private ConfigEntry<int> configAtgeirKnockBack;
+        private ConfigEntry<int> configAtgeirBackStab;
+        private ConfigEntry<int> configAtgeirUseStamina;
+        private ConfigEntry<int> configAtgeirUseStaminaAtgeir;
+        private ConfigEntry<int> configAtgeirUseStaminaPoke;
+
+        private ConfigEntry<bool> configSwordEnable;
+        private ConfigEntry<string> configSwordName;
+        private ConfigEntry<string> configSwordDescription;
+        private ConfigEntry<string> configSwordCraftingStation;
+        private ConfigEntry<int> configSwordMinStationLevel;
+        private ConfigEntry<string> configSwordRecipe;
+        private ConfigEntry<string> configSwordRecipeUpgrade;
+        private ConfigEntry<int> configSwordRecipeMultiplier;
+        private ConfigEntry<int> configSwordMaxQuality;
+
+        private ConfigEntry<KeyboardShortcut> configWeaponModeKey;
+
+        private ButtonConfig hammerWeaponModeButton;
+
+        private CustomStatusEffect hammerHammerStatusEffect;
+        private CustomStatusEffect hammerAtgeirStatusEffect;
+        private CustomStatusEffect swordLightningStatusEffect;
+        private CustomStatusEffect swordFireStatusEffect;
+        private CustomStatusEffect swordFrostStatusEffect;
 
         private void Awake()
         {
             ModQuery.Enable();
 
-            AddStatusEffects();
-            HandleConfigValues();
-            AddInputs();
+            InitConfig();
+            InitAssetBundle();
+            InitInputs();
+            InitStatusEffects();
 
-            if (configLoadSpecials.Value)
-            {
-                PrefabManager.OnVanillaPrefabsAvailable += AddKimetsusSpecial;
-                PrefabManager.OnVanillaPrefabsAvailable += AddDirksBoner;
-                PrefabManager.OnVanillaPrefabsAvailable += AddMarksHark;
-            }
+            if (configHammerEnable.Value)
+                PrefabManager.OnVanillaPrefabsAvailable += AddHammer;
+
+            if (configSwordEnable.Value)
+                PrefabManager.OnVanillaPrefabsAvailable += AddSword;
+
+            if (configAtgeirEnable.Value)
+                PrefabManager.OnVanillaPrefabsAvailable += AddAtgeir;
         }
 
-        // Called every frame
         private void Update()
         {
             // Since our Update function in our BepInEx mod class will load BEFORE Valheim loads,
@@ -61,45 +121,81 @@ namespace ValheimModding
             if (ZInput.instance != null)
             {
                 // KeyboardShortcuts are also injected into the ZInput system
-                if (ShortcutButton != null && MessageHud.instance != null)
+                if (hammerWeaponModeButton != null && MessageHud.instance != null)
                 {
-                    if (ZInput.GetButtonDown(ShortcutButton.Name) && MessageHud.instance.m_msgQeue.Count == 0)
+                    if (ZInput.GetButtonDown(hammerWeaponModeButton.Name) && MessageHud.instance.m_msgQeue.Count == 0)
                     {
-                        GameObject itemObject = PrefabManager.Instance.GetPrefab("KimetsusSpecial_DW");
-                        ItemDrop item = itemObject.GetComponent<ItemDrop>();
-                        GameObject targetItemObject;
-
-                        if (weaponModeKimetsu == 0)
+                        if (Player.m_localPlayer)
                         {
-                            targetItemObject = PrefabManager.Instance.GetPrefab("AtgeirHimminAflClone");
-                            ItemDrop targetItem = targetItemObject.GetComponent<ItemDrop>();
-
-                            if (Player.m_localPlayer)
+                            ItemDrop.ItemData weapon = Player.m_localPlayer.GetCurrentWeapon();
+                            if (weapon != null && weapon.m_shared.m_name == configHammerName.Value)
                             {
-                                ItemDrop.ItemData weapon = Player.m_localPlayer.GetCurrentWeapon();
-                                if (weapon != null && weapon.m_shared.m_name == "Kimetsu's Special")
+                                if (weapon.m_shared.m_attack.m_drawDurationMin == 0)
                                 {
-                                    weapon.m_shared.m_secondaryAttack = targetItem.m_itemData.m_shared.m_secondaryAttack;
-                                    weaponModeKimetsu = 1;
-                                    MessageHud.instance.ShowMessage(MessageHud.MessageType.Center, "Changed mode to " + (weaponModeKimetsu == 0 ? "Hammer" : "Atgeir"));
+                                    ItemDrop itemDrop = hammerPrefabAtgeir.GetComponent<ItemDrop>();
+                                    weapon.m_dropPrefab = hammerPrefabAtgeir;
+                                    weapon.m_shared = itemDrop.m_itemData.m_shared;
+                                    weapon.m_shared.m_attack.m_drawDurationMin = 1;
                                 }
+                                else
+                                {
+                                    ItemDrop itemDrop = hammerPrefabHammer.GetComponent<ItemDrop>();
+                                    weapon.m_dropPrefab = hammerPrefabHammer;
+                                    weapon.m_shared = itemDrop.m_itemData.m_shared;
+                                    weapon.m_shared.m_attack.m_drawDurationMin = 0;
+                                }
+
+                                Player.m_localPlayer.UnequipItem(weapon);
+                                Player.m_localPlayer.EquipItem(weapon);
+                                MessageHud.instance.ShowMessage(MessageHud.MessageType.Center, "Changed mode to " + (weapon.m_shared.m_attack.m_drawDurationMin == 0 ? "Hammer" : "Atgeir"));
                             }
-                        }
-                        else
-                        {
-                            // Create a clone of the original GameObject that was used to create the item (to prevent other changes from other mods)
-                            targetItemObject = PrefabManager.Instance.GetPrefab("SledgeDemolisherClone");
-                            ItemDrop targetItem = targetItemObject.GetComponent<ItemDrop>();
 
-                            if (Player.m_localPlayer)
+                            else if (weapon != null && weapon.m_shared.m_name == configAtgeirName.Value)
                             {
-                                ItemDrop.ItemData weapon = Player.m_localPlayer.GetCurrentWeapon();
-                                if (weapon != null && weapon.m_shared.m_name == "Kimetsu's Special")
+                                if (weapon.m_shared.m_attack.m_drawDurationMin == 0)
                                 {
-                                    weapon.m_shared.m_secondaryAttack = targetItem.m_itemData.m_shared.m_attack;
-                                    weaponModeKimetsu = 0;
-                                    MessageHud.instance.ShowMessage(MessageHud.MessageType.Center, "Changed mode to " + (weaponModeKimetsu == 0 ? "Hammer" : "Atgeir"));
+                                    ItemDrop itemDrop = atgeirPrefabBattleAxe.GetComponent<ItemDrop>();
+                                    weapon.m_shared = itemDrop.m_itemData.m_shared;
+                                    weapon.m_shared.m_attack.m_drawDurationMin = 1;
                                 }
+                                else
+                                {
+                                    ItemDrop itemDrop = atgeirPrefabAtgeir.GetComponent<ItemDrop>();
+                                    weapon.m_shared = itemDrop.m_itemData.m_shared;
+                                    weapon.m_shared.m_attack.m_drawDurationMin = 0;
+                                }
+
+                                MessageHud.instance.ShowMessage(MessageHud.MessageType.Center, "Changed mode to " + (weapon.m_shared.m_attack.m_drawDurationMin == 0 ? "Atgeir" : "Poke"));
+                            }
+
+                            else if (weapon != null && weapon.m_shared.m_name == "Dirks Dominance")
+                            {
+                                if (weapon.m_shared.m_attack.m_drawDurationMin == 0)
+                                {
+                                    ItemDrop itemDrop = swordPrefabFire.GetComponent<ItemDrop>();
+                                    weapon.m_dropPrefab = swordPrefabFire;
+                                    weapon.m_shared = itemDrop.m_itemData.m_shared;
+                                    weapon.m_shared.m_attack.m_drawDurationMin = 1;
+                                }
+                                else if (weapon.m_shared.m_attack.m_drawDurationMin == 1)
+                                {
+                                    ItemDrop itemDrop = swordPrefabFrost.GetComponent<ItemDrop>();
+                                    weapon.m_dropPrefab = swordPrefabFrost;
+                                    weapon.m_shared = itemDrop.m_itemData.m_shared;
+                                    weapon.m_shared.m_attack.m_drawDurationMin = 2;
+                                }
+                                else
+                                {
+                                    ItemDrop itemDrop = swordPrefabLightning.GetComponent<ItemDrop>();
+                                    weapon.m_dropPrefab = swordPrefabLightning;
+                                    weapon.m_shared = itemDrop.m_itemData.m_shared;
+                                    weapon.m_shared.m_attack.m_drawDurationMin = 0;
+                                }
+
+                                Player.m_localPlayer.UnequipItem(weapon);
+                                Player.m_localPlayer.EquipItem(weapon);
+                                // Player.m_localPlayer.StartEmote("Cheer");
+                                MessageHud.instance.ShowMessage(MessageHud.MessageType.Center, "Changed mode to " + (weapon.m_shared.m_attack.m_drawDurationMin == 0 ? "Lightning" : weapon.m_shared.m_attack.m_drawDurationMin == 1 ? "Fire" : "Frost"));
                             }
                         }
                     }
@@ -107,221 +203,451 @@ namespace ValheimModding
             }
         }
 
-        private void HandleConfigValues()
+        private void AddHammer()
         {
-            ConfigurationManagerAttributes isAdminOnly = new ConfigurationManagerAttributes { IsAdminOnly = true };
-            configLoadSpecials = base.Config.Bind(new ConfigDefinition("General", "Special weapons"), false, new ConfigDescription("Wether or not to enable special weapons I created", null, new ConfigurationManagerAttributes { IsAdminOnly = true }));
+            ConfigRecipe recipe = new ConfigRecipe(configHammerRecipe.Value, configHammerRecipeUpgrade.Value);
+            ItemConfig itemConfig = new ItemConfig();
+            itemConfig.Name = configHammerName.Value;
+            itemConfig.Description = configHammerDescription.Value;
+            itemConfig.CraftingStation = configHammerCraftingStation.Value;
+            itemConfig.MinStationLevel = configHammerMinStationLevel.Value;
 
-            // BepInEx' KeyboardShortcut class is supported, too
-            ShortcutConfig = Config.Bind("Special mode", "Keycodes with modifiers", new KeyboardShortcut(KeyCode.Y), new ConfigDescription("Secret key combination", null, new ConfigurationManagerAttributes { IsAdminOnly = true }));
-        }
-
-        private void AddInputs()
-        {
-            // Supply your KeyboardShortcut configs to ShortcutConfig instead.
-            ShortcutButton = new ButtonConfig
+            foreach (var requirement in recipe.requirements)
             {
-                Name = "SecretShortcut",
-                ShortcutConfig = ShortcutConfig,
-                HintToken = "$lulzcut"
-            };
-            InputManager.Instance.AddButton(PluginGUID, ShortcutButton);
-        }
-
-        private void AddKimetsusSpecial()
-        {
-            bool warfareInstalled = false;
-            Jotunn.Logger.LogInfo($"Modded prefabs:");
-            foreach (var moddedPrefab in ModQuery.GetPrefabs())
-            {
-                Jotunn.Logger.LogInfo($"  {moddedPrefab.Prefab.name} added by {moddedPrefab.SourceMod.Name}");
-                if (moddedPrefab.Prefab.name == "BattlehammerDvergr_TW")
-                {
-                    warfareInstalled = true;
-                    Jotunn.Logger.LogInfo("Found Battlehammer!");
-                }
+                int multiplier = configHammerRecipeMultiplier.Value != 0 ? configHammerRecipeMultiplier.Value : 1;
+                int amountPerlevel = requirement.amountPerLevel * multiplier;
+                itemConfig.AddRequirement(new RequirementConfig(requirement.material, requirement.amount, amountPerlevel, true));
             }
 
-            // Create item config for custom item
+            ItemDrop itemDropHammer = hammerPrefabHammer.GetComponent<ItemDrop>();
+            itemDropHammer.m_itemData.m_shared.m_maxQuality = configHammerMaxQuality.Value;
+            itemDropHammer.m_itemData.m_shared.m_equipStatusEffect = hammerHammerStatusEffect.StatusEffect;
+            itemDropHammer.m_itemData.m_shared.m_movementModifier = configHammerMovementSpeed.Value;
+            itemDropHammer.m_itemData.m_shared.m_damages.m_blunt = itemDropHammer.m_itemData.m_shared.m_damages.m_blunt * configHammerDamageMultiplier.Value;
+            itemDropHammer.m_itemData.m_shared.m_damages.m_lightning = itemDropHammer.m_itemData.m_shared.m_damages.m_lightning * configHammerDamageMultiplier.Value;
+            itemDropHammer.m_itemData.m_shared.m_blockPower = configHammerBlockArmor.Value;
+            itemDropHammer.m_itemData.m_shared.m_deflectionForce = configHammerBlockForce.Value;
+            itemDropHammer.m_itemData.m_shared.m_attackForce = configHammerKnockBack.Value;
+            itemDropHammer.m_itemData.m_shared.m_backstabBonus = configHammerBackStab.Value;
+            itemDropHammer.m_itemData.m_shared.m_attack.m_attackStamina = configHammerUseStamina.Value;
+            itemDropHammer.m_itemData.m_shared.m_secondaryAttack.m_attackStamina = configHammerUseStaminaHammer.Value;
+
+            ItemDrop itemDropAtgeir = hammerPrefabAtgeir.GetComponent<ItemDrop>();
+            itemDropAtgeir.m_itemData.m_shared.m_maxQuality = configHammerMaxQuality.Value;
+            itemDropAtgeir.m_itemData.m_shared.m_equipStatusEffect = hammerAtgeirStatusEffect.StatusEffect;
+            itemDropAtgeir.m_itemData.m_shared.m_movementModifier = configHammerMovementSpeed.Value;
+            itemDropAtgeir.m_itemData.m_shared.m_damages.m_blunt = itemDropAtgeir.m_itemData.m_shared.m_damages.m_blunt * configHammerDamageMultiplier.Value;
+            itemDropAtgeir.m_itemData.m_shared.m_damages.m_lightning = itemDropAtgeir.m_itemData.m_shared.m_damages.m_lightning * configHammerDamageMultiplier.Value;
+            itemDropAtgeir.m_itemData.m_shared.m_blockPower = configHammerBlockArmor.Value;
+            itemDropAtgeir.m_itemData.m_shared.m_deflectionForce = configHammerBlockForce.Value;
+            itemDropAtgeir.m_itemData.m_shared.m_attackForce = configHammerKnockBack.Value;
+            itemDropAtgeir.m_itemData.m_shared.m_backstabBonus = configHammerBackStab.Value;
+            itemDropAtgeir.m_itemData.m_shared.m_attack.m_attackStamina = configHammerUseStamina.Value;
+            itemDropAtgeir.m_itemData.m_shared.m_secondaryAttack.m_attackStamina = configHammerUseStaminaAtgeir.Value;
+
+            ItemManager.Instance.AddItem(new CustomItem(hammerPrefabHammer, true, itemConfig));
+            ItemManager.Instance.AddItem(new CustomItem(hammerPrefabAtgeir, true, new ItemConfig()));
+            PrefabManager.OnVanillaPrefabsAvailable -= AddHammer;
+        }
+
+        private void AddSword()
+        {
+            ConfigRecipe recipe = new ConfigRecipe(configSwordRecipe.Value, configSwordRecipeUpgrade.Value);
             ItemConfig itemConfig = new ItemConfig();
-            itemConfig.CraftingStation = CraftingStations.Forge;
-            itemConfig.AddRequirement(new RequirementConfig("Silver", 25, 5));
-            itemConfig.AddRequirement(new RequirementConfig("ElderBark", 20, 5));
-            itemConfig.AddRequirement(new RequirementConfig("WolfFang", 10, 5));
-            itemConfig.AddRequirement(new RequirementConfig("TrophyCultist", 1));
+            itemConfig.Name = configSwordName.Value;
+            itemConfig.Description = configSwordDescription.Value;
+            itemConfig.CraftingStation = configSwordCraftingStation.Value;
+            itemConfig.MinStationLevel = configSwordMinStationLevel.Value;
 
-            // Create our custom item based of another
-            CustomItem item = new CustomItem("KimetsusSpecial_DW", warfareInstalled ? "BattlehammerDvergr_TW" : "SledgeDemolisher", itemConfig);
+            foreach (var requirement in recipe.requirements)
+            {
+                int multiplier = configSwordRecipeMultiplier.Value != 0 ? configSwordRecipeMultiplier.Value : 1;
+                int amountPerlevel = requirement.amountPerLevel * multiplier;
+                itemConfig.AddRequirement(new RequirementConfig(requirement.material, requirement.amount, amountPerlevel, true));
+            }
 
-            // Clone the GameObject of our target item
-            GameObject targetItemObject = PrefabManager.Instance.CreateClonedPrefab("BattleaxeCrystalClone", "BattleaxeCrystal");
-            ItemDrop targetItem = targetItemObject.GetComponent<ItemDrop>();
+            ItemDrop itemDropLightning = swordPrefabLightning.GetComponent<ItemDrop>();
+            itemDropLightning.m_itemData.m_shared.m_maxQuality = configSwordMaxQuality.Value;
+            itemDropLightning.m_itemData.m_shared.m_equipStatusEffect = swordLightningStatusEffect.StatusEffect;
+            ItemDrop itemDropFire = swordPrefabFire.GetComponent<ItemDrop>();
+            itemDropFire.m_itemData.m_shared.m_maxQuality = configSwordMaxQuality.Value;
+            itemDropFire.m_itemData.m_shared.m_equipStatusEffect = swordFireStatusEffect.StatusEffect;
+            ItemDrop itemDropFrost = swordPrefabFrost.GetComponent<ItemDrop>();
+            itemDropFrost.m_itemData.m_shared.m_maxQuality = configSwordMaxQuality.Value;
+            itemDropFrost.m_itemData.m_shared.m_equipStatusEffect = swordFrostStatusEffect.StatusEffect;
 
-            // Create a clone of the original GameObject that was used to create the item (to prevent other changes from other mods)
-            GameObject originalItemObject = PrefabManager.Instance.CreateClonedPrefab("SledgeDemolisherClone", warfareInstalled ? "BattlehammerDvergr_TW" : "SledgeDemolisher");
-            ItemDrop originalItem = originalItemObject.GetComponent<ItemDrop>();
+            ItemManager.Instance.AddItem(new CustomItem(swordPrefabLightning, true, itemConfig));
+            ItemManager.Instance.AddItem(new CustomItem(swordPrefabFire, true, new ItemConfig()));
+            ItemManager.Instance.AddItem(new CustomItem(swordPrefabFrost, true, new ItemConfig()));
 
-            GameObject effectItemObject = PrefabManager.Instance.CreateClonedPrefab("AtgeirHimminAflClone", "AtgeirHimminAfl");
-            ItemDrop effectItem = effectItemObject.GetComponent<ItemDrop>();
+            //CustomItem DirksBoner = new CustomItem("DirksBoner_DW", "SwordMistwalker", DirkBonerConfig);
 
-            EffectList.EffectData fxHimminAflHit = new EffectList.EffectData();
-            fxHimminAflHit.m_prefab = PrefabManager.Cache.GetPrefab<GameObject>("fx_himminafl_hit");
-            fxHimminAflHit.m_enabled = true;
-            fxHimminAflHit.m_variant = 0;
+            //// Stats
+            //DirksBoner.ItemDrop.m_itemData.m_shared.m_damages.m_damage = 0;
+            //DirksBoner.ItemDrop.m_itemData.m_shared.m_damages.m_slash = 35;
+            //DirksBoner.ItemDrop.m_itemData.m_shared.m_damages.m_frost = 40;
+            //DirksBoner.ItemDrop.m_itemData.m_shared.m_damages.m_spirit = 20;
+            //DirksBoner.ItemDrop.m_itemData.m_shared.m_attack.m_attackStamina = 12;
+            //DirksBoner.ItemDrop.m_itemData.m_shared.m_blockPower = 30;
+            //DirksBoner.ItemDrop.m_itemData.m_shared.m_attackForce = 80;
+            //DirksBoner.ItemDrop.m_itemData.m_shared.m_deflectionForce = 30;
 
-            //// Retrieve asset bundle
-            marksHarkBundle = AssetUtils.LoadAssetBundleFromResources("markshark_dw");
-            var lightningAOEObject = marksHarkBundle.LoadAsset<GameObject>("lightningAOE_no_damage");
+            //// Quality
+            //DirksBoner.ItemDrop.m_itemData.m_shared.m_maxQuality = 10;
+            //DirksBoner.ItemDrop.m_itemData.m_shared.m_damagesPerLevel.m_slash = 3;
+            //DirksBoner.ItemDrop.m_itemData.m_shared.m_damagesPerLevel.m_frost = 3;
+            //DirksBoner.ItemDrop.m_itemData.m_shared.m_damagesPerLevel.m_spirit = 3;
+            //DirksBoner.ItemDrop.m_itemData.m_shared.m_blockPowerPerLevel = 5;
+            //DirksBoner.ItemDrop.m_itemData.m_shared.m_durabilityPerLevel = 50;
 
-            EffectList.EffectData lightningAOE = new EffectList.EffectData();
-            //lightningAOE.m_prefab = PrefabManager.Cache.GetPrefab<GameObject>("lightningAOE");
-            lightningAOE.m_prefab = lightningAOEObject;
-            lightningAOE.m_enabled = true;
-            lightningAOE.m_variant = -1;
+            //ItemManager.Instance.AddItem(DirksBoner);
 
-            EffectList.EffectData[] onlyFxHimminAflHit = new EffectList.EffectData[] { fxHimminAflHit };
-            EffectList.EffectData[] onlyLightningAOE = new EffectList.EffectData[] { lightningAOE };
 
-            // Apply target/original/effect item values to custom item
-            item.ItemDrop.m_itemData.m_shared = targetItem.m_itemData.m_shared;
-            item.ItemDrop.m_itemData.m_shared.m_name = "Kimetsu's Special";
-            item.ItemDrop.m_itemData.m_shared.m_description = "May the bones of you enemies forever be crushed, my friend... to dust!";
-            item.ItemDrop.m_itemData.m_shared.m_icons = originalItem.m_itemData.m_shared.m_icons;
-            item.ItemDrop.m_itemData.m_shared.m_equipStatusEffect = weaponModeEffect.StatusEffect;
-            item.ItemDrop.m_itemData.m_shared.m_attack.m_hitEffect.m_effectPrefabs = onlyFxHimminAflHit;
-
-            // Override second attack
-            item.ItemDrop.m_itemData.m_shared.m_secondaryAttack = originalItem.m_itemData.m_shared.m_attack;
-            item.ItemDrop.m_itemData.m_shared.m_secondaryAttack.m_triggerEffect = originalItem.m_itemData.m_shared.m_triggerEffect;
-            item.ItemDrop.m_itemData.m_shared.m_secondaryAttack.m_hitEffect.m_effectPrefabs = onlyLightningAOE;
-
-            // Override other stats
-            item.ItemDrop.m_itemData.m_shared.m_skillType = Skills.SkillType.Clubs;
-            item.ItemDrop.m_itemData.m_shared.m_movementModifier = -0.05f;
-            item.ItemDrop.m_itemData.m_shared.m_damages.m_damage = 0;
-            item.ItemDrop.m_itemData.m_shared.m_damages.m_slash = 0;
-            item.ItemDrop.m_itemData.m_shared.m_damages.m_blunt = 75;
-            item.ItemDrop.m_itemData.m_shared.m_damagesPerLevel.m_blunt = 5;
-            item.ItemDrop.m_itemData.m_shared.m_damagesPerLevel.m_spirit = 3;
-            item.ItemDrop.m_itemData.m_shared.m_attack.m_attackStamina = 18;
-            item.ItemDrop.m_itemData.m_shared.m_attackForce = 75;
-            item.ItemDrop.m_itemData.m_shared.m_blockPower = 40;
-            item.ItemDrop.m_itemData.m_shared.m_blockPowerPerLevel = 5;
-            item.ItemDrop.m_itemData.m_durability = 200f;
-            item.ItemDrop.m_itemData.m_shared.m_maxDurability = 200f;
-            item.ItemDrop.m_itemData.m_shared.m_durabilityPerLevel = 50;
-            item.ItemDrop.m_itemData.m_shared.m_maxQuality = 10;
-
-            // Add item to instance and remove this function from the event
-            ItemManager.Instance.AddItem(item);
-            PrefabManager.OnVanillaPrefabsAvailable -= AddKimetsusSpecial;
+            PrefabManager.OnVanillaPrefabsAvailable -= AddSword;
         }
 
-        private void AddDirksBoner()
+        private void AddAtgeir()
         {
-            ItemConfig DirkBonerConfig = new ItemConfig();
-            DirkBonerConfig.Name = "Dirk's Boner";
-            DirkBonerConfig.Description = "I'm going in hard and I'm going in fast... gotta assert my DOMINANCE!";
-            DirkBonerConfig.CraftingStation = CraftingStations.Forge;
-            DirkBonerConfig.AddRequirement(new RequirementConfig("Silver", 25, 5));
-            DirkBonerConfig.AddRequirement(new RequirementConfig("ElderBark", 10, 5));
-            DirkBonerConfig.AddRequirement(new RequirementConfig("FreezeGland", 5, 3));
-            DirkBonerConfig.AddRequirement(new RequirementConfig("YmirRemains", 5));
-
-            CustomItem DirksBoner = new CustomItem("DirksBoner_DW", "SwordMistwalker", DirkBonerConfig);
-
-            // Stats
-            DirksBoner.ItemDrop.m_itemData.m_shared.m_damages.m_damage = 0;
-            DirksBoner.ItemDrop.m_itemData.m_shared.m_damages.m_slash = 35;
-            DirksBoner.ItemDrop.m_itemData.m_shared.m_damages.m_frost = 40;
-            DirksBoner.ItemDrop.m_itemData.m_shared.m_damages.m_spirit = 20;
-            DirksBoner.ItemDrop.m_itemData.m_shared.m_attack.m_attackStamina = 12;
-            DirksBoner.ItemDrop.m_itemData.m_shared.m_blockPower = 30;
-            DirksBoner.ItemDrop.m_itemData.m_shared.m_attackForce = 80;
-            DirksBoner.ItemDrop.m_itemData.m_shared.m_deflectionForce = 30;
-
-            // Quality
-            DirksBoner.ItemDrop.m_itemData.m_shared.m_maxQuality = 10;
-            DirksBoner.ItemDrop.m_itemData.m_shared.m_damagesPerLevel.m_slash = 3;
-            DirksBoner.ItemDrop.m_itemData.m_shared.m_damagesPerLevel.m_frost = 3;
-            DirksBoner.ItemDrop.m_itemData.m_shared.m_damagesPerLevel.m_spirit = 3;
-            DirksBoner.ItemDrop.m_itemData.m_shared.m_blockPowerPerLevel = 5;
-            DirksBoner.ItemDrop.m_itemData.m_shared.m_durabilityPerLevel = 50;
-
-            ItemManager.Instance.AddItem(DirksBoner);
-            PrefabManager.OnVanillaPrefabsAvailable -= AddDirksBoner;
-        }
-
-        private void AddMarksHark()
-        {
-            // var EmbeddedResourceBundle = AssetUtils.LoadAssetBundleFromResources("lightningaoe_no_damage");
-            // GameObject lightningAOEPrefab = EmbeddedResourceBundle.LoadAsset<GameObject>("lightningaoe_no_damage");
-
-            // Create item config for custom item
+            ConfigRecipe recipe = new ConfigRecipe(configAtgeirRecipe.Value, configAtgeirRecipeUpgrade.Value);
             ItemConfig itemConfig = new ItemConfig();
-            itemConfig.CraftingStation = CraftingStations.Forge;
-            itemConfig.AddRequirement(new RequirementConfig("Silver", 30, 5));
-            itemConfig.AddRequirement(new RequirementConfig("ElderBark", 15, 5));
-            itemConfig.AddRequirement(new RequirementConfig("FreezeGland", 7, 3));
-            itemConfig.AddRequirement(new RequirementConfig("YmirRemains", 5));
+            itemConfig.Name = configAtgeirName.Value;
+            itemConfig.Description = configAtgeirDescription.Value;
+            itemConfig.CraftingStation = configAtgeirCraftingStation.Value;
+            itemConfig.MinStationLevel = configAtgeirMinStationLevel.Value;
 
-            ////// Create our custom item based of another
-            ////CustomItem item = new CustomItem("MarksHark_DW", "Cultivator", itemConfig);
+            foreach (var requirement in recipe.requirements)
+            {
+                int multiplier = configAtgeirRecipeMultiplier.Value != 0 ? configAtgeirRecipeMultiplier.Value : 1;
+                int amountPerlevel = requirement.amountPerLevel * multiplier;
+                itemConfig.AddRequirement(new RequirementConfig(requirement.material, requirement.amount, amountPerlevel, true));
+            }
 
-            //// Clone the GameObject of our target item
-            //GameObject targetItemObject = PrefabManager.Instance.CreateClonedPrefab("AtgeirHimminAflClone", "AtgeirHimminAfl");
-            //ItemDrop targetItem = targetItemObject.GetComponent<ItemDrop>();
+            ItemDrop itemDropAtgeir = atgeirPrefabAtgeir.GetComponent<ItemDrop>();
+            itemDropAtgeir.m_itemData.m_shared.m_maxQuality = configAtgeirMaxQuality.Value;
+            itemDropAtgeir.m_itemData.m_shared.m_movementModifier = configAtgeirMovementSpeed.Value;
+            itemDropAtgeir.m_itemData.m_shared.m_damages.m_pierce = itemDropAtgeir.m_itemData.m_shared.m_damages.m_blunt * configAtgeirDamageMultiplier.Value;
+            itemDropAtgeir.m_itemData.m_shared.m_damages.m_lightning = itemDropAtgeir.m_itemData.m_shared.m_damages.m_lightning * configAtgeirDamageMultiplier.Value;
+            itemDropAtgeir.m_itemData.m_shared.m_blockPower = configAtgeirBlockArmor.Value;
+            itemDropAtgeir.m_itemData.m_shared.m_deflectionForce = configAtgeirBlockForce.Value;
+            itemDropAtgeir.m_itemData.m_shared.m_attackForce = configAtgeirKnockBack.Value;
+            itemDropAtgeir.m_itemData.m_shared.m_backstabBonus = configAtgeirBackStab.Value;
+            itemDropAtgeir.m_itemData.m_shared.m_attack.m_attackStamina = configAtgeirUseStamina.Value;
+            itemDropAtgeir.m_itemData.m_shared.m_secondaryAttack.m_attackStamina = configAtgeirUseStaminaAtgeir.Value;
 
-            //// Create a clone of the original GameObject that was used to create the item (to prevent other changes from other mods)
-            //GameObject originalItemObject = PrefabManager.Instance.CreateClonedPrefab("CultivatorClone", "Cultivator");
-            //ItemDrop originalItem = originalItemObject.GetComponent<ItemDrop>();
+            ItemDrop itemDropBattleAxe = atgeirPrefabBattleAxe.GetComponent<ItemDrop>();
+            itemDropBattleAxe.m_itemData.m_shared.m_maxQuality = configAtgeirMaxQuality.Value;
+            itemDropBattleAxe.m_itemData.m_shared.m_movementModifier = configAtgeirMovementSpeed.Value;
+            itemDropBattleAxe.m_itemData.m_shared.m_damages.m_pierce = itemDropBattleAxe.m_itemData.m_shared.m_damages.m_blunt * configAtgeirDamageMultiplier.Value;
+            itemDropBattleAxe.m_itemData.m_shared.m_damages.m_lightning = itemDropBattleAxe.m_itemData.m_shared.m_damages.m_lightning * configAtgeirDamageMultiplier.Value;
+            itemDropBattleAxe.m_itemData.m_shared.m_blockPower = configAtgeirBlockArmor.Value;
+            itemDropBattleAxe.m_itemData.m_shared.m_deflectionForce = configAtgeirBlockForce.Value;
+            itemDropBattleAxe.m_itemData.m_shared.m_attackForce = configAtgeirKnockBack.Value;
+            itemDropBattleAxe.m_itemData.m_shared.m_backstabBonus = configAtgeirBackStab.Value;
+            itemDropBattleAxe.m_itemData.m_shared.m_attack.m_attackStamina = configAtgeirUseStamina.Value;
+            itemDropBattleAxe.m_itemData.m_shared.m_secondaryAttack.m_attackStamina = configAtgeirUseStaminaPoke.Value;
 
-            //// Create a clone of the original GameObject that was used to create the item (to prevent other changes from other mods)
-            //GameObject itemObject = PrefabManager.Instance.CreateClonedPrefab("MarksHark_DW", "Cultivator");
-            //ItemDrop item = itemObject.GetComponent<ItemDrop>();
-
-            //EffectList.EffectData lightningAOE = new EffectList.EffectData();
-            //// lightningAOE.m_prefab = PrefabManager.Cache.GetPrefab<GameObject>("fx_himminafl_aoe");
-            //lightningAOE.m_prefab = lightningAOEPrefab;
-            //lightningAOE.m_enabled = true;
-            //lightningAOE.m_variant = -1;
-
-            //EffectList.EffectData[] onlyLightningAOE = new EffectList.EffectData[] { lightningAOE };
-
-            //// Apply target/original item values to custom item
-            //item.m_itemData.m_shared = targetItem.m_itemData.m_shared;
-            //item.m_itemData.m_shared.m_name = "Mark's Hark";
-            //item.m_itemData.m_shared.m_description = "I'mma steal them sweet lewds from Durk! Grabby grabby!";
-            //item.m_itemData.m_shared.m_icons = originalItem.m_itemData.m_shared.m_icons;
-            //item.m_itemData.m_shared.m_secondaryAttack.m_triggerEffect.m_effectPrefabs = onlyLightningAOE;
-
-            //// Reduce range on attack
-            //item.m_itemData.m_shared.m_attack.m_attackRange = 2.5f;
-
-            // Retrieve asset bundle
-            // AssetBundle marksHarkBundle = AssetUtils.LoadAssetBundleFromResources("markshark_dw");
-
-            // Add item to instance and remove this function from the event
-            ItemManager.Instance.AddItem(new CustomItem(marksHarkBundle, "MarksHark_DW", true, itemConfig));
-            PrefabManager.OnVanillaPrefabsAvailable -= AddMarksHark;
+            ItemManager.Instance.AddItem(new CustomItem(atgeirPrefabAtgeir, true, itemConfig));
+            ItemManager.Instance.AddItem(new CustomItem(atgeirPrefabBattleAxe, true, new ItemConfig()));
+            PrefabManager.OnVanillaPrefabsAvailable -= AddAtgeir;
         }
 
-        // Add new status effects
-        private void AddStatusEffects()
+        private void InitStatusEffects()
         {
-            StatusEffect effect = ScriptableObject.CreateInstance<StatusEffect>();
-            effect.name = "WeaponMode";
-            effect.m_name = "Weapon Mode";
-            effect.m_icon = AssetUtils.LoadSpriteFromFile("Package/Assets/rune_test.png");
-            effect.m_startMessageType = MessageHud.MessageType.Center;
-            effect.m_startMessage = "Start";
-            effect.m_stopMessageType = MessageHud.MessageType.Center;
-            effect.m_stopMessage = "Stop";
+            StatusEffect hammerHammerEffect = ScriptableObject.CreateInstance<StatusEffect>();
+            hammerHammerEffect.name = "HammerHammerEffect";
+            hammerHammerEffect.m_name = "Hammer Mode";
+            hammerHammerEffect.m_icon = hammerHammerSprite;
+            hammerHammerEffect.m_startMessageType = MessageHud.MessageType.Center;
+            hammerHammerEffect.m_startMessage = "";
+            hammerHammerEffect.m_stopMessageType = MessageHud.MessageType.Center;
+            hammerHammerEffect.m_stopMessage = "";
+            hammerHammerEffect.m_tooltip = "Hammer Time!";
+            hammerHammerStatusEffect = new CustomStatusEffect(hammerHammerEffect, fixReference: false);  // We dont need to fix refs here, because no mocks were used
+            ItemManager.Instance.AddStatusEffect(hammerHammerStatusEffect);
 
-            Jotunn.Logger.LogInfo(effect.m_icon != null);
+            StatusEffect hammerAtgeirEffect = ScriptableObject.CreateInstance<StatusEffect>();
+            hammerAtgeirEffect.name = "HammerAtgeirEffect";
+            hammerAtgeirEffect.m_name = "Atgeir Mode";
+            hammerAtgeirEffect.m_icon = hammerAtgeirSprite;
+            hammerAtgeirEffect.m_startMessageType = MessageHud.MessageType.Center;
+            hammerAtgeirEffect.m_startMessage = "";
+            hammerAtgeirEffect.m_stopMessageType = MessageHud.MessageType.Center;
+            hammerAtgeirEffect.m_stopMessage = "";
+            hammerAtgeirEffect.m_tooltip = "Swirl that Hammer around as if it was an Atgeir!";
+            hammerAtgeirStatusEffect = new CustomStatusEffect(hammerAtgeirEffect, fixReference: false);  // We dont need to fix refs here, because no mocks were used
+            ItemManager.Instance.AddStatusEffect(hammerAtgeirStatusEffect);
 
-            weaponModeEffect = new CustomStatusEffect(effect, fixReference: false);  // We dont need to fix refs here, because no mocks were used
-            ItemManager.Instance.AddStatusEffect(weaponModeEffect);
+            StatusEffect swordLightningEffect = ScriptableObject.CreateInstance<StatusEffect>();
+            swordLightningEffect.name = "SwordLightningEffect";
+            swordLightningEffect.m_name = "Lightning Mode";
+            swordLightningEffect.m_icon = swordLightningSprite;
+            swordLightningEffect.m_startMessageType = MessageHud.MessageType.Center;
+            swordLightningEffect.m_startMessage = "";
+            swordLightningEffect.m_stopMessageType = MessageHud.MessageType.Center;
+            swordLightningEffect.m_stopMessage = "";
+            swordLightningEffect.m_tooltip = "The power of Thor flows through the blade!";
+            swordLightningStatusEffect = new CustomStatusEffect(swordLightningEffect, fixReference: false);  // We dont need to fix refs here, because no mocks were used
+            ItemManager.Instance.AddStatusEffect(swordLightningStatusEffect);
+
+            StatusEffect swordFireEffect = ScriptableObject.CreateInstance<StatusEffect>();
+            swordFireEffect.name = "SwordFireEffect";
+            swordFireEffect.m_name = "Fire Mode";
+            swordFireEffect.m_icon = swordFireSprite;
+            swordFireEffect.m_startMessageType = MessageHud.MessageType.Center;
+            swordFireEffect.m_startMessage = "";
+            swordFireEffect.m_stopMessageType = MessageHud.MessageType.Center;
+            swordFireEffect.m_stopMessage = "";
+            swordFireEffect.m_tooltip = "Your blade is on fire!";
+            swordFireStatusEffect = new CustomStatusEffect(swordFireEffect, fixReference: false);  // We dont need to fix refs here, because no mocks were used
+            ItemManager.Instance.AddStatusEffect(swordFireStatusEffect);
+
+            StatusEffect swordFrostEffect = ScriptableObject.CreateInstance<StatusEffect>();
+            swordFrostEffect.name = "SwordFrostEffect";
+            swordFrostEffect.m_name = "Frost Mode";
+            swordFrostEffect.m_icon = swordFrostSprite;
+            swordFrostEffect.m_startMessageType = MessageHud.MessageType.Center;
+            swordFrostEffect.m_startMessage = "";
+            swordFrostEffect.m_stopMessageType = MessageHud.MessageType.Center;
+            swordFrostEffect.m_stopMessage = "";
+            swordFrostEffect.m_tooltip = "Your blade feels as cold as Jotunheim!";
+            swordFrostStatusEffect = new CustomStatusEffect(swordFrostEffect, fixReference: false);  // We dont need to fix refs here, because no mocks were used
+            ItemManager.Instance.AddStatusEffect(swordFrostStatusEffect);
+        }
+
+        private void InitConfig()
+        {
+            Config.SaveOnConfigSet = true;
+
+            // General
+            configWeaponModeKey = Config.Bind("1. General", "Weapon mode key", new KeyboardShortcut(KeyCode.Y),
+                new ConfigDescription("Key to change the weaponmode (applies to all weapons)", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            // Hammer
+            configHammerEnable = base.Config.Bind(new ConfigDefinition("2. Hammer", "Enable"), true,
+                new ConfigDescription("Wether or not to enable the hammer", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configHammerName = base.Config.Bind(new ConfigDefinition("2. Hammer", "Name"), "Kimetsus Special",
+                new ConfigDescription("The name given to the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configHammerDescription = base.Config.Bind(new ConfigDefinition("2. Hammer", "Description"), "May the bones of you enemies forever be crushed, my friend... to dust!",
+                new ConfigDescription("The description given to the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configHammerCraftingStation = base.Config.Bind(new ConfigDefinition("2. Hammer", "Crafting station"), "Forge",
+                new ConfigDescription("The crafting station the item can be created in",
+                new AcceptableValueList<string>(new string[] { "Disabled", "Inventory", "Workbench", "Cauldron", "Forge", "ArtisanTable", "StoneCutter", "MageTable", "BlackForge" }),
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configHammerMinStationLevel = base.Config.Bind(new ConfigDefinition("2. Hammer", "Required station level"), 1,
+                new ConfigDescription("The required station level to craft the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configHammerRecipe = base.Config.Bind(new ConfigDefinition("2. Hammer", "Crafting costs"), "Silver:30,ElderBark:10,Thunderstone:5,YmirRemains:5",
+                new ConfigDescription("The items required to craft the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configHammerRecipeUpgrade = base.Config.Bind(new ConfigDefinition("2. Hammer", "Upgrade costs"), "Silver:5,ElderBark:3,Thunderstone:1",
+                new ConfigDescription("The costs to upgrade the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configHammerRecipeMultiplier = base.Config.Bind(new ConfigDefinition("2. Hammer", "Upgrade multiplier"), 1,
+                new ConfigDescription("The multiplier applied to the upgrade costs", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configHammerMaxQuality = base.Config.Bind(new ConfigDefinition("2. Hammer", "Max quality"), 4,
+                new ConfigDescription("The maximum quality the item can become", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configHammerMovementSpeed = base.Config.Bind(new ConfigDefinition("2. Hammer", "Movement speed"), -0.05f,
+                new ConfigDescription("The movement speed stat on the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configHammerDamageMultiplier = base.Config.Bind(new ConfigDefinition("2. Hammer", "Damage multiplier"), 1f,
+                new ConfigDescription("Multiplier to adjust the damage on the item (90 blunt, 30 lightning)", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configHammerBlockArmor = base.Config.Bind(new ConfigDefinition("2. Hammer", "Block armor"), 40,
+                new ConfigDescription("The block armor on the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configHammerBlockForce = base.Config.Bind(new ConfigDefinition("2. Hammer", "Block force"), 70,
+                new ConfigDescription("The block force on the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configHammerKnockBack = base.Config.Bind(new ConfigDefinition("2. Hammer", "Knockback"), 75,
+                new ConfigDescription("The knockback on the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configHammerBackStab = base.Config.Bind(new ConfigDefinition("2. Hammer", "Backstab"), 3,
+                new ConfigDescription("The block armor on the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configHammerUseStamina = base.Config.Bind(new ConfigDefinition("2. Hammer", "Attack stamina"), 22,
+                new ConfigDescription("Normal attack stamina usage", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configHammerUseStaminaHammer = base.Config.Bind(new ConfigDefinition("2. Hammer", "Secondary hammer ability stamina"), 28,
+                new ConfigDescription("The secondary hammer attack stamina usage", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configHammerUseStaminaAtgeir = base.Config.Bind(new ConfigDefinition("2. Hammer", "Secondary atgeir ability stamina"), 40,
+                new ConfigDescription("The secondary atgeir attack stamina usage", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            // Sword
+            configSwordEnable = base.Config.Bind(new ConfigDefinition("3. Sword", "Enable"), true,
+                new ConfigDescription("Wether or not to enable the sword", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configSwordName = base.Config.Bind(new ConfigDefinition("3. Sword", "Name"), "Dirks Dominance",
+                new ConfigDescription("The name given to the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configSwordDescription = base.Config.Bind(new ConfigDefinition("3. Sword", "Description"), "Got to assert your DOMINANCE!",
+                new ConfigDescription("The description given to the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configSwordCraftingStation = base.Config.Bind(new ConfigDefinition("3. Sword", "Crafting station"), "Forge",
+                new ConfigDescription("The crafting station the item can be created in",
+                new AcceptableValueList<string>(new string[] { "Disabled", "Inventory", "Workbench", "Cauldron", "Forge", "ArtisanTable", "StoneCutter", "MageTable", "BlackForge" }),
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configSwordMinStationLevel = base.Config.Bind(new ConfigDefinition("3. Sword", "Required station level"), 1,
+                new ConfigDescription("The required station level to craft the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configSwordRecipe = base.Config.Bind(new ConfigDefinition("3. Sword", "Crafting costs"), "Silver:25,ElderBark:10,FreezeGland:5,YmirRemains:5",
+                new ConfigDescription("The items required to craft the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configSwordRecipeUpgrade = base.Config.Bind(new ConfigDefinition("3. Sword", "Upgrade costs"), "Silver:5,ElderBark:5,FreezeGland:3",
+                new ConfigDescription("The costs to upgrade the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configSwordRecipeMultiplier = base.Config.Bind(new ConfigDefinition("3. Sword", "Upgrade multiplier"), 1,
+                new ConfigDescription("The multiplier applied to the upgrade costs", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configSwordMaxQuality = base.Config.Bind(new ConfigDefinition("3. Sword", "Max quality"), 4,
+                new ConfigDescription("The maximum quality the item can become", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            // Atgeir
+            configAtgeirEnable = base.Config.Bind(new ConfigDefinition("4. Atgeir", "Enable"), true,
+                new ConfigDescription("Wether or not to enable the atgeir", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configAtgeirName = base.Config.Bind(new ConfigDefinition("4. Atgeir", "Name"), "Marks Hark",
+                new ConfigDescription("The name given to the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configAtgeirDescription = base.Config.Bind(new ConfigDefinition("4. Atgeir", "Description"), "Imma steal them sweet lewds from Durk! Grabby grabby!",
+                new ConfigDescription("The description given to the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configAtgeirCraftingStation = base.Config.Bind(new ConfigDefinition("4. Atgeir", "Crafting station"), "Forge",
+                new ConfigDescription("The crafting station the item can be created in",
+                new AcceptableValueList<string>(new string[] { "Disabled", "Inventory", "Workbench", "Cauldron", "Forge", "ArtisanTable", "StoneCutter", "MageTable", "BlackForge" }),
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configAtgeirMinStationLevel = base.Config.Bind(new ConfigDefinition("4. Atgeir", "Required station level"), 1,
+                new ConfigDescription("The required station level to craft the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configAtgeirRecipe = base.Config.Bind(new ConfigDefinition("4. Atgeir", "Crafting costs"), "Silver:25,ElderBark:15,FreezeGland:5,YmirRemains:5",
+                new ConfigDescription("The items required to craft the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configAtgeirRecipeUpgrade = base.Config.Bind(new ConfigDefinition("4. Atgeir", "Upgrade costs"), "Silver:5,ElderBark:5,FreezeGland:3",
+                new ConfigDescription("The costs to upgrade the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configAtgeirRecipeMultiplier = base.Config.Bind(new ConfigDefinition("4. Atgeir", "Upgrade multiplier"), 1,
+                new ConfigDescription("The multiplier applied to the upgrade costs", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configAtgeirMaxQuality = base.Config.Bind(new ConfigDefinition("4. Atgeir", "Max quality"), 4,
+                new ConfigDescription("The maximum quality the item can become", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configAtgeirMovementSpeed = base.Config.Bind(new ConfigDefinition("4. Atgeir", "Movement speed"), 0f,
+                new ConfigDescription("The movement speed stat on the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configAtgeirDamageMultiplier = base.Config.Bind(new ConfigDefinition("4. Atgeir", "Damage multiplier"), 1f,
+                new ConfigDescription("Multiplier to adjust the damage on the item (85, 40 lightning)", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configAtgeirBlockArmor = base.Config.Bind(new ConfigDefinition("4. Atgeir", "Block armor"), 64,
+                new ConfigDescription("The block armor on the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configAtgeirBlockForce = base.Config.Bind(new ConfigDefinition("4. Atgeir", "Block force"), 40,
+                new ConfigDescription("The block force on the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configAtgeirKnockBack = base.Config.Bind(new ConfigDefinition("4. Atgeir", "Knockback"), 40,
+                new ConfigDescription("The knockback on the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configAtgeirBackStab = base.Config.Bind(new ConfigDefinition("4. Atgeir", "Backstab"), 3,
+                new ConfigDescription("The block armor on the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configAtgeirUseStamina = base.Config.Bind(new ConfigDefinition("4. Atgeir", "Attack stamina"), 20,
+                new ConfigDescription("Normal attack stamina usage", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configAtgeirUseStaminaAtgeir = base.Config.Bind(new ConfigDefinition("4. Atgeir", "Secondary atgeir ability stamina"), 40,
+                new ConfigDescription("The secondary atgeir attack stamina usage", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            configAtgeirUseStaminaPoke = base.Config.Bind(new ConfigDefinition("4. Atgeir", "Secondary poke ability stamina"), 9,
+                new ConfigDescription("The secondary poke attack stamina usage", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+        }
+
+        private void InitAssetBundle()
+        {
+            specialWeaponsBundle = AssetUtils.LoadAssetBundleFromResources("specialweapons_dw");
+            hammerPrefabHammer = specialWeaponsBundle.LoadAsset<GameObject>("KimetsusSpecial_Hammer_DW");
+            hammerPrefabAtgeir = specialWeaponsBundle.LoadAsset<GameObject>("KimetsusSpecial_Atgeir_DW");
+            atgeirPrefabAtgeir = specialWeaponsBundle.LoadAsset<GameObject>("MarksHark_Atgeir_DW");
+            atgeirPrefabBattleAxe = specialWeaponsBundle.LoadAsset<GameObject>("MarksHark_BattleAxe_DW");
+            swordPrefabLightning = specialWeaponsBundle.LoadAsset<GameObject>("DirksDominance_Lightning_DW");
+            swordPrefabFire = specialWeaponsBundle.LoadAsset<GameObject>("DirksDominance_Fire_DW");
+            swordPrefabFrost = specialWeaponsBundle.LoadAsset<GameObject>("DirksDominance_Frost_DW");
+
+            hammerHammerSprite = specialWeaponsBundle.LoadAsset<Sprite>("SledgeDemolisher");
+            hammerAtgeirSprite = specialWeaponsBundle.LoadAsset<Sprite>("AtgeirHimminAfl");
+            swordLightningSprite = specialWeaponsBundle.LoadAsset<Sprite>("Lightning");
+            swordFireSprite = specialWeaponsBundle.LoadAsset<Sprite>("SwordFire");
+            swordFrostSprite = specialWeaponsBundle.LoadAsset<Sprite>("Frost");
+        }
+
+        private void InitInputs()
+        {
+            hammerWeaponModeButton = new ButtonConfig
+            {
+                Name = "Weapon mode",
+                ShortcutConfig = configWeaponModeKey,
+                ActiveInGUI = true,
+                ActiveInCustomGUI = true,
+            };
+            InputManager.Instance.AddButton(PluginGUID, hammerWeaponModeButton);
+
+            //KeyHintConfig KHC = new KeyHintConfig
+            //{
+            //    Item = "KimetsusSpecial_Hammer_DW",
+            //    ButtonConfigs = new[]
+            //    {
+            //        hammerWeaponModeButton,
+            //    }
+            //};
+            //KeyHintManager.Instance.AddKeyHint(KHC);
         }
     }
 }

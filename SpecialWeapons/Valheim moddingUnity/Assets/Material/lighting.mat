@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: lighting
   m_Shader: {fileID: 4800000, guid: c51eab22b8359eb428238fa4a6646bac, type: 3}
-  m_ShaderKeywords: 
+  m_ShaderKeywords:
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -20,7 +20,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: eefe8c0129046f14bb7392aacbb27a49, type: 3}
+        m_Texture: {fileID: 2800000, guid: 07222f772e5384441b35a3d3a4a6440a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:

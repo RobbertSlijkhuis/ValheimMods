@@ -81,6 +81,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfigRecipe.cs" />
     <Compile Include="Properties\IgnoreAccessModifiers.cs" />
     <Compile Include="SpecialWeapons.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -88,10 +89,8 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <EmbeddedResource Include="Package\Assets\markshark_dw" />
-    <EmbeddedResource Include="Package\Assets\markshark_dw.manifest" />
-    <EmbeddedResource Include="Package\Assets\AtgeirIron.asset" />
-    <EmbeddedResource Include="Package\Assets\SledgeDemolisher.asset" />
+    <EmbeddedResource Include="Package\Assets\specialweapons_dw" />
+    <EmbeddedResource Include="Package\Assets\specialweapons_dw.manifest" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
@@ -101,7 +100,6 @@
     <None Include="Package\manifest.json" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Package\Assets\rune_test.png" />
     <Content Include="Package\icon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
