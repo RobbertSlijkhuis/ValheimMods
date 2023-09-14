@@ -1,7 +1,7 @@
 {
-    "name": "Legendary Weapons",
+    "name": "LegendaryWeapons",
     "description": "Add three new weapons to the game with different weapon modes!",
     "version_number": "1.0.0",
     "dependencies": ["ValheimModding-Jotunn-2.12.4"],
-    "website_url": "https://github.com/RobbertSlijkhuis/Valheim-upgrade-antler-pickaxe/blob/master/README.MD"
+    "website_url": ""
 }

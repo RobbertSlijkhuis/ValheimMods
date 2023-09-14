@@ -27,9 +27,11 @@ The mod comes with a config, be sure to check wether the config has changed in f
 
 ## Roadmap
 There are still some features planned to be implemented:
- - Setup something for ppl to notify me of bug reports, suggestions etc. Most likely Nexus mods
  - ServerSync (Not sure if it already works, untested)
  - Update recipe ingame on config changes
+
+ ## Bug/Suggestion
+ Found a bug or have some suggestions? You can leave a post or bug report here: [https://www.nexusmods.com/valheim/mods/2522/?tab=bugs](https://www.nexusmods.com/valheim/mods/2522/?tab=bugs)
 
  ## Screenshots
 ![Hammer_1](https://robhost.nl/img/valheim/Hammer_1.jpg)
