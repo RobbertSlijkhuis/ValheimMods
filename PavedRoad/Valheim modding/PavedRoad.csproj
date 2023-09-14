@@ -82,7 +82,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\IgnoreAccessModifiers.cs" />
-    <Compile Include="PavedRoad.cs" />
+    <Compile Include="PavedRoadNoLevel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -91,7 +91,6 @@
     <EmbeddedResource Include="Package\Assets\pavedroad_dw" />
     <EmbeddedResource Include="Package\Assets\pavedroad_dw.manifest" />
     <None Include="Package\README.md" />
-    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Package\plugins\" />

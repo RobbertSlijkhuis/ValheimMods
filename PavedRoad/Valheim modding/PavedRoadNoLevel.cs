@@ -12,10 +12,10 @@ namespace ValheimModding
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
-    internal class PavedRoad : BaseUnityPlugin
+    internal class PavedRoadNoLevel : BaseUnityPlugin
     {
-        public const string PluginGUID = "DeathWizsh.PavedRoad";
-        public const string PluginName = "Paved Road";
+        public const string PluginGUID = "DeathWizsh.PavedRoadNoLevel";
+        public const string PluginName = "Paved Road No Level";
         public const string PluginVersion = "1.0.0";
         
         // Use this class to add your own localization to the game
