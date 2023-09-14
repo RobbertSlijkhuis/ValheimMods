@@ -2,7 +2,7 @@
 
 A simple mod to allow upgrades for the Antler Pickaxe, just like any other pickaxe in the game.
 
-## Removed the weapons I made for my friends and created entirely new ones in this mod *link to mod*. The prefab names are not the same, if you update to this version they will be removed!
+## Removed the weapons I made for my friends and created entirely new ones in this mod https://valheim.thunderstore.io/package/DeathWizsh/LegendaryWeapons/. The prefab names are not the same, if you update to this version they will be removed!
 
 ## Configuration
 The mod comes with a config, be sure to check wether the config has changed on future updates. The following options are available:
@@ -17,13 +17,15 @@ The mod comes with a config, be sure to check wether the config has changed on f
 
 ## Roadmap
 There are still some features planned to be implemented:
- - Setup something for ppl to notify me of bug reports, suggestions etc.
  - ServerSync (Not sure if it already works, untested)
  - Update recipe ingame on config changes
 
+## Bug/Suggestion
+Found a bug or have some suggestions? You can leave a post or bug report here: https://www.nexusmods.com/valheim/mods/2523/?tab=bugs
+
 ## Changelog
 ### 1.1.0
- - Removed the weapons I made for my friends and created entire new ones in this mod *link to mod*. The prefab names are not the same, if you update to this version they will be removed!
+ - Removed the weapons I made for my friends and created entire new ones in this mod https://valheim.thunderstore.io/package/DeathWizsh/LegendaryWeapons/. The prefab names are not the same, if you update to this version they will be removed!
  - Added config entries to set the name, description, crafting station, crafting recipe, upgrade costs & being able to choose wether to edit the orignal Antler Pickaxe or to create a clone
  - The plugin GUID has changed, please remove the old config & edit the new one (sorry :S) 
 
