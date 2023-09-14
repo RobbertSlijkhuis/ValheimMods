@@ -31,6 +31,18 @@ There are still some features planned to be implemented:
  - ServerSync (Not sure if it already works, untested)
  - Update recipe ingame on config changes
 
+ ## Screenshots
+![Hammer_1](https://robhost.nl/img/valheim/Hammer_1.jpg)
+![Hammer_3](https://robhost.nl/img/valheim/Hammer_2.jpg)
+![Hammer_3](https://robhost.nl/img/valheim/Hammer_3.jpg)
+
+![Atgeir_1](https://robhost.nl/img/valheim/Atgeir_1.jpg)
+![Atgeir_1](https://robhost.nl/img/valheim/Atgeir_2.jpg)
+
+![Sword_1](https://robhost.nl/img/valheim/Sword_1.jpg)
+![Sword_1](https://robhost.nl/img/valheim/Sword_2.jpg)
+![Sword_1](https://robhost.nl/img/valheim/Sword_3.jpg)
+
 ## Changelog
 ### 1.0.0
 - First release
