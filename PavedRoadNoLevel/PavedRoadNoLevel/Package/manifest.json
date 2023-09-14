@@ -1,0 +1,7 @@
+{
+  "name": "PavedRoadNoLevel",
+  "description": "A quality of life mod that removes the leveling effect from the 'Paved Road' of the Hoe. Now you can pave your roads without messing with the terrain!",
+  "version_number": "1.0.2",
+  "dependencies": [ "ValheimModding-Jotunn-2.12.4" ],
+  "website_url": ""
+}
