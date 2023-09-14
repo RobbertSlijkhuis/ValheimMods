@@ -2,6 +2,8 @@
 
 A simple mod to allow upgrades for the Antler Pickaxe, just like any other pickaxe in the game.
 
+## Removed the weapons I made for my friends and created entirely new ones in this mod *link to mod*. The prefab names are not the same, if you update to this version they will be removed!
+
 ## Configuration
 The mod comes with a config, be sure to check wether the config has changed on future updates. The following options are available:
  - **Enable**: Wether the Antler Pickaxe can be upgraded. Default: *true*
@@ -21,7 +23,7 @@ There are still some features planned to be implemented:
 
 ## Changelog
 ### 1.1.0
- - Removed the weapons I made for my friends
+ - Removed the weapons I made for my friends and created entire new ones in this mod *link to mod*. The prefab names are not the same, if you update to this version they will be removed!
  - Added config entries to set the name, description, crafting station, crafting recipe, upgrade costs & being able to choose wether to edit the orignal Antler Pickaxe or to create a clone
  - The plugin GUID has changed, please remove the old config & edit the new one (sorry :S) 
 

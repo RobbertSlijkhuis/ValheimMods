@@ -29,6 +29,7 @@ namespace ValheimModding
         private ConfigEntry<string> configName;
         private ConfigEntry<string> configDescription;
         private ConfigEntry<string> configCraftingStation;
+        private ConfigEntry<int> configMinStationLevel;
         private ConfigEntry<string> configRecipe;
         private ConfigEntry<string> configRecipeUpgrade;
         private ConfigEntry<int> configRecipeMultiplier;
@@ -96,7 +97,7 @@ namespace ValheimModding
                 }
 
                 PrefabManager.OnVanillaPrefabsAvailable -= PatchStats;
-                Jotunn.Logger.LogInfo("Successfully patched stats the antler pickaxe, enjoy!");
+                Jotunn.Logger.LogInfo("Successfully patched stats on the antler pickaxe, enjoy!");
             } 
             catch (Exception error)
             {
@@ -154,6 +155,7 @@ namespace ValheimModding
                 RecipeConfig antlerPickaxeRecipe = new RecipeConfig();
                 antlerPickaxeRecipe.Item = "PickaxeAntler";
                 antlerPickaxeRecipe.CraftingStation = configCraftingStation.Value;
+                antlerPickaxeRecipe.MinStationLevel = configMinStationLevel.Value;
 
                 foreach (var requirement in recipe.requirements)
                 {
@@ -264,6 +266,10 @@ namespace ValheimModding
                 configCraftingStation = base.Config.Bind(new ConfigDefinition("General", "Crafting station"), "Workbench",
                     new ConfigDescription("The crafting station the item can be created in",
                     new AcceptableValueList<string>(new string[] { "Disabled", "Inventory", "Workbench", "Cauldron", "Forge", "ArtisanTable", "StoneCutter", "MageTable", "BlackForge" }),
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+                configMinStationLevel = base.Config.Bind(new ConfigDefinition("General", "Required station level"), 1,
+                    new ConfigDescription("The required station level to craft the item", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
 
                 configRecipe = base.Config.Bind(new ConfigDefinition("General", "Crafting costs"), "Wood:10,HardAntler:1",
