@@ -6,7 +6,7 @@ Sprite:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Frost
+  m_Name: Frost_DW
   m_Rect:
     serializedVersion: 2
     x: 1512.0541
@@ -19,8 +19,8 @@ Sprite:
   m_Pivot: {x: 0.4916267, y: 0.5}
   m_Extrude: 1
   m_IsPolygon: 0
-  m_AtlasName:
-  m_PackingTag:
+  m_AtlasName: 
+  m_PackingTag: 
   m_RenderDataKey:
     7163572e468f43a43a094ee8823deedf: 21300000
   m_AtlasTags: []
@@ -122,13 +122,13 @@ Sprite:
     alphaTexture: {fileID: 0}
     secondaryTextures: []
     m_SubMeshes: []
-    m_IndexBuffer:
+    m_IndexBuffer: 
     m_VertexData:
       serializedVersion: 3
       m_VertexCount: 0
       m_Channels: []
       m_DataSize: 0
-      _typelessdata:
+      _typelessdata: 
     m_Bindpose: []
     textureRect:
       serializedVersion: 2
@@ -184,4 +184,4 @@ Sprite:
     - {x: 0.14, y: -0.25}
     - {x: 0.06, y: -0.14}
   m_Bones: []
-  m_SpriteID:
+  m_SpriteID: 

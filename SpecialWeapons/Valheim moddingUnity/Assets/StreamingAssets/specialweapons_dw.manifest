@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 4266196137
+CRC: 479739352
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: c8dbb5b5b97644445059d844877744da
+    Hash: 4fb2e899be33b574665fd9e59261847b
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 25135d0fc286109bc3f35f780099efb4
+    Hash: c5683b532a9117a0bb5a6092ac93b368
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -42,9 +42,11 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: 313648218, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+  Script: {fileID: 788646874, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 2140874873, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -59,6 +61,8 @@ ClassTypes:
   Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: -585565762, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 2094620348, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 115
   Script: {instanceID: 0}
 - Class: 164
@@ -92,11 +96,16 @@ SerializeReferenceClassIdentifiers:
   ClassName: ItemDrop/ItemData
 - AssemblyName: assembly_valheim
   ClassName: ItemDrop/ItemData/SharedData
+- AssemblyName: assembly_valheim
+  ClassName: Piece/Requirement
+- AssemblyName: assembly_valheim
+  ClassName: TerrainOp/Settings
 Assets:
 - Assets/Sprite/Frost.asset
 - Assets/Sprite/Lightning.asset
 - Assets/Sprite/AtgeirHimminAfl.asset
 - Assets/Custom/DirksDominance_Frost_DW.prefab
+- Assets/Custom/PrefabInstance/path_road_DW.prefab
 - Assets/Custom/DirksDominance_Fire_DW.prefab
 - Assets/Sprite/SledgeDemolisher.asset
 - Assets/Custom/MarksHark_BattleAxe_DW.prefab

@@ -6,23 +6,23 @@ Sprite:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Lightning
+  m_Name: SledgeDemolisher_DW
   m_Rect:
     serializedVersion: 2
-    x: 1508.0631
-    y: 1872.0267
-    width: 50.898186
-    height: 63.973248
-  m_Offset: {x: -0.5121592, y: -0.013374458}
+    x: 576
+    y: 648
+    width: 64
+    height: 64
+  m_Offset: {x: 0, y: 0}
   m_Border: {x: 0, y: 0, z: 0, w: 0}
-  m_PixelsToUnits: 50
-  m_Pivot: {x: 0.48993757, y: 0.49979094}
+  m_PixelsToUnits: 100
+  m_Pivot: {x: 0.5, y: 0.5}
   m_Extrude: 1
   m_IsPolygon: 0
-  m_AtlasName:
-  m_PackingTag:
+  m_AtlasName: 
+  m_PackingTag: 
   m_RenderDataKey:
-    695f2732c6fe1b73a9963b8470e7a3b5: 21300000
+    8b50330302c51654da754b4d962eca00: 21300000
   m_AtlasTags: []
   m_SpriteAtlas: {fileID: 0}
   m_RD:
@@ -33,18 +33,18 @@ Sprite:
     m_SubMeshes:
     - serializedVersion: 2
       firstByte: 0
-      indexCount: 15
+      indexCount: 6
       topology: 0
       baseVertex: 0
       firstVertex: 0
-      vertexCount: 7
+      vertexCount: 4
       localAABB:
         m_Center: {x: 0, y: 0, z: 0}
         m_Extent: {x: 0, y: 0, z: 0}
-    m_IndexBuffer: 060005000300040003000500000003000400010003000000020001000000
+    m_IndexBuffer: 000001000200020001000300
     m_VertexData:
       serializedVersion: 3
-      m_VertexCount: 7
+      m_VertexCount: 4
       m_Channels:
       - stream: 0
         offset: 0
@@ -102,19 +102,19 @@ Sprite:
         offset: 0
         format: 0
         dimension: 0
-      m_DataSize: 152
-      _typelessdata: 8fc2f53e0ad7233f00000000b81e053fb81e05bf00000000b81e053f8fc2f53e00000000295c8f3e0ad723bf000000007b14aebe0ad7233f00000000000000bf295c0f3f00000000000000bf0ad723bf000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+      m_DataSize: 80
+      _typelessdata: 0ad7a3be0ad7a33e000000000ad7a33e0ad7a33e000000000ad7a3be0ad7a3be000000000ad7a33e0ad7a3be000000000000000000000000000000000000000000000000000000000000000000000000
     m_Bindpose: []
     textureRect:
       serializedVersion: 2
-      x: 1508.0631
-      y: 1872.0267
-      width: 50.898186
-      height: 63.973248
+      x: 576
+      y: 648
+      width: 64
+      height: 64
     textureRectOffset: {x: 0, y: 0}
-    atlasRectOffset: {x: 1501, y: 1872}
-    settingsRaw: 67
-    uvTransform: {x: 50, y: 1533, z: 50, w: 1904}
+    atlasRectOffset: {x: 576, y: 648}
+    settingsRaw: 3
+    uvTransform: {x: 100, y: 608, z: 100, w: 680}
     downscaleMultiplier: 1
   m_AtlasRD:
     serializedVersion: 3
@@ -122,13 +122,13 @@ Sprite:
     alphaTexture: {fileID: 0}
     secondaryTextures: []
     m_SubMeshes: []
-    m_IndexBuffer:
+    m_IndexBuffer: 
     m_VertexData:
       serializedVersion: 3
       m_VertexCount: 0
       m_Channels: []
       m_DataSize: 0
-      _typelessdata:
+      _typelessdata: 
     m_Bindpose: []
     textureRect:
       serializedVersion: 2
@@ -141,14 +141,6 @@ Sprite:
     settingsRaw: 0
     uvTransform: {x: 0, y: 0, z: 0, w: 0}
     downscaleMultiplier: 0
-  m_PhysicsShape:
-  - - {x: 0.24, y: 0.45999998}
-    - {x: -0.12, y: 0.45999998}
-    - {x: -0.17999999, y: 0.44}
-    - {x: -0.19999999, y: 0.26}
-    - {x: -0.19999999, y: -0.42}
-    - {x: -0.099999994, y: -0.42}
-    - {x: 0.16, y: -0.12}
-    - {x: 0.24, y: 0.06}
+  m_PhysicsShape: []
   m_Bones: []
-  m_SpriteID:
+  m_SpriteID: 

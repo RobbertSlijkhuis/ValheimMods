@@ -4663,7 +4663,7 @@ MonoBehaviour:
     m_pickaxe: 0
     m_fire: 0
     m_frost: 0
-    m_lightning: 30
+    m_lightning: 40
     m_poison: 0
     m_spirit: 0
   m_dodgeable: 0
@@ -4691,9 +4691,9 @@ MonoBehaviour:
   m_hitOwner: 0
   m_hitParent: 0
   m_hitSame: 0
-  m_hitFriendly: 1
+  m_hitFriendly: 0
   m_hitEnemy: 1
-  m_hitCharacters: 0
+  m_hitCharacters: 1
   m_hitProps: 1
   m_ignorePVP: 0
   m_skill: 0
@@ -9262,7 +9262,7 @@ MonoBehaviour:
     m_pickaxe: 0
     m_fire: 0
     m_frost: 0
-    m_lightning: 30
+    m_lightning: 0
     m_poison: 0
     m_spirit: 0
   m_dodgeable: 0
@@ -9292,7 +9292,7 @@ MonoBehaviour:
   m_hitSame: 0
   m_hitFriendly: 1
   m_hitEnemy: 1
-  m_hitCharacters: 0
+  m_hitCharacters: 1
   m_hitProps: 1
   m_ignorePVP: 0
   m_skill: 0
@@ -14185,7 +14185,7 @@ GameObject:
   - component: {fileID: 114339487899175121}
   - component: {fileID: 114442270096511880}
   m_Layer: 0
-  m_Name: lightningAOE_DW
+  m_Name: LightningAOE_DW
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

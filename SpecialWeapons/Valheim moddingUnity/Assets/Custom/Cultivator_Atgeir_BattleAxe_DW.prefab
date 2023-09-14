@@ -46,7 +46,7 @@ GameObject:
   - component: {fileID: 199530368792666807}
   - component: {fileID: 198450253590442811}
   m_Layer: 12
-  m_Name: MarksHark_BattleAxe_DW
+  m_Name: Cultivator_Atgeir_BattleAxe_DW
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -137,7 +137,7 @@ MonoBehaviour:
     m_quality: 1
     m_variant: 0
     m_shared:
-      m_name: Marks Hark
+      m_name: Cultivator Atgeir
       m_dlc: 
       m_itemType: 14
       m_icons:
