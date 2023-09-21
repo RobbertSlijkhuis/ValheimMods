@@ -92,10 +92,8 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <EmbeddedResource Include="Package\Assets\rideablebrute_dw" />
-    <EmbeddedResource Include="Package\Assets\rideablebrute_dw.manifest" />
-    <EmbeddedResource Include="Package\Assets\customsaddles" />
-    <EmbeddedResource Include="Package\Assets\customsaddles.manifest" />
+    <EmbeddedResource Include="Package\Assets\customsaddles_dw" />
+    <EmbeddedResource Include="Package\Assets\customsaddles_dw.manifest" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>

@@ -26,6 +26,7 @@ namespace RideableSeekerBrute
         AssetBundle assetBundle;
 
         GameObject saddleSimple;
+        GameObject saddleMedium;
         GameObject saddleHeavy;
 
         GameObject seekerBrute;
@@ -33,6 +34,7 @@ namespace RideableSeekerBrute
         GameObject deer;
         GameObject wolf;
         GameObject boar;
+        GameObject abomination;
 
         private void Awake()
         {
@@ -50,6 +52,7 @@ namespace RideableSeekerBrute
             wolf = PrefabManager.Instance.GetPrefab("Wolf");
             deer = PrefabManager.Instance.GetPrefab("Deer");
             bunny = PrefabManager.Instance.GetPrefab("Hare");
+            abomination = PrefabManager.Instance.GetPrefab("Abomination");
 
             ItemConfig simpleSaddleConfig = new ItemConfig();
             simpleSaddleConfig.Name = "Simple Saddle";
@@ -61,6 +64,17 @@ namespace RideableSeekerBrute
             simpleSaddleConfig.AddRequirement(new RequirementConfig("Wood", 10));
             CustomItem simpleSaddle = new CustomItem(saddleSimple, true, simpleSaddleConfig);
             ItemManager.Instance.AddItem(simpleSaddle);
+
+            ItemConfig mediumSaddleConfig = new ItemConfig();
+            mediumSaddleConfig.Name = "Medium Saddle";
+            mediumSaddleConfig.Description = "A comfy saddle, used for mounts!";
+            mediumSaddleConfig.CraftingStation = "Workbench";
+            mediumSaddleConfig.AddRequirement(new RequirementConfig("LeatherScraps", 10));
+            mediumSaddleConfig.AddRequirement(new RequirementConfig("DeerHide", 10));
+            mediumSaddleConfig.AddRequirement(new RequirementConfig("Chain", 4));
+            mediumSaddleConfig.AddRequirement(new RequirementConfig("RoundLog", 10));
+            CustomItem mediumSaddle = new CustomItem(saddleMedium, true, mediumSaddleConfig);
+            ItemManager.Instance.AddItem(mediumSaddle);
 
             ItemConfig heavySaddleConfig = new ItemConfig();
             heavySaddleConfig.Name = "Heavy Saddle";
@@ -87,6 +101,7 @@ namespace RideableSeekerBrute
             tameable.MakeTameable(boar, tameableConfig);
             tameable.MakeTameable(bunny, tameableConfig);
             tameable.MakeTameable(deer, tameableConfig);
+            tameable.MakeTameable(abomination, tameableConfig);
 
             // Mount stuff
             SaddleConfig saddleConfigHeavy = new SaddleConfig(heavySaddle.ItemPrefab, "Visual");
@@ -95,6 +110,13 @@ namespace RideableSeekerBrute
             saddleConfigHeavy.attach.position = new Vector3(0, 2, 0);
             saddleConfigHeavy.attach.scale = new Vector3(1, 1, 1);
             saddleConfigHeavy.sphereRadius = 1;
+
+            SaddleConfig saddleConfigMedium = new SaddleConfig(mediumSaddle.ItemPrefab, "Visual");
+            saddleConfigMedium.hoverText = "Medium Saddle";
+            saddleConfigMedium.maxStamina = 240;
+            saddleConfigMedium.attach.position = new Vector3(0, 2, 0);
+            saddleConfigMedium.attach.scale = new Vector3(1, 1, 1);
+            saddleConfigMedium.sphereRadius = 1;
 
             SaddleConfig saddleConfigSimple = new SaddleConfig(simpleSaddle.ItemPrefab, "Visual");
             saddleConfigSimple.hoverText = "Simple Saddle";
@@ -138,6 +160,13 @@ namespace RideableSeekerBrute
             hareAttachConfig.saddleAttach.position = new Vector3(0, -0.0037f, -0.003f);
             hareAttachConfig.saddleAttach.scale = new Vector3(0.0075f, 0.0075f, 0.0075f);
 
+            MountableConfig abomAttachConfig = new MountableConfig("hip");
+            abomAttachConfig.characterAttach.position = new Vector3(0.011f, 0.024f, 0);
+            abomAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(270, 90, 0);
+            abomAttachConfig.characterAttach.scale = new Vector3(1, 1, 1);
+            abomAttachConfig.saddleAttach.position = new Vector3(0, -0.0033f, -0.0025f);
+            abomAttachConfig.saddleAttach.scale = new Vector3(0.006f, 0.006f, 0.006f);
+
             MountableManager.Instance.MakeMountable(seekerBrute, saddleConfigHeavy, bruteAttachConfig);
 
             // saddleConfig.sphereRadius = 0.9f;
@@ -159,13 +188,20 @@ namespace RideableSeekerBrute
             saddleConfigSimple.sphereRadius = 0.5f;
             saddleConfigSimple.attach.position = new Vector3(0, 1.6f, 0);
             MountableManager.Instance.MakeMountable(deer, saddleConfigSimple, deerAttachConfig);
+
+            saddleConfigHeavy.maxUseRange = 6;
+            saddleConfigHeavy.sphereRadius = 0.7f;
+            // saddleConfigHeavy.attach.position = new Vector3(0, 2.5f, 1.5f);
+            saddleConfigHeavy.attach.position = new Vector3(0, 0.01f, 0);
+            MountableManager.Instance.MakeMountable(abomination, saddleConfigHeavy, abomAttachConfig);
         }
 
         private void InitAssetBundle()
         {
-            assetBundle = AssetUtils.LoadAssetBundleFromResources("customsaddles");
-            saddleHeavy = assetBundle.LoadAsset<GameObject>("SaddleHeavy");
-            saddleSimple = assetBundle.LoadAsset<GameObject>("SaddleSimple");
+            assetBundle = AssetUtils.LoadAssetBundleFromResources("customsaddles_dw");
+            saddleHeavy = assetBundle.LoadAsset<GameObject>("SaddleHeavy_DW");
+            saddleMedium = assetBundle.LoadAsset<GameObject>("SaddleMedium_DW");
+            saddleSimple = assetBundle.LoadAsset<GameObject>("SaddleSimple_2_DW");
         }
     }
 }
