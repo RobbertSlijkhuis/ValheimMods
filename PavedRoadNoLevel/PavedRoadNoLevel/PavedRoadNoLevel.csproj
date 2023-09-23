@@ -88,9 +88,7 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <EmbeddedResource Include="Package\Assets\pavedroad_dw" />
-    <EmbeddedResource Include="Package\Assets\pavedroad_dw.manifest" />
-    <None Include="README.md" />
+    <None Include="Package\README.md" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Package\plugins\" />

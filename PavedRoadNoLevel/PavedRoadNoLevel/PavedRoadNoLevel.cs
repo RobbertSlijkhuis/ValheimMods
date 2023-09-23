@@ -1,94 +1,126 @@
 using BepInEx;
 using BepInEx.Configuration;
-using Jotunn.Configs;
-using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
 using System;
+using System.IO;
 using UnityEngine;
 
 namespace PavedRoadNoLevel
 {
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
-    //[NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
+    [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     internal class PavedRoadNoLevel : BaseUnityPlugin
     {
         public const string PluginGUID = "DeathWizsh.PavedRoadNoLevel";
         public const string PluginName = "Paved Road No Level";
-        public const string PluginVersion = "1.0.2";
-
-        // Use this class to add your own localization to the game
-        // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
-        public static CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();
-
-        private AssetBundle pavedRoadBundle;
-        private GameObject pavedRoad;
-        private GameObject pavedRoadStonecutter;
+        public const string PluginVersion = "1.0.3";
+        private static string configFileName = PluginGUID + ".cfg";
+        private static string configFileFullPath = BepInEx.Paths.ConfigPath + Path.DirectorySeparatorChar.ToString() + configFileName;
 
         private ConfigEntry<bool> configEnable;
         private ConfigEntry<bool> configRequireStoncutter;
 
+        private CraftingStation stonecutterPiece;
+        private bool firstPatch = true;
+
+        /**
+         * Called when the plugin is being initialised
+         */
         private void Awake()
         {
             InitConfig();
 
             if (!configEnable.Value) return;
 
-            InitAssetBundle();
-
-            PieceManager.OnPiecesRegistered += RemoveOrginalPavedRoad;
-            PrefabManager.OnVanillaPrefabsAvailable += AddCustomPavedRoad;
+            PrefabManager.OnVanillaPrefabsAvailable += PatchOriginal;
         }
 
-        private void AddCustomPavedRoad()
+        /**
+         * Called when the plugin is unloaded
+         */
+        private void OnDestroy()
+        {
+            Config.Save();
+        }
+
+        /**
+         * Patches the original paved_road_v2 prefab
+         */
+        private void PatchOriginal()
         {
             try
             {
-                PieceConfig config = new PieceConfig();
-                config.Name = "Paved road";
-                config.PieceTable = PieceTables.Hoe;
-                config.Category = PieceCategories.Misc;
-                GameObject prefab = configRequireStoncutter.Value == true ? pavedRoadStonecutter : pavedRoad;
+                GameObject original = PrefabManager.Instance.GetPrefab("paved_road_v2");
+                Piece pieceComp = original.GetComponent<Piece>();
+                pieceComp.m_allowAltGroundPlacement = false;
 
-                PieceManager.Instance.AddPiece(new CustomPiece(prefab, true, config));
-                PrefabManager.OnVanillaPrefabsAvailable -= AddCustomPavedRoad;
-            }
-            catch (Exception error)
-            {
-                Jotunn.Logger.LogError(error);
-            }
-        }
-
-        private void RemoveOrginalPavedRoad()
-        {
-            try
-            {
-                PieceTable hoe = PieceManager.Instance.GetPieceTable(PieceTables.Hoe);
-                GameObject pieceToRemove = null;
-
-                foreach (var piece in hoe.m_pieces)
+                if (firstPatch)
                 {
-                    if (piece.name == "paved_road_v2")
-                    {
-                        pieceToRemove = piece;
-                        break;
-                    }
+                    stonecutterPiece = pieceComp.m_craftingStation;
+                    firstPatch = false;
                 }
 
-                if (pieceToRemove != null)
-                    hoe.m_pieces.Remove(pieceToRemove);
-                else
-                    Jotunn.Logger.LogWarning("Could not find the original paved road prefab to remove! This can cause issues.");
+                if (!configRequireStoncutter.Value)
+                    pieceComp.m_craftingStation = null;
+                else if (pieceComp.m_craftingStation == null)
+                    pieceComp.m_craftingStation = stonecutterPiece;
 
-                PieceManager.OnPiecesRegistered -= RemoveOrginalPavedRoad;
+                TerrainOp terrainComp = original.GetComponent<TerrainOp>();
+                terrainComp.m_settings.m_smooth = false;
+
+                Jotunn.Logger.LogInfo("Successfully patched Paved Road, enjoy!");
             }
             catch (Exception error)
             {
-                Jotunn.Logger.LogError(error);
+                Jotunn.Logger.LogError("Could not patch original: " + error);
             }
         }
 
+        /**
+         * Undo the changes done to the paved_road_v2 prefab
+         */
+        private void UnpatchOriginal()
+        {
+            try
+            {
+                GameObject original = PrefabManager.Instance.GetPrefab("paved_road_v2");
+                Piece pieceComp = original.GetComponent<Piece>();
+                pieceComp.m_allowAltGroundPlacement = true;
+
+                if (pieceComp.m_craftingStation == null)
+                    pieceComp.m_craftingStation = stonecutterPiece;
+
+                TerrainOp terrainComp = original.GetComponent<TerrainOp>();
+                terrainComp.m_settings.m_smooth = true;
+
+                Jotunn.Logger.LogInfo("Successfully unpatched Paved Road, Why u do this?!");
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not unpatch original: " + error);
+            }
+        }
+
+        /**
+         * Apply changes when the config has changed
+         */
+        private void ApplyConfigChanges()
+        {
+            if (configEnable.Value)
+            {
+                PatchOriginal();
+            }
+            else
+            {
+                UnpatchOriginal();
+            }
+        }
+
+        /**
+         * Initialise config entries and add the necessary events
+         */
         private void InitConfig()
         {
             try
@@ -107,25 +139,44 @@ namespace PavedRoadNoLevel
                 {
                     if (attr.InitialSynchronization)
                     {
-                        Jotunn.Logger.LogMessage("Initial Config sync event received");
+                        ApplyConfigChanges();
                     }
                     else
                     {
-                        Jotunn.Logger.LogMessage("Config sync event received");
+                        ApplyConfigChanges();
                     }
                 };
+
+                FileSystemWatcher configWatcher = new FileSystemWatcher(BepInEx.Paths.ConfigPath, configFileName);
+                configWatcher.Changed += new FileSystemEventHandler(OnConfigFileChange);
+                configWatcher.Created += new FileSystemEventHandler(OnConfigFileChange);
+                configWatcher.Renamed += new RenamedEventHandler(OnConfigFileChange);
+                configWatcher.IncludeSubdirectories = true;
+                configWatcher.SynchronizingObject = ThreadingHelper.SynchronizingObject;
+                configWatcher.EnableRaisingEvents = true;
             }
             catch (Exception error)
             {
-                Jotunn.Logger.LogError("Something went wrong with initialising the config or config events: " + error);
+                Jotunn.Logger.LogError("Could not initialise the config & events: " + error);
             }
         }
 
-        private void InitAssetBundle()
+        /**
+         * Event handler for when the config file changes
+         */
+        private void OnConfigFileChange(object sender, FileSystemEventArgs e)
         {
-            pavedRoadBundle = AssetUtils.LoadAssetBundleFromResources("pavedroad_dw");
-            pavedRoad = pavedRoadBundle.LoadAsset<GameObject>("paved_road_DW");
-            pavedRoadStonecutter = pavedRoadBundle.LoadAsset<GameObject>("paved_road_stonecutter_DW");
+            if (!File.Exists(configFileFullPath))
+                return;
+
+            try
+            {
+                Config.Reload();
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Something went wrong while reloading the config, please check if the file exists and the entries are valid! " + error);
+            }
         }
     }
 }
