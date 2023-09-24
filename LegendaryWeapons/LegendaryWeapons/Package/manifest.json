@@ -1,7 +1,7 @@
 {
     "name": "LegendaryWeapons",
     "description": "A mod that adds 3 new weapons to the game with different weapon modes! While holding the weapon you can press the weapon mode key (Default: Y) to change the weapon mode.",
-    "version_number": "1.0.1",
+    "version_number": "1.0.2",
     "dependencies": ["ValheimModding-Jotunn-2.12.4"],
     "website_url": ""
 }

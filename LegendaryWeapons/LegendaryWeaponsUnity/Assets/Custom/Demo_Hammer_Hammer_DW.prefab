@@ -344,27 +344,7 @@ MonoBehaviour:
         m_startEffect:
           m_effectPrefabs: []
         m_triggerEffect:
-          m_effectPrefabs:
-          - m_prefab: {fileID: 5458635079977080822, guid: 4837faf3c2eabb747adb90f09a2c91bc,
-              type: 3}
-            m_enabled: 1
-            m_variant: -1
-            m_attach: 0
-            m_inheritParentRotation: 0
-            m_inheritParentScale: 0
-            m_randomRotation: 0
-            m_scale: 0
-            m_childTransform: 
-          - m_prefab: {fileID: 1610531113345640, guid: cec371838512e644dabd93ac68ce71a1,
-              type: 3}
-            m_enabled: 1
-            m_variant: -1
-            m_attach: 0
-            m_inheritParentRotation: 0
-            m_inheritParentScale: 0
-            m_randomRotation: 0
-            m_scale: 0
-            m_childTransform: 
+          m_effectPrefabs: []
         m_trailStartEffect:
           m_effectPrefabs: []
         m_burstEffect:
@@ -402,7 +382,7 @@ MonoBehaviour:
           m_randomRotation: 0
           m_scale: 0
           m_childTransform: 
-        - m_prefab: {fileID: 1688561987757631, guid: dd96bb2dc10c3d84c90b570037b6dbf4,
+        - m_prefab: {fileID: 3971812246006931960, guid: 9deb3b1a6ea576b4596464fe0bfcec13,
             type: 3}
           m_enabled: 1
           m_variant: -1
@@ -412,7 +392,7 @@ MonoBehaviour:
           m_randomRotation: 0
           m_scale: 0
           m_childTransform: 
-        - m_prefab: {fileID: 1453005504158329, guid: 03a450863444a8b4dade6f26b2c9b0a9,
+        - m_prefab: {fileID: 2192442494742230413, guid: 1f5db2af41fffdd4dbebf21cb26074e6,
             type: 3}
           m_enabled: 1
           m_variant: -1
@@ -436,7 +416,7 @@ MonoBehaviour:
         m_effectPrefabs: []
       m_blockEffect:
         m_effectPrefabs:
-        - m_prefab: {fileID: 1184450386518423, guid: 5c6245cfb77241046b23c21ecd0ec067,
+        - m_prefab: {fileID: 3096011320337130239, guid: 7b1688c9367668f459d5624957c62a28,
             type: 3}
           m_enabled: 1
           m_variant: -1
@@ -456,7 +436,7 @@ MonoBehaviour:
           m_randomRotation: 0
           m_scale: 0
           m_childTransform: 
-        - m_prefab: {fileID: 1664763483195493, guid: bbf86c1541fee464f8e3bc0c3ebb85a7,
+        - m_prefab: {fileID: 7068215727749765215, guid: d917533149c9dc54bb1b94aafb1b5c27,
             type: 3}
           m_enabled: 1
           m_variant: -1
@@ -472,7 +452,7 @@ MonoBehaviour:
         m_effectPrefabs: []
       m_triggerEffect:
         m_effectPrefabs:
-        - m_prefab: {fileID: 1289657736840195, guid: 6428c4d286057184ab8dc105760698f7,
+        - m_prefab: {fileID: 3280892434776421326, guid: 3c3bcf2750b8048459a0e85018e35e04,
             type: 3}
           m_enabled: 1
           m_variant: -1
@@ -484,7 +464,7 @@ MonoBehaviour:
           m_childTransform: 
       m_trailStartEffect:
         m_effectPrefabs:
-        - m_prefab: {fileID: 1708414484196195, guid: 0a3c647430f1f3449a2a3f54b186e49c,
+        - m_prefab: {fileID: 5680451561623516348, guid: 8bd52807d9f57e94889b9d3ab05f6f7a,
             type: 3}
           m_enabled: 1
           m_variant: -1

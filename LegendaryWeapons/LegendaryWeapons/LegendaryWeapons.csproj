@@ -81,16 +81,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\RecipeHelper.cs" />
     <Compile Include="Properties\IgnoreAccessModifiers.cs" />
     <Compile Include="LegendaryWeapons.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RecipeHelper.cs" />
+    <Compile Include="Types\RecipeUpdateType.cs" />
+    <Compile Include="Types\WeaponType.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <EmbeddedResource Include="Package\Assets\legendaryweapons_dw" />
-    <EmbeddedResource Include="Package\Assets\legendaryweapons_dw.manifest" />
+    <EmbeddedResource Include="Resources\legendaryweapons_dw" />
+    <EmbeddedResource Include="Resources\legendaryweapons_dw.manifest" />
+    <None Include="Package\README.md" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Package\plugins\" />

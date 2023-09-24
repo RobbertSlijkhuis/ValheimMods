@@ -373,7 +373,7 @@ MonoBehaviour:
           m_randomRotation: 0
           m_scale: 0
           m_childTransform: 
-        - m_prefab: {fileID: 1482878011437274, guid: b45fa5c98aa3e42419d64cf40d174ca9,
+        - m_prefab: {fileID: 3162457238624749587, guid: bccb42389e536af4c82cd527f591b61e,
             type: 3}
           m_enabled: 1
           m_variant: -1
@@ -383,7 +383,7 @@ MonoBehaviour:
           m_randomRotation: 0
           m_scale: 0
           m_childTransform: 
-        - m_prefab: {fileID: 1453005504158329, guid: 03a450863444a8b4dade6f26b2c9b0a9,
+        - m_prefab: {fileID: 2192442494742230413, guid: 1f5db2af41fffdd4dbebf21cb26074e6,
             type: 3}
           m_enabled: 1
           m_variant: -1
@@ -397,7 +397,7 @@ MonoBehaviour:
         m_effectPrefabs: []
       m_blockEffect:
         m_effectPrefabs:
-        - m_prefab: {fileID: 1540927631583339, guid: 88b11ef3a82f1d849bade84032abe747,
+        - m_prefab: {fileID: 5162358829784782818, guid: 87481fdc1465f6f4c8e40433bb98dd47,
             type: 3}
           m_enabled: 1
           m_variant: -1
@@ -417,7 +417,7 @@ MonoBehaviour:
           m_randomRotation: 0
           m_scale: 0
           m_childTransform: 
-        - m_prefab: {fileID: 1664763483195493, guid: bbf86c1541fee464f8e3bc0c3ebb85a7,
+        - m_prefab: {fileID: 7068215727749765215, guid: d917533149c9dc54bb1b94aafb1b5c27,
             type: 3}
           m_enabled: 1
           m_variant: -1
@@ -433,7 +433,7 @@ MonoBehaviour:
         m_effectPrefabs: []
       m_triggerEffect:
         m_effectPrefabs:
-        - m_prefab: {fileID: 1289657736840195, guid: 6428c4d286057184ab8dc105760698f7,
+        - m_prefab: {fileID: 3280892434776421326, guid: 3c3bcf2750b8048459a0e85018e35e04,
             type: 3}
           m_enabled: 1
           m_variant: -1
@@ -445,7 +445,7 @@ MonoBehaviour:
           m_childTransform: 
       m_trailStartEffect:
         m_effectPrefabs:
-        - m_prefab: {fileID: 1743651065942238, guid: 5880e1f5924195345a13a742257e10b4,
+        - m_prefab: {fileID: 5822642686965027870, guid: 1561b349ffb088746a7d83abd319f7e7,
             type: 3}
           m_enabled: 1
           m_variant: -1
