@@ -3,6 +3,28 @@ using UnityEngine;
 
 namespace RideableSeekerBrute
 {
+    [HarmonyPatch(typeof(MonsterAI), nameof(MonsterAI.SetFollowTarget))]
+    class WakeUpSleepy_patch
+    {
+        static bool Prefix(ref MonsterAI __instance)
+        {
+            // Certain creatures start as sleeping, like the Stone Golem
+            // or the Abomination. When you log in they are in their
+            // sleeping (underground) position and cannot be ridden
+            // or cannot follow. In order to wake it up you either need
+            // to do damage to them or have an enemy nearby. This patch
+            // will prevent them from ever sleeping
+
+            if (__instance != null) 
+            {
+                if (__instance.IsSleeping() && __instance.m_character.m_tamed)
+                    __instance.Wakeup();
+            }
+
+            return true;
+        }
+    }
+
     [HarmonyPatch(typeof(Tameable), nameof(Tameable.SetSaddle))]
     class SetSaddle_Patch
     {

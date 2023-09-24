@@ -1,9 +1,11 @@
 using BepInEx;
+using BepInEx.Configuration;
 using HarmonyLib;
 using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
+using System;
 using UnityEngine;
 
 namespace RideableSeekerBrute
@@ -13,7 +15,7 @@ namespace RideableSeekerBrute
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     internal class RideableSeekerBrute : BaseUnityPlugin
     {
-        public const string PluginGUID = "com.jotunn.Test1";
+        public const string PluginGUID = "DeathWizsh.RideableBrute";
         public const string PluginName = "RideableSeekerBrute";
         public const string PluginVersion = "0.0.1";
 
@@ -35,14 +37,116 @@ namespace RideableSeekerBrute
         GameObject wolf;
         GameObject boar;
         GameObject abomination;
+        GameObject warg;
+
+        private ConfigEntry<KeyboardShortcut> configAttackKey;
+        private ConfigEntry<KeyboardShortcut> configAttackSecondaryKey;
+        private ConfigEntry<bool> configDebug;
+
+        private ButtonConfig AttackButton;
+        private ButtonConfig AttackSecondaryButton;
 
         private void Awake()
         {
+            InitConfig();
+            
+            ModQuery.Enable();
             harmony.PatchAll();
 
             InitAssetBundle();
+            InitInputs();
 
             PrefabManager.OnVanillaPrefabsAvailable += InitMountable;
+            PrefabManager.OnPrefabsRegistered += InitCustomMounts;
+        }
+
+        private void Update()
+        {
+            if (ZInput.instance == null)
+                return;
+
+            Player player = Player.m_localPlayer;
+
+            if (!player)
+                return;
+
+            AttackButton.BlockOtherInputs = player.IsRiding();
+            AttackSecondaryButton.BlockOtherInputs = player.IsRiding();
+
+            if (!player.IsRiding())
+                return;
+
+            Humanoid character = (Humanoid)player.GetDoodadController().GetControlledComponent();
+
+            if (ZInput.GetButton(AttackButton.Name) && !character.InAttack())
+            {
+                Jotunn.Logger.LogWarning(AttackButton.BlockOtherInputs);
+                if (character.m_defaultItems.Length > 0 && character.m_defaultItems[0] != null)
+                {
+                    Jotunn.Logger.LogInfo("Attack!");
+                    character.m_rightItem = character.m_defaultItems[0].GetComponent<ItemDrop>().m_itemData;
+                    character.StartAttack(null, false);
+                }
+            }
+            else if (ZInput.GetButton(AttackSecondaryButton.Name) && !character.InAttack())
+            {
+                if (character.m_defaultItems.Length > 1 && character.m_defaultItems[1] != null)
+                {
+                    Jotunn.Logger.LogInfo("Secondary attack!");
+                    character.m_rightItem = character.m_defaultItems[1].GetComponent<ItemDrop>().m_itemData;
+                    character.StartAttack(null, false);
+                }
+            }
+        }
+
+        private void InitCustomMounts()
+        {
+            // Jotunn.Logger.LogInfo($"Modded prefabs:");
+            foreach (var moddedPrefab in ModQuery.GetPrefabs())
+            {
+                // Jotunn.Logger.LogInfo($"  {moddedPrefab.Prefab.name} added by {moddedPrefab.SourceMod.Name}");
+                if (moddedPrefab.Prefab.name == "AshenWarg_TW")
+                {
+                    warg = moddedPrefab.Prefab;
+                    Jotunn.Logger.LogInfo("Found Warg!");
+                    break;
+                }
+            }
+
+            if (warg != null)
+            {
+                TameableConfig tameableConfig = new TameableConfig();
+                tameableConfig.feedDuration = 15;
+                tameableConfig.tamingTime = 15;
+                tameableConfig.commandable = true;
+                tameableConfig.AddConsumeItem(PrefabManager.Instance.GetPrefab("RawMeat").GetComponent<ItemDrop>());
+                tameableConfig.AddConsumeItem(PrefabManager.Instance.GetPrefab("DeerMeat").GetComponent<ItemDrop>());
+
+                TameableManager tameable = new TameableManager();
+                tameable.MakeTameable(warg, tameableConfig);
+
+                // Mount stuff
+                GameObject mediumSaddle = PrefabManager.Instance.GetPrefab("SaddleMedium_DW");
+                Jotunn.Logger.LogWarning("Saddle prefab: "+ mediumSaddle?.name);
+
+                SaddleConfig saddleConfigMedium = new SaddleConfig(mediumSaddle, "Visual");
+                saddleConfigMedium.hoverText = "Medium Saddle";
+                saddleConfigMedium.maxStamina = 240;
+                saddleConfigMedium.attach.position = new Vector3(0, 1.6f, 0);
+                saddleConfigMedium.attach.scale = new Vector3(1, 1, 1);
+                saddleConfigMedium.sphereRadius = 0.6f;
+
+                MountableConfig wargAttachConfig = new MountableConfig("BARGHEST_ Spine");
+                wargAttachConfig.characterAttach.position = new Vector3(-0.6f, -0.4f, 0);
+                wargAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(0, 270, 180);
+                wargAttachConfig.characterAttach.scale = new Vector3(1, 1, 1);
+                wargAttachConfig.saddleAttach.position = new Vector3(0, -0.4f, -0.27f);
+                wargAttachConfig.saddleAttach.scale = new Vector3(0.7f, 0.7f, 0.7f);
+
+                MountableManager.Instance.MakeMountable(warg, saddleConfigMedium, wargAttachConfig);
+            }
+
+            PrefabManager.OnVanillaPrefabsAvailable -= InitCustomMounts;
         }
 
         private void InitMountable()
@@ -161,7 +265,7 @@ namespace RideableSeekerBrute
             hareAttachConfig.saddleAttach.scale = new Vector3(0.0075f, 0.0075f, 0.0075f);
 
             MountableConfig abomAttachConfig = new MountableConfig("hip");
-            abomAttachConfig.characterAttach.position = new Vector3(0.011f, 0.024f, 0);
+            abomAttachConfig.characterAttach.position = new Vector3(-0.0013f, 0.011f, 0);
             abomAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(270, 90, 0);
             abomAttachConfig.characterAttach.scale = new Vector3(1, 1, 1);
             abomAttachConfig.saddleAttach.position = new Vector3(0, -0.0033f, -0.0025f);
@@ -191,9 +295,24 @@ namespace RideableSeekerBrute
 
             saddleConfigHeavy.maxUseRange = 6;
             saddleConfigHeavy.sphereRadius = 0.7f;
-            // saddleConfigHeavy.attach.position = new Vector3(0, 2.5f, 1.5f);
-            saddleConfigHeavy.attach.position = new Vector3(0, 0.01f, 0);
+            saddleConfigHeavy.attach.position = new Vector3(0, 2.5f, 1.5f);
             MountableManager.Instance.MakeMountable(abomination, saddleConfigHeavy, abomAttachConfig);
+
+            PrefabManager.OnVanillaPrefabsAvailable -= InitMountable;
+        }
+
+        private void InitConfig()
+        {
+            Config.SaveOnConfigSet = true;
+
+            configDebug = Config.Bind("General", "Debug", false,
+                new ConfigDescription("Put mod in debug mode", null));
+            // configDebug.SettingChanged += (obj, attr) => { };
+
+            //configAttackKey = Config.Bind("General", "Attack", new KeyboardShortcut((KeyCode)323),
+            //     new ConfigDescription("Attack with main attack", null));
+            //configAttackSecondaryKey = Config.Bind("General", "Secondary attack", new KeyboardShortcut((KeyCode)325),
+            //    new ConfigDescription("Attack with secondary attack", null));
         }
 
         private void InitAssetBundle()
@@ -202,6 +321,35 @@ namespace RideableSeekerBrute
             saddleHeavy = assetBundle.LoadAsset<GameObject>("SaddleHeavy_DW");
             saddleMedium = assetBundle.LoadAsset<GameObject>("SaddleMedium_DW");
             saddleSimple = assetBundle.LoadAsset<GameObject>("SaddleSimple_2_DW");
+        }
+
+        /**
+         * Initialise the inputs of this mod
+         */
+        private void InitInputs()
+        {
+            try
+            {
+                AttackButton = new ButtonConfig
+                {
+                    Name = "Attack",
+                    Key = (KeyCode)323,
+                    BlockOtherInputs = true
+                };
+                InputManager.Instance.AddButton(PluginGUID, AttackButton);
+
+                AttackSecondaryButton = new ButtonConfig
+                {
+                    Name = "Secondary attack",
+                    Key = (KeyCode)325,
+                    BlockOtherInputs = true
+                };
+                InputManager.Instance.AddButton(PluginGUID, AttackSecondaryButton);
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise inputs: " + error);
+            }
         }
     }
 }

@@ -93,10 +93,15 @@ namespace RideableSeekerBrute
             try
             {
                 Transform objWithMesh = Utils.FindChild(saddleConfig.prefab.transform, "Cube");
+                Jotunn.Logger.LogInfo("objWithMesh: " + (bool)objWithMesh);
                 Transform saddleAttach = Utils.FindChild(prefab.transform, "SaddleAttachPoint");
+                Jotunn.Logger.LogInfo("saddleAttach: " + (bool)saddleAttach);
                 Transform saddleParent = Utils.FindChild(prefab.transform, "Saddle");
+                Jotunn.Logger.LogInfo("saddleParent: " + (bool)saddleParent);
                 Tameable tameableComp = prefab.GetComponent<Tameable>();
+                Jotunn.Logger.LogInfo("tameableComp: " + (bool)tameableComp);
                 Sadle saddleComp = saddleParent.GetComponent<Sadle>();
+                Jotunn.Logger.LogInfo("saddleComp: " + (bool)saddleComp);
 
                 // Update Tameable component with saddle config
                 tameableComp.m_saddleItem = saddleConfig.prefab.GetComponent<ItemDrop>();
