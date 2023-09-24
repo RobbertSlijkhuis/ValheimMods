@@ -15,7 +15,7 @@ namespace PavedRoadNoLevel
     {
         public const string PluginGUID = "DeathWizsh.PavedRoadNoLevel";
         public const string PluginName = "Paved Road No Level";
-        public const string PluginVersion = "1.0.3";
+        public const string PluginVersion = "1.0.4";
         private static string configFileName = PluginGUID + ".cfg";
         private static string configFileFullPath = BepInEx.Paths.ConfigPath + Path.DirectorySeparatorChar.ToString() + configFileName;
 
@@ -130,22 +130,12 @@ namespace PavedRoadNoLevel
                 configEnable = Config.Bind(new ConfigDefinition("General", "Enable"), true,
                     new ConfigDescription("Enable this mod", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                configEnable.SettingChanged += (obj, attr) => { ApplyConfigChanges(); };
 
                 configRequireStoncutter = Config.Bind(new ConfigDefinition("General", "Stonecutter requirement"), true,
                     new ConfigDescription("Enable the Stonecutter as a requirement (to pave roads)", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
-
-                SynchronizationManager.OnConfigurationSynchronized += (obj, attr) =>
-                {
-                    if (attr.InitialSynchronization)
-                    {
-                        ApplyConfigChanges();
-                    }
-                    else
-                    {
-                        ApplyConfigChanges();
-                    }
-                };
+                configRequireStoncutter.SettingChanged += (obj, attr) => { ApplyConfigChanges(); };
 
                 FileSystemWatcher configWatcher = new FileSystemWatcher(BepInEx.Paths.ConfigPath, configFileName);
                 configWatcher.Changed += new FileSystemEventHandler(OnConfigFileChange);
