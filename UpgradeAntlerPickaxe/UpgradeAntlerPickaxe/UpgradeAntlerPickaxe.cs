@@ -3,24 +3,25 @@ using BepInEx.Configuration;
 using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
+using Jotunn.Utils;
 using System;
-using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 namespace UpgradeAntlerPickaxe
 {
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
-    //[NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
+    [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     internal class UpgradeAntlerPickaxe : BaseUnityPlugin
     {
         public const string PluginGUID = "DeathWizsh.UpgradeAntlerPickaxe";
         public const string PluginName = "Upgrade Antler Pickaxe";
-        public const string PluginVersion = "1.1.1";
+        public const string PluginVersion = "1.1.2";
+        private static string configFileName = PluginGUID + ".cfg";
+        private static string configFileFullPath = BepInEx.Paths.ConfigPath + Path.DirectorySeparatorChar.ToString() + configFileName;
 
-        // Use this class to add your own localization to the game
-        // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
-        public static CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();
+        private string[] configCraftingStationOptions = new string[] { "None", "Disabled", "Workbench", "Forge", "Stonecutter", "Cauldron", "ArtisanTable", "BlackForge", "GaldrTable" };
 
         private ConfigEntry<bool> configEnable;
         private ConfigEntry<bool> configCreateClone;
@@ -32,8 +33,9 @@ namespace UpgradeAntlerPickaxe
         private ConfigEntry<string> configRecipeUpgrade;
         private ConfigEntry<int> configRecipeMultiplier;
 
-        private bool isRecipeInitialised = false;
-
+        /**
+         * Called when the mod is being initialised
+         */
         private void Awake()
         {
             try
@@ -42,16 +44,12 @@ namespace UpgradeAntlerPickaxe
 
                 if (configEnable.Value)
                 {
-                    RecipeHelper recipe = new RecipeHelper(configRecipe.Value, configRecipeUpgrade.Value);
-                    if (!recipe.IsConfigRecipeValid())
-                        throw new Exception("Invalid recipe config");
-
                     PrefabManager.OnVanillaPrefabsAvailable += PatchStats;
 
                     if (!configCreateClone.Value)
                     {
-                        AddRecipe();
-                        ItemManager.OnItemsRegistered += RemoveRecipe; // This will remove the original, but only this time
+                        AddCustomRecipe();
+                        ItemManager.OnItemsRegistered += RemoveOriginalRecipe;
                     }
                 }
             }
@@ -61,6 +59,17 @@ namespace UpgradeAntlerPickaxe
             }
         }
 
+        /**
+         * Called when the mod is unloaded
+         */
+        private void OnDestroy()
+        {
+            Config.Save();
+        }
+
+        /**
+         * Update the original or clone of the Antler Pickaxe
+         */
         private void PatchStats()
         {
             try
@@ -73,16 +82,9 @@ namespace UpgradeAntlerPickaxe
                 }
                 else if (ItemManager.Instance.GetItem("PickaxeAntler_DW") == null)
                 {
-                    RecipeHelper recipe = new RecipeHelper(configRecipe.Value, configRecipeUpgrade.Value);
                     ItemConfig itemConfig = new ItemConfig();
                     itemConfig.CraftingStation = configCraftingStation.Value;
-
-                    foreach (var requirement in recipe.requirements)
-                    {
-                        int multiplier = configRecipeMultiplier.Value != 0 ? configRecipeMultiplier.Value : 1;
-                        int amountPerlevel = requirement.amountPerLevel * multiplier;
-                        itemConfig.AddRequirement(new RequirementConfig(requirement.material, requirement.amount, amountPerlevel, true));
-                    }
+                    itemConfig.Requirements = RecipeHelper.GetAsRequirementConfigArray(configRecipe.Value, configRecipeUpgrade.Value, configRecipeMultiplier.Value);
 
                     CustomItem antlerPickaxe = new CustomItem("PickaxeAntler_DW", "PickaxeAntler", itemConfig);
                     UpdateItemStats(antlerPickaxe.ItemDrop);
@@ -103,6 +105,9 @@ namespace UpgradeAntlerPickaxe
             }
         }
 
+        /**
+         * Undo any changes made to the original or clone
+         */
         private void UnpatchStats()
         {
             try
@@ -127,6 +132,9 @@ namespace UpgradeAntlerPickaxe
             }
         }
 
+        /**
+         * Update the stats of an item
+         */
         private void UpdateItemStats(ItemDrop item, bool unpatch = false)
         {
             if (unpatch)
@@ -145,24 +153,20 @@ namespace UpgradeAntlerPickaxe
             item.m_itemData.m_shared.m_durabilityPerLevel = 50;
         }
 
-        private void AddRecipe()
+        /**
+         * Add the recipe of the Antler Pickaxe
+         */
+        private void AddCustomRecipe()
         {
             try
             {
-                RecipeHelper recipe = new RecipeHelper(configRecipe.Value, configRecipeUpgrade.Value);
-                RecipeConfig antlerPickaxeRecipe = new RecipeConfig();
-                antlerPickaxeRecipe.Item = "PickaxeAntler";
-                antlerPickaxeRecipe.CraftingStation = configCraftingStation.Value;
-                antlerPickaxeRecipe.MinStationLevel = configMinStationLevel.Value;
+                RecipeConfig recipe = new RecipeConfig();
+                recipe.Item = "PickaxeAntler";
+                recipe.CraftingStation = configCraftingStation.Value;
+                recipe.MinStationLevel = configMinStationLevel.Value;
+                recipe.Requirements = RecipeHelper.GetAsRequirementConfigArray(configRecipe.Value, configRecipeUpgrade.Value, configRecipeMultiplier.Value);
 
-                foreach (var requirement in recipe.requirements)
-                {
-                    int multiplier = configRecipeMultiplier.Value != 0 ? configRecipeMultiplier.Value : 1;
-                    int amountPerlevel = requirement.amountPerLevel * multiplier;
-                    antlerPickaxeRecipe.AddRequirement(new RequirementConfig(requirement.material, requirement.amount, amountPerlevel, true));
-                }
-
-                ItemManager.Instance.AddRecipe(new CustomRecipe(antlerPickaxeRecipe));
+                ItemManager.Instance.AddRecipe(new CustomRecipe(recipe));
             }
             catch (Exception error)
             {
@@ -170,7 +174,10 @@ namespace UpgradeAntlerPickaxe
             }
         }
 
-        private void RemoveRecipe()
+        /**
+         * Remove the original Antler Pickaxe recipe
+         */
+        private void RemoveOriginalRecipe()
         {
             try
             {
@@ -183,10 +190,7 @@ namespace UpgradeAntlerPickaxe
                 else
                     throw new Exception("Could not find recipe to remove!");
 
-                if (!isRecipeInitialised)
-                    isRecipeInitialised = true;
-
-                ItemManager.OnItemsRegistered -= RemoveRecipe;
+                ItemManager.OnItemsRegistered -= RemoveOriginalRecipe;
             }
             catch (Exception error)
             {
@@ -195,150 +199,164 @@ namespace UpgradeAntlerPickaxe
         }
 
         /**
-         * Currently stuck at a Index was outside of bounds of the array error
+         * Update recipe related fields when the config changes
          */
-        private void UpdateRecipe()
+        private void PatchRecipe(RecipeUpdateType updateType = RecipeUpdateType.Recipe)
         {
             try
             {
-                Jotunn.Logger.LogWarning("UpdateRecipe()");
-                //foreach (var dbRecipe in ObjectDB.instance.m_recipes)
-                //{
-                //    Jotunn.Logger.LogInfo(dbRecipe.name);
-                //}
+                string recipeName = "Recipe_" + (configCreateClone.Value ? "PickaxeAntler_DW" : "PickaxeAntler");
+                CustomRecipe recipe = ItemManager.Instance.GetRecipe(recipeName);
 
-                RecipeHelper recipe = new RecipeHelper(configRecipe.Value, configRecipeUpgrade.Value);
-                bool isValid = recipe.IsConfigRecipeValid();
+                if (recipe == null)
+                    throw new Exception("Could not find recipe!");
 
-                if (!isValid)
-                    throw new Exception("Cannot update recipe because its not valid!");
+                if (!configEnable.Value)
+                    return;
 
-                CustomRecipe itemRecipe = ItemManager.Instance.GetRecipe("Recipe_PickaxeAntler" + (configCreateClone.Value == true ? "_DW" : ""));
-                List<Piece.Requirement> list = new List<Piece.Requirement>();
-                // Mock<global::CraftingStation>.Create(CraftingStation);
-
-                foreach (var requirement in recipe.requirements)
+                switch (updateType)
                 {
-                    Piece.Requirement pieceRequirement = new Piece.Requirement();
-                    int multiplier = configRecipeMultiplier.Value != 0 ? configRecipeMultiplier.Value : 1;
-                    int amountPerlevel = requirement.amountPerLevel * multiplier;
+                    case RecipeUpdateType.Recipe:
+                        Piece.Requirement[] requirements = RecipeHelper.GetAsPieceRequirementArray(configRecipe.Value, configRecipeUpgrade.Value, configRecipeMultiplier.Value);
 
-                    pieceRequirement.m_amountPerLevel = amountPerlevel;
-                    pieceRequirement.m_amount = requirement.amount;
-                    pieceRequirement.m_resItem = Mock<ItemDrop>.Create(requirement.material);
-                    pieceRequirement.m_recover = true;
+                        if (requirements == null)
+                            throw new Exception("Requirements is null");
 
-                    list.Add(pieceRequirement);
+                        foreach(var requirement in requirements)
+                        {
+                            Jotunn.Logger.LogInfo(requirement.m_resItem?.name);
+                            Jotunn.Logger.LogInfo(requirement.m_amount);
+                            Jotunn.Logger.LogInfo(requirement.m_amountPerLevel);
+                        }
+
+                        recipe.Recipe.m_resources = requirements;
+                        break;
+                    case RecipeUpdateType.CraftingStation:
+                        if (configCraftingStation.Value == "None")
+                        {
+                            recipe.Recipe.m_craftingStation = null;
+                            recipe.Recipe.m_enabled = true;
+                        }
+                        else if (configCraftingStation.Value == "Disabled")
+                        {
+                            recipe.Recipe.m_craftingStation = null;
+                            recipe.Recipe.m_enabled = false;
+                        }
+                        else
+                        {
+                            string pieceName = CraftingStations.GetInternalName(configCraftingStation.Value);
+                            recipe.Recipe.m_enabled = true;
+                            recipe.Recipe.m_craftingStation = PrefabManager.Instance.GetPrefab(pieceName).GetComponent<CraftingStation>();
+                        }
+                        break;
+                    case RecipeUpdateType.MinRequiredLevel:
+                        recipe.Recipe.m_minStationLevel = configMinStationLevel.Value;
+                        break;
                 }
-
-                itemRecipe.Recipe.m_resources = list.ToArray();
             }
             catch (Exception error)
             {
-                Jotunn.Logger.LogError("Unable to update the recipe: " + error);
+                Jotunn.Logger.LogError("Could not update recipe: " + error);
             }
         }
 
+        /**
+         * Initialise config entries and add the necessary events
+         */
         private void InitConfig()
         {
             try
             {
-                Config.SaveOnConfigSet = true;
+                Config.SaveOnConfigSet = false;
 
-                configEnable = base.Config.Bind(new ConfigDefinition("General", "Enable"), true,
+                configEnable = Config.Bind(new ConfigDefinition("General", "Enable"), true,
                     new ConfigDescription("Wether or not to enable this mod. When changed while the game is running it will disable the ability to upgrade\nthe pickaxe but will not modify already upgraded ones. They will be reverted back to normal on next game start\nEXCEPT if they were cloned, then they will be deleted!", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
-
-                configCreateClone = base.Config.Bind(new ConfigDefinition("General", "Create clone"), false,
-                    new ConfigDescription("Wether to patch the original Antler Pickaxe or to create a clone instead", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-
-                configName = base.Config.Bind(new ConfigDefinition("General", "Name"), "Antler pickaxe+",
-                    new ConfigDescription("The name given to the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-
-                configDescription = base.Config.Bind(new ConfigDefinition("General", "Description"), "This tool is hard enough to crack even the most stubborn rocks.",
-                    new ConfigDescription("The description given to the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-
-                configCraftingStation = base.Config.Bind(new ConfigDefinition("General", "Crafting station"), "Workbench",
-                    new ConfigDescription("The crafting station the item can be created in",
-                    new AcceptableValueList<string>(new string[] { "Disabled", "Inventory", "Workbench", "Cauldron", "Forge", "ArtisanTable", "StoneCutter", "MageTable", "BlackForge" }),
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-
-                configMinStationLevel = base.Config.Bind(new ConfigDefinition("General", "Required station level"), 1,
-                    new ConfigDescription("The required station level to craft the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-
-                configRecipe = base.Config.Bind(new ConfigDefinition("General", "Crafting costs"), "Wood:10,HardAntler:1",
-                    new ConfigDescription("The items required to craft the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-
-                configRecipeUpgrade = base.Config.Bind(new ConfigDefinition("General", "Upgrade costs"), "Wood:4,HardAntler:1",
-                    new ConfigDescription("The costs to upgrade the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-
-                configRecipeMultiplier = base.Config.Bind(new ConfigDefinition("General", "Upgrade multiplier"), 1,
-                    new ConfigDescription("The multiplier applied to the upgrade costs", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-
                 configEnable.SettingChanged += (obj, attr) =>
                 {
                     if (!configEnable.Value)
+                    {
                         UnpatchStats();
+
+                        string cloneAddition = configCreateClone.Value ? " and will be deleted when players relog!" : "!";
+                        Jotunn.Logger.LogWarning("UpgradeAntlerPickaxe is now disabled! The Antler Pickaxe can no longer be upgraded" + cloneAddition);
+                    }
                     else
-                    {
                         PatchStats();
-                    }
                 };
 
-                configName.SettingChanged += (obj, attr) =>
-                {
-                    PatchStats();
-                };
+                configCreateClone = Config.Bind(new ConfigDefinition("General", "Create clone"), false,
+                    new ConfigDescription("Wether to patch the original Antler Pickaxe or to create a clone instead (requires restart)", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
 
-                configDescription.SettingChanged += (obj, attr) =>
-                {
-                    PatchStats();
-                };
+                configName = Config.Bind(new ConfigDefinition("General", "Name"), "Antler pickaxe+",
+                    new ConfigDescription("The name given to the item", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                configName.SettingChanged += (obj, attr) => { PatchStats(); };
 
-                //configRecipe.SettingChanged += (obj, attr) =>
-                //{
-                //    UpdateRecipe();
-                //};
+                configDescription = Config.Bind(new ConfigDefinition("General", "Description"), "This tool is hard enough to crack even the most stubborn rocks.",
+                    new ConfigDescription("The description given to the item", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                configDescription.SettingChanged += (obj, attr) => { PatchStats(); };
 
-                //configRecipeUpgrade.SettingChanged += (obj, attr) =>
-                //{
-                //    UpdateRecipe();
-                //};
+                configCraftingStation = Config.Bind(new ConfigDefinition("General", "Crafting station"), "Workbench",
+                    new ConfigDescription("The crafting station the item can be created in",
+                    new AcceptableValueList<string>(configCraftingStationOptions),
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                configCraftingStation.SettingChanged += (obj, attr) => { PatchRecipe(RecipeUpdateType.CraftingStation); };
 
-                //configRecipeMultiplier.SettingChanged += (obj, attr) =>
-                //{
-                //    UpdateRecipe();
-                //};
+                configMinStationLevel = Config.Bind(new ConfigDefinition("General", "Required station level"), 1,
+                    new ConfigDescription("The required station level to craft the item", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                configMinStationLevel.SettingChanged += (obj, attr) => { PatchRecipe(RecipeUpdateType.MinRequiredLevel); };
 
-                SynchronizationManager.OnConfigurationSynchronized += (obj, attr) =>
-                {
-                    if (attr.InitialSynchronization)
-                    {
-                        Jotunn.Logger.LogMessage("Initial Config sync event received");
-                    }
-                    else
-                    {
-                        Jotunn.Logger.LogMessage("Config sync event received");
+                configRecipe = Config.Bind(new ConfigDefinition("General", "Crafting costs"), "Wood:10,HardAntler:1",
+                    new ConfigDescription("The items required to craft the item", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                configRecipe.SettingChanged += (obj, attr) => { PatchRecipe(); };
 
-                        if (!configEnable.Value)
-                            UnpatchStats();
-                        else
-                        {
-                            PatchStats();
-                        }
-                    }
-                };
+                configRecipeUpgrade = Config.Bind(new ConfigDefinition("General", "Upgrade costs"), "Wood:4,HardAntler:1",
+                    new ConfigDescription("The costs to upgrade the item", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                configRecipeUpgrade.SettingChanged += (obj, attr) => { PatchRecipe(); };
+
+                // Enable SaveOnConfigSet before the last bind allowing the config file to be created on first run
+                Config.SaveOnConfigSet = true;
+
+                configRecipeMultiplier = Config.Bind(new ConfigDefinition("General", "Upgrade multiplier"), 1,
+                    new ConfigDescription("The multiplier applied to the upgrade costs", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                configRecipeMultiplier.SettingChanged += (obj, attr) => { PatchRecipe(); };
+
+                FileSystemWatcher configWatcher = new FileSystemWatcher(BepInEx.Paths.ConfigPath, configFileName);
+                configWatcher.Changed += new FileSystemEventHandler(OnConfigFileChange);
+                configWatcher.Created += new FileSystemEventHandler(OnConfigFileChange);
+                configWatcher.Renamed += new RenamedEventHandler(OnConfigFileChange);
+                configWatcher.IncludeSubdirectories = true;
+                configWatcher.SynchronizingObject = ThreadingHelper.SynchronizingObject;
+                configWatcher.EnableRaisingEvents = true;
             }
             catch (Exception error)
             {
                 Jotunn.Logger.LogError("Something went wrong with initialising the config or config events: " + error);
+            }
+        }
+
+        /**
+         * Event handler for when the config file changes
+         */
+        private void OnConfigFileChange(object sender, FileSystemEventArgs e)
+        {
+            if (!File.Exists(configFileFullPath))
+                return;
+
+            try
+            {
+                Config.Reload();
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Something went wrong while reloading the config, please check if the file exists and the entries are valid! " + error);
             }
         }
     }
