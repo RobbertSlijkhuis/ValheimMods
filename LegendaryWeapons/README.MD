@@ -45,16 +45,19 @@ Found a bug or have some suggestions? You can leave a post or bug report here: h
 ![Sword_1](https://robhost.nl/img/valheim/Sword_3.jpg)
 
 ## Changelog
+### 1.0.3
+- Fixed recipe upgrade multiplier not being applied
+
+<details>
+    <summary>Click to view previous versions</summary>
+    <!-- have to be followed by an empty line! -->
+
 ### 1.0.2
 - Enabled client/server requiring the mod and same version
 - Added Filewatcher to watch for config changes & tested ServerSync, config changes should synchronize and update in game
 - The weapon mode key config entry should no longer require you to be admin
 - Fixed recipe for TriSword (Tresverd)
 - Added more mocks to prefabs to decrease the amount of files in the AssetBundle
-
-<details>
-    <summary>Click to view previous versions</summary>
-    <!-- have to be followed by an empty line! -->
 
 ### 1.0.1
 - Fixed internal name to be unique from JotunnModStub causing issues with my other mods

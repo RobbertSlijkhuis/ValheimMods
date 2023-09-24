@@ -13,16 +13,22 @@ namespace LegendaryWeapons
         private static readonly Regex nukeWhiteSpaceRegex = new Regex(@"\s+");
         private static readonly Regex recipeEntryRegex = new Regex(@"^([a-zA-Z]+:[0-9]+)$");
 
-        public static RequirementConfig[] GetAsRequirementConfigArray(string configRecipe, string upgradeRecipe)
+        /**
+         * Convert the recipe and return a RequirementConfig array
+         */
+        public static RequirementConfig[] GetAsRequirementConfigArray(string configRecipe, string upgradeRecipe, int multiplier)
         {
-            return GetAsRequirementConfigList(configRecipe, upgradeRecipe).ToArray();
+            return GetAsRequirementConfigList(configRecipe, upgradeRecipe, multiplier).ToArray();
         }
 
-        public static Piece.Requirement[] GetAsPieceRequirementArray(string configRecipe, string upgradeRecipe)
+        /**
+         * Convert the recipe and return a Piece.Requirement array
+         */
+        public static Piece.Requirement[] GetAsPieceRequirementArray(string configRecipe, string upgradeRecipe, int multiplier)
         {
             try
             {
-                List<RequirementConfig> list = GetAsRequirementConfigList(configRecipe, upgradeRecipe);
+                List<RequirementConfig> list = GetAsRequirementConfigList(configRecipe, upgradeRecipe, multiplier);
                 List<Piece.Requirement> pieceList = new List<Piece.Requirement>();
 
                 foreach (RequirementConfig entry in list)
@@ -49,7 +55,10 @@ namespace LegendaryWeapons
             }
         }
 
-        public static List<RequirementConfig> GetAsRequirementConfigList(string configRecipe, string upgradeRecipe)
+        /**
+         * Convert the recipe and return a RequirementConfig list
+         */
+        public static List<RequirementConfig> GetAsRequirementConfigList(string configRecipe, string upgradeRecipe, int multiplier)
         {
             try
             {
@@ -79,7 +88,7 @@ namespace LegendaryWeapons
 
                             if (requirement.Item == upgradeEntryValues[0])
                             {
-                                requirement.AmountPerLevel = Int32.Parse(upgradeEntryValues[1]);
+                                requirement.AmountPerLevel = Int32.Parse(upgradeEntryValues[1]) * multiplier;
                                 break;
                             }
                         }
@@ -97,6 +106,9 @@ namespace LegendaryWeapons
             }
         }
 
+        /**
+         * Check wether the recipe & upgrade recipe are valid
+         */
         public static bool IsConfigRecipeValid(string configRecipe, string upgradeRecipe)
         {
             try
@@ -132,7 +144,7 @@ namespace LegendaryWeapons
             }
             catch (Exception error)
             {
-                Jotunn.Logger.LogError("Could not validate recipe due to an error: "+ error);
+                Jotunn.Logger.LogError("Could not validate recipe due to an error: " + error);
                 return false;
             }
         }

@@ -19,7 +19,7 @@ namespace LegendaryWeapons
     {
         public const string PluginGUID = "DeathWizsh.LegendaryWeapons";
         public const string PluginName = "Legendary Weapons";
-        public const string PluginVersion = "1.0.2";
+        public const string PluginVersion = "1.0.3";
         private static string configFileName = PluginGUID + ".cfg";
         private static string configFileFullPath = BepInEx.Paths.ConfigPath + Path.DirectorySeparatorChar.ToString() + configFileName;
 
@@ -260,7 +260,7 @@ namespace LegendaryWeapons
                 ItemConfig itemConfig = new ItemConfig();
                 itemConfig.CraftingStation = configDemoHammerCraftingStation.Value;
                 itemConfig.MinStationLevel = configDemoHammerMinStationLevel.Value;
-                itemConfig.Requirements = RecipeHelper.GetAsRequirementConfigArray(configDemoHammerRecipe.Value, configDemoHammerRecipeUpgrade.Value);
+                itemConfig.Requirements = RecipeHelper.GetAsRequirementConfigArray(configDemoHammerRecipe.Value, configDemoHammerRecipeUpgrade.Value, configDemoHammerRecipeMultiplier.Value);
 
                 ItemDrop itemDropHammer = demoHammerHammerPrefab.GetComponent<ItemDrop>();
                 GameObject lightningAOEPrefab = PrefabManager.Instance.CreateClonedPrefab("lightningAOE_Hammer_DW", "lightningAOE");
@@ -306,7 +306,7 @@ namespace LegendaryWeapons
                 ItemConfig itemConfig = new ItemConfig();
                 itemConfig.CraftingStation = configTriSwordCraftingStation.Value;
                 itemConfig.MinStationLevel = configTriSwordMinStationLevel.Value;
-                itemConfig.Requirements = RecipeHelper.GetAsRequirementConfigArray(configTriSwordRecipe.Value, configTriSwordRecipeUpgrade.Value);
+                itemConfig.Requirements = RecipeHelper.GetAsRequirementConfigArray(configTriSwordRecipe.Value, configTriSwordRecipeUpgrade.Value, configTriSwordRecipeMultiplier.Value);
 
                 PatchTriSwordStats();
 
@@ -331,7 +331,7 @@ namespace LegendaryWeapons
                 ItemConfig itemConfig = new ItemConfig();
                 itemConfig.CraftingStation = configCultivatorAtgeirCraftingStation.Value;
                 itemConfig.MinStationLevel = configCultivatorAtgeirMinStationLevel.Value;
-                itemConfig.Requirements = RecipeHelper.GetAsRequirementConfigArray(configCultivatorAtgeirRecipe.Value, configCultivatorAtgeirRecipeUpgrade.Value);
+                itemConfig.Requirements = RecipeHelper.GetAsRequirementConfigArray(configCultivatorAtgeirRecipe.Value, configCultivatorAtgeirRecipeUpgrade.Value, configCultivatorAtgeirRecipeMultiplier.Value);
 
                 Projectile projectileComp = cultivatorProjectilePrefab.GetComponent<Projectile>();
                 GameObject lightningAOEPrefab = PrefabManager.Instance.CreateClonedPrefab("lightningAOE_Projectile_DW", "lightningAOE");
@@ -491,6 +491,9 @@ namespace LegendaryWeapons
             itemDropSpear.m_itemData.m_shared.m_secondaryAttack.m_attackStamina = configCultivatorAtgeirUseStaminaSpear.Value;
         }
 
+        /**
+         * Update recipe related fields when the config changes
+         */
         private void PatchRecipe(WeaponType weaponType, RecipeUpdateType updateType = RecipeUpdateType.Recipe, bool disableOverride = false)
         {
             try
@@ -519,6 +522,9 @@ namespace LegendaryWeapons
                         default:
                             throw new Exception("Could not find weapon type!");
                     }
+
+                    if (recipe == null)
+                        throw new Exception("Could not find recipe!");
 
                     recipe.Recipe.m_craftingStation = null;
                     recipe.Recipe.m_enabled = false;
@@ -566,7 +572,7 @@ namespace LegendaryWeapons
                 switch (updateType)
                 {
                     case RecipeUpdateType.Recipe:
-                        Piece.Requirement[] requirements = RecipeHelper.GetAsPieceRequirementArray(configRecipe, configUpgrade);
+                        Piece.Requirement[] requirements = RecipeHelper.GetAsPieceRequirementArray(configRecipe, configUpgrade, configMultiplier);
 
                         if (requirements == null)
                             throw new Exception("Requirements is null");
@@ -574,8 +580,6 @@ namespace LegendaryWeapons
                         recipe.Recipe.m_resources = requirements;
                         break;
                     case RecipeUpdateType.CraftingStation:
-                        string pieceName = CraftingStations.GetInternalName(configCraftingStation);
-
                         if (configCraftingStation == "None")
                         {
                             recipe.Recipe.m_craftingStation = null;
@@ -588,6 +592,7 @@ namespace LegendaryWeapons
                         }
                         else
                         {
+                            string pieceName = CraftingStations.GetInternalName(configCraftingStation);
                             recipe.Recipe.m_enabled = true;
                             recipe.Recipe.m_craftingStation = PrefabManager.Instance.GetPrefab(pieceName).GetComponent<CraftingStation>();
                         }
@@ -604,8 +609,8 @@ namespace LegendaryWeapons
         }
 
         /**
-        * Initialise config entries and add the necessary events
-        */
+         * Initialise config entries and add the necessary events
+         */
         private void InitConfig()
         {
             try
@@ -941,6 +946,9 @@ namespace LegendaryWeapons
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
                 configCultivatorAtgeirUseStaminaAtgeir.SettingChanged += (obj, attr) => { PatchCultivatorAtgeirStats(); };
 
+                // Enable SaveOnConfigSet before the last bind allowing the config file to be created on first run
+                Config.SaveOnConfigSet = true;
+
                 configCultivatorAtgeirUseStaminaSpear = Config.Bind(new ConfigDefinition(sectionCultivatorAtgeir, "Secondary spear ability stamina"), 20,
                     new ConfigDescription("The secondary spear attack stamina usage", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
@@ -953,8 +961,6 @@ namespace LegendaryWeapons
                 configWatcher.IncludeSubdirectories = true;
                 configWatcher.SynchronizingObject = ThreadingHelper.SynchronizingObject;
                 configWatcher.EnableRaisingEvents = true;
-
-                Config.SaveOnConfigSet = true;
             }
             catch (Exception error)
             {
@@ -963,8 +969,8 @@ namespace LegendaryWeapons
         }
 
         /**
-        * Event handler for when the config file changes
-        */
+         * Event handler for when the config file changes
+         */
         private void OnConfigFileChange(object sender, FileSystemEventArgs e)
         {
             if (!File.Exists(configFileFullPath))
