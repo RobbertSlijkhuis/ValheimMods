@@ -1124,8 +1124,6 @@ namespace LegendaryWeapons
                 {
                     Name = "Weapon mode",
                     ShortcutConfig = configWeaponModeKey,
-                    ActiveInGUI = true,
-                    ActiveInCustomGUI = true,
                 };
 
                 InputManager.Instance.AddButton(PluginGUID, weaponModeButton);
