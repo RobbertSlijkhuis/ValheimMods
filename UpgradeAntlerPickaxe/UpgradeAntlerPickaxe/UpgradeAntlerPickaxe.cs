@@ -222,13 +222,6 @@ namespace UpgradeAntlerPickaxe
                         if (requirements == null)
                             throw new Exception("Requirements is null");
 
-                        foreach(var requirement in requirements)
-                        {
-                            Jotunn.Logger.LogInfo(requirement.m_resItem?.name);
-                            Jotunn.Logger.LogInfo(requirement.m_amount);
-                            Jotunn.Logger.LogInfo(requirement.m_amountPerLevel);
-                        }
-
                         recipe.Recipe.m_resources = requirements;
                         break;
                     case RecipeUpdateType.CraftingStation:
