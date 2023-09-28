@@ -1,0 +1,106 @@
+ManifestFileVersion: 0
+CRC: 3738845457
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: a916858fffef3eab0c7d73ed0df04ee7
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 27e4cbf454239960c574bf1b50039f36
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 54
+  Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
+- Class: 82
+  Script: {instanceID: 0}
+- Class: 83
+  Script: {instanceID: 0}
+- Class: 108
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 313648218, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 2140874873, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: -1044604064, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 69470131, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: -179248876, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 198
+  Script: {instanceID: 0}
+- Class: 199
+  Script: {instanceID: 0}
+- Class: 205
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+- Class: 241
+  Script: {instanceID: 0}
+- Class: 243
+  Script: {instanceID: 0}
+- Class: 245
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers:
+- AssemblyName: assembly_valheim
+  ClassName: Attack
+- AssemblyName: assembly_valheim
+  ClassName: EffectList
+- AssemblyName: assembly_valheim
+  ClassName: EffectList/EffectData
+- AssemblyName: assembly_valheim
+  ClassName: HitData/DamageTypes
+- AssemblyName: assembly_valheim
+  ClassName: ItemDrop/ItemData
+- AssemblyName: assembly_valheim
+  ClassName: ItemDrop/ItemData/SharedData
+Assets:
+- Assets/CustomNEW/StaffLightning_DW.prefab
+- Assets/CustomNEW/StaffEarth_DW.prefab
+- Assets/CustomNEW/PrefabInstance/Ice/staff_metal_spawn_iceshard_script_DW.prefab
+- Assets/CustomNEW/PrefabInstance/Earth/staff_earth_projectile_DW.prefab
+- Assets/CustomNEW/StaffMetalIceShards_DW.prefab
+- Assets/CustomNEW/PrefabInstance/fx/fx_staff_lightning_aoe_DW.prefab
+- Assets/CustomNEW/PrefabInstance/fx/fx_staff_lightning_secondary_DW.prefab
+- Assets/CustomNEW/PrefabInstance/Ice/staff_metal_iceshard_projectile_DW.prefab
+- Assets/CustomNEW/PrefabInstance/Ice/staff_metal_iceshard_big_projectile_DW.prefab
+- Assets/CustomNEW/PrefabInstance/Earth/staff_earth_stone_projectile_DW.prefab
+- Assets/CustomNEW/PrefabInstance/Lightning/staff_lightning_projectile_DW.prefab
+- Assets/CustomNEW/PrefabInstance/Lightning/staff_lightning_secondary_DW.prefab
+- Assets/CustomNEW/PrefabInstance/Earth/staff_earth_spawn_stone_projectile_DW.prefab
+- Assets/CustomNEW/PrefabInstance/fx/fx_staff_lightning_hit_DW.prefab
+- Assets/CustomNEW/PrefabInstance/Earth/staff_earth_spawn_stone_script_DW.prefab
+- Assets/CustomNEW/PrefabInstance/Ice/staff_metal_spawn_iceshard_projectile_DW.prefab
+Dependencies: []
