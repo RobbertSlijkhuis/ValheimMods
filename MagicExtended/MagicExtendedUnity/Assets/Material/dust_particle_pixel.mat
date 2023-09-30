@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: dust_particle_pixel
-  m_Shader: {fileID: 4800000, guid: abc7e25ddbcd08648b1e67d0412c6bf9, type: 3}
+  m_Shader: {fileID: 4800000, guid: 33e690d6121b6f241a5939f0a9596a06, type: 3}
   m_ShaderKeywords: GEOM_TYPE_FROND GEOM_TYPE_MESH _ALPHABLEND_ON _FADING_ON
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
@@ -28,7 +28,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: e1eb03db0a0d19144b94b89bfc2ea834, type: 3}
+        m_Texture: {fileID: 2800000, guid: aa0b886a347b6ab419acf112121fe7df, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:

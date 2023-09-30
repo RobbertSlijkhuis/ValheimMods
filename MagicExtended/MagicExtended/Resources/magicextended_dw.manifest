@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 3738845457
+CRC: 233441399
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: a916858fffef3eab0c7d73ed0df04ee7
+    Hash: 219bb9697f5ef4c95b8678b29676c70c
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 27e4cbf454239960c574bf1b50039f36
+    Hash: a568439e93dc6616e39ead34cc3082d6
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -40,11 +40,11 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 2140874873, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -56,8 +56,12 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 69470131, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: 971010301, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: -179248876, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 115
+  Script: {instanceID: 0}
+- Class: 135
   Script: {instanceID: 0}
 - Class: 198
   Script: {instanceID: 0}
@@ -91,16 +95,24 @@ Assets:
 - Assets/CustomNEW/StaffEarth_DW.prefab
 - Assets/CustomNEW/PrefabInstance/Ice/staff_metal_spawn_iceshard_script_DW.prefab
 - Assets/CustomNEW/PrefabInstance/Earth/staff_earth_projectile_DW.prefab
+- Assets/CustomNEW/StaffMetalLightning_DW.prefab
 - Assets/CustomNEW/StaffMetalIceShards_DW.prefab
+- Assets/CustomNEW/StaffMetalFireBall_DW.prefab
+- Assets/CustomNEW/PrefabInstance/Fire/staff_metal_fireball_projectile.prefab
+- Assets/CustomNEW/StaffMetalEarth_DW.prefab
+- Assets/CustomNEW/PrefabInstance/fx/fx_staff_lightning_windup_DW.prefab
 - Assets/CustomNEW/PrefabInstance/fx/fx_staff_lightning_aoe_DW.prefab
-- Assets/CustomNEW/PrefabInstance/fx/fx_staff_lightning_secondary_DW.prefab
+- Assets/CustomNEW/PrefabInstance/fx/fx_staff_earth_windup_DW.prefab
+- Assets/CustomNEW/PrefabInstance/fx/fx_staff_ice_windup_DW.prefab
 - Assets/CustomNEW/PrefabInstance/Ice/staff_metal_iceshard_projectile_DW.prefab
 - Assets/CustomNEW/PrefabInstance/Ice/staff_metal_iceshard_big_projectile_DW.prefab
 - Assets/CustomNEW/PrefabInstance/Earth/staff_earth_stone_projectile_DW.prefab
+- Assets/CustomNEW/PrefabInstance/fx/fx_staff_fire_windup_DW.prefab
 - Assets/CustomNEW/PrefabInstance/Lightning/staff_lightning_projectile_DW.prefab
-- Assets/CustomNEW/PrefabInstance/Lightning/staff_lightning_secondary_DW.prefab
+- Assets/CustomNEW/PrefabInstance/Lightning/staff_lightning_aoe_projectile_DW.prefab
 - Assets/CustomNEW/PrefabInstance/Earth/staff_earth_spawn_stone_projectile_DW.prefab
-- Assets/CustomNEW/PrefabInstance/fx/fx_staff_lightning_hit_DW.prefab
+- Assets/CustomNEW/PrefabInstance/Fire/fire_clusterbomb_aoe.prefab
 - Assets/CustomNEW/PrefabInstance/Earth/staff_earth_spawn_stone_script_DW.prefab
 - Assets/CustomNEW/PrefabInstance/Ice/staff_metal_spawn_iceshard_projectile_DW.prefab
+- Assets/CustomNEW/PrefabInstance/fx/fx_staff_lightning_hit_DW.prefab
 Dependencies: []

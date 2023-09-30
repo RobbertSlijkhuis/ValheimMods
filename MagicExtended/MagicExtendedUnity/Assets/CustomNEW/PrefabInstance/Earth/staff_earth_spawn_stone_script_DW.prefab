@@ -52,7 +52,7 @@ MonoBehaviour:
   m_maxSpawned: 0
   m_spawnRadius: 15
   m_snapToTerrain: 0
-  m_spawnGroundOffset: 75
+  m_spawnGroundOffset: 50
   m_getSolidHeightMargin: 1000
   m_initialSpawnDelay: 0
   m_spawnDelay: 0.5
@@ -67,8 +67,18 @@ MonoBehaviour:
   m_targetWhenPathfindingType: 1
   m_maxTargetRange: 40
   m_spawnEffects:
-    m_effectPrefabs: []
+    m_effectPrefabs:
+    - m_prefab: {fileID: 5311311176889647107, guid: 897039b774435bf49b09e167f643baf5,
+        type: 3}
+      m_enabled: 1
+      m_variant: -1
+      m_attach: 0
+      m_inheritParentRotation: 0
+      m_inheritParentScale: 0
+      m_randomRotation: 0
+      m_scale: 0
+      m_childTransform: 
   m_preSpawnEffects:
     m_effectPrefabs: []
-  m_projectileVelocity: 40
+  m_projectileVelocity: 30
   m_projectileAccuracy: 3

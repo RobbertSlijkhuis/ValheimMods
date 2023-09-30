@@ -7,7 +7,7 @@ AudioMixerGroupController:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Music
-  m_AudioMixer: {fileID: 24100000, guid: be9f9c4a783421d4b8d297b9a70746b5, type: 2}
+  m_AudioMixer: {fileID: 24100000, guid: 08480147056a77347bbe5b1c00e1f4bf, type: 2}
   m_GroupID: f435ee2158e87457385696fc9a2fdc7e
   m_Children: []
   m_Volume: 00000000000000000000000000000000

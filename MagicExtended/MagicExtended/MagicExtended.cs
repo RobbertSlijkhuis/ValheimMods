@@ -28,18 +28,21 @@ namespace MagicExtended
         private GameObject staffLightningPrefab;
         private GameObject staffEarthPrefab;
         private GameObject staffMetalIcePrefab;
+        private GameObject staffMetalFirePrefab;
+        private GameObject staffMetalLightningPrefab;
+        private GameObject StaffMetalEarthPrefab;
 
         private GameObject projectileLightningPrefab;
-        private GameObject projectileEarthPrefab;
+        private GameObject projectileLightningAOEPrefab;
         private GameObject projectileRockPrefab;
         private GameObject projectileIceShardPrefab;
-        private GameObject secondaryLightningPrefab;
-        private GameObject stoneSpawnPrefab;
-        private GameObject iceShardScriptPrefab;
+        private GameObject projectileIceShardBigPrefab;
 
+        private string[] configModStyleOptions = new string[] { "Vanilla", "Kimetsu" };
 
         private string sectionGeneral = "1. General";
         private ConfigEntry<bool> configEnable;
+        private ConfigEntry<string> configModStyle;
 
         private string sectionLightningStaff = "2. Lightning staff";
         private static ConfigEntry<bool> configLightningStaffEnable;
@@ -81,11 +84,23 @@ namespace MagicExtended
         private string sectionEarthStaffMetal = "5. Earth staff";
         private static ConfigEntry<bool> configEarthStaffMetalEnable;
 
+        private bool isModStyleInitialised = false;
+        private string normalEffects = "normal_effects";
+        private string normalCrystals = "normal_crystals";
+        private string kimetsuEffects = "kimetsu_effects";
+        private string kimetsuCrystals = "kimetsu_crystals";
+
         /**
          * Called when the mod is being initialised
          */
         private void Awake()
         {
+            // TODO
+            // 1. Add AOE to frost shower otherwise you need to hit them very precise.
+            // 2. Check damage on frost shower
+            // 3. Check damage on boulder shower
+            // 4. Check damage on lightning ball & AOE range
+
             InitConfig();
 
             if (!configEnable.Value) return;
@@ -95,6 +110,8 @@ namespace MagicExtended
             PrefabManager.OnVanillaPrefabsAvailable += AddLightningStaff;
             PrefabManager.OnVanillaPrefabsAvailable += AddEarthStaff;
             PrefabManager.OnVanillaPrefabsAvailable += AddMetalIceStaff;
+            PrefabManager.OnVanillaPrefabsAvailable += AddMetalFireStaff;
+            ItemManager.OnItemsRegistered += PatchModStyle;
         }
 
         private void AddLightningStaff()
@@ -106,24 +123,8 @@ namespace MagicExtended
             staffConfig.AddRequirement(new RequirementConfig("Thunderstone", 5, 3));
             staffConfig.AddRequirement(new RequirementConfig("Eitr", 15, 3));
             ItemManager.Instance.AddItem(new CustomItem(staffLightningPrefab, true, staffConfig));
+            ItemManager.Instance.AddItem(new CustomItem(staffMetalLightningPrefab, true, staffConfig));
             PrefabManager.OnVanillaPrefabsAvailable -= AddLightningStaff;
-        }
-
-        private void AddMetalIceStaff()
-        {
-            var script = iceShardScriptPrefab.GetComponent<SpawnAbility>();
-            script.m_spawnRadius = 15;
-            script.m_spawnDelay = 0.05f;
-            script.m_projectileAccuracy = 3;
-
-            ItemConfig staffConfig = new ItemConfig();
-            staffConfig.Name = "Metal Ice Staff";
-            staffConfig.CraftingStation = "Workbench";
-            staffConfig.AddRequirement(new RequirementConfig("FineWood", 10, 5));
-            staffConfig.AddRequirement(new RequirementConfig("Thunderstone", 5, 3));
-            staffConfig.AddRequirement(new RequirementConfig("Eitr", 15, 3));
-            ItemManager.Instance.AddItem(new CustomItem(staffMetalIcePrefab, true, staffConfig));
-            PrefabManager.OnVanillaPrefabsAvailable -= AddMetalIceStaff;
         }
 
         private void AddEarthStaff()
@@ -154,7 +155,76 @@ namespace MagicExtended
             staffConfig.AddRequirement(new RequirementConfig("Stone", 20, 3));
             staffConfig.AddRequirement(new RequirementConfig("Eitr", 15, 3));
             ItemManager.Instance.AddItem(new CustomItem(staffEarthPrefab, true, staffConfig));
+            ItemManager.Instance.AddItem(new CustomItem(StaffMetalEarthPrefab, true, staffConfig));
             PrefabManager.OnVanillaPrefabsAvailable -= AddEarthStaff;
+        }
+
+        private void AddMetalIceStaff()
+        {
+            ItemConfig staffConfig = new ItemConfig();
+            staffConfig.Name = "Metal Ice Staff";
+            staffConfig.CraftingStation = "Workbench";
+            staffConfig.AddRequirement(new RequirementConfig("FineWood", 10, 5));
+            staffConfig.AddRequirement(new RequirementConfig("Thunderstone", 5, 3));
+            staffConfig.AddRequirement(new RequirementConfig("Eitr", 15, 3));
+            ItemManager.Instance.AddItem(new CustomItem(staffMetalIcePrefab, true, staffConfig));
+            PrefabManager.OnVanillaPrefabsAvailable -= AddMetalIceStaff;
+        }
+
+        private void AddMetalFireStaff()
+        {
+            ItemConfig staffConfig = new ItemConfig();
+            staffConfig.Name = "Metal Fire Staff";
+            staffConfig.CraftingStation = "Workbench";
+            staffConfig.AddRequirement(new RequirementConfig("FineWood", 10, 5));
+            staffConfig.AddRequirement(new RequirementConfig("Thunderstone", 5, 3));
+            staffConfig.AddRequirement(new RequirementConfig("Eitr", 15, 3));
+            ItemManager.Instance.AddItem(new CustomItem(staffMetalFirePrefab, true, staffConfig));
+            PrefabManager.OnVanillaPrefabsAvailable -= AddMetalFireStaff;
+        }
+
+        private void PatchModStyle()
+        {
+            
+            Transform effectsIceNormal = staffMetalIcePrefab.transform.Find("attach/default/effects/" + normalEffects);
+            Jotunn.Logger.LogWarning(effectsIceNormal.gameObject.name);
+            Transform effectsIceKimetsu = staffMetalIcePrefab.transform.Find("attach/default/effects/" + kimetsuEffects);
+            Transform crystalsIceNormal = staffMetalIcePrefab.transform.Find("attach/default/" + normalCrystals);
+            Transform crystalsIceKimetsu = staffMetalIcePrefab.transform.Find("attach/default/" + kimetsuCrystals);
+            Transform effectsLightningNormal = staffMetalLightningPrefab.transform.Find("attach/default/effects/" + normalEffects);
+            Transform effectsLightningKimetsu = staffMetalLightningPrefab.transform.Find("attach/default/effects/" + kimetsuEffects);
+            Transform Thunderstone = staffMetalLightningPrefab.transform.Find("attach/default/thunderstone");
+            Transform crystalsLightningKimetsu = staffMetalLightningPrefab.transform.Find("attach/default/" + kimetsuCrystals);
+
+            switch (configModStyle.Value)
+            {
+                case "Vanilla":
+                    effectsIceNormal.gameObject.SetActive(true);
+                    effectsIceKimetsu.gameObject.SetActive(false);
+                    crystalsIceNormal.gameObject.SetActive(true);
+                    crystalsIceKimetsu.gameObject.SetActive(false);
+                    effectsLightningNormal.gameObject.SetActive(true);
+                    effectsLightningKimetsu.gameObject.SetActive(false);
+                    Thunderstone.gameObject.SetActive(true);
+                    crystalsLightningKimetsu.gameObject.SetActive(false);
+                    break;
+                case "Kimetsu":
+                    effectsIceNormal.gameObject.SetActive(false);
+                    effectsIceKimetsu.gameObject.SetActive(true);
+                    crystalsIceNormal.gameObject.SetActive(false);
+                    crystalsIceKimetsu.gameObject.SetActive(true);
+                    effectsLightningNormal.gameObject.SetActive(false);
+                    effectsLightningKimetsu.gameObject.SetActive(true);
+                    Thunderstone.gameObject.SetActive(false);
+                    crystalsLightningKimetsu.gameObject.SetActive(true);
+                    break;
+            }
+
+            if (!isModStyleInitialised)
+            {
+                ItemManager.OnItemsRegistered += PatchModStyle;
+                isModStyleInitialised = true;
+            }
         }
 
         /**
@@ -172,6 +242,11 @@ namespace MagicExtended
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
 
                 Config.SaveOnConfigSet = true;
+
+                configModStyle = Config.Bind(new ConfigDefinition(sectionGeneral, "Mod style"), "Vanilla",
+                    new ConfigDescription("The crafting station the item can be created in",
+                    new AcceptableValueList<string>(configModStyleOptions)));
+                configModStyle.SettingChanged += (obj, attr) => { PatchModStyle(); };
 
                 FileSystemWatcher configWatcher = new FileSystemWatcher(BepInEx.Paths.ConfigPath, configFileName);
                 configWatcher.Changed += new FileSystemEventHandler(OnConfigFileChange);
@@ -216,29 +291,39 @@ namespace MagicExtended
             staffLightningPrefab = magicExtendedBundle.LoadAsset<GameObject>("StaffLightning_DW");
             staffEarthPrefab = magicExtendedBundle.LoadAsset<GameObject>("StaffEarth_DW");
             staffMetalIcePrefab = magicExtendedBundle.LoadAsset<GameObject>("StaffMetalIceShards_DW");
+            staffMetalFirePrefab = magicExtendedBundle.LoadAsset<GameObject>("StaffMetalFireBall_DW");
+            staffMetalLightningPrefab = magicExtendedBundle.LoadAsset<GameObject>("StaffMetalLightning_DW");
+            StaffMetalEarthPrefab = magicExtendedBundle.LoadAsset<GameObject>("StaffMetalEarth_DW");
 
             // Lightning assets
+            projectileLightningPrefab = magicExtendedBundle.LoadAsset<GameObject>("staff_lightning_projectile_DW");
+            projectileLightningAOEPrefab = magicExtendedBundle.LoadAsset<GameObject>("staff_lightning_aoe_projectile_DW");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(projectileLightningPrefab, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(projectileLightningAOEPrefab, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_lightning_aoe_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_lightning_hit_DW"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_lightning_secondary_DW"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_lightning_projectile_DW"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_lightning_secondary_DW"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_lightning_windup_DW"), true));
 
             // Earth assets
+            projectileRockPrefab = magicExtendedBundle.LoadAsset<GameObject>("staff_earth_stone_projectile_DW");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(projectileRockPrefab, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_earth_projectile_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_earth_spawn_stone_script_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_earth_spawn_stone_projectile_DW"), true));
-            projectileRockPrefab = magicExtendedBundle.LoadAsset<GameObject>("staff_earth_stone_projectile_DW");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(projectileRockPrefab, true));
-
+            
             // Ice Metal assets
             projectileIceShardPrefab = magicExtendedBundle.LoadAsset<GameObject>("staff_metal_iceshard_projectile_DW");
+            projectileIceShardBigPrefab = magicExtendedBundle.LoadAsset<GameObject>("staff_metal_iceshard_big_projectile_DW");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(projectileIceShardPrefab, true));
-            iceShardScriptPrefab = magicExtendedBundle.LoadAsset<GameObject>("staff_metal_spawn_iceshard_script_DW");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(iceShardScriptPrefab, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(projectileIceShardBigPrefab, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_metal_spawn_iceshard_script_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_metal_spawn_iceshard_projectile_DW"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_metal_iceshard_big_projectile_DW"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_ice_windup_DW"), true));            
+
+            // Fire Metal assets
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_metal_fireball_projectile"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fire_clusterbomb_aoe"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_fire_windup_DW"), true));
         }
     }
 }
-

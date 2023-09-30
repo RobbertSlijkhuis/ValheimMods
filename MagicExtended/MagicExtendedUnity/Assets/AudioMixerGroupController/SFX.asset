@@ -7,11 +7,10 @@ AudioMixerGroupController:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: SFX
-  m_AudioMixer: {fileID: 24100000, guid: be9f9c4a783421d4b8d297b9a70746b5, type: 2}
+  m_AudioMixer: {fileID: 24100000, guid: 08480147056a77347bbe5b1c00e1f4bf, type: 2}
   m_GroupID: 6d09eb078ad0d4c61921dadd38238697
   m_Children:
-  - {fileID: 24300000, guid: 1a909743f46d63c42b62c3195194754d, type: 2}
-  - {fileID: -5969198356104597350, guid: be9f9c4a783421d4b8d297b9a70746b5, type: 2}
+  - {fileID: 24300000, guid: eeeb8c43a869336469dcd57bd7563398, type: 2}
   m_Volume: 00000000000000000000000000000000
   m_Pitch: 00000000000000000000000000000000
   m_Send: 00000000000000000000000000000000

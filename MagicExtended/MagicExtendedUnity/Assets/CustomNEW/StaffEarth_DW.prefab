@@ -2673,7 +2673,7 @@ MonoBehaviour:
           m_effectPrefabs: []
         m_burstEffect:
           m_effectPrefabs:
-          - m_prefab: {fileID: 8192410369262713086, guid: cef0130e83384f44eb0846a5d9fb0a5f,
+          - m_prefab: {fileID: 7551501131836803338, guid: 220e67212368e2f47a0a8250e8d9ea9d,
               type: 3}
             m_enabled: 1
             m_variant: 0
@@ -2684,30 +2684,30 @@ MonoBehaviour:
             m_scale: 0
             m_childTransform: 
       m_secondaryAttack:
-        m_attackType: 2
-        m_attackAnimation: staff_fireball
+        m_attackType: 0
+        m_attackAnimation: 
         m_attackRandomAnimations: 0
-        m_attackChainLevels: 2
+        m_attackChainLevels: 0
         m_loopingAttack: 0
         m_consumeItem: 0
         m_hitTerrain: 1
-        m_attackStamina: 0
-        m_attackEitr: 100
+        m_attackStamina: 20
+        m_attackEitr: 0
         m_attackHealth: 0
         m_attackHealthPercentage: 0
-        m_speedFactor: 0.3
-        m_speedFactorRotation: 0.3
-        m_attackStartNoise: 0
-        m_attackHitNoise: 0
-        m_damageMultiplier: 0
+        m_speedFactor: 0.2
+        m_speedFactorRotation: 0.2
+        m_attackStartNoise: 10
+        m_attackHitNoise: 30
+        m_damageMultiplier: 1
         m_forceMultiplier: 1
         m_staggerMultiplier: 1
         m_recoilPushback: 0
         m_selfDamage: 0
         m_attackOriginJoint: 
-        m_attackRange: 2
-        m_attackHeight: 1.2
-        m_attackOffset: 0.2
+        m_attackRange: 1.5
+        m_attackHeight: 0.6
+        m_attackOffset: 0
         m_spawnOnTrigger: {fileID: 0}
         m_toggleFlying: 0
         m_attach: 0
@@ -2733,16 +2733,15 @@ MonoBehaviour:
         m_skillHitType: 4
         m_specialHitSkill: 0
         m_specialHitType: 0
-        m_attackProjectile: {fileID: 1827402336280744, guid: 4d5033f59e9b5e94ba7e6ab866bea770,
-          type: 3}
-        m_projectileVel: 100
-        m_projectileVelMin: 100
-        m_projectileAccuracy: 1
-        m_projectileAccuracyMin: 0
+        m_attackProjectile: {fileID: 0}
+        m_projectileVel: 10
+        m_projectileVelMin: 2
+        m_projectileAccuracy: 10
+        m_projectileAccuracyMin: 20
         m_skillAccuracy: 0
         m_useCharacterFacing: 0
         m_useCharacterFacingYAim: 0
-        m_launchAngle: -5
+        m_launchAngle: 0
         m_projectiles: 1
         m_projectileBursts: 1
         m_burstInterval: 0
