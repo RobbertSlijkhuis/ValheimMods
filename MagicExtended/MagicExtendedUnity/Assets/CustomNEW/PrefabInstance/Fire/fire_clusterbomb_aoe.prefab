@@ -350,7 +350,7 @@ ParticleSystem:
     sphericalDirectionAmount: 0
     randomPositionAmount: 0
     radius:
-      value: 6
+      value: 5
       mode: 0
       spread: 0
       speed:
@@ -2369,16 +2369,16 @@ MonoBehaviour:
     m_pierce: 0
     m_chop: 0
     m_pickaxe: 0
-    m_fire: 100
+    m_fire: 30
     m_frost: 0
     m_lightning: 0
     m_poison: 0
     m_spirit: 0
-  m_dodgeable: 0
-  m_blockable: 0
+  m_dodgeable: 1
+  m_blockable: 1
   m_toolTier: 0
   m_attackForce: 0
-  m_backstabBonus: 4
+  m_backstabBonus: 3
   m_statusEffect: 
   m_statusEffectIfBoss: 
   m_statusEffectIfPlayer: 
@@ -2409,7 +2409,7 @@ MonoBehaviour:
   m_useTriggers: 0
   m_triggerEnterOnly: 0
   m_useCollider: {fileID: 0}
-  m_radius: 6
+  m_radius: 5
   m_ttl: 7.9
   m_hitInterval: 1
   m_hitEffects:
@@ -2778,7 +2778,7 @@ ParticleSystem:
     sphericalDirectionAmount: 0
     randomPositionAmount: 0
     radius:
-      value: 6
+      value: 5
       mode: 0
       spread: 0
       speed:
@@ -5345,7 +5345,7 @@ ParticleSystem:
     sphericalDirectionAmount: 0
     randomPositionAmount: 0
     radius:
-      value: 6
+      value: 5
       mode: 0
       spread: 0
       speed:
@@ -9871,7 +9871,7 @@ ParticleSystem:
     sphericalDirectionAmount: 0
     randomPositionAmount: 0
     radius:
-      value: 0.6
+      value: 0.5
       mode: 0
       spread: 0
       speed:

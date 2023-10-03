@@ -233,7 +233,7 @@ MonoBehaviour:
     m_lightning: 0
     m_poison: 0
     m_spirit: 0
-  m_aoe: 3
+  m_aoe: 2.2
   m_dodgeable: 1
   m_blockable: 1
   m_attackForce: 0

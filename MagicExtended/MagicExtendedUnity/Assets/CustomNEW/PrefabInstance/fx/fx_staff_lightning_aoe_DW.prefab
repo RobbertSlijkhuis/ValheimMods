@@ -7133,7 +7133,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6033508324056190344}
   m_Layer: 0
-  m_Name: normal
+  m_Name: normal_effects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7165,7 +7165,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3224115107855835018}
   m_Layer: 0
-  m_Name: purple
+  m_Name: kimetsu_effects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -173,7 +173,7 @@ Light:
   serializedVersion: 10
   m_Type: 2
   m_Shape: 0
-  m_Color: {r: 1, g: 0.250988, b: 0, a: 1}
+  m_Color: {r: 1, g: 0.4627451, b: 0.16470589, a: 1}
   m_Intensity: 1.5
   m_Range: 3
   m_SpotAngle: 30
@@ -414,12 +414,12 @@ MonoBehaviour:
       m_toolTier: 0
       m_damages:
         m_damage: 0
-        m_blunt: 120
+        m_blunt: 150
         m_slash: 0
         m_pierce: 0
         m_chop: 0
         m_pickaxe: 0
-        m_fire: 120
+        m_fire: 150
         m_frost: 0
         m_lightning: 0
         m_poison: 0
@@ -456,7 +456,7 @@ MonoBehaviour:
         m_consumeItem: 0
         m_hitTerrain: 1
         m_attackStamina: 0
-        m_attackEitr: 35
+        m_attackEitr: 40
         m_attackHealth: 0
         m_attackHealthPercentage: 0
         m_speedFactor: 0.3
@@ -3112,7 +3112,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 0.625, g: 0.625, b: 0.625, a: 1}
-      maxColor: {r: 1, g: 0.27033633, b: 0, a: 0.078431375}
+      maxColor: {r: 1, g: 0.49019608, b: 0.21176471, a: 0.078431375}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}

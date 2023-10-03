@@ -81,4 +81,4 @@ MonoBehaviour:
   m_preSpawnEffects:
     m_effectPrefabs: []
   m_projectileVelocity: 30
-  m_projectileAccuracy: 3
+  m_projectileAccuracy: 4

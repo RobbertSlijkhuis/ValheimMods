@@ -82,21 +82,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_damage:
     m_damage: 0
-    m_blunt: 120
+    m_blunt: 0
     m_slash: 0
-    m_pierce: 0
-    m_chop: 50
-    m_pickaxe: 50
+    m_pierce: 40
+    m_chop: 20
+    m_pickaxe: 0
     m_fire: 0
-    m_frost: 0
+    m_frost: 50
     m_lightning: 0
     m_poison: 0
     m_spirit: 0
-  m_aoe: 0
+  m_aoe: 1.5
   m_dodgeable: 1
   m_blockable: 1
   m_attackForce: 100
-  m_backstabBonus: 2
+  m_backstabBonus: 4
   m_statusEffect: 
   m_canHitWater: 0
   m_ttl: 8
@@ -227,7 +227,7 @@ Light:
   m_Type: 2
   m_Shape: 0
   m_Color: {r: 0.18039216, g: 0.3882353, b: 0.74509805, a: 1}
-  m_Intensity: 2
+  m_Intensity: 4
   m_Range: 5
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -401,7 +401,7 @@ Light:
   m_Type: 2
   m_Shape: 0
   m_Color: {r: 0.45490196, g: 0.84313726, b: 1, a: 1}
-  m_Intensity: 2
+  m_Intensity: 3
   m_Range: 5
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -2739,12 +2739,12 @@ GameObject:
   m_Component:
   - component: {fileID: 3381079004371380891}
   m_Layer: 0
-  m_Name: dark
+  m_Name: kimetsu_effects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3381079004371380891
 Transform:
   m_ObjectHideFlags: 0
@@ -2771,12 +2771,12 @@ GameObject:
   m_Component:
   - component: {fileID: 8034597821196918095}
   m_Layer: 0
-  m_Name: normal
+  m_Name: normal_effects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &8034597821196918095
 Transform:
   m_ObjectHideFlags: 0

@@ -416,11 +416,11 @@ MonoBehaviour:
         m_damage: 0
         m_blunt: 0
         m_slash: 0
-        m_pierce: 0
+        m_pierce: 130
         m_chop: 0
         m_pickaxe: 0
         m_fire: 0
-        m_frost: 30
+        m_frost: 130
         m_lightning: 0
         m_poison: 0
         m_spirit: 0
@@ -428,11 +428,11 @@ MonoBehaviour:
         m_damage: 0
         m_blunt: 0
         m_slash: 0
-        m_pierce: 0
+        m_pierce: 2
         m_chop: 0
         m_pickaxe: 0
         m_fire: 0
-        m_frost: 2
+        m_frost: 3
         m_lightning: 0
         m_poison: 0
         m_spirit: 0
@@ -456,7 +456,7 @@ MonoBehaviour:
         m_consumeItem: 0
         m_hitTerrain: 1
         m_attackStamina: 0
-        m_attackEitr: 35
+        m_attackEitr: 40
         m_attackHealth: 0
         m_attackHealthPercentage: 0
         m_speedFactor: 0.3
@@ -470,7 +470,7 @@ MonoBehaviour:
         m_selfDamage: 0
         m_attackOriginJoint: 
         m_attackRange: 2
-        m_attackHeight: 1.2
+        m_attackHeight: 1.4
         m_attackOffset: 0.2
         m_spawnOnTrigger: {fileID: 0}
         m_toggleFlying: 0

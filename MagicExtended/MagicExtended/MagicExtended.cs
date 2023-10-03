@@ -34,9 +34,13 @@ namespace MagicExtended
 
         private GameObject projectileLightningPrefab;
         private GameObject projectileLightningAOEPrefab;
+        private GameObject fxLightningAOEPrefab;
+        private GameObject fxLightningHitPrefab;
+        private GameObject fxLightningWindupPrefab;
         private GameObject projectileRockPrefab;
         private GameObject projectileIceShardPrefab;
         private GameObject projectileIceShardBigPrefab;
+        private GameObject fxIceWindupPrefab;
 
         private string[] configModStyleOptions = new string[] { "Vanilla", "Kimetsu" };
 
@@ -111,7 +115,7 @@ namespace MagicExtended
             PrefabManager.OnVanillaPrefabsAvailable += AddEarthStaff;
             PrefabManager.OnVanillaPrefabsAvailable += AddMetalIceStaff;
             PrefabManager.OnVanillaPrefabsAvailable += AddMetalFireStaff;
-            ItemManager.OnItemsRegistered += PatchModStyle;
+            PrefabManager.OnVanillaPrefabsAvailable += PatchModStyle;
         }
 
         private void AddLightningStaff()
@@ -185,44 +189,105 @@ namespace MagicExtended
 
         private void PatchModStyle()
         {
-            
+            // Ice
             Transform effectsIceNormal = staffMetalIcePrefab.transform.Find("attach/default/effects/" + normalEffects);
-            Jotunn.Logger.LogWarning(effectsIceNormal.gameObject.name);
             Transform effectsIceKimetsu = staffMetalIcePrefab.transform.Find("attach/default/effects/" + kimetsuEffects);
             Transform crystalsIceNormal = staffMetalIcePrefab.transform.Find("attach/default/" + normalCrystals);
             Transform crystalsIceKimetsu = staffMetalIcePrefab.transform.Find("attach/default/" + kimetsuCrystals);
+            Transform effectsIceProjectileNormal = projectileIceShardPrefab.transform.Find(normalEffects);
+            Transform effectsIceProjectileKimetsu = projectileIceShardPrefab.transform.Find(kimetsuEffects);
+            Transform effectsIceBigProjectileNormal = projectileIceShardBigPrefab.transform.Find("visual/" + normalEffects);
+            Transform effectsIceBigProjectileKimetsu = projectileIceShardBigPrefab.transform.Find("visual/" + kimetsuEffects);
+            Transform effectsIceWindupNormal = fxIceWindupPrefab.transform.Find(normalEffects);
+            Transform effectsIceWindupNormal2 = fxIceWindupPrefab.transform.Find("parent/" + normalEffects + "_2");
+            Transform effectsIceWindupKimetsu = fxIceWindupPrefab.transform.Find(kimetsuEffects);
+            Transform effectsIceWindupKimetsu2 = fxIceWindupPrefab.transform.Find("parent/" + kimetsuEffects + "_2");
+
+            // Lightning
             Transform effectsLightningNormal = staffMetalLightningPrefab.transform.Find("attach/default/effects/" + normalEffects);
             Transform effectsLightningKimetsu = staffMetalLightningPrefab.transform.Find("attach/default/effects/" + kimetsuEffects);
             Transform Thunderstone = staffMetalLightningPrefab.transform.Find("attach/default/thunderstone");
             Transform crystalsLightningKimetsu = staffMetalLightningPrefab.transform.Find("attach/default/" + kimetsuCrystals);
+            Transform effectsLightningProjectileNormal = projectileLightningPrefab.transform.Find(normalEffects);
+            Transform effectsLightningProjectileKimetsu = projectileLightningPrefab.transform.Find(kimetsuEffects);
+            Transform effectsLightningAOENormal = fxLightningAOEPrefab.transform.Find(normalEffects);
+            Transform effectsLightningAOEKimetsu = fxLightningAOEPrefab.transform.Find(kimetsuEffects);
+            Transform effectsLightningHitnormal = fxLightningHitPrefab.transform.Find(normalEffects);
+            Transform effectsLightningHitKimetsu = fxLightningHitPrefab.transform.Find(kimetsuEffects);
+            Transform effectsLightningWindupNormal = fxLightningWindupPrefab.transform.Find(normalEffects);
+            Transform effectsLightningWindupNormal2 = fxLightningWindupPrefab.transform.Find("parent/" + normalEffects + "_2");
+            Transform effectsLightningWindupKimetsu = fxLightningWindupPrefab.transform.Find(kimetsuEffects);
+            Transform effectsLightningWindupKimetsu2 = fxLightningWindupPrefab.transform.Find("parent/" + kimetsuEffects + "_2");
 
             switch (configModStyle.Value)
             {
                 case "Vanilla":
+                    // Ice
                     effectsIceNormal.gameObject.SetActive(true);
                     effectsIceKimetsu.gameObject.SetActive(false);
                     crystalsIceNormal.gameObject.SetActive(true);
                     crystalsIceKimetsu.gameObject.SetActive(false);
+                    effectsIceProjectileNormal.gameObject.SetActive(true);
+                    effectsIceProjectileKimetsu.gameObject.SetActive(false);
+                    effectsIceBigProjectileNormal.gameObject.SetActive(true);
+                    effectsIceBigProjectileKimetsu.gameObject.SetActive(false);
+                    effectsIceWindupNormal.gameObject.SetActive(true);
+                    effectsIceWindupKimetsu.gameObject.SetActive(false);
+                    effectsIceWindupNormal2.gameObject.SetActive(true);
+                    effectsIceWindupKimetsu2.gameObject.SetActive(false);
+
+                    // Lightning
                     effectsLightningNormal.gameObject.SetActive(true);
                     effectsLightningKimetsu.gameObject.SetActive(false);
                     Thunderstone.gameObject.SetActive(true);
                     crystalsLightningKimetsu.gameObject.SetActive(false);
+                    effectsLightningProjectileNormal.gameObject.SetActive(true);
+                    effectsLightningProjectileKimetsu.gameObject.SetActive(false);
+                    effectsLightningAOENormal.gameObject.SetActive(true);
+                    effectsLightningAOEKimetsu.gameObject.SetActive(false);
+                    effectsLightningHitnormal.gameObject.SetActive(true);
+                    effectsLightningHitKimetsu.gameObject.SetActive(false);
+                    effectsLightningWindupNormal.gameObject.SetActive(true);
+                    effectsLightningWindupKimetsu.gameObject.SetActive(false);
+                    effectsLightningWindupNormal2.gameObject.SetActive(true);
+                    effectsLightningWindupKimetsu2.gameObject.SetActive(false);
                     break;
                 case "Kimetsu":
+                    // Ice
                     effectsIceNormal.gameObject.SetActive(false);
                     effectsIceKimetsu.gameObject.SetActive(true);
                     crystalsIceNormal.gameObject.SetActive(false);
                     crystalsIceKimetsu.gameObject.SetActive(true);
+                    effectsIceProjectileNormal.gameObject.SetActive(false);
+                    effectsIceProjectileKimetsu.gameObject.SetActive(true);
+                    effectsIceBigProjectileNormal.gameObject.SetActive(false);
+                    effectsIceBigProjectileKimetsu.gameObject.SetActive(true);
+                    effectsIceWindupNormal.gameObject.SetActive(false);
+                    effectsIceWindupKimetsu.gameObject.SetActive(true);
+                    effectsIceWindupNormal2.gameObject.SetActive(false);
+                    effectsIceWindupKimetsu2.gameObject.SetActive(true);
+
+                    // Lightning
                     effectsLightningNormal.gameObject.SetActive(false);
                     effectsLightningKimetsu.gameObject.SetActive(true);
                     Thunderstone.gameObject.SetActive(false);
                     crystalsLightningKimetsu.gameObject.SetActive(true);
+                    effectsLightningProjectileNormal.gameObject.SetActive(false);
+                    effectsLightningProjectileKimetsu.gameObject.SetActive(true);
+                    effectsLightningAOENormal.gameObject.SetActive(false);
+                    effectsLightningAOEKimetsu.gameObject.SetActive(true);
+                    effectsLightningHitnormal.gameObject.SetActive(false);
+                    effectsLightningHitKimetsu.gameObject.SetActive(true);
+                    effectsLightningWindupNormal.gameObject.SetActive(false);
+                    effectsLightningWindupKimetsu.gameObject.SetActive(true);
+                    effectsLightningWindupNormal2.gameObject.SetActive(false);
+                    effectsLightningWindupKimetsu2.gameObject.SetActive(true);
                     break;
             }
 
             if (!isModStyleInitialised)
             {
-                ItemManager.OnItemsRegistered += PatchModStyle;
+                PrefabManager.OnVanillaPrefabsAvailable -= PatchModStyle;
                 isModStyleInitialised = true;
             }
         }
@@ -298,11 +363,14 @@ namespace MagicExtended
             // Lightning assets
             projectileLightningPrefab = magicExtendedBundle.LoadAsset<GameObject>("staff_lightning_projectile_DW");
             projectileLightningAOEPrefab = magicExtendedBundle.LoadAsset<GameObject>("staff_lightning_aoe_projectile_DW");
+            fxLightningAOEPrefab = magicExtendedBundle.LoadAsset<GameObject>("fx_staff_lightning_aoe_DW");
+            fxLightningHitPrefab = magicExtendedBundle.LoadAsset<GameObject>("fx_staff_lightning_hit_DW");
+            fxLightningWindupPrefab = magicExtendedBundle.LoadAsset<GameObject>("fx_staff_lightning_windup_DW");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(projectileLightningPrefab, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(projectileLightningAOEPrefab, true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_lightning_aoe_DW"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_lightning_hit_DW"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_lightning_windup_DW"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(fxLightningAOEPrefab, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(fxLightningHitPrefab, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(fxLightningWindupPrefab, true));
 
             // Earth assets
             projectileRockPrefab = magicExtendedBundle.LoadAsset<GameObject>("staff_earth_stone_projectile_DW");
@@ -314,11 +382,12 @@ namespace MagicExtended
             // Ice Metal assets
             projectileIceShardPrefab = magicExtendedBundle.LoadAsset<GameObject>("staff_metal_iceshard_projectile_DW");
             projectileIceShardBigPrefab = magicExtendedBundle.LoadAsset<GameObject>("staff_metal_iceshard_big_projectile_DW");
+            fxIceWindupPrefab = magicExtendedBundle.LoadAsset<GameObject>("fx_staff_ice_windup_DW");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(projectileIceShardPrefab, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(projectileIceShardBigPrefab, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(fxIceWindupPrefab, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_metal_spawn_iceshard_script_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_metal_spawn_iceshard_projectile_DW"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_ice_windup_DW"), true));            
 
             // Fire Metal assets
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_metal_fireball_projectile"), true));

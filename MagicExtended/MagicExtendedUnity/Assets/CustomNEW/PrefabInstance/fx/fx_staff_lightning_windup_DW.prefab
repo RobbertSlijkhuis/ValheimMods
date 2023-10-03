@@ -43,8 +43,8 @@ Light:
   serializedVersion: 10
   m_Type: 2
   m_Shape: 0
-  m_Color: {r: 0.7411765, g: 0.92941177, b: 1, a: 0.49019608}
-  m_Intensity: 4
+  m_Color: {r: 0.5058824, g: 0.8627451, b: 1, a: 1}
+  m_Intensity: 2
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -2704,7 +2704,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.7411765, g: 0.92941177, b: 1, a: 1}
+      maxColor: {r: 0.5058824, g: 0.8627451, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -3209,7 +3209,7 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 0.22745098, g: 0.78431374, b: 1, a: 0}
+        key0: {r: 0.5058824, g: 0.8627451, b: 1, a: 0}
         key1: {r: 1, g: 1, b: 1, a: 1}
         key2: {r: 0, g: 0, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
@@ -7393,7 +7393,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 0.46323532, g: 0.067089245, b: 0, a: 1}
-      maxColor: {r: 0.7411765, g: 0.92941177, b: 1, a: 1}
+      maxColor: {r: 0.5058824, g: 0.8627451, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -7866,7 +7866,7 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 0.22745098, g: 0.78431374, b: 1, a: 1}
+        key0: {r: 0.5058824, g: 0.8627451, b: 1, a: 1}
         key1: {r: 0.5254902, g: 0.9137255, b: 1, a: 0}
         key2: {r: 1, g: 0, b: 0.15569353, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
@@ -14057,7 +14057,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7327544033661839007}
   m_Layer: 0
-  m_Name: purple
+  m_Name: kimetsu_effects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14192,7 +14192,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.9490196, g: 0.85490197, b: 1, a: 1}
+      maxColor: {r: 0.8980392, g: 0.72156864, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -14697,7 +14697,7 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 0.22745098, g: 0.78431374, b: 1, a: 0}
+        key0: {r: 0.8980392, g: 0.72156864, b: 1, a: 0}
         key1: {r: 1, g: 1, b: 1, a: 1}
         key2: {r: 0, g: 0, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
@@ -16372,7 +16372,7 @@ GameObject:
   m_Component:
   - component: {fileID: 194793466887981244}
   m_Layer: 8
-  m_Name: purple
+  m_Name: kimetsu_effects_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16510,7 +16510,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 0.46323532, g: 0.067089245, b: 0, a: 1}
-      maxColor: {r: 0.9490196, g: 0.85490197, b: 1, a: 1}
+      maxColor: {r: 0.8980392, g: 0.72156864, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -16983,7 +16983,7 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 0.22745098, g: 0.78431374, b: 1, a: 1}
+        key0: {r: 0.8980392, g: 0.72156864, b: 1, a: 1}
         key1: {r: 0.5254902, g: 0.9137255, b: 1, a: 0}
         key2: {r: 1, g: 0, b: 0.15569353, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
@@ -18631,8 +18631,8 @@ Light:
   serializedVersion: 10
   m_Type: 2
   m_Shape: 0
-  m_Color: {r: 0.9490196, g: 0.85490197, b: 1, a: 0.49019608}
-  m_Intensity: 4
+  m_Color: {r: 0.8980392, g: 0.72156864, b: 1, a: 1}
+  m_Intensity: 2
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -18711,7 +18711,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1735360811957331295}
   m_Layer: 0
-  m_Name: normal
+  m_Name: normal_effects_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -18745,7 +18745,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8733481142516272514}
   m_Layer: 8
-  m_Name: normal
+  m_Name: normal_effects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

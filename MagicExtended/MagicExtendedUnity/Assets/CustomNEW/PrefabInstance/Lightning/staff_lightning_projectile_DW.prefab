@@ -233,11 +233,11 @@ MonoBehaviour:
     m_lightning: 0
     m_poison: 0
     m_spirit: 0
-  m_aoe: 3
+  m_aoe: 2.4
   m_dodgeable: 1
   m_blockable: 1
   m_attackForce: 0
-  m_backstabBonus: 4
+  m_backstabBonus: 3
   m_statusEffect: 
   m_canHitWater: 0
   m_ttl: 20
@@ -325,7 +325,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6465489522454763771}
   m_Layer: 0
-  m_Name: purple
+  m_Name: kimetsu_effects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5132,7 +5132,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4628138016414494612}
   m_Layer: 0
-  m_Name: normal
+  m_Name: normal_effects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

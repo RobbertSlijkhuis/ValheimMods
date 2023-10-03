@@ -61,11 +61,11 @@ MonoBehaviour:
     m_lightning: 0
     m_poison: 0
     m_spirit: 0
-  m_aoe: 0
+  m_aoe: 1
   m_dodgeable: 1
   m_blockable: 1
   m_attackForce: 0
-  m_backstabBonus: 2
+  m_backstabBonus: 3
   m_statusEffect: 
   m_canHitWater: 0
   m_ttl: 6
@@ -267,8 +267,8 @@ Light:
   m_Type: 2
   m_Shape: 0
   m_Color: {r: 0.18039216, g: 0.3882353, b: 0.74509805, a: 1}
-  m_Intensity: 2
-  m_Range: 3
+  m_Intensity: 4
+  m_Range: 4
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -2605,12 +2605,12 @@ GameObject:
   m_Component:
   - component: {fileID: 5630342729740479267}
   m_Layer: 0
-  m_Name: normal
+  m_Name: normal_effects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &5630342729740479267
 Transform:
   m_ObjectHideFlags: 0
@@ -2670,8 +2670,8 @@ Light:
   m_Type: 2
   m_Shape: 0
   m_Color: {r: 0.45490193, g: 0.8421095, b: 1, a: 1}
-  m_Intensity: 2
-  m_Range: 3
+  m_Intensity: 3
+  m_Range: 4
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -2730,12 +2730,12 @@ GameObject:
   m_Component:
   - component: {fileID: 2459901880096233604}
   m_Layer: 0
-  m_Name: dark
+  m_Name: kimetsu_effects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2459901880096233604
 Transform:
   m_ObjectHideFlags: 0

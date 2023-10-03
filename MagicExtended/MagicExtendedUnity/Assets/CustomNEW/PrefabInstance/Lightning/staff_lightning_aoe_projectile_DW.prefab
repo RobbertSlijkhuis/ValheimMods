@@ -95,7 +95,7 @@ MonoBehaviour:
   m_blockable: 0
   m_toolTier: 0
   m_attackForce: 500
-  m_backstabBonus: 1
+  m_backstabBonus: 3
   m_statusEffect: 
   m_statusEffectIfBoss: 
   m_statusEffectIfPlayer: 
@@ -116,11 +116,11 @@ MonoBehaviour:
   m_hitOwner: 0
   m_hitParent: 0
   m_hitSame: 0
-  m_hitFriendly: 1
+  m_hitFriendly: 0
   m_hitEnemy: 1
   m_hitCharacters: 1
-  m_hitProps: 1
-  m_ignorePVP: 1
+  m_hitProps: 0
+  m_ignorePVP: 0
   m_skill: 0
   m_canRaiseSkill: 0
   m_useTriggers: 0
@@ -130,15 +130,5 @@ MonoBehaviour:
   m_ttl: 3
   m_hitInterval: 0
   m_hitEffects:
-    m_effectPrefabs:
-    - m_prefab: {fileID: 1610531113345640, guid: d355a0cf30babd442aa8243617c8f851,
-        type: 3}
-      m_enabled: 1
-      m_variant: -1
-      m_attach: 0
-      m_inheritParentRotation: 0
-      m_inheritParentScale: 0
-      m_randomRotation: 0
-      m_scale: 0
-      m_childTransform: 
+    m_effectPrefabs: []
   m_attachToCaster: 0
