@@ -10,12 +10,12 @@ namespace PavedRoadNoLevel
 {
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
-    [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
+    [NetworkCompatibility(CompatibilityLevel.ClientMustHaveMod, VersionStrictness.Minor)]
     internal class PavedRoadNoLevel : BaseUnityPlugin
     {
         public const string PluginGUID = "DeathWizsh.PavedRoadNoLevel";
         public const string PluginName = "Paved Road No Level";
-        public const string PluginVersion = "1.0.4";
+        public const string PluginVersion = "1.0.5";
         private static string configFileName = PluginGUID + ".cfg";
         private static string configFileFullPath = BepInEx.Paths.ConfigPath + Path.DirectorySeparatorChar.ToString() + configFileName;
 
@@ -125,12 +125,14 @@ namespace PavedRoadNoLevel
         {
             try
             {
-                Config.SaveOnConfigSet = true;
+                Config.SaveOnConfigSet = false;
 
                 configEnable = Config.Bind(new ConfigDefinition("General", "Enable"), true,
                     new ConfigDescription("Enable this mod", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
                 configEnable.SettingChanged += (obj, attr) => { ApplyConfigChanges(); };
+
+                Config.SaveOnConfigSet = true;
 
                 configRequireStoncutter = Config.Bind(new ConfigDefinition("General", "Stonecutter requirement"), true,
                     new ConfigDescription("Enable the Stonecutter as a requirement (to pave roads)", null,
