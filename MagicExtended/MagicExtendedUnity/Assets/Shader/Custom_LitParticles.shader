@@ -2,6 +2,7 @@ Shader "Custom/LitParticles" {
 	Properties {
 		_Color ("Color", Vector) = (1,1,1,1)
 		_MainTex ("Albedo (RGB)", 2D) = "white" {}
+		[HDR] _EmissionColor ("Emission Color", Vector) = (0,0,0,1)
 		_NormalTex ("Normal", 2D) = "bump" {}
 		_BumpScale ("Normal power", Range(0, 4)) = 1
 		_LightNormalFactor ("Light normal factor", Range(0, 1)) = 0
@@ -11,6 +12,7 @@ Shader "Custom/LitParticles" {
 		_CameraYFadeDistance ("Camera Y fade distance", Float) = 0
 		[MaterialToggle] _Billboard ("Billboard", Float) = 0
 		[MaterialToggle] _SkyMask ("SkyMask", Float) = 0
+		[KeywordEnum(Red,Green,Blue,Alpha)] _AlphaChannel ("Alpha Channel", Float) = 3
 		_NoiseTex ("Noise", 2D) = "white" {}
 	}
 	//DummyShaderTextExporter

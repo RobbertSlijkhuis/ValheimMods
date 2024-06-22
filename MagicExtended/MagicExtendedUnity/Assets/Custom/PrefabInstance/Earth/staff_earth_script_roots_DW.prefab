@@ -1,0 +1,96 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1029351410757724
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4034508971615446}
+  - component: {fileID: 114874486196054551}
+  m_Layer: 22
+  m_Name: staff_earth_script_roots_DW
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4034508971615446
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1029351410757724}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 500, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
+--- !u!114 &114874486196054551
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1029351410757724}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -179248876, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_spawnPrefab:
+  - {fileID: 1615339647763054, guid: 2518cc22b7153de4eba96c52994675b3, type: 3}
+  m_spawnOnAwake: 0
+  m_alertSpawnedCreature: 1
+  m_passiveAggressive: 1
+  m_spawnAtTarget: 1
+  m_minToSpawn: 7
+  m_maxToSpawn: 7
+  m_maxSpawned: 7
+  m_spawnRadius: 15
+  m_circleSpawn: 0
+  m_snapToTerrain: 1
+  m_randomYRotation: 0
+  m_spawnGroundOffset: 0.2
+  m_getSolidHeightMargin: 1000
+  m_initialSpawnDelay: 0
+  m_spawnDelay: 0.1
+  m_preSpawnDelay: 0
+  m_commandOnSpawn: 0
+  m_wakeUpAnimation: 0
+  m_copySkill: 0
+  m_copySkillToRandomFactor: 0
+  m_setMaxInstancesFromWeaponLevel: 0
+  m_levelUpSettings: []
+  m_targetType: 3
+  m_targetWhenPathfindingType: 1
+  m_maxTargetRange: 10
+  m_spawnEffects:
+    m_effectPrefabs:
+    - m_prefab: {fileID: 7081219430501593318, guid: dd6f06f5233686c44986e70338be197f,
+        type: 3}
+      m_enabled: 1
+      m_variant: -1
+      m_attach: 0
+      m_follow: 0
+      m_inheritParentRotation: 0
+      m_inheritParentScale: 0
+      m_multiplyParentVisualScale: 0
+      m_randomRotation: 0
+      m_scale: 0
+      m_childTransform: 
+  m_preSpawnEffects:
+    m_effectPrefabs: []
+  m_aoePrefab: {fileID: 0}
+  m_projectileVelocity: 0
+  m_projectileVelocityMax: 0
+  m_projectileAccuracy: 1
+  m_randomDirection: 0
+  m_randomAngleMin: 0
+  m_randomAngleMax: 0

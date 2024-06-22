@@ -2,25 +2,32 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!21 &2100000
 Material:
-  serializedVersion: 6
+  serializedVersion: 8
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: stone
-  m_Shader: {fileID: 4800000, guid: 7898177a2f885a54da7f98d06042a064, type: 3}
-  m_ShaderKeywords: _ADDRAIN_ON _EMISSION _NORMALMAP
+  m_Shader: {fileID: 4800000, guid: 66f305d8321cfc84ba6e193797d5fffa, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _ADDRAIN_ON
+  - _EMISSION
+  - _NORMALMAP
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
     - _BumpMap:
-        m_Texture: {fileID: 2800000, guid: 04dbc783f5c4d9c4ba5373dc94629d21, type: 3}
+        m_Texture: {fileID: 2800000, guid: ffa6b672f5fd637489ef9f9d7b60d7ab, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissiveTex:
@@ -32,7 +39,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: f557619dbc2bdf04d898eb67301256fe, type: 3}
+        m_Texture: {fileID: 2800000, guid: d2a35f7243301ba4a8999b2be53d6e9a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetalTex:
@@ -43,6 +50,7 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    m_Ints: {}
     m_Floats:
     - _AddRain: 1
     - _AddSnow: 0

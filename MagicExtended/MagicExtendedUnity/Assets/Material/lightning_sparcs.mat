@@ -2,14 +2,19 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!21 &2100000
 Material:
-  serializedVersion: 6
+  serializedVersion: 8
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: lightning_sparcs
-  m_Shader: {fileID: 4800000, guid: abc9ebac840009a43b7ad8d5d59c84ca, type: 3}
-  m_ShaderKeywords: _ALPHABLEND_ON _EMISSION
+  m_Shader: {fileID: 4800000, guid: df1984a560b9a584faec8926354a1238, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _ALPHABLEND_ON
+  - _EMISSION
+  m_InvalidKeywords: []
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -17,7 +22,8 @@ Material:
   stringTagMap:
   - RenderType: Transparent
   disabledShaderPasses:
-  - ALWAYS
+  - GRABPASS
+  m_LockedProperties:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -30,9 +36,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: a8c82af3299e12442979929e31ae6a49, type: 3}
+        m_Texture: {fileID: 2800000, guid: e3071324657ff0241a459bfe7fec4699, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    m_Ints: {}
     m_Floats:
     - _BlendOp: 0
     - _BumpScale: 1

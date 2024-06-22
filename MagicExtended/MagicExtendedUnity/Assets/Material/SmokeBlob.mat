@@ -2,25 +2,39 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!21 &2100000
 Material:
-  serializedVersion: 6
+  serializedVersion: 8
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: SmokeBlob
-  m_Shader: {fileID: 4800000, guid: c9bf4565c2d98084f960537abba65572, type: 3}
-  m_ShaderKeywords: GEOM_TYPE_BRANCH GEOM_TYPE_FROND GEOM_TYPE_MESH _ADDSNOW_ON _ALPHABLEND_ON _BILLBOARD_ON _CAMCULL_ON _DISTANCESCALE_ON _FADING_ON _NORMALMAP
+  m_Shader: {fileID: 4800000, guid: ba499e89cb9149740812cde0a9ec29dc, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - GEOM_TYPE_BRANCH
+  - GEOM_TYPE_FROND
+  - GEOM_TYPE_MESH
+  - _ADDSNOW_ON
+  - _ALPHABLEND_ON
+  - _BILLBOARD_ON
+  - _CAMCULL_ON
+  - _DISTANCESCALE_ON
+  - _FADING_ON
+  - _NORMALMAP
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 20d0f12a78d8ed444b0a15edc044d54e, type: 3}
+        m_Texture: {fileID: 2800000, guid: 74bb698959452894baa7a848c9cbebb0, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NoiseTex:
@@ -28,12 +42,14 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalTex:
-        m_Texture: {fileID: 2800000, guid: 0eb5a1c71a0ca9f49919abb601bf7349, type: 3}
+        m_Texture: {fileID: 2800000, guid: 9cc63a303f56b2645af5e4a4117fcd25, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    m_Ints: {}
     m_Floats:
     - _AddLightsPerPixel: 1
     - _AddSnow: 1
+    - _AlphaChannel: 3
     - _AlphaInfluence: 1
     - _Billboard: 1
     - _BlendOp: 0
