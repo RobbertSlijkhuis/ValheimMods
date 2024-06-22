@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: 75947fdcf2e264144b20ef890e6a2e24
-timeCreated: 1696523269
+guid: e2cca58df5c07ed4bb2d6ee80820376a
+timeCreated: 1696523268
 licenseType: Free
 TextureImporter:
   serializedVersion: 12
@@ -9,7 +9,7 @@ TextureImporter:
   mipmaps:
     mipMapMode: 0
     enableMipMap: 1
-    sRGBTexture: 0
+    sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
     borderMipMap: 0
@@ -54,7 +54,7 @@ TextureImporter:
   alphaUsage: 1
   alphaIsTransparency: 1
   spriteTessellationDetail: -1
-  textureType: 1
+  textureType: 0
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 0

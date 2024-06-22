@@ -92,9 +92,9 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <EmbeddedResource Include="Package\Assets\customsaddles_dw" />
-    <EmbeddedResource Include="Package\Assets\customsaddles_dw.manifest" />
     <None Include="README.md" />
+    <EmbeddedResource Include="Resources\saddles_dw" />
+    <EmbeddedResource Include="Resources\saddles_dw.manifest" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Package\plugins\" />

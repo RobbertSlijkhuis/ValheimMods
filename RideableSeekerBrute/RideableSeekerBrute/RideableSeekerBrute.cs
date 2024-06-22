@@ -28,6 +28,7 @@ namespace RideableSeekerBrute
         AssetBundle assetBundle;
 
         GameObject saddleSimple;
+        GameObject saddleNoCloth;
         GameObject saddleMedium;
         GameObject saddleHeavy;
 
@@ -38,6 +39,7 @@ namespace RideableSeekerBrute
         GameObject boar;
         GameObject abomination;
         GameObject warg;
+        GameObject drake;
 
         private ConfigEntry<KeyboardShortcut> configAttackKey;
         private ConfigEntry<KeyboardShortcut> configAttackSecondaryKey;
@@ -49,6 +51,7 @@ namespace RideableSeekerBrute
         private void Awake()
         {
             InitConfig();
+
             
             ModQuery.Enable();
             harmony.PatchAll();
@@ -157,6 +160,19 @@ namespace RideableSeekerBrute
             deer = PrefabManager.Instance.GetPrefab("Deer");
             bunny = PrefabManager.Instance.GetPrefab("Hare");
             abomination = PrefabManager.Instance.GetPrefab("Abomination");
+            drake = PrefabManager.Instance.GetPrefab("Hatchling");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(drake, true));
+
+            ItemConfig saddleConfig = new ItemConfig();
+            saddleConfig.Name = "Saddle";
+            saddleConfig.Description = "A saddle, used for mounts!";
+            saddleConfig.CraftingStation = "Workbench";
+            saddleConfig.AddRequirement(new RequirementConfig("LeatherScraps", 10));
+            saddleConfig.AddRequirement(new RequirementConfig("DeerHide", 10));
+            saddleConfig.AddRequirement(new RequirementConfig("Chain", 4));
+            saddleConfig.AddRequirement(new RequirementConfig("Wood", 10));
+            CustomItem saddle = new CustomItem(saddleNoCloth, true, saddleConfig);
+            ItemManager.Instance.AddItem(saddle);
 
             ItemConfig simpleSaddleConfig = new ItemConfig();
             simpleSaddleConfig.Name = "Simple Saddle";
@@ -206,6 +222,7 @@ namespace RideableSeekerBrute
             tameable.MakeTameable(bunny, tameableConfig);
             tameable.MakeTameable(deer, tameableConfig);
             tameable.MakeTameable(abomination, tameableConfig);
+            //tameable.MakeTameable(drake, tameableConfig);
 
             // Mount stuff
             SaddleConfig saddleConfigHeavy = new SaddleConfig(heavySaddle.ItemPrefab, "Visual");
@@ -229,47 +246,60 @@ namespace RideableSeekerBrute
             saddleConfigSimple.attach.scale = new Vector3(1, 1, 1);
             saddleConfigSimple.sphereRadius = 1;
 
-            MountableConfig bruteAttachConfig = new MountableConfig("hip");
+            MountableConfig bruteAttachConfig = new MountableConfig("Visual/Armature/root/root2/hip");
             bruteAttachConfig.characterAttach.position = new Vector3(0, 0.013f, 0.004f);
             bruteAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(270, 180, 0);
             bruteAttachConfig.characterAttach.scale = new Vector3(1, 1, 1);
             bruteAttachConfig.saddleAttach.position = new Vector3(0, -0.004f, -0.0037f);
             bruteAttachConfig.saddleAttach.scale = new Vector3(0.008f, 0.008f, 0.008f);
 
-            MountableConfig wolfAttachConfig = new MountableConfig("Spine1");
+            MountableConfig wolfAttachConfig = new MountableConfig("Visual/WolfSmooth/CG/Pelvis/Spine/Spine1");
             wolfAttachConfig.characterAttach.position = new Vector3(-0.25f, -0.03f, 0);
             wolfAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(350, 270, 180);
             wolfAttachConfig.characterAttach.scale = new Vector3(1, 1, 1);
             wolfAttachConfig.saddleAttach.position = new Vector3(0, -0.27f, -0.22f);
             wolfAttachConfig.saddleAttach.scale = new Vector3(0.52f, 0.52f, 0.52f);
 
-            MountableConfig boarAttachConfig = new MountableConfig("CG");
+            MountableConfig boarAttachConfig = new MountableConfig("Visual/CG");
             boarAttachConfig.characterAttach.position = new Vector3(-0.7f, 0, 0.1f);
             boarAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(0, 270, 270);
             boarAttachConfig.characterAttach.scale = new Vector3(1, 1, 1);
             boarAttachConfig.saddleAttach.position = new Vector3(0, -0.4f, -0.33f);
             boarAttachConfig.saddleAttach.scale = new Vector3(0.75f, 0.75f, 0.75f);
 
-            MountableConfig deerAttachConfig = new MountableConfig("CG");
+            MountableConfig deerAttachConfig = new MountableConfig("Visual/CG");
             deerAttachConfig.characterAttach.position = new Vector3(-0.75f, 0, 0.08f);
             deerAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(0, 270, 270);
             deerAttachConfig.characterAttach.scale = new Vector3(1, 1, 1);
-            deerAttachConfig.saddleAttach.position = new Vector3(0 , -0.45f, -0.3f);
+            deerAttachConfig.saddleAttach.position = new Vector3(0, -0.45f, -0.3f);
             deerAttachConfig.saddleAttach.scale = new Vector3(0.8f, 0.8f, 0.8f);
 
-            MountableConfig hareAttachConfig = new MountableConfig("Root");
+            MountableConfig hareAttachConfig = new MountableConfig("Visual/Armature/Root");
             hareAttachConfig.characterAttach.position = new Vector3(0, 0.008f, -0.003f);
             hareAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(0, 180, 0);
             hareAttachConfig.characterAttach.scale = new Vector3(1, 1, 1);
             hareAttachConfig.saddleAttach.position = new Vector3(0, -0.0037f, -0.003f);
             hareAttachConfig.saddleAttach.scale = new Vector3(0.0075f, 0.0075f, 0.0075f);
 
-            MountableConfig abomAttachConfig = new MountableConfig("hip");
+            MountableConfig abomAttachConfig = new MountableConfig("Visual/Armature.001/root/hip");
             abomAttachConfig.characterAttach.position = new Vector3(-0.0013f, 0.011f, 0);
             abomAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(270, 90, 0);
             abomAttachConfig.characterAttach.scale = new Vector3(1, 1, 1);
             abomAttachConfig.saddleAttach.position = new Vector3(0, -0.0033f, -0.0025f);
             abomAttachConfig.saddleAttach.scale = new Vector3(0.006f, 0.006f, 0.006f);
+
+            //MountableConfig drakeAttachConfig = new MountableConfig("Neck2");
+            //drakeAttachConfig.characterAttach.position = new Vector3(0, -0.001f, -0.005f);
+            //drakeAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(285, 0, 180);
+            //drakeAttachConfig.characterAttach.scale = new Vector3(1, 1, 1);
+            //drakeAttachConfig.saddleAttach.position = new Vector3(0, 0, 0);
+            //// drakeAttachConfig.saddleAttach.scale = new Vector3(0.01f, 0.01f, 0.01f);
+            //drakeAttachConfig.saddleAttach.scale = new Vector3(0, 0, 0);
+            ////drakeAttachConfig.characterAttach.position = new Vector3(0, 0, 0);
+            ////drakeAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(-90, 0, 0);
+            ////drakeAttachConfig.characterAttach.scale = new Vector3(1, 1, 1);
+            ////drakeAttachConfig.saddleAttach.position = new Vector3(0, 0, 0);
+            ////drakeAttachConfig.saddleAttach.scale = new Vector3(0.008f, 0.008f, 0.008f);
 
             MountableManager.Instance.MakeMountable(seekerBrute, saddleConfigHeavy, bruteAttachConfig);
 
@@ -298,6 +328,12 @@ namespace RideableSeekerBrute
             saddleConfigHeavy.attach.position = new Vector3(0, 2.5f, 1.5f);
             MountableManager.Instance.MakeMountable(abomination, saddleConfigHeavy, abomAttachConfig);
 
+            //// saddleConfig.sphereRadius = 0.9f;
+            //saddleConfigHeavy.maxUseRange = 20;
+            //saddleConfigSimple.sphereRadius = 1;
+            //saddleConfigSimple.attach.position = new Vector3(0, 2, 1);
+            //MountableManager.Instance.MakeMountable(drake, saddleConfigSimple, drakeAttachConfig);
+
             PrefabManager.OnVanillaPrefabsAvailable -= InitMountable;
         }
 
@@ -317,10 +353,15 @@ namespace RideableSeekerBrute
 
         private void InitAssetBundle()
         {
-            assetBundle = AssetUtils.LoadAssetBundleFromResources("customsaddles_dw");
+            assetBundle = AssetUtils.LoadAssetBundleFromResources("saddles_dw");
             saddleHeavy = assetBundle.LoadAsset<GameObject>("SaddleHeavy_DW");
             saddleMedium = assetBundle.LoadAsset<GameObject>("SaddleMedium_DW");
-            saddleSimple = assetBundle.LoadAsset<GameObject>("SaddleSimple_2_DW");
+            saddleSimple = assetBundle.LoadAsset<GameObject>("SaddleSimple_DW");
+            saddleNoCloth = assetBundle.LoadAsset<GameObject>("SaddleNoCloth_DW");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(saddleHeavy, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(saddleMedium, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(saddleSimple, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(saddleNoCloth, true));
         }
 
         /**

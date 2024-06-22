@@ -135,7 +135,7 @@ namespace RideableSeekerBrute
             monsterComp.m_takeoffTime = animalAI.m_takeoffTime;
             monsterComp.m_flyAltitudeMin = animalAI.m_flyAltitudeMin;
             monsterComp.m_flyAltitudeMax = animalAI.m_flyAltitudeMax;
-            monsterComp.m_limitMaxAltitude = animalAI.m_limitMaxAltitude;
+            // monsterComp.m_limitMaxAltitude = animalAI.m_limitMaxAltitude;
 
             // Other
             monsterComp.m_avoidFire = animalAI.m_avoidFire;

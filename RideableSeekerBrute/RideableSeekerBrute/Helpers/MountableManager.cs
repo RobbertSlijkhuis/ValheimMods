@@ -15,17 +15,19 @@ namespace RideableSeekerBrute
         {
             try
             {
-                Transform parentOfSaddle = Utils.FindChild(prefab.transform, saddleConfig.parentTransform);
-                Transform parentOfCharacterAttach = Utils.FindChild(prefab.transform, mountableConfig.parentTransform);
+                // Transform parentOfSaddle = Utils.FindChild(prefab.transform, saddleConfig.parentTransform);
+                Transform parentOfSaddle = prefab.transform.Find(saddleConfig.parentTransform);
+                // Transform parentOfCharacterAttach = Utils.FindChild(prefab.transform, mountableConfig.parentTransform);
+                Transform parentOfCharacterAttach = prefab.transform.Find(mountableConfig.parentTransform);
 
                 if (parentOfSaddle == null)
                 {
-                    Jotunn.Logger.LogWarning("Could not find parent Transform " + saddleConfig.parentTransform + " for the saddle, skipping"+ prefab.name);
+                    Jotunn.Logger.LogWarning("Could not find parent Transform " + saddleConfig.parentTransform + " for the saddle, skipping " + prefab.name);
                     return;
                 }
                 if (parentOfCharacterAttach == null)
                 {
-                    Jotunn.Logger.LogWarning("Could not find parent Transform " + mountableConfig.parentTransform + " for the mount point, skipping" + prefab.name);
+                    Jotunn.Logger.LogWarning("Could not find parent Transform " + mountableConfig.parentTransform + " for the mount point, skipping " + prefab.name);
                     return;
                 }
 
@@ -68,7 +70,7 @@ namespace RideableSeekerBrute
                 saddleObj.AddComponent<SphereCollider>();
                 SphereCollider sphereComp = saddleObj.GetComponent<SphereCollider>();
                 sphereComp.center = saddleConfig.sphereCenter;
-                Jotunn.Logger.LogWarning("sphereRadius: "+ saddleConfig.sphereRadius);
+                Jotunn.Logger.LogWarning("sphereRadius: " + saddleConfig.sphereRadius);
                 sphereComp.radius = saddleConfig.sphereRadius;
 
                 // RenderDebugSphere(saddleObj, saddleConfig);
@@ -77,26 +79,33 @@ namespace RideableSeekerBrute
                 SaddleAttachObj.AddComponent<MeshRenderer>();
 
                 prefab.AddComponent<SaddleAnchor>();
+                Jotunn.Logger.LogInfo("Added components...");
                 SaddleAnchor saddleAnchorComp = prefab.GetComponent<SaddleAnchor>();
                 saddleAnchorComp.m_saddle_anchor = SaddleAttachObj.transform;
+                Jotunn.Logger.LogInfo("Set anchor transform... " + saddleAnchorComp.m_saddle_anchor.name);
 
-                UpdateTameable(prefab, saddleConfig);
+                UpdateTameable(prefab, saddleConfig, mountableConfig);
+                Jotunn.Logger.LogInfo("Updated Tameable component...");
             }
             catch (Exception error)
             {
-                Jotunn.Logger.LogError("Error while adding Saddle component, "+ error.Message);
+                Jotunn.Logger.LogError("Error while adding Saddle component, " + error.Message);
             }
         }
 
-        public void UpdateTameable(GameObject prefab, SaddleConfig saddleConfig)
+        public void UpdateTameable(GameObject prefab, SaddleConfig saddleConfig, MountableConfig mountableConfig)
         {
             try
             {
-                Transform objWithMesh = Utils.FindChild(saddleConfig.prefab.transform, "Cube");
+                // Transform objWithMesh = Utils.FindChild(saddleConfig.prefab.transform, "Cube");
+                Transform objWithMesh = saddleConfig.prefab.transform.Find("attach/Cube");
                 Jotunn.Logger.LogInfo("objWithMesh: " + (bool)objWithMesh);
-                Transform saddleAttach = Utils.FindChild(prefab.transform, "SaddleAttachPoint");
+                // Transform saddleAttach = Utils.FindChild(prefab.transform, "SaddleAttachPoint");
+                Transform saddleAttach = prefab.transform.Find(mountableConfig.parentTransform + "/CharacterAttachPoint/SaddleAttachPoint");
                 Jotunn.Logger.LogInfo("saddleAttach: " + (bool)saddleAttach);
-                Transform saddleParent = Utils.FindChild(prefab.transform, "Saddle");
+                // Transform saddleParent = Utils.FindChild(prefab.transform, "Saddle");
+                Transform saddleParent = prefab.transform.Find(saddleConfig.parentTransform + "/Saddle");
+                
                 Jotunn.Logger.LogInfo("saddleParent: " + (bool)saddleParent);
                 Tameable tameableComp = prefab.GetComponent<Tameable>();
                 Jotunn.Logger.LogInfo("tameableComp: " + (bool)tameableComp);
@@ -115,8 +124,9 @@ namespace RideableSeekerBrute
                 meshFilter.mesh = objWithMesh.GetComponent<MeshFilter>().mesh;
                 MeshRenderer meshRenderer = saddleAttach.GetComponent<MeshRenderer>();
                 meshRenderer.materials = objWithMesh.GetComponent<MeshRenderer>().materials;
+                Jotunn.Logger.LogWarning(meshRenderer.materials[0].name);
 
-                Jotunn.Logger.LogWarning("Updated the saddle ItemDrop & saddle GameObject in Tameable component on "+ prefab.name);
+                Jotunn.Logger.LogWarning("Updated the saddle ItemDrop & saddle GameObject in Tameable component on " + prefab.name);
             }
             catch (Exception error)
             {
