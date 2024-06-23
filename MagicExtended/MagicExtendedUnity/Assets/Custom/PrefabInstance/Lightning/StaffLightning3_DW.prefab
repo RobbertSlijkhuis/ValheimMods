@@ -232,7 +232,7 @@ MonoBehaviour:
       m_dlc: 
       m_itemType: 14
       m_icons:
-      - {fileID: 21300000, guid: 75a98e44b35905a4197e434d7d778fc7, type: 2}
+      - {fileID: 21300000, guid: b83eecfd11c32c347b90f989f10ac4a0, type: 3}
       m_attachOverride: 4
       m_description: $item_stafffireball_description
       m_maxStackSize: 1
@@ -342,7 +342,7 @@ MonoBehaviour:
         m_speedFactor: 0.3
         m_speedFactorRotation: 0.3
         m_attackStartNoise: 0
-        m_attackHitNoise: 0
+        m_attackHitNoise: 15
         m_damageMultiplier: 1
         m_damageMultiplierPerMissingHP: 0
         m_damageMultiplierByTotalHealthMissing: 0
@@ -446,7 +446,7 @@ MonoBehaviour:
         m_attackChainLevels: 0
         m_loopingAttack: 0
         m_consumeItem: 0
-        m_hitTerrain: 1
+        m_hitTerrain: 0
         m_hitFriendly: 0
         m_isHomeItem: 0
         m_attackStamina: 0
@@ -459,7 +459,7 @@ MonoBehaviour:
         m_speedFactor: 0.3
         m_speedFactorRotation: 0.3
         m_attackStartNoise: 0
-        m_attackHitNoise: 0
+        m_attackHitNoise: 20
         m_damageMultiplier: 1
         m_damageMultiplierPerMissingHP: 0
         m_damageMultiplierByTotalHealthMissing: 0
@@ -525,19 +525,20 @@ MonoBehaviour:
         m_skillHitType: 4
         m_specialHitSkill: 0
         m_specialHitType: 0
-        m_attackProjectile: {fileID: 0}
-        m_projectileVel: 0
-        m_projectileVelMin: 0
+        m_attackProjectile: {fileID: 1779027360810206, guid: 282a711fb2b30c847b762c281a859de9,
+          type: 3}
+        m_projectileVel: 15
+        m_projectileVelMin: 15
         m_randomVelocity: 0
-        m_projectileAccuracy: 0
-        m_projectileAccuracyMin: 0
-        m_circularProjectileLaunch: 0
-        m_distributeProjectilesAroundCircle: 0
+        m_projectileAccuracy: 10
+        m_projectileAccuracyMin: 5
+        m_circularProjectileLaunch: 1
+        m_distributeProjectilesAroundCircle: 1
         m_skillAccuracy: 0
-        m_useCharacterFacing: 1
+        m_useCharacterFacing: 0
         m_useCharacterFacingYAim: 0
         m_launchAngle: -5
-        m_projectiles: 1
+        m_projectiles: 5
         m_projectileBursts: 1
         m_burstInterval: 0
         m_destroyPreviousProjectile: 0
@@ -10348,7 +10349,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: d4759049113052f488cdc75eb87a874c, type: 2}
+  - {fileID: 2100000, guid: b8156e13290d94148afa6a795d35ba26, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

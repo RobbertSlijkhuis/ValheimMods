@@ -74,7 +74,7 @@ MonoBehaviour:
   m_gravity: 4
   m_drag: 0
   m_rayRadius: 0.1
-  m_hitNoise: 50
+  m_hitNoise: 0
   m_doOwnerRaytest: 1
   m_stayAfterHitStatic: 0
   m_stayAfterHitDynamic: 0

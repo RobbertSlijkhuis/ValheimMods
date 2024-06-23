@@ -235,7 +235,7 @@ MonoBehaviour:
         m_speedFactor: 0.5
         m_speedFactorRotation: 1
         m_attackStartNoise: 0
-        m_attackHitNoise: 0
+        m_attackHitNoise: 10
         m_damageMultiplier: 1
         m_damageMultiplierPerMissingHP: 0
         m_damageMultiplierByTotalHealthMissing: 0
@@ -303,10 +303,10 @@ MonoBehaviour:
         m_specialHitType: 0
         m_attackProjectile: {fileID: 1837339956046829, guid: 29a7e02c9176eef49b46bfb6487a1969,
           type: 3}
-        m_projectileVel: 35
-        m_projectileVelMin: 35
+        m_projectileVel: 25
+        m_projectileVelMin: 25
         m_randomVelocity: 0
-        m_projectileAccuracy: 4
+        m_projectileAccuracy: 3
         m_projectileAccuracyMin: 0
         m_circularProjectileLaunch: 0
         m_distributeProjectilesAroundCircle: 0
@@ -316,7 +316,7 @@ MonoBehaviour:
         m_launchAngle: -4
         m_projectiles: 1
         m_projectileBursts: 999
-        m_burstInterval: 0.36
+        m_burstInterval: 0.35
         m_destroyPreviousProjectile: 0
         m_perBurstResourceUsage: 1
         m_hitEffect:
@@ -328,8 +328,8 @@ MonoBehaviour:
           - m_prefab: {fileID: 8511591029135674299, guid: 5b8cbc58f0cdd3c4a87df5a7fd9098e7,
               type: 3}
             m_enabled: 1
-            m_variant: 0
-            m_attach: 1
+            m_variant: -1
+            m_attach: 0
             m_follow: 0
             m_inheritParentRotation: 0
             m_inheritParentScale: 0
@@ -346,7 +346,7 @@ MonoBehaviour:
           - m_prefab: {fileID: 7551501131836803338, guid: 220e67212368e2f47a0a8250e8d9ea9d,
               type: 3}
             m_enabled: 1
-            m_variant: 0
+            m_variant: -1
             m_attach: 0
             m_follow: 0
             m_inheritParentRotation: 0
@@ -358,7 +358,7 @@ MonoBehaviour:
           - m_prefab: {fileID: 1758473627833946668, guid: fe6b8dec766435f49b3bc760d3b35883,
               type: 3}
             m_enabled: 1
-            m_variant: 0
+            m_variant: -1
             m_attach: 0
             m_follow: 0
             m_inheritParentRotation: 0
@@ -375,7 +375,7 @@ MonoBehaviour:
         m_attackChainLevels: 0
         m_loopingAttack: 0
         m_consumeItem: 0
-        m_hitTerrain: 1
+        m_hitTerrain: 0
         m_hitFriendly: 0
         m_isHomeItem: 0
         m_attackStamina: 0
@@ -388,7 +388,7 @@ MonoBehaviour:
         m_speedFactor: 0.3
         m_speedFactorRotation: 0.3
         m_attackStartNoise: 0
-        m_attackHitNoise: 0
+        m_attackHitNoise: 35
         m_damageMultiplier: 1
         m_damageMultiplierPerMissingHP: 0
         m_damageMultiplierByTotalHealthMissing: 0
@@ -466,7 +466,7 @@ MonoBehaviour:
         m_skillAccuracy: 0
         m_useCharacterFacing: 0
         m_useCharacterFacingYAim: 0
-        m_launchAngle: 0
+        m_launchAngle: -5
         m_projectiles: 1
         m_projectileBursts: 1
         m_burstInterval: 0
@@ -3077,7 +3077,7 @@ Transform:
   m_GameObject: {fileID: 1214126178104938962}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.014, y: -0.02, z: -0.501}
+  m_LocalPosition: {x: 0, y: -0.0304, z: -0.4983}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5382,7 +5382,7 @@ Transform:
   m_GameObject: {fileID: 6041947631392466070}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.7173863, z: -0.69667566, w: 0}
-  m_LocalPosition: {x: -0.039, y: 0.01, z: -0.515}
+  m_LocalPosition: {x: 0, y: -0.0304, z: -0.4983}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5513,7 +5513,7 @@ Transform:
   m_GameObject: {fileID: 6937618152755491485}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.028, z: -0.5}
+  m_LocalPosition: {x: 0, y: -0.0304, z: -0.4983}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

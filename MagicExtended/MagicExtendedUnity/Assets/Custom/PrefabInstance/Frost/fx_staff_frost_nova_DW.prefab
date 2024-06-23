@@ -9637,10 +9637,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_playOnAwake: 1
   m_audioClips:
-  - {fileID: 8300000, guid: da70eff3f6179b34e8b52c855897497e, type: 3}
-  - {fileID: 8300000, guid: 69be2312599567a4d8f027136acc26dd, type: 3}
-  - {fileID: 8300000, guid: 65355416c0180564c9c599a7153ef2e7, type: 3}
-  - {fileID: 8300000, guid: 89586256331898949b16da787fe8f5ec, type: 3}
+  - {fileID: 8300000, guid: efe51f5eb30bdce4abee43b1e2a22cca, type: 3}
+  - {fileID: 8300000, guid: d7f4a6055ac52de48848dc0cd8f8273c, type: 3}
+  - {fileID: 8300000, guid: b23fab3da489e6d4ab21e275f17f0868, type: 3}
+  - {fileID: 8300000, guid: 8de3a7a94d3caca44bd4daf4da1bfa4c, type: 3}
   m_maxConcurrentSources: 0
   m_ignoreConcurrencyDistance: 0
   m_maxPitch: 1
@@ -9654,8 +9654,8 @@ MonoBehaviour:
   m_randomPan: 0
   m_minPan: -1
   m_maxPan: 1
-  m_maxDelay: 1
-  m_minDelay: 1
+  m_maxDelay: 1.7
+  m_minDelay: 1.7
   m_distanceReverb: 1
   m_useCustomReverbDistance: 0
   m_customReverbDistance: 10

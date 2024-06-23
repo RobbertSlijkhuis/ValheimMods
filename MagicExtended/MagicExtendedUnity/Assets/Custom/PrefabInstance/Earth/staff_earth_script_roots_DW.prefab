@@ -73,7 +73,7 @@ MonoBehaviour:
   m_maxTargetRange: 10
   m_spawnEffects:
     m_effectPrefabs:
-    - m_prefab: {fileID: 7081219430501593318, guid: dd6f06f5233686c44986e70338be197f,
+    - m_prefab: {fileID: 4948246665371944619, guid: 721205d986158054496dc3d90582963a,
         type: 3}
       m_enabled: 1
       m_variant: -1

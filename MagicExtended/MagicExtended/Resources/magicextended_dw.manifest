@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 3293212756
+CRC: 40852944
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 5284a926c423e9eb18a6c4a95389e6f6
+    Hash: cf12453b329b79a12b1d590b319f614a
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 3469e388b6fc60d258b7d2c9152860de
+    Hash: 02fad380d5ac7ce64b96ae765f2757f2
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 5284a926c423e9eb18a6c4a95389e6f6
+    Hash: cf12453b329b79a12b1d590b319f614a
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -75,6 +75,8 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 829610738, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: 2106984268, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: 1345532120, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 971010301, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
@@ -118,6 +120,8 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: Attack
 - AssemblyName: assembly_valheim
+  ClassName: DropTable
+- AssemblyName: assembly_valheim
   ClassName: EffectList
 - AssemblyName: assembly_valheim
   ClassName: EffectList/EffectData
@@ -132,21 +136,34 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: ItemDrop/ItemData/SharedData
 Assets:
+- Assets/Custom/PrefabInstance/Lightning/staff_lightning_projectile_DW.prefab
 - Assets/Custom/PrefabInstance/Frost/staff_frost_script_iceshards_DW.prefab
 - Assets/Custom/PrefabInstance/Fenring/Ashlands/ArmorFenringChestAshlands_DW.prefab
+- Assets/Custom/PrefabInstance/Lightning/staff_lightning_nova_AOE_DW.prefab
 - Assets/Custom/PrefabInstance/Fire/StaffFire1_DW.prefab
+- Assets/CustomNEW/StaffMetalIceShards_DW.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/GribSnow_DW.prefab
 - Assets/Custom/PrefabInstance/Fire/staff_fire_projectile_DW.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/Pickable_GribSnow_DW.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/Pickable_PircedMushroom_DW.prefab
 - Assets/Custom/PrefabInstance/Fenring/Ashlands/ArmorFenringLegsAshlands_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/StaffEarth2_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/staff_earth_projectile_secondary_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/fx_staff_earth_windup_DW.prefab
 - Assets/Custom/PrefabInstance/Fire/fx_staff_fire_nova_DW.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/Pickable_BogMushroom_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/StaffEarth1_DW.prefab
 - Assets/Custom/PrefabInstance/Frost/staff_frost_projectile_DW.prefab
 - Assets/Custom/PrefabInstance/Frost/fx_staff_frost_nova_DW.prefab
+- Assets/Custom/PrefabInstance/Lightning/StaffLightning1_DW.prefab
+- Assets/Custom/PrefabInstance/Earth/fx_mushroom_projectile_hit_DW.prefab
 - Assets/Custom/PrefabInstance/Lightning/fx_staff_lightning_AOE_DW.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/PircedMushroom_DW.prefab
+- Assets/Custom/PrefabInstance/Lightning/StaffLightning2_DW.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/Pickable_MagicalMushroom_DW.prefab
 - Assets/Custom/PrefabInstance/Fire/StaffFire2_DW.prefab
 - Assets/Custom/PrefabInstance/Frost/fx_staff_frost_windup_DW.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/BogMushroom_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/staff_earth_script_roots_DW.prefab
 - Assets/Custom/PrefabInstance/Frost/StaffFrost3_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/staff_earth_projectile_DW.prefab
@@ -154,10 +171,12 @@ Assets:
 - Assets/Custom/PrefabInstance/Books/MasterSpellbook_DW.prefab
 - Assets/Custom/PrefabInstance/Eitr/FineEitr_DW.prefab
 - Assets/Custom/PrefabInstance/Fenring/Plains/ArmorFenringChestPlains_DW.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/MagicalMushroom_DW.prefab
 - Assets/Custom/PrefabInstance/Fire/cinder_DW.prefab
 - Assets/Custom/PrefabInstance/Lightning/StaffLightning3_DW.prefab
 - Assets/Custom/PrefabInstance/Frost/StaffFrost1_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/StaffEarth3_DW.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/CookedMagicalMushroom_DW.prefab
 - Assets/Custom/PrefabInstance/Fenring/Ashlands/HelmetFenringAshlands_DW.prefab
 - Assets/Custom/PrefabInstance/Fenring/Mistlands/ArmorFenringLegsMistlands_DW.prefab
 - Assets/Custom/PrefabInstance/Eitr/CrudeEitr_DW.prefab
@@ -172,8 +191,9 @@ Assets:
 - Assets/Custom/PrefabInstance/Lightning/fx_staff_lightning_windup_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/staff_earth_projectile_spawn_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/TentaRoot_DW.prefab
-- Assets/Custom/PrefabInstance/Lightning/staff_lightning_projectile_DW.prefab
+- Assets/Custom/PrefabInstance/Earth/staff_earth_projectile_mushroom_DW.prefab
 - Assets/Custom/PrefabInstance/Frost/staff_frost_nova_AOE_DW.prefab
+- Assets/Custom/PrefabInstance/Earth/StaffEarth0_DW.prefab
 - Assets/Custom/PrefabInstance/Books/AdvancedSpellbook_DW.prefab
 - Assets/Custom/PrefabInstance/Fenring/Mistlands/ArmorFenringChestMistlands_DW.prefab
 - Assets/Custom/PrefabInstance/Fenring/Plains/HelmetFenringPlains_DW.prefab

@@ -1,19 +1,36 @@
 ﻿using BepInEx.Configuration;
-using MagicExtended.Helpers;
 using MagicExtended.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 
 namespace MagicExtended.Configs
 {
     internal static class ConfigStaffs
     {
+        // Eart0 staff
+        public static string sectionStaffEarth0 = "02. Staff of Mushrooms";
+        public static string staffEarth0RecipeName = "Recipe_StaffEarth0_DW";
+        public static string staffEarth0DefaultRecipe = "RoundLog:20, Stone:20, Resin:20, CrudeEitr_DW:16";
+        public static string staffEarth0DefaultUpgradeRecipe = "RoundLog:10, Stone:10, CrudeEitr_DW:8";
+
+        public static ConfigEntry<bool> staffEarth0Enable;
+        public static ConfigEntry<string> staffEarth0Name;
+        public static ConfigEntry<string> staffEarth0Description;
+        public static ConfigEntry<string> staffEarth0CraftingStation;
+        public static ConfigEntry<int> staffEarth0MinStationLevel;
+        public static ConfigEntry<string> staffEarth0Recipe;
+        public static ConfigEntry<string> staffEarth0RecipeUpgrade;
+        public static ConfigEntry<int> staffEarth0RecipeMultiplier;
+        public static ConfigEntry<int> staffEarth0MaxQuality;
+        public static ConfigEntry<float> staffEarth0MovementSpeed;
+        public static ConfigEntry<float> staffEarth0DamageBlunt;
+        public static ConfigEntry<float> staffEarth0DamageSpirit;
+        public static ConfigEntry<int> staffEarth0BlockArmor;
+        public static ConfigEntry<int> staffEarth0DeflectionForce;
+        public static ConfigEntry<int> staffEarth0AttackForce;
+        public static ConfigEntry<int> staffEarth0UseEitr;
+
         // Eart1 staff
-        public static string sectionStaffEarth1 = "02. Staff of Stone";
+        public static string sectionStaffEarth1 = "03. Staff of Stone";
         public static string staffEarth1RecipeName = "Recipe_StaffEarth1_DW";
         public static string staffEarth1DefaultRecipe = "RoundLog:20, Stone:20, Resin:20, CrudeEitr_DW:16";
         public static string staffEarth1DefaultUpgradeRecipe = "RoundLog:10, Stone:10, CrudeEitr_DW:8";
@@ -36,7 +53,7 @@ namespace MagicExtended.Configs
         public static ConfigEntry<int> staffEarth1UseEitr;
 
         // Earth2 staff
-        public static string sectionStaffEarth2 = "03. Staff of Boulders";
+        public static string sectionStaffEarth2 = "04. Staff of Boulders";
         public static string staffEarth2RecipeName = "Recipe_StaffEarth2_DW";
         public static string staffEarth2DefaultRecipe = "StaffEarth1_DW:1, FineWood:20, Root:10, FineEitr_DW:16";
         public static string staffEarth2DefaultUpgradeRecipe = "FineWood:10, Root:4, FineEitr_DW:8";
@@ -61,7 +78,7 @@ namespace MagicExtended.Configs
         public static ConfigEntry<float> staffEarth2SecondaryCooldown;
 
         // Earth3 Staff
-        public static string sectionStaffEarth3 = "04. Staff of Earth";
+        public static string sectionStaffEarth3 = "05. Staff of Earth";
         public static string staffEarth3RecipeName = "Recipe_StaffEarth3_DW";
         public static string staffEarth3DefaultRecipe = "StaffEarth2_DW:1, YggdrasilWood:20, Sap:10, Eitr:16";
         public static string staffEarth3DefaultUpgradeRecipe = "YggdrasilWood:10, Sap:4, Eitr:8";
@@ -87,7 +104,7 @@ namespace MagicExtended.Configs
         public static ConfigEntry<float> staffEarth3SecondaryCooldown;
 
         // Fire1 Staff
-        public static string sectionStaffFireBall = "05. Staff of Fireball";
+        public static string sectionStaffFire1 = "06. Staff of Fireball";
         public static string staffFire1RecipeName = "Recipe_StaffFire1_DW";
         public static string staffFire1DefaultRecipe = "Bronze:10, SurtlingCore:10, Coal:20, CrudeEitr_DW:16";
         public static string staffFire1DefaultUpgradeRecipe = "Bronze:5, SurtlingCore:2, Coal:5, CrudeEitr_DW:8";
@@ -110,7 +127,7 @@ namespace MagicExtended.Configs
         public static ConfigEntry<int> staffFire1UseEitr;
 
         // Fire2 Staff
-        public static string sectionStaffFire2 = "06. Staff of Fire";
+        public static string sectionStaffFire2 = "07. Staff of Fire";
         public static string staffFire2RecipeName = "Recipe_StaffFire2_DW";
         public static string staffFire2DefaultRecipe = "StaffFire1_DW:1, Iron:20, Obsidian:10, FineEitr_DW:16";
         public static string staffFire2DefaultUpgradeRecipe = "Iron:5, Obsidian:4, FineEitr_DW:8";
@@ -126,7 +143,7 @@ namespace MagicExtended.Configs
         public static ConfigEntry<int> staffFire2MaxQuality;
         public static ConfigEntry<float> staffFire2MovementSpeed;
         public static ConfigEntry<float> staffFire2DamageBlunt;
-        public static ConfigEntry<float> staffFire2DamageFire2;
+        public static ConfigEntry<float> staffFire2DamageFire;
         public static ConfigEntry<int> staffFire2BlockArmor;
         public static ConfigEntry<int> staffFire2DeflectionForce;
         public static ConfigEntry<int> staffFire2AttackForce;
@@ -135,10 +152,11 @@ namespace MagicExtended.Configs
         public static ConfigEntry<float> staffFire2SecondaryCooldown;
 
         // Fire3 Staff
-        public static string sectionStaffFire3 = "07. Staff of Engulfing Flames";
+        public static string sectionStaffFire3 = "08. Staff of Engulfing Flames";
         public static string staffFire3RecipeName = "Recipe_StaffFire3_DW";
         public static string staffFire3DefaultRecipe = "StaffFire2_DW:1, BlackMarble:20, BlackCore:10, Eitr:16";
         public static string staffFire3DefaultUpgradeRecipe = "BlackMarble:10, BlackCore:4, Eitr:8";
+        public static string staffFire3CooldownStatusEffectName = "StaffFire3Cooldown_DW";
 
         public static ConfigEntry<bool> staffFire3Enable;
         public static ConfigEntry<string> staffFire3Name;
@@ -151,7 +169,7 @@ namespace MagicExtended.Configs
         public static ConfigEntry<int> staffFire3MaxQuality;
         public static ConfigEntry<float> staffFire3MovementSpeed;
         public static ConfigEntry<float> staffFire3DamageBlunt;
-        public static ConfigEntry<float> staffFire3DamageFire3;
+        public static ConfigEntry<float> staffFire3DamageFire;
         public static ConfigEntry<int> staffFire3BlockArmor;
         public static ConfigEntry<int> staffFire3DeflectionForce;
         public static ConfigEntry<int> staffFire3AttackForce;
@@ -160,7 +178,7 @@ namespace MagicExtended.Configs
         public static ConfigEntry<float> staffFire3SecondaryCooldown;
 
         // Frost1 Staff
-        public static string sectionStaffFrost1 = "08. Staff of Ice";
+        public static string sectionStaffFrost1 = "09. Staff of Ice";
         public static string staffFrost1RecipeName = "Recipe_StaffFrost1_DW";
         public static string staffFrost1DefaultRecipe = "FineWood:20, FreezeGland:10, FineEitr_DW:16";
         public static string staffFrost1DefaultUpgradeRecipe = "FineWood:10, FreezeGland:4, FineEitr_DW:8";
@@ -183,10 +201,11 @@ namespace MagicExtended.Configs
         public static ConfigEntry<int> staffFrost1UseEitr;
 
         // Frost2 Staff
-        public static string sectionStaffFrost2 = "09. Staff of Iceshards";
+        public static string sectionStaffFrost2 = "10. Staff of Iceshards";
         public static string staffFrost2RecipeName = "Recipe_StaffFrost2_DW";
         public static string staffFrost2DefaultRecipe = "FineWood:20, FreezeGland:10, FineEitr_DW:16";
         public static string staffFrost2DefaultUpgradeRecipe = "FineWood:10, FreezeGland:4, FineEitr_DW:8";
+        public static string staffFrost2CooldownStatusEffectName = "StaffFrost2Cooldown_DW";
 
         public static ConfigEntry<bool> staffFrost2Enable;
         public static ConfigEntry<string> staffFrost2Name;
@@ -208,10 +227,11 @@ namespace MagicExtended.Configs
         public static ConfigEntry<float> staffFrost2SecondaryCooldown;
 
         // Frost3 Staff
-        public static string sectionStaffFrost3 = "10. Staff of Frost";
+        public static string sectionStaffFrost3 = "11. Staff of Frost";
         public static string staffFrost3RecipeName = "Recipe_StaffFrost3_DW";
         public static string staffFrost3DefaultRecipe = "YggdrasilWood:20, FreezeGland:10, Eitr:16";
         public static string staffFrost3DefaultUpgradeRecipe = "YggdrasilWood:10, FreezeGland:4, Eitr:8";
+        public static string staffFrost3CooldownStatusEffectName = "StaffFrost3Cooldown_DW";
 
         public static ConfigEntry<bool> staffFrost3Enable;
         public static ConfigEntry<string> staffFrost3Name;
@@ -232,11 +252,63 @@ namespace MagicExtended.Configs
         public static ConfigEntry<int> staffFrost3UseEitrSecondary;
         public static ConfigEntry<float> staffFrost3SecondaryCooldown;
 
+        // Lightning1 Staff
+        public static string sectionStaffLightning1 = "12. Staff of Eikthyr";
+        public static string staffLightning1RecipeName = "Recipe_StaffLightning1_DW";
+        public static string staffLightning1DefaultRecipe = "YggdrasilWood:20, Thunderstone:10, Eitr:16";
+        public static string staffLightning1DefaultUpgradeRecipe = "YggdrasilWood:10, Thunderstone:4, Eitr:8";
+
+        public static ConfigEntry<bool> staffLightning1Enable;
+        public static ConfigEntry<string> staffLightning1Name;
+        public static ConfigEntry<string> staffLightning1Description;
+        public static ConfigEntry<string> staffLightning1CraftingStation;
+        public static ConfigEntry<int> staffLightning1MinStationLevel;
+        public static ConfigEntry<string> staffLightning1Recipe;
+        public static ConfigEntry<string> staffLightning1RecipeUpgrade;
+        public static ConfigEntry<int> staffLightning1RecipeMultiplier;
+        public static ConfigEntry<int> staffLightning1MaxQuality;
+        public static ConfigEntry<float> staffLightning1MovementSpeed;
+        public static ConfigEntry<float> staffLightning1DamagePickaxe;
+        public static ConfigEntry<float> staffLightning1DamagePierce;
+        public static ConfigEntry<float> staffLightning1DamageLightning;
+        public static ConfigEntry<int> staffLightning1BlockArmor;
+        public static ConfigEntry<int> staffLightning1DeflectionForce;
+        public static ConfigEntry<int> staffLightning1AttackForce;
+        public static ConfigEntry<int> staffLightning1UseEitr;
+
+        // Lightning2 Staff
+        public static string sectionStaffLightning2 = "13. Staff of Sparcs";
+        public static string staffLightning2RecipeName = "Recipe_StaffLightning2_DW";
+        public static string staffLightning2DefaultRecipe = "YggdrasilWood:20, Thunderstone:10, Eitr:16";
+        public static string staffLightning2DefaultUpgradeRecipe = "YggdrasilWood:10, Thunderstone:4, Eitr:8";
+        public static string staffLightning2CooldownStatusEffectName = "StaffLightning2Cooldown_DW";
+
+        public static ConfigEntry<bool> staffLightning2Enable;
+        public static ConfigEntry<string> staffLightning2Name;
+        public static ConfigEntry<string> staffLightning2Description;
+        public static ConfigEntry<string> staffLightning2CraftingStation;
+        public static ConfigEntry<int> staffLightning2MinStationLevel;
+        public static ConfigEntry<string> staffLightning2Recipe;
+        public static ConfigEntry<string> staffLightning2RecipeUpgrade;
+        public static ConfigEntry<int> staffLightning2RecipeMultiplier;
+        public static ConfigEntry<int> staffLightning2MaxQuality;
+        public static ConfigEntry<float> staffLightning2MovementSpeed;
+        public static ConfigEntry<float> staffLightning2DamagePickaxe;
+        public static ConfigEntry<float> staffLightning2DamagePierce;
+        public static ConfigEntry<float> staffLightning2DamageLightning;
+        public static ConfigEntry<int> staffLightning2BlockArmor;
+        public static ConfigEntry<int> staffLightning2DeflectionForce;
+        public static ConfigEntry<int> staffLightning2AttackForce;
+        public static ConfigEntry<int> staffLightning2UseEitr;
+        public static ConfigEntry<int> staffLightning2UseEitrSecondary;
+        public static ConfigEntry<float> staffLightning2SecondaryCooldown;
+
         // Lightning3 Staff
-        public static string sectionStaffLightning = "13. Staff of Lightning";
+        public static string sectionStaffLightning3 = "14. Staff of Lightning";
         public static string staffLightning3RecipeName = "Recipe_StaffLightning3_DW";
         public static string staffLightning3DefaultRecipe = "YggdrasilWood:20, Thunderstone:10, Eitr:16";
         public static string staffLightning3DefaultUpgradeRecipe = "YggdrasilWood:10, Thunderstone:4, Eitr:8";
+        public static string staffLightning3CooldownStatusEffectName = "StaffLightning3Cooldown_DW";
 
         public static ConfigEntry<bool> staffLightning3Enable;
         public static ConfigEntry<string> staffLightning3Name;
@@ -260,6 +332,7 @@ namespace MagicExtended.Configs
 
         public static void Init()
         {
+            InitStaffEarth0Config();
             InitStaffEarth1Config();
             InitStaffEarth2Config();
             InitStaffEarth3Config();
@@ -269,7 +342,60 @@ namespace MagicExtended.Configs
             InitStaffFrost1Config();
             InitStaffFrost2Config();
             InitStaffFrost3Config();
+            InitStaffLightning1Config();
+            InitStaffLightning2Config();
             InitStaffLightning3Config();
+        }
+
+        private static void InitStaffEarth0Config()
+        {
+            try
+            {
+                StaffConfig staffConfig = new StaffConfig()
+                {
+                    sectionName = sectionStaffEarth0,
+                    recipeName = staffEarth0RecipeName,
+                    prefab = MagicExtended.Instance.staffEarth0Prefab,
+                    enable = true,
+                    name = "Staff of Mushrooms",
+                    description = "You feel weird holding this staff... its as if everything seems different but you can put your finger on it. Finger! Haha!",
+                    craftingStation = "Workbench",
+                    minStationLevel = 1,
+                    recipe = staffEarth0DefaultRecipe,
+                    recipeUpgrade = staffEarth0DefaultUpgradeRecipe,
+                    recipeMultiplier = 1,
+                    maxQuality = 4,
+                    movementSpeed = -0.05f,
+                    damageBlunt = 20f,
+                    damageSpirit = 6f,
+                    blockArmor = 48,
+                    deflectionForce = 20,
+                    attackForce = 35,
+                    useEitr = 10,
+                };
+                staffConfig.GenerateConfig();
+
+                staffEarth0Enable = staffConfig.configEnable;
+                staffEarth0Name = staffConfig.configName;
+                staffEarth0Description = staffConfig.configDescription;
+                staffEarth0CraftingStation = staffConfig.configCraftingStation;
+                staffEarth0MinStationLevel = staffConfig.configMinStationLevel;
+                staffEarth0Recipe = staffConfig.configRecipe;
+                staffEarth0RecipeUpgrade = staffConfig.configRecipeUpgrade;
+                staffEarth0RecipeMultiplier = staffConfig.configRecipeMultiplier;
+                staffEarth0MaxQuality = staffConfig.configMaxQuality;
+                staffEarth0MovementSpeed = staffConfig.configMovementSpeed;
+                staffEarth0DamageBlunt = staffConfig.configDamageBlunt;
+                staffEarth0DamageSpirit = staffConfig.configDamageSpirit;
+                staffEarth0BlockArmor = staffConfig.configBlockArmor;
+                staffEarth0DeflectionForce = staffConfig.configDeflectionForce;
+                staffEarth0AttackForce = staffConfig.configAttackForce;
+                staffEarth0UseEitr = staffConfig.configUseEitr;
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise Staff of Stone config: " + error);
+            }
         }
 
         private static void InitStaffEarth1Config()
@@ -316,189 +442,6 @@ namespace MagicExtended.Configs
                 staffEarth1DeflectionForce = staffConfig.configDeflectionForce;
                 staffEarth1AttackForce = staffConfig.configAttackForce;
                 staffEarth1UseEitr = staffConfig.configUseEitr;
-
-                //ConfigFile Config = MagicExtended.Instance.Config;
-                //GameObject prefab = MagicExtended.Instance.staffEarth1Prefab;
-
-                //staffEarth1Enable = Config.Bind(new ConfigDefinition(sectionStaffEarth1, "Enable"), true,
-                //   new ConfigDescription("Enable Staff of Stone", null,
-                //   new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth1Enable.SettingChanged += (obj, attr) => {
-                //    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                //    {
-                //        name = staffEarth1RecipeName,
-                //        updateType = RecipeUpdateType.Enable,
-                //        enable = staffEarth1Enable.Value,
-                //    });
-                //};
-
-                //staffEarth1Name = Config.Bind(new ConfigDefinition(sectionStaffEarth1, "Name"), "Staff of Stone",
-                //   new ConfigDescription("The name given to the item", null,
-                //   new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth1Name.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        name = staffEarth1Name.Value,
-                //    });
-                //};
-
-                //staffEarth1Description = Config.Bind(new ConfigDefinition(sectionStaffEarth1, "Description"), "The power of nature at your disposal!",
-                //    new ConfigDescription("The description given to the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth1Description.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        description = staffEarth1Description.Value,
-                //    });
-                //};
-
-                //staffEarth1CraftingStation = Config.Bind(new ConfigDefinition(sectionStaffEarth1, "Crafting station"), "Workbench",
-                //    new ConfigDescription("The crafting station the item can be created in",
-                //    new AcceptableValueList<string>(ConfigPlugin.craftingStationOptions),
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth1CraftingStation.SettingChanged += (obj, attr) => {
-                //    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                //    {
-                //        name = staffEarth1RecipeName,
-                //        updateType = RecipeUpdateType.CraftingStation,
-                //        craftingStation = staffEarth1CraftingStation.Value,
-                //    });
-                //};
-
-                //staffEarth1MinStationLevel = Config.Bind(new ConfigDefinition(sectionStaffEarth1, "Required station level"), 3,
-                //    new ConfigDescription("The required station level to craft", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth1MinStationLevel.SettingChanged += (obj, attr) => {
-                //    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                //    {
-                //        name = staffEarth1RecipeName,
-                //        updateType = RecipeUpdateType.MinRequiredStationLevel,
-                //        requiredStationLevel = staffEarth1MinStationLevel.Value,
-                //    });
-                //};
-
-                //staffEarth1Recipe = Config.Bind(new ConfigDefinition(sectionStaffEarth1, "Crafting costs"), staffEarth1DefaultRecipe,
-                //    new ConfigDescription("The items required to craft", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth1Recipe.SettingChanged += (obj, attr) => {
-                //    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                //    {
-                //        name = staffEarth1RecipeName,
-                //        updateType = RecipeUpdateType.Recipe,
-                //        requirements = staffEarth1Recipe.Value,
-                //        upgradeRequirements = staffEarth1RecipeUpgrade.Value,
-                //        upgradeMultiplier = staffEarth1RecipeMultiplier.Value,
-                //    });
-                //};
-
-                //staffEarth1RecipeUpgrade = Config.Bind(new ConfigDefinition(sectionStaffEarth1, "Upgrade costs"), staffEarth1DefaultUpgradeRecipe,
-                //    new ConfigDescription("The costs to upgrade the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth1RecipeUpgrade.SettingChanged += (obj, attr) =>
-                //{
-                //    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                //    {
-                //        name = staffEarth1RecipeName,
-                //        updateType = RecipeUpdateType.Recipe,
-                //        requirements = staffEarth1Recipe.Value,
-                //        upgradeRequirements = staffEarth1RecipeUpgrade.Value,
-                //        upgradeMultiplier = staffEarth1RecipeMultiplier.Value,
-                //    });
-                //};
-
-                //staffEarth1RecipeMultiplier = Config.Bind(new ConfigDefinition(sectionStaffEarth1, "Upgrade multiplier"), 1,
-                //    new ConfigDescription("The multiplier applied to the upgrade costs", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth1RecipeMultiplier.SettingChanged += (obj, attr) => {
-                //    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                //    {
-                //        name = staffEarth1RecipeName,
-                //        updateType = RecipeUpdateType.Recipe,
-                //        requirements = staffEarth1Recipe.Value,
-                //        upgradeRequirements = staffEarth1RecipeUpgrade.Value,
-                //        upgradeMultiplier = staffEarth1RecipeMultiplier.Value,
-                //    });
-                //};
-
-                //staffEarth1MaxQuality = Config.Bind(new ConfigDefinition(sectionStaffEarth1, "Max quality"), 4,
-                //    new ConfigDescription("The maximum quality the item can become", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth1MaxQuality.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        maxQuality = staffEarth1MaxQuality.Value,
-                //    });
-                //};
-
-                //staffEarth1MovementSpeed = Config.Bind(new ConfigDefinition(sectionStaffEarth1, "Movement speed"), -0.05f,
-                //    new ConfigDescription("The movement speed stat on the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth1MovementSpeed.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        movementModifier = staffEarth1MovementSpeed.Value,
-                //    });
-                //};
-
-                //staffEarth1DamageBlunt = Config.Bind(new ConfigDefinition(sectionStaffEarth1, "Attack damage blunt"), 15f,
-                //    new ConfigDescription("Blunt damage on the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth1DamageBlunt.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        damageBlunt = staffEarth1DamageBlunt.Value,
-                //    });
-                //};
-
-                //staffEarth1DamageSpirit = Config.Bind(new ConfigDefinition(sectionStaffEarth1, "Attack damage spirit"), 1f,
-                //    new ConfigDescription("Spirit damage on the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth1DamageSpirit.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        damageSpirit = staffEarth1DamageSpirit.Value,
-                //    });
-                //};
-
-                //staffEarth1BlockArmor = Config.Bind(new ConfigDefinition(sectionStaffEarth1, "Block armor"), 48,
-                //    new ConfigDescription("The block armor on the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth1BlockArmor.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        blockPower = staffEarth1BlockArmor.Value,
-                //    });
-                //};
-
-                //staffEarth1DeflectionForce = Config.Bind(new ConfigDefinition(sectionStaffEarth1, "Block force"), 20,
-                //    new ConfigDescription("The block force on the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth1DeflectionForce.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        deflectionForce = staffEarth1DeflectionForce.Value,
-                //    });
-                //};
-
-                //staffEarth1AttackForce = Config.Bind(new ConfigDefinition(sectionStaffEarth1, "Knockback"), 35,
-                //    new ConfigDescription("The knockback on the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth1AttackForce.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        attackForce = staffEarth1AttackForce.Value,
-                //    });
-                //};
-
-                //staffEarth1UseEitr = Config.Bind(new ConfigDefinition(sectionStaffEarth1, "Attack eitr cost"), 5,
-                //    new ConfigDescription("Normal attack eitr cost", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth1UseEitr.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        attackEitr = staffEarth1UseEitr.Value,
-                //    });
-                //};
             }
             catch (Exception error)
             {
@@ -552,211 +495,6 @@ namespace MagicExtended.Configs
                 staffEarth2AttackForce = staffConfig.configAttackForce;
                 staffEarth2UseEitr = staffConfig.configUseEitr;
                 staffEarth2UseEitrSecondary = staffConfig.configUseEitrSecondary;
-
-                //ConfigFile Config = MagicExtended.Instance.Config;
-                //GameObject prefab = MagicExtended.Instance.staffEarth2Prefab;
-
-                //staffEarth2Enable = Config.Bind(new ConfigDefinition(sectionStaffBoulder, "Enable"), true,
-                //   new ConfigDescription("Enable Staff of Boulder", null,
-                //   new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth2Enable.SettingChanged += (obj, attr) => {
-                //    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                //    {
-                //        name = staffEarth2RecipeName,
-                //        updateType = RecipeUpdateType.Enable,
-                //        enable = staffEarth2Enable.Value,
-                //    });
-                //};
-
-                //staffEarth2Name = Config.Bind(new ConfigDefinition(sectionStaffBoulder, "Name"), "Staff of Boulders",
-                //   new ConfigDescription("The name given to the item", null,
-                //   new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth2Name.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        name = staffEarth2Name.Value,
-                //    });
-                //};
-
-                //staffEarth2Description = Config.Bind(new ConfigDefinition(sectionStaffBoulder, "Description"), "The power of nature at your disposal!",
-                //    new ConfigDescription("The description given to the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth2Description.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        description = staffEarth2Description.Value,
-                //    });
-                //};
-
-                //staffEarth2CraftingStation = Config.Bind(new ConfigDefinition(sectionStaffBoulder, "Crafting station"), "Workbench",
-                //    new ConfigDescription("The crafting station the item can be created in",
-                //    new AcceptableValueList<string>(ConfigPlugin.craftingStationOptions),
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth2CraftingStation.SettingChanged += (obj, attr) => {
-                //    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                //    {
-                //        name = staffEarth2RecipeName,
-                //        updateType = RecipeUpdateType.CraftingStation,
-                //        craftingStation = staffEarth2CraftingStation.Value,
-                //    });
-                //};
-
-                //staffEarth2MinStationLevel = Config.Bind(new ConfigDefinition(sectionStaffBoulder, "Required station level"), 5,
-                //    new ConfigDescription("The required station level to craft", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth2MinStationLevel.SettingChanged += (obj, attr) => {
-                //    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                //    {
-                //        name = staffEarth2RecipeName,
-                //        updateType = RecipeUpdateType.MinRequiredStationLevel,
-                //        requiredStationLevel = staffEarth2MinStationLevel.Value,
-                //    });
-                //};
-
-                //staffEarth2Recipe = Config.Bind(new ConfigDefinition(sectionStaffBoulder, "Crafting costs"), staffEarth2DefaultRecipe,
-                //    new ConfigDescription("The items required to craft", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth2Recipe.SettingChanged += (obj, attr) => {
-                //    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                //    {
-                //        name = staffEarth2RecipeName,
-                //        updateType = RecipeUpdateType.Recipe,
-                //        requirements = staffEarth2Recipe.Value,
-                //        upgradeRequirements = staffEarth2RecipeUpgrade.Value,
-                //        upgradeMultiplier = staffEarth2RecipeMultiplier.Value,
-                //    });
-                //};
-
-                //staffEarth2RecipeUpgrade = Config.Bind(new ConfigDefinition(sectionStaffBoulder, "Upgrade costs"), staffEarth2DefaultUpgradeRecipe,
-                //    new ConfigDescription("The costs to upgrade the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth2RecipeUpgrade.SettingChanged += (obj, attr) =>
-                //{
-                //    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                //    {
-                //        name = staffEarth2RecipeName,
-                //        updateType = RecipeUpdateType.Recipe,
-                //        requirements = staffEarth2Recipe.Value,
-                //        upgradeRequirements = staffEarth2RecipeUpgrade.Value,
-                //        upgradeMultiplier = staffEarth2RecipeMultiplier.Value,
-                //    });
-                //};
-
-                //staffEarth2RecipeMultiplier = Config.Bind(new ConfigDefinition(sectionStaffBoulder, "Upgrade multiplier"), 1,
-                //    new ConfigDescription("The multiplier applied to the upgrade costs", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth2RecipeMultiplier.SettingChanged += (obj, attr) => {
-                //    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                //    {
-                //        name = staffEarth2RecipeName,
-                //        updateType = RecipeUpdateType.Recipe,
-                //        requirements = staffEarth2Recipe.Value,
-                //        upgradeRequirements = staffEarth2RecipeUpgrade.Value,
-                //        upgradeMultiplier = staffEarth2RecipeMultiplier.Value,
-                //    });
-                //};
-
-                //staffEarth2MaxQuality = Config.Bind(new ConfigDefinition(sectionStaffBoulder, "Max quality"), 4,
-                //    new ConfigDescription("The maximum quality the item can become", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth2MaxQuality.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        maxQuality = staffEarth2MaxQuality.Value,
-                //    });
-                //};
-
-                //staffEarth2MovementSpeed = Config.Bind(new ConfigDefinition(sectionStaffBoulder, "Movement speed"), -0.05f,
-                //    new ConfigDescription("The movement speed stat on the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth2MovementSpeed.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        movementModifier = staffEarth2MovementSpeed.Value,
-                //    });
-                //};
-
-                //staffEarth2DamageBlunt = Config.Bind(new ConfigDefinition(sectionStaffBoulder, "Attack damage blunt"), 21f,
-                //    new ConfigDescription("Blunt damage on the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth2DamageBlunt.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        damageBlunt = staffEarth2DamageBlunt.Value,
-                //    });
-                //};
-
-                //staffEarth2DamageSpirit = Config.Bind(new ConfigDefinition(sectionStaffBoulder, "Attack damage spirit"), 2f,
-                //    new ConfigDescription("Spirit damage on the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth2DamageSpirit.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        damageSpirit = staffEarth2DamageSpirit.Value,
-                //    });
-                //};
-
-                //staffEarth2BlockArmor = Config.Bind(new ConfigDefinition(sectionStaffBoulder, "Block armor"), 48,
-                //    new ConfigDescription("The block armor on the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth2BlockArmor.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        blockPower = staffEarth2BlockArmor.Value,
-                //    });
-                //};
-
-                //staffEarth2DeflectionForce = Config.Bind(new ConfigDefinition(sectionStaffBoulder, "Block force"), 20,
-                //    new ConfigDescription("The block force on the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth2DeflectionForce.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        deflectionForce = staffEarth2DeflectionForce.Value,
-                //    });
-                //};
-
-                //staffEarth2AttackForce = Config.Bind(new ConfigDefinition(sectionStaffBoulder, "Knockback"), 35,
-                //    new ConfigDescription("The knockback on the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth2AttackForce.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        attackForce = staffEarth2AttackForce.Value,
-                //    });
-                //};
-
-                //staffEarth2UseEitr = Config.Bind(new ConfigDefinition(sectionStaffBoulder, "Attack eitr cost"), 5,
-                //    new ConfigDescription("Normal attack eitr cost", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth2UseEitr.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        attackEitr = staffEarth2UseEitr.Value,
-                //    });
-                //};
-
-                //staffEarth2UseEitrSecondary = Config.Bind(new ConfigDefinition(sectionStaffBoulder, "Secondary ability eitr cost"), 100,
-                //    new ConfigDescription("The secondary attack eitr cost", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth2UseEitrSecondary.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        secondaryAttackEitr = staffEarth2UseEitrSecondary.Value,
-                //    });
-                //};
-
-                //staffEarth2SecondaryCooldown = Config.Bind(new ConfigDefinition(sectionStaffBoulder, "Secondary cooldown"), 20f,
-                //    new ConfigDescription("Cooldown duration of the secondary ability", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth2SecondaryCooldown.SettingChanged += (obj, attr) => {
-                //    StatusEffect statusEffect = ObjectDB.instance.GetStatusEffect(StringExtensionMethods.GetStableHashCode("StaffEarth2Cooldown_DW"));
-
-                //    if (statusEffect != null)
-                //    {
-                //        statusEffect.m_ttl = staffEarth2SecondaryCooldown.Value;
-                //    }
-                //};
             }
             catch (Exception error)
             {
@@ -813,211 +551,6 @@ namespace MagicExtended.Configs
                 staffEarth3UseEitr = staffConfig.configUseEitr;
                 staffEarth3UseEitrSecondary = staffConfig.configUseEitrSecondary;
                 staffEarth3SecondaryCooldown = staffConfig.configSecondaryCooldown;
-
-                //ConfigFile Config = MagicExtended.Instance.Config;
-                //GameObject prefab = MagicExtended.Instance.staffEarth3Prefab;
-
-                //staffEarth3Enable = Config.Bind(new ConfigDefinition(sectionStaffEarth3, "Enable"), true,
-                //   new ConfigDescription("Enable Staff of Earth", null,
-                //   new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth3Enable.SettingChanged += (obj, attr) => {
-                //    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                //    {
-                //        name = staffEarth3RecipeName,
-                //        updateType = RecipeUpdateType.Enable,
-                //        enable = staffEarth3Enable.Value,
-                //    });
-                //};
-
-                //staffEarth3Name = Config.Bind(new ConfigDefinition(sectionStaffEarth3, "Name"), "Staff of Earth",
-                //   new ConfigDescription("The name given to the item", null,
-                //   new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth3Name.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        name = staffEarth3Name.Value,
-                //    });
-                //};
-
-                //staffEarth3Description = Config.Bind(new ConfigDefinition(sectionStaffEarth3, "Description"), "The power of nature at your disposal!",
-                //    new ConfigDescription("The description given to the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth3Description.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        description = staffEarth3Description.Value,
-                //    });
-                //};
-
-                //staffEarth3CraftingStation = Config.Bind(new ConfigDefinition(sectionStaffEarth3, "Crafting station"), "GaldrTable",
-                //    new ConfigDescription("The crafting station the item can be created in",
-                //    new AcceptableValueList<string>(ConfigPlugin.craftingStationOptions),
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth3CraftingStation.SettingChanged += (obj, attr) => {
-                //    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                //    {
-                //        name = staffEarth3RecipeName,
-                //        updateType = RecipeUpdateType.CraftingStation,
-                //        craftingStation = staffEarth3CraftingStation.Value,
-                //    });
-                //};
-
-                //staffEarth3MinStationLevel = Config.Bind(new ConfigDefinition(sectionStaffEarth3, "Required station level"), 1,
-                //    new ConfigDescription("The required station level to craft", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth3MinStationLevel.SettingChanged += (obj, attr) => {
-                //    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                //    {
-                //        name = staffEarth3RecipeName,
-                //        updateType = RecipeUpdateType.MinRequiredStationLevel,
-                //        requiredStationLevel = staffEarth3MinStationLevel.Value,
-                //    });
-                //};
-
-                //staffEarth3Recipe = Config.Bind(new ConfigDefinition(sectionStaffEarth3, "Crafting costs"), staffEarth3DefaultRecipe,
-                //    new ConfigDescription("The items required to craft", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth3Recipe.SettingChanged += (obj, attr) => {
-                //    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                //    {
-                //        name = staffEarth3RecipeName,
-                //        updateType = RecipeUpdateType.Recipe,
-                //        requirements = staffEarth3Recipe.Value,
-                //        upgradeRequirements = staffEarth3RecipeUpgrade.Value,
-                //        upgradeMultiplier = staffEarth3RecipeMultiplier.Value,
-                //    });
-                //};
-
-                //staffEarth3RecipeUpgrade = Config.Bind(new ConfigDefinition(sectionStaffEarth3, "Upgrade costs"), staffEarth3DefaultUpgradeRecipe,
-                //    new ConfigDescription("The costs to upgrade the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth3RecipeUpgrade.SettingChanged += (obj, attr) =>
-                //{
-                //    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                //    {
-                //        name = staffEarth3RecipeName,
-                //        updateType = RecipeUpdateType.Recipe,
-                //        requirements = staffEarth3Recipe.Value,
-                //        upgradeRequirements = staffEarth3RecipeUpgrade.Value,
-                //        upgradeMultiplier = staffEarth3RecipeMultiplier.Value,
-                //    });
-                //};
-
-                //staffEarth3RecipeMultiplier = Config.Bind(new ConfigDefinition(sectionStaffEarth3, "Upgrade multiplier"), 1,
-                //    new ConfigDescription("The multiplier applied to the upgrade costs", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth3RecipeMultiplier.SettingChanged += (obj, attr) => {
-                //    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                //    {
-                //        name = staffEarth3RecipeName,
-                //        updateType = RecipeUpdateType.Recipe,
-                //        requirements = staffEarth3Recipe.Value,
-                //        upgradeRequirements = staffEarth3RecipeUpgrade.Value,
-                //        upgradeMultiplier = staffEarth3RecipeMultiplier.Value,
-                //    });
-                //};
-
-                //staffEarth3MaxQuality = Config.Bind(new ConfigDefinition(sectionStaffEarth3, "Max quality"), 4,
-                //    new ConfigDescription("The maximum quality the item can become", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth3MaxQuality.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        maxQuality = staffEarth3MaxQuality.Value,
-                //    });
-                //};
-
-                //staffEarth3MovementSpeed = Config.Bind(new ConfigDefinition(sectionStaffEarth3, "Movement speed"), -0.05f,
-                //    new ConfigDescription("The movement speed stat on the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth3MovementSpeed.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        movementModifier = staffEarth3MovementSpeed.Value,
-                //    });
-                //};
-
-                //staffEarth3DamageBlunt = Config.Bind(new ConfigDefinition(sectionStaffEarth3, "Attack damage blunt"), 27f,
-                //    new ConfigDescription("Blunt damage on the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth3DamageBlunt.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        damageBlunt = staffEarth3DamageBlunt.Value,
-                //    });
-                //};
-
-                //staffEarth3DamageSpirit = Config.Bind(new ConfigDefinition(sectionStaffEarth3, "Attack damage spirit"), 3f,
-                //    new ConfigDescription("Spirit damage on the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth3DamageSpirit.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        damageSpirit = staffEarth3DamageSpirit.Value,
-                //    });
-                //};
-
-                //staffEarth3BlockArmor = Config.Bind(new ConfigDefinition(sectionStaffEarth3, "Block armor"), 48,
-                //    new ConfigDescription("The block armor on the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth3BlockArmor.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        blockPower = staffEarth3BlockArmor.Value,
-                //    });
-                //};
-
-                //staffEarth3DeflectionForce = Config.Bind(new ConfigDefinition(sectionStaffEarth3, "Block force"), 20,
-                //    new ConfigDescription("The block force on the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth3DeflectionForce.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        deflectionForce = staffEarth3DeflectionForce.Value,
-                //    });
-                //};
-
-                //staffEarth3AttackForce = Config.Bind(new ConfigDefinition(sectionStaffEarth3, "Knockback"), 35,
-                //    new ConfigDescription("The knockback on the item", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth3AttackForce.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        attackForce = staffEarth3AttackForce.Value,
-                //    });
-                //};
-
-                //staffEarth3UseEitr = Config.Bind(new ConfigDefinition(sectionStaffEarth3, "Attack eitr cost"), 5,
-                //    new ConfigDescription("Normal attack eitr cost", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth3UseEitr.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        attackEitr = staffEarth3UseEitr.Value,
-                //    });
-                //};
-
-                //staffEarth3UseEitrSecondary = Config.Bind(new ConfigDefinition(sectionStaffEarth3, "Secondary ability eitr cost"), 100,
-                //    new ConfigDescription("The secondary attack eitr cost", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth3UseEitrSecondary.SettingChanged += (obj, attr) => {
-                //    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                //    {
-                //        secondaryAttackEitr = staffEarth3UseEitrSecondary.Value,
-                //    });
-                //};
-
-                //staffEarth3SecondaryCooldown = Config.Bind(new ConfigDefinition(sectionStaffEarth3, "Secondary cooldown"), 20f,
-                //    new ConfigDescription("Cooldown duration of the secondary ability", null,
-                //    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //staffEarth3SecondaryCooldown.SettingChanged += (obj, attr) => {
-                //    StatusEffect statusEffect = ObjectDB.instance.GetStatusEffect(StringExtensionMethods.GetStableHashCode("StaffEarth3Cooldown_DW"));
-
-                //    if (statusEffect != null)
-                //    {
-                //        statusEffect.m_ttl = staffEarth3SecondaryCooldown.Value;
-                //    }
-                //};
             }
             catch (Exception error)
             {
@@ -1029,188 +562,46 @@ namespace MagicExtended.Configs
         {
             try
             {
-                ConfigFile Config = MagicExtended.Instance.Config;
-                GameObject prefab = MagicExtended.Instance.staffFire1Prefab;
-
-                staffFire1Enable = Config.Bind(new ConfigDefinition(sectionStaffFireBall, "Enable"), true,
-                   new ConfigDescription("Enable Staff of FireBall", null,
-                   new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire1Enable.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFire1RecipeName,
-                        updateType = RecipeUpdateType.Enable,
-                        enable = staffFire1Enable.Value,
-                    });
-                };
-
-                staffFire1Name = Config.Bind(new ConfigDefinition(sectionStaffFireBall, "Name"), "Staff of Fireball",
-                   new ConfigDescription("The name given to the item", null,
-                   new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire1Name.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        name = staffFire1Name.Value,
-                    });
-                };
-
-                staffFire1Description = Config.Bind(new ConfigDefinition(sectionStaffFireBall, "Description"), "It is time for this world to BURN!",
-                    new ConfigDescription("The description given to the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire1Description.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        description = staffFire1Description.Value,
-                    });
-                };
-
-                staffFire1CraftingStation = Config.Bind(new ConfigDefinition(sectionStaffFireBall, "Crafting station"), "Forge",
-                    new ConfigDescription("The crafting station the item can be created in",
-                    new AcceptableValueList<string>(ConfigPlugin.craftingStationOptions),
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire1CraftingStation.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFire1RecipeName,
-                        updateType = RecipeUpdateType.CraftingStation,
-                        craftingStation = staffFire1CraftingStation.Value,
-                    });
-                };
-
-                staffFire1MinStationLevel = Config.Bind(new ConfigDefinition(sectionStaffFireBall, "Required station level"), 1,
-                    new ConfigDescription("The required station level to craft", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire1MinStationLevel.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFire1RecipeName,
-                        updateType = RecipeUpdateType.MinRequiredStationLevel,
-                        requiredStationLevel = staffFire1MinStationLevel.Value,
-                    });
-                };
-
-                staffFire1Recipe = Config.Bind(new ConfigDefinition(sectionStaffFireBall, "Crafting costs"), staffFire1DefaultRecipe,
-                    new ConfigDescription("The items required to craft", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire1Recipe.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFire1RecipeName,
-                        updateType = RecipeUpdateType.Recipe,
-                        requirements = staffFire1Recipe.Value,
-                        upgradeRequirements = staffFire1RecipeUpgrade.Value,
-                        upgradeMultiplier = staffFire1RecipeMultiplier.Value,
-                    });
-                };
-
-                staffFire1RecipeUpgrade = Config.Bind(new ConfigDefinition(sectionStaffFireBall, "Upgrade costs"), staffFire1DefaultUpgradeRecipe,
-                    new ConfigDescription("The costs to upgrade the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire1RecipeUpgrade.SettingChanged += (obj, attr) =>
+                StaffConfig staffConfig = new StaffConfig()
                 {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFire1RecipeName,
-                        updateType = RecipeUpdateType.Recipe,
-                        requirements = staffFire1Recipe.Value,
-                        upgradeRequirements = staffFire1RecipeUpgrade.Value,
-                        upgradeMultiplier = staffFire1RecipeMultiplier.Value,
-                    });
+                    sectionName = sectionStaffFire1,
+                    recipeName = staffFire1RecipeName,
+                    prefab = MagicExtended.Instance.staffFire1Prefab,
+                    enable = true,
+                    name = "Staff of Fireball",
+                    description = "It is time for this world to BURN!",
+                    craftingStation = "Forge",
+                    minStationLevel = 1,
+                    recipe = staffFire1DefaultRecipe,
+                    recipeUpgrade = staffFire1DefaultUpgradeRecipe,
+                    recipeMultiplier = 1,
+                    maxQuality = 4,
+                    movementSpeed = -0.05f,
+                    damageBlunt = 40f,
+                    damageFire = 40f,
+                    blockArmor = 48,
+                    deflectionForce = 20,
+                    attackForce = 35,
+                    useEitr = 5,
                 };
+                staffConfig.GenerateConfig();
 
-                staffFire1RecipeMultiplier = Config.Bind(new ConfigDefinition(sectionStaffFireBall, "Upgrade multiplier"), 1,
-                    new ConfigDescription("The multiplier applied to the upgrade costs", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire1RecipeMultiplier.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFire1RecipeName,
-                        updateType = RecipeUpdateType.Recipe,
-                        requirements = staffFire1Recipe.Value,
-                        upgradeRequirements = staffFire1RecipeUpgrade.Value,
-                        upgradeMultiplier = staffFire1RecipeMultiplier.Value,
-                    });
-                };
-
-                staffFire1MaxQuality = Config.Bind(new ConfigDefinition(sectionStaffFireBall, "Max quality"), 4,
-                    new ConfigDescription("The maximum quality the item can become", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire1MaxQuality.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        maxQuality = staffFire1MaxQuality.Value,
-                    });
-                };
-
-                staffFire1MovementSpeed = Config.Bind(new ConfigDefinition(sectionStaffFireBall, "Movement speed"), -0.05f,
-                    new ConfigDescription("The movement speed stat on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire1MovementSpeed.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        movementModifier = staffFire1MovementSpeed.Value,
-                    });
-                };
-
-                staffFire1DamageBlunt = Config.Bind(new ConfigDefinition(sectionStaffFireBall, "Attack damage blunt"), 40f,
-                    new ConfigDescription("Blunt damage on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire1DamageBlunt.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        damageBlunt = staffFire1DamageBlunt.Value,
-                    });
-                };
-
-                staffFire1DamageFire = Config.Bind(new ConfigDefinition(sectionStaffFireBall, "Attack damage fire"), 40f,
-                    new ConfigDescription("FireBall damage on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire1DamageFire.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        damageFire = staffFire1DamageFire.Value,
-                    });
-                };
-
-                staffFire1BlockArmor = Config.Bind(new ConfigDefinition(sectionStaffFireBall, "Block armor"), 48,
-                    new ConfigDescription("The block armor on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire1BlockArmor.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        blockPower = staffFire1BlockArmor.Value,
-                    });
-                };
-
-                staffFire1DeflectionForce = Config.Bind(new ConfigDefinition(sectionStaffFireBall, "Block force"), 20,
-                    new ConfigDescription("The block force on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire1DeflectionForce.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        deflectionForce = staffFire1DeflectionForce.Value,
-                    });
-                };
-
-                staffFire1AttackForce = Config.Bind(new ConfigDefinition(sectionStaffFireBall, "Knockback"), 35,
-                    new ConfigDescription("The knockback on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire1AttackForce.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        attackForce = staffFire1AttackForce.Value,
-                    });
-                };
-
-                staffFire1UseEitr = Config.Bind(new ConfigDefinition(sectionStaffFireBall, "Attack eitr cost"), 5,
-                    new ConfigDescription("Normal attack eitr cost", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire1UseEitr.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        attackEitr = staffFire1UseEitr.Value,
-                    });
-                };
+                staffFire1Enable = staffConfig.configEnable;
+                staffFire1Name = staffConfig.configName;
+                staffFire1Description = staffConfig.configDescription;
+                staffFire1CraftingStation = staffConfig.configCraftingStation;
+                staffFire1MinStationLevel = staffConfig.configMinStationLevel;
+                staffFire1Recipe = staffConfig.configRecipe;
+                staffFire1RecipeUpgrade = staffConfig.configRecipeUpgrade;
+                staffFire1RecipeMultiplier = staffConfig.configRecipeMultiplier;
+                staffFire1MaxQuality = staffConfig.configMaxQuality;
+                staffFire1MovementSpeed = staffConfig.configMovementSpeed;
+                staffFire1DamageBlunt = staffConfig.configDamageBlunt;
+                staffFire1DamageFire = staffConfig.configDamageFire;
+                staffFire1BlockArmor = staffConfig.configBlockArmor;
+                staffFire1DeflectionForce = staffConfig.configDeflectionForce;
+                staffFire1AttackForce = staffConfig.configAttackForce;
+                staffFire1UseEitr = staffConfig.configUseEitr;
             }
             catch (Exception error)
             {
@@ -1222,210 +613,48 @@ namespace MagicExtended.Configs
         {
             try
             {
-                ConfigFile Config = MagicExtended.Instance.Config;
-                GameObject prefab = MagicExtended.Instance.staffFire2Prefab;
-
-                staffFire2Enable = Config.Bind(new ConfigDefinition(sectionStaffFire2, "Enable"), true,
-                   new ConfigDescription("Enable Staff of Fire2", null,
-                   new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire2Enable.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFire2RecipeName,
-                        updateType = RecipeUpdateType.Enable,
-                        enable = staffFire2Enable.Value,
-                    });
-                };
-
-                staffFire2Name = Config.Bind(new ConfigDefinition(sectionStaffFire2, "Name"), "Staff of Fire",
-                   new ConfigDescription("The name given to the item", null,
-                   new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire2Name.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        name = staffFire2Name.Value,
-                    });
-                };
-
-                staffFire2Description = Config.Bind(new ConfigDefinition(sectionStaffFire2, "Description"), "It is time for this world to BURN!",
-                    new ConfigDescription("The description given to the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire2Description.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        description = staffFire2Description.Value,
-                    });
-                };
-
-                staffFire2CraftingStation = Config.Bind(new ConfigDefinition(sectionStaffFire2, "Crafting station"), "Forge",
-                    new ConfigDescription("The crafting station the item can be created in",
-                    new AcceptableValueList<string>(ConfigPlugin.craftingStationOptions),
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire2CraftingStation.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFire2RecipeName,
-                        updateType = RecipeUpdateType.CraftingStation,
-                        craftingStation = staffFire2CraftingStation.Value,
-                    });
-                };
-
-                staffFire2MinStationLevel = Config.Bind(new ConfigDefinition(sectionStaffFire2, "Required station level"), 4,
-                    new ConfigDescription("The required station level to craft", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire2MinStationLevel.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFire2RecipeName,
-                        updateType = RecipeUpdateType.MinRequiredStationLevel,
-                        requiredStationLevel = staffFire2MinStationLevel.Value,
-                    });
-                };
-
-                staffFire2Recipe = Config.Bind(new ConfigDefinition(sectionStaffFire2, "Crafting costs"), staffFire2DefaultRecipe,
-                    new ConfigDescription("The items required to craft", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire2Recipe.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFire2RecipeName,
-                        updateType = RecipeUpdateType.Recipe,
-                        requirements = staffFire2Recipe.Value,
-                        upgradeRequirements = staffFire2RecipeUpgrade.Value,
-                        upgradeMultiplier = staffFire2RecipeMultiplier.Value,
-                    });
-                };
-
-                staffFire2RecipeUpgrade = Config.Bind(new ConfigDefinition(sectionStaffFire2, "Upgrade costs"), staffFire2DefaultUpgradeRecipe,
-                    new ConfigDescription("The costs to upgrade the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire2RecipeUpgrade.SettingChanged += (obj, attr) =>
+                StaffConfig staffConfig = new StaffConfig()
                 {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFire2RecipeName,
-                        updateType = RecipeUpdateType.Recipe,
-                        requirements = staffFire2Recipe.Value,
-                        upgradeRequirements = staffFire2RecipeUpgrade.Value,
-                        upgradeMultiplier = staffFire2RecipeMultiplier.Value,
-                    });
+                    sectionName = sectionStaffFire2,
+                    recipeName = staffFire2RecipeName,
+                    prefab = MagicExtended.Instance.staffFire2Prefab,
+                    enable = true,
+                    name = "Staff of Fire",
+                    description = "Some other description",
+                    craftingStation = "Forge",
+                    minStationLevel = 4,
+                    recipe = staffFire2DefaultRecipe,
+                    recipeUpgrade = staffFire2DefaultUpgradeRecipe,
+                    recipeMultiplier = 1,
+                    maxQuality = 4,
+                    movementSpeed = -0.05f,
+                    damageBlunt = 80f,
+                    damageFire = 80f,
+                    blockArmor = 48,
+                    deflectionForce = 20,
+                    attackForce = 35,
+                    useEitr = 5,
+                    useEitrSecondary = 100,
                 };
+                staffConfig.GenerateConfig();
 
-                staffFire2RecipeMultiplier = Config.Bind(new ConfigDefinition(sectionStaffFire2, "Upgrade multiplier"), 1,
-                    new ConfigDescription("The multiplier applied to the upgrade costs", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire2RecipeMultiplier.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFire2RecipeName,
-                        updateType = RecipeUpdateType.Recipe,
-                        requirements = staffFire2Recipe.Value,
-                        upgradeRequirements = staffFire2RecipeUpgrade.Value,
-                        upgradeMultiplier = staffFire2RecipeMultiplier.Value,
-                    });
-                };
-
-                staffFire2MaxQuality = Config.Bind(new ConfigDefinition(sectionStaffFire2, "Max quality"), 4,
-                    new ConfigDescription("The maximum quality the item can become", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire2MaxQuality.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        maxQuality = staffFire2MaxQuality.Value,
-                    });
-                };
-
-                staffFire2MovementSpeed = Config.Bind(new ConfigDefinition(sectionStaffFire2, "Movement speed"), -0.05f,
-                    new ConfigDescription("The movement speed stat on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire2MovementSpeed.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        movementModifier = staffFire2MovementSpeed.Value,
-                    });
-                };
-
-                staffFire2DamageBlunt = Config.Bind(new ConfigDefinition(sectionStaffFire2, "Attack damage blunt"), 80f,
-                    new ConfigDescription("Blunt damage on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire2DamageBlunt.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        damageBlunt = staffFire2DamageBlunt.Value,
-                    });
-                };
-
-                staffFire2DamageFire2 = Config.Bind(new ConfigDefinition(sectionStaffFire2, "Attack damage fire"), 80f,
-                    new ConfigDescription("Fire2 damage on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire2DamageFire2.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        damageFire = staffFire2DamageFire2.Value,
-                    });
-                };
-
-                staffFire2BlockArmor = Config.Bind(new ConfigDefinition(sectionStaffFire2, "Block armor"), 48,
-                    new ConfigDescription("The block armor on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire2BlockArmor.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        blockPower = staffFire2BlockArmor.Value,
-                    });
-                };
-
-                staffFire2DeflectionForce = Config.Bind(new ConfigDefinition(sectionStaffFire2, "Block force"), 20,
-                    new ConfigDescription("The block force on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire2DeflectionForce.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        deflectionForce = staffFire2DeflectionForce.Value,
-                    });
-                };
-
-                staffFire2AttackForce = Config.Bind(new ConfigDefinition(sectionStaffFire2, "Knockback"), 35,
-                    new ConfigDescription("The knockback on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire2AttackForce.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        attackForce = staffFire2AttackForce.Value,
-                    });
-                };
-
-                staffFire2UseEitr = Config.Bind(new ConfigDefinition(sectionStaffFire2, "Attack eitr cost"), 5,
-                    new ConfigDescription("Normal attack eitr cost", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire2UseEitr.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        attackEitr = staffFire2UseEitr.Value,
-                    });
-                };
-
-                staffFire2UseEitrSecondary = Config.Bind(new ConfigDefinition(sectionStaffFire2, "Secondary ability eitr cost"), 100,
-                    new ConfigDescription("The secondary attack eitr cost", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire2UseEitrSecondary.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        secondaryAttackEitr = staffFire2UseEitrSecondary.Value,
-                    });
-                };
-
-                staffFire2SecondaryCooldown = Config.Bind(new ConfigDefinition(sectionStaffFire2, "Secondary cooldown"), 20f,
-                    new ConfigDescription("Cooldown duration of the secondary ability", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire2SecondaryCooldown.SettingChanged += (obj, attr) => {
-                    StatusEffect statusEffect = ObjectDB.instance.GetStatusEffect(StringExtensionMethods.GetStableHashCode("StaffFire2Cooldown_DW"));
-
-                    if (statusEffect != null)
-                    {
-                        statusEffect.m_ttl = staffFire2SecondaryCooldown.Value;
-                    }
-                };
+                staffFire2Enable = staffConfig.configEnable;
+                staffFire2Name = staffConfig.configName;
+                staffFire2Description = staffConfig.configDescription;
+                staffFire2CraftingStation = staffConfig.configCraftingStation;
+                staffFire2MinStationLevel = staffConfig.configMinStationLevel;
+                staffFire2Recipe = staffConfig.configRecipe;
+                staffFire2RecipeUpgrade = staffConfig.configRecipeUpgrade;
+                staffFire2RecipeMultiplier = staffConfig.configRecipeMultiplier;
+                staffFire2MaxQuality = staffConfig.configMaxQuality;
+                staffFire2MovementSpeed = staffConfig.configMovementSpeed;
+                staffFire2DamageBlunt = staffConfig.configDamageBlunt;
+                staffFire2DamageFire = staffConfig.configDamageFire;
+                staffFire2BlockArmor = staffConfig.configBlockArmor;
+                staffFire2DeflectionForce = staffConfig.configDeflectionForce;
+                staffFire2AttackForce = staffConfig.configAttackForce;
+                staffFire2UseEitr = staffConfig.configUseEitr;
+                staffFire2UseEitrSecondary = staffConfig.configUseEitrSecondary;
             }
             catch (Exception error)
             {
@@ -1437,439 +666,55 @@ namespace MagicExtended.Configs
         {
             try
             {
-                ConfigFile Config = MagicExtended.Instance.Config;
-                GameObject prefab = MagicExtended.Instance.staffFire3Prefab;
-
-                staffFire3Enable = Config.Bind(new ConfigDefinition(sectionStaffFire3, "Enable"), true,
-                   new ConfigDescription("Enable Staff of Fire3", null,
-                   new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire3Enable.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFire3RecipeName,
-                        updateType = RecipeUpdateType.Enable,
-                        enable = staffFire3Enable.Value,
-                    });
-                };
-
-                staffFire3Name = Config.Bind(new ConfigDefinition(sectionStaffFire3, "Name"), "Staff of Engulfing Flames",
-                   new ConfigDescription("The name given to the item", null,
-                   new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire3Name.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        name = staffFire3Name.Value,
-                    });
-                };
-
-                staffFire3Description = Config.Bind(new ConfigDefinition(sectionStaffFire3, "Description"), "It is time for this world to BURN!",
-                    new ConfigDescription("The description given to the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire3Description.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        description = staffFire3Description.Value,
-                    });
-                };
-
-                staffFire3CraftingStation = Config.Bind(new ConfigDefinition(sectionStaffFire3, "Crafting station"), "GaldrTable",
-                    new ConfigDescription("The crafting station the item can be created in",
-                    new AcceptableValueList<string>(ConfigPlugin.craftingStationOptions),
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire3CraftingStation.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFire3RecipeName,
-                        updateType = RecipeUpdateType.CraftingStation,
-                        craftingStation = staffFire3CraftingStation.Value,
-                    });
-                };
-
-                staffFire3MinStationLevel = Config.Bind(new ConfigDefinition(sectionStaffFire3, "Required station level"), 1,
-                    new ConfigDescription("The required station level to craft", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire3MinStationLevel.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFire3RecipeName,
-                        updateType = RecipeUpdateType.MinRequiredStationLevel,
-                        requiredStationLevel = staffFire3MinStationLevel.Value,
-                    });
-                };
-
-                staffFire3Recipe = Config.Bind(new ConfigDefinition(sectionStaffFire3, "Crafting costs"), staffFire3DefaultRecipe,
-                    new ConfigDescription("The items required to craft", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire3Recipe.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFire3RecipeName,
-                        updateType = RecipeUpdateType.Recipe,
-                        requirements = staffFire3Recipe.Value,
-                        upgradeRequirements = staffFire3RecipeUpgrade.Value,
-                        upgradeMultiplier = staffFire3RecipeMultiplier.Value,
-                    });
-                };
-
-                staffFire3RecipeUpgrade = Config.Bind(new ConfigDefinition(sectionStaffFire3, "Upgrade costs"), staffFire3DefaultUpgradeRecipe,
-                    new ConfigDescription("The costs to upgrade the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire3RecipeUpgrade.SettingChanged += (obj, attr) =>
+                StaffConfig staffConfig = new StaffConfig()
                 {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFire3RecipeName,
-                        updateType = RecipeUpdateType.Recipe,
-                        requirements = staffFire3Recipe.Value,
-                        upgradeRequirements = staffFire3RecipeUpgrade.Value,
-                        upgradeMultiplier = staffFire3RecipeMultiplier.Value,
-                    });
+                    sectionName = sectionStaffFire3,
+                    recipeName = staffFire3RecipeName,
+                    cooldownStatusEffectName = staffFire3CooldownStatusEffectName,
+                    prefab = MagicExtended.Instance.staffFire3Prefab,
+                    enable = true,
+                    name = "Staff of Engulfing Flames",
+                    description = "It is time for this world to burn to ashes!",
+                    craftingStation = "GaldrTable",
+                    minStationLevel = 1,
+                    recipe = staffFire3DefaultRecipe,
+                    recipeUpgrade = staffFire3DefaultUpgradeRecipe,
+                    recipeMultiplier = 1,
+                    maxQuality = 4,
+                    movementSpeed = -0.05f,
+                    damageBlunt = 120f,
+                    damageFire = 120f,
+                    blockArmor = 48,
+                    deflectionForce = 20,
+                    attackForce = 35,
+                    useEitr = 5,
+                    useEitrSecondary = 100,
+                    secondaryCooldown = 20f,
                 };
+                staffConfig.GenerateConfig();
 
-                staffFire3RecipeMultiplier = Config.Bind(new ConfigDefinition(sectionStaffFire3, "Upgrade multiplier"), 1,
-                    new ConfigDescription("The multiplier applied to the upgrade costs", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire3RecipeMultiplier.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFire3RecipeName,
-                        updateType = RecipeUpdateType.Recipe,
-                        requirements = staffFire3Recipe.Value,
-                        upgradeRequirements = staffFire3RecipeUpgrade.Value,
-                        upgradeMultiplier = staffFire3RecipeMultiplier.Value,
-                    });
-                };
-
-                staffFire3MaxQuality = Config.Bind(new ConfigDefinition(sectionStaffFire3, "Max quality"), 4,
-                    new ConfigDescription("The maximum quality the item can become", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire3MaxQuality.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        maxQuality = staffFire3MaxQuality.Value,
-                    });
-                };
-
-                staffFire3MovementSpeed = Config.Bind(new ConfigDefinition(sectionStaffFire3, "Movement speed"), -0.05f,
-                    new ConfigDescription("The movement speed stat on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire3MovementSpeed.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        movementModifier = staffFire3MovementSpeed.Value,
-                    });
-                };
-
-                staffFire3DamageBlunt = Config.Bind(new ConfigDefinition(sectionStaffFire3, "Attack damage blunt"), 120f,
-                    new ConfigDescription("Blunt damage on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire3DamageBlunt.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        damageBlunt = staffFire3DamageBlunt.Value,
-                    });
-                };
-
-                staffFire3DamageFire3 = Config.Bind(new ConfigDefinition(sectionStaffFire3, "Attack damage fire"), 120f,
-                    new ConfigDescription("Fire3 damage on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire3DamageFire3.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        damageFire = staffFire3DamageFire3.Value,
-                    });
-                };
-
-                staffFire3BlockArmor = Config.Bind(new ConfigDefinition(sectionStaffFire3, "Block armor"), 48,
-                    new ConfigDescription("The block armor on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire3BlockArmor.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        blockPower = staffFire3BlockArmor.Value,
-                    });
-                };
-
-                staffFire3DeflectionForce = Config.Bind(new ConfigDefinition(sectionStaffFire3, "Block force"), 20,
-                    new ConfigDescription("The block force on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire3DeflectionForce.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        deflectionForce = staffFire3DeflectionForce.Value,
-                    });
-                };
-
-                staffFire3AttackForce = Config.Bind(new ConfigDefinition(sectionStaffFire3, "Knockback"), 35,
-                    new ConfigDescription("The knockback on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire3AttackForce.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        attackForce = staffFire3AttackForce.Value,
-                    });
-                };
-
-                staffFire3UseEitr = Config.Bind(new ConfigDefinition(sectionStaffFire3, "Attack eitr cost"), 5,
-                    new ConfigDescription("Normal attack eitr cost", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire3UseEitr.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        attackEitr = staffFire3UseEitr.Value,
-                    });
-                };
-
-                staffFire3UseEitrSecondary = Config.Bind(new ConfigDefinition(sectionStaffFire3, "Secondary ability eitr cost"), 100,
-                    new ConfigDescription("The secondary attack eitr cost", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire3UseEitrSecondary.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        secondaryAttackEitr = staffFire3UseEitrSecondary.Value,
-                    });
-                };
-
-                staffFire3SecondaryCooldown = Config.Bind(new ConfigDefinition(sectionStaffFire3, "Secondary cooldown"), 20f,
-                    new ConfigDescription("Cooldown duration of the secondary ability", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFire3SecondaryCooldown.SettingChanged += (obj, attr) => {
-                    StatusEffect statusEffect = ObjectDB.instance.GetStatusEffect(StringExtensionMethods.GetStableHashCode("StaffFire3Cooldown_DW"));
-
-                    if (statusEffect != null)
-                    {
-                        statusEffect.m_ttl = staffFire3SecondaryCooldown.Value;
-                    }
-                };
+                staffFire3Enable = staffConfig.configEnable;
+                staffFire3Name = staffConfig.configName;
+                staffFire3Description = staffConfig.configDescription;
+                staffFire3CraftingStation = staffConfig.configCraftingStation;
+                staffFire3MinStationLevel = staffConfig.configMinStationLevel;
+                staffFire3Recipe = staffConfig.configRecipe;
+                staffFire3RecipeUpgrade = staffConfig.configRecipeUpgrade;
+                staffFire3RecipeMultiplier = staffConfig.configRecipeMultiplier;
+                staffFire3MaxQuality = staffConfig.configMaxQuality;
+                staffFire3MovementSpeed = staffConfig.configMovementSpeed;
+                staffFire3DamageBlunt = staffConfig.configDamageBlunt;
+                staffFire3DamageFire = staffConfig.configDamageFire;
+                staffFire3BlockArmor = staffConfig.configBlockArmor;
+                staffFire3DeflectionForce = staffConfig.configDeflectionForce;
+                staffFire3AttackForce = staffConfig.configAttackForce;
+                staffFire3UseEitr = staffConfig.configUseEitr;
+                staffFire3UseEitrSecondary = staffConfig.configUseEitrSecondary;
+                staffFire3SecondaryCooldown = staffConfig.configSecondaryCooldown;
             }
             catch (Exception error)
             {
                 Jotunn.Logger.LogError("Could not initialise Staff of Engulfing Flames config: " + error);
-            }
-        }
-
-        private static void InitStaffLightning3Config()
-        {
-            try
-            {
-                ConfigFile Config = MagicExtended.Instance.Config;
-                GameObject prefab = MagicExtended.Instance.staffLightning3Prefab;
-
-                staffLightning3Enable = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Enable"), true,
-                   new ConfigDescription("Enable Staff of Lightning", null,
-                   new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3Enable.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffLightning3RecipeName,
-                        updateType = RecipeUpdateType.Enable,
-                        enable = staffLightning3Enable.Value,
-                    });
-                };
-
-                staffLightning3Name = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Name"), "Staff of Lightning",
-                   new ConfigDescription("The name given to the item", null,
-                   new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3Name.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        name = staffLightning3Name.Value,
-                    });
-                };
-
-                staffLightning3Description = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Description"), "STATIC!",
-                    new ConfigDescription("The description given to the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3Description.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        description = staffLightning3Description.Value,
-                    });
-                };
-
-                staffLightning3CraftingStation = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Crafting station"), "GaldrTable",
-                    new ConfigDescription("The crafting station the item can be created in",
-                    new AcceptableValueList<string>(ConfigPlugin.craftingStationOptions),
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3CraftingStation.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffLightning3RecipeName,
-                        updateType = RecipeUpdateType.CraftingStation,
-                        craftingStation = staffLightning3CraftingStation.Value,
-                    });
-                };
-
-                staffLightning3MinStationLevel = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Required station level"), 1,
-                    new ConfigDescription("The required station level to craft", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3MinStationLevel.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffLightning3RecipeName,
-                        updateType = RecipeUpdateType.MinRequiredStationLevel,
-                        requiredStationLevel = staffLightning3MinStationLevel.Value,
-                    });
-                };
-
-                staffLightning3Recipe = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Crafting costs"), staffLightning3DefaultRecipe,
-                    new ConfigDescription("The items required to craft", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3Recipe.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffLightning3RecipeName,
-                        updateType = RecipeUpdateType.Recipe,
-                        requirements = staffLightning3Recipe.Value,
-                        upgradeRequirements = staffLightning3RecipeUpgrade.Value,
-                        upgradeMultiplier = staffLightning3RecipeMultiplier.Value,
-                    });
-                };
-
-                staffLightning3RecipeUpgrade = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Upgrade costs"), staffLightning3DefaultUpgradeRecipe,
-                    new ConfigDescription("The costs to upgrade the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3RecipeUpgrade.SettingChanged += (obj, attr) =>
-                {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffLightning3RecipeName,
-                        updateType = RecipeUpdateType.Recipe,
-                        requirements = staffLightning3Recipe.Value,
-                        upgradeRequirements = staffLightning3RecipeUpgrade.Value,
-                        upgradeMultiplier = staffLightning3RecipeMultiplier.Value,
-                    });
-                };
-
-                staffLightning3RecipeMultiplier = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Upgrade multiplier"), 1,
-                    new ConfigDescription("The multiplier applied to the upgrade costs", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3RecipeMultiplier.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffLightning3RecipeName,
-                        updateType = RecipeUpdateType.Recipe,
-                        requirements = staffLightning3Recipe.Value,
-                        upgradeRequirements = staffLightning3RecipeUpgrade.Value,
-                        upgradeMultiplier = staffLightning3RecipeMultiplier.Value,
-                    });
-                };
-
-                staffLightning3MaxQuality = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Max quality"), 4,
-                    new ConfigDescription("The maximum quality the item can become", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3MaxQuality.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        maxQuality = staffLightning3MaxQuality.Value,
-                    });
-                };
-
-                staffLightning3MovementSpeed = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Movement speed"), -0.05f,
-                    new ConfigDescription("The movement speed stat on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3MovementSpeed.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        movementModifier = staffLightning3MovementSpeed.Value,
-                    });
-                };
-
-                staffLightning3DamagePickaxe = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Attack damage pickaxe"), 30f,
-                    new ConfigDescription("Pickaxe damage on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3DamagePickaxe.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        damagePickaxe = staffLightning3DamagePickaxe.Value,
-                    });
-                };
-                
-                staffLightning3DamagePierce = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Attack damage pierce"), 120f,
-                    new ConfigDescription("Pierce damage on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3DamagePierce.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        damagePierce = staffLightning3DamagePierce.Value,
-                    });
-                };
-
-                staffLightning3DamageLightning = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Attack damage lightning"), 120f,
-                    new ConfigDescription("Lightning damage on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3DamageLightning.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        damageLightning = staffLightning3DamageLightning.Value,
-                    });
-                };
-
-                staffLightning3BlockArmor = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Block armor"), 48,
-                    new ConfigDescription("The block armor on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3BlockArmor.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        blockPower = staffLightning3BlockArmor.Value,
-                    });
-                };
-
-                staffLightning3DeflectionForce = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Block force"), 20,
-                    new ConfigDescription("The block force on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3DeflectionForce.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        deflectionForce = staffLightning3DeflectionForce.Value,
-                    });
-                };
-
-                staffLightning3AttackForce = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Knockback"), 35,
-                    new ConfigDescription("The knockback on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3AttackForce.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        attackForce = staffLightning3AttackForce.Value,
-                    });
-                };
-
-                staffLightning3UseEitr = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Attack eitr cost"), 5,
-                    new ConfigDescription("Normal attack eitr cost", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3UseEitr.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        attackEitr = staffLightning3UseEitr.Value,
-                    });
-                };
-
-                staffLightning3UseEitrSecondary = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Secondary ability eitr cost"), 100,
-                    new ConfigDescription("The secondary attack eitr cost", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3UseEitrSecondary.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        secondaryAttackEitr = staffLightning3UseEitrSecondary.Value,
-                    });
-                };
-
-                staffLightning3SecondaryCooldown = Config.Bind(new ConfigDefinition(sectionStaffLightning, "Secondary cooldown"), 20f,
-                    new ConfigDescription("Cooldown duration of the secondary ability", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffLightning3SecondaryCooldown.SettingChanged += (obj, attr) => {
-                    StatusEffect statusEffect = ObjectDB.instance.GetStatusEffect(StringExtensionMethods.GetStableHashCode("StaffLightning3Cooldown_DW"));
-
-                    if (statusEffect != null)
-                    {
-                        statusEffect.m_ttl = staffLightning3SecondaryCooldown.Value;
-                    }
-                };
-            }
-            catch (Exception error)
-            {
-                Jotunn.Logger.LogError("Could not initialise Staff of Lightning config: " + error);
             }
         }
 
@@ -1928,227 +773,50 @@ namespace MagicExtended.Configs
         {
             try
             {
-                ConfigFile Config = MagicExtended.Instance.Config;
-                GameObject prefab = MagicExtended.Instance.staffFrost2Prefab;
-
-                staffFrost2Enable = Config.Bind(new ConfigDefinition(sectionStaffFrost2, "Enable"), true,
-                   new ConfigDescription("Enable Staff of Iceshards", null,
-                   new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost2Enable.SettingChanged += (obj, attr) =>
+                StaffConfig staffConfig = new StaffConfig()
                 {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFrost2RecipeName,
-                        updateType = RecipeUpdateType.Enable,
-                        enable = staffFrost2Enable.Value,
-                    });
+                    sectionName = sectionStaffFrost2,
+                    recipeName = staffFrost2RecipeName,
+                    prefab = MagicExtended.Instance.staffFrost2Prefab,
+                    enable = true,
+                    name = "Staff of Iceshards",
+                    description = "Frreeezzzze!",
+                    craftingStation = "GaldrTable",
+                    minStationLevel = 1,
+                    recipe = staffFrost2DefaultRecipe,
+                    recipeUpgrade = staffFrost2DefaultUpgradeRecipe,
+                    recipeMultiplier = 1,
+                    maxQuality = 4,
+                    movementSpeed = -0.05f,
+                    damageFrost = 17f,
+                    damagePierce = 6f,
+                    blockArmor = 48,
+                    deflectionForce = 20,
+                    attackForce = 35,
+                    useEitr = 5,
+                    useEitrSecondary = 100,
+                    secondaryCooldown = 20f,
                 };
+                staffConfig.GenerateConfig();
 
-                staffFrost2Name = Config.Bind(new ConfigDefinition(sectionStaffFrost2, "Name"), "Staff of Iceshards",
-                   new ConfigDescription("The name given to the item", null,
-                   new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost2Name.SettingChanged += (obj, attr) =>
-                {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        name = staffFrost2Name.Value,
-                    });
-                };
-
-                staffFrost2Description = Config.Bind(new ConfigDefinition(sectionStaffFrost2, "Description"), "Frreeezzzze!",
-                    new ConfigDescription("The description given to the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost2Description.SettingChanged += (obj, attr) =>
-                {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        description = staffFrost2Description.Value,
-                    });
-                };
-
-                staffFrost2CraftingStation = Config.Bind(new ConfigDefinition(sectionStaffFrost2, "Crafting station"), "GaldrTable",
-                    new ConfigDescription("The crafting station the item can be created in",
-                    new AcceptableValueList<string>(ConfigPlugin.craftingStationOptions),
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost2CraftingStation.SettingChanged += (obj, attr) =>
-                {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFrost2RecipeName,
-                        updateType = RecipeUpdateType.CraftingStation,
-                        craftingStation = staffFrost2CraftingStation.Value,
-                    });
-                };
-
-                staffFrost2MinStationLevel = Config.Bind(new ConfigDefinition(sectionStaffFrost2, "Required station level"), 1,
-                    new ConfigDescription("The required station level to craft", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost2MinStationLevel.SettingChanged += (obj, attr) =>
-                {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFrost2RecipeName,
-                        updateType = RecipeUpdateType.MinRequiredStationLevel,
-                        requiredStationLevel = staffFrost2MinStationLevel.Value,
-                    });
-                };
-
-                staffFrost2Recipe = Config.Bind(new ConfigDefinition(sectionStaffFrost2, "Crafting costs"), staffFrost2DefaultRecipe,
-                    new ConfigDescription("The items required to craft", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost2Recipe.SettingChanged += (obj, attr) =>
-                {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFrost2RecipeName,
-                        updateType = RecipeUpdateType.Recipe,
-                        requirements = staffFrost2Recipe.Value,
-                        upgradeRequirements = staffFrost2RecipeUpgrade.Value,
-                        upgradeMultiplier = staffFrost2RecipeMultiplier.Value,
-                    });
-                };
-
-                staffFrost2RecipeUpgrade = Config.Bind(new ConfigDefinition(sectionStaffFrost2, "Upgrade costs"), staffFrost2DefaultUpgradeRecipe,
-                    new ConfigDescription("The costs to upgrade the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost2RecipeUpgrade.SettingChanged += (obj, attr) =>
-                {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFrost2RecipeName,
-                        updateType = RecipeUpdateType.Recipe,
-                        requirements = staffFrost2Recipe.Value,
-                        upgradeRequirements = staffFrost2RecipeUpgrade.Value,
-                        upgradeMultiplier = staffFrost2RecipeMultiplier.Value,
-                    });
-                };
-
-                staffFrost2RecipeMultiplier = Config.Bind(new ConfigDefinition(sectionStaffFrost2, "Upgrade multiplier"), 1,
-                    new ConfigDescription("The multiplier applied to the upgrade costs", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost2RecipeMultiplier.SettingChanged += (obj, attr) =>
-                {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFrost2RecipeName,
-                        updateType = RecipeUpdateType.Recipe,
-                        requirements = staffFrost2Recipe.Value,
-                        upgradeRequirements = staffFrost2RecipeUpgrade.Value,
-                        upgradeMultiplier = staffFrost2RecipeMultiplier.Value,
-                    });
-                };
-
-                staffFrost2MaxQuality = Config.Bind(new ConfigDefinition(sectionStaffFrost2, "Max quality"), 4,
-                    new ConfigDescription("The maximum quality the item can become", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost2MaxQuality.SettingChanged += (obj, attr) =>
-                {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        maxQuality = staffFrost2MaxQuality.Value,
-                    });
-                };
-
-                staffFrost2MovementSpeed = Config.Bind(new ConfigDefinition(sectionStaffFrost2, "Movement speed"), -0.05f,
-                    new ConfigDescription("The movement speed stat on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost2MovementSpeed.SettingChanged += (obj, attr) =>
-                {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        movementModifier = staffFrost2MovementSpeed.Value,
-                    });
-                };
-
-                staffFrost2DamagePierce = Config.Bind(new ConfigDefinition(sectionStaffFrost2, "Attack damage pierce"), 6f,
-                    new ConfigDescription("Pierce damage on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost2DamagePierce.SettingChanged += (obj, attr) =>
-                {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        damagePierce = staffFrost2DamagePierce.Value,
-                    });
-                };
-
-                staffFrost2DamageFrost = Config.Bind(new ConfigDefinition(sectionStaffFrost2, "Attack damage frost"), 18f,
-                    new ConfigDescription("Frost damage on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost2DamageFrost.SettingChanged += (obj, attr) =>
-                {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        damageFrost = staffFrost2DamageFrost.Value,
-                    });
-                };
-
-                staffFrost2BlockArmor = Config.Bind(new ConfigDefinition(sectionStaffFrost2, "Block armor"), 48,
-                    new ConfigDescription("The block armor on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost2BlockArmor.SettingChanged += (obj, attr) =>
-                {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        blockPower = staffFrost2BlockArmor.Value,
-                    });
-                };
-
-                staffFrost2DeflectionForce = Config.Bind(new ConfigDefinition(sectionStaffFrost2, "Block force"), 20,
-                    new ConfigDescription("The block force on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost2DeflectionForce.SettingChanged += (obj, attr) =>
-                {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        deflectionForce = staffFrost2DeflectionForce.Value,
-                    });
-                };
-
-                staffFrost2AttackForce = Config.Bind(new ConfigDefinition(sectionStaffFrost2, "Knockback"), 25,
-                    new ConfigDescription("The knockback on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost2AttackForce.SettingChanged += (obj, attr) =>
-                {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        attackForce = staffFrost2AttackForce.Value,
-                    });
-                };
-
-                staffFrost2UseEitr = Config.Bind(new ConfigDefinition(sectionStaffFrost2, "Attack eitr cost"), 5,
-                    new ConfigDescription("Normal attack eitr cost", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost2UseEitr.SettingChanged += (obj, attr) =>
-                {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        attackEitr = staffFrost2UseEitr.Value,
-                    });
-                };
-
-                staffFrost2UseEitrSecondary = Config.Bind(new ConfigDefinition(sectionStaffFrost2, "Secondary ability eitr cost"), 100,
-                    new ConfigDescription("The secondary attack eitr cost", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost2UseEitrSecondary.SettingChanged += (obj, attr) =>
-                {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        secondaryAttackEitr = staffFrost2UseEitrSecondary.Value,
-                    });
-                };
-
-                staffFrost2SecondaryCooldown = Config.Bind(new ConfigDefinition(sectionStaffFrost2, "Secondary cooldown"), 20f,
-                    new ConfigDescription("Cooldown duration of the secondary ability", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost2SecondaryCooldown.SettingChanged += (obj, attr) =>
-                {
-                    StatusEffect statusEffect = ObjectDB.instance.GetStatusEffect(StringExtensionMethods.GetStableHashCode("StaffFrost2Cooldown_DW"));
-
-                    if (statusEffect != null)
-                    {
-                        statusEffect.m_ttl = staffFrost2SecondaryCooldown.Value;
-                    }
-                };
+                staffFrost2Enable = staffConfig.configEnable;
+                staffFrost2Name = staffConfig.configName;
+                staffFrost2Description = staffConfig.configDescription;
+                staffFrost2CraftingStation = staffConfig.configCraftingStation;
+                staffFrost2MinStationLevel = staffConfig.configMinStationLevel;
+                staffFrost2Recipe = staffConfig.configRecipe;
+                staffFrost2RecipeUpgrade = staffConfig.configRecipeUpgrade;
+                staffFrost2RecipeMultiplier = staffConfig.configRecipeMultiplier;
+                staffFrost2MaxQuality = staffConfig.configMaxQuality;
+                staffFrost2MovementSpeed = staffConfig.configMovementSpeed;
+                staffFrost2DamageFrost = staffConfig.configDamageFrost;
+                staffFrost2DamagePierce = staffConfig.configDamagePierce;
+                staffFrost2BlockArmor = staffConfig.configBlockArmor;
+                staffFrost2DeflectionForce = staffConfig.configDeflectionForce;
+                staffFrost2AttackForce = staffConfig.configAttackForce;
+                staffFrost2UseEitr = staffConfig.configUseEitr;
+                staffFrost2UseEitrSecondary = staffConfig.configUseEitrSecondary;
+                staffFrost2SecondaryCooldown = staffConfig.configSecondaryCooldown;
             }
             catch (Exception error)
             {
@@ -2160,217 +828,225 @@ namespace MagicExtended.Configs
         {
             try
             {
-                ConfigFile Config = MagicExtended.Instance.Config;
-                GameObject prefab = MagicExtended.Instance.staffFrost3Prefab;
-
-                staffFrost3Enable = Config.Bind(new ConfigDefinition(sectionStaffFrost3, "Enable"), true,
-                   new ConfigDescription("Enable Staff of Frost", null,
-                   new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost3Enable.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFrost3RecipeName,
-                        updateType = RecipeUpdateType.Enable,
-                        enable = staffFrost3Enable.Value,
-                    });
-                };
-
-                staffFrost3Name = Config.Bind(new ConfigDefinition(sectionStaffFrost3, "Name"), "Staff of Frost",
-                   new ConfigDescription("The name given to the item", null,
-                   new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost3Name.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        name = staffFrost3Name.Value,
-                    });
-                };
-
-                staffFrost3Description = Config.Bind(new ConfigDefinition(sectionStaffFrost3, "Description"), "Frreeezzzze!",
-                    new ConfigDescription("The description given to the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost3Description.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        description = staffFrost3Description.Value,
-                    });
-                };
-
-                staffFrost3CraftingStation = Config.Bind(new ConfigDefinition(sectionStaffFrost3, "Crafting station"), "GaldrTable",
-                    new ConfigDescription("The crafting station the item can be created in",
-                    new AcceptableValueList<string>(ConfigPlugin.craftingStationOptions),
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost3CraftingStation.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFrost3RecipeName,
-                        updateType = RecipeUpdateType.CraftingStation,
-                        craftingStation = staffFrost3CraftingStation.Value,
-                    });
-                };
-
-                staffFrost3MinStationLevel = Config.Bind(new ConfigDefinition(sectionStaffFrost3, "Required station level"), 1,
-                    new ConfigDescription("The required station level to craft", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost3MinStationLevel.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFrost3RecipeName,
-                        updateType = RecipeUpdateType.MinRequiredStationLevel,
-                        requiredStationLevel = staffFrost3MinStationLevel.Value,
-                    });
-                };
-
-                staffFrost3Recipe = Config.Bind(new ConfigDefinition(sectionStaffFrost3, "Crafting costs"), staffFrost3DefaultRecipe,
-                    new ConfigDescription("The items required to craft", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost3Recipe.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFrost3RecipeName,
-                        updateType = RecipeUpdateType.Recipe,
-                        requirements = staffFrost3Recipe.Value,
-                        upgradeRequirements = staffFrost3RecipeUpgrade.Value,
-                        upgradeMultiplier = staffFrost3RecipeMultiplier.Value,
-                    });
-                };
-
-                staffFrost3RecipeUpgrade = Config.Bind(new ConfigDefinition(sectionStaffFrost3, "Upgrade costs"), staffFrost3DefaultUpgradeRecipe,
-                    new ConfigDescription("The costs to upgrade the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost3RecipeUpgrade.SettingChanged += (obj, attr) =>
+                StaffConfig staffConfig = new StaffConfig()
                 {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFrost3RecipeName,
-                        updateType = RecipeUpdateType.Recipe,
-                        requirements = staffFrost3Recipe.Value,
-                        upgradeRequirements = staffFrost3RecipeUpgrade.Value,
-                        upgradeMultiplier = staffFrost3RecipeMultiplier.Value,
-                    });
+                    sectionName = sectionStaffFrost3,
+                    recipeName = staffFrost3RecipeName,
+                    cooldownStatusEffectName = staffFrost3CooldownStatusEffectName,
+                    prefab = MagicExtended.Instance.staffFrost3Prefab,
+                    enable = true,
+                    name = "Staff of Frost",
+                    description = "Frreeezzzze!",
+                    craftingStation = "GaldrTable",
+                    minStationLevel = 1,
+                    recipe = staffFrost3DefaultRecipe,
+                    recipeUpgrade = staffFrost3DefaultUpgradeRecipe,
+                    recipeMultiplier = 1,
+                    maxQuality = 4,
+                    movementSpeed = -0.05f,
+                    damageFrost = 20f,
+                    damagePierce = 10f,
+                    blockArmor = 48,
+                    deflectionForce = 20,
+                    attackForce = 35,
+                    useEitr = 5,
+                    useEitrSecondary = 100,
+                    secondaryCooldown = 20f,
                 };
+                staffConfig.GenerateConfig();
 
-                staffFrost3RecipeMultiplier = Config.Bind(new ConfigDefinition(sectionStaffFrost3, "Upgrade multiplier"), 1,
-                    new ConfigDescription("The multiplier applied to the upgrade costs", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost3RecipeMultiplier.SettingChanged += (obj, attr) => {
-                    RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                    {
-                        name = staffFrost3RecipeName,
-                        updateType = RecipeUpdateType.Recipe,
-                        requirements = staffFrost3Recipe.Value,
-                        upgradeRequirements = staffFrost3RecipeUpgrade.Value,
-                        upgradeMultiplier = staffFrost3RecipeMultiplier.Value,
-                    });
-                };
-
-                staffFrost3MaxQuality = Config.Bind(new ConfigDefinition(sectionStaffFrost3, "Max quality"), 4,
-                    new ConfigDescription("The maximum quality the item can become", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost3MaxQuality.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        maxQuality = staffFrost3MaxQuality.Value,
-                    });
-                };
-
-                staffFrost3MovementSpeed = Config.Bind(new ConfigDefinition(sectionStaffFrost3, "Movement speed"), -0.05f,
-                    new ConfigDescription("The movement speed stat on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost3MovementSpeed.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        movementModifier = staffFrost3MovementSpeed.Value,
-                    });
-                };
-
-                staffFrost3DamagePierce = Config.Bind(new ConfigDefinition(sectionStaffFrost3, "Attack damage pierce"), 10f,
-                    new ConfigDescription("Pierce damage on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost3DamagePierce.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        damagePierce = staffFrost3DamagePierce.Value,
-                    });
-                };
-
-                staffFrost3DamageFrost = Config.Bind(new ConfigDefinition(sectionStaffFrost3, "Attack damage frost"), 27f,
-                    new ConfigDescription("Frost damage on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost3DamageFrost.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        damageFrost = staffFrost3DamageFrost.Value,
-                    });
-                };
-
-                staffFrost3BlockArmor = Config.Bind(new ConfigDefinition(sectionStaffFrost3, "Block armor"), 48,
-                    new ConfigDescription("The block armor on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost3BlockArmor.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        blockPower = staffFrost3BlockArmor.Value,
-                    });
-                };
-
-                staffFrost3DeflectionForce = Config.Bind(new ConfigDefinition(sectionStaffFrost3, "Block force"), 20,
-                    new ConfigDescription("The block force on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost3DeflectionForce.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        deflectionForce = staffFrost3DeflectionForce.Value,
-                    });
-                };
-
-                staffFrost3AttackForce = Config.Bind(new ConfigDefinition(sectionStaffFrost3, "Knockback"), 35,
-                    new ConfigDescription("The knockback on the item", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost3AttackForce.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        attackForce = staffFrost3AttackForce.Value,
-                    });
-                };
-
-                staffFrost3UseEitr = Config.Bind(new ConfigDefinition(sectionStaffFrost3, "Attack eitr cost"), 5,
-                    new ConfigDescription("Normal attack eitr cost", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost3UseEitr.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        attackEitr = staffFrost3UseEitr.Value,
-                    });
-                };
-
-                staffFrost3UseEitrSecondary = Config.Bind(new ConfigDefinition(sectionStaffFrost3, "Secondary ability eitr cost"), 100,
-                    new ConfigDescription("The secondary attack eitr cost", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost3UseEitrSecondary.SettingChanged += (obj, attr) => {
-                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
-                    {
-                        secondaryAttackEitr = staffFrost3UseEitrSecondary.Value,
-                    });
-                };
-
-                staffFrost3SecondaryCooldown = Config.Bind(new ConfigDefinition(sectionStaffFrost3, "Secondary cooldown"), 20f,
-                    new ConfigDescription("Cooldown duration of the secondary ability", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                staffFrost3SecondaryCooldown.SettingChanged += (obj, attr) => {
-                    StatusEffect statusEffect = ObjectDB.instance.GetStatusEffect(StringExtensionMethods.GetStableHashCode("StaffFrost3Cooldown_DW"));
-
-                    if (statusEffect != null)
-                    {
-                        statusEffect.m_ttl = staffFrost3SecondaryCooldown.Value;
-                    }
-                };
+                staffFrost3Enable = staffConfig.configEnable;
+                staffFrost3Name = staffConfig.configName;
+                staffFrost3Description = staffConfig.configDescription;
+                staffFrost3CraftingStation = staffConfig.configCraftingStation;
+                staffFrost3MinStationLevel = staffConfig.configMinStationLevel;
+                staffFrost3Recipe = staffConfig.configRecipe;
+                staffFrost3RecipeUpgrade = staffConfig.configRecipeUpgrade;
+                staffFrost3RecipeMultiplier = staffConfig.configRecipeMultiplier;
+                staffFrost3MaxQuality = staffConfig.configMaxQuality;
+                staffFrost3MovementSpeed = staffConfig.configMovementSpeed;
+                staffFrost3DamageFrost = staffConfig.configDamageFrost;
+                staffFrost3DamagePierce = staffConfig.configDamagePierce;
+                staffFrost3BlockArmor = staffConfig.configBlockArmor;
+                staffFrost3DeflectionForce = staffConfig.configDeflectionForce;
+                staffFrost3AttackForce = staffConfig.configAttackForce;
+                staffFrost3UseEitr = staffConfig.configUseEitr;
+                staffFrost3UseEitrSecondary = staffConfig.configUseEitrSecondary;
+                staffFrost3SecondaryCooldown = staffConfig.configSecondaryCooldown;
             }
             catch (Exception error)
             {
                 Jotunn.Logger.LogError("Could not initialise Staff of Frost config: " + error);
             }
+        }
 
+        private static void InitStaffLightning1Config()
+        {
+            try
+            {
+                StaffConfig staffConfig = new StaffConfig()
+                {
+                    sectionName = sectionStaffLightning1,
+                    recipeName = staffLightning1RecipeName,
+                    prefab = MagicExtended.Instance.staffLightning1Prefab,
+                    enable = true,
+                    name = "Staff of Eikthyr",
+                    description = "STATIC!",
+                    craftingStation = "GaldrTable",
+                    minStationLevel = 1,
+                    recipe = staffLightning1DefaultRecipe,
+                    recipeUpgrade = staffLightning1DefaultUpgradeRecipe,
+                    recipeMultiplier = 1,
+                    maxQuality = 4,
+                    movementSpeed = -0.05f,
+                    damageLightning = 40f,
+                    damagePickaxe = 30f,
+                    damagePierce = 40f,
+                    blockArmor = 48,
+                    deflectionForce = 20,
+                    attackForce = 35,
+                    useEitr = 5,
+                };
+                staffConfig.GenerateConfig();
 
+                staffLightning1Enable = staffConfig.configEnable;
+                staffLightning1Name = staffConfig.configName;
+                staffLightning1Description = staffConfig.configDescription;
+                staffLightning1CraftingStation = staffConfig.configCraftingStation;
+                staffLightning1MinStationLevel = staffConfig.configMinStationLevel;
+                staffLightning1Recipe = staffConfig.configRecipe;
+                staffLightning1RecipeUpgrade = staffConfig.configRecipeUpgrade;
+                staffLightning1RecipeMultiplier = staffConfig.configRecipeMultiplier;
+                staffLightning1MaxQuality = staffConfig.configMaxQuality;
+                staffLightning1MovementSpeed = staffConfig.configMovementSpeed;
+                staffLightning1DamageLightning = staffConfig.configDamageLightning;
+                staffLightning1DamagePickaxe = staffConfig.configDamagePickaxe;
+                staffLightning1DamagePierce = staffConfig.configDamagePierce;
+                staffLightning1BlockArmor = staffConfig.configBlockArmor;
+                staffLightning1DeflectionForce = staffConfig.configDeflectionForce;
+                staffLightning1AttackForce = staffConfig.configAttackForce;
+                staffLightning1UseEitr = staffConfig.configUseEitr;
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise Staff of Sparcs config: " + error);
+            }
+        }
+
+        private static void InitStaffLightning2Config()
+        {
+            try
+            {
+                StaffConfig staffConfig = new StaffConfig()
+                {
+                    sectionName = sectionStaffLightning2,
+                    recipeName = staffLightning2RecipeName,
+                    cooldownStatusEffectName = staffLightning2CooldownStatusEffectName,
+                    prefab = MagicExtended.Instance.staffLightning2Prefab,
+                    enable = true,
+                    name = "Staff of Sparcs",
+                    description = "STATIC!",
+                    craftingStation = "GaldrTable",
+                    minStationLevel = 1,
+                    recipe = staffLightning2DefaultRecipe,
+                    recipeUpgrade = staffLightning2DefaultUpgradeRecipe,
+                    recipeMultiplier = 1,
+                    maxQuality = 4,
+                    movementSpeed = -0.05f,
+                    damageLightning = 80f,
+                    damagePickaxe = 30f,
+                    damagePierce = 80f,
+                    blockArmor = 48,
+                    deflectionForce = 20,
+                    attackForce = 35,
+                    useEitr = 5,
+                    useEitrSecondary = 100,
+                    secondaryCooldown = 20f,
+                };
+                staffConfig.GenerateConfig();
+
+                staffLightning2Enable = staffConfig.configEnable;
+                staffLightning2Name = staffConfig.configName;
+                staffLightning2Description = staffConfig.configDescription;
+                staffLightning2CraftingStation = staffConfig.configCraftingStation;
+                staffLightning2MinStationLevel = staffConfig.configMinStationLevel;
+                staffLightning2Recipe = staffConfig.configRecipe;
+                staffLightning2RecipeUpgrade = staffConfig.configRecipeUpgrade;
+                staffLightning2RecipeMultiplier = staffConfig.configRecipeMultiplier;
+                staffLightning2MaxQuality = staffConfig.configMaxQuality;
+                staffLightning2MovementSpeed = staffConfig.configMovementSpeed;
+                staffLightning2DamageLightning = staffConfig.configDamageLightning;
+                staffLightning2DamagePickaxe = staffConfig.configDamagePickaxe;
+                staffLightning2DamagePierce = staffConfig.configDamagePierce;
+                staffLightning2BlockArmor = staffConfig.configBlockArmor;
+                staffLightning2DeflectionForce = staffConfig.configDeflectionForce;
+                staffLightning2AttackForce = staffConfig.configAttackForce;
+                staffLightning2UseEitr = staffConfig.configUseEitr;
+                staffLightning2UseEitrSecondary = staffConfig.configUseEitrSecondary;
+                staffLightning2SecondaryCooldown = staffConfig.configSecondaryCooldown;
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise Staff of Sparcs config: " + error);
+            }
+        }
+
+        private static void InitStaffLightning3Config()
+        {
+            try
+            {
+                StaffConfig staffConfig = new StaffConfig()
+                {
+                    sectionName = sectionStaffLightning3,
+                    recipeName = staffLightning3RecipeName,
+                    cooldownStatusEffectName = staffLightning3CooldownStatusEffectName,
+                    prefab = MagicExtended.Instance.staffLightning3Prefab,
+                    enable = true,
+                    name = "Staff of Lightning",
+                    description = "STATIC!",
+                    craftingStation = "GaldrTable",
+                    minStationLevel = 1,
+                    recipe = staffLightning3DefaultRecipe,
+                    recipeUpgrade = staffLightning3DefaultUpgradeRecipe,
+                    recipeMultiplier = 1,
+                    maxQuality = 4,
+                    movementSpeed = -0.05f,
+                    damageLightning = 120f,
+                    damagePickaxe = 30f,
+                    damagePierce = 120f,
+                    blockArmor = 48,
+                    deflectionForce = 20,
+                    attackForce = 35,
+                    useEitr = 5,
+                    useEitrSecondary = 100,
+                    secondaryCooldown = 20f,
+                };
+                staffConfig.GenerateConfig();
+
+                staffLightning3Enable = staffConfig.configEnable;
+                staffLightning3Name = staffConfig.configName;
+                staffLightning3Description = staffConfig.configDescription;
+                staffLightning3CraftingStation = staffConfig.configCraftingStation;
+                staffLightning3MinStationLevel = staffConfig.configMinStationLevel;
+                staffLightning3Recipe = staffConfig.configRecipe;
+                staffLightning3RecipeUpgrade = staffConfig.configRecipeUpgrade;
+                staffLightning3RecipeMultiplier = staffConfig.configRecipeMultiplier;
+                staffLightning3MaxQuality = staffConfig.configMaxQuality;
+                staffLightning3MovementSpeed = staffConfig.configMovementSpeed;
+                staffLightning3DamageLightning = staffConfig.configDamageLightning;
+                staffLightning3DamagePickaxe = staffConfig.configDamagePickaxe;
+                staffLightning3DamagePierce = staffConfig.configDamagePierce;
+                staffLightning3BlockArmor = staffConfig.configBlockArmor;
+                staffLightning3DeflectionForce = staffConfig.configDeflectionForce;
+                staffLightning3AttackForce = staffConfig.configAttackForce;
+                staffLightning3UseEitr = staffConfig.configUseEitr;
+                staffLightning3UseEitrSecondary = staffConfig.configUseEitrSecondary;
+                staffLightning3SecondaryCooldown = staffConfig.configSecondaryCooldown;
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise Staff of Lightning config: " + error);
+            }
         }
     }
 }

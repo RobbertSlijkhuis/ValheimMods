@@ -1,4 +1,6 @@
-﻿using BepInEx;
+﻿#nullable enable
+
+using BepInEx;
 using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
@@ -18,9 +20,9 @@ namespace MagicExtended.Helpers
         /**
          * Convert the recipe and return a RequirementConfig array
          */
-        public static RequirementConfig[] GetAsRequirementConfigArray(string configRecipe, string upgradeRecipe, int multiplier)
+        public static RequirementConfig[]? GetAsRequirementConfigArray(string configRecipe, string? upgradeRecipe, int? multiplier)
         {
-            List<RequirementConfig> requirements = GetAsRequirementConfigList(configRecipe, upgradeRecipe, multiplier);
+            List<RequirementConfig>? requirements = GetAsRequirementConfigList(configRecipe, upgradeRecipe, multiplier);
 
             if (requirements == null)
                 return null;
@@ -31,11 +33,11 @@ namespace MagicExtended.Helpers
         /**
          * Convert the recipe and return a Piece.Requirement array
          */
-        public static Piece.Requirement[] GetAsPieceRequirementArray(string configRecipe, string upgradeRecipe, int multiplier)
+        public static Piece.Requirement[]? GetAsPieceRequirementArray(string configRecipe, string? upgradeRecipe, int? multiplier)
         {
             try
             {
-                List<RequirementConfig> list = GetAsRequirementConfigList(configRecipe, upgradeRecipe, multiplier);
+                List<RequirementConfig>? list = GetAsRequirementConfigList(configRecipe, upgradeRecipe, multiplier);
                 List<Piece.Requirement> pieceList = new List<Piece.Requirement>();
 
                 if (list == null)
@@ -51,8 +53,11 @@ namespace MagicExtended.Helpers
                     Piece.Requirement requirement = new Piece.Requirement();
                     requirement.m_resItem = item.GetComponent<ItemDrop>();
                     requirement.m_amount = entry.Amount;
-                    requirement.m_amountPerLevel = entry.AmountPerLevel;
                     requirement.m_recover = entry.Recover;
+
+                    if (upgradeRecipe != null && multiplier != null)
+                        requirement.m_amountPerLevel = entry.AmountPerLevel;
+
                     pieceList.Add(requirement);
                 }
 
@@ -68,18 +73,19 @@ namespace MagicExtended.Helpers
         /**
          * Convert the recipe and return a RequirementConfig list
          */
-        public static List<RequirementConfig> GetAsRequirementConfigList(string configRecipe, string upgradeRecipe, int multiplier)
+        public static List<RequirementConfig>? GetAsRequirementConfigList(string configRecipe, string? upgradeRecipe, int? multiplier)
         {
             try
             {
                 configRecipe = nukeWhiteSpaceRegex.Replace(configRecipe, "");
-                upgradeRecipe = nukeWhiteSpaceRegex.Replace(upgradeRecipe, "");
+
+                if (upgradeRecipe != null)
+                    upgradeRecipe = nukeWhiteSpaceRegex.Replace(upgradeRecipe, "");
 
                 if (!IsConfigRecipeValid(configRecipe, upgradeRecipe))
                 {
                     Jotunn.Logger.LogWarning("Config is not valid, please check the values");
                     return null;
-                    // throw new Exception("Config is not valid, please check the values!");
                 }
 
                 List<RequirementConfig> list = new List<RequirementConfig>();
@@ -93,7 +99,7 @@ namespace MagicExtended.Helpers
                     requirement.Amount = Int32.Parse(recipeEntryValues[1]);
                     requirement.Recover = true;
 
-                    if (!upgradeRecipe.IsNullOrWhiteSpace())
+                    if (upgradeRecipe != null && !upgradeRecipe.IsNullOrWhiteSpace() && multiplier != null)
                     {
                         string[] upgradeEntries = upgradeRecipe.Trim().Split(',');
                         foreach (string upgradeEntry in upgradeEntries)
@@ -102,7 +108,7 @@ namespace MagicExtended.Helpers
 
                             if (requirement.Item == upgradeEntryValues[0])
                             {
-                                requirement.AmountPerLevel = Int32.Parse(upgradeEntryValues[1]) * multiplier;
+                                requirement.AmountPerLevel = Int32.Parse(upgradeEntryValues[1]) * (int)multiplier;
                                 break;
                             }
                         }
@@ -123,7 +129,7 @@ namespace MagicExtended.Helpers
         /**
          * Check wether the recipe & upgrade recipe are valid
          */
-        public static bool IsConfigRecipeValid(string configRecipe, string upgradeRecipe)
+        public static bool IsConfigRecipeValid(string configRecipe, string? upgradeRecipe)
         {
             try
             {
@@ -140,7 +146,7 @@ namespace MagicExtended.Helpers
                     }
                 }
 
-                if (upgradeRecipe.IsNullOrWhiteSpace())
+                if (upgradeRecipe == null || upgradeRecipe.IsNullOrWhiteSpace())
                     return isValid;
 
                 string[] upgradeEntries = upgradeRecipe.Split(',');
@@ -178,13 +184,16 @@ namespace MagicExtended.Helpers
                 switch (options.updateType)
                 {
                     case RecipeUpdateType.Enable:
-                        recipe.Recipe.m_enabled = options.enable;
+                        if (options.enable == null)
+                            throw new Exception("Enable is null");
+
+                        recipe.Recipe.m_enabled = (bool)options.enable;
                         break;
                     case RecipeUpdateType.Recipe:
-                        if (options.requirements == null || options.upgradeRequirements == null || options.upgradeMultiplier < 1)
-                            throw new Exception("Requirements, upgrade requirements or multiplier is null");
+                        if (options.requirements == null)
+                            throw new Exception("Requirements is null");
 
-                        Piece.Requirement[] requirements = GetAsPieceRequirementArray(options.requirements, options.upgradeRequirements, options.upgradeMultiplier);
+                        Piece.Requirement[]? requirements = GetAsPieceRequirementArray(options.requirements, options.upgradeRequirements, options.upgradeMultiplier);
 
                         if (requirements == null)
                         {
@@ -196,8 +205,8 @@ namespace MagicExtended.Helpers
                         recipe.Recipe.m_resources = requirements;
                         break;
                     case RecipeUpdateType.CraftingStation:
-                        if (options.craftingStation == null)
-                            throw new Exception("Craftingstation is null");
+                        if (options.craftingStation == null || options.craftingStation == "")
+                            throw new Exception("Craftingstation is null or empty string");
 
                         if (options.craftingStation == "None")
                         {
@@ -217,10 +226,10 @@ namespace MagicExtended.Helpers
                         }
                         break;
                     case RecipeUpdateType.MinRequiredStationLevel:
-                        if (options.requiredStationLevel < 1)
-                            throw new Exception("Required station level is lower then 1");
+                        if (options.requiredStationLevel == null || options.requiredStationLevel < 1)
+                            throw new Exception("Required station level is null or lower then 1");
 
-                        recipe.Recipe.m_minStationLevel = options.requiredStationLevel;
+                        recipe.Recipe.m_minStationLevel = (int)options.requiredStationLevel;
                         break;
                 }
             }

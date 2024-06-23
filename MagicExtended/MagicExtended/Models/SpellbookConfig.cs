@@ -20,8 +20,6 @@ namespace MagicExtended.Models
         public string craftingStation;
         public int minStationLevel;
         public string recipe;
-        public string recipeUpgrade;
-        public int recipeMultiplier;
         public float eitr;
         public float eitrRegen;
 
@@ -32,8 +30,6 @@ namespace MagicExtended.Models
         public ConfigEntry<string> configCraftingStation;
         public ConfigEntry<int> configMinStationLevel;
         public ConfigEntry<string> configRecipe;
-        public ConfigEntry<string> configRecipeUpgrade;
-        public ConfigEntry<int> configRecipeMultiplier;
         public ConfigEntry<float> configEitr;
         public ConfigEntry<float> configEitrRegen;
 
@@ -113,38 +109,6 @@ namespace MagicExtended.Models
                     name = this.recipeName,
                     updateType = RecipeUpdateType.Recipe,
                     requirements = this.configRecipe.Value,
-                    upgradeRequirements = this.configRecipeUpgrade.Value,
-                    upgradeMultiplier = this.configRecipeMultiplier.Value,
-                });
-            };
-
-            this.configRecipeUpgrade = Config.Bind(new ConfigDefinition(this.sectionName, "Upgrade costs"), this.recipeUpgrade,
-                new ConfigDescription("The costs to upgrade the item", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true }));
-            this.configRecipeUpgrade.SettingChanged += (obj, attr) =>
-            {
-                RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                {
-                    name = this.recipeName,
-                    updateType = RecipeUpdateType.Recipe,
-                    requirements = this.configRecipe.Value,
-                    upgradeRequirements = this.configRecipeUpgrade.Value,
-                    upgradeMultiplier = this.configRecipeMultiplier.Value,
-                });
-            };
-
-            this.configRecipeMultiplier = Config.Bind(new ConfigDefinition(this.sectionName, "Upgrade multiplier"), this.recipeMultiplier,
-                new ConfigDescription("The multiplier applied to the upgrade costs", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true }));
-            this.configRecipeMultiplier.SettingChanged += (obj, attr) =>
-            {
-                RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                {
-                    name = this.recipeName,
-                    updateType = RecipeUpdateType.Recipe,
-                    requirements = this.configRecipe.Value,
-                    upgradeRequirements = this.configRecipeUpgrade.Value,
-                    upgradeMultiplier = this.configRecipeMultiplier.Value,
                 });
             };
 

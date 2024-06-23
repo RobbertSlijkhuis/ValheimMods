@@ -1,4 +1,5 @@
 using BepInEx;
+using Jotunn;
 using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
@@ -30,6 +31,7 @@ namespace MagicExtended
         public static MagicExtended Instance;
 
         private AssetBundle magicExtendedBundle;
+        public GameObject staffEarth0Prefab;
         public GameObject staffEarth1Prefab;
         public GameObject staffEarth2Prefab;
         public GameObject staffEarth3Prefab;
@@ -39,17 +41,31 @@ namespace MagicExtended
         public GameObject staffFrost1Prefab;
         public GameObject staffFrost2Prefab;
         public GameObject staffFrost3Prefab;
+        public GameObject staffLightning1Prefab;
+        public GameObject staffLightning2Prefab;
         public GameObject staffLightning3Prefab;
 
         public GameObject simpleSpellbookPrefab;
         public GameObject advancedSpellbookPrefab;
         public GameObject masterSpellbookPrefab;
 
-        public CustomStatusEffect staffEarthRootCooldownEffect;
+        public GameObject projectileMushroomPrefab;
+
+        public GameObject magicalMushroomPrefab;
+        public GameObject magicalCookedMushroomPrefab;
+        public GameObject magicalMushroomPickablePrefab;
+        public GameObject gribSnowMushroomPrefab;
+        public GameObject gribSnowMushroomPickablePrefab;        
+        public GameObject bogMushroomPrefab;
+        public GameObject bogMushroomPickablePrefab;
+        public GameObject pircedMushroomPrefab;
+        public GameObject pircedMushroomPickablePrefab;
 
         //// Use this class to add your own localization to the game
         //// https://valheim-modding.github.io/Jotunn/tutorials/localization.html
         //public static CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();
+
+        // TODO: Disable certain abilities in dungeons because of hitting through walls or being completely ineffective
 
         private void Awake()
         {
@@ -60,13 +76,16 @@ namespace MagicExtended
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             PrefabManager.OnVanillaPrefabsAvailable += AddMaterials;
+            PrefabManager.OnVanillaPrefabsAvailable += AddFood;
             PrefabManager.OnVanillaPrefabsAvailable += AddEarthStaffs;
             PrefabManager.OnVanillaPrefabsAvailable += AddFireStaffs;
             PrefabManager.OnVanillaPrefabsAvailable += AddFrostStaffs;
             PrefabManager.OnVanillaPrefabsAvailable += AddLightningStaffs;
             PrefabManager.OnVanillaPrefabsAvailable += AddSpellbooks;
             PrefabManager.OnVanillaPrefabsAvailable += AddFenringArmor;
-
+            ZoneManager.OnVanillaVegetationAvailable += AddLocations;
+            
+            ZoneManager.OnVegetationRegistered += CheckLocations;
             // ItemManager.OnItemsRegistered += LogRecipes;
         }
 
@@ -79,6 +98,28 @@ namespace MagicExtended
 
         //    ItemManager.OnItemsRegistered -= LogRecipes;
         //}
+
+        private void CheckLocations()
+        {
+            var pm = ZoneManager.Instance.GetZoneVegetation("Pickable_Thistle");
+            Jotunn.Logger.LogInfo(pm.m_biome);
+            Jotunn.Logger.LogInfo(pm.m_biomeArea);
+            Jotunn.Logger.LogInfo("Block Check: " + pm.m_blockCheck);
+            Jotunn.Logger.LogInfo("Force placement: " + pm.m_forcePlacement);
+            Jotunn.Logger.LogInfo("Group Radius: " + pm.m_groupRadius);
+            Jotunn.Logger.LogInfo("Group Size: " + pm.m_groupSizeMin + " - " + pm.m_groupSizeMax);
+            Jotunn.Logger.LogInfo("Random Scale: " + pm.m_scaleMin + " - " + pm.m_scaleMax);
+            Jotunn.Logger.LogInfo("In Forest: " + pm.m_inForest);
+            Jotunn.Logger.LogInfo("Forest Threshold: " + pm.m_forestTresholdMin + " - " + pm.m_forestTresholdMax);
+            Jotunn.Logger.LogInfo("Distance form similar: " + pm.m_surroundCheckDistance);
+            Jotunn.Logger.LogInfo("Min/max allowed in zone: " + pm.m_min + " - " + pm.m_max);
+
+            Jotunn.Logger.LogInfo("Altitude: " + pm.m_minAltitude + " - " + pm.m_maxAltitude);
+            Jotunn.Logger.LogInfo("Terrain Delta: " + pm.m_minTerrainDelta + " - " + pm.m_maxTerrainDelta);
+            Jotunn.Logger.LogInfo("Terrain Delta Radius: " + pm.m_terrainDeltaRadius);
+            Jotunn.Logger.LogInfo("Ocean Depth: " + pm.m_minOceanDepth + " - " + pm.m_maxOceanDepth);
+            Jotunn.Logger.LogInfo("Tilt: " + pm.m_minTilt + " - " + pm.m_maxTilt);
+        }
 
         private void AddEarthStaffs()
         {
@@ -104,7 +145,35 @@ namespace MagicExtended
             List<EffectData> effectList = new List<EffectData> { effect };
             projComp.m_hitEffects.m_effectPrefabs = effectList.ToArray();
 
-            // Stone staff
+            // Earth0 staff
+            ItemConfig earth0Config = new ItemConfig();
+            earth0Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffEarth0Enable.Value : false;
+            earth0Config.CraftingStation = ConfigStaffs.staffEarth0CraftingStation.Value;
+            earth0Config.MinStationLevel = ConfigStaffs.staffEarth0MinStationLevel.Value;
+            RequirementConfig[] earth0Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffEarth0Recipe.Value, ConfigStaffs.staffEarth0RecipeUpgrade.Value, ConfigStaffs.staffEarth0RecipeMultiplier.Value);
+
+            if (earth0Requirements == null || earth0Requirements.Length == 0)
+                Jotunn.Logger.LogWarning("Could not resolve recipe for: StaffEarth0_DW");
+            else
+                earth0Config.Requirements = earth0Requirements;
+
+            ConfigHelper.PatchStats(staffEarth0Prefab, new PatchStatsOptions()
+            {
+                name = ConfigStaffs.staffEarth0Name.Value,
+                description = ConfigStaffs.staffEarth0Description.Value,
+                maxQuality = ConfigStaffs.staffEarth0MaxQuality.Value,
+                movementModifier = ConfigStaffs.staffEarth0MovementSpeed.Value,
+                blockPower = ConfigStaffs.staffEarth0BlockArmor.Value,
+                deflectionForce = ConfigStaffs.staffEarth0DeflectionForce.Value,
+                attackForce = ConfigStaffs.staffEarth0AttackForce.Value,
+                damageBlunt = ConfigStaffs.staffEarth0DamageBlunt.Value,
+                damageSpirit = ConfigStaffs.staffEarth0DamageSpirit.Value,
+                attackEitr = ConfigStaffs.staffEarth0UseEitr.Value,
+            });
+
+            ItemManager.Instance.AddItem(new CustomItem(staffEarth0Prefab, true, earth0Config));
+
+            // Earth1 staff
             ItemConfig earth1Config = new ItemConfig();
             earth1Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffEarth1Enable.Value : false;
             earth1Config.CraftingStation = ConfigStaffs.staffEarth1CraftingStation.Value;
@@ -244,7 +313,7 @@ namespace MagicExtended
                 deflectionForce = ConfigStaffs.staffFire2DeflectionForce.Value,
                 attackForce = ConfigStaffs.staffFire2AttackForce.Value,
                 damageBlunt = ConfigStaffs.staffFire2DamageBlunt.Value,
-                damageFire = ConfigStaffs.staffFire2DamageFire2.Value,
+                damageFire = ConfigStaffs.staffFire2DamageFire.Value,
                 attackEitr = ConfigStaffs.staffFire2UseEitr.Value,
                 secondaryAttackEitr = ConfigStaffs.staffFire2UseEitrSecondary.Value,
             });
@@ -273,47 +342,13 @@ namespace MagicExtended
                 deflectionForce = ConfigStaffs.staffFire3DeflectionForce.Value,
                 attackForce = ConfigStaffs.staffFire3AttackForce.Value,
                 damageBlunt = ConfigStaffs.staffFire3DamageBlunt.Value,
-                damageFire = ConfigStaffs.staffFire3DamageFire3.Value,
+                damageFire = ConfigStaffs.staffFire3DamageFire.Value,
                 attackEitr = ConfigStaffs.staffFire3UseEitr.Value,
                 secondaryAttackEitr = ConfigStaffs.staffFire3UseEitrSecondary.Value,
             });
 
             ItemManager.Instance.AddItem(new CustomItem(staffFire3Prefab, true, fire3Config));
             PrefabManager.OnVanillaPrefabsAvailable -= AddFireStaffs;
-        }
-
-        private void AddLightningStaffs()
-        {
-            // Lightning3 staff
-            ItemConfig lightning3Config = new ItemConfig();
-            lightning3Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffLightning3Enable.Value : false;
-            lightning3Config.CraftingStation = ConfigStaffs.staffLightning3CraftingStation.Value;
-            lightning3Config.MinStationLevel = ConfigStaffs.staffLightning3MinStationLevel.Value;
-            RequirementConfig[] lightning3Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffLightning3Recipe.Value, ConfigStaffs.staffLightning3RecipeUpgrade.Value, ConfigStaffs.staffLightning3RecipeMultiplier.Value);
-
-            if (lightning3Requirements == null || lightning3Requirements.Length == 0)
-                Jotunn.Logger.LogWarning("Could not resolve recipe for: StaffLightning3_DW");
-            else
-                lightning3Config.Requirements = lightning3Requirements;
-
-            ConfigHelper.PatchStats(staffLightning3Prefab, new PatchStatsOptions()
-            {
-                name = ConfigStaffs.staffLightning3Name.Value,
-                description = ConfigStaffs.staffLightning3Description.Value,
-                maxQuality = ConfigStaffs.staffLightning3MaxQuality.Value,
-                movementModifier = ConfigStaffs.staffLightning3MovementSpeed.Value,
-                blockPower = ConfigStaffs.staffLightning3BlockArmor.Value,
-                deflectionForce = ConfigStaffs.staffLightning3DeflectionForce.Value,
-                attackForce = ConfigStaffs.staffLightning3AttackForce.Value,
-                damagePickaxe = ConfigStaffs.staffLightning3DamagePickaxe.Value,
-                damagePierce = ConfigStaffs.staffLightning3DamagePierce.Value,
-                damageLightning = ConfigStaffs.staffLightning3DamageLightning.Value,
-                attackEitr = ConfigStaffs.staffLightning3UseEitr.Value,
-                secondaryAttackEitr = ConfigStaffs.staffLightning3UseEitrSecondary.Value,
-            });
-
-            ItemManager.Instance.AddItem(new CustomItem(staffLightning3Prefab, true, lightning3Config));
-            PrefabManager.OnVanillaPrefabsAvailable -= AddLightningStaffs;
         }
 
         private void AddFrostStaffs()
@@ -406,6 +441,99 @@ namespace MagicExtended
             PrefabManager.OnVanillaPrefabsAvailable -= AddFrostStaffs;
         }
 
+        private void AddLightningStaffs()
+        {
+            // Lightning1 staff
+            ItemConfig lightning1Config = new ItemConfig();
+            lightning1Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffLightning1Enable.Value : false;
+            lightning1Config.CraftingStation = ConfigStaffs.staffLightning1CraftingStation.Value;
+            lightning1Config.MinStationLevel = ConfigStaffs.staffLightning1MinStationLevel.Value;
+            RequirementConfig[] lightning1Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffLightning1Recipe.Value, ConfigStaffs.staffLightning1RecipeUpgrade.Value, ConfigStaffs.staffLightning1RecipeMultiplier.Value);
+
+            if (lightning1Requirements == null || lightning1Requirements.Length == 0)
+                Jotunn.Logger.LogWarning("Could not resolve recipe for: StaffLightning1_DW");
+            else
+                lightning1Config.Requirements = lightning1Requirements;
+
+            ConfigHelper.PatchStats(staffLightning1Prefab, new PatchStatsOptions()
+            {
+                name = ConfigStaffs.staffLightning1Name.Value,
+                description = ConfigStaffs.staffLightning1Description.Value,
+                maxQuality = ConfigStaffs.staffLightning1MaxQuality.Value,
+                movementModifier = ConfigStaffs.staffLightning1MovementSpeed.Value,
+                blockPower = ConfigStaffs.staffLightning1BlockArmor.Value,
+                deflectionForce = ConfigStaffs.staffLightning1DeflectionForce.Value,
+                attackForce = ConfigStaffs.staffLightning1AttackForce.Value,
+                damagePickaxe = ConfigStaffs.staffLightning1DamagePickaxe.Value,
+                damagePierce = ConfigStaffs.staffLightning1DamagePierce.Value,
+                damageLightning = ConfigStaffs.staffLightning1DamageLightning.Value,
+                attackEitr = ConfigStaffs.staffLightning1UseEitr.Value,
+            });
+
+            ItemManager.Instance.AddItem(new CustomItem(staffLightning1Prefab, true, lightning1Config));
+
+            // Lightning2 staff
+            ItemConfig lightning2Config = new ItemConfig();
+            lightning2Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffLightning2Enable.Value : false;
+            lightning2Config.CraftingStation = ConfigStaffs.staffLightning2CraftingStation.Value;
+            lightning2Config.MinStationLevel = ConfigStaffs.staffLightning2MinStationLevel.Value;
+            RequirementConfig[] lightning2Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffLightning2Recipe.Value, ConfigStaffs.staffLightning2RecipeUpgrade.Value, ConfigStaffs.staffLightning2RecipeMultiplier.Value);
+
+            if (lightning2Requirements == null || lightning2Requirements.Length == 0)
+                Jotunn.Logger.LogWarning("Could not resolve recipe for: StaffLightning2_DW");
+            else
+                lightning2Config.Requirements = lightning2Requirements;
+
+            ConfigHelper.PatchStats(staffLightning2Prefab, new PatchStatsOptions()
+            {
+                name = ConfigStaffs.staffLightning2Name.Value,
+                description = ConfigStaffs.staffLightning2Description.Value,
+                maxQuality = ConfigStaffs.staffLightning2MaxQuality.Value,
+                movementModifier = ConfigStaffs.staffLightning2MovementSpeed.Value,
+                blockPower = ConfigStaffs.staffLightning2BlockArmor.Value,
+                deflectionForce = ConfigStaffs.staffLightning2DeflectionForce.Value,
+                attackForce = ConfigStaffs.staffLightning2AttackForce.Value,
+                damagePickaxe = ConfigStaffs.staffLightning2DamagePickaxe.Value,
+                damagePierce = ConfigStaffs.staffLightning2DamagePierce.Value,
+                damageLightning = ConfigStaffs.staffLightning2DamageLightning.Value,
+                attackEitr = ConfigStaffs.staffLightning2UseEitr.Value,
+                secondaryAttackEitr = ConfigStaffs.staffLightning2UseEitrSecondary.Value,
+            });
+
+            ItemManager.Instance.AddItem(new CustomItem(staffLightning2Prefab, true, lightning2Config));
+
+            // Lightning3 staff
+            ItemConfig lightning3Config = new ItemConfig();
+            lightning3Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffLightning3Enable.Value : false;
+            lightning3Config.CraftingStation = ConfigStaffs.staffLightning3CraftingStation.Value;
+            lightning3Config.MinStationLevel = ConfigStaffs.staffLightning3MinStationLevel.Value;
+            RequirementConfig[] lightning3Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffLightning3Recipe.Value, ConfigStaffs.staffLightning3RecipeUpgrade.Value, ConfigStaffs.staffLightning3RecipeMultiplier.Value);
+
+            if (lightning3Requirements == null || lightning3Requirements.Length == 0)
+                Jotunn.Logger.LogWarning("Could not resolve recipe for: StaffLightning3_DW");
+            else
+                lightning3Config.Requirements = lightning3Requirements;
+
+            ConfigHelper.PatchStats(staffLightning3Prefab, new PatchStatsOptions()
+            {
+                name = ConfigStaffs.staffLightning3Name.Value,
+                description = ConfigStaffs.staffLightning3Description.Value,
+                maxQuality = ConfigStaffs.staffLightning3MaxQuality.Value,
+                movementModifier = ConfigStaffs.staffLightning3MovementSpeed.Value,
+                blockPower = ConfigStaffs.staffLightning3BlockArmor.Value,
+                deflectionForce = ConfigStaffs.staffLightning3DeflectionForce.Value,
+                attackForce = ConfigStaffs.staffLightning3AttackForce.Value,
+                damagePickaxe = ConfigStaffs.staffLightning3DamagePickaxe.Value,
+                damagePierce = ConfigStaffs.staffLightning3DamagePierce.Value,
+                damageLightning = ConfigStaffs.staffLightning3DamageLightning.Value,
+                attackEitr = ConfigStaffs.staffLightning3UseEitr.Value,
+                secondaryAttackEitr = ConfigStaffs.staffLightning3UseEitrSecondary.Value,
+            });
+
+            ItemManager.Instance.AddItem(new CustomItem(staffLightning3Prefab, true, lightning3Config));
+            PrefabManager.OnVanillaPrefabsAvailable -= AddLightningStaffs;
+        }
+
         private void AddSpellbooks()
         {
             // Simple Spellbook
@@ -413,7 +541,7 @@ namespace MagicExtended
             simpleConfig.Enabled = ConfigPlugin.configEnable.Value ? ConfigSpellbooks.simpleSpellbookEnable.Value : false;
             simpleConfig.CraftingStation = ConfigSpellbooks.simpleSpellbookCraftingStation.Value;
             simpleConfig.MinStationLevel = ConfigSpellbooks.simpleSpellbookMinStationLevel.Value;
-            RequirementConfig[] simpleRequirements = RecipeHelper.GetAsRequirementConfigArray(ConfigSpellbooks.simpleSpellbookRecipe.Value, ConfigSpellbooks.simpleSpellbookRecipeUpgrade.Value, ConfigSpellbooks.simpleSpellbookRecipeMultiplier.Value);
+            RequirementConfig[] simpleRequirements = RecipeHelper.GetAsRequirementConfigArray(ConfigSpellbooks.simpleSpellbookRecipe.Value, null, null);
 
             if (simpleRequirements == null || simpleRequirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: SimpleSpellbook_DW");
@@ -442,7 +570,7 @@ namespace MagicExtended
             advancedConfig.Enabled = ConfigPlugin.configEnable.Value ? ConfigSpellbooks.advancedSpellbookEnable.Value : false;
             advancedConfig.CraftingStation = ConfigSpellbooks.advancedSpellbookCraftingStation.Value;
             advancedConfig.MinStationLevel = ConfigSpellbooks.advancedSpellbookMinStationLevel.Value;
-            RequirementConfig[] advancedRequirements = RecipeHelper.GetAsRequirementConfigArray(ConfigSpellbooks.advancedSpellbookRecipe.Value, ConfigSpellbooks.advancedSpellbookRecipeUpgrade.Value, ConfigSpellbooks.advancedSpellbookRecipeMultiplier.Value);
+            RequirementConfig[] advancedRequirements = RecipeHelper.GetAsRequirementConfigArray(ConfigSpellbooks.advancedSpellbookRecipe.Value, null, null);
 
             if (advancedRequirements == null || advancedRequirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: AdvancedSpellbook_DW");
@@ -471,7 +599,7 @@ namespace MagicExtended
             masterConfig.Enabled = ConfigPlugin.configEnable.Value ? ConfigSpellbooks.masterSpellbookEnable.Value : false;
             masterConfig.CraftingStation = ConfigSpellbooks.masterSpellbookCraftingStation.Value;
             masterConfig.MinStationLevel = ConfigSpellbooks.masterSpellbookMinStationLevel.Value;
-            RequirementConfig[] masterRequirements = RecipeHelper.GetAsRequirementConfigArray(ConfigSpellbooks.masterSpellbookRecipe.Value, ConfigSpellbooks.masterSpellbookRecipeUpgrade.Value, ConfigSpellbooks.masterSpellbookRecipeMultiplier.Value);
+            RequirementConfig[] masterRequirements = RecipeHelper.GetAsRequirementConfigArray(ConfigSpellbooks.masterSpellbookRecipe.Value, null, null);
 
             if (masterRequirements == null || masterRequirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: MasterSpellbook_DW");
@@ -522,6 +650,181 @@ namespace MagicExtended
             ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("CrudeEitr_DW"), true, crudeConfig));
             ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("FineEitr_DW"), true, fineConfig));
             PrefabManager.OnVanillaPrefabsAvailable -= AddMaterials;
+        }
+
+        private void AddFood()
+        {
+            //// Increase size to find them better
+            //Transform visual = magicalMushroomPickablePrefab.transform.Find("visual");
+            //visual.localScale = new Vector3(3, 3, 3);
+
+            //Transform visualGribSnow = gribSnowMushroomPickablePrefab.transform.Find("visual");
+            //visualGribSnow.localScale = new Vector3(3, 3, 3);
+
+            //Transform visualBog = bogMushroomPickablePrefab.transform.Find("visual");
+            //Transform visualBogFoot = bogMushroomPickablePrefab.transform.Find("bogfoot");
+            //visualBog.localScale = new Vector3(3, 3, 3);
+            //visualBogFoot.localScale = new Vector3(3, 3, 3);
+
+            ItemConfig magicMushroomConfig = new ItemConfig();
+            magicMushroomConfig.Name = "Magical Mushroom";
+            magicMushroomConfig.Description = "An oddly blue colored mushroom with a soft glow.";
+            magicMushroomConfig.Weight = 0.1f;
+
+            ItemConfig cookedMagicMushroomConfig = new ItemConfig();
+            cookedMagicMushroomConfig.Name = "Cooked Magical Mushroom";
+            cookedMagicMushroomConfig.Description = "They say you should be carefull eating unknown mushrooms... but it looks so delicious!";
+            cookedMagicMushroomConfig.Weight = 0.1f;
+
+            ItemConfig gribsnowConfig = new ItemConfig();
+            gribsnowConfig.Name = "Gribsnow";
+            gribsnowConfig.Description = "The name completely does not imply its effect... does it?";
+            gribsnowConfig.Weight = 0.1f;
+
+            ItemConfig bogMushroomConfig = new ItemConfig();
+            bogMushroomConfig.Name = "Bog Mushroom";
+            bogMushroomConfig.Description = "They taste as vile as they look, you better cook these first!";
+            bogMushroomConfig.Weight = 0.1f;
+
+            ItemConfig pircedMushroomConfig = new ItemConfig();
+            pircedMushroomConfig.Name = "Pirced Mushroom";
+            pircedMushroomConfig.Description = "They have a nice crunch and teste oddly sweet.";
+            pircedMushroomConfig.Weight = 0.1f;
+
+            CookingConversionConfig cookedMushroomConfig = new CookingConversionConfig();
+            cookedMushroomConfig.FromItem = "MagicalMushroom_DW";
+            cookedMushroomConfig.ToItem = "CookedMagicalMushroom_DW";
+            cookedMushroomConfig.Station = CookingStations.CookingStation;
+            cookedMushroomConfig.CookTime = 20f;
+
+            ItemManager.Instance.AddItem(new CustomItem(magicalMushroomPrefab, true, magicMushroomConfig));
+            ItemManager.Instance.AddItem(new CustomItem(magicalCookedMushroomPrefab, true, cookedMagicMushroomConfig));
+            ItemManager.Instance.AddItem(new CustomItem(gribSnowMushroomPrefab, true, gribsnowConfig));
+            ItemManager.Instance.AddItem(new CustomItem(bogMushroomPrefab, true, bogMushroomConfig));
+            ItemManager.Instance.AddItem(new CustomItem(pircedMushroomPrefab, true, pircedMushroomConfig));
+            ItemManager.Instance.AddItemConversion(new CustomItemConversion(cookedMushroomConfig));
+            PrefabManager.OnVanillaPrefabsAvailable -= AddFood;
+        }
+
+        private void AddLocations()
+        {
+            // Magical Mushroom
+            List<Heightmap.Biome> magicMushroomBiomeList = new List<Heightmap.Biome>();
+            magicMushroomBiomeList.Add(Heightmap.Biome.Meadows);
+            magicMushroomBiomeList.Add(Heightmap.Biome.BlackForest);
+
+            VegetationConfig magicMushroomVegetationConfig = new VegetationConfig();
+            magicMushroomVegetationConfig.Biome = ZoneManager.AnyBiomeOf(magicMushroomBiomeList.ToArray());
+            magicMushroomVegetationConfig.BiomeArea = Heightmap.BiomeArea.Everything;
+            magicMushroomVegetationConfig.BlockCheck = true;
+            magicMushroomVegetationConfig.GroupRadius = 5;
+            magicMushroomVegetationConfig.GroupSizeMin = 3;
+            magicMushroomVegetationConfig.GroupSizeMax = 6;
+            magicMushroomVegetationConfig.ScaleMin = 1f;
+            magicMushroomVegetationConfig.ScaleMax = 1.5f;
+            magicMushroomVegetationConfig.InForest = true;
+            magicMushroomVegetationConfig.ForestThresholdMin = 0;
+            magicMushroomVegetationConfig.ForestThresholdMax = 1;
+            magicMushroomVegetationConfig.Min = 1;
+            magicMushroomVegetationConfig.Max = 2;
+            magicMushroomVegetationConfig.MinAltitude = 1f;
+            magicMushroomVegetationConfig.MaxAltitude = 1000f;
+            magicMushroomVegetationConfig.MinTerrainDelta = 0f;
+            magicMushroomVegetationConfig.MaxTerrainDelta = 2f;
+            magicMushroomVegetationConfig.TerrainDeltaRadius = 0f;
+            magicMushroomVegetationConfig.MinOceanDepth = 0f;
+            magicMushroomVegetationConfig.MaxOceanDepth = 2f;
+            magicMushroomVegetationConfig.MinTilt = 0f;
+            magicMushroomVegetationConfig.MaxTilt = 25;
+            ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(magicalMushroomPickablePrefab, true, magicMushroomVegetationConfig));
+
+            // GribSnow
+            List<Heightmap.Biome> gribSnowBiomeList = new List<Heightmap.Biome>();
+            gribSnowBiomeList.Add(Heightmap.Biome.BlackForest);
+
+            VegetationConfig gribSnowVegetationConfig = new VegetationConfig();
+            gribSnowVegetationConfig.Biome = ZoneManager.AnyBiomeOf(gribSnowBiomeList.ToArray());
+            gribSnowVegetationConfig.BiomeArea = Heightmap.BiomeArea.Everything;
+            gribSnowVegetationConfig.BlockCheck = true;
+            gribSnowVegetationConfig.GroupRadius = 5;
+            gribSnowVegetationConfig.GroupSizeMin = 1;
+            gribSnowVegetationConfig.GroupSizeMax = 3;
+            gribSnowVegetationConfig.ScaleMin = 1f;
+            gribSnowVegetationConfig.ScaleMax = 1.5f;
+            gribSnowVegetationConfig.InForest = true;
+            gribSnowVegetationConfig.ForestThresholdMin = 0;
+            gribSnowVegetationConfig.ForestThresholdMax = 1;
+            gribSnowVegetationConfig.Min = 1;
+            gribSnowVegetationConfig.Max = 2;
+            gribSnowVegetationConfig.MinAltitude = 1f;
+            gribSnowVegetationConfig.MaxAltitude = 1000f;
+            gribSnowVegetationConfig.MinTerrainDelta = 0f;
+            gribSnowVegetationConfig.MaxTerrainDelta = 2f;
+            gribSnowVegetationConfig.TerrainDeltaRadius = 0f;
+            gribSnowVegetationConfig.MinOceanDepth = 0f;
+            gribSnowVegetationConfig.MaxOceanDepth = 2f;
+            gribSnowVegetationConfig.MinTilt = 0f;
+            gribSnowVegetationConfig.MaxTilt = 25;
+            ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(gribSnowMushroomPickablePrefab, true, gribSnowVegetationConfig));
+
+            // Bog Mushroom
+            List<Heightmap.Biome> bogMushroomBiomeList = new List<Heightmap.Biome>();
+            bogMushroomBiomeList.Add(Heightmap.Biome.Swamp);
+
+            VegetationConfig bogMushroomVegetationConfig = new VegetationConfig();
+            bogMushroomVegetationConfig.Biome = ZoneManager.AnyBiomeOf(bogMushroomBiomeList.ToArray());
+            bogMushroomVegetationConfig.BiomeArea = Heightmap.BiomeArea.Median;
+            bogMushroomVegetationConfig.BlockCheck = true;
+            bogMushroomVegetationConfig.GroupRadius = 4;
+            bogMushroomVegetationConfig.GroupSizeMin = 2;
+            bogMushroomVegetationConfig.GroupSizeMax = 5;
+            bogMushroomVegetationConfig.ScaleMin = 0.5f;
+            bogMushroomVegetationConfig.ScaleMax = 1f;
+            bogMushroomVegetationConfig.InForest = false;
+            bogMushroomVegetationConfig.ForestThresholdMin = 1f;
+            bogMushroomVegetationConfig.ForestThresholdMax = 1.15f;
+            bogMushroomVegetationConfig.Min = 1;
+            bogMushroomVegetationConfig.Max = 2;
+            bogMushroomVegetationConfig.MinAltitude = 0f;
+            bogMushroomVegetationConfig.MaxAltitude = 1000f;
+            bogMushroomVegetationConfig.MinTerrainDelta = 0f;
+            bogMushroomVegetationConfig.MaxTerrainDelta = 2f;
+            bogMushroomVegetationConfig.TerrainDeltaRadius = 0f;
+            bogMushroomVegetationConfig.MinOceanDepth = 0f;
+            bogMushroomVegetationConfig.MaxOceanDepth = 0f;
+            bogMushroomVegetationConfig.MinTilt = 0f;
+            bogMushroomVegetationConfig.MaxTilt = 20;
+            ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(bogMushroomPickablePrefab, true, bogMushroomVegetationConfig));
+
+            // pirced Mushroom
+            List<Heightmap.Biome> pircedMushroomBiomeList = new List<Heightmap.Biome>();
+            pircedMushroomBiomeList.Add(Heightmap.Biome.Mountain);
+
+            VegetationConfig pircedMushroomVegetationConfig = new VegetationConfig();
+            pircedMushroomVegetationConfig.Biome = ZoneManager.AnyBiomeOf(pircedMushroomBiomeList.ToArray());
+            pircedMushroomVegetationConfig.BiomeArea = Heightmap.BiomeArea.Median;
+            pircedMushroomVegetationConfig.BlockCheck = true;
+            pircedMushroomVegetationConfig.GroupRadius = 4;
+            pircedMushroomVegetationConfig.GroupSizeMin = 2;
+            pircedMushroomVegetationConfig.GroupSizeMax = 5;
+            pircedMushroomVegetationConfig.ScaleMin = 0.5f;
+            pircedMushroomVegetationConfig.ScaleMax = 1f;
+            pircedMushroomVegetationConfig.InForest = false;
+            pircedMushroomVegetationConfig.ForestThresholdMin = 1f;
+            pircedMushroomVegetationConfig.ForestThresholdMax = 1.15f;
+            pircedMushroomVegetationConfig.Min = 1;
+            pircedMushroomVegetationConfig.Max = 2;
+            pircedMushroomVegetationConfig.MinAltitude = 0f;
+            pircedMushroomVegetationConfig.MaxAltitude = 1000f;
+            pircedMushroomVegetationConfig.MinTerrainDelta = 0f;
+            pircedMushroomVegetationConfig.MaxTerrainDelta = 2f;
+            pircedMushroomVegetationConfig.TerrainDeltaRadius = 0f;
+            pircedMushroomVegetationConfig.MinOceanDepth = 0f;
+            pircedMushroomVegetationConfig.MaxOceanDepth = 0f;
+            pircedMushroomVegetationConfig.MinTilt = 0f;
+            pircedMushroomVegetationConfig.MaxTilt = 20;
+            ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(pircedMushroomPickablePrefab, true, pircedMushroomVegetationConfig));
+            ZoneManager.OnVanillaVegetationAvailable -= AddLocations;
         }
 
         private void AddFenringArmor()
@@ -612,8 +915,19 @@ namespace MagicExtended
             cooldownEffect.m_stopMessage = "";
             cooldownEffect.m_tooltip = "Be patient!";
             cooldownEffect.m_ttl = ConfigStaffs.staffEarth3SecondaryCooldown.Value;
-            staffEarthRootCooldownEffect = new CustomStatusEffect(cooldownEffect, fixReference: false);
-            ItemManager.Instance.AddStatusEffect(staffEarthRootCooldownEffect);
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(cooldownEffect, fixReference: false));
+
+            StatusEffect exhaustAndFhoulMagicEffect = ScriptableObject.CreateInstance<StatusEffect>();
+            exhaustAndFhoulMagicEffect.name = "ExhaustAndFoulMagicEffect_DW";
+            exhaustAndFhoulMagicEffect.m_name = "Exhausted by foul magic";
+            exhaustAndFhoulMagicEffect.m_icon = magicExtendedBundle.LoadAsset<Sprite>("staffEarthSprite");
+            exhaustAndFhoulMagicEffect.m_startMessageType = MessageHud.MessageType.Center;
+            exhaustAndFhoulMagicEffect.m_startMessage = "";
+            exhaustAndFhoulMagicEffect.m_stopMessageType = MessageHud.MessageType.Center;
+            exhaustAndFhoulMagicEffect.m_stopMessage = "";
+            exhaustAndFhoulMagicEffect.m_tooltip = "You are exhausted by the use of foul magic, reducing your strength and magic effectiveness";
+            exhaustAndFhoulMagicEffect.m_ttl = 300;
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(exhaustAndFhoulMagicEffect, fixReference: false));
         }
 
         /**
@@ -624,17 +938,22 @@ namespace MagicExtended
             magicExtendedBundle = AssetUtils.LoadAssetBundleFromResources("magicextended_dw");          
 
             // Earth assets
+            staffEarth0Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffEarth0_DW");
             staffEarth1Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffEarth1_DW");
             staffEarth2Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffEarth2_DW");
             staffEarth3Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffEarth3_DW");
+            projectileMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("staff_earth_projectile_mushroom_DW");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_earth_projectile_DW"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(projectileMushroomPrefab, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_earth_projectile_secondary_DW"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_earth_projectile_spawn_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_earth_script_big_stone_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_earth_script_roots_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("TentaRoot_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_earth_burst_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_earth_windup_DW"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_earth_projectile_spawn_DW"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_mushroom_projectile_hit_DW"), true));
+
 
             // Fire assets
             staffFire1Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffFire1_DW");
@@ -651,15 +970,18 @@ namespace MagicExtended
             staffFrost3Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffFrost3_DW");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_frost_projectile_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_frost_projectile_secondary_DW"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_frost_projectile_spawn_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_frost_script_iceshards_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_frost_nova_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_frost_windup_DW"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_frost_projectile_spawn_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_frost_nova_AOE_DW"), true));
 
             // Lightning
+            staffLightning1Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffLightning1_DW");
+            staffLightning2Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffLightning2_DW");
             staffLightning3Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffLightning3_DW");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_lightning_projectile_DW"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_lightning_nova_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_lightning_AOE_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_lightning_windup_DW"), true));
 
@@ -667,6 +989,21 @@ namespace MagicExtended
             simpleSpellbookPrefab = magicExtendedBundle.LoadAsset<GameObject>("SimpleSpellbook_DW");
             advancedSpellbookPrefab = magicExtendedBundle.LoadAsset<GameObject>("AdvancedSpellbook_DW");
             masterSpellbookPrefab = magicExtendedBundle.LoadAsset<GameObject>("MasterSpellbook_DW");
+
+            // Food
+            magicalMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("MagicalMushroom_DW");
+            magicalCookedMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("CookedMagicalMushroom_DW");
+            magicalMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_MagicalMushroom_DW");
+            gribSnowMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("GribSnow_DW");
+            gribSnowMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_GribSnow_DW");
+            bogMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("BogMushroom_DW");
+            bogMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_BogMushroom_DW");
+            pircedMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("PircedMushroom_DW");
+            pircedMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_PircedMushroom_DW");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicalMushroomPickablePrefab, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(gribSnowMushroomPickablePrefab, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(bogMushroomPickablePrefab, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(pircedMushroomPickablePrefab, true));
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using MagicExtended.Configs;
+using UnityEngine;
 
 namespace MagicExtended.Harmony
 {
@@ -10,10 +11,16 @@ namespace MagicExtended.Harmony
         [HarmonyPrefix]
         public static bool AttackStart_Prefix(Humanoid character, Attack __instance)
         {
-            if (__instance == null || character == null || __instance.m_drawStaminaDrain != 8901f)
+            if (__instance == null || character == null)
                 return true;
 
-            if (ConfigStaffs.staffEarth3SecondaryCooldown.Value == 0)
+            if (__instance.m_drawStaminaDrain == 8900f)
+            {
+                RandomizeMushroom();
+                return true;
+            }
+
+            if (__instance.m_drawStaminaDrain != 8901f || ConfigStaffs.staffEarth3SecondaryCooldown.Value == 0)
                 return true;
 
             bool hasEffect = character.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode("StaffEarth3Cooldown_DW"));
@@ -58,6 +65,61 @@ namespace MagicExtended.Harmony
                 return;
 
             eitr += amount;
+        }
+
+        private static void RandomizeMushroom()
+        {
+            Transform mushroom = MagicExtended.Instance.projectileMushroomPrefab.transform.Find("visual/Mushroom");
+            Transform mushroomBlue = MagicExtended.Instance.projectileMushroomPrefab.transform.Find("visual/MushroomBlue");
+            Transform mushroomYellow = MagicExtended.Instance.projectileMushroomPrefab.transform.Find("visual/MushroomYellow");
+            Transform branch = MagicExtended.Instance.projectileMushroomPrefab.transform.Find("visual/Branch");
+            Transform dandelion = MagicExtended.Instance.projectileMushroomPrefab.transform.Find("visual/Dandelion");
+            Transform stone = MagicExtended.Instance.projectileMushroomPrefab.transform.Find("visual/Stone");
+            Transform flint = MagicExtended.Instance.projectileMushroomPrefab.transform.Find("visual/Flint");
+            Transform bush = MagicExtended.Instance.projectileMushroomPrefab.transform.Find("visual/RaspberryBush");
+
+            mushroom.gameObject.SetActive(false);
+            mushroomBlue.gameObject.SetActive(false);
+            mushroomYellow.gameObject.SetActive(false);
+            branch.gameObject.SetActive(false);
+            dandelion.gameObject.SetActive(false);
+            stone.gameObject.SetActive(false);
+            flint.gameObject.SetActive(false);
+            bush.gameObject.SetActive(false);
+
+            int index = Random.Range(0, 8);
+
+            switch (index)
+            {
+                case 0:
+                    mushroom.gameObject.SetActive(true);
+                    break;
+                case 1:
+                    mushroomBlue.gameObject.SetActive(true);
+                    break;
+                case 2:
+                    mushroomYellow.gameObject.SetActive(true);
+                    break;
+                case 3:
+                    branch.gameObject.SetActive(true);
+                    break;
+                case 4:
+                    dandelion.gameObject.SetActive(true);
+                    break;
+                case 5:
+                    stone.gameObject.SetActive(true);
+                    break;
+                case 6:
+                    flint.gameObject.SetActive(true);
+                    break;
+                case 7:
+                    bush.gameObject.SetActive(true);
+                    break;
+                default:
+                    mushroom.gameObject.SetActive(true);
+                    break;
+            }
+
         }
     }
 }

@@ -212,9 +212,24 @@ namespace MagicExtended.Models
                 };
             }
 
+            if (this.damageFire > -1)
+            {
+                configDamageFire = Config.Bind(new ConfigDefinition(sectionName, "Attack damage fire"), this.damageFire,
+                    new ConfigDescription("Fire damage on the item", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                configDamageFire.SettingChanged += (obj, attr) =>
+                {
+                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
+                    {
+                        damageFire = configDamageFire.Value,
+                    });
+                };
+            }
+
+
             if (this.damageFrost > -1) {
                 configDamageFrost = Config.Bind(new ConfigDefinition(sectionName, "Attack damage frost"), this.damageFrost,
-                    new ConfigDescription("Pierce damage on the item", null,
+                    new ConfigDescription("Frost damage on the item", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
                 configDamageFrost.SettingChanged += (obj, attr) =>
                 {
@@ -225,15 +240,55 @@ namespace MagicExtended.Models
                 };
             }
 
+            if (this.damageLightning > -1) {
+                configDamageLightning = Config.Bind(new ConfigDefinition(sectionName, "Attack damage lightning"), this.damageLightning,
+                    new ConfigDescription("Lightning damage on the item", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                configDamageLightning.SettingChanged += (obj, attr) =>
+                {
+                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
+                    {
+                        damageLightning = configDamageLightning.Value,
+                    });
+                };
+            }
+
+            if (this.damagePickaxe > -1) {
+                configDamagePickaxe = Config.Bind(new ConfigDefinition(sectionName, "Attack damage pickaxe"), this.damagePickaxe,
+                    new ConfigDescription("Pickaxe damage on the item", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                        configDamagePickaxe.SettingChanged += (obj, attr) =>
+                {
+                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
+                    {
+                        damagePickaxe = configDamagePickaxe.Value,
+                    });
+                };
+            }
+
             if (this.damagePierce > -1) {
                 configDamagePierce = Config.Bind(new ConfigDefinition(sectionName, "Attack damage pierce"), this.damagePierce,
-                    new ConfigDescription("Frost damage on the item", null,
+                    new ConfigDescription("Pierce damage on the item", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
                 configDamagePierce.SettingChanged += (obj, attr) =>
                 {
                     ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
                     {
                         damagePierce = configDamagePierce.Value,
+                    });
+                };
+            }
+
+            if (this.damageSlash > -1)
+            {
+                configDamageSlash = Config.Bind(new ConfigDefinition(sectionName, "Attack damage slash"), this.damageSlash,
+                    new ConfigDescription("Slash damage on the item", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                        configDamageSlash.SettingChanged += (obj, attr) =>
+                {
+                    ConfigHelper.PatchStats(prefab, new PatchStatsOptions()
+                    {
+                        damageSlash = configDamageSlash.Value,
                     });
                 };
             }

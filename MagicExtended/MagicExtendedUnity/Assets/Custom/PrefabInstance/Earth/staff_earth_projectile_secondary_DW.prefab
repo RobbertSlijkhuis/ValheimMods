@@ -85,8 +85,8 @@ MonoBehaviour:
     m_blunt: 90
     m_slash: 0
     m_pierce: 0
-    m_chop: 20
-    m_pickaxe: 10
+    m_chop: 30
+    m_pickaxe: 30
     m_fire: 0
     m_frost: 0
     m_lightning: 0
@@ -99,12 +99,12 @@ MonoBehaviour:
   m_backstabBonus: 1
   m_statusEffect: 
   m_healthReturn: 0
-  m_canHitWater: 1
+  m_canHitWater: 0
   m_ttl: 8
   m_gravity: 0
   m_drag: 0
   m_rayRadius: 1
-  m_hitNoise: 50
+  m_hitNoise: 70
   m_doOwnerRaytest: 0
   m_stayAfterHitStatic: 1
   m_stayAfterHitDynamic: 0

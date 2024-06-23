@@ -10,7 +10,6 @@ namespace MagicExtended.Configs
         public static string sectionSimpleSpellbook = "30. Simple Spellbook";
         public static string simpleSpellbookRecipeName = "Recipe_SimpleSpellbook_DW";
         public static string simpleSpellbookDefaultRecipe = "TrollHide:5, Bronze:2, Resin:8, CrudeEitr_DW:4";
-        public static string simpleSpellbookDefaultUpgradeRecipe = "TrollHide:2, Bronze:1, Resin:3, CrudeEitr_DW:2";
 
         public static ConfigEntry<bool> simpleSpellbookEnable;
         public static ConfigEntry<string> simpleSpellbookName;
@@ -18,8 +17,6 @@ namespace MagicExtended.Configs
         public static ConfigEntry<string> simpleSpellbookCraftingStation;
         public static ConfigEntry<int> simpleSpellbookMinStationLevel;
         public static ConfigEntry<string> simpleSpellbookRecipe;
-        public static ConfigEntry<string> simpleSpellbookRecipeUpgrade;
-        public static ConfigEntry<int> simpleSpellbookRecipeMultiplier;
         public static ConfigEntry<float> simpleSpellbookEitr;
         public static ConfigEntry<float> simpleSpellbookEitrRegen;
 
@@ -27,7 +24,6 @@ namespace MagicExtended.Configs
         public static string sectionAdvancedSpellbook = "31. Advanced Spellbook";
         public static string advancedSpellbookRecipeName = "Recipe_AdvancedSpellbook_DW";
         public static string advancedSpellbookDefaultRecipe = "SimpleSpellbook_DW:1, Bronze:2, Resin:8, FineEitr_DW:4";
-        public static string advancedSpellbookDefaultUpgradeRecipe = "Bronze:1, Resin:3, FineEitr_DW:2";
 
         public static ConfigEntry<bool> advancedSpellbookEnable;
         public static ConfigEntry<string> advancedSpellbookName;
@@ -35,8 +31,6 @@ namespace MagicExtended.Configs
         public static ConfigEntry<string> advancedSpellbookCraftingStation;
         public static ConfigEntry<int> advancedSpellbookMinStationLevel;
         public static ConfigEntry<string> advancedSpellbookRecipe;
-        public static ConfigEntry<string> advancedSpellbookRecipeUpgrade;
-        public static ConfigEntry<int> advancedSpellbookRecipeMultiplier;
         public static ConfigEntry<float> advancedSpellbookEitr;
         public static ConfigEntry<float> advancedSpellbookEitrRegen;
 
@@ -44,7 +38,6 @@ namespace MagicExtended.Configs
         public static string sectionMasterSpellbook = "32. Master Spellbook";
         public static string masterSpellbookRecipeName = "Recipe_MasterSpellbook_DW";
         public static string masterSpellbookDefaultRecipe = "AdvancedSpellbook_DW:1, Bronze:2, Resin:8, Eitr:4";
-        public static string masterSpellbookDefaultUpgradeRecipe = "Bronze:1, Resin:3, Eitr:2";
 
         public static ConfigEntry<bool> masterSpellbookEnable;
         public static ConfigEntry<string> masterSpellbookName;
@@ -52,8 +45,6 @@ namespace MagicExtended.Configs
         public static ConfigEntry<string> masterSpellbookCraftingStation;
         public static ConfigEntry<int> masterSpellbookMinStationLevel;
         public static ConfigEntry<string> masterSpellbookRecipe;
-        public static ConfigEntry<string> masterSpellbookRecipeUpgrade;
-        public static ConfigEntry<int> masterSpellbookRecipeMultiplier;
         public static ConfigEntry<float> masterSpellbookEitr;
         public static ConfigEntry<float> masterSpellbookEitrRegen;
 
@@ -79,8 +70,6 @@ namespace MagicExtended.Configs
                     craftingStation = "Workbench",
                     minStationLevel = 3,
                     recipe = simpleSpellbookDefaultRecipe,
-                    recipeUpgrade = simpleSpellbookDefaultUpgradeRecipe,
-                    recipeMultiplier = 1,
                     eitr = 25f,
                     eitrRegen = 0.1f,
                 };
@@ -92,8 +81,6 @@ namespace MagicExtended.Configs
                 simpleSpellbookCraftingStation = spellbookConfig.configCraftingStation;
                 simpleSpellbookMinStationLevel = spellbookConfig.configMinStationLevel;
                 simpleSpellbookRecipe = spellbookConfig.configRecipe;
-                simpleSpellbookRecipeUpgrade = spellbookConfig.configRecipeUpgrade;
-                simpleSpellbookRecipeMultiplier = spellbookConfig.configRecipeMultiplier;
                 simpleSpellbookEitr = spellbookConfig.configEitr;
                 simpleSpellbookEitrRegen = spellbookConfig.configEitrRegen;
             }
@@ -118,8 +105,6 @@ namespace MagicExtended.Configs
                     craftingStation = "Workbench",
                     minStationLevel = 5,
                     recipe = advancedSpellbookDefaultRecipe,
-                    recipeUpgrade = advancedSpellbookDefaultUpgradeRecipe,
-                    recipeMultiplier = 1,
                     eitr = 45f,
                     eitrRegen = 0.2f,
                 };
@@ -131,8 +116,6 @@ namespace MagicExtended.Configs
                 advancedSpellbookCraftingStation = spellbookConfig.configCraftingStation;
                 advancedSpellbookMinStationLevel = spellbookConfig.configMinStationLevel;
                 advancedSpellbookRecipe = spellbookConfig.configRecipe;
-                advancedSpellbookRecipeUpgrade = spellbookConfig.configRecipeUpgrade;
-                advancedSpellbookRecipeMultiplier = spellbookConfig.configRecipeMultiplier;
                 advancedSpellbookEitr = spellbookConfig.configEitr;
                 advancedSpellbookEitrRegen = spellbookConfig.configEitrRegen;
             }
@@ -157,8 +140,6 @@ namespace MagicExtended.Configs
                     craftingStation = "GaldrTable",
                     minStationLevel = 1,
                     recipe = masterSpellbookDefaultRecipe,
-                    recipeUpgrade = masterSpellbookDefaultUpgradeRecipe,
-                    recipeMultiplier = 1,
                     eitr = 60f,
                     eitrRegen = 0.25f,
                 };
@@ -170,8 +151,6 @@ namespace MagicExtended.Configs
                 masterSpellbookCraftingStation = spellbookConfig.configCraftingStation;
                 masterSpellbookMinStationLevel = spellbookConfig.configMinStationLevel;
                 masterSpellbookRecipe = spellbookConfig.configRecipe;
-                masterSpellbookRecipeUpgrade = spellbookConfig.configRecipeUpgrade;
-                masterSpellbookRecipeMultiplier = spellbookConfig.configRecipeMultiplier;
                 masterSpellbookEitr = spellbookConfig.configEitr;
                 masterSpellbookEitrRegen = spellbookConfig.configEitrRegen;
             }
