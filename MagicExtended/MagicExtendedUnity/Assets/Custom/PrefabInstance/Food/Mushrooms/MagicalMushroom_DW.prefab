@@ -124,7 +124,7 @@ MonoBehaviour:
       m_dlc: 
       m_itemType: 2
       m_icons:
-      - {fileID: 21300000, guid: 700df7bd45f5eb54cb588e32473a1197, type: 2}
+      - {fileID: 21300000, guid: fbb9dbf750d46ec4190d14f119b6727c, type: 3}
       m_attachOverride: 0
       m_description: An oddly blue colored mushroom with a soft glow.
       m_maxStackSize: 50

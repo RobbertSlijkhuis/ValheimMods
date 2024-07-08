@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: FenringArmorHoodAshlands_DW
-  m_Shader: {fileID: 4800000, guid: 82448bf7f69a9334a87915d33e41c2aa, type: 3}
+  m_Shader: {fileID: 4800000, guid: 5a36a9f472e9c1349b04a07ce8d60067, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -28,7 +28,31 @@ Material:
         m_Texture: {fileID: 2800000, guid: e4cc8e9c538b1a943abc61569314ec30, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _ChestBumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ChestMetal:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ChestTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _LegsBumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _LegsMetal:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _LegsTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -41,6 +65,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NoiseGlowTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SkinBumpMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -61,6 +89,7 @@ Material:
     - _GlossyReflections: 1
     - _Hue: 0
     - _MetalGloss: 0
+    - _MetalGlossiness: 0.5
     - _Metallic: 0
     - _Mode: 0
     - _NoiseGlowEdge: 0
@@ -85,4 +114,5 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _MetalColor: {r: 1, g: 1, b: 1, a: 1}
     - _NoiseGlowColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SkinColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

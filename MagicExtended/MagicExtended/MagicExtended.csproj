@@ -58,10 +58,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configs\ConfigMaterials.cs" />
     <Compile Include="Configs\ConfigPlugin.cs" />
     <Compile Include="Configs\ConfigStaffs.cs" />
     <Compile Include="Harmony\Patches.cs" />
     <Compile Include="Helpers\ConfigHelper.cs" />
+    <Compile Include="Models\MaterialConfig.cs" />
     <Compile Include="Models\SpellbookConfig.cs" />
     <Compile Include="Models\PatchRecipeOptions.cs" />
     <Compile Include="Models\PatchStatsOptions.cs" />

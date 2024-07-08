@@ -1,0 +1,114 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1345532120, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+  m_Name: SetEffect_SwampMageArmor_DW
+  m_EditorClassIdentifier: 
+  m_name: Wraith Set
+  m_category: 
+  m_icon: {fileID: 21300000, guid: 012c110c33aad054381e8b23a8e701d6, type: 2}
+  m_flashIcon: 0
+  m_cooldownIcon: 0
+  m_tooltip: You've partly become a wraith yourself!
+  m_attributes: 0
+  m_startMessageType: 1
+  m_startMessage: 
+  m_stopMessageType: 1
+  m_stopMessage: 
+  m_repeatMessageType: 1
+  m_repeatMessage: 
+  m_repeatInterval: 0
+  m_ttl: 0
+  m_startEffects:
+    m_effectPrefabs:
+    - m_prefab: {fileID: 3697470573784717150, guid: 7eed36ade55ee94468ab08b5ab711363,
+        type: 3}
+      m_enabled: 1
+      m_variant: 0
+      m_attach: 1
+      m_follow: 1
+      m_inheritParentRotation: 0
+      m_inheritParentScale: 0
+      m_multiplyParentVisualScale: 0
+      m_randomRotation: 0
+      m_scale: 0
+      m_childTransform: 
+  m_stopEffects:
+    m_effectPrefabs:
+    - m_prefab: {fileID: 3697470573784717150, guid: 7eed36ade55ee94468ab08b5ab711363,
+        type: 3}
+      m_enabled: 1
+      m_variant: 0
+      m_attach: 1
+      m_follow: 1
+      m_inheritParentRotation: 0
+      m_inheritParentScale: 0
+      m_multiplyParentVisualScale: 0
+      m_randomRotation: 0
+      m_scale: 0
+      m_childTransform: 
+  m_cooldown: 0
+  m_activationAnimation: gpower
+  m_tickInterval: 0
+  m_healthPerTickMinHealthPercentage: 0
+  m_healthPerTick: 0
+  m_hitType: 0
+  m_healthOverTime: 0
+  m_healthOverTimeDuration: 0
+  m_healthOverTimeInterval: 0
+  m_staminaOverTime: 0
+  m_staminaOverTimeDuration: 0
+  m_staminaDrainPerSec: 0
+  m_runStaminaDrainModifier: 0
+  m_jumpStaminaUseModifier: 0
+  m_attackStaminaUseModifier: 0
+  m_blockStaminaUseModifier: 0
+  m_dodgeStaminaUseModifier: 0
+  m_swimStaminaUseModifier: 0
+  m_homeItemStaminaUseModifier: 0
+  m_sneakStaminaUseModifier: 0
+  m_runStaminaUseModifier: 0
+  m_eitrOverTime: 0
+  m_eitrOverTimeDuration: 0
+  m_healthRegenMultiplier: 1
+  m_staminaRegenMultiplier: 1
+  m_eitrRegenMultiplier: 1
+  m_raiseSkill: 0
+  m_raiseSkillModifier: 0
+  m_skillLevel: 0
+  m_skillLevelModifier: 0
+  m_skillLevel2: 0
+  m_skillLevelModifier2: 0
+  m_mods:
+  - m_type: 256
+    m_modifier: 1
+  m_modifyAttackSkill: 0
+  m_damageModifier: 1
+  m_percentigeDamageModifiers:
+    m_damage: 0
+    m_blunt: 0
+    m_slash: 0
+    m_pierce: 0
+    m_chop: 0
+    m_pickaxe: 0
+    m_fire: 0
+    m_frost: 0
+    m_lightning: 0
+    m_poison: 0
+    m_spirit: 0
+  m_noiseModifier: 0
+  m_stealthModifier: 0
+  m_addMaxCarryWeight: 0
+  m_speedModifier: 0
+  m_jumpModifier: {x: 0, y: 0, z: 0}
+  m_maxMaxFallSpeed: 0
+  m_fallDamageModifier: 0
+  m_windMovementModifier: 0

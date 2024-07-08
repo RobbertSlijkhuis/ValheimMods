@@ -106,6 +106,7 @@ namespace MagicExtended.Configs
                 });
             };
 
+            ConfigMaterials.Init();
             ConfigStaffs.Init();
             ConfigSpellbooks.Init();
         }

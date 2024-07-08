@@ -20,26 +20,7 @@ namespace MagicExtended.Harmony
                 return true;
             }
 
-            if (__instance.m_drawStaminaDrain != 8901f || ConfigStaffs.staffEarth3SecondaryCooldown.Value == 0)
-                return true;
-
-            bool hasEffect = character.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode("StaffEarth3Cooldown_DW"));
-
-            if (!hasEffect)
-            {
-                if (!character.HaveEitr(ConfigStaffs.staffEarth3UseEitrSecondary.Value))
-                {
-                    character.Message(MessageHud.MessageType.Center, "You do not have enough Eitr to perform this action!");
-                    return true;
-                }
-
-                StatusEffect statusEffect = ObjectDB.instance.GetStatusEffect(StringExtensionMethods.GetStableHashCode("StaffEarth3Cooldown_DW"));
-                character.GetSEMan().AddStatusEffect(statusEffect);
-                return true;
-            }
-
-            character.Message(MessageHud.MessageType.Center, "The staff is still recharging!");
-            return false;
+            return CheckForCooldown(character, __instance);
         }
 
         [HarmonyPostfix]
@@ -54,6 +35,92 @@ namespace MagicExtended.Harmony
             SetEitr(__instance, "MasterEitrStatusEffect_DW", ConfigSpellbooks.masterSpellbookEitr.Value, ref eitr);
         }
 
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Humanoid), "EquipItem")]
+        public static void EquipItem_Postfix(ItemDrop.ItemData item)
+        {
+            setEvilSmoke(item, true);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Humanoid), "UnequipItem")]
+        public static void UnequipItem_Postfix(ItemDrop.ItemData item)
+        {
+            setEvilSmoke(item, false);
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(StatusEffect), "RemoveStartEffects")]
+        public static bool RemoveStartEffects_Prefix(StatusEffect __instance)
+        {
+            if (__instance == null) 
+                return true;
+
+            if (__instance.name == "SwampMageArmorSet_DW")
+                return false;
+
+            return true;
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Humanoid), "UpdateEquipmentStatusEffects")]
+        public static void UpdateEquipmentStatusEffects_Postfix()
+        {
+            if (Player.m_localPlayer == null) return;
+
+            if (Player.m_localPlayer.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode("SwampMageArmorSet_DW")))
+            {
+                Jotunn.Logger.LogWarning("Wraith mode");
+                Player.m_localPlayer.gameObject.transform.Find("Visual/body").gameObject.SetActive(false);
+                Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/Neck/Head/Helmet_attach").gameObject.SetActive(false);
+                Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/Neck/Head/evil_smoke_face").gameObject.SetActive(true);
+            }
+            else
+            {
+                Jotunn.Logger.LogWarning("Normal mode");
+                Player.m_localPlayer.gameObject.transform.Find("Visual/body").gameObject.SetActive(true);
+                Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/Neck/Head/Helmet_attach").gameObject.SetActive(true);
+                Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/Neck/Head/evil_smoke_face").gameObject.SetActive(false);
+            }
+        }
+
+        private static void setEvilSmoke(ItemDrop.ItemData item, bool enable)
+        {
+            if (Player.m_localPlayer && item != null)
+            {
+                GameObject eyeLeft;
+                GameObject eyeRight;
+                GameObject evilSmoke;
+                GameObject evilSmokeLeft;
+                GameObject evilSmokeRight;
+                switch (item.m_shared.m_name)
+                {
+                    case "Swamp Hood":
+                        eyeLeft = Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/Neck/Head/eye_left").gameObject;
+                        eyeRight = Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/Neck/Head/eye_right").gameObject;
+                        evilSmoke = Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/Neck/Head/evil_smoke").gameObject;
+                        eyeLeft.SetActive(enable);
+                        eyeRight.SetActive(enable);
+                        evilSmoke.SetActive(enable);
+                        break;
+                    case "Swamp Chest":
+                        evilSmoke = Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/evil_smoke").gameObject;
+                        evilSmokeLeft = Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHand_Attach/evil_smoke_left").gameObject;
+                        evilSmokeRight = Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHand_Attach/evil_smoke_right").gameObject;
+                        evilSmoke.SetActive(enable);
+                        evilSmokeLeft.SetActive(enable);
+                        evilSmokeRight.SetActive(enable);
+                        break;
+                    case "Swamp Legs":
+                        evilSmokeLeft = Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/LeftUpLeg/LeftLeg/evil_smoke_left").gameObject;
+                        evilSmokeRight = Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/RightUpLeg/RightLeg/evil_smoke_right").gameObject;
+                        evilSmokeLeft.SetActive(enable);
+                        evilSmokeRight.SetActive(enable);
+                        break;
+                }
+            }
+        }
+
         private static void SetEitr(Player player, string name, float amount, ref float eitr)
         {
             if (player == null)
@@ -65,6 +132,43 @@ namespace MagicExtended.Harmony
                 return;
 
             eitr += amount;
+        }
+
+        private static bool CheckForCooldown(Character character, Attack attack)
+        {
+            float configCooldownValue = 0f;
+            float configEitrValue = 0f;
+            string effectName = "";
+            bool hasEffect = false;
+
+            switch (attack.m_drawStaminaDrain)
+            {
+                case 8901f:
+                    configCooldownValue = ConfigStaffs.staffEarth3SecondaryCooldown.Value;
+                    configEitrValue = ConfigStaffs.staffEarth3UseEitrSecondary.Value;
+                    effectName = "StaffEarth3Cooldown_DW";
+                    hasEffect = character.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode(effectName));
+                    break;
+            }
+
+            if (effectName == "" || configCooldownValue == 0f)
+                return true;
+
+            if (!hasEffect)
+            {
+                if (!character.HaveEitr(configEitrValue))
+                {
+                    character.Message(MessageHud.MessageType.Center, "You do not have enough Eitr to perform this action!");
+                    return true;
+                }
+
+                StatusEffect statusEffect = ObjectDB.instance.GetStatusEffect(StringExtensionMethods.GetStableHashCode(effectName));
+                character.GetSEMan().AddStatusEffect(statusEffect);
+                return true;
+            }
+
+            character.Message(MessageHud.MessageType.Center, "The staff is still recharging!");
+            return false;
         }
 
         private static void RandomizeMushroom()
@@ -119,7 +223,6 @@ namespace MagicExtended.Harmony
                     mushroom.gameObject.SetActive(true);
                     break;
             }
-
         }
     }
 }

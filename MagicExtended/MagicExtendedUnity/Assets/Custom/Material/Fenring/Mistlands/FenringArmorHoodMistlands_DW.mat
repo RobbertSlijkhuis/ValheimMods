@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: FenringArmorHoodMistlands_DW
-  m_Shader: {fileID: 4800000, guid: 82448bf7f69a9334a87915d33e41c2aa, type: 3}
+  m_Shader: {fileID: 4800000, guid: 5a36a9f472e9c1349b04a07ce8d60067, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []

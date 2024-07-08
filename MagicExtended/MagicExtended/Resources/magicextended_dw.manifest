@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 40852944
+CRC: 1601699709
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: cf12453b329b79a12b1d590b319f614a
+    Hash: d74bd73b26647755204c4592638ade73
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 02fad380d5ac7ce64b96ae765f2757f2
+    Hash: 46989f6bfadc9798a82507df417b66a9
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: cf12453b329b79a12b1d590b319f614a
+    Hash: d74bd73b26647755204c4592638ade73
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -29,6 +29,8 @@ ClassTypes:
 - Class: 48
   Script: {instanceID: 0}
 - Class: 54
+  Script: {instanceID: 0}
+- Class: 64
   Script: {instanceID: 0}
 - Class: 65
   Script: {instanceID: 0}
@@ -53,6 +55,8 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: 69470131, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 2140874873, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
@@ -67,9 +71,13 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 1999586283, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: 927819712, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: -1421768954, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: -923427435, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -83,8 +91,6 @@ ClassTypes:
 - Class: 114
   Script: {fileID: -179248876, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
   Script: {fileID: 313648218, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: -917656959, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
@@ -92,11 +98,15 @@ ClassTypes:
   Script: {fileID: 11500000, guid: 9205bc1bbacc90040a998067b5643d16, type: 3}
 - Class: 115
   Script: {instanceID: 0}
+- Class: 134
+  Script: {instanceID: 0}
 - Class: 135
   Script: {instanceID: 0}
 - Class: 136
   Script: {instanceID: 0}
 - Class: 137
+  Script: {instanceID: 0}
+- Class: 183
   Script: {instanceID: 0}
 - Class: 198
   Script: {instanceID: 0}
@@ -137,40 +147,55 @@ SerializeReferenceClassIdentifiers:
   ClassName: ItemDrop/ItemData/SharedData
 Assets:
 - Assets/Custom/PrefabInstance/Lightning/staff_lightning_projectile_DW.prefab
+- Assets/Custom/PrefabInstance/Armor/BlackForest/ArmorShamanChest_DW.prefab
 - Assets/Custom/PrefabInstance/Frost/staff_frost_script_iceshards_DW.prefab
+- Assets/Custom/Material/Armor/Ashlands/AshlandsMageArmorChest_red_DW.mat
 - Assets/Custom/PrefabInstance/Fenring/Ashlands/ArmorFenringChestAshlands_DW.prefab
 - Assets/Custom/PrefabInstance/Lightning/staff_lightning_nova_AOE_DW.prefab
+- Assets/Custom/PrefabInstance/Armor/Mountain/ArmorMountainChest_DW.prefab
 - Assets/Custom/PrefabInstance/Fire/StaffFire1_DW.prefab
-- Assets/CustomNEW/StaffMetalIceShards_DW.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/GribSnow_DW.prefab
 - Assets/Custom/PrefabInstance/Fire/staff_fire_projectile_DW.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/Pickable_GribSnow_DW.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/Pickable_PircedMushroom_DW.prefab
+- Assets/Custom/PrefabInstance/CharredRoot/ArmorCharredRootChest_DW.prefab
+- Assets/Custom/PrefabInstance/Armor/BlackForest/HelmetShaman_DW.prefab
 - Assets/Custom/PrefabInstance/Fenring/Ashlands/ArmorFenringLegsAshlands_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/StaffEarth2_DW.prefab
-- Assets/Custom/PrefabInstance/Earth/staff_earth_projectile_secondary_DW.prefab
+- Assets/Custom/Material/Armor/Ashlands/AshlandsMageArmor_red_DW.mat
+- Assets/Custom/PrefabInstance/Armor/Mountain/HelmetMountain_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/fx_staff_earth_windup_DW.prefab
 - Assets/Custom/PrefabInstance/Fire/fx_staff_fire_nova_DW.prefab
+- Assets/Custom/PrefabInstance/Earth/staff_earth_projectile_secondary_DW.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/Pickable_BogMushroom_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/StaffEarth1_DW.prefab
 - Assets/Custom/PrefabInstance/Frost/staff_frost_projectile_DW.prefab
 - Assets/Custom/PrefabInstance/Frost/fx_staff_frost_nova_DW.prefab
 - Assets/Custom/PrefabInstance/Lightning/StaffLightning1_DW.prefab
+- Assets/Custom/PrefabInstance/Armor/Swamp/ArmorMageSwampLegs_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/fx_mushroom_projectile_hit_DW.prefab
+- Assets/Custom/PrefabInstance/Armor/Mountain/CapeMountain_DW.prefab
+- Assets/Custom/PrefabInstance/Armor/Swamp/CapeMageSwamp_DW.prefab
 - Assets/Custom/PrefabInstance/Lightning/fx_staff_lightning_AOE_DW.prefab
+- Assets/Custom/PrefabInstance/Lantern/Lantern_DW.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/PircedMushroom_DW.prefab
+- Assets/Custom/PrefabInstance/Armor/Swamp/HelmetMageSwamp_DW.prefab
 - Assets/Custom/PrefabInstance/Lightning/StaffLightning2_DW.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/Pickable_MagicalMushroom_DW.prefab
 - Assets/Custom/PrefabInstance/Fire/StaffFire2_DW.prefab
 - Assets/Custom/PrefabInstance/Frost/fx_staff_frost_windup_DW.prefab
+- Assets/Custom/PrefabInstance/Armor/Swamp/SwampMageArmorSetSEEffect_DW.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/BogMushroom_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/staff_earth_script_roots_DW.prefab
+- Assets/Custom/PrefabInstance/Fenring/Plains/ArmorFenringChestPlains_DW.prefab
 - Assets/Custom/PrefabInstance/Frost/StaffFrost3_DW.prefab
+- Assets/Custom/PrefabInstance/Armor/BlackForest/CapeShaman_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/staff_earth_projectile_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/staff_earth_script_big_stone_DW.prefab
+- Assets/Custom/PrefabInstance/Armor/BlackForest/ArmorShamanLegs_DW.prefab
 - Assets/Custom/PrefabInstance/Books/MasterSpellbook_DW.prefab
 - Assets/Custom/PrefabInstance/Eitr/FineEitr_DW.prefab
-- Assets/Custom/PrefabInstance/Fenring/Plains/ArmorFenringChestPlains_DW.prefab
+- Assets/Custom/PrefabInstance/Armor/Swamp/ArmorMageSwampChest_DW.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/MagicalMushroom_DW.prefab
 - Assets/Custom/PrefabInstance/Fire/cinder_DW.prefab
 - Assets/Custom/PrefabInstance/Lightning/StaffLightning3_DW.prefab
@@ -178,7 +203,9 @@ Assets:
 - Assets/Custom/PrefabInstance/Earth/StaffEarth3_DW.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/CookedMagicalMushroom_DW.prefab
 - Assets/Custom/PrefabInstance/Fenring/Ashlands/HelmetFenringAshlands_DW.prefab
+- Assets/Custom/PrefabInstance/CharredRoot/ArmorCharredRootLegs_DW.prefab
 - Assets/Custom/PrefabInstance/Fenring/Mistlands/ArmorFenringLegsMistlands_DW.prefab
+- Assets/Custom/Material/Armor/Ashlands/AshlandsMageArmorLegs_red_DW.mat
 - Assets/Custom/PrefabInstance/Eitr/CrudeEitr_DW.prefab
 - Assets/Custom/PrefabInstance/Books/SimpleSpellbook_DW.prefab
 - Assets/Custom/PrefabInstance/Frost/StaffFrost2_DW.prefab
@@ -186,16 +213,19 @@ Assets:
 - Assets/Custom/PrefabInstance/Fire/fx_staff_fire_windup_DW.prefab
 - Assets/Custom/PrefabInstance/Fenring/Mistlands/HelmetFenringMistlands_DW.prefab
 - Assets/Custom/PrefabInstance/Frost/staff_frost_projectile_secondary_DW.prefab
-- Assets/Custom/Sprite/Earth/StaffEarth3Sprite.png
+- Assets/Custom/Sprite/Earth/StaffEarth3Sprite_DW.png
 - Assets/Custom/PrefabInstance/Fire/StaffFire3_DW.prefab
 - Assets/Custom/PrefabInstance/Lightning/fx_staff_lightning_windup_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/staff_earth_projectile_spawn_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/TentaRoot_DW.prefab
 - Assets/Custom/PrefabInstance/Earth/staff_earth_projectile_mushroom_DW.prefab
-- Assets/Custom/PrefabInstance/Frost/staff_frost_nova_AOE_DW.prefab
+- Assets/Custom/MonoBehaviour/Armor/Swamp/SetEffect_SwampMageArmor_DW.asset
 - Assets/Custom/PrefabInstance/Earth/StaffEarth0_DW.prefab
 - Assets/Custom/PrefabInstance/Books/AdvancedSpellbook_DW.prefab
-- Assets/Custom/PrefabInstance/Fenring/Mistlands/ArmorFenringChestMistlands_DW.prefab
+- Assets/Custom/PrefabInstance/Frost/staff_frost_nova_AOE_DW.prefab
+- Assets/Custom/PrefabInstance/Armor/Mountain/ArmorMountainLegs_DW.prefab
 - Assets/Custom/PrefabInstance/Fenring/Plains/HelmetFenringPlains_DW.prefab
 - Assets/Custom/PrefabInstance/Frost/staff_frost_projectile_spawn_DW.prefab
+- Assets/Custom/PrefabInstance/CharredRoot/HelmetCharredRoot_DW.prefab
+- Assets/Custom/PrefabInstance/Fenring/Mistlands/ArmorFenringChestMistlands_DW.prefab
 Dependencies: []

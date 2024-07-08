@@ -31,6 +31,23 @@ namespace MagicExtended
         public static MagicExtended Instance;
 
         private AssetBundle magicExtendedBundle;
+
+        // Materials
+        public GameObject crudeEitrPrefab;
+        public GameObject fineEitrPrefab;
+
+        // Food
+        public GameObject magicalMushroomPrefab;
+        public GameObject magicalCookedMushroomPrefab;
+        public GameObject magicalMushroomPickablePrefab;
+        public GameObject gribSnowMushroomPrefab;
+        public GameObject gribSnowMushroomPickablePrefab;
+        public GameObject bogMushroomPrefab;
+        public GameObject bogMushroomPickablePrefab;
+        public GameObject pircedMushroomPrefab;
+        public GameObject pircedMushroomPickablePrefab;
+
+        // Staffs
         public GameObject staffEarth0Prefab;
         public GameObject staffEarth1Prefab;
         public GameObject staffEarth2Prefab;
@@ -45,21 +62,23 @@ namespace MagicExtended
         public GameObject staffLightning2Prefab;
         public GameObject staffLightning3Prefab;
 
+        // Projectiles
+        public GameObject projectileMushroomPrefab;
+
+        // Books
         public GameObject simpleSpellbookPrefab;
         public GameObject advancedSpellbookPrefab;
         public GameObject masterSpellbookPrefab;
 
-        public GameObject projectileMushroomPrefab;
+        // Swamp
+        public GameObject helmetMageSwamp;
+        public GameObject ArmorMageSwampChest;
+        public GameObject ArmorMageSwampLegs;
+        public StatusEffect SwampMageArmorSetSE;
 
-        public GameObject magicalMushroomPrefab;
-        public GameObject magicalCookedMushroomPrefab;
-        public GameObject magicalMushroomPickablePrefab;
-        public GameObject gribSnowMushroomPrefab;
-        public GameObject gribSnowMushroomPickablePrefab;        
-        public GameObject bogMushroomPrefab;
-        public GameObject bogMushroomPickablePrefab;
-        public GameObject pircedMushroomPrefab;
-        public GameObject pircedMushroomPickablePrefab;
+        // Special
+        public GameObject PlayerHead;
+        public GameObject EvilSmoke;
 
         //// Use this class to add your own localization to the game
         //// https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -82,10 +101,11 @@ namespace MagicExtended
             PrefabManager.OnVanillaPrefabsAvailable += AddFrostStaffs;
             PrefabManager.OnVanillaPrefabsAvailable += AddLightningStaffs;
             PrefabManager.OnVanillaPrefabsAvailable += AddSpellbooks;
+            PrefabManager.OnVanillaPrefabsAvailable += AddArmor;
             PrefabManager.OnVanillaPrefabsAvailable += AddFenringArmor;
             ZoneManager.OnVanillaVegetationAvailable += AddLocations;
             
-            ZoneManager.OnVegetationRegistered += CheckLocations;
+            // ZoneManager.OnVegetationRegistered += CheckLocations;
             // ItemManager.OnItemsRegistered += LogRecipes;
         }
 
@@ -99,27 +119,27 @@ namespace MagicExtended
         //    ItemManager.OnItemsRegistered -= LogRecipes;
         //}
 
-        private void CheckLocations()
-        {
-            var pm = ZoneManager.Instance.GetZoneVegetation("Pickable_Thistle");
-            Jotunn.Logger.LogInfo(pm.m_biome);
-            Jotunn.Logger.LogInfo(pm.m_biomeArea);
-            Jotunn.Logger.LogInfo("Block Check: " + pm.m_blockCheck);
-            Jotunn.Logger.LogInfo("Force placement: " + pm.m_forcePlacement);
-            Jotunn.Logger.LogInfo("Group Radius: " + pm.m_groupRadius);
-            Jotunn.Logger.LogInfo("Group Size: " + pm.m_groupSizeMin + " - " + pm.m_groupSizeMax);
-            Jotunn.Logger.LogInfo("Random Scale: " + pm.m_scaleMin + " - " + pm.m_scaleMax);
-            Jotunn.Logger.LogInfo("In Forest: " + pm.m_inForest);
-            Jotunn.Logger.LogInfo("Forest Threshold: " + pm.m_forestTresholdMin + " - " + pm.m_forestTresholdMax);
-            Jotunn.Logger.LogInfo("Distance form similar: " + pm.m_surroundCheckDistance);
-            Jotunn.Logger.LogInfo("Min/max allowed in zone: " + pm.m_min + " - " + pm.m_max);
+        //private void CheckLocations()
+        //{
+        //    var pm = ZoneManager.Instance.GetZoneVegetation("Pickable_Thistle");
+        //    Jotunn.Logger.LogInfo(pm.m_biome);
+        //    Jotunn.Logger.LogInfo(pm.m_biomeArea);
+        //    Jotunn.Logger.LogInfo("Block Check: " + pm.m_blockCheck);
+        //    Jotunn.Logger.LogInfo("Force placement: " + pm.m_forcePlacement);
+        //    Jotunn.Logger.LogInfo("Group Radius: " + pm.m_groupRadius);
+        //    Jotunn.Logger.LogInfo("Group Size: " + pm.m_groupSizeMin + " - " + pm.m_groupSizeMax);
+        //    Jotunn.Logger.LogInfo("Random Scale: " + pm.m_scaleMin + " - " + pm.m_scaleMax);
+        //    Jotunn.Logger.LogInfo("In Forest: " + pm.m_inForest);
+        //    Jotunn.Logger.LogInfo("Forest Threshold: " + pm.m_forestTresholdMin + " - " + pm.m_forestTresholdMax);
+        //    Jotunn.Logger.LogInfo("Distance form similar: " + pm.m_surroundCheckDistance);
+        //    Jotunn.Logger.LogInfo("Min/max allowed in zone: " + pm.m_min + " - " + pm.m_max);
 
-            Jotunn.Logger.LogInfo("Altitude: " + pm.m_minAltitude + " - " + pm.m_maxAltitude);
-            Jotunn.Logger.LogInfo("Terrain Delta: " + pm.m_minTerrainDelta + " - " + pm.m_maxTerrainDelta);
-            Jotunn.Logger.LogInfo("Terrain Delta Radius: " + pm.m_terrainDeltaRadius);
-            Jotunn.Logger.LogInfo("Ocean Depth: " + pm.m_minOceanDepth + " - " + pm.m_maxOceanDepth);
-            Jotunn.Logger.LogInfo("Tilt: " + pm.m_minTilt + " - " + pm.m_maxTilt);
-        }
+        //    Jotunn.Logger.LogInfo("Altitude: " + pm.m_minAltitude + " - " + pm.m_maxAltitude);
+        //    Jotunn.Logger.LogInfo("Terrain Delta: " + pm.m_minTerrainDelta + " - " + pm.m_maxTerrainDelta);
+        //    Jotunn.Logger.LogInfo("Terrain Delta Radius: " + pm.m_terrainDeltaRadius);
+        //    Jotunn.Logger.LogInfo("Ocean Depth: " + pm.m_minOceanDepth + " - " + pm.m_maxOceanDepth);
+        //    Jotunn.Logger.LogInfo("Tilt: " + pm.m_minTilt + " - " + pm.m_maxTilt);
+        //}
 
         private void AddEarthStaffs()
         {
@@ -534,6 +554,172 @@ namespace MagicExtended
             PrefabManager.OnVanillaPrefabsAvailable -= AddLightningStaffs;
         }
 
+        private void AddArmor()
+        {
+            ItemConfig shamanConfig = new ItemConfig();
+            shamanConfig.Enabled = true;
+            shamanConfig.Name = "Shaman Hood";
+            shamanConfig.Description = "New armor!";
+            shamanConfig.CraftingStation = "Workbench";
+            shamanConfig.AddRequirement(new RequirementConfig("WolfHairBundle", 1, 1));
+            shamanConfig.AddRequirement(new RequirementConfig("WolfPelt", 1, 1));
+            shamanConfig.AddRequirement(new RequirementConfig("LeatherScraps", 1, 1));
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("HelmetShaman_DW"), true, shamanConfig));
+            shamanConfig.Name = "Shaman Cape";
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("CapeShaman_DW"), true, shamanConfig));
+            shamanConfig.Name = "Shaman Chest";
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("ArmorShamanChest_DW"), true, shamanConfig));
+            shamanConfig.Name = "Shaman Legs";
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("ArmorShamanLegs_DW"), true, shamanConfig));
+            shamanConfig.Name = "Charred Mask";
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("HelmetCharredRoot_DW"), true, shamanConfig));
+            shamanConfig.Name = "Charred Chest";
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("ArmorCharredRootChest_DW"), true, shamanConfig));
+            shamanConfig.Name = "Charred Legs";
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("ArmorCharredRootLegs_DW"), true, shamanConfig));
+            shamanConfig.Name = "Mountain Hood";
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("HelmetMountain_DW"), true, shamanConfig));
+            shamanConfig.Name = "Mountain Cape";
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("CapeMountain_DW"), true, shamanConfig));
+            shamanConfig.Name = "Mountain Chest";
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("ArmorMountainChest_DW"), true, shamanConfig));
+            shamanConfig.Name = "Mountain Legs";
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("ArmorMountainLegs_DW"), true, shamanConfig));
+            shamanConfig.Name = "Mystic Lantern";
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("Lantern_DW"), true, shamanConfig));
+
+            shamanConfig.Name = "Swamp Hood";
+            ItemManager.Instance.AddItem(new CustomItem(helmetMageSwamp, true, shamanConfig));
+            shamanConfig.Name = "Swamp Cloak";
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("CapeMageSwamp_DW"), true, shamanConfig));
+            shamanConfig.Name = "Swamp Chest";
+            ItemManager.Instance.AddItem(new CustomItem(ArmorMageSwampChest, true, shamanConfig));
+            shamanConfig.Name = "Swamp Legs";
+            ItemManager.Instance.AddItem(new CustomItem(ArmorMageSwampLegs, true, shamanConfig));
+
+            //// Set evil smoke to player model
+            GameObject player = PrefabManager.Instance.GetPrefab("Player");
+            GameObject playerHead = player.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/Neck/Head").gameObject;
+            GameObject playerChest = player.transform.Find("Visual/Armature/Hips/Spine/Spine1").gameObject;
+            GameObject playerArmLeft = player.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHand_Attach").gameObject;
+            GameObject playerArmRight = player.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHand_Attach").gameObject;
+            GameObject playerLegLeft = player.transform.Find("Visual/Armature/Hips/LeftUpLeg/LeftLeg").gameObject;
+            GameObject playerLegRight = player.transform.Find("Visual/Armature/Hips/RightUpLeg/RightLeg").gameObject;
+
+            GameObject eyeLeft = helmetMageSwamp.transform.Find("eye_left").gameObject;
+            GameObject eyeRight = helmetMageSwamp.transform.Find("eye_right").gameObject;
+
+            GameObject evilSmokeHead = helmetMageSwamp.transform.Find("evil_smoke").gameObject;
+            GameObject evilSmokeHeadFace = helmetMageSwamp.transform.Find("evil_smoke_face").gameObject;
+            GameObject evilSmokeChest = ArmorMageSwampChest.transform.Find("evil_smoke").gameObject;
+            GameObject evilSmokeArmLeft = ArmorMageSwampChest.transform.Find("evil_smoke_left").gameObject;
+            GameObject evilSmokeArmRight = ArmorMageSwampChest.transform.Find("evil_smoke_right").gameObject;
+            GameObject evilSmokeLegsLeft = ArmorMageSwampLegs.transform.Find("evil_smoke_left").gameObject;
+            GameObject evilSmokeLegsRight = ArmorMageSwampLegs.transform.Find("evil_smoke_right").gameObject;
+
+            Quaternion eyeLeftRotation = new Quaternion(0, 0, 0, 0);
+            eyeLeftRotation.eulerAngles = new Vector3(0f, 340.544f, 0f);
+            eyeLeft.transform.parent = playerHead.transform;
+            eyeLeft.transform.localPosition = new Vector3(-0.00087f, 0.00178f, -0.00035f);
+            eyeLeft.transform.localRotation = eyeLeftRotation;
+            eyeLeft.transform.localScale = new Vector3(0.0002f, 0.0001f, 0.0003f);
+            eyeLeft.SetActive(false);
+
+            Quaternion eyeRightRotation = new Quaternion(0, 0, 0, 0);
+            eyeRightRotation.eulerAngles = new Vector3(0f, 27.096f, 0f);
+            eyeRight.transform.parent = playerHead.transform;
+            eyeRight.transform.localPosition = new Vector3(-0.00087f, 0.00178f, 0.00044f);
+            eyeRight.transform.localRotation = eyeRightRotation;
+            eyeRight.transform.localScale = new Vector3(0.0002f, 0.0001f, 0.0003f);
+            eyeRight.SetActive(false);
+
+            evilSmokeHead.transform.parent = playerHead.transform;
+            evilSmokeHead.transform.localPosition = new Vector3(0f, 0f, 0f);
+            evilSmokeHead.SetActive(false);
+            evilSmokeHead.FixReferences();
+
+            evilSmokeHeadFace.transform.parent = playerHead.transform;
+            evilSmokeHeadFace.transform.localPosition = new Vector3(-0.0015f, 0.001f, 0f);
+            evilSmokeHeadFace.SetActive(false);
+            evilSmokeHeadFace.FixReferences();
+
+            evilSmokeChest.transform.parent = playerChest.transform;
+            evilSmokeChest.transform.localPosition = new Vector3(0f, 0f, 0f);
+            evilSmokeChest.SetActive(false);
+            evilSmokeChest.FixReferences();
+
+            evilSmokeArmLeft.transform.parent = playerArmLeft.transform;
+            evilSmokeArmLeft.transform.localPosition = new Vector3(0f, 0f, 0f);
+            evilSmokeArmLeft.SetActive(false);
+            evilSmokeArmLeft.FixReferences();
+
+            evilSmokeArmRight.transform.parent = playerArmRight.transform;
+            evilSmokeArmRight.transform.localPosition = new Vector3(0f, 0f, 0f);
+            evilSmokeArmRight.SetActive(false);
+            evilSmokeArmRight.FixReferences();
+
+            evilSmokeLegsLeft.transform.parent = playerLegLeft.transform;
+            evilSmokeLegsLeft.transform.localPosition = new Vector3(0f, 0f, 0f);
+            evilSmokeLegsLeft.SetActive(false);
+            evilSmokeLegsLeft.FixReferences();
+
+            evilSmokeLegsRight.transform.parent = playerLegRight.transform;
+            evilSmokeLegsRight.transform.localPosition = new Vector3(0f, 0f, 0f);
+            evilSmokeLegsRight.SetActive(false);
+            evilSmokeLegsRight.FixReferences();
+
+            // ArmorStand
+
+            // Prepare materials for Embla set
+            Material ashlandsMageArmorMat = magicExtendedBundle.LoadAsset<Material>("AshlandsMageArmor_red_DW");
+            Material ashlandsMageArmorChestMat = magicExtendedBundle.LoadAsset<Material>("AshlandsMageArmorChest_red_DW");
+            Material ashlandsMageArmorLegsMat = magicExtendedBundle.LoadAsset<Material>("AshlandsMageArmorLegs_red_DW");
+            ashlandsMageArmorMat.FixReferences();
+            ashlandsMageArmorChestMat.FixReferences();
+            ashlandsMageArmorLegsMat.FixReferences();
+            List<Material> ashlandsMageArmorMaterials = new List<Material>();
+            ashlandsMageArmorMaterials.Add(ashlandsMageArmorMat);
+
+            // Override materials on Embla Hood
+            GameObject emblaHood = PrefabManager.Instance.GetPrefab("HelmetMage_Ashlands");
+            Transform ashlandsHood = emblaHood.transform.Find("attach_skin/AshlandsHood");
+            Transform hoodFlat = emblaHood.transform.Find("hood");
+
+            SkinnedMeshRenderer ashlandsHoodMesh = ashlandsHood.gameObject.GetComponent<SkinnedMeshRenderer>();
+            MeshRenderer hoodFlatMesh = hoodFlat.gameObject.GetComponent<MeshRenderer>();
+
+            ashlandsHoodMesh.materials = ashlandsMageArmorMaterials.ToArray();
+            hoodFlatMesh.materials = ashlandsMageArmorMaterials.ToArray();
+
+            // Override materials on Embla Chest
+            GameObject emblaChest = PrefabManager.Instance.GetPrefab("ArmorMageChest_Ashlands");
+            ItemDrop emblaChestItemDrop = emblaChest.GetComponent<ItemDrop>();
+            Transform chest = emblaChest.transform.Find("attach_skin/AshlandsMageChest");
+            Transform modelFlat = emblaChest.transform.Find("model");
+
+            SkinnedMeshRenderer chestMesh = chest.gameObject.GetComponent<SkinnedMeshRenderer>();
+            MeshRenderer modelFlatMesh = modelFlat.gameObject.GetComponent<MeshRenderer>();
+
+            emblaChestItemDrop.m_itemData.m_shared.m_armorMaterial = ashlandsMageArmorChestMat; // Chest mat
+            chestMesh.materials = ashlandsMageArmorMaterials.ToArray();
+            modelFlatMesh.materials = ashlandsMageArmorMaterials.ToArray();
+
+            // Override Materials on Embla Leggs
+            GameObject emblaLegs = PrefabManager.Instance.GetPrefab("ArmorMageLegs_Ashlands");
+            ItemDrop emblaLegsItemDrop = emblaLegs.GetComponent<ItemDrop>();
+            Transform Legs = emblaLegs.transform.Find("attach_skin/AshlandsMageLegs");
+            Transform log = emblaLegs.transform.Find("log");
+
+            SkinnedMeshRenderer legsMesh = Legs.gameObject.GetComponent<SkinnedMeshRenderer>();
+            MeshRenderer logMesh = log.gameObject.GetComponent<MeshRenderer>();
+
+            emblaLegsItemDrop.m_itemData.m_shared.m_armorMaterial = ashlandsMageArmorLegsMat; // Legs mat
+            legsMesh.materials = ashlandsMageArmorMaterials.ToArray();
+            logMesh.materials = ashlandsMageArmorMaterials.ToArray();
+
+            PrefabManager.OnVanillaPrefabsAvailable -= AddArmor;
+        }
+
         private void AddSpellbooks()
         {
             // Simple Spellbook
@@ -627,6 +813,7 @@ namespace MagicExtended
 
         private void AddMaterials()
         {
+            // Refines Eitr
             GameObject eitr = PrefabManager.Instance.GetPrefab("Eitr");
             Transform sparcs = eitr.transform.Find("attach/sparcs_world");
             ParticleSystem particles = sparcs.GetComponent<ParticleSystem>();
@@ -635,20 +822,41 @@ namespace MagicExtended
             particles.playbackSpeed = 1.2f;
             particles.startColor = new Color(255, 0, 0);
 
-
+            // Crude Eitr
             ItemConfig crudeConfig = new ItemConfig();
-            crudeConfig.CraftingStation = "Cauldron";
-            crudeConfig.AddRequirement(new RequirementConfig("GreydwarfEye", 5));
-            crudeConfig.AddRequirement(new RequirementConfig("Resin", 5));
+            crudeConfig.Name = ConfigMaterials.crudeEitrName.Value;
+            crudeConfig.Description = ConfigMaterials.crudeEitrDescription.Value;
+            crudeConfig.CraftingStation = ConfigMaterials.crudeEitrCraftingStation.Value;
+            //crudeConfig.AddRequirement(new RequirementConfig("GreydwarfEye", 5));
+            //crudeConfig.AddRequirement(new RequirementConfig("Resin", 5));
 
+            RequirementConfig[] crudeRequirements = RecipeHelper.GetAsRequirementConfigArray(ConfigMaterials.crudeEitrRecipe.Value, null, null);
+
+            if (crudeRequirements == null || crudeRequirements.Length == 0)
+                Jotunn.Logger.LogWarning("Could not resolve recipe for: CrudeEitr_DW");
+            else
+                crudeConfig.Requirements = crudeRequirements;
+
+            ItemManager.Instance.AddItem(new CustomItem(crudeEitrPrefab, true, crudeConfig));
+
+            // Fine Eitr
             ItemConfig fineConfig = new ItemConfig();
-            fineConfig.CraftingStation = "Cauldron";
-            fineConfig.MinStationLevel = 3;
-            fineConfig.AddRequirement(new RequirementConfig("Crystal", 5));
-            fineConfig.AddRequirement(new RequirementConfig("Coal", 5));
+            fineConfig.Name = ConfigMaterials.fineEitrName.Value;
+            fineConfig.Description = ConfigMaterials.fineEitrDescription.Value;
+            fineConfig.CraftingStation = ConfigMaterials.fineEitrCraftingStation.Value;
+            fineConfig.MinStationLevel = ConfigMaterials.fineEitrMinStationLevel.Value;
+            //fineConfig.AddRequirement(new RequirementConfig("Crystal", 5));
+            //fineConfig.AddRequirement(new RequirementConfig("Coal", 5));
 
-            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("CrudeEitr_DW"), true, crudeConfig));
-            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("FineEitr_DW"), true, fineConfig));
+            RequirementConfig[] fineRequirements = RecipeHelper.GetAsRequirementConfigArray(ConfigMaterials.fineEitrRecipe.Value, null, null);
+
+            if (fineRequirements == null || fineRequirements.Length == 0)
+                Jotunn.Logger.LogWarning("Could not resolve recipe for: FineEitr_DW");
+            else
+                fineConfig.Requirements = fineRequirements;
+
+            
+            ItemManager.Instance.AddItem(new CustomItem(fineEitrPrefab, true, fineConfig));
             PrefabManager.OnVanillaPrefabsAvailable -= AddMaterials;
         }
 
@@ -870,14 +1078,6 @@ namespace MagicExtended
             {
                 ConfigPlugin.Init();
                 Config.Save();
-
-                //FileSystemWatcher configWatcher = new FileSystemWatcher(BepInEx.Paths.ConfigPath, configFileName);
-                //configWatcher.Changed += new FileSystemEventHandler(OnConfigFileChange);
-                //configWatcher.Created += new FileSystemEventHandler(OnConfigFileChange);
-                //configWatcher.Renamed += new RenamedEventHandler(OnConfigFileChange);
-                //configWatcher.IncludeSubdirectories = true;
-                //configWatcher.SynchronizingObject = ThreadingHelper.SynchronizingObject;
-                //configWatcher.EnableRaisingEvents = true;
             }
             catch (Exception error)
             {
@@ -885,30 +1085,12 @@ namespace MagicExtended
             }
         }
 
-        ///**
-        // * Event handler for when the config file changes
-        // */
-        //private void OnConfigFileChange(object sender, FileSystemEventArgs e)
-        //{
-        //    if (!File.Exists(configFileFullPath))
-        //        return;
-
-        //    try
-        //    {
-        //        Config.Reload();
-        //    }
-        //    catch (Exception error)
-        //    {
-        //        Jotunn.Logger.LogError("Something went wrong while reloading the config, please check if the file exists and the entries are valid! " + error);
-        //    }
-        //}
-
         private void InitStatusEffects()
         {
             StatusEffect cooldownEffect = ScriptableObject.CreateInstance<StatusEffect>();
             cooldownEffect.name = ConfigStaffs.staffEarth3CooldownStatusEffectName;
             cooldownEffect.m_name = "Summon roots cooldown";
-            cooldownEffect.m_icon = magicExtendedBundle.LoadAsset<Sprite>("staffEarthSprite");
+            cooldownEffect.m_icon = magicExtendedBundle.LoadAsset<Sprite>("StaffEarth3Sprite_DW");
             cooldownEffect.m_startMessageType = MessageHud.MessageType.Center;
             cooldownEffect.m_startMessage = "";
             cooldownEffect.m_stopMessageType = MessageHud.MessageType.Center;
@@ -920,7 +1102,7 @@ namespace MagicExtended
             StatusEffect exhaustAndFhoulMagicEffect = ScriptableObject.CreateInstance<StatusEffect>();
             exhaustAndFhoulMagicEffect.name = "ExhaustAndFoulMagicEffect_DW";
             exhaustAndFhoulMagicEffect.m_name = "Exhausted by foul magic";
-            exhaustAndFhoulMagicEffect.m_icon = magicExtendedBundle.LoadAsset<Sprite>("staffEarthSprite");
+            exhaustAndFhoulMagicEffect.m_icon = magicExtendedBundle.LoadAsset<Sprite>("staffEarth3Sprite");
             exhaustAndFhoulMagicEffect.m_startMessageType = MessageHud.MessageType.Center;
             exhaustAndFhoulMagicEffect.m_startMessage = "";
             exhaustAndFhoulMagicEffect.m_stopMessageType = MessageHud.MessageType.Center;
@@ -928,6 +1110,9 @@ namespace MagicExtended
             exhaustAndFhoulMagicEffect.m_tooltip = "You are exhausted by the use of foul magic, reducing your strength and magic effectiveness";
             exhaustAndFhoulMagicEffect.m_ttl = 300;
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(exhaustAndFhoulMagicEffect, fixReference: false));
+
+            SwampMageArmorSetSE.name = "SwampMageArmorSet_DW";
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(SwampMageArmorSetSE, true));
         }
 
         /**
@@ -935,7 +1120,26 @@ namespace MagicExtended
          */
         private void InitAssetBundle()
         {
-            magicExtendedBundle = AssetUtils.LoadAssetBundleFromResources("magicextended_dw");          
+            magicExtendedBundle = AssetUtils.LoadAssetBundleFromResources("magicextended_dw");
+
+            // Materials
+            crudeEitrPrefab = magicExtendedBundle.LoadAsset<GameObject>("CrudeEitr_DW");
+            fineEitrPrefab = magicExtendedBundle.LoadAsset<GameObject>("FineEitr_DW");
+
+            // Food
+            magicalMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("MagicalMushroom_DW");
+            magicalCookedMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("CookedMagicalMushroom_DW");
+            magicalMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_MagicalMushroom_DW");
+            gribSnowMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("GribSnow_DW");
+            gribSnowMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_GribSnow_DW");
+            bogMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("BogMushroom_DW");
+            bogMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_BogMushroom_DW");
+            pircedMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("PircedMushroom_DW");
+            pircedMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_PircedMushroom_DW");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicalMushroomPickablePrefab, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(gribSnowMushroomPickablePrefab, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(bogMushroomPickablePrefab, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(pircedMushroomPickablePrefab, true));
 
             // Earth assets
             staffEarth0Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffEarth0_DW");
@@ -953,7 +1157,6 @@ namespace MagicExtended
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_earth_burst_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_earth_windup_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_mushroom_projectile_hit_DW"), true));
-
 
             // Fire assets
             staffFire1Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffFire1_DW");
@@ -990,20 +1193,12 @@ namespace MagicExtended
             advancedSpellbookPrefab = magicExtendedBundle.LoadAsset<GameObject>("AdvancedSpellbook_DW");
             masterSpellbookPrefab = magicExtendedBundle.LoadAsset<GameObject>("MasterSpellbook_DW");
 
-            // Food
-            magicalMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("MagicalMushroom_DW");
-            magicalCookedMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("CookedMagicalMushroom_DW");
-            magicalMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_MagicalMushroom_DW");
-            gribSnowMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("GribSnow_DW");
-            gribSnowMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_GribSnow_DW");
-            bogMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("BogMushroom_DW");
-            bogMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_BogMushroom_DW");
-            pircedMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("PircedMushroom_DW");
-            pircedMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_PircedMushroom_DW");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicalMushroomPickablePrefab, true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(gribSnowMushroomPickablePrefab, true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(bogMushroomPickablePrefab, true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(pircedMushroomPickablePrefab, true));
+            // Swamp
+            helmetMageSwamp = magicExtendedBundle.LoadAsset<GameObject>("HelmetMageSwamp_DW");
+            ArmorMageSwampChest = magicExtendedBundle.LoadAsset<GameObject>("ArmorMageSwampChest_DW");
+            ArmorMageSwampLegs = magicExtendedBundle.LoadAsset<GameObject>("ArmorMageSwampLegs_DW");
+            SwampMageArmorSetSE = magicExtendedBundle.LoadAsset<StatusEffect>("SetEffect_SwampMageArmor_DW");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("SwampMageArmorSetSEEffect_DW"), true));
         }
     }
 }
