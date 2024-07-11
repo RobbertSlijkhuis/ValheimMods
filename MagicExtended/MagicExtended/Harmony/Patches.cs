@@ -30,9 +30,9 @@ namespace MagicExtended.Harmony
             if (__instance == null)
                 return;
 
-            SetEitr(__instance, "SimpleEitrStatusEffect_DW", ConfigSpellbooks.simpleSpellbookEitr.Value, ref eitr);
-            SetEitr(__instance, "AdvancedEitrStatusEffect_DW", ConfigSpellbooks.advancedSpellbookEitr.Value, ref eitr);
-            SetEitr(__instance, "MasterEitrStatusEffect_DW", ConfigSpellbooks.masterSpellbookEitr.Value, ref eitr);
+            SetEitr(__instance, "SimpleEitrStatusEffect_DW", ConfigSpellbooks.simpleSpellbook.eitr.Value, ref eitr);
+            SetEitr(__instance, "AdvancedEitrStatusEffect_DW", ConfigSpellbooks.advancedSpellbook.eitr.Value, ref eitr);
+            SetEitr(__instance, "MasterEitrStatusEffect_DW", ConfigSpellbooks.masterSpellbook.eitr.Value, ref eitr);
         }
 
         [HarmonyPostfix]
@@ -56,10 +56,15 @@ namespace MagicExtended.Harmony
             if (__instance == null) 
                 return true;
 
-            if (__instance.name == "SwampMageArmorSet_DW")
-                return false;
-
-            return true;
+            switch (__instance.name)
+            {
+                case "BlackForestMageArmorSet_DW":
+                case "SwampMageArmorSet_DW":
+                case "MountainMageArmorSet_DW":
+                    return false;
+                default:
+                    return true;
+            }
         }
 
         [HarmonyPostfix]
@@ -144,8 +149,8 @@ namespace MagicExtended.Harmony
             switch (attack.m_drawStaminaDrain)
             {
                 case 8901f:
-                    configCooldownValue = ConfigStaffs.staffEarth3SecondaryCooldown.Value;
-                    configEitrValue = ConfigStaffs.staffEarth3UseEitrSecondary.Value;
+                    configCooldownValue = ConfigStaffs.staffEarth3.secondaryCooldown.Value;
+                    configEitrValue = ConfigStaffs.staffEarth3.useEitrSecondary.Value;
                     effectName = "StaffEarth3Cooldown_DW";
                     hasEffect = character.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode(effectName));
                     break;
@@ -173,14 +178,14 @@ namespace MagicExtended.Harmony
 
         private static void RandomizeMushroom()
         {
-            Transform mushroom = MagicExtended.Instance.projectileMushroomPrefab.transform.Find("visual/Mushroom");
-            Transform mushroomBlue = MagicExtended.Instance.projectileMushroomPrefab.transform.Find("visual/MushroomBlue");
-            Transform mushroomYellow = MagicExtended.Instance.projectileMushroomPrefab.transform.Find("visual/MushroomYellow");
-            Transform branch = MagicExtended.Instance.projectileMushroomPrefab.transform.Find("visual/Branch");
-            Transform dandelion = MagicExtended.Instance.projectileMushroomPrefab.transform.Find("visual/Dandelion");
-            Transform stone = MagicExtended.Instance.projectileMushroomPrefab.transform.Find("visual/Stone");
-            Transform flint = MagicExtended.Instance.projectileMushroomPrefab.transform.Find("visual/Flint");
-            Transform bush = MagicExtended.Instance.projectileMushroomPrefab.transform.Find("visual/RaspberryBush");
+            Transform mushroom = MagicExtended.Instance.prefabs.projectileMushroomPrefab.transform.Find("visual/Mushroom");
+            Transform mushroomBlue = MagicExtended.Instance.prefabs.projectileMushroomPrefab.transform.Find("visual/MushroomBlue");
+            Transform mushroomYellow = MagicExtended.Instance.prefabs.projectileMushroomPrefab.transform.Find("visual/MushroomYellow");
+            Transform branch = MagicExtended.Instance.prefabs.projectileMushroomPrefab.transform.Find("visual/Branch");
+            Transform dandelion = MagicExtended.Instance.prefabs.projectileMushroomPrefab.transform.Find("visual/Dandelion");
+            Transform stone = MagicExtended.Instance.prefabs.projectileMushroomPrefab.transform.Find("visual/Stone");
+            Transform flint = MagicExtended.Instance.prefabs.projectileMushroomPrefab.transform.Find("visual/Flint");
+            Transform bush = MagicExtended.Instance.prefabs.projectileMushroomPrefab.transform.Find("visual/RaspberryBush");
 
             mushroom.gameObject.SetActive(false);
             mushroomBlue.gameObject.SetActive(false);

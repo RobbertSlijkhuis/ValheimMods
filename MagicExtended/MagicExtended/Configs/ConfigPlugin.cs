@@ -21,89 +21,96 @@ namespace MagicExtended.Configs
                 new ConfigDescription("Enable this mod", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             configEnable.SettingChanged += (obj, attr) => {
-                RecipeHelper.PatchRecipe(new PatchRecipeOptions()
+                RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
+                {
+                    name = ConfigStaffs.staffEarth0RecipeName,
+                    updateType = RecipeUpdateType.ENABLE,
+                    enable = configEnable.Value ? ConfigStaffs.staffEarth0.enable.Value : false,
+
+                });
+                RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
                 {
                     name = ConfigStaffs.staffEarth1RecipeName,
-                    updateType = RecipeUpdateType.Enable,
-                    enable = configEnable.Value ? ConfigStaffs.staffEarth1Enable.Value : false,
+                    updateType = RecipeUpdateType.ENABLE,
+                    enable = configEnable.Value ? ConfigStaffs.staffEarth1.enable.Value : false,
                 });
 
-                RecipeHelper.PatchRecipe(new PatchRecipeOptions()
+                RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
                 {
                     name = ConfigStaffs.staffEarth2RecipeName,
-                    updateType = RecipeUpdateType.Enable,
-                    enable = configEnable.Value ? ConfigStaffs.staffEarth2Enable.Value : false,
+                    updateType = RecipeUpdateType.ENABLE,
+                    enable = configEnable.Value ? ConfigStaffs.staffEarth2.enable.Value : false,
                 });
 
-                RecipeHelper.PatchRecipe(new PatchRecipeOptions()
+                RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
                 {
                     name = ConfigStaffs.staffEarth3RecipeName,
-                    updateType = RecipeUpdateType.Enable,
-                    enable = configEnable.Value ? ConfigStaffs.staffEarth3Enable.Value : false,
+                    updateType = RecipeUpdateType.ENABLE,
+                    enable = configEnable.Value ? ConfigStaffs.staffEarth3.enable.Value : false,
                 });
 
-                RecipeHelper.PatchRecipe(new PatchRecipeOptions()
+                RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
                 {
                     name = ConfigStaffs.staffFire1RecipeName,
-                    updateType = RecipeUpdateType.Enable,
-                    enable = configEnable.Value ? ConfigStaffs.staffFire1Enable.Value : false,
+                    updateType = RecipeUpdateType.ENABLE,
+                    enable = configEnable.Value ? ConfigStaffs.staffFire1.enable.Value : false,
                 });
 
-                RecipeHelper.PatchRecipe(new PatchRecipeOptions()
+                RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
                 {
                     name = ConfigStaffs.staffFire2RecipeName,
-                    updateType = RecipeUpdateType.Enable,
-                    enable = configEnable.Value ? ConfigStaffs.staffFire2Enable.Value : false,
+                    updateType = RecipeUpdateType.ENABLE,
+                    enable = configEnable.Value ? ConfigStaffs.staffFire2.enable.Value : false,
                 });
 
-                RecipeHelper.PatchRecipe(new PatchRecipeOptions()
+                RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
                 {
                     name = ConfigStaffs.staffFire3RecipeName,
-                    updateType = RecipeUpdateType.Enable,
-                    enable = configEnable.Value ? ConfigStaffs.staffFire3Enable.Value : false,
+                    updateType = RecipeUpdateType.ENABLE,
+                    enable = configEnable.Value ? ConfigStaffs.staffFire3.enable.Value : false,
                 });
 
-                RecipeHelper.PatchRecipe(new PatchRecipeOptions()
+                RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
                 {
                     name = ConfigStaffs.staffFrost2RecipeName,
-                    updateType = RecipeUpdateType.Enable,
-                    enable = configEnable.Value ? ConfigStaffs.staffFrost2Enable.Value : false,
+                    updateType = RecipeUpdateType.ENABLE,
+                    enable = configEnable.Value ? ConfigStaffs.staffFrost2.enable.Value : false,
                 });
 
-                RecipeHelper.PatchRecipe(new PatchRecipeOptions()
+                RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
                 {
                     name = ConfigStaffs.staffFrost3RecipeName,
-                    updateType = RecipeUpdateType.Enable,
-                    enable = configEnable.Value ? ConfigStaffs.staffFrost3Enable.Value : false,
+                    updateType = RecipeUpdateType.ENABLE,
+                    enable = configEnable.Value ? ConfigStaffs.staffFrost3.enable.Value : false,
                 });
 
-                RecipeHelper.PatchRecipe(new PatchRecipeOptions()
+                RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
                 {
                     name = ConfigStaffs.staffLightning3RecipeName,
-                    updateType = RecipeUpdateType.Enable,
-                    enable = configEnable.Value ? ConfigStaffs.staffLightning3Enable.Value : false,
+                    updateType = RecipeUpdateType.ENABLE,
+                    enable = configEnable.Value ? ConfigStaffs.staffLightning3.enable.Value : false,
                 });
 
-                RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                {
-                    name = ConfigSpellbooks.simpleSpellbookRecipeName,
-                    updateType = RecipeUpdateType.Enable,
-                    enable = configEnable.Value ? ConfigSpellbooks.simpleSpellbookEnable.Value : false,
-                });
+                //RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
+                //{
+                //    name = ConfigSpellbooks.simpleSpellbookRecipeName,
+                //    updateType = RecipeUpdateType.Enable,
+                //    enable = configEnable.Value ? ConfigSpellbooks.simpleSpellbookEnable.Value : false,
+                //});
 
-                RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                {
-                    name = ConfigSpellbooks.advancedSpellbookRecipeName,
-                    updateType = RecipeUpdateType.Enable,
-                    enable = configEnable.Value ? ConfigSpellbooks.advancedSpellbookEnable.Value : false,
-                });
+                //RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
+                //{
+                //    name = ConfigSpellbooks.advancedSpellbookRecipeName,
+                //    updateType = RecipeUpdateType.Enable,
+                //    enable = configEnable.Value ? ConfigSpellbooks.advancedSpellbookEnable.Value : false,
+                //});
 
-                RecipeHelper.PatchRecipe(new PatchRecipeOptions()
-                {
-                    name = ConfigSpellbooks.masterSpellbookRecipeName,
-                    updateType = RecipeUpdateType.Enable,
-                    enable = configEnable.Value ? ConfigSpellbooks.masterSpellbookEnable.Value : false,
-                });
+                //RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
+                //{
+                //    name = ConfigSpellbooks.masterSpellbookRecipeName,
+                //    updateType = RecipeUpdateType.Enable,
+                //    enable = configEnable.Value ? ConfigSpellbooks.masterSpellbookEnable.Value : false,
+                //});
             };
 
             ConfigMaterials.Init();

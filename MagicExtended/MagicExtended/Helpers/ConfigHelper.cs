@@ -1,4 +1,6 @@
-﻿using MagicExtended.Models;
+﻿#nullable enable
+
+using MagicExtended.Models;
 using System;
 using UnityEngine;
 
@@ -6,7 +8,7 @@ namespace MagicExtended.Helpers
 {
     internal static class ConfigHelper
     {
-        public static void PatchStats(GameObject prefab, PatchStatsOptions options)
+        public static void UpdateItemDropStats(GameObject prefab, UpdateItemDropStatsOptions options)
         {
             try
             {
@@ -20,31 +22,31 @@ namespace MagicExtended.Helpers
 
                 if (options.name != null) { itemDrop.m_itemData.m_shared.m_name = options.name; }
                 if (options.description != null) { itemDrop.m_itemData.m_shared.m_description = options.description; }
-                if (options.maxQuality > 0) { itemDrop.m_itemData.m_shared.m_maxQuality = options.maxQuality; }
-                if (options.movementModifier > -9999f) { itemDrop.m_itemData.m_shared.m_movementModifier = options.movementModifier; }
+                if (options.maxQuality > 0) { itemDrop.m_itemData.m_shared.m_maxQuality = (int)options.maxQuality; }
+                if (options.movementModifier != null) { itemDrop.m_itemData.m_shared.m_movementModifier = (float)options.movementModifier; }
 
-                if (options.blockPower > -1f) { itemDrop.m_itemData.m_shared.m_blockPower = options.blockPower; }
-                if (options.deflectionForce > -1f) { itemDrop.m_itemData.m_shared.m_deflectionForce = options.deflectionForce; }
-                if (options.attackForce > -1f) { itemDrop.m_itemData.m_shared.m_attackForce = options.attackForce; }
-                if (options.backstabBonus > -1f) { itemDrop.m_itemData.m_shared.m_backstabBonus = options.backstabBonus; }
+                if (options.blockPower != null) { itemDrop.m_itemData.m_shared.m_blockPower = (float)options.blockPower; }
+                if (options.deflectionForce != null) { itemDrop.m_itemData.m_shared.m_deflectionForce = (float)options.deflectionForce; }
+                if (options.attackForce != null) { itemDrop.m_itemData.m_shared.m_attackForce = (float)options.attackForce; }
+                if (options.backstabBonus != null) { itemDrop.m_itemData.m_shared.m_backstabBonus = (float)options.backstabBonus; }
 
-                if (options.attackEitr > -1f) { itemDrop.m_itemData.m_shared.m_attack.m_attackEitr = options.attackEitr; }
-                if (options.secondaryAttackEitr > -1f) { itemDrop.m_itemData.m_shared.m_secondaryAttack.m_attackEitr = options.secondaryAttackEitr; }
-                if (options.damageBlunt > -1f) { itemDrop.m_itemData.m_shared.m_damages.m_blunt = options.damageBlunt; }
-                if (options.damageChop > -1f) { itemDrop.m_itemData.m_shared.m_damages.m_chop = options.damageChop; }
-                if (options.damageFire > -1f) { itemDrop.m_itemData.m_shared.m_damages.m_fire = options.damageFire; }
-                if (options.damageFrost > -1f) { itemDrop.m_itemData.m_shared.m_damages.m_frost = options.damageFrost; }
-                if (options.damageLightning > -1f) { itemDrop.m_itemData.m_shared.m_damages.m_lightning = options.damageLightning; }
-                if (options.damagePickaxe > -1f) { itemDrop.m_itemData.m_shared.m_damages.m_pickaxe = options.damagePickaxe; }
-                if (options.damagePierce > -1f) { itemDrop.m_itemData.m_shared.m_damages.m_pierce = options.damagePierce; }
-                if (options.damageSlash > -1f) { itemDrop.m_itemData.m_shared.m_damages.m_slash = options.damageSlash; }
-                if (options.damageSpirit > -1f) { itemDrop.m_itemData.m_shared.m_damages.m_spirit = options.damageSpirit; }
+                if (options.attackEitr != null) { itemDrop.m_itemData.m_shared.m_attack.m_attackEitr = (float)options.attackEitr; }
+                if (options.secondaryAttackEitr != null) { itemDrop.m_itemData.m_shared.m_secondaryAttack.m_attackEitr = (float)options.secondaryAttackEitr; }
+                if (options.damageBlunt != null) { itemDrop.m_itemData.m_shared.m_damages.m_blunt = (float)options.damageBlunt; }
+                if (options.damageChop != null) { itemDrop.m_itemData.m_shared.m_damages.m_chop = (float)options.damageChop; }
+                if (options.damageFire != null) { itemDrop.m_itemData.m_shared.m_damages.m_fire = (float)options.damageFire; }
+                if (options.damageFrost != null) { itemDrop.m_itemData.m_shared.m_damages.m_frost = (float)options.damageFrost; }
+                if (options.damageLightning != null) { itemDrop.m_itemData.m_shared.m_damages.m_lightning = (float)options.damageLightning; }
+                if (options.damagePickaxe != null) { itemDrop.m_itemData.m_shared.m_damages.m_pickaxe = (float)options.damagePickaxe; }
+                if (options.damagePierce != null) { itemDrop.m_itemData.m_shared.m_damages.m_pierce = (float)options.damagePierce; }
+                if (options.damageSlash != null) { itemDrop.m_itemData.m_shared.m_damages.m_slash = (float)options.damageSlash; }
+                if (options.damageSpirit != null) { itemDrop.m_itemData.m_shared.m_damages.m_spirit = (float)options.damageSpirit; }
 
-                if (options.eitrRegen > -1f) { itemDrop.m_itemData.m_shared.m_eitrRegenModifier = options.eitrRegen; }
+                if (options.eitrRegen != null) { itemDrop.m_itemData.m_shared.m_eitrRegenModifier = (float)options.eitrRegen; }
             }
             catch (Exception error)
             {
-                Jotunn.Logger.LogError("Could not patch stats: " + error);
+                Jotunn.Logger.LogError("Could not update ItemDrop stats: " + error);
             }
         }
     }

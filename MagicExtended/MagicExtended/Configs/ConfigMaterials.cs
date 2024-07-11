@@ -1,5 +1,4 @@
-﻿using BepInEx.Configuration;
-using MagicExtended.Models;
+﻿using MagicExtended.Models;
 using System;
 
 namespace MagicExtended.Configs
@@ -10,25 +9,13 @@ namespace MagicExtended.Configs
         public static string sectionCrudeEitr = "40. Crude Eitr";
         public static string crudeEitrRecipeName = "Recipe_CrudeEitr_DW";
         public static string crudeEitrDefaultRecipe = "GreydwarfEye:3, Resin:3, GribSnow_DW:3";
-
-        public static ConfigEntry<bool> crudeEitrEnable;
-        public static ConfigEntry<string> crudeEitrName;
-        public static ConfigEntry<string> crudeEitrDescription;
-        public static ConfigEntry<string> crudeEitrCraftingStation;
-        public static ConfigEntry<int> crudeEitrMinStationLevel;
-        public static ConfigEntry<string> crudeEitrRecipe;
+        public static MaterialConfig crudeEitr = new MaterialConfig();
 
         // FineEitr
         public static string sectionFineEitr = "41. Fine Eitr";
         public static string fineEitrRecipeName = "Recipe_FineEitr_DW";
         public static string fineEitrDefaultRecipe = "Crystal:3, Coal:3, PircedMushroom_DW:3";
-
-        public static ConfigEntry<bool> fineEitrEnable;
-        public static ConfigEntry<string> fineEitrName;
-        public static ConfigEntry<string> fineEitrDescription;
-        public static ConfigEntry<string> fineEitrCraftingStation;
-        public static ConfigEntry<int> fineEitrMinStationLevel;
-        public static ConfigEntry<string> fineEitrRecipe;
+        public static MaterialConfig fineEitr = new MaterialConfig();
 
         public static void Init()
         {
@@ -40,11 +27,11 @@ namespace MagicExtended.Configs
         {
             try
             {
-                MaterialConfig materialConfig = new MaterialConfig()
+                MaterialConfigOptions options = new MaterialConfigOptions()
                 {
                     sectionName = sectionCrudeEitr,
                     recipeName = crudeEitrRecipeName,
-                    prefab = MagicExtended.Instance.crudeEitrPrefab,
+                    prefab = MagicExtended.Instance.prefabs.crudeEitrPrefab,
                     enable = true,
                     name = "Crude Eitr",
                     description = "Magic in a crude form, but better then the mushrooms",
@@ -52,14 +39,7 @@ namespace MagicExtended.Configs
                     minStationLevel = 1,
                     recipe = crudeEitrDefaultRecipe,
                 };
-                materialConfig.GenerateConfig();
-
-                crudeEitrEnable = materialConfig.configEnable;
-                crudeEitrName = materialConfig.configName;
-                crudeEitrDescription = materialConfig.configDescription;
-                crudeEitrCraftingStation = materialConfig.configCraftingStation;
-                crudeEitrMinStationLevel = materialConfig.configMinStationLevel;
-                crudeEitrRecipe = materialConfig.configRecipe;
+                crudeEitr.GenerateConfig(options);
             }
             catch (Exception error)
             {
@@ -71,11 +51,11 @@ namespace MagicExtended.Configs
         {
             try
             {
-                MaterialConfig materialConfig = new MaterialConfig()
+                MaterialConfigOptions options = new MaterialConfigOptions()
                 {
                     sectionName = sectionFineEitr,
                     recipeName = fineEitrRecipeName,
-                    prefab = MagicExtended.Instance.fineEitrPrefab,
+                    prefab = MagicExtended.Instance.prefabs.fineEitrPrefab,
                     enable = true,
                     name = "Fine Eitr",
                     description = "Fine Magic to create powerfull weapons, tools and armor!",
@@ -83,14 +63,7 @@ namespace MagicExtended.Configs
                     minStationLevel = 3,
                     recipe = fineEitrDefaultRecipe,
                 };
-                materialConfig.GenerateConfig();
-
-                fineEitrEnable = materialConfig.configEnable;
-                fineEitrName = materialConfig.configName;
-                fineEitrDescription = materialConfig.configDescription;
-                fineEitrCraftingStation = materialConfig.configCraftingStation;
-                fineEitrMinStationLevel = materialConfig.configMinStationLevel;
-                fineEitrRecipe = materialConfig.configRecipe;
+                fineEitr.GenerateConfig(options);
             }
             catch (Exception error)
             {

@@ -30,55 +30,11 @@ namespace MagicExtended
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
         public static MagicExtended Instance;
 
+        public PlayerArmatureHelper playerArmature;
+
         private AssetBundle magicExtendedBundle;
-
-        // Materials
-        public GameObject crudeEitrPrefab;
-        public GameObject fineEitrPrefab;
-
-        // Food
-        public GameObject magicalMushroomPrefab;
-        public GameObject magicalCookedMushroomPrefab;
-        public GameObject magicalMushroomPickablePrefab;
-        public GameObject gribSnowMushroomPrefab;
-        public GameObject gribSnowMushroomPickablePrefab;
-        public GameObject bogMushroomPrefab;
-        public GameObject bogMushroomPickablePrefab;
-        public GameObject pircedMushroomPrefab;
-        public GameObject pircedMushroomPickablePrefab;
-
-        // Staffs
-        public GameObject staffEarth0Prefab;
-        public GameObject staffEarth1Prefab;
-        public GameObject staffEarth2Prefab;
-        public GameObject staffEarth3Prefab;
-        public GameObject staffFire1Prefab;
-        public GameObject staffFire2Prefab;
-        public GameObject staffFire3Prefab;
-        public GameObject staffFrost1Prefab;
-        public GameObject staffFrost2Prefab;
-        public GameObject staffFrost3Prefab;
-        public GameObject staffLightning1Prefab;
-        public GameObject staffLightning2Prefab;
-        public GameObject staffLightning3Prefab;
-
-        // Projectiles
-        public GameObject projectileMushroomPrefab;
-
-        // Books
-        public GameObject simpleSpellbookPrefab;
-        public GameObject advancedSpellbookPrefab;
-        public GameObject masterSpellbookPrefab;
-
-        // Swamp
-        public GameObject helmetMageSwamp;
-        public GameObject ArmorMageSwampChest;
-        public GameObject ArmorMageSwampLegs;
-        public StatusEffect SwampMageArmorSetSE;
-
-        // Special
-        public GameObject PlayerHead;
-        public GameObject EvilSmoke;
+        public CustomPrefabs prefabs = new CustomPrefabs();
+        public CustomStatusEffects statusEffects = new CustomStatusEffects();
 
         //// Use this class to add your own localization to the game
         //// https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -94,6 +50,7 @@ namespace MagicExtended
             InitStatusEffects();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
+            PrefabManager.OnVanillaPrefabsAvailable += InitPlayerArmature;
             PrefabManager.OnVanillaPrefabsAvailable += AddMaterials;
             PrefabManager.OnVanillaPrefabsAvailable += AddFood;
             PrefabManager.OnVanillaPrefabsAvailable += AddEarthStaffs;
@@ -104,9 +61,9 @@ namespace MagicExtended
             PrefabManager.OnVanillaPrefabsAvailable += AddArmor;
             PrefabManager.OnVanillaPrefabsAvailable += AddFenringArmor;
             ZoneManager.OnVanillaVegetationAvailable += AddLocations;
-            
-            // ZoneManager.OnVegetationRegistered += CheckLocations;
-            // ItemManager.OnItemsRegistered += LogRecipes;
+
+            //ZoneManager.OnVegetationRegistered += CheckLocations;
+            //ItemManager.OnItemsRegistered += LogRecipes;
         }
 
         //private void LogRecipes()
@@ -167,117 +124,117 @@ namespace MagicExtended
 
             // Earth0 staff
             ItemConfig earth0Config = new ItemConfig();
-            earth0Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffEarth0Enable.Value : false;
-            earth0Config.CraftingStation = ConfigStaffs.staffEarth0CraftingStation.Value;
-            earth0Config.MinStationLevel = ConfigStaffs.staffEarth0MinStationLevel.Value;
-            RequirementConfig[] earth0Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffEarth0Recipe.Value, ConfigStaffs.staffEarth0RecipeUpgrade.Value, ConfigStaffs.staffEarth0RecipeMultiplier.Value);
+            earth0Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffEarth0.enable.Value : false;
+            earth0Config.CraftingStation = ConfigStaffs.staffEarth0.craftingStation.Value;
+            earth0Config.MinStationLevel = ConfigStaffs.staffEarth0.minStationLevel.Value;
+            RequirementConfig[] earth0Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffEarth0.recipe.Value, ConfigStaffs.staffEarth0.recipeUpgrade.Value, ConfigStaffs.staffEarth0.recipeMultiplier.Value);
 
             if (earth0Requirements == null || earth0Requirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: StaffEarth0_DW");
             else
                 earth0Config.Requirements = earth0Requirements;
 
-            ConfigHelper.PatchStats(staffEarth0Prefab, new PatchStatsOptions()
+            ConfigHelper.UpdateItemDropStats(prefabs.staffEarth0Prefab, new UpdateItemDropStatsOptions()
             {
-                name = ConfigStaffs.staffEarth0Name.Value,
-                description = ConfigStaffs.staffEarth0Description.Value,
-                maxQuality = ConfigStaffs.staffEarth0MaxQuality.Value,
-                movementModifier = ConfigStaffs.staffEarth0MovementSpeed.Value,
-                blockPower = ConfigStaffs.staffEarth0BlockArmor.Value,
-                deflectionForce = ConfigStaffs.staffEarth0DeflectionForce.Value,
-                attackForce = ConfigStaffs.staffEarth0AttackForce.Value,
-                damageBlunt = ConfigStaffs.staffEarth0DamageBlunt.Value,
-                damageSpirit = ConfigStaffs.staffEarth0DamageSpirit.Value,
-                attackEitr = ConfigStaffs.staffEarth0UseEitr.Value,
+                name = ConfigStaffs.staffEarth0.name.Value,
+                description = ConfigStaffs.staffEarth0.description.Value,
+                maxQuality = ConfigStaffs.staffEarth0.maxQuality.Value,
+                movementModifier = ConfigStaffs.staffEarth0.movementSpeed.Value,
+                blockPower = ConfigStaffs.staffEarth0.blockArmor.Value,
+                deflectionForce = ConfigStaffs.staffEarth0.deflectionForce.Value,
+                attackForce = ConfigStaffs.staffEarth0.attackForce.Value,
+                damageBlunt = ConfigStaffs.staffEarth0.damageBlunt.Value,
+                damageSpirit = ConfigStaffs.staffEarth0.damageSpirit.Value,
+                attackEitr = ConfigStaffs.staffEarth0.useEitr.Value,
             });
 
-            ItemManager.Instance.AddItem(new CustomItem(staffEarth0Prefab, true, earth0Config));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.staffEarth0Prefab, true, earth0Config));
 
             // Earth1 staff
             ItemConfig earth1Config = new ItemConfig();
-            earth1Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffEarth1Enable.Value : false;
-            earth1Config.CraftingStation = ConfigStaffs.staffEarth1CraftingStation.Value;
-            earth1Config.MinStationLevel = ConfigStaffs.staffEarth1MinStationLevel.Value;
-            RequirementConfig[] earth1Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffEarth1Recipe.Value, ConfigStaffs.staffEarth1RecipeUpgrade.Value, ConfigStaffs.staffEarth1RecipeMultiplier.Value);
+            earth1Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffEarth1.enable.Value : false;
+            earth1Config.CraftingStation = ConfigStaffs.staffEarth1.craftingStation.Value;
+            earth1Config.MinStationLevel = ConfigStaffs.staffEarth1.minStationLevel.Value;
+            RequirementConfig[] earth1Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffEarth1.recipe.Value, ConfigStaffs.staffEarth1.recipeUpgrade.Value, ConfigStaffs.staffEarth1.recipeMultiplier.Value);
 
             if (earth1Requirements == null || earth1Requirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: StaffEarth1_DW");
             else
                 earth1Config.Requirements = earth1Requirements;
 
-            ConfigHelper.PatchStats(staffEarth1Prefab, new PatchStatsOptions()
+            ConfigHelper.UpdateItemDropStats(prefabs.staffEarth1Prefab, new UpdateItemDropStatsOptions()
             {
-                name = ConfigStaffs.staffEarth1Name.Value,
-                description = ConfigStaffs.staffEarth1Description.Value,
-                maxQuality = ConfigStaffs.staffEarth1MaxQuality.Value,
-                movementModifier = ConfigStaffs.staffEarth1MovementSpeed.Value,
-                blockPower = ConfigStaffs.staffEarth1BlockArmor.Value,
-                deflectionForce = ConfigStaffs.staffEarth1DeflectionForce.Value,
-                attackForce = ConfigStaffs.staffEarth1AttackForce.Value,
-                damageBlunt = ConfigStaffs.staffEarth1DamageBlunt.Value,
-                damageSpirit = ConfigStaffs.staffEarth1DamageSpirit.Value,
-                attackEitr = ConfigStaffs.staffEarth1UseEitr.Value,
+                name = ConfigStaffs.staffEarth1.name.Value,
+                description = ConfigStaffs.staffEarth1.description.Value,
+                maxQuality = ConfigStaffs.staffEarth1.maxQuality.Value,
+                movementModifier = ConfigStaffs.staffEarth1.movementSpeed.Value,
+                blockPower = ConfigStaffs.staffEarth1.blockArmor.Value,
+                deflectionForce = ConfigStaffs.staffEarth1.deflectionForce.Value,
+                attackForce = ConfigStaffs.staffEarth1.attackForce.Value,
+                damageBlunt = ConfigStaffs.staffEarth1.damageBlunt.Value,
+                damageSpirit = ConfigStaffs.staffEarth1.damageSpirit.Value,
+                attackEitr = ConfigStaffs.staffEarth1.useEitr.Value,
             });
 
-            ItemManager.Instance.AddItem(new CustomItem(staffEarth1Prefab, true, earth1Config));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.staffEarth1Prefab, true, earth1Config));
 
             // Earth2 staff
             ItemConfig earth2Config = new ItemConfig();
-            earth2Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffEarth2Enable.Value : false;
-            earth2Config.CraftingStation = ConfigStaffs.staffEarth2CraftingStation.Value;
-            earth2Config.MinStationLevel = ConfigStaffs.staffEarth2MinStationLevel.Value;
-            RequirementConfig[] earth2Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffEarth2Recipe.Value, ConfigStaffs.staffEarth2RecipeUpgrade.Value, ConfigStaffs.staffEarth2RecipeMultiplier.Value);
+            earth2Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffEarth2.enable.Value : false;
+            earth2Config.CraftingStation = ConfigStaffs.staffEarth2.craftingStation.Value;
+            earth2Config.MinStationLevel = ConfigStaffs.staffEarth2.minStationLevel.Value;
+            RequirementConfig[] earth2Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffEarth2.recipe.Value, ConfigStaffs.staffEarth2.recipeUpgrade.Value, ConfigStaffs.staffEarth2.recipeMultiplier.Value);
 
             if (earth2Requirements == null || earth2Requirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: StaffEarth2_DW");
             else
                 earth2Config.Requirements = earth2Requirements;
 
-            ConfigHelper.PatchStats(staffEarth2Prefab, new PatchStatsOptions()
+            ConfigHelper.UpdateItemDropStats(prefabs.staffEarth2Prefab, new UpdateItemDropStatsOptions()
             {
-                name = ConfigStaffs.staffEarth2Name.Value,
-                description = ConfigStaffs.staffEarth2Description.Value,
-                maxQuality = ConfigStaffs.staffEarth2MaxQuality.Value,
-                movementModifier = ConfigStaffs.staffEarth2MovementSpeed.Value,
-                blockPower = ConfigStaffs.staffEarth2BlockArmor.Value,
-                deflectionForce = ConfigStaffs.staffEarth2DeflectionForce.Value,
-                attackForce = ConfigStaffs.staffEarth2AttackForce.Value,
-                damageBlunt = ConfigStaffs.staffEarth2DamageBlunt.Value,
-                damageSpirit = ConfigStaffs.staffEarth2DamageSpirit.Value,
-                attackEitr = ConfigStaffs.staffEarth2UseEitr.Value,
-                secondaryAttackEitr = ConfigStaffs.staffEarth2UseEitrSecondary.Value,
+                name = ConfigStaffs.staffEarth2.name.Value,
+                description = ConfigStaffs.staffEarth2.description.Value,
+                maxQuality = ConfigStaffs.staffEarth2.maxQuality.Value,
+                movementModifier = ConfigStaffs.staffEarth2.movementSpeed.Value,
+                blockPower = ConfigStaffs.staffEarth2.blockArmor.Value,
+                deflectionForce = ConfigStaffs.staffEarth2.deflectionForce.Value,
+                attackForce = ConfigStaffs.staffEarth2.attackForce.Value,
+                damageBlunt = ConfigStaffs.staffEarth2.damageBlunt.Value,
+                damageSpirit = ConfigStaffs.staffEarth2.damageSpirit.Value,
+                attackEitr = ConfigStaffs.staffEarth2.useEitr.Value,
+                secondaryAttackEitr = ConfigStaffs.staffEarth2.useEitrSecondary.Value,
             });
 
-            ItemManager.Instance.AddItem(new CustomItem(staffEarth2Prefab, true, earth2Config));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.staffEarth2Prefab, true, earth2Config));
 
             // Earth3 staff
             ItemConfig earth3Config = new ItemConfig();
-            earth3Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffEarth3Enable.Value : false;
-            earth3Config.CraftingStation = ConfigStaffs.staffEarth3CraftingStation.Value;
-            earth3Config.MinStationLevel = ConfigStaffs.staffEarth3MinStationLevel.Value;
-            RequirementConfig[] earth3Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffEarth3Recipe.Value, ConfigStaffs.staffEarth3RecipeUpgrade.Value, ConfigStaffs.staffEarth3RecipeMultiplier.Value);
+            earth3Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffEarth3.enable.Value : false;
+            earth3Config.CraftingStation = ConfigStaffs.staffEarth3.craftingStation.Value;
+            earth3Config.MinStationLevel = ConfigStaffs.staffEarth3.minStationLevel.Value;
+            RequirementConfig[] earth3Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffEarth3.recipe.Value, ConfigStaffs.staffEarth3.recipeUpgrade.Value, ConfigStaffs.staffEarth3.recipeMultiplier.Value);
 
             if (earth3Requirements == null || earth3Requirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: StaffEarth3_DW");
             else
                 earth3Config.Requirements = earth3Requirements;
 
-            ConfigHelper.PatchStats(staffEarth3Prefab, new PatchStatsOptions()
+            ConfigHelper.UpdateItemDropStats(prefabs.staffEarth3Prefab, new UpdateItemDropStatsOptions()
             {
-                name = ConfigStaffs.staffEarth3Name.Value,
-                description = ConfigStaffs.staffEarth3Description.Value,
-                maxQuality = ConfigStaffs.staffEarth3MaxQuality.Value,
-                movementModifier = ConfigStaffs.staffEarth3MovementSpeed.Value,
-                blockPower = ConfigStaffs.staffEarth3BlockArmor.Value,
-                deflectionForce = ConfigStaffs.staffEarth3DeflectionForce.Value,
-                attackForce = ConfigStaffs.staffEarth3AttackForce.Value,
-                damageBlunt = ConfigStaffs.staffEarth3DamageBlunt.Value,
-                damageSpirit = ConfigStaffs.staffEarth3DamageSpirit.Value,
-                attackEitr = ConfigStaffs.staffEarth3UseEitr.Value,
-                secondaryAttackEitr = ConfigStaffs.staffEarth3UseEitrSecondary.Value,
+                name = ConfigStaffs.staffEarth3.name.Value,
+                description = ConfigStaffs.staffEarth3.description.Value,
+                maxQuality = ConfigStaffs.staffEarth3.maxQuality.Value,
+                movementModifier = ConfigStaffs.staffEarth3.movementSpeed.Value,
+                blockPower = ConfigStaffs.staffEarth3.blockArmor.Value,
+                deflectionForce = ConfigStaffs.staffEarth3.deflectionForce.Value,
+                attackForce = ConfigStaffs.staffEarth3.attackForce.Value,
+                damageBlunt = ConfigStaffs.staffEarth3.damageBlunt.Value,
+                damageSpirit = ConfigStaffs.staffEarth3.damageSpirit.Value,
+                attackEitr = ConfigStaffs.staffEarth3.useEitr.Value,
+                secondaryAttackEitr = ConfigStaffs.staffEarth3.useEitrSecondary.Value,
             });
 
-            ItemManager.Instance.AddItem(new CustomItem(staffEarth3Prefab, true, earth3Config));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.staffEarth3Prefab, true, earth3Config));
             PrefabManager.OnVanillaPrefabsAvailable -= AddEarthStaffs;
         }
 
@@ -285,89 +242,89 @@ namespace MagicExtended
         {
             // Fire1 staff
             ItemConfig fire1Config = new ItemConfig();
-            fire1Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffFire1Enable.Value : false;
-            fire1Config.CraftingStation = ConfigStaffs.staffFire1CraftingStation.Value;
-            fire1Config.MinStationLevel = ConfigStaffs.staffFire1MinStationLevel.Value;
-            RequirementConfig[] fire1Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffFire1Recipe.Value, ConfigStaffs.staffFire1RecipeUpgrade.Value, ConfigStaffs.staffFire1RecipeMultiplier.Value);
+            fire1Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffFire1.enable.Value : false;
+            fire1Config.CraftingStation = ConfigStaffs.staffFire1.craftingStation.Value;
+            fire1Config.MinStationLevel = ConfigStaffs.staffFire1.minStationLevel.Value;
+            RequirementConfig[] fire1Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffFire1.recipe.Value, ConfigStaffs.staffFire1.recipeUpgrade.Value, ConfigStaffs.staffFire1.recipeMultiplier.Value);
 
             if (fire1Requirements == null || fire1Requirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: StaffFire1_DW");
             else
                 fire1Config.Requirements = fire1Requirements;
 
-            ConfigHelper.PatchStats(staffFire1Prefab, new PatchStatsOptions()
+            ConfigHelper.UpdateItemDropStats(prefabs.staffFire1Prefab, new UpdateItemDropStatsOptions()
             {
-                name = ConfigStaffs.staffFire1Name.Value,
-                description = ConfigStaffs.staffFire1Description.Value,
-                maxQuality = ConfigStaffs.staffFire1MaxQuality.Value,
-                movementModifier = ConfigStaffs.staffFire1MovementSpeed.Value,
-                blockPower = ConfigStaffs.staffFire1BlockArmor.Value,
-                deflectionForce = ConfigStaffs.staffFire1DeflectionForce.Value,
-                attackForce = ConfigStaffs.staffFire1AttackForce.Value,
-                damageBlunt = ConfigStaffs.staffFire1DamageBlunt.Value,
-                damageFire = ConfigStaffs.staffFire1DamageFire.Value,
-                attackEitr = ConfigStaffs.staffFire1UseEitr.Value,
+                name = ConfigStaffs.staffFire1.name.Value,
+                description = ConfigStaffs.staffFire1.description.Value,
+                maxQuality = ConfigStaffs.staffFire1.maxQuality.Value,
+                movementModifier = ConfigStaffs.staffFire1.movementSpeed.Value,
+                blockPower = ConfigStaffs.staffFire1.blockArmor.Value,
+                deflectionForce = ConfigStaffs.staffFire1.deflectionForce.Value,
+                attackForce = ConfigStaffs.staffFire1.attackForce.Value,
+                damageBlunt = ConfigStaffs.staffFire1.damageBlunt.Value,
+                damageFire = ConfigStaffs.staffFire1.damageFire.Value,
+                attackEitr = ConfigStaffs.staffFire1.useEitr.Value,
             });
 
-            ItemManager.Instance.AddItem(new CustomItem(staffFire1Prefab, true, fire1Config));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.staffFire1Prefab, true, fire1Config));
 
             // Fire2 staff
             ItemConfig fire2Config = new ItemConfig();
-            fire2Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffFire2Enable.Value : false;
-            fire2Config.CraftingStation = ConfigStaffs.staffFire2CraftingStation.Value;
-            fire2Config.MinStationLevel = ConfigStaffs.staffFire2MinStationLevel.Value;
-            RequirementConfig[] fire2Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffFire2Recipe.Value, ConfigStaffs.staffFire2RecipeUpgrade.Value, ConfigStaffs.staffFire2RecipeMultiplier.Value);
+            fire2Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffFire2.enable.Value : false;
+            fire2Config.CraftingStation = ConfigStaffs.staffFire2.craftingStation.Value;
+            fire2Config.MinStationLevel = ConfigStaffs.staffFire2.minStationLevel.Value;
+            RequirementConfig[] fire2Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffFire2.recipe.Value, ConfigStaffs.staffFire2.recipeUpgrade.Value, ConfigStaffs.staffFire2.recipeMultiplier.Value);
 
             if (fire2Requirements == null || fire2Requirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: StaffFire2_DW");
             else
                 fire2Config.Requirements = fire2Requirements;
 
-            ConfigHelper.PatchStats(staffFire2Prefab, new PatchStatsOptions()
+            ConfigHelper.UpdateItemDropStats(prefabs.staffFire2Prefab, new UpdateItemDropStatsOptions()
             {
-                name = ConfigStaffs.staffFire2Name.Value,
-                description = ConfigStaffs.staffFire2Description.Value,
-                maxQuality = ConfigStaffs.staffFire2MaxQuality.Value,
-                movementModifier = ConfigStaffs.staffFire2MovementSpeed.Value,
-                blockPower = ConfigStaffs.staffFire2BlockArmor.Value,
-                deflectionForce = ConfigStaffs.staffFire2DeflectionForce.Value,
-                attackForce = ConfigStaffs.staffFire2AttackForce.Value,
-                damageBlunt = ConfigStaffs.staffFire2DamageBlunt.Value,
-                damageFire = ConfigStaffs.staffFire2DamageFire.Value,
-                attackEitr = ConfigStaffs.staffFire2UseEitr.Value,
-                secondaryAttackEitr = ConfigStaffs.staffFire2UseEitrSecondary.Value,
+                name = ConfigStaffs.staffFire2.name.Value,
+                description = ConfigStaffs.staffFire2.description.Value,
+                maxQuality = ConfigStaffs.staffFire2.maxQuality.Value,
+                movementModifier = ConfigStaffs.staffFire2.movementSpeed.Value,
+                blockPower = ConfigStaffs.staffFire2.blockArmor.Value,
+                deflectionForce = ConfigStaffs.staffFire2.deflectionForce.Value,
+                attackForce = ConfigStaffs.staffFire2.attackForce.Value,
+                damageBlunt = ConfigStaffs.staffFire2.damageBlunt.Value,
+                damageFire = ConfigStaffs.staffFire2.damageFire.Value,
+                attackEitr = ConfigStaffs.staffFire2.useEitr.Value,
+                secondaryAttackEitr = ConfigStaffs.staffFire2.useEitrSecondary.Value,
             });
 
-            ItemManager.Instance.AddItem(new CustomItem(staffFire2Prefab, true, fire2Config));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.staffFire2Prefab, true, fire2Config));
 
-            // Fire3 staff
+            // Fire3 staff.blockArmor.Value
             ItemConfig fire3Config = new ItemConfig();
-            fire3Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffFire3Enable.Value : false;
-            fire3Config.CraftingStation = ConfigStaffs.staffFire3CraftingStation.Value;
-            fire3Config.MinStationLevel = ConfigStaffs.staffFire3MinStationLevel.Value;
-            RequirementConfig[] fire3Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffFire3Recipe.Value, ConfigStaffs.staffFire3RecipeUpgrade.Value, ConfigStaffs.staffFire3RecipeMultiplier.Value);
+            fire3Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffFire3.enable.Value : false;
+            fire3Config.CraftingStation = ConfigStaffs.staffFire3.craftingStation.Value;
+            fire3Config.MinStationLevel = ConfigStaffs.staffFire3.minStationLevel.Value;
+            RequirementConfig[] fire3Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffFire3.recipe.Value, ConfigStaffs.staffFire3.recipeUpgrade.Value, ConfigStaffs.staffFire3.recipeMultiplier.Value);
 
             if (fire3Requirements == null || fire3Requirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: StaffFire3_DW");
             else
                 fire3Config.Requirements = fire3Requirements;
 
-            ConfigHelper.PatchStats(staffFire3Prefab, new PatchStatsOptions()
+            ConfigHelper.UpdateItemDropStats(prefabs.staffFire3Prefab, new UpdateItemDropStatsOptions()
             {
-                name = ConfigStaffs.staffFire3Name.Value,
-                description = ConfigStaffs.staffFire3Description.Value,
-                maxQuality = ConfigStaffs.staffFire3MaxQuality.Value,
-                movementModifier = ConfigStaffs.staffFire3MovementSpeed.Value,
-                blockPower = ConfigStaffs.staffFire3BlockArmor.Value,
-                deflectionForce = ConfigStaffs.staffFire3DeflectionForce.Value,
-                attackForce = ConfigStaffs.staffFire3AttackForce.Value,
-                damageBlunt = ConfigStaffs.staffFire3DamageBlunt.Value,
-                damageFire = ConfigStaffs.staffFire3DamageFire.Value,
-                attackEitr = ConfigStaffs.staffFire3UseEitr.Value,
-                secondaryAttackEitr = ConfigStaffs.staffFire3UseEitrSecondary.Value,
+                name = ConfigStaffs.staffFire3.name.Value,
+                description = ConfigStaffs.staffFire3.description.Value,
+                maxQuality = ConfigStaffs.staffFire3.maxQuality.Value,
+                movementModifier = ConfigStaffs.staffFire3.movementSpeed.Value,
+                blockPower = ConfigStaffs.staffFire3.blockArmor.Value,
+                deflectionForce = ConfigStaffs.staffFire3.deflectionForce.Value,
+                attackForce = ConfigStaffs.staffFire3.attackForce.Value,
+                damageBlunt = ConfigStaffs.staffFire3.damageBlunt.Value,
+                damageFire = ConfigStaffs.staffFire3.damageFire.Value,
+                attackEitr = ConfigStaffs.staffFire3.useEitr.Value,
+                secondaryAttackEitr = ConfigStaffs.staffFire3.useEitrSecondary.Value,
             });
 
-            ItemManager.Instance.AddItem(new CustomItem(staffFire3Prefab, true, fire3Config));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.staffFire3Prefab, true, fire3Config));
             PrefabManager.OnVanillaPrefabsAvailable -= AddFireStaffs;
         }
 
@@ -375,89 +332,89 @@ namespace MagicExtended
         {
             // Frost1 staff
             ItemConfig frost1Config = new ItemConfig();
-            frost1Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffFrost1Enable.Value : false;
-            frost1Config.CraftingStation = ConfigStaffs.staffFrost1CraftingStation.Value;
-            frost1Config.MinStationLevel = ConfigStaffs.staffFrost1MinStationLevel.Value;
-            RequirementConfig[] frost1Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffFrost1Recipe.Value, ConfigStaffs.staffFrost1RecipeUpgrade.Value, ConfigStaffs.staffFrost1RecipeMultiplier.Value);
+            frost1Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffFrost1.enable.Value : false;
+            frost1Config.CraftingStation = ConfigStaffs.staffFrost1.craftingStation.Value;
+            frost1Config.MinStationLevel = ConfigStaffs.staffFrost1.minStationLevel.Value;
+            RequirementConfig[] frost1Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffFrost1.recipe.Value, ConfigStaffs.staffFrost1.recipeUpgrade.Value, ConfigStaffs.staffFrost1.recipeMultiplier.Value);
 
             if (frost1Requirements == null || frost1Requirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: StaffFrost1_DW");
             else
                 frost1Config.Requirements = frost1Requirements;
 
-            ConfigHelper.PatchStats(staffFrost1Prefab, new PatchStatsOptions()
+            ConfigHelper.UpdateItemDropStats(prefabs.staffFrost1Prefab, new UpdateItemDropStatsOptions()
             {
-                name = ConfigStaffs.staffFrost1Name.Value,
-                description = ConfigStaffs.staffFrost1Description.Value,
-                maxQuality = ConfigStaffs.staffFrost1MaxQuality.Value,
-                movementModifier = ConfigStaffs.staffFrost1MovementSpeed.Value,
-                blockPower = ConfigStaffs.staffFrost1BlockArmor.Value,
-                deflectionForce = ConfigStaffs.staffFrost1DeflectionForce.Value,
-                attackForce = ConfigStaffs.staffFrost1AttackForce.Value,
-                damagePierce = ConfigStaffs.staffFrost1DamagePierce.Value,
-                damageFrost = ConfigStaffs.staffFrost1DamageFrost.Value,
-                attackEitr = ConfigStaffs.staffFrost1UseEitr.Value,
+                name = ConfigStaffs.staffFrost1.name.Value,
+                description = ConfigStaffs.staffFrost1.description.Value,
+                maxQuality = ConfigStaffs.staffFrost1.maxQuality.Value,
+                movementModifier = ConfigStaffs.staffFrost1.movementSpeed.Value,
+                blockPower = ConfigStaffs.staffFrost1.blockArmor.Value,
+                deflectionForce = ConfigStaffs.staffFrost1.deflectionForce.Value,
+                attackForce = ConfigStaffs.staffFrost1.attackForce.Value,
+                damagePierce = ConfigStaffs.staffFrost1.damagePierce.Value,
+                damageFrost = ConfigStaffs.staffFrost1.damageFrost.Value,
+                attackEitr = ConfigStaffs.staffFrost1.useEitr.Value,
             });
 
-            ItemManager.Instance.AddItem(new CustomItem(staffFrost1Prefab, true, frost1Config));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.staffFrost1Prefab, true, frost1Config));
 
             // Frost2 staff
             ItemConfig frost2Config = new ItemConfig();
-            frost2Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffFrost2Enable.Value : false;
-            frost2Config.CraftingStation = ConfigStaffs.staffFrost2CraftingStation.Value;
-            frost2Config.MinStationLevel = ConfigStaffs.staffFrost2MinStationLevel.Value;
-            RequirementConfig[] frost2Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffFrost2Recipe.Value, ConfigStaffs.staffFrost2RecipeUpgrade.Value, ConfigStaffs.staffFrost2RecipeMultiplier.Value);
+            frost2Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffFrost2.enable.Value : false;
+            frost2Config.CraftingStation = ConfigStaffs.staffFrost2.craftingStation.Value;
+            frost2Config.MinStationLevel = ConfigStaffs.staffFrost2.minStationLevel.Value;
+            RequirementConfig[] frost2Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffFrost2.recipe.Value, ConfigStaffs.staffFrost2.recipeUpgrade.Value, ConfigStaffs.staffFrost2.recipeMultiplier.Value);
 
             if (frost2Requirements == null || frost2Requirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: StaffFrost2_DW");
             else
                 frost2Config.Requirements = frost2Requirements;
 
-            ConfigHelper.PatchStats(staffFrost2Prefab, new PatchStatsOptions()
+            ConfigHelper.UpdateItemDropStats(prefabs.staffFrost2Prefab, new UpdateItemDropStatsOptions()
             {
-                name = ConfigStaffs.staffFrost2Name.Value,
-                description = ConfigStaffs.staffFrost2Description.Value,
-                maxQuality = ConfigStaffs.staffFrost2MaxQuality.Value,
-                movementModifier = ConfigStaffs.staffFrost2MovementSpeed.Value,
-                blockPower = ConfigStaffs.staffFrost2BlockArmor.Value,
-                deflectionForce = ConfigStaffs.staffFrost2DeflectionForce.Value,
-                attackForce = ConfigStaffs.staffFrost2AttackForce.Value,
-                damagePierce = ConfigStaffs.staffFrost2DamagePierce.Value,
-                damageFrost = ConfigStaffs.staffFrost2DamageFrost.Value,
-                attackEitr = ConfigStaffs.staffFrost2UseEitr.Value,
-                secondaryAttackEitr = ConfigStaffs.staffFrost2UseEitrSecondary.Value,
+                name = ConfigStaffs.staffFrost2.name.Value,
+                description = ConfigStaffs.staffFrost2.description.Value,
+                maxQuality = ConfigStaffs.staffFrost2.maxQuality.Value,
+                movementModifier = ConfigStaffs.staffFrost2.movementSpeed.Value,
+                blockPower = ConfigStaffs.staffFrost2.blockArmor.Value,
+                deflectionForce = ConfigStaffs.staffFrost2.deflectionForce.Value,
+                attackForce = ConfigStaffs.staffFrost2.attackForce.Value,
+                damagePierce = ConfigStaffs.staffFrost2.damagePierce.Value,
+                damageFrost = ConfigStaffs.staffFrost2.damageFrost.Value,
+                attackEitr = ConfigStaffs.staffFrost2.useEitr.Value,
+                secondaryAttackEitr = ConfigStaffs.staffFrost2.useEitrSecondary.Value,
             });
 
-            ItemManager.Instance.AddItem(new CustomItem(staffFrost2Prefab, true, frost2Config));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.staffFrost2Prefab, true, frost2Config));
 
             // Frost3 staff
             ItemConfig frost3Config = new ItemConfig();
-            frost3Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffFrost3Enable.Value : false;
-            frost3Config.CraftingStation = ConfigStaffs.staffFrost3CraftingStation.Value;
-            frost3Config.MinStationLevel = ConfigStaffs.staffFrost3MinStationLevel.Value;
-            RequirementConfig[] frost3Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffFrost3Recipe.Value, ConfigStaffs.staffFrost3RecipeUpgrade.Value, ConfigStaffs.staffFrost3RecipeMultiplier.Value);
+            frost3Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffFrost3.enable.Value : false;
+            frost3Config.CraftingStation = ConfigStaffs.staffFrost3.craftingStation.Value;
+            frost3Config.MinStationLevel = ConfigStaffs.staffFrost3.minStationLevel.Value;
+            RequirementConfig[] frost3Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffFrost3.recipe.Value, ConfigStaffs.staffFrost3.recipeUpgrade.Value, ConfigStaffs.staffFrost3.recipeMultiplier.Value);
 
             if (frost3Requirements == null || frost3Requirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: StaffFrost3_DW");
             else
                 frost3Config.Requirements = frost3Requirements;
 
-            ConfigHelper.PatchStats(staffFrost3Prefab, new PatchStatsOptions()
+            ConfigHelper.UpdateItemDropStats(prefabs.staffFrost3Prefab, new UpdateItemDropStatsOptions()
             {
-                name = ConfigStaffs.staffFrost3Name.Value,
-                description = ConfigStaffs.staffFrost3Description.Value,
-                maxQuality = ConfigStaffs.staffFrost3MaxQuality.Value,
-                movementModifier = ConfigStaffs.staffFrost3MovementSpeed.Value,
-                blockPower = ConfigStaffs.staffFrost3BlockArmor.Value,
-                deflectionForce = ConfigStaffs.staffFrost3DeflectionForce.Value,
-                attackForce = ConfigStaffs.staffFrost3AttackForce.Value,
-                damagePierce = ConfigStaffs.staffFrost3DamagePierce.Value,
-                damageFrost = ConfigStaffs.staffFrost3DamageFrost.Value,
-                attackEitr = ConfigStaffs.staffFrost3UseEitr.Value,
-                secondaryAttackEitr = ConfigStaffs.staffFrost3UseEitrSecondary.Value,
+                name = ConfigStaffs.staffFrost3.name.Value,
+                description = ConfigStaffs.staffFrost3.description.Value,
+                maxQuality = ConfigStaffs.staffFrost3.maxQuality.Value,
+                movementModifier = ConfigStaffs.staffFrost3.movementSpeed.Value,
+                blockPower = ConfigStaffs.staffFrost3.blockArmor.Value,
+                deflectionForce = ConfigStaffs.staffFrost3.deflectionForce.Value,
+                attackForce = ConfigStaffs.staffFrost3.attackForce.Value,
+                damagePierce = ConfigStaffs.staffFrost3.damagePierce.Value,
+                damageFrost = ConfigStaffs.staffFrost3.damageFrost.Value,
+                attackEitr = ConfigStaffs.staffFrost3.useEitr.Value,
+                secondaryAttackEitr = ConfigStaffs.staffFrost3.useEitrSecondary.Value,
             });
 
-            ItemManager.Instance.AddItem(new CustomItem(staffFrost3Prefab, true, frost3Config));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.staffFrost3Prefab, true, frost3Config));
             PrefabManager.OnVanillaPrefabsAvailable -= AddFrostStaffs;
         }
 
@@ -465,92 +422,92 @@ namespace MagicExtended
         {
             // Lightning1 staff
             ItemConfig lightning1Config = new ItemConfig();
-            lightning1Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffLightning1Enable.Value : false;
-            lightning1Config.CraftingStation = ConfigStaffs.staffLightning1CraftingStation.Value;
-            lightning1Config.MinStationLevel = ConfigStaffs.staffLightning1MinStationLevel.Value;
-            RequirementConfig[] lightning1Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffLightning1Recipe.Value, ConfigStaffs.staffLightning1RecipeUpgrade.Value, ConfigStaffs.staffLightning1RecipeMultiplier.Value);
+            lightning1Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffLightning1.enable.Value : false;
+            lightning1Config.CraftingStation = ConfigStaffs.staffLightning1.craftingStation.Value;
+            lightning1Config.MinStationLevel = ConfigStaffs.staffLightning1.minStationLevel.Value;
+            RequirementConfig[] lightning1Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffLightning1.recipe.Value, ConfigStaffs.staffLightning1.recipeUpgrade.Value, ConfigStaffs.staffLightning1.recipeMultiplier.Value);
 
             if (lightning1Requirements == null || lightning1Requirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: StaffLightning1_DW");
             else
                 lightning1Config.Requirements = lightning1Requirements;
 
-            ConfigHelper.PatchStats(staffLightning1Prefab, new PatchStatsOptions()
+            ConfigHelper.UpdateItemDropStats(prefabs.staffLightning1Prefab, new UpdateItemDropStatsOptions()
             {
-                name = ConfigStaffs.staffLightning1Name.Value,
-                description = ConfigStaffs.staffLightning1Description.Value,
-                maxQuality = ConfigStaffs.staffLightning1MaxQuality.Value,
-                movementModifier = ConfigStaffs.staffLightning1MovementSpeed.Value,
-                blockPower = ConfigStaffs.staffLightning1BlockArmor.Value,
-                deflectionForce = ConfigStaffs.staffLightning1DeflectionForce.Value,
-                attackForce = ConfigStaffs.staffLightning1AttackForce.Value,
-                damagePickaxe = ConfigStaffs.staffLightning1DamagePickaxe.Value,
-                damagePierce = ConfigStaffs.staffLightning1DamagePierce.Value,
-                damageLightning = ConfigStaffs.staffLightning1DamageLightning.Value,
-                attackEitr = ConfigStaffs.staffLightning1UseEitr.Value,
+                name = ConfigStaffs.staffLightning1.name.Value,
+                description = ConfigStaffs.staffLightning1.description.Value,
+                maxQuality = ConfigStaffs.staffLightning1.maxQuality.Value,
+                movementModifier = ConfigStaffs.staffLightning1.movementSpeed.Value,
+                blockPower = ConfigStaffs.staffLightning1.blockArmor.Value,
+                deflectionForce = ConfigStaffs.staffLightning1.deflectionForce.Value,
+                attackForce = ConfigStaffs.staffLightning1.attackForce.Value,
+                damagePickaxe = ConfigStaffs.staffLightning1.damagePickaxe.Value,
+                damagePierce = ConfigStaffs.staffLightning1.damagePierce.Value,
+                damageLightning = ConfigStaffs.staffLightning1.damageLightning.Value,
+                attackEitr = ConfigStaffs.staffLightning1.useEitr.Value,
             });
 
-            ItemManager.Instance.AddItem(new CustomItem(staffLightning1Prefab, true, lightning1Config));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.staffLightning1Prefab, true, lightning1Config));
 
             // Lightning2 staff
             ItemConfig lightning2Config = new ItemConfig();
-            lightning2Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffLightning2Enable.Value : false;
-            lightning2Config.CraftingStation = ConfigStaffs.staffLightning2CraftingStation.Value;
-            lightning2Config.MinStationLevel = ConfigStaffs.staffLightning2MinStationLevel.Value;
-            RequirementConfig[] lightning2Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffLightning2Recipe.Value, ConfigStaffs.staffLightning2RecipeUpgrade.Value, ConfigStaffs.staffLightning2RecipeMultiplier.Value);
+            lightning2Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffLightning2.enable.Value : false;
+            lightning2Config.CraftingStation = ConfigStaffs.staffLightning2.craftingStation.Value;
+            lightning2Config.MinStationLevel = ConfigStaffs.staffLightning2.minStationLevel.Value;
+            RequirementConfig[] lightning2Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffLightning2.recipe.Value, ConfigStaffs.staffLightning2.recipeUpgrade.Value, ConfigStaffs.staffLightning2.recipeMultiplier.Value);
 
             if (lightning2Requirements == null || lightning2Requirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: StaffLightning2_DW");
             else
                 lightning2Config.Requirements = lightning2Requirements;
 
-            ConfigHelper.PatchStats(staffLightning2Prefab, new PatchStatsOptions()
+            ConfigHelper.UpdateItemDropStats(prefabs.staffLightning2Prefab, new UpdateItemDropStatsOptions()
             {
-                name = ConfigStaffs.staffLightning2Name.Value,
-                description = ConfigStaffs.staffLightning2Description.Value,
-                maxQuality = ConfigStaffs.staffLightning2MaxQuality.Value,
-                movementModifier = ConfigStaffs.staffLightning2MovementSpeed.Value,
-                blockPower = ConfigStaffs.staffLightning2BlockArmor.Value,
-                deflectionForce = ConfigStaffs.staffLightning2DeflectionForce.Value,
-                attackForce = ConfigStaffs.staffLightning2AttackForce.Value,
-                damagePickaxe = ConfigStaffs.staffLightning2DamagePickaxe.Value,
-                damagePierce = ConfigStaffs.staffLightning2DamagePierce.Value,
-                damageLightning = ConfigStaffs.staffLightning2DamageLightning.Value,
-                attackEitr = ConfigStaffs.staffLightning2UseEitr.Value,
-                secondaryAttackEitr = ConfigStaffs.staffLightning2UseEitrSecondary.Value,
+                name = ConfigStaffs.staffLightning2.name.Value,
+                description = ConfigStaffs.staffLightning2.description.Value,
+                maxQuality = ConfigStaffs.staffLightning2.maxQuality.Value,
+                movementModifier = ConfigStaffs.staffLightning2.movementSpeed.Value,
+                blockPower = ConfigStaffs.staffLightning2.blockArmor.Value,
+                deflectionForce = ConfigStaffs.staffLightning2.deflectionForce.Value,
+                attackForce = ConfigStaffs.staffLightning2.attackForce.Value,
+                damagePickaxe = ConfigStaffs.staffLightning2.damagePickaxe.Value,
+                damagePierce = ConfigStaffs.staffLightning2.damagePierce.Value,
+                damageLightning = ConfigStaffs.staffLightning2.damageLightning.Value,
+                attackEitr = ConfigStaffs.staffLightning2.useEitr.Value,
+                secondaryAttackEitr = ConfigStaffs.staffLightning2.useEitrSecondary.Value,
             });
 
-            ItemManager.Instance.AddItem(new CustomItem(staffLightning2Prefab, true, lightning2Config));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.staffLightning2Prefab, true, lightning2Config));
 
             // Lightning3 staff
             ItemConfig lightning3Config = new ItemConfig();
-            lightning3Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffLightning3Enable.Value : false;
-            lightning3Config.CraftingStation = ConfigStaffs.staffLightning3CraftingStation.Value;
-            lightning3Config.MinStationLevel = ConfigStaffs.staffLightning3MinStationLevel.Value;
-            RequirementConfig[] lightning3Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffLightning3Recipe.Value, ConfigStaffs.staffLightning3RecipeUpgrade.Value, ConfigStaffs.staffLightning3RecipeMultiplier.Value);
+            lightning3Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffLightning3.enable.Value : false;
+            lightning3Config.CraftingStation = ConfigStaffs.staffLightning3.craftingStation.Value;
+            lightning3Config.MinStationLevel = ConfigStaffs.staffLightning3.minStationLevel.Value;
+            RequirementConfig[] lightning3Requirements = RecipeHelper.GetAsRequirementConfigArray(ConfigStaffs.staffLightning3.recipe.Value, ConfigStaffs.staffLightning3.recipeUpgrade.Value, ConfigStaffs.staffLightning3.recipeMultiplier.Value);
 
             if (lightning3Requirements == null || lightning3Requirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: StaffLightning3_DW");
             else
                 lightning3Config.Requirements = lightning3Requirements;
 
-            ConfigHelper.PatchStats(staffLightning3Prefab, new PatchStatsOptions()
+            ConfigHelper.UpdateItemDropStats(prefabs.staffLightning3Prefab, new UpdateItemDropStatsOptions()
             {
-                name = ConfigStaffs.staffLightning3Name.Value,
-                description = ConfigStaffs.staffLightning3Description.Value,
-                maxQuality = ConfigStaffs.staffLightning3MaxQuality.Value,
-                movementModifier = ConfigStaffs.staffLightning3MovementSpeed.Value,
-                blockPower = ConfigStaffs.staffLightning3BlockArmor.Value,
-                deflectionForce = ConfigStaffs.staffLightning3DeflectionForce.Value,
-                attackForce = ConfigStaffs.staffLightning3AttackForce.Value,
-                damagePickaxe = ConfigStaffs.staffLightning3DamagePickaxe.Value,
-                damagePierce = ConfigStaffs.staffLightning3DamagePierce.Value,
-                damageLightning = ConfigStaffs.staffLightning3DamageLightning.Value,
-                attackEitr = ConfigStaffs.staffLightning3UseEitr.Value,
-                secondaryAttackEitr = ConfigStaffs.staffLightning3UseEitrSecondary.Value,
+                name = ConfigStaffs.staffLightning3.name.Value,
+                description = ConfigStaffs.staffLightning3.description.Value,
+                maxQuality = ConfigStaffs.staffLightning3.maxQuality.Value,
+                movementModifier = ConfigStaffs.staffLightning3.movementSpeed.Value,
+                blockPower = ConfigStaffs.staffLightning3.blockArmor.Value,
+                deflectionForce = ConfigStaffs.staffLightning3.deflectionForce.Value,
+                attackForce = ConfigStaffs.staffLightning3.attackForce.Value,
+                damagePickaxe = ConfigStaffs.staffLightning3.damagePickaxe.Value,
+                damagePierce = ConfigStaffs.staffLightning3.damagePierce.Value,
+                damageLightning = ConfigStaffs.staffLightning3.damageLightning.Value,
+                attackEitr = ConfigStaffs.staffLightning3.useEitr.Value,
+                secondaryAttackEitr = ConfigStaffs.staffLightning3.useEitrSecondary.Value,
             });
 
-            ItemManager.Instance.AddItem(new CustomItem(staffLightning3Prefab, true, lightning3Config));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.staffLightning3Prefab, true, lightning3Config));
             PrefabManager.OnVanillaPrefabsAvailable -= AddLightningStaffs;
         }
 
@@ -589,13 +546,13 @@ namespace MagicExtended
             ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("Lantern_DW"), true, shamanConfig));
 
             shamanConfig.Name = "Swamp Hood";
-            ItemManager.Instance.AddItem(new CustomItem(helmetMageSwamp, true, shamanConfig));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.helmetMageSwampPrefab, true, shamanConfig));
             shamanConfig.Name = "Swamp Cloak";
             ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("CapeMageSwamp_DW"), true, shamanConfig));
             shamanConfig.Name = "Swamp Chest";
-            ItemManager.Instance.AddItem(new CustomItem(ArmorMageSwampChest, true, shamanConfig));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.ArmorMageSwampChestPrefab, true, shamanConfig));
             shamanConfig.Name = "Swamp Legs";
-            ItemManager.Instance.AddItem(new CustomItem(ArmorMageSwampLegs, true, shamanConfig));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.ArmorMageSwampLegsPrefab, true, shamanConfig));
 
             //// Set evil smoke to player model
             GameObject player = PrefabManager.Instance.GetPrefab("Player");
@@ -606,32 +563,48 @@ namespace MagicExtended
             GameObject playerLegLeft = player.transform.Find("Visual/Armature/Hips/LeftUpLeg/LeftLeg").gameObject;
             GameObject playerLegRight = player.transform.Find("Visual/Armature/Hips/RightUpLeg/RightLeg").gameObject;
 
-            GameObject eyeLeft = helmetMageSwamp.transform.Find("eye_left").gameObject;
-            GameObject eyeRight = helmetMageSwamp.transform.Find("eye_right").gameObject;
+            GameObject eyeLeft = prefabs.helmetMageSwampPrefab.transform.Find("eye_left").gameObject;
+            GameObject eyeRight = prefabs.helmetMageSwampPrefab.transform.Find("eye_right").gameObject;
 
-            GameObject evilSmokeHead = helmetMageSwamp.transform.Find("evil_smoke").gameObject;
-            GameObject evilSmokeHeadFace = helmetMageSwamp.transform.Find("evil_smoke_face").gameObject;
-            GameObject evilSmokeChest = ArmorMageSwampChest.transform.Find("evil_smoke").gameObject;
-            GameObject evilSmokeArmLeft = ArmorMageSwampChest.transform.Find("evil_smoke_left").gameObject;
-            GameObject evilSmokeArmRight = ArmorMageSwampChest.transform.Find("evil_smoke_right").gameObject;
-            GameObject evilSmokeLegsLeft = ArmorMageSwampLegs.transform.Find("evil_smoke_left").gameObject;
-            GameObject evilSmokeLegsRight = ArmorMageSwampLegs.transform.Find("evil_smoke_right").gameObject;
+            GameObject evilSmokeHead = prefabs.helmetMageSwampPrefab.transform.Find("evil_smoke").gameObject;
+            GameObject evilSmokeHeadFace = prefabs.helmetMageSwampPrefab.transform.Find("evil_smoke_face").gameObject;
+            GameObject evilSmokeChest = prefabs.ArmorMageSwampChestPrefab.transform.Find("evil_smoke").gameObject;
+            GameObject evilSmokeArmLeft = prefabs.ArmorMageSwampChestPrefab.transform.Find("evil_smoke_left").gameObject;
+            GameObject evilSmokeArmRight = prefabs.ArmorMageSwampChestPrefab.transform.Find("evil_smoke_right").gameObject;
+            GameObject evilSmokeLegsLeft = prefabs.ArmorMageSwampLegsPrefab.transform.Find("evil_smoke_left").gameObject;
+            GameObject evilSmokeLegsRight = prefabs.ArmorMageSwampLegsPrefab.transform.Find("evil_smoke_right").gameObject;
 
-            Quaternion eyeLeftRotation = new Quaternion(0, 0, 0, 0);
-            eyeLeftRotation.eulerAngles = new Vector3(0f, 340.544f, 0f);
-            eyeLeft.transform.parent = playerHead.transform;
-            eyeLeft.transform.localPosition = new Vector3(-0.00087f, 0.00178f, -0.00035f);
-            eyeLeft.transform.localRotation = eyeLeftRotation;
-            eyeLeft.transform.localScale = new Vector3(0.0002f, 0.0001f, 0.0003f);
-            eyeLeft.SetActive(false);
+            //Quaternion eyeLeftRotation = new Quaternion(0, 0, 0, 0);
+            //eyeLeftRotation.eulerAngles = new Vector3(0f, 340.544f, 0f);
+            //eyeLeft.transform.parent = playerHead.transform;
+            //eyeLeft.transform.localPosition = new Vector3(-0.00087f, 0.00178f, -0.00035f);
+            //eyeLeft.transform.localRotation = eyeLeftRotation;
+            //eyeLeft.transform.localScale = new Vector3(0.0002f, 0.0001f, 0.0003f);
+            //eyeLeft.SetActive(false);
 
-            Quaternion eyeRightRotation = new Quaternion(0, 0, 0, 0);
-            eyeRightRotation.eulerAngles = new Vector3(0f, 27.096f, 0f);
-            eyeRight.transform.parent = playerHead.transform;
-            eyeRight.transform.localPosition = new Vector3(-0.00087f, 0.00178f, 0.00044f);
-            eyeRight.transform.localRotation = eyeRightRotation;
-            eyeRight.transform.localScale = new Vector3(0.0002f, 0.0001f, 0.0003f);
-            eyeRight.SetActive(false);
+            //Quaternion eyeRightRotation = new Quaternion(0, 0, 0, 0);
+            //eyeRightRotation.eulerAngles = new Vector3(0f, 27.096f, 0f);
+            //eyeRight.transform.parent = playerHead.transform;
+            //eyeRight.transform.localPosition = new Vector3(-0.00087f, 0.00178f, 0.00044f);
+            //eyeRight.transform.localRotation = eyeRightRotation;
+            //eyeRight.transform.localScale = new Vector3(0.0002f, 0.0001f, 0.0003f);
+            //eyeRight.SetActive(false);
+
+            playerArmature.AddPrefab(Types.PlayerArmatureType.HEAD, eyeLeft, new AddPrefabToArmatureOptions()
+            {
+                active = false,
+                position = new Vector3(-0.00087f, 0.00178f, -0.00035f),
+                rotation = new Vector3(0f, 340.544f, 0f),
+                scale = new Vector3(0.0002f, 0.0001f, 0.0003f),
+            });
+
+            playerArmature.AddPrefab(Types.PlayerArmatureType.HEAD, eyeRight, new AddPrefabToArmatureOptions()
+            {
+                active = false,
+                position = new Vector3(-0.00087f, 0.00178f, 0.00044f),
+                rotation = new Vector3(0f, 27.096f, 0f),
+                scale = new Vector3(0.0002f, 0.0001f, 0.0003f),
+            });
 
             evilSmokeHead.transform.parent = playerHead.transform;
             evilSmokeHead.transform.localPosition = new Vector3(0f, 0f, 0f);
@@ -724,90 +697,90 @@ namespace MagicExtended
         {
             // Simple Spellbook
             ItemConfig simpleConfig = new ItemConfig();
-            simpleConfig.Enabled = ConfigPlugin.configEnable.Value ? ConfigSpellbooks.simpleSpellbookEnable.Value : false;
-            simpleConfig.CraftingStation = ConfigSpellbooks.simpleSpellbookCraftingStation.Value;
-            simpleConfig.MinStationLevel = ConfigSpellbooks.simpleSpellbookMinStationLevel.Value;
-            RequirementConfig[] simpleRequirements = RecipeHelper.GetAsRequirementConfigArray(ConfigSpellbooks.simpleSpellbookRecipe.Value, null, null);
+            simpleConfig.Enabled = ConfigPlugin.configEnable.Value ? ConfigSpellbooks.simpleSpellbook.enable.Value : false;
+            simpleConfig.CraftingStation = ConfigSpellbooks.simpleSpellbook.craftingStation.Value;
+            simpleConfig.MinStationLevel = ConfigSpellbooks.simpleSpellbook.minStationLevel.Value;
+            RequirementConfig[] simpleRequirements = RecipeHelper.GetAsRequirementConfigArray(ConfigSpellbooks.simpleSpellbook.recipe.Value, null, null);
 
             if (simpleRequirements == null || simpleRequirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: SimpleSpellbook_DW");
             else
                 simpleConfig.Requirements = simpleRequirements;
 
-            ItemDrop simpleDrop = simpleSpellbookPrefab.GetComponent<ItemDrop>();
+            ItemDrop simpleDrop = prefabs.simpleSpellbookPrefab.GetComponent<ItemDrop>();
             StatusEffectWithEitr simpleStatusEffect = ScriptableObject.CreateInstance<StatusEffectWithEitr>();
             simpleStatusEffect.name = "SimpleEitrStatusEffect_DW";
             simpleStatusEffect.m_name = simpleDrop.m_itemData.m_shared.m_name;
             simpleStatusEffect.m_icon = simpleDrop.m_itemData.GetIcon();
-            simpleStatusEffect.SetEitr(ConfigSpellbooks.simpleSpellbookEitr.Value);
+            simpleStatusEffect.SetEitr(ConfigSpellbooks.simpleSpellbook.eitr.Value);
             simpleDrop.m_itemData.m_shared.m_equipStatusEffect = simpleStatusEffect;
 
-            ConfigHelper.PatchStats(simpleSpellbookPrefab, new PatchStatsOptions()
+            ConfigHelper.UpdateItemDropStats(prefabs.simpleSpellbookPrefab, new UpdateItemDropStatsOptions()
             {
-                name = ConfigSpellbooks.simpleSpellbookName.Value,
-                description = ConfigSpellbooks.simpleSpellbookDescription.Value,
-                eitrRegen = ConfigSpellbooks.simpleSpellbookEitrRegen.Value,
+                name = ConfigSpellbooks.simpleSpellbook.name.Value,
+                description = ConfigSpellbooks.simpleSpellbook.description.Value,
+                eitrRegen = ConfigSpellbooks.simpleSpellbook.eitrRegen.Value,
             });
 
-            ItemManager.Instance.AddItem(new CustomItem(simpleSpellbookPrefab, true, simpleConfig));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.simpleSpellbookPrefab, true, simpleConfig));
 
             // Advanced Spellbook
             ItemConfig advancedConfig = new ItemConfig();
-            advancedConfig.Enabled = ConfigPlugin.configEnable.Value ? ConfigSpellbooks.advancedSpellbookEnable.Value : false;
-            advancedConfig.CraftingStation = ConfigSpellbooks.advancedSpellbookCraftingStation.Value;
-            advancedConfig.MinStationLevel = ConfigSpellbooks.advancedSpellbookMinStationLevel.Value;
-            RequirementConfig[] advancedRequirements = RecipeHelper.GetAsRequirementConfigArray(ConfigSpellbooks.advancedSpellbookRecipe.Value, null, null);
+            advancedConfig.Enabled = ConfigPlugin.configEnable.Value ? ConfigSpellbooks.advancedSpellbook.enable.Value : false;
+            advancedConfig.CraftingStation = ConfigSpellbooks.advancedSpellbook.craftingStation.Value;
+            advancedConfig.MinStationLevel = ConfigSpellbooks.advancedSpellbook.minStationLevel.Value;
+            RequirementConfig[] advancedRequirements = RecipeHelper.GetAsRequirementConfigArray(ConfigSpellbooks.advancedSpellbook.recipe.Value, null, null);
 
             if (advancedRequirements == null || advancedRequirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: AdvancedSpellbook_DW");
             else
                 advancedConfig.Requirements = advancedRequirements;
 
-            ItemDrop advancedDrop = advancedSpellbookPrefab.GetComponent<ItemDrop>();
+            ItemDrop advancedDrop = prefabs.advancedSpellbookPrefab.GetComponent<ItemDrop>();
             StatusEffectWithEitr advancedStatusEffect = ScriptableObject.CreateInstance<StatusEffectWithEitr>();
             advancedStatusEffect.name = "AdvancedEitrStatusEffect_DW";
             advancedStatusEffect.m_name = advancedDrop.m_itemData.m_shared.m_name;
             advancedStatusEffect.m_icon = advancedDrop.m_itemData.GetIcon();
-            advancedStatusEffect.SetEitr(ConfigSpellbooks.advancedSpellbookEitr.Value);
+            advancedStatusEffect.SetEitr(ConfigSpellbooks.advancedSpellbook.eitr.Value);
             advancedDrop.m_itemData.m_shared.m_equipStatusEffect = advancedStatusEffect;
 
-            ConfigHelper.PatchStats(advancedSpellbookPrefab, new PatchStatsOptions()
+            ConfigHelper.UpdateItemDropStats(prefabs.advancedSpellbookPrefab, new UpdateItemDropStatsOptions()
             {
-                name = ConfigSpellbooks.advancedSpellbookName.Value,
-                description = ConfigSpellbooks.advancedSpellbookDescription.Value,
-                eitrRegen = ConfigSpellbooks.advancedSpellbookEitrRegen.Value,
+                name = ConfigSpellbooks.advancedSpellbook.name.Value,
+                description = ConfigSpellbooks.advancedSpellbook.description.Value,
+                eitrRegen = ConfigSpellbooks.advancedSpellbook.eitrRegen.Value,
             });
 
-            ItemManager.Instance.AddItem(new CustomItem(advancedSpellbookPrefab, true, advancedConfig));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.advancedSpellbookPrefab, true, advancedConfig));
 
             // Master Spellbook
             ItemConfig masterConfig = new ItemConfig();
-            masterConfig.Enabled = ConfigPlugin.configEnable.Value ? ConfigSpellbooks.masterSpellbookEnable.Value : false;
-            masterConfig.CraftingStation = ConfigSpellbooks.masterSpellbookCraftingStation.Value;
-            masterConfig.MinStationLevel = ConfigSpellbooks.masterSpellbookMinStationLevel.Value;
-            RequirementConfig[] masterRequirements = RecipeHelper.GetAsRequirementConfigArray(ConfigSpellbooks.masterSpellbookRecipe.Value, null, null);
+            masterConfig.Enabled = ConfigPlugin.configEnable.Value ? ConfigSpellbooks.masterSpellbook.enable.Value : false;
+            masterConfig.CraftingStation = ConfigSpellbooks.masterSpellbook.craftingStation.Value;
+            masterConfig.MinStationLevel = ConfigSpellbooks.masterSpellbook.minStationLevel.Value;
+            RequirementConfig[] masterRequirements = RecipeHelper.GetAsRequirementConfigArray(ConfigSpellbooks.masterSpellbook.recipe.Value, null, null);
 
             if (masterRequirements == null || masterRequirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: MasterSpellbook_DW");
             else
                 masterConfig.Requirements = masterRequirements;
 
-            ItemDrop masterDrop = masterSpellbookPrefab.GetComponent<ItemDrop>();
+            ItemDrop masterDrop = prefabs.masterSpellbookPrefab.GetComponent<ItemDrop>();
             StatusEffectWithEitr masterStatusEffect = ScriptableObject.CreateInstance<StatusEffectWithEitr>();
             masterStatusEffect.name = "MasterEitrStatusEffect_DW";
             masterStatusEffect.m_name = masterDrop.m_itemData.m_shared.m_name;
             masterStatusEffect.m_icon = masterDrop.m_itemData.GetIcon();
-            masterStatusEffect.SetEitr(ConfigSpellbooks.masterSpellbookEitr.Value);
+            masterStatusEffect.SetEitr(ConfigSpellbooks.masterSpellbook.eitr.Value);
             masterDrop.m_itemData.m_shared.m_equipStatusEffect = masterStatusEffect;
 
-            ConfigHelper.PatchStats(masterSpellbookPrefab, new PatchStatsOptions()
+            ConfigHelper.UpdateItemDropStats(prefabs.masterSpellbookPrefab, new UpdateItemDropStatsOptions()
             {
-                name = ConfigSpellbooks.masterSpellbookName.Value,
-                description = ConfigSpellbooks.masterSpellbookDescription.Value,
-                eitrRegen = ConfigSpellbooks.masterSpellbookEitrRegen.Value,
+                name = ConfigSpellbooks.masterSpellbook.name.Value,
+                description = ConfigSpellbooks.masterSpellbook.description.Value,
+                eitrRegen = ConfigSpellbooks.masterSpellbook.eitrRegen.Value,
             });
 
-            ItemManager.Instance.AddItem(new CustomItem(masterSpellbookPrefab, true, masterConfig));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.masterSpellbookPrefab, true, masterConfig));
             PrefabManager.OnVanillaPrefabsAvailable -= AddSpellbooks;
         }
 
@@ -824,39 +797,39 @@ namespace MagicExtended
 
             // Crude Eitr
             ItemConfig crudeConfig = new ItemConfig();
-            crudeConfig.Name = ConfigMaterials.crudeEitrName.Value;
-            crudeConfig.Description = ConfigMaterials.crudeEitrDescription.Value;
-            crudeConfig.CraftingStation = ConfigMaterials.crudeEitrCraftingStation.Value;
+            crudeConfig.Name = ConfigMaterials.crudeEitr.name.Value;
+            crudeConfig.Description = ConfigMaterials.crudeEitr.description.Value;
+            crudeConfig.CraftingStation = ConfigMaterials.crudeEitr.craftingStation.Value;
             //crudeConfig.AddRequirement(new RequirementConfig("GreydwarfEye", 5));
             //crudeConfig.AddRequirement(new RequirementConfig("Resin", 5));
 
-            RequirementConfig[] crudeRequirements = RecipeHelper.GetAsRequirementConfigArray(ConfigMaterials.crudeEitrRecipe.Value, null, null);
+            RequirementConfig[] crudeRequirements = RecipeHelper.GetAsRequirementConfigArray(ConfigMaterials.crudeEitr.recipe.Value, null, null);
 
             if (crudeRequirements == null || crudeRequirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: CrudeEitr_DW");
             else
                 crudeConfig.Requirements = crudeRequirements;
 
-            ItemManager.Instance.AddItem(new CustomItem(crudeEitrPrefab, true, crudeConfig));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.crudeEitrPrefab, true, crudeConfig));
 
             // Fine Eitr
             ItemConfig fineConfig = new ItemConfig();
-            fineConfig.Name = ConfigMaterials.fineEitrName.Value;
-            fineConfig.Description = ConfigMaterials.fineEitrDescription.Value;
-            fineConfig.CraftingStation = ConfigMaterials.fineEitrCraftingStation.Value;
-            fineConfig.MinStationLevel = ConfigMaterials.fineEitrMinStationLevel.Value;
+            fineConfig.Name = ConfigMaterials.fineEitr.name.Value;
+            fineConfig.Description = ConfigMaterials.fineEitr.description.Value;
+            fineConfig.CraftingStation = ConfigMaterials.fineEitr.craftingStation.Value;
+            fineConfig.MinStationLevel = ConfigMaterials.fineEitr.minStationLevel.Value;
             //fineConfig.AddRequirement(new RequirementConfig("Crystal", 5));
             //fineConfig.AddRequirement(new RequirementConfig("Coal", 5));
 
-            RequirementConfig[] fineRequirements = RecipeHelper.GetAsRequirementConfigArray(ConfigMaterials.fineEitrRecipe.Value, null, null);
+            RequirementConfig[] fineRequirements = RecipeHelper.GetAsRequirementConfigArray(ConfigMaterials.fineEitr.recipe.Value, null, null);
 
             if (fineRequirements == null || fineRequirements.Length == 0)
                 Jotunn.Logger.LogWarning("Could not resolve recipe for: FineEitr_DW");
             else
                 fineConfig.Requirements = fineRequirements;
 
-            
-            ItemManager.Instance.AddItem(new CustomItem(fineEitrPrefab, true, fineConfig));
+
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.fineEitrPrefab, true, fineConfig));
             PrefabManager.OnVanillaPrefabsAvailable -= AddMaterials;
         }
 
@@ -905,11 +878,11 @@ namespace MagicExtended
             cookedMushroomConfig.Station = CookingStations.CookingStation;
             cookedMushroomConfig.CookTime = 20f;
 
-            ItemManager.Instance.AddItem(new CustomItem(magicalMushroomPrefab, true, magicMushroomConfig));
-            ItemManager.Instance.AddItem(new CustomItem(magicalCookedMushroomPrefab, true, cookedMagicMushroomConfig));
-            ItemManager.Instance.AddItem(new CustomItem(gribSnowMushroomPrefab, true, gribsnowConfig));
-            ItemManager.Instance.AddItem(new CustomItem(bogMushroomPrefab, true, bogMushroomConfig));
-            ItemManager.Instance.AddItem(new CustomItem(pircedMushroomPrefab, true, pircedMushroomConfig));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.magicalMushroomPrefab, true, magicMushroomConfig));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.magicalCookedMushroomPrefab, true, cookedMagicMushroomConfig));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.gribSnowMushroomPrefab, true, gribsnowConfig));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.bogMushroomPrefab, true, bogMushroomConfig));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.pircedMushroomPrefab, true, pircedMushroomConfig));
             ItemManager.Instance.AddItemConversion(new CustomItemConversion(cookedMushroomConfig));
             PrefabManager.OnVanillaPrefabsAvailable -= AddFood;
         }
@@ -944,7 +917,7 @@ namespace MagicExtended
             magicMushroomVegetationConfig.MaxOceanDepth = 2f;
             magicMushroomVegetationConfig.MinTilt = 0f;
             magicMushroomVegetationConfig.MaxTilt = 25;
-            ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(magicalMushroomPickablePrefab, true, magicMushroomVegetationConfig));
+            ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(prefabs.magicalMushroomPickablePrefab, true, magicMushroomVegetationConfig));
 
             // GribSnow
             List<Heightmap.Biome> gribSnowBiomeList = new List<Heightmap.Biome>();
@@ -973,7 +946,7 @@ namespace MagicExtended
             gribSnowVegetationConfig.MaxOceanDepth = 2f;
             gribSnowVegetationConfig.MinTilt = 0f;
             gribSnowVegetationConfig.MaxTilt = 25;
-            ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(gribSnowMushroomPickablePrefab, true, gribSnowVegetationConfig));
+            ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(prefabs.gribSnowMushroomPickablePrefab, true, gribSnowVegetationConfig));
 
             // Bog Mushroom
             List<Heightmap.Biome> bogMushroomBiomeList = new List<Heightmap.Biome>();
@@ -1002,7 +975,7 @@ namespace MagicExtended
             bogMushroomVegetationConfig.MaxOceanDepth = 0f;
             bogMushroomVegetationConfig.MinTilt = 0f;
             bogMushroomVegetationConfig.MaxTilt = 20;
-            ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(bogMushroomPickablePrefab, true, bogMushroomVegetationConfig));
+            ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(prefabs.bogMushroomPickablePrefab, true, bogMushroomVegetationConfig));
 
             // pirced Mushroom
             List<Heightmap.Biome> pircedMushroomBiomeList = new List<Heightmap.Biome>();
@@ -1031,7 +1004,7 @@ namespace MagicExtended
             pircedMushroomVegetationConfig.MaxOceanDepth = 0f;
             pircedMushroomVegetationConfig.MinTilt = 0f;
             pircedMushroomVegetationConfig.MaxTilt = 20;
-            ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(pircedMushroomPickablePrefab, true, pircedMushroomVegetationConfig));
+            ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(prefabs.pircedMushroomPickablePrefab, true, pircedMushroomVegetationConfig));
             ZoneManager.OnVanillaVegetationAvailable -= AddLocations;
         }
 
@@ -1096,13 +1069,13 @@ namespace MagicExtended
             cooldownEffect.m_stopMessageType = MessageHud.MessageType.Center;
             cooldownEffect.m_stopMessage = "";
             cooldownEffect.m_tooltip = "Be patient!";
-            cooldownEffect.m_ttl = ConfigStaffs.staffEarth3SecondaryCooldown.Value;
+            cooldownEffect.m_ttl = ConfigStaffs.staffEarth3.secondaryCooldown.Value;
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(cooldownEffect, fixReference: false));
 
             StatusEffect exhaustAndFhoulMagicEffect = ScriptableObject.CreateInstance<StatusEffect>();
             exhaustAndFhoulMagicEffect.name = "ExhaustAndFoulMagicEffect_DW";
             exhaustAndFhoulMagicEffect.m_name = "Exhausted by foul magic";
-            exhaustAndFhoulMagicEffect.m_icon = magicExtendedBundle.LoadAsset<Sprite>("staffEarth3Sprite");
+            exhaustAndFhoulMagicEffect.m_icon = magicExtendedBundle.LoadAsset<Sprite>("staffEarth3.Sprite");
             exhaustAndFhoulMagicEffect.m_startMessageType = MessageHud.MessageType.Center;
             exhaustAndFhoulMagicEffect.m_startMessage = "";
             exhaustAndFhoulMagicEffect.m_stopMessageType = MessageHud.MessageType.Center;
@@ -1111,8 +1084,14 @@ namespace MagicExtended
             exhaustAndFhoulMagicEffect.m_ttl = 300;
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(exhaustAndFhoulMagicEffect, fixReference: false));
 
-            SwampMageArmorSetSE.name = "SwampMageArmorSet_DW";
-            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(SwampMageArmorSetSE, true));
+            statusEffects.BlackForestMageArmorSetSE.name = "BlackForestMageArmorSet_DW";
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(statusEffects.BlackForestMageArmorSetSE, true));
+
+            statusEffects.SwampMageArmorSetSE.name = "SwampMageArmorSet_DW";
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(statusEffects.SwampMageArmorSetSE, true));
+
+            statusEffects.MountainMageArmorSetSE.name = "MountainMageArmorSet_DW";
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(statusEffects.MountainMageArmorSetSE, true));
         }
 
         /**
@@ -1123,32 +1102,32 @@ namespace MagicExtended
             magicExtendedBundle = AssetUtils.LoadAssetBundleFromResources("magicextended_dw");
 
             // Materials
-            crudeEitrPrefab = magicExtendedBundle.LoadAsset<GameObject>("CrudeEitr_DW");
-            fineEitrPrefab = magicExtendedBundle.LoadAsset<GameObject>("FineEitr_DW");
+            prefabs.crudeEitrPrefab = magicExtendedBundle.LoadAsset<GameObject>("CrudeEitr_DW");
+            prefabs.fineEitrPrefab = magicExtendedBundle.LoadAsset<GameObject>("FineEitr_DW");
 
             // Food
-            magicalMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("MagicalMushroom_DW");
-            magicalCookedMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("CookedMagicalMushroom_DW");
-            magicalMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_MagicalMushroom_DW");
-            gribSnowMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("GribSnow_DW");
-            gribSnowMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_GribSnow_DW");
-            bogMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("BogMushroom_DW");
-            bogMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_BogMushroom_DW");
-            pircedMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("PircedMushroom_DW");
-            pircedMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_PircedMushroom_DW");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicalMushroomPickablePrefab, true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(gribSnowMushroomPickablePrefab, true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(bogMushroomPickablePrefab, true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(pircedMushroomPickablePrefab, true));
+            prefabs.magicalMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("MagicalMushroom_DW");
+            prefabs.magicalCookedMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("CookedMagicalMushroom_DW");
+            prefabs.magicalMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_MagicalMushroom_DW");
+            prefabs.gribSnowMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("GribSnow_DW");
+            prefabs.gribSnowMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_GribSnow_DW");
+            prefabs.bogMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("BogMushroom_DW");
+            prefabs.bogMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_BogMushroom_DW");
+            prefabs.pircedMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("PircedMushroom_DW");
+            prefabs.pircedMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_PircedMushroom_DW");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.magicalMushroomPickablePrefab, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.gribSnowMushroomPickablePrefab, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.bogMushroomPickablePrefab, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.pircedMushroomPickablePrefab, true));
 
             // Earth assets
-            staffEarth0Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffEarth0_DW");
-            staffEarth1Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffEarth1_DW");
-            staffEarth2Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffEarth2_DW");
-            staffEarth3Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffEarth3_DW");
-            projectileMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("staff_earth_projectile_mushroom_DW");
+            prefabs.staffEarth0Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffEarth0_DW");
+            prefabs.staffEarth1Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffEarth1_DW");
+            prefabs.staffEarth2Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffEarth2_DW");
+            prefabs.staffEarth3Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffEarth3_DW");
+            prefabs.projectileMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("staff_earth_projectile_mushroom_DW");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_earth_projectile_DW"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(projectileMushroomPrefab, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.projectileMushroomPrefab, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_earth_projectile_secondary_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_earth_projectile_spawn_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_earth_script_big_stone_DW"), true));
@@ -1159,18 +1138,18 @@ namespace MagicExtended
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_mushroom_projectile_hit_DW"), true));
 
             // Fire assets
-            staffFire1Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffFire1_DW");
-            staffFire2Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffFire2_DW");
-            staffFire3Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffFire3_DW");
+            prefabs.staffFire1Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffFire1_DW");
+            prefabs.staffFire2Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffFire2_DW");
+            prefabs.staffFire3Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffFire3_DW");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_fire_projectile_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("cinder_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_fire_windup_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_fire_nova_DW"), true));
 
             // Frost assets
-            staffFrost1Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffFrost1_DW");
-            staffFrost2Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffFrost2_DW");
-            staffFrost3Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffFrost3_DW");
+            prefabs.staffFrost1Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffFrost1_DW");
+            prefabs.staffFrost2Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffFrost2_DW");
+            prefabs.staffFrost3Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffFrost3_DW");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_frost_projectile_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_frost_projectile_secondary_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_frost_projectile_spawn_DW"), true));
@@ -1180,25 +1159,39 @@ namespace MagicExtended
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_frost_nova_AOE_DW"), true));
 
             // Lightning
-            staffLightning1Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffLightning1_DW");
-            staffLightning2Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffLightning2_DW");
-            staffLightning3Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffLightning3_DW");
+            prefabs.staffLightning1Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffLightning1_DW");
+            prefabs.staffLightning2Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffLightning2_DW");
+            prefabs.staffLightning3Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffLightning3_DW");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_lightning_projectile_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_lightning_nova_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_lightning_AOE_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_lightning_windup_DW"), true));
 
             // Books
-            simpleSpellbookPrefab = magicExtendedBundle.LoadAsset<GameObject>("SimpleSpellbook_DW");
-            advancedSpellbookPrefab = magicExtendedBundle.LoadAsset<GameObject>("AdvancedSpellbook_DW");
-            masterSpellbookPrefab = magicExtendedBundle.LoadAsset<GameObject>("MasterSpellbook_DW");
+            prefabs.simpleSpellbookPrefab = magicExtendedBundle.LoadAsset<GameObject>("SimpleSpellbook_DW");
+            prefabs.advancedSpellbookPrefab = magicExtendedBundle.LoadAsset<GameObject>("AdvancedSpellbook_DW");
+            prefabs.masterSpellbookPrefab = magicExtendedBundle.LoadAsset<GameObject>("MasterSpellbook_DW");
+
+            // BlackForest
+            statusEffects.BlackForestMageArmorSetSE = magicExtendedBundle.LoadAsset<StatusEffect>("SetEffect_BlackForestMageArmor_DW");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("BlackForestMageArmorSetSEEffect_DW"), true));
 
             // Swamp
-            helmetMageSwamp = magicExtendedBundle.LoadAsset<GameObject>("HelmetMageSwamp_DW");
-            ArmorMageSwampChest = magicExtendedBundle.LoadAsset<GameObject>("ArmorMageSwampChest_DW");
-            ArmorMageSwampLegs = magicExtendedBundle.LoadAsset<GameObject>("ArmorMageSwampLegs_DW");
-            SwampMageArmorSetSE = magicExtendedBundle.LoadAsset<StatusEffect>("SetEffect_SwampMageArmor_DW");
+            prefabs.helmetMageSwampPrefab = magicExtendedBundle.LoadAsset<GameObject>("HelmetMageSwamp_DW");
+            prefabs.ArmorMageSwampChestPrefab = magicExtendedBundle.LoadAsset<GameObject>("ArmorMageSwampChest_DW");
+            prefabs.ArmorMageSwampLegsPrefab = magicExtendedBundle.LoadAsset<GameObject>("ArmorMageSwampLegs_DW");
+            statusEffects.SwampMageArmorSetSE = magicExtendedBundle.LoadAsset<StatusEffect>("SetEffect_SwampMageArmor_DW");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("SwampMageArmorSetSEEffect_DW"), true));
+
+            // Mountain
+            statusEffects.MountainMageArmorSetSE = magicExtendedBundle.LoadAsset<StatusEffect>("SetEffect_MountainMageArmor_DW");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("MountainMageArmorSetSEEffect_DW"), true));
+        }
+
+        private void InitPlayerArmature()
+        {
+            playerArmature = new PlayerArmatureHelper(PrefabManager.Instance.GetPrefab("Player"));
+            PrefabManager.OnVanillaPrefabsAvailable -= InitPlayerArmature;
         }
     }
 }

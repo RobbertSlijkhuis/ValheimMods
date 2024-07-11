@@ -1855,9 +1855,10 @@ MonoBehaviour:
       m_trophyPos: {x: 0, y: 0}
       m_buildPieces: {fileID: 0}
       m_centerCamera: 0
-      m_setName: 
-      m_setSize: 0
-      m_setStatusEffect: {fileID: 0}
+      m_setName: MountainMageArmor
+      m_setSize: 4
+      m_setStatusEffect: {fileID: 11400000, guid: 00e341d050cd7c140afd84f61360be8a,
+        type: 2}
       m_equipStatusEffect: {fileID: 0}
       m_eitrRegenModifier: 0
       m_movementModifier: 0
@@ -5190,7 +5191,7 @@ SkinnedMeshRenderer:
   m_Quality: 0
   m_UpdateWhenOffscreen: 0
   m_SkinnedMotionVectors: 1
-  m_Mesh: {fileID: 4300000, guid: cbd76ca4bd851f7429d677484794a32f, type: 2}
+  m_Mesh: {fileID: 1187454469829090855, guid: 221fda5c42e90264d85f8b791cb68502, type: 3}
   m_Bones:
   - {fileID: 4279203959490156}
   - {fileID: 4623613031818879}

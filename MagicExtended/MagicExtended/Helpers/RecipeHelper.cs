@@ -127,7 +127,7 @@ namespace MagicExtended.Helpers
         }
 
         /**
-         * Check wether the recipe & upgrade recipe are valid
+         * Check wether the recipe and/or upgrade recipe are valid
          */
         public static bool IsConfigRecipeValid(string configRecipe, string? upgradeRecipe)
         {
@@ -172,7 +172,7 @@ namespace MagicExtended.Helpers
         /**
          * Update recipe related fields when the config changes
          */
-        public static void PatchRecipe(PatchRecipeOptions options)
+        public static void UpdateRecipe(UpdateRecipeOptions options)
         {
             try
             {
@@ -183,13 +183,13 @@ namespace MagicExtended.Helpers
 
                 switch (options.updateType)
                 {
-                    case RecipeUpdateType.Enable:
+                    case RecipeUpdateType.ENABLE:
                         if (options.enable == null)
                             throw new Exception("Enable is null");
 
                         recipe.Recipe.m_enabled = (bool)options.enable;
                         break;
-                    case RecipeUpdateType.Recipe:
+                    case RecipeUpdateType.RECIPE:
                         if (options.requirements == null)
                             throw new Exception("Requirements is null");
 
@@ -204,7 +204,7 @@ namespace MagicExtended.Helpers
 
                         recipe.Recipe.m_resources = requirements;
                         break;
-                    case RecipeUpdateType.CraftingStation:
+                    case RecipeUpdateType.CRAFTINGSTATION:
                         if (options.craftingStation == null || options.craftingStation == "")
                             throw new Exception("Craftingstation is null or empty string");
 
@@ -225,7 +225,7 @@ namespace MagicExtended.Helpers
                             recipe.Recipe.m_craftingStation = PrefabManager.Instance.GetPrefab(pieceName).GetComponent<CraftingStation>();
                         }
                         break;
-                    case RecipeUpdateType.MinRequiredStationLevel:
+                    case RecipeUpdateType.MINREQUIREDSTATIONLEVEL:
                         if (options.requiredStationLevel == null || options.requiredStationLevel < 1)
                             throw new Exception("Required station level is null or lower then 1");
 
