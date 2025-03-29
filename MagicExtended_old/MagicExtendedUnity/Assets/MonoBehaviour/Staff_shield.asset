@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 615461926, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+  m_Name: Staff_shield
+  m_EditorClassIdentifier:
+  m_name: $se_shield
+  m_category:
+  m_icon: {fileID: 21300000, guid: 6adaef9df12a6ec48b6a739e5c16d082, type: 2}
+  m_flashIcon: 0
+  m_cooldownIcon: 0
+  m_tooltip: $se_shield_description
+  m_attributes: 0
+  m_startMessageType: 1
+  m_startMessage:
+  m_stopMessageType: 1
+  m_stopMessage:
+  m_repeatMessageType: 1
+  m_repeatMessage:
+  m_repeatInterval: 0
+  m_ttl: 120
+  m_startEffects:
+    m_effectPrefabs:
+    - m_prefab: {fileID: 1830073757133246, guid: 651e3222e59f167408e7b461f0bb4f99, type: 2}
+      m_enabled: 1
+      m_variant: -1
+      m_attach: 1
+      m_inheritParentRotation: 0
+      m_inheritParentScale: 0
+      m_randomRotation: 0
+      m_scale: 1
+      m_childTransform:
+  m_stopEffects:
+    m_effectPrefabs: []
+  m_cooldown: 0
+  m_activationAnimation: gpower
+  m_absorbDamage: 200
+  m_levelUpSkillOnBreak: 10
+  m_levelUpSkillFactor: 1
+  m_ttlPerItemLevel: 60
+  m_absorbDamagePerSkillLevel: 5
+  m_breakEffects:
+    m_effectPrefabs:
+    - m_prefab: {fileID: 1808230467651428, guid: df1dfd4b11caf6447a410fff1be38481, type: 2}
+      m_enabled: 1
+      m_variant: -1
+      m_attach: 0
+      m_inheritParentRotation: 0
+      m_inheritParentScale: 0
+      m_randomRotation: 0
+      m_scale: 1
+      m_childTransform:
+  m_hitEffects:
+    m_effectPrefabs:
+    - m_prefab: {fileID: 1024609026692636, guid: f252ae63eec6bc84aa5e1b24951fe4f4, type: 2}
+      m_enabled: 1
+      m_variant: -1
+      m_attach: 0
+      m_inheritParentRotation: 0
+      m_inheritParentScale: 0
+      m_randomRotation: 0
+      m_scale: 0
+      m_childTransform:
