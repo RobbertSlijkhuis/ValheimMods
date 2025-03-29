@@ -660,7 +660,7 @@ namespace LegendaryWeapons
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
                 configDemoHammerName.SettingChanged += (obj, attr) => { PatchHammerStats(); };
 
-                configDemoHammerDescription = Config.Bind(new ConfigDefinition(sectionDemoHammer, "Description"), "Its might not be Mjölnir, but it still hits like a thunderstorm!",
+                configDemoHammerDescription = Config.Bind(new ConfigDefinition(sectionDemoHammer, "Description"), "It might not be Mjölnir, but it still hits like a thunderstorm!",
                     new ConfigDescription("The description given to the item", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
                 configDemoHammerDescription.SettingChanged += (obj, attr) => { PatchHammerStats(); }; ;
