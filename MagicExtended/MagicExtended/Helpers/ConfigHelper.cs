@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MagicExtended.Helpers
 {
-    internal static class ConfigHelper
+    internal class ConfigHelper
     {
         public static void UpdateItemDropStats(GameObject prefab, UpdateItemDropStatsOptions options)
         {

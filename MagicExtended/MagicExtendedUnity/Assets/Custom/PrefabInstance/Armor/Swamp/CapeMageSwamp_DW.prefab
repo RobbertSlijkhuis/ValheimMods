@@ -2176,7 +2176,7 @@ MonoBehaviour:
       m_dlc: 
       m_itemType: 17
       m_icons:
-      - {fileID: 21300000, guid: 3d182739b4e964e4dbb2e74c72dda9e5, type: 2}
+      - {fileID: 21300000, guid: 3e030e46f225d644fa8d795f216924d1, type: 3}
       m_attachOverride: 0
       m_description: $item_cape_linen_description
       m_maxStackSize: 1

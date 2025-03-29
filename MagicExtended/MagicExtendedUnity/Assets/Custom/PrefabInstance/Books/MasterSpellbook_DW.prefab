@@ -4165,7 +4165,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 100, y: 100.00006, z: 100.00006}
+  m_LocalScale: {x: 100, y: 100, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 695444085043807364}
@@ -4215,7 +4215,7 @@ SkinnedMeshRenderer:
   m_Quality: 0
   m_UpdateWhenOffscreen: 0
   m_SkinnedMotionVectors: 1
-  m_Mesh: {fileID: -4063878859935821962, guid: 0e91ecc7b136fed4f83c777949bc940c, type: 3}
+  m_Mesh: {fileID: 4300000, guid: c3fd21b7343a2ca48a9650af71249255, type: 2}
   m_Bones:
   - {fileID: 6151449672672129544}
   - {fileID: 2243731950044837984}

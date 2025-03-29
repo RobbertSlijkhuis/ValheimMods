@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: PircedMushroom_DW
-  m_Shader: {fileID: 4800000, guid: a2991a03359ecf049a1a006c200406cc, type: 3}
+  m_Shader: {fileID: 4800000, guid: b87a14c803e5f294798d8028435f814f, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []

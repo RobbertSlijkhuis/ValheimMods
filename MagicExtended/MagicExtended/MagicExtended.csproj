@@ -64,11 +64,12 @@
     <Compile Include="Harmony\Patches.cs" />
     <Compile Include="Helpers\ConfigHelper.cs" />
     <Compile Include="Helpers\PlayerArmatureHelper.cs" />
+    <Compile Include="Helpers\TransformHelper.cs" />
     <Compile Include="Models\config\MaterialConfig.cs" />
     <Compile Include="Models\config\SpellbookConfig.cs" />
-    <Compile Include="Models\CustomPrefabs.cs" />
-    <Compile Include="Models\CustomStatusEffects.cs" />
-    <Compile Include="Models\options\AddPrefabToArmatureOptions.cs" />
+    <Compile Include="CustomPrefabs.cs" />
+    <Compile Include="CustomStatusEffects.cs" />
+    <Compile Include="Models\options\TransformOptions.cs" />
     <Compile Include="Models\options\MaterialConfigOptions.cs" />
     <Compile Include="Models\options\SpellbookConfigOptions.cs" />
     <Compile Include="Models\options\StaffConfigOptions.cs" />
@@ -80,7 +81,6 @@
     <Compile Include="Properties\IgnoreAccessModifiers.cs" />
     <Compile Include="MagicExtended.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Types\PlayerArmatureType.cs" />
     <Compile Include="Types\RecipeUpdateType.cs" />
   </ItemGroup>
   <ItemGroup>

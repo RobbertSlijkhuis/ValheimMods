@@ -276,7 +276,7 @@ MonoBehaviour:
       m_dlc: 
       m_itemType: 6
       m_icons:
-      - {fileID: 21300000, guid: 85dd9353b841b3b488502aa6177c8399, type: 2}
+      - {fileID: 21300000, guid: fe35855e230a3b8488abb16a7c1823e4, type: 3}
       m_attachOverride: 0
       m_description: $item_helmet_root_description
       m_maxStackSize: 1

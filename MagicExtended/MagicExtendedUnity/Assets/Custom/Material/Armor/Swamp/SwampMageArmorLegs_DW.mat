@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: SwampMageArmorLegs_DW
-  m_Shader: {fileID: 4800000, guid: 5bb17b6f8f4318b478d46023cf936f16, type: 3}
+  m_Shader: {fileID: 4800000, guid: f2cd1ad2e6953684e8f26f3aae35b766, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []

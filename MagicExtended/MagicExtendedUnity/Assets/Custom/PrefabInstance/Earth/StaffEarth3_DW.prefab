@@ -343,7 +343,7 @@ MonoBehaviour:
           m_effectPrefabs: []
         m_burstEffect:
           m_effectPrefabs:
-          - m_prefab: {fileID: 7551501131836803338, guid: 220e67212368e2f47a0a8250e8d9ea9d,
+          - m_prefab: {fileID: 3217206040513978424, guid: 2a4d1bf39fb10b84cbab4722d1a6da99,
               type: 3}
             m_enabled: 1
             m_variant: -1
@@ -355,10 +355,22 @@ MonoBehaviour:
             m_randomRotation: 0
             m_scale: 0
             m_childTransform: 
-          - m_prefab: {fileID: 1758473627833946668, guid: fe6b8dec766435f49b3bc760d3b35883,
+          - m_prefab: {fileID: 9010705504000869803, guid: f33ba765e2b2b7b4e80e59d2043508c3,
               type: 3}
             m_enabled: 1
-            m_variant: -1
+            m_variant: 0
+            m_attach: 0
+            m_follow: 0
+            m_inheritParentRotation: 0
+            m_inheritParentScale: 0
+            m_multiplyParentVisualScale: 0
+            m_randomRotation: 0
+            m_scale: 0
+            m_childTransform: 
+          - m_prefab: {fileID: 3622263877137668723, guid: 2bcd57e56918b7441bb99f1d040bc381,
+              type: 3}
+            m_enabled: 1
+            m_variant: 0
             m_attach: 0
             m_follow: 0
             m_inheritParentRotation: 0

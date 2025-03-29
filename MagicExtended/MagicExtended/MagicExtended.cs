@@ -36,6 +36,9 @@ namespace MagicExtended
         public CustomPrefabs prefabs = new CustomPrefabs();
         public CustomStatusEffects statusEffects = new CustomStatusEffects();
 
+        public Material SwampMageArmor_eye_DW;
+        public Material PlainsMageArmor_eye_DW;
+
         //// Use this class to add your own localization to the game
         //// https://valheim-modding.github.io/Jotunn/tutorials/localization.html
         //public static CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();
@@ -45,12 +48,13 @@ namespace MagicExtended
         private void Awake()
         {
             Instance = this;
+            playerArmature = new PlayerArmatureHelper();
+
             InitAssetBundle();
             InitConfig();
             InitStatusEffects();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            PrefabManager.OnVanillaPrefabsAvailable += InitPlayerArmature;
             PrefabManager.OnVanillaPrefabsAvailable += AddMaterials;
             PrefabManager.OnVanillaPrefabsAvailable += AddFood;
             PrefabManager.OnVanillaPrefabsAvailable += AddEarthStaffs;
@@ -297,7 +301,7 @@ namespace MagicExtended
 
             ItemManager.Instance.AddItem(new CustomItem(prefabs.staffFire2Prefab, true, fire2Config));
 
-            // Fire3 staff.blockArmor.Value
+            // Fire3
             ItemConfig fire3Config = new ItemConfig();
             fire3Config.Enabled = ConfigPlugin.configEnable.Value ? ConfigStaffs.staffFire3.enable.Value : false;
             fire3Config.CraftingStation = ConfigStaffs.staffFire3.craftingStation.Value;
@@ -513,6 +517,23 @@ namespace MagicExtended
 
         private void AddArmor()
         {
+            GameObject player = PrefabManager.Instance.GetPrefab("Player");
+            GameObject playerHead = player.transform.Find(playerArmature.headPath).gameObject;
+            GameObject playerSpine2 = player.transform.Find(playerArmature.spine2Path).gameObject;
+            GameObject playerSpine1 = player.transform.Find(playerArmature.spine1Path).gameObject;
+            GameObject playerShoulderLeft = player.transform.Find(playerArmature.shoulderLeftPath).gameObject;
+            GameObject playerShoulderRight = player.transform.Find(playerArmature.shoulderRightPath).gameObject;
+            GameObject playerElbowLeft = player.transform.Find(playerArmature.elbowLeftPath).gameObject;
+            GameObject playerElbowRight = player.transform.Find(playerArmature.elbowRightPath).gameObject;
+            GameObject playerWristLeft = player.transform.Find(playerArmature.wristLeftPath).gameObject;
+            GameObject playerWristRight = player.transform.Find(playerArmature.wristRightPath).gameObject;
+            GameObject playerHandLeft = player.transform.Find(playerArmature.handLeftPath).gameObject;
+            GameObject playerHandRight = player.transform.Find(playerArmature.handRightPath).gameObject;
+            GameObject playerKneeLeft = player.transform.Find(playerArmature.kneeLeftPath).gameObject;
+            GameObject playerKneeRight = player.transform.Find(playerArmature.kneeRightPath).gameObject;
+            GameObject playerAnkleLeft = player.transform.Find(playerArmature.ankleLeftPath).gameObject;
+            GameObject playerAnkleRight = player.transform.Find(playerArmature.ankleRightPath).gameObject;
+
             ItemConfig shamanConfig = new ItemConfig();
             shamanConfig.Enabled = true;
             shamanConfig.Name = "Shaman Hood";
@@ -521,127 +542,271 @@ namespace MagicExtended
             shamanConfig.AddRequirement(new RequirementConfig("WolfHairBundle", 1, 1));
             shamanConfig.AddRequirement(new RequirementConfig("WolfPelt", 1, 1));
             shamanConfig.AddRequirement(new RequirementConfig("LeatherScraps", 1, 1));
-            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("HelmetShaman_DW"), true, shamanConfig));
+
+            prefabs.helmetMageBlackForestPrefab = magicExtendedBundle.LoadAsset<GameObject>("HelmetShaman_DW");
+            prefabs.armorMageBlackForestChestPrefab = magicExtendedBundle.LoadAsset<GameObject>("ArmorShamanChest_DW");
+            prefabs.armorMageBlackForestLegsPrefab = magicExtendedBundle.LoadAsset<GameObject>("ArmorShamanLegs_DW");
+
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.helmetMageBlackForestPrefab, true, shamanConfig));
             shamanConfig.Name = "Shaman Cape";
             ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("CapeShaman_DW"), true, shamanConfig));
             shamanConfig.Name = "Shaman Chest";
-            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("ArmorShamanChest_DW"), true, shamanConfig));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.armorMageBlackForestChestPrefab, true, shamanConfig));
             shamanConfig.Name = "Shaman Legs";
-            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("ArmorShamanLegs_DW"), true, shamanConfig));
-            shamanConfig.Name = "Charred Mask";
-            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("HelmetCharredRoot_DW"), true, shamanConfig));
-            shamanConfig.Name = "Charred Chest";
-            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("ArmorCharredRootChest_DW"), true, shamanConfig));
-            shamanConfig.Name = "Charred Legs";
-            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("ArmorCharredRootLegs_DW"), true, shamanConfig));
-            shamanConfig.Name = "Mountain Hood";
-            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("HelmetMountain_DW"), true, shamanConfig));
-            shamanConfig.Name = "Mountain Cape";
-            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("CapeMountain_DW"), true, shamanConfig));
-            shamanConfig.Name = "Mountain Chest";
-            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("ArmorMountainChest_DW"), true, shamanConfig));
-            shamanConfig.Name = "Mountain Legs";
-            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("ArmorMountainLegs_DW"), true, shamanConfig));
-            shamanConfig.Name = "Mystic Lantern";
-            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("Lantern_DW"), true, shamanConfig));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.armorMageBlackForestLegsPrefab, true, shamanConfig));
+
+            GameObject blackForestEffectHead = prefabs.helmetMageBlackForestPrefab.transform.Find("ME_blackforest_effect_head").gameObject;
+            GameObject blackForestEffectAntlerLeft = prefabs.helmetMageBlackForestPrefab.transform.Find("ME_blackforest_effect_antler_left").gameObject;
+            GameObject blackForestEffectAntlerRight = prefabs.helmetMageBlackForestPrefab.transform.Find("ME_blackforest_effect_antler_right").gameObject;
+            GameObject blackForestEffectWristLeft = prefabs.armorMageBlackForestChestPrefab.transform.Find("ME_blackforest_effect_wrist_left").gameObject;
+            GameObject blackForestEffectWristRight = prefabs.armorMageBlackForestChestPrefab.transform.Find("ME_blackforest_effect_wrist_right").gameObject;
+            GameObject blackForestEffectShinLeft = prefabs.armorMageBlackForestLegsPrefab.transform.Find("ME_blackforest_effect_knee_left").gameObject;
+            GameObject blackForestEffectShinRight = prefabs.armorMageBlackForestLegsPrefab.transform.Find("ME_blackforest_effect_knee_right").gameObject;
+
+            blackForestEffectHead.FixReferences();
+            blackForestEffectAntlerLeft.FixReferences();
+            blackForestEffectAntlerRight.FixReferences();
+            blackForestEffectWristLeft.FixReferences();
+            blackForestEffectWristRight.FixReferences();
+            blackForestEffectShinLeft.FixReferences();
+            blackForestEffectShinRight.FixReferences();
+
+            blackForestEffectHead.transform.parent = playerHead.transform;
+            //blackForestEffectHead.transform.localPosition = new Vector3(0.001f, 0.004f, 0f);
+            //blackForestEffectShinLeft.transform.localRotation = TransformHelper.generateRotation(new Vector3(270f, 0f, 0f));
+            //blackForestEffectHead.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+            blackForestEffectHead.transform.localPosition = new Vector3(-0.0017f, -0.0008f, 0f);
+            blackForestEffectHead.transform.localRotation = TransformHelper.generateRotation(new Vector3(90f, 0f, 0f));
+            blackForestEffectHead.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+            blackForestEffectHead.SetActive(false);
+
+            blackForestEffectAntlerLeft.transform.parent = playerHead.transform;
+            //blackForestEffectAntlerLeft.transform.localPosition = new Vector3(0f, 0.0035f, 0.002f);
+            //blackForestEffectAntlerLeft.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
+            blackForestEffectAntlerLeft.transform.localPosition = new Vector3(0f, 0.004f, 0f);
+            blackForestEffectAntlerLeft.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 0f, 0f));
+            blackForestEffectAntlerLeft.transform.localScale = new Vector3(0.0007f, 0.0007f, 0.0007f);
+            blackForestEffectAntlerLeft.SetActive(false);
+
+            blackForestEffectAntlerRight.transform.parent = playerHead.transform;
+            //blackForestEffectAntlerRight.transform.localPosition = new Vector3(0f, 0.0035f, -0.004f);
+            //blackForestEffectAntlerRight.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
+            blackForestEffectAntlerRight.transform.localPosition = new Vector3(0f, 0.004f, 0f);
+            blackForestEffectAntlerRight.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 0f, 0f));
+            blackForestEffectAntlerRight.transform.localScale = new Vector3(0.0007f, 0.0007f, 0.0007f);
+            blackForestEffectAntlerRight.SetActive(false);
+
+            blackForestEffectWristLeft.transform.parent = playerWristLeft.transform;
+            blackForestEffectWristLeft.transform.localPosition = new Vector3(-0.0012f, -0.001f, -0.00081f);
+            blackForestEffectWristLeft.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 0f, 0f));
+            blackForestEffectWristLeft.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
+            blackForestEffectWristLeft.SetActive(false);
+
+            blackForestEffectWristRight.transform.parent = playerWristRight.transform;
+            blackForestEffectWristRight.transform.localPosition = new Vector3(-0.0012f, -0.001f, 0f);
+            blackForestEffectWristRight.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 0f, 0f));
+            blackForestEffectWristRight.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
+            blackForestEffectWristRight.SetActive(false);
+
+            blackForestEffectShinLeft.transform.parent = playerKneeLeft.transform;
+            blackForestEffectShinLeft.transform.localPosition = new Vector3(-0.0012f, 0.003f, 0f);
+            blackForestEffectShinLeft.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 0f, 0f));
+            blackForestEffectShinLeft.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
+            blackForestEffectShinLeft.SetActive(false);
+
+            blackForestEffectShinRight.transform.parent = playerKneeRight.transform;
+            blackForestEffectShinRight.transform.localPosition = new Vector3(-0.0012f, 0.003f, 0f);
+            blackForestEffectShinRight.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 0f, 0f));
+            blackForestEffectShinRight.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
+            blackForestEffectShinRight.SetActive(false);
+
+            //shamanConfig.Name = "Charred Mask";
+            //ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("HelmetCharredRoot_DW"), true, shamanConfig));
+            //shamanConfig.Name = "Charred Chest";
+            //ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("ArmorCharredRootChest_DW"), true, shamanConfig));
+            //shamanConfig.Name = "Charred Legs";
+            //ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("ArmorCharredRootLegs_DW"), true, shamanConfig));
+
+            prefabs.helmetMageSwampPrefab = magicExtendedBundle.LoadAsset<GameObject>("HelmetMageSwamp_DW");
+            prefabs.armorMageSwampChestPrefab = magicExtendedBundle.LoadAsset<GameObject>("ArmorMageSwampChest_DW");
+            prefabs.armorMageSwampLegsPrefab = magicExtendedBundle.LoadAsset<GameObject>("ArmorMageSwampLegs_DW");
 
             shamanConfig.Name = "Swamp Hood";
             ItemManager.Instance.AddItem(new CustomItem(prefabs.helmetMageSwampPrefab, true, shamanConfig));
             shamanConfig.Name = "Swamp Cloak";
             ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("CapeMageSwamp_DW"), true, shamanConfig));
             shamanConfig.Name = "Swamp Chest";
-            ItemManager.Instance.AddItem(new CustomItem(prefabs.ArmorMageSwampChestPrefab, true, shamanConfig));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.armorMageSwampChestPrefab, true, shamanConfig));
             shamanConfig.Name = "Swamp Legs";
-            ItemManager.Instance.AddItem(new CustomItem(prefabs.ArmorMageSwampLegsPrefab, true, shamanConfig));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.armorMageSwampLegsPrefab, true, shamanConfig));
 
-            //// Set evil smoke to player model
-            GameObject player = PrefabManager.Instance.GetPrefab("Player");
-            GameObject playerHead = player.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/Neck/Head").gameObject;
-            GameObject playerChest = player.transform.Find("Visual/Armature/Hips/Spine/Spine1").gameObject;
-            GameObject playerArmLeft = player.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHand_Attach").gameObject;
-            GameObject playerArmRight = player.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHand_Attach").gameObject;
-            GameObject playerLegLeft = player.transform.Find("Visual/Armature/Hips/LeftUpLeg/LeftLeg").gameObject;
-            GameObject playerLegRight = player.transform.Find("Visual/Armature/Hips/RightUpLeg/RightLeg").gameObject;
+            GameObject eyeLeft = prefabs.helmetMageSwampPrefab.transform.Find("ME_eye_left").gameObject;
+            GameObject eyeRight = prefabs.helmetMageSwampPrefab.transform.Find("ME_eye_right").gameObject;
+            GameObject swampEffectHead = prefabs.helmetMageSwampPrefab.transform.Find("ME_swamp_effect_head").gameObject;
+            GameObject swampEffectHeadFace = prefabs.helmetMageSwampPrefab.transform.Find("ME_swamp_effect_face").gameObject;
+            GameObject swampEffectSpine1 = prefabs.armorMageSwampChestPrefab.transform.Find("ME_swamp_effect_spine1").gameObject;
+            GameObject swampEffectHandLeft = prefabs.armorMageSwampChestPrefab.transform.Find("ME_swamp_effect_hand_left").gameObject;
+            GameObject swampEffectHandRight = prefabs.armorMageSwampChestPrefab.transform.Find("ME_swamp_effect_hand_right").gameObject;
+            GameObject swampEffectKneeLeft = prefabs.armorMageSwampLegsPrefab.transform.Find("ME_swamp_effect_knee_left").gameObject;
+            GameObject swampEffectKneeRight = prefabs.armorMageSwampLegsPrefab.transform.Find("ME_swamp_effect_knee_right").gameObject;
 
-            GameObject eyeLeft = prefabs.helmetMageSwampPrefab.transform.Find("eye_left").gameObject;
-            GameObject eyeRight = prefabs.helmetMageSwampPrefab.transform.Find("eye_right").gameObject;
+            eyeLeft.FixReferences();
+            eyeRight.FixReferences();
+            swampEffectHead.FixReferences();
+            swampEffectHeadFace.FixReferences();
+            swampEffectSpine1.FixReferences();
+            swampEffectHandLeft.FixReferences();
+            swampEffectHandRight.FixReferences();
+            swampEffectKneeLeft.FixReferences();
+            swampEffectKneeRight.FixReferences();
 
-            GameObject evilSmokeHead = prefabs.helmetMageSwampPrefab.transform.Find("evil_smoke").gameObject;
-            GameObject evilSmokeHeadFace = prefabs.helmetMageSwampPrefab.transform.Find("evil_smoke_face").gameObject;
-            GameObject evilSmokeChest = prefabs.ArmorMageSwampChestPrefab.transform.Find("evil_smoke").gameObject;
-            GameObject evilSmokeArmLeft = prefabs.ArmorMageSwampChestPrefab.transform.Find("evil_smoke_left").gameObject;
-            GameObject evilSmokeArmRight = prefabs.ArmorMageSwampChestPrefab.transform.Find("evil_smoke_right").gameObject;
-            GameObject evilSmokeLegsLeft = prefabs.ArmorMageSwampLegsPrefab.transform.Find("evil_smoke_left").gameObject;
-            GameObject evilSmokeLegsRight = prefabs.ArmorMageSwampLegsPrefab.transform.Find("evil_smoke_right").gameObject;
+            eyeLeft.transform.parent = playerHead.transform;
+            eyeLeft.transform.localPosition = new Vector3(-0.00087f, 0.00178f, -0.00035f);
+            eyeLeft.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 340.544f, 0f));
+            eyeLeft.transform.localScale = new Vector3(0.0002f, 0.0001f, 0.0003f);
+            eyeLeft.SetActive(false);
 
-            //Quaternion eyeLeftRotation = new Quaternion(0, 0, 0, 0);
-            //eyeLeftRotation.eulerAngles = new Vector3(0f, 340.544f, 0f);
-            //eyeLeft.transform.parent = playerHead.transform;
-            //eyeLeft.transform.localPosition = new Vector3(-0.00087f, 0.00178f, -0.00035f);
-            //eyeLeft.transform.localRotation = eyeLeftRotation;
-            //eyeLeft.transform.localScale = new Vector3(0.0002f, 0.0001f, 0.0003f);
-            //eyeLeft.SetActive(false);
+            eyeRight.transform.parent = playerHead.transform;
+            eyeRight.transform.localPosition = new Vector3(-0.00087f, 0.00178f, 0.00044f);
+            eyeRight.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 27.096f, 0f));
+            eyeRight.transform.localScale = new Vector3(0.0002f, 0.0001f, 0.0003f);
+            eyeRight.SetActive(false);
 
-            //Quaternion eyeRightRotation = new Quaternion(0, 0, 0, 0);
-            //eyeRightRotation.eulerAngles = new Vector3(0f, 27.096f, 0f);
-            //eyeRight.transform.parent = playerHead.transform;
-            //eyeRight.transform.localPosition = new Vector3(-0.00087f, 0.00178f, 0.00044f);
-            //eyeRight.transform.localRotation = eyeRightRotation;
-            //eyeRight.transform.localScale = new Vector3(0.0002f, 0.0001f, 0.0003f);
-            //eyeRight.SetActive(false);
+            swampEffectHead.transform.parent = playerHead.transform;
+            swampEffectHead.transform.localPosition = new Vector3(0f, 0f, 0f);
+            swampEffectHead.SetActive(false);
 
-            playerArmature.AddPrefab(Types.PlayerArmatureType.HEAD, eyeLeft, new AddPrefabToArmatureOptions()
-            {
-                active = false,
-                position = new Vector3(-0.00087f, 0.00178f, -0.00035f),
-                rotation = new Vector3(0f, 340.544f, 0f),
-                scale = new Vector3(0.0002f, 0.0001f, 0.0003f),
-            });
+            swampEffectHeadFace.transform.parent = playerHead.transform;
+            swampEffectHeadFace.transform.localPosition = new Vector3(-0.0015f, 0.001f, 0f);
+            swampEffectHeadFace.SetActive(false);
 
-            playerArmature.AddPrefab(Types.PlayerArmatureType.HEAD, eyeRight, new AddPrefabToArmatureOptions()
-            {
-                active = false,
-                position = new Vector3(-0.00087f, 0.00178f, 0.00044f),
-                rotation = new Vector3(0f, 27.096f, 0f),
-                scale = new Vector3(0.0002f, 0.0001f, 0.0003f),
-            });
+            swampEffectSpine1.transform.parent = playerSpine1.transform;
+            swampEffectSpine1.transform.localPosition = new Vector3(0f, 0f, 0f);
+            swampEffectSpine1.SetActive(false);
 
-            evilSmokeHead.transform.parent = playerHead.transform;
-            evilSmokeHead.transform.localPosition = new Vector3(0f, 0f, 0f);
-            evilSmokeHead.SetActive(false);
-            evilSmokeHead.FixReferences();
+            swampEffectHandLeft.transform.parent = playerHandLeft.transform;
+            swampEffectHandLeft.transform.localPosition = new Vector3(0f, 0f, 0f);
+            swampEffectHandLeft.SetActive(false);
 
-            evilSmokeHeadFace.transform.parent = playerHead.transform;
-            evilSmokeHeadFace.transform.localPosition = new Vector3(-0.0015f, 0.001f, 0f);
-            evilSmokeHeadFace.SetActive(false);
-            evilSmokeHeadFace.FixReferences();
+            swampEffectHandRight.transform.parent = playerHandRight.transform;
+            swampEffectHandRight.transform.localPosition = new Vector3(0f, 0f, 0f);
+            swampEffectHandRight.SetActive(false);
 
-            evilSmokeChest.transform.parent = playerChest.transform;
-            evilSmokeChest.transform.localPosition = new Vector3(0f, 0f, 0f);
-            evilSmokeChest.SetActive(false);
-            evilSmokeChest.FixReferences();
+            swampEffectKneeLeft.transform.parent = playerKneeLeft.transform;
+            swampEffectKneeLeft.transform.localPosition = new Vector3(0f, 0f, 0f);
+            swampEffectKneeLeft.SetActive(false);
 
-            evilSmokeArmLeft.transform.parent = playerArmLeft.transform;
-            evilSmokeArmLeft.transform.localPosition = new Vector3(0f, 0f, 0f);
-            evilSmokeArmLeft.SetActive(false);
-            evilSmokeArmLeft.FixReferences();
+            swampEffectKneeRight.transform.parent = playerKneeRight.transform;
+            swampEffectKneeRight.transform.localPosition = new Vector3(0f, 0f, 0f);
+            swampEffectKneeRight.SetActive(false);
 
-            evilSmokeArmRight.transform.parent = playerArmRight.transform;
-            evilSmokeArmRight.transform.localPosition = new Vector3(0f, 0f, 0f);
-            evilSmokeArmRight.SetActive(false);
-            evilSmokeArmRight.FixReferences();
+            prefabs.helmetMageMountainPrefab = magicExtendedBundle.LoadAsset<GameObject>("HelmetMountain_DW");
+            prefabs.armorMageMountainChestPrefab = magicExtendedBundle.LoadAsset<GameObject>("ArmorMountainChest_DW");
+            prefabs.armorMageMountainLegsPrefab = magicExtendedBundle.LoadAsset<GameObject>("ArmorMountainLegs_DW");
 
-            evilSmokeLegsLeft.transform.parent = playerLegLeft.transform;
-            evilSmokeLegsLeft.transform.localPosition = new Vector3(0f, 0f, 0f);
-            evilSmokeLegsLeft.SetActive(false);
-            evilSmokeLegsLeft.FixReferences();
+            shamanConfig.Name = "Mountain Hood";
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.helmetMageMountainPrefab, true, shamanConfig));
+            shamanConfig.Name = "Mountain Cape";
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("CapeMountain_DW"), true, shamanConfig));
+            shamanConfig.Name = "Mountain Chest";
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.armorMageMountainChestPrefab, true, shamanConfig));
+            shamanConfig.Name = "Mountain Legs";
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.armorMageMountainLegsPrefab, true, shamanConfig));
 
-            evilSmokeLegsRight.transform.parent = playerLegRight.transform;
-            evilSmokeLegsRight.transform.localPosition = new Vector3(0f, 0f, 0f);
-            evilSmokeLegsRight.SetActive(false);
-            evilSmokeLegsRight.FixReferences();
+            GameObject mountainEffectHead = prefabs.helmetMageMountainPrefab.transform.Find("ME_mountain_effect_head").gameObject;
+            GameObject mountainEffectSpine2 = prefabs.armorMageMountainChestPrefab.transform.Find("ME_mountain_effect_spine2").gameObject;
+            GameObject mountainEffectHandLeft = prefabs.armorMageMountainChestPrefab.transform.Find("ME_mountain_effect_hand_left").gameObject;
+            GameObject mountainEffectHandRight = prefabs.armorMageMountainChestPrefab.transform.Find("ME_mountain_effect_hand_right").gameObject;
+            GameObject mountainEffectKneeLeft = prefabs.armorMageMountainLegsPrefab.transform.Find("ME_mountain_effect_knee_left").gameObject;
+            GameObject mountainEffectKneeRight = prefabs.armorMageMountainLegsPrefab.transform.Find("ME_mountain_effect_knee_right").gameObject;
 
-            // ArmorStand
+            mountainEffectHead.FixReferences();
+            mountainEffectSpine2.FixReferences();
+            mountainEffectHandLeft.FixReferences();
+            mountainEffectHandRight.FixReferences();
+            mountainEffectKneeLeft.FixReferences();
+            mountainEffectKneeRight.FixReferences();
+
+            mountainEffectHead.transform.parent = playerHead.transform;
+            mountainEffectHead.transform.localPosition = new Vector3(0f, 0.0025f, 0f);
+            mountainEffectHead.transform.localScale = new Vector3(1f, 1f, 1f);
+            mountainEffectHead.SetActive(false);
+
+            mountainEffectSpine2.transform.parent = playerSpine2.transform;
+            mountainEffectSpine2.transform.localPosition = new Vector3(0f, 0f, 0f);
+            mountainEffectSpine2.transform.localScale = new Vector3(1f, 1f, 1f);
+            mountainEffectSpine2.SetActive(false);
+
+            mountainEffectHandLeft.transform.parent = playerHandLeft.transform;
+            mountainEffectHandLeft.transform.localPosition = new Vector3(0f, 0f, 0f);
+            mountainEffectHandLeft.transform.localScale = new Vector3(1f, 1f, 1f);
+            mountainEffectHandLeft.SetActive(false);
+
+            mountainEffectHandRight.transform.parent = playerHandRight.transform;
+            mountainEffectHandRight.transform.localPosition = new Vector3(0f, 0f, 0f);
+            mountainEffectHandRight.transform.localScale = new Vector3(1f, 1f, 1f);
+            mountainEffectHandRight.SetActive(false);
+
+            mountainEffectKneeLeft.transform.parent = playerKneeLeft.transform;
+            mountainEffectKneeLeft.transform.localPosition = new Vector3(0f, 0f, 0f);
+            mountainEffectKneeLeft.transform.localScale = new Vector3(1f, 1f, 1f);
+            mountainEffectKneeLeft.SetActive(false);
+
+            mountainEffectKneeRight.transform.parent = playerKneeRight.transform;
+            mountainEffectKneeRight.transform.localPosition = new Vector3(0f, 0f, 0f);
+            mountainEffectKneeRight.transform.localScale = new Vector3(1f, 1f, 1f);
+            mountainEffectKneeRight.SetActive(false);
+
+            prefabs.helmetPlainsMagePrefab = magicExtendedBundle.LoadAsset<GameObject>("HelmetPlainsMage_DW");
+            prefabs.armorPlainsMageChestPrefab = magicExtendedBundle.LoadAsset<GameObject>("ArmorPlainsMageChest_DW");
+            prefabs.armorPlainsMageLegsPrefab = magicExtendedBundle.LoadAsset<GameObject>("ArmorPlainsMageLegs_DW");
+
+            shamanConfig.Name = "Plains Hood";
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.helmetPlainsMagePrefab, true, shamanConfig));
+            shamanConfig.Name = "Plains Cape";
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("CapePlainsMage_DW"), true, shamanConfig));
+            shamanConfig.Name = "Plains Chest";
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.armorPlainsMageChestPrefab, true, shamanConfig));
+            shamanConfig.Name = "Plains Legs";
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.armorPlainsMageLegsPrefab, true, shamanConfig));
+
+            GameObject plainsEffectShoulderLeft = prefabs.armorPlainsMageChestPrefab.transform.Find("ME_plains_effect_shoulder_left").gameObject;
+            GameObject plainsEffectShoulderRight = prefabs.armorPlainsMageChestPrefab.transform.Find("ME_plains_effect_shoulder_right").gameObject;
+
+            plainsEffectShoulderLeft.FixReferences();
+            plainsEffectShoulderRight.FixReferences();
+
+            plainsEffectShoulderLeft.transform.parent = playerShoulderLeft.transform;
+            plainsEffectShoulderLeft.transform.localPosition = new Vector3(0f, 0f, -0.0001f);
+            // plainsEffectShoulderLeft.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 0f, 0f));
+            plainsEffectShoulderLeft.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+            plainsEffectShoulderLeft.SetActive(false);
+
+            plainsEffectShoulderRight.transform.parent = playerShoulderRight.transform;
+            plainsEffectShoulderRight.transform.localPosition = new Vector3(0f, 0f, -0.0001f); // 0 -0,0007 -0,0005
+            // plainsEffectShoulderRight.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 0f, 0f)); // 58, 130, 90
+            plainsEffectShoulderRight.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+            plainsEffectShoulderRight.SetActive(false);
+
+
+            // TODO: Als extra effect on verschillende footstep entries hangen
+            List<GameObject> footstepEffectList = new List<GameObject>();
+            footstepEffectList.Add(prefabs.PlainsMageFootStepsPrefab);
+            FootStep.StepEffect footstep = new FootStep.StepEffect();
+            footstep.m_name = "PlainsMage Fire";
+            footstep.m_motionType = FootStep.MotionType.Run;
+            footstep.m_material = FootStep.GroundMaterial.Everything;
+            footstep.m_effectPrefabs = footstepEffectList.ToArray();
+
+            FootStep footstepComp = player.GetComponent<FootStep>();
+            footstepComp.m_effects.Add(footstep);
+
+            //GameObject fxFootStepGrassRun = PrefabManager.Instance.GetPrefab("fx_footstep_run");
+            //prefabs.PlainsMageFootStepsPrefab.transform.parent = fxFootStepGrassRun.transform;
+
+            // TODO: init somewhere else
+            shamanConfig.Name = "Mystic Lantern";
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("Lantern_DW"), true, shamanConfig));
 
             // Prepare materials for Embla set
             Material ashlandsMageArmorMat = magicExtendedBundle.LoadAsset<Material>("AshlandsMageArmor_red_DW");
@@ -869,8 +1034,13 @@ namespace MagicExtended
 
             ItemConfig pircedMushroomConfig = new ItemConfig();
             pircedMushroomConfig.Name = "Pirced Mushroom";
-            pircedMushroomConfig.Description = "They have a nice crunch and teste oddly sweet.";
+            pircedMushroomConfig.Description = "They have a nice crunch and taste oddly sweet.";
             pircedMushroomConfig.Weight = 0.1f;
+
+            ItemConfig cloudMushroomConfig = new ItemConfig();
+            cloudMushroomConfig.Name = "Violet Cloud Mushroom";
+            cloudMushroomConfig.Description = "A distinct violet mushroom with swirls!";
+            cloudMushroomConfig.Weight = 0.1f;
 
             CookingConversionConfig cookedMushroomConfig = new CookingConversionConfig();
             cookedMushroomConfig.FromItem = "MagicalMushroom_DW";
@@ -883,6 +1053,7 @@ namespace MagicExtended
             ItemManager.Instance.AddItem(new CustomItem(prefabs.gribSnowMushroomPrefab, true, gribsnowConfig));
             ItemManager.Instance.AddItem(new CustomItem(prefabs.bogMushroomPrefab, true, bogMushroomConfig));
             ItemManager.Instance.AddItem(new CustomItem(prefabs.pircedMushroomPrefab, true, pircedMushroomConfig));
+            ItemManager.Instance.AddItem(new CustomItem(prefabs.cloudMushroomPrefab, true, cloudMushroomConfig));
             ItemManager.Instance.AddItemConversion(new CustomItemConversion(cookedMushroomConfig));
             PrefabManager.OnVanillaPrefabsAvailable -= AddFood;
         }
@@ -892,7 +1063,6 @@ namespace MagicExtended
             // Magical Mushroom
             List<Heightmap.Biome> magicMushroomBiomeList = new List<Heightmap.Biome>();
             magicMushroomBiomeList.Add(Heightmap.Biome.Meadows);
-            magicMushroomBiomeList.Add(Heightmap.Biome.BlackForest);
 
             VegetationConfig magicMushroomVegetationConfig = new VegetationConfig();
             magicMushroomVegetationConfig.Biome = ZoneManager.AnyBiomeOf(magicMushroomBiomeList.ToArray());
@@ -928,8 +1098,8 @@ namespace MagicExtended
             gribSnowVegetationConfig.BiomeArea = Heightmap.BiomeArea.Everything;
             gribSnowVegetationConfig.BlockCheck = true;
             gribSnowVegetationConfig.GroupRadius = 5;
-            gribSnowVegetationConfig.GroupSizeMin = 1;
-            gribSnowVegetationConfig.GroupSizeMax = 3;
+            gribSnowVegetationConfig.GroupSizeMin = 2;
+            gribSnowVegetationConfig.GroupSizeMax = 4;
             gribSnowVegetationConfig.ScaleMin = 1f;
             gribSnowVegetationConfig.ScaleMax = 1.5f;
             gribSnowVegetationConfig.InForest = true;
@@ -959,7 +1129,7 @@ namespace MagicExtended
             bogMushroomVegetationConfig.GroupRadius = 4;
             bogMushroomVegetationConfig.GroupSizeMin = 2;
             bogMushroomVegetationConfig.GroupSizeMax = 5;
-            bogMushroomVegetationConfig.ScaleMin = 0.5f;
+            bogMushroomVegetationConfig.ScaleMin = 0.7f;
             bogMushroomVegetationConfig.ScaleMax = 1f;
             bogMushroomVegetationConfig.InForest = false;
             bogMushroomVegetationConfig.ForestThresholdMin = 1f;
@@ -977,7 +1147,7 @@ namespace MagicExtended
             bogMushroomVegetationConfig.MaxTilt = 20;
             ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(prefabs.bogMushroomPickablePrefab, true, bogMushroomVegetationConfig));
 
-            // pirced Mushroom
+            // Pirced Mushroom
             List<Heightmap.Biome> pircedMushroomBiomeList = new List<Heightmap.Biome>();
             pircedMushroomBiomeList.Add(Heightmap.Biome.Mountain);
 
@@ -988,7 +1158,7 @@ namespace MagicExtended
             pircedMushroomVegetationConfig.GroupRadius = 4;
             pircedMushroomVegetationConfig.GroupSizeMin = 2;
             pircedMushroomVegetationConfig.GroupSizeMax = 5;
-            pircedMushroomVegetationConfig.ScaleMin = 0.5f;
+            pircedMushroomVegetationConfig.ScaleMin = 0.8f;
             pircedMushroomVegetationConfig.ScaleMax = 1f;
             pircedMushroomVegetationConfig.InForest = false;
             pircedMushroomVegetationConfig.ForestThresholdMin = 1f;
@@ -1005,6 +1175,35 @@ namespace MagicExtended
             pircedMushroomVegetationConfig.MinTilt = 0f;
             pircedMushroomVegetationConfig.MaxTilt = 20;
             ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(prefabs.pircedMushroomPickablePrefab, true, pircedMushroomVegetationConfig));
+
+            // Violet Cloud Mushroom
+            List<Heightmap.Biome> cloudCloudMushroomBiomeList = new List<Heightmap.Biome>();
+            cloudCloudMushroomBiomeList.Add(Heightmap.Biome.Plains);
+
+            VegetationConfig cloudMushroomVegetationConfig = new VegetationConfig();
+            cloudMushroomVegetationConfig.Biome = ZoneManager.AnyBiomeOf(cloudCloudMushroomBiomeList.ToArray());
+            cloudMushroomVegetationConfig.BiomeArea = Heightmap.BiomeArea.Median;
+            cloudMushroomVegetationConfig.BlockCheck = true;
+            cloudMushroomVegetationConfig.GroupRadius = 4;
+            cloudMushroomVegetationConfig.GroupSizeMin = 2;
+            cloudMushroomVegetationConfig.GroupSizeMax = 5;
+            cloudMushroomVegetationConfig.ScaleMin = 0.7f;
+            cloudMushroomVegetationConfig.ScaleMax = 1f;
+            cloudMushroomVegetationConfig.InForest = false;
+            cloudMushroomVegetationConfig.ForestThresholdMin = 1f;
+            cloudMushroomVegetationConfig.ForestThresholdMax = 1.15f;
+            cloudMushroomVegetationConfig.Min = 1;
+            cloudMushroomVegetationConfig.Max = 2;
+            cloudMushroomVegetationConfig.MinAltitude = 0f;
+            cloudMushroomVegetationConfig.MaxAltitude = 1000f;
+            cloudMushroomVegetationConfig.MinTerrainDelta = 0f;
+            cloudMushroomVegetationConfig.MaxTerrainDelta = 2f;
+            cloudMushroomVegetationConfig.TerrainDeltaRadius = 0f;
+            cloudMushroomVegetationConfig.MinOceanDepth = 0f;
+            cloudMushroomVegetationConfig.MaxOceanDepth = 0f;
+            cloudMushroomVegetationConfig.MinTilt = 0f;
+            cloudMushroomVegetationConfig.MaxTilt = 20;
+            ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(prefabs.cloudMushroomPickablePrefab, true, cloudMushroomVegetationConfig));
             ZoneManager.OnVanillaVegetationAvailable -= AddLocations;
         }
 
@@ -1092,6 +1291,9 @@ namespace MagicExtended
 
             statusEffects.MountainMageArmorSetSE.name = "MountainMageArmorSet_DW";
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(statusEffects.MountainMageArmorSetSE, true));
+
+            statusEffects.PlainsMageArmorSetSE.name = "PlainsMageArmorSet_DW";
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(statusEffects.PlainsMageArmorSetSE, true));
         }
 
         /**
@@ -1104,6 +1306,8 @@ namespace MagicExtended
             // Materials
             prefabs.crudeEitrPrefab = magicExtendedBundle.LoadAsset<GameObject>("CrudeEitr_DW");
             prefabs.fineEitrPrefab = magicExtendedBundle.LoadAsset<GameObject>("FineEitr_DW");
+            SwampMageArmor_eye_DW = magicExtendedBundle.LoadAsset<Material>("SwampMageArmor_eye_DW");
+            PlainsMageArmor_eye_DW = magicExtendedBundle.LoadAsset<Material>("PlainsMageArmor_eye_DW");
 
             // Food
             prefabs.magicalMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("MagicalMushroom_DW");
@@ -1115,10 +1319,13 @@ namespace MagicExtended
             prefabs.bogMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_BogMushroom_DW");
             prefabs.pircedMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("PircedMushroom_DW");
             prefabs.pircedMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_PircedMushroom_DW");
+            prefabs.cloudMushroomPrefab = magicExtendedBundle.LoadAsset<GameObject>("VioletCloudMushroom_DW");
+            prefabs.cloudMushroomPickablePrefab = magicExtendedBundle.LoadAsset<GameObject>("Pickable_VioletCloudMushroom_DW");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.magicalMushroomPickablePrefab, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.gribSnowMushroomPickablePrefab, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.bogMushroomPickablePrefab, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.pircedMushroomPickablePrefab, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.cloudMushroomPickablePrefab, true));
 
             // Earth assets
             prefabs.staffEarth0Prefab = magicExtendedBundle.LoadAsset<GameObject>("StaffEarth0_DW");
@@ -1133,7 +1340,8 @@ namespace MagicExtended
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_earth_script_big_stone_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_earth_script_roots_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("TentaRoot_DW"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_earth_burst_DW"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_earth_spores_DW"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_earth_spikes_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_earth_windup_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_mushroom_projectile_hit_DW"), true));
 
@@ -1154,6 +1362,8 @@ namespace MagicExtended
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_frost_projectile_secondary_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_frost_projectile_spawn_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_frost_script_iceshards_DW"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_iceshard_launch_DW"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_iceshard_launch_smoke_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_frost_nova_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("fx_staff_frost_windup_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("staff_frost_nova_AOE_DW"), true));
@@ -1172,26 +1382,16 @@ namespace MagicExtended
             prefabs.advancedSpellbookPrefab = magicExtendedBundle.LoadAsset<GameObject>("AdvancedSpellbook_DW");
             prefabs.masterSpellbookPrefab = magicExtendedBundle.LoadAsset<GameObject>("MasterSpellbook_DW");
 
-            // BlackForest
+            // Effects
             statusEffects.BlackForestMageArmorSetSE = magicExtendedBundle.LoadAsset<StatusEffect>("SetEffect_BlackForestMageArmor_DW");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("BlackForestMageArmorSetSEEffect_DW"), true));
-
-            // Swamp
-            prefabs.helmetMageSwampPrefab = magicExtendedBundle.LoadAsset<GameObject>("HelmetMageSwamp_DW");
-            prefabs.ArmorMageSwampChestPrefab = magicExtendedBundle.LoadAsset<GameObject>("ArmorMageSwampChest_DW");
-            prefabs.ArmorMageSwampLegsPrefab = magicExtendedBundle.LoadAsset<GameObject>("ArmorMageSwampLegs_DW");
             statusEffects.SwampMageArmorSetSE = magicExtendedBundle.LoadAsset<StatusEffect>("SetEffect_SwampMageArmor_DW");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("SwampMageArmorSetSEEffect_DW"), true));
-
-            // Mountain
             statusEffects.MountainMageArmorSetSE = magicExtendedBundle.LoadAsset<StatusEffect>("SetEffect_MountainMageArmor_DW");
+            statusEffects.PlainsMageArmorSetSE = magicExtendedBundle.LoadAsset<StatusEffect>("SetEffect_PlainsMageArmor_DW");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("BlackForestMageArmorSetSEEffect_DW"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("SwampMageArmorSetSEEffect_DW"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(magicExtendedBundle.LoadAsset<GameObject>("MountainMageArmorSetSEEffect_DW"), true));
-        }
-
-        private void InitPlayerArmature()
-        {
-            playerArmature = new PlayerArmatureHelper(PrefabManager.Instance.GetPrefab("Player"));
-            PrefabManager.OnVanillaPrefabsAvailable -= InitPlayerArmature;
+            prefabs.PlainsMageFootStepsPrefab = magicExtendedBundle.LoadAsset<GameObject>("PlainsMageFootSteps_DW");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.PlainsMageFootStepsPrefab, true));
         }
     }
 }

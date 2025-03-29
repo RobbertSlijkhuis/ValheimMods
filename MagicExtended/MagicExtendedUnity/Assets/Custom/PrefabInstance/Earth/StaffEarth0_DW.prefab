@@ -533,13 +533,11 @@ MonoBehaviour:
       m_unequipEffect:
         m_effectPrefabs: []
       m_triggerEffect:
-        m_effectPrefabs: []
-      m_trailStartEffect:
         m_effectPrefabs:
-        - m_prefab: {fileID: 7551501131836803338, guid: 220e67212368e2f47a0a8250e8d9ea9d,
+        - m_prefab: {fileID: 9010705504000869803, guid: f33ba765e2b2b7b4e80e59d2043508c3,
             type: 3}
           m_enabled: 1
-          m_variant: -1
+          m_variant: 0
           m_attach: 0
           m_follow: 0
           m_inheritParentRotation: 0
@@ -548,7 +546,21 @@ MonoBehaviour:
           m_randomRotation: 0
           m_scale: 0
           m_childTransform: 
-        - m_prefab: {fileID: 2353600328335836179, guid: ceec7516237b4104b94300043ca39784,
+        - m_prefab: {fileID: 3622263877137668723, guid: 2bcd57e56918b7441bb99f1d040bc381,
+            type: 3}
+          m_enabled: 1
+          m_variant: 0
+          m_attach: 0
+          m_follow: 0
+          m_inheritParentRotation: 0
+          m_inheritParentScale: 0
+          m_multiplyParentVisualScale: 0
+          m_randomRotation: 0
+          m_scale: 0
+          m_childTransform: 
+      m_trailStartEffect:
+        m_effectPrefabs:
+        - m_prefab: {fileID: 7551501131836803338, guid: 220e67212368e2f47a0a8250e8d9ea9d,
             type: 3}
           m_enabled: 1
           m_variant: -1

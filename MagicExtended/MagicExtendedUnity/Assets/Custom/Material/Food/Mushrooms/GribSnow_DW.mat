@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: GribSnow_DW
-  m_Shader: {fileID: 4800000, guid: a2991a03359ecf049a1a006c200406cc, type: 3}
+  m_Shader: {fileID: 4800000, guid: b87a14c803e5f294798d8028435f814f, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -26,7 +26,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _Albedo:
-        m_Texture: {fileID: 2800000, guid: 6413f6a495825324191ed6ac1c053e94, type: 3}
+        m_Texture: {fileID: 2800000, guid: 67d7bba31e30f30419d8f9fee848fba8, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:

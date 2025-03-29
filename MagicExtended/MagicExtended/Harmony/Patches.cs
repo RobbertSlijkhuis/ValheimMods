@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using MagicExtended.Configs;
+using System;
 using UnityEngine;
 
 namespace MagicExtended.Harmony
@@ -39,14 +40,14 @@ namespace MagicExtended.Harmony
         [HarmonyPatch(typeof(Humanoid), "EquipItem")]
         public static void EquipItem_Postfix(ItemDrop.ItemData item)
         {
-            setEvilSmoke(item, true);
+            updateItemEffects(item, true);
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Humanoid), "UnequipItem")]
         public static void UnequipItem_Postfix(ItemDrop.ItemData item)
         {
-            setEvilSmoke(item, false);
+            updateItemEffects(item, false);
         }
 
         [HarmonyPrefix]
@@ -71,58 +72,129 @@ namespace MagicExtended.Harmony
         [HarmonyPatch(typeof(Humanoid), "UpdateEquipmentStatusEffects")]
         public static void UpdateEquipmentStatusEffects_Postfix()
         {
-            if (Player.m_localPlayer == null) return;
+            try
+            {
+                if (Player.m_localPlayer == null) return;
 
-            if (Player.m_localPlayer.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode("SwampMageArmorSet_DW")))
-            {
-                Jotunn.Logger.LogWarning("Wraith mode");
-                Player.m_localPlayer.gameObject.transform.Find("Visual/body").gameObject.SetActive(false);
-                Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/Neck/Head/Helmet_attach").gameObject.SetActive(false);
-                Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/Neck/Head/evil_smoke_face").gameObject.SetActive(true);
+                if (Player.m_localPlayer.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode("BlackForestMageArmorSet_DW")))
+                {
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_blackforest_effect_head").gameObject.SetActive(true);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_blackforest_effect_antler_left").gameObject.SetActive(true);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_blackforest_effect_antler_right").gameObject.SetActive(true);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.wristLeftPath + "/ME_blackforest_effect_wrist_left").gameObject.SetActive(true);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.wristRightPath + "/ME_blackforest_effect_wrist_right").gameObject.SetActive(true);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.kneeLeftPath + "/ME_blackforest_effect_knee_left").gameObject.SetActive(true);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.kneeRightPath + "/ME_blackforest_effect_knee_right").gameObject.SetActive(true);
+                }
+                else
+                {
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_blackforest_effect_head").gameObject.SetActive(false);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_blackforest_effect_antler_left").gameObject.SetActive(false);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_blackforest_effect_antler_right").gameObject.SetActive(false);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.wristLeftPath + "/ME_blackforest_effect_wrist_left").gameObject.SetActive(false);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.wristRightPath + "/ME_blackforest_effect_wrist_right").gameObject.SetActive(false);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.kneeLeftPath + "/ME_blackforest_effect_knee_left").gameObject.SetActive(false);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.kneeRightPath + "/ME_blackforest_effect_knee_right").gameObject.SetActive(false);
+                }
+
+                if (Player.m_localPlayer.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode("SwampMageArmorSet_DW")))
+                {
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.bodyPath).gameObject.SetActive(false);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.helmetAttachPath).gameObject.SetActive(false);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_swamp_effect_face").gameObject.SetActive(true);
+                }
+                else
+                {
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.bodyPath).gameObject.SetActive(true);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.helmetAttachPath).gameObject.SetActive(true);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_swamp_effect_face").gameObject.SetActive(false);
+                }
+
+                if (Player.m_localPlayer.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode("MountainMageArmorSet_DW")))
+                {
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_mountain_effect_head").gameObject.SetActive(true);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.spine2Path + "/ME_mountain_effect_spine2").gameObject.SetActive(true);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.handLeftPath + "/ME_mountain_effect_hand_left").gameObject.SetActive(true);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.handRightPath + "/ME_mountain_effect_hand_right").gameObject.SetActive(true);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.kneeLeftPath + "/ME_mountain_effect_knee_left").gameObject.SetActive(true);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.kneeRightPath + "/ME_mountain_effect_knee_right").gameObject.SetActive(true);
+                }
+                else
+                {
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_mountain_effect_head").gameObject.SetActive(false);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.spine2Path + "/ME_mountain_effect_spine2").gameObject.SetActive(false);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.handLeftPath + "/ME_mountain_effect_hand_left").gameObject.SetActive(false);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.handRightPath + "/ME_mountain_effect_hand_right").gameObject.SetActive(false);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.kneeLeftPath + "/ME_mountain_effect_knee_left").gameObject.SetActive(false);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.kneeRightPath + "/ME_mountain_effect_knee_right").gameObject.SetActive(false);
+                }
+
+                if (Player.m_localPlayer.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode("PlainsMageArmorSet_DW")))
+                {
+                    Jotunn.Logger.LogWarning("Found Plains set");
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_eye_left/flames").gameObject.SetActive(true);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_eye_right/flames").gameObject.SetActive(true);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.shoulderLeftPath + "/ME_plains_effect_shoulder_left").gameObject.SetActive(true);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.shoulderRightPath + "/ME_plains_effect_shoulder_right").gameObject.SetActive(true);
+                    MagicExtended.Instance.prefabs.PlainsMageFootStepsPrefab.SetActive(true);
+                }
+                else
+                {
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_eye_left/flames").gameObject.SetActive(false);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_eye_right/flames").gameObject.SetActive(false);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.shoulderLeftPath + "/ME_plains_effect_shoulder_left").gameObject.SetActive(false);
+                    Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.shoulderRightPath + "/ME_plains_effect_shoulder_right").gameObject.SetActive(false);
+                    MagicExtended.Instance.prefabs.PlainsMageFootStepsPrefab.SetActive(false);
+                }
             }
-            else
+            catch (Exception error)
             {
-                Jotunn.Logger.LogWarning("Normal mode");
-                Player.m_localPlayer.gameObject.transform.Find("Visual/body").gameObject.SetActive(true);
-                Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/Neck/Head/Helmet_attach").gameObject.SetActive(true);
-                Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/Neck/Head/evil_smoke_face").gameObject.SetActive(false);
+                Jotunn.Logger.LogError("Could not de/activate set effects: "+ error);
             }
         }
 
-        private static void setEvilSmoke(ItemDrop.ItemData item, bool enable)
+        private static void updateItemEffects(ItemDrop.ItemData item, bool enable)
         {
-            if (Player.m_localPlayer && item != null)
+            try
             {
-                GameObject eyeLeft;
-                GameObject eyeRight;
-                GameObject evilSmoke;
-                GameObject evilSmokeLeft;
-                GameObject evilSmokeRight;
-                switch (item.m_shared.m_name)
+                if (Player.m_localPlayer && item != null)
                 {
-                    case "Swamp Hood":
-                        eyeLeft = Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/Neck/Head/eye_left").gameObject;
-                        eyeRight = Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/Neck/Head/eye_right").gameObject;
-                        evilSmoke = Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/Neck/Head/evil_smoke").gameObject;
-                        eyeLeft.SetActive(enable);
-                        eyeRight.SetActive(enable);
-                        evilSmoke.SetActive(enable);
-                        break;
-                    case "Swamp Chest":
-                        evilSmoke = Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/evil_smoke").gameObject;
-                        evilSmokeLeft = Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHand_Attach/evil_smoke_left").gameObject;
-                        evilSmokeRight = Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHand_Attach/evil_smoke_right").gameObject;
-                        evilSmoke.SetActive(enable);
-                        evilSmokeLeft.SetActive(enable);
-                        evilSmokeRight.SetActive(enable);
-                        break;
-                    case "Swamp Legs":
-                        evilSmokeLeft = Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/LeftUpLeg/LeftLeg/evil_smoke_left").gameObject;
-                        evilSmokeRight = Player.m_localPlayer.gameObject.transform.Find("Visual/Armature/Hips/RightUpLeg/RightLeg/evil_smoke_right").gameObject;
-                        evilSmokeLeft.SetActive(enable);
-                        evilSmokeRight.SetActive(enable);
-                        break;
+                    GameObject eyeLeft;
+                    GameObject eyeRight;
+                    switch (item.m_shared.m_name)
+                    {
+                        case "Swamp Hood":
+                            eyeLeft = Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_eye_left").gameObject;
+                            eyeRight = Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_eye_right").gameObject;
+                            eyeLeft.GetComponent<MeshRenderer>().material = MagicExtended.Instance.SwampMageArmor_eye_DW;
+                            eyeRight.GetComponent<MeshRenderer>().material = MagicExtended.Instance.SwampMageArmor_eye_DW;
+                            eyeLeft.SetActive(enable);
+                            eyeRight.SetActive(enable);
+                            Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_swamp_effect_head").gameObject.SetActive(enable);
+                            break;
+                        case "Swamp Chest":
+                            Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.spine1Path + "/ME_swamp_effect_spine1").gameObject.SetActive(enable);
+                            Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.handLeftPath + "/ME_swamp_effect_hand_left").gameObject.SetActive(enable);
+                            Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.handRightPath + "/ME_swamp_effect_hand_right").gameObject.SetActive(enable);
+                            break;
+                        case "Swamp Legs":
+                            Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.kneeLeftPath + "/ME_swamp_effect_knee_left").gameObject.SetActive(enable);
+                            Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.kneeRightPath + "/ME_swamp_effect_knee_right").gameObject.SetActive(enable);
+                            break;
+                        case "Plains Hood":
+                            eyeLeft = Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_eye_left").gameObject;
+                            eyeRight = Player.m_localPlayer.gameObject.transform.Find(MagicExtended.Instance.playerArmature.headPath + "/ME_eye_right").gameObject;
+                            eyeLeft.GetComponent<MeshRenderer>().material = MagicExtended.Instance.PlainsMageArmor_eye_DW;
+                            eyeRight.GetComponent<MeshRenderer>().material = MagicExtended.Instance.PlainsMageArmor_eye_DW;
+                            eyeLeft.SetActive(enable);
+                            eyeRight.SetActive(enable);
+                            break;
+                    }
                 }
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not de/activate item effects: " + error);
             }
         }
 
@@ -196,7 +268,7 @@ namespace MagicExtended.Harmony
             flint.gameObject.SetActive(false);
             bush.gameObject.SetActive(false);
 
-            int index = Random.Range(0, 8);
+            int index = UnityEngine.Random.Range(0, 8);
 
             switch (index)
             {
