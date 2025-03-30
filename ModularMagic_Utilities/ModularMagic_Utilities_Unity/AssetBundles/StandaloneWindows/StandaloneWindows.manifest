@@ -1,0 +1,7 @@
+ManifestFileVersion: 0
+CRC: 2937829461
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: modularmagic_utilities_dw
+      Dependencies: {}

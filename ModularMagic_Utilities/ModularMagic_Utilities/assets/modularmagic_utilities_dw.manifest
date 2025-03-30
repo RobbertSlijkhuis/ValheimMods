@@ -1,0 +1,87 @@
+ManifestFileVersion: 0
+CRC: 349293170
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 01e5a915e3d97c7332bea305c7387cc8
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 7f416024c40a50719a41ed9de9721988
+  IncrementalBuildHash:
+    serializedVersion: 2
+    Hash: 01e5a915e3d97c7332bea305c7387cc8
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 54
+  Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
+- Class: 108
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 489050665, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 137
+  Script: {instanceID: 0}
+- Class: 198
+  Script: {instanceID: 0}
+- Class: 199
+  Script: {instanceID: 0}
+- Class: 205
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+- Class: 330
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers:
+- AssemblyName: assembly_valheim
+  ClassName: Attack
+- AssemblyName: assembly_valheim
+  ClassName: EffectList
+- AssemblyName: assembly_valheim
+  ClassName: HitData/DamageTypes
+- AssemblyName: assembly_valheim
+  ClassName: ItemDrop/ItemData
+- AssemblyName: assembly_valheim
+  ClassName: ItemDrop/ItemData/SharedData
+Assets:
+- Assets/Custom/PrefabInstance/Books/MMU_MasterSpellbook.prefab
+- Assets/Custom/Material/Lanterns/EverWinterLanternMat_MMU.mat
+- Assets/Custom/PrefabInstance/Lantern/MMU_BlackCoreLantern.prefab
+- Assets/Custom/Material/Lanterns/MysticLanternMat_Off_MMU.mat
+- Assets/Custom/PrefabInstance/Lantern/MMU_EverWinterLantern.prefab
+- Assets/Custom/Material/Lanterns/EverWinterLanternMat_Off_MMU.mat
+- Assets/Custom/PrefabInstance/Books/MMU_SimpleSpellbook.prefab
+- Assets/Custom/Material/Lanterns/BlackCoreLanternMat_Off_MMU.mat
+- Assets/Custom/PrefabInstance/Lantern/MMU_MysticLantern.prefab
+- Assets/Custom/PrefabInstance/Books/MMU_AdvancedSpellbook.prefab
+- Assets/Custom/Material/Lanterns/MysticLanternMat_MMU.mat
+- Assets/Custom/Material/Lanterns/BlackCoreLanternMat_MMU.mat
+Dependencies: []
