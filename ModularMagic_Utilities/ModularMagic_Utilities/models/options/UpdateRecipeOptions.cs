@@ -4,9 +4,9 @@ namespace ModularMagic_Utilities.Models
 {
     internal class UpdateRecipeOptions
     {
-        public string? craftingStation = null;
-        public bool? enable = null;
         public string? name = null;
+        public bool? enable = null;
+        public string? craftingStation = null;
         public string? requirements = null;
         public int? requiredStationLevel = null;
         public RecipeUpdateType updateType = RecipeUpdateType.RECIPE;

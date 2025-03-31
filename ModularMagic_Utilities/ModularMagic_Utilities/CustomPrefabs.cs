@@ -5,13 +5,13 @@ namespace ModularMagic_Utilities.Models
     class CustomPrefabs
     {
         // Books
-        public GameObject simpleSpellbookPrefab;
-        public GameObject advancedSpellbookPrefab;
-        public GameObject masterSpellbookPrefab;
+        public GameObject spellbook1Prefab;
+        public GameObject spellbook2Prefab;
+        public GameObject spellbook3Prefab;
 
         // Lanterns
-        public GameObject mysticLanternPrefab;
-        public GameObject everWinterLanternPrefab;
-        public GameObject blackCoreLanternPrefab;
+        public GameObject lantern1Prefab;
+        public GameObject lantern2Prefab;
+        public GameObject lantern3Prefab;
     }
 }

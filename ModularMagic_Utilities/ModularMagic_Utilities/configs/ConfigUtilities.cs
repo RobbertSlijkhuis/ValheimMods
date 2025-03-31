@@ -8,223 +8,206 @@ namespace ModularMagic_Utilities.Configs
     internal static class ConfigUtilities
     {
         // Simple Spellbook
-        public static string sectionSimpleSpellbook = "2. Simple Spellbook";
-        public static string simpleSpellbookRecipeName = "Recipe_MMU_SimpleSpellbook";
-        public static string simpleSpellbookDefaultRecipe = "TrollHide:6, Bronze:4, Resin:8, Coal: 10";
-        public static UtilitiesConfig simpleSpellbook = new UtilitiesConfig();
+        public static string book1Name = "Spellbook of the Hearth";
+        public static string book1Recipe = "TrollHide:6, Bronze:4, Resin:8, Coal:10";
+        public static UtilitiesConfig spellbook1 = new UtilitiesConfig();
 
         // Advanced Spellbook
-        public static string sectionAdvancedSpellbook = "3. Advanced Spellbook";
-        public static string advancedSpellbookRecipeName = "Recipe_MMU_AdvancedSpellbook";
-        public static string advancedSpellbookDefaultRecipe = "MMU_SimpleSpellbook:1, Silver:4, Thunderstone:2, Chitin: 10";
-        public static UtilitiesConfig advancedSpellbook = new UtilitiesConfig();
+        public static string book2Name = "Grimoire of the Storm";
+        public static string book2Recipe = "MMU_SpellbookOfTheHearth:1, Silver:4, Thunderstone:2, Chitin:10";
+        public static UtilitiesConfig spellbook2 = new UtilitiesConfig();
 
         // Master Spellbook
-        public static string sectionMasterSpellbook = "4. Master Spellbook";
-        public static string masterSpellbookRecipeName = "Recipe_MMU_MasterSpellbook";
-        public static string masterSpellbookDefaultRecipe = "MMU_AdvancedSpellbook:1, BlackCore:6, Sap:10, Eitr: 8";
-        public static UtilitiesConfig masterSpellbook = new UtilitiesConfig();
+        public static string book3Name = "Codex of the Asgardian Sorcerer";
+        public static string book3Recipe = "MMU_GrimoireOfTheStorm:1, BlackCore:6, Sap:10, Eitr:8";
+        public static UtilitiesConfig spellbook3 = new UtilitiesConfig();
 
         // Mystic Lantern
-        public static string sectionMysticLantern = "5. Mystic Lantern";
-        public static string mysticLanternRecipeName = "Recipe_MMU_MysticLantern";
-        public static string mysticLanternDefaultRecipe = "RoundLog: 10, Bronze:4, Resin:8, SurtlingCore:2";
-        public static UtilitiesConfig mysticLantern = new UtilitiesConfig();
+        public static string lantern1Name = "Mystical Lantern";
+        public static string lantern1Recipe = "RoundLog: 10, Bronze:4, Resin:8, SurtlingCore:2";
+        public static UtilitiesConfig lantern1 = new UtilitiesConfig();
 
         // Ever Winter Lantern
-        public static string sectionEverWinterLantern = "6. EverWinter Lantern";
-        public static string everWinterLanternRecipeName = "Recipe_MMU_EverWinterLantern";
-        public static string everWinterLanternDefaultRecipe = "MMU_MysticLantern:1, Crystal:10, Silver:6, DragonEgg:1";
-        public static UtilitiesConfig everWinterLantern = new UtilitiesConfig();
+        public static string lantern2Name = "Everwinter Lantern";
+        public static string lantern2Recipe = "MMU_MythicalLantern:1, Silver:6, Crystal:10, DragonEgg:1";
+        public static UtilitiesConfig lantern2 = new UtilitiesConfig();
 
         // Black Core Lantern
-        public static string sectionBlackCoreLantern = "7. Black Core Lantern";
-        public static string blackCoreLanternRecipeName = "Recipe_MMU_BlackCoreLantern";
-        public static string blackCoreLanternDefaultRecipe = "MMU_EverWinterLantern:1, BlackCore:6, BlackMarble:12, Eitr:6";
-        public static UtilitiesConfig blackCoreLantern = new UtilitiesConfig();
+        public static string lantern3Name = "Mistcaller Lantern";
+        public static string lantern3Recipe = "MMU_EverwinterLantern:1, BlackCore:6, BlackMarble:12, Eitr:6";
+        public static UtilitiesConfig lantern3 = new UtilitiesConfig();
 
         // Other
         public static  ConfigEntry<KeyboardShortcut> configUtilityModeKey;
-        public static string sectionGeneral = "1. General";
+        private static int sectionIndex = 1;
 
         public static void Init()
         {
             InitGeneralConfig();
-            InitSimpleSpellbookConfig();
-            InitAdvancedSpellbookConfig();
-            InitMasterSpellbookConfig();
-            InitMysticLanternConfig();
-            InitEverWinterLanternConfig();
-            InitBlackCoreLanternConfig();
+            InitSpellbook1Config();
+            InitSpellbook2Config();
+            InitSpellbook3Config();
+            InitLantern1Config();
+            InitLantern2Config();
+            InitLantern3Config();
         }
 
         private static void InitGeneralConfig()
         {
-            configUtilityModeKey = ModularMagic_Utilities.Instance.Config.Bind(sectionGeneral, "Utility mode key", new KeyboardShortcut(KeyCode.Y),
+            configUtilityModeKey = ModularMagic_Utilities.Instance.Config.Bind($"{sectionIndex}. General", "Utility mode key", new KeyboardShortcut(KeyCode.Y),
                 new ConfigDescription("Key to change the mode on utilities (applies to lanterns)", null));
             configUtilityModeKey.SettingChanged += (obj, attr) =>
             {
                 Jotunn.Logger.LogWarning("key has been changed to: " + configUtilityModeKey.Value);
             };
+            IncrementSectionIndex();
         }
 
-        private static void InitSimpleSpellbookConfig()
+        private static void InitSpellbook1Config()
         {
             try
             {
-                UtilitiesConfigOptions options = new UtilitiesConfigOptions()
+                UtilitiesConfigOptions options = new UtilitiesConfigOptions(ModularMagic_Utilities.Instance.prefabs.spellbook1Prefab, book1Name, book1Recipe, sectionIndex)
                 {
-                    sectionName = sectionSimpleSpellbook,
-                    recipeName = simpleSpellbookRecipeName,
-                    prefab = ModularMagic_Utilities.Instance.prefabs.simpleSpellbookPrefab,
-                    enable = true,
-                    name = "Simple Spellbook",
-                    description = "This book has some crudely written instructions on how to attune one self to the use of magic.",
+                    description = "The first step on the path to wielding the arcane arts. This humble tome contains some crudely written instructions on how to attune one self to the use of magic.",
                     craftingStation = "Workbench",
                     minStationLevel = 3,
-                    recipe = simpleSpellbookDefaultRecipe,
-                    eitr = 25f,
+                    eitr = 20f,
                     eitrRegen = 0.1f,
+                    elementalMagic = 4f,
+                    bloodMagic = 4f,
                 };
-                simpleSpellbook.GenerateConfig(options);
+                spellbook1.GenerateConfig(options);
+                IncrementSectionIndex();
             }
             catch (Exception error)
             {
-                Jotunn.Logger.LogError("Could not initialise " + sectionSimpleSpellbook + " config: " + error);
+                Jotunn.Logger.LogError("Could not initialise " + book1Name + " config: " + error);
             }
         }
 
-        private static void InitAdvancedSpellbookConfig()
+        private static void InitSpellbook2Config()
         {
             try
             {
-                UtilitiesConfigOptions options = new UtilitiesConfigOptions()
+                UtilitiesConfigOptions options = new UtilitiesConfigOptions(ModularMagic_Utilities.Instance.prefabs.spellbook2Prefab, book2Name, book2Recipe, sectionIndex)
                 {
-                    sectionName = sectionAdvancedSpellbook,
-                    recipeName = advancedSpellbookRecipeName,
-                    prefab = ModularMagic_Utilities.Instance.prefabs.advancedSpellbookPrefab, 
-                    enable = true,
-                    name = "Advanced Spellbook",
-                    description = "A book with more advanced spells and how to improve magical items.Pretty neat!",
+                    description = "As you journey further into the realms of magic, this tome reveals more complex spells, drawn from the primal forces of the world. The Grimoire of the Storm holds the secrets of the gods themselves!",
                     craftingStation = "Workbench",
                     minStationLevel = 5,
-                    recipe = advancedSpellbookDefaultRecipe,
-                    eitr = 45f,
-                    eitrRegen = 0.2f,
+                    eitr = 40f,
+                    eitrRegen = 0.15f,
+                    elementalMagic = 7f,
+                    bloodMagic = 7f,
                 };
-                advancedSpellbook.GenerateConfig(options);
+                spellbook2.GenerateConfig(options);
+                IncrementSectionIndex();
             }
             catch (Exception error)
             {
-                Jotunn.Logger.LogError("Could not initialise " + sectionAdvancedSpellbook + " config: " + error);
+                Jotunn.Logger.LogError("Could not initialise " + book2Name + " config: " + error);
             }
         }
 
-        private static void InitMasterSpellbookConfig()
+        private static void InitSpellbook3Config()
         {
             try
             {
-                UtilitiesConfigOptions options = new UtilitiesConfigOptions()
+                UtilitiesConfigOptions options = new UtilitiesConfigOptions(ModularMagic_Utilities.Instance.prefabs.spellbook3Prefab, book3Name, book3Recipe, sectionIndex)
                 {
-                    sectionName = sectionMasterSpellbook,
-                    recipeName = masterSpellbookRecipeName,
-                    prefab = ModularMagic_Utilities.Instance.prefabs.masterSpellbookPrefab,
-                    enable = true,
-                    name = "Master Spellbook",
-                    description = "The one book to rule them all... well not really but it sounded cool right?",
+                    description = "A tome of unimaginable power, said to have been written by the greatest mages of Asgard. The Codex holds the most potent and intricate spells, woven with the threads of fate itself.\r\n",
                     craftingStation = "GaldrTable",
                     minStationLevel = 1,
-                    recipe = masterSpellbookDefaultRecipe,
-                    eitr = 60f,
-                    eitrRegen = 0.25f,
+                    eitr = 50f,
+                    eitrRegen = 0.2f,
+                    elementalMagic = 10f,
+                    bloodMagic = 10f,
                 };
-                masterSpellbook.GenerateConfig(options);
+                spellbook3.GenerateConfig(options);
+                IncrementSectionIndex();
             }
             catch (Exception error)
             {
-                Jotunn.Logger.LogError("Could not initialise " + sectionMasterSpellbook + " config: " + error);
+                Jotunn.Logger.LogError("Could not initialise " + book3Name + " config: " + error);
             }
         }
 
-        private static void InitMysticLanternConfig()
+        private static void InitLantern1Config()
         {
             try
             {
-                UtilitiesConfigOptions options = new UtilitiesConfigOptions()
+                UtilitiesConfigOptions options = new UtilitiesConfigOptions(ModularMagic_Utilities.Instance.prefabs.lantern1Prefab, lantern1Name, lantern1Recipe, sectionIndex)
                 {
-                    sectionName = sectionMysticLantern,
-                    recipeName = mysticLanternRecipeName,
-                    prefab = ModularMagic_Utilities.Instance.prefabs.mysticLanternPrefab,
-                    enable = true,
-                    name = "Mystic Lantern",
-                    description = "A latern to light you way on your travels",
+                    description = "Carved with ancient runes, this lantern channels the power of the gods themselves. Its light flickers with a divine glow, illuminating the paths of those who seek wisdom and courage in the realms.",
                     craftingStation = "Forge",
                     minStationLevel = 1,
-                    recipe = mysticLanternDefaultRecipe,
                     eitr = 15f,
                     eitrRegen = 0.15f,
+                    elementalMagic = 3f,
+                    bloodMagic = 3f,
                     demister = 0f,
+
                 };
-                mysticLantern.GenerateConfig(options);
+                lantern1.GenerateConfig(options);
+                IncrementSectionIndex();
             }
             catch (Exception error)
             {
-                Jotunn.Logger.LogError("Could not initialise " + sectionMysticLantern + " config: " + error);
+                Jotunn.Logger.LogError("Could not initialise " + lantern1Name + " config: " + error);
             }
         }
 
-        private static void InitEverWinterLanternConfig()
+        private static void InitLantern2Config()
         {
             try
             {
-                UtilitiesConfigOptions options = new UtilitiesConfigOptions()
+                UtilitiesConfigOptions options = new UtilitiesConfigOptions(ModularMagic_Utilities.Instance.prefabs.lantern2Prefab, lantern2Name, lantern2Recipe, sectionIndex)
                 {
-                    sectionName = sectionEverWinterLantern,
-                    recipeName = everWinterLanternRecipeName,
-                    prefab = ModularMagic_Utilities.Instance.prefabs.everWinterLanternPrefab,
-                    enable = true,
-                    name = "Ever Winter Lantern",
-                    description = "A lantern to keep you warm in the extreme cold",
+                    description = "This lantern’s light glows like the pale blue of the northern ice. Said to be crafted by the dwarves who once guarded the icy mountains.",
                     craftingStation = "Forge",
                     minStationLevel = 5,
-                    recipe = everWinterLanternDefaultRecipe,
-                    eitr = 37f,
-                    eitrRegen = 0.25f,
+                    eitr = 35f,
+                    eitrRegen = 0.2f,
+                    elementalMagic = 6f,
+                    bloodMagic = 6f,
                     demister = 0f,
                 };
-                everWinterLantern.GenerateConfig(options);
+                lantern2.GenerateConfig(options);
+                IncrementSectionIndex();
             }
             catch (Exception error)
             {
-                Jotunn.Logger.LogError("Could not initialise " + sectionEverWinterLantern + " config: " + error);
+                Jotunn.Logger.LogError("Could not initialise " + lantern2Name + " config: " + error);
             }
         }
 
-        private static void InitBlackCoreLanternConfig()
+        private static void InitLantern3Config()
         {
             try
             {
-                UtilitiesConfigOptions options = new UtilitiesConfigOptions()
+                UtilitiesConfigOptions options = new UtilitiesConfigOptions(ModularMagic_Utilities.Instance.prefabs.lantern3Prefab, lantern3Name, lantern3Recipe, sectionIndex)
                 {
-                    sectionName = sectionBlackCoreLantern,
-                    recipeName = blackCoreLanternRecipeName,
-                    prefab = ModularMagic_Utilities.Instance.prefabs.blackCoreLanternPrefab,
-                    enable = true,
-                    name = "Black Core Lantern",
-                    description = "A darknesss eminates from inside, who ever made this dabbled in dark magics",
+                    description = "A lantern woven from the essence of the mists that shroud the edges of Valheim. The soft glow is calming, though its true power lies in its ability to guide those lost in the fog.",
                     craftingStation = "BlackForge",
                     minStationLevel = 1,
-                    recipe = blackCoreLanternDefaultRecipe,
-                    eitr = 50f,
-                    eitrRegen = 0.30f,
+                    eitr = 45f,
+                    eitrRegen = 0.25f,
+                    elementalMagic = 8f,
+                    bloodMagic = 8f,
                     demister = 6f,
                 };
-                blackCoreLantern.GenerateConfig(options);
+                lantern3.GenerateConfig(options);
+                IncrementSectionIndex();
             }
             catch (Exception error)
             {
-                Jotunn.Logger.LogError("Could not initialise " + sectionBlackCoreLantern + " config: " + error);
+                Jotunn.Logger.LogError("Could not initialise " + lantern3Name + " config: " + error);
             }
+        }
+
+        private static void IncrementSectionIndex()
+        {
+            sectionIndex = sectionIndex + 1;
         }
     }
 }

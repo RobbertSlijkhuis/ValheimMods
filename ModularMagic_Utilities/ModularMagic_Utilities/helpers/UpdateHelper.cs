@@ -20,10 +20,10 @@ namespace ModularMagic_Utilities.helpers
             GameObject demisterObj = Player.m_localPlayer.transform.Find("Visual/attach_skin(Clone)/equiped/MMU_Lantern Demister").gameObject;
             GameObject lanternObj = Player.m_localPlayer.transform.Find("Visual/attach_skin(Clone)/Lantern").gameObject;
 
-            Jotunn.Logger.LogWarning($"{lightObj.name}");
-            Jotunn.Logger.LogWarning($"{flareObj.name}");
-            Jotunn.Logger.LogWarning($"{demisterObj.name}");
-            Jotunn.Logger.LogWarning($"Active: {lightObj.activeSelf}");
+            //Jotunn.Logger.LogWarning($"{lightObj.name}");
+            //Jotunn.Logger.LogWarning($"{flareObj.name}");
+            //Jotunn.Logger.LogWarning($"{demisterObj.name}");
+            //Jotunn.Logger.LogWarning($"Active: {lightObj.activeSelf}");
 
             if (lightObj.activeSelf)
             {

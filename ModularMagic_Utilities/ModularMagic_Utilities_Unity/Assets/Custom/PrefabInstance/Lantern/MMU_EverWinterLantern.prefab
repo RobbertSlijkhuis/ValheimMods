@@ -124,7 +124,7 @@ GameObject:
   - component: {fileID: 198388539650339373}
   - component: {fileID: 205533094715385349}
   m_Layer: 12
-  m_Name: MMU_EverWinterLantern
+  m_Name: MMU_EverwinterLantern
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -229,7 +229,7 @@ MonoBehaviour:
     m_worldLevel: 0
     m_pickedUp: 0
     m_shared:
-      m_name: Ever Winter Lantern
+      m_name: Everwinter Lantern
       m_dlc: 
       m_itemType: 18
       m_icons:
@@ -554,7 +554,7 @@ MonoBehaviour:
           m_effectPrefabs: []
         m_burstEffect:
           m_effectPrefabs: []
-      m_useDurability: 1
+      m_useDurability: 0
       m_destroyBroken: 1
       m_canBeReparied: 1
       m_maxDurability: 100
@@ -5255,7 +5255,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 16b7aa47791101844879002c8637d731, type: 2}
+  - {fileID: 2100000, guid: f7fe794f7fa6f5943a1f83c345532267, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -7839,7 +7839,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 16b7aa47791101844879002c8637d731, type: 2}
+  - {fileID: 2100000, guid: f7fe794f7fa6f5943a1f83c345532267, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

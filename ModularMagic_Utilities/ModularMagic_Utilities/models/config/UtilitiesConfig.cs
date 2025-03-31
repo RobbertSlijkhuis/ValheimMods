@@ -1,5 +1,4 @@
 ﻿using BepInEx.Configuration;
-using ModularMagic_Utilities.Configs;
 using ModularMagic_Utilities.helpers;
 using ModularMagic_Utilities.Helpers;
 using ModularMagic_Utilities.StatusEffects;
@@ -21,11 +20,19 @@ namespace ModularMagic_Utilities.Models
         public ConfigEntry<string> recipe;
         public ConfigEntry<float> eitr;
         public ConfigEntry<float> eitrRegen;
+        public ConfigEntry<float> elementalMagic;
+        public ConfigEntry<float> bloodMagic;
         public ConfigEntry <int> demister;
+
+        // Other
+        public string cooldownStatusEffectName;
+        public string magicStatusEffectName;
 
         public void GenerateConfig(UtilitiesConfigOptions options)
         {
             ConfigFile Config = ModularMagic_Utilities.Instance.Config;
+            cooldownStatusEffectName = options.cooldownStatusEffectName;
+            magicStatusEffectName = options.magicStatusEffectName;
 
             this.enable = Config.Bind(new ConfigDefinition(options.sectionName, "Enable"), (bool)options.enable,
                new ConfigDescription("Enable " + this.name, null,
@@ -111,7 +118,7 @@ namespace ModularMagic_Utilities.Models
                 if (this.eitr.Value < 0f) return;
 
                 ItemDrop spellBookDrop = options.prefab.GetComponent<ItemDrop>();
-                StatusEffectWithEitr statusEffect = (StatusEffectWithEitr)spellBookDrop.m_itemData.m_shared.m_equipStatusEffect;
+                MagicStatusEffect statusEffect = (MagicStatusEffect)spellBookDrop.m_itemData.m_shared.m_equipStatusEffect;
                 statusEffect.SetEitr(this.eitr.Value);
             };
 
@@ -127,6 +134,22 @@ namespace ModularMagic_Utilities.Models
                 });
 
                 UpdateHelper.updateEitrRegenOnPlayer(options.name, this.eitrRegen.Value);
+            };
+
+            this.elementalMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Elemental magic"), (float)options.elementalMagic,
+                new ConfigDescription("The amount of Elemental magic the item has", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+            this.elementalMagic.SettingChanged += (obj, attr) =>
+            {
+                Jotunn.Logger.LogWarning("ElementalMagic: " + this.elementalMagic.Value);
+            };
+
+            this.bloodMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Blood magic"), (float)options.bloodMagic,
+                new ConfigDescription("The amount of Blood magic the item has", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true }));
+            this.bloodMagic.SettingChanged += (obj, attr) =>
+            {
+                Jotunn.Logger.LogWarning("BloodMagic: " + this.bloodMagic.Value);
             };
 
             if (options.demister != null)

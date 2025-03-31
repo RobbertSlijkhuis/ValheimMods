@@ -61,7 +61,7 @@ namespace MagicExtended
             PrefabManager.OnVanillaPrefabsAvailable += AddFireStaffs;
             PrefabManager.OnVanillaPrefabsAvailable += AddFrostStaffs;
             PrefabManager.OnVanillaPrefabsAvailable += AddLightningStaffs;
-            PrefabManager.OnVanillaPrefabsAvailable += AddSpellbooks;
+            //PrefabManager.OnVanillaPrefabsAvailable += AddSpellbooks;
             PrefabManager.OnVanillaPrefabsAvailable += AddArmor;
             PrefabManager.OnVanillaPrefabsAvailable += AddFenringArmor;
             ZoneManager.OnVanillaVegetationAvailable += AddLocations;
@@ -804,9 +804,7 @@ namespace MagicExtended
             //GameObject fxFootStepGrassRun = PrefabManager.Instance.GetPrefab("fx_footstep_run");
             //prefabs.PlainsMageFootStepsPrefab.transform.parent = fxFootStepGrassRun.transform;
 
-            // TODO: init somewhere else
-            shamanConfig.Name = "Mystic Lantern";
-            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("Lantern_DW"), true, shamanConfig));
+
 
             // Prepare materials for Embla set
             Material ashlandsMageArmorMat = magicExtendedBundle.LoadAsset<Material>("AshlandsMageArmor_red_DW");
