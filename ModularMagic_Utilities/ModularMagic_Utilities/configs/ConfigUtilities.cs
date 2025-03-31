@@ -7,32 +7,26 @@ namespace ModularMagic_Utilities.Configs
 {
     internal static class ConfigUtilities
     {
-        // Simple Spellbook
         public static string book1Name = "Spellbook of the Hearth";
         public static string book1Recipe = "TrollHide:6, Bronze:4, Resin:8, Coal:10";
         public static UtilitiesConfig spellbook1 = new UtilitiesConfig();
 
-        // Advanced Spellbook
         public static string book2Name = "Grimoire of the Storm";
         public static string book2Recipe = "MMU_SpellbookOfTheHearth:1, Silver:4, Thunderstone:2, Chitin:10";
         public static UtilitiesConfig spellbook2 = new UtilitiesConfig();
 
-        // Master Spellbook
         public static string book3Name = "Codex of the Asgardian Sorcerer";
         public static string book3Recipe = "MMU_GrimoireOfTheStorm:1, BlackCore:6, Sap:10, Eitr:8";
         public static UtilitiesConfig spellbook3 = new UtilitiesConfig();
 
-        // Mystic Lantern
         public static string lantern1Name = "Mystical Lantern";
         public static string lantern1Recipe = "RoundLog: 10, Bronze:4, Resin:8, SurtlingCore:2";
         public static UtilitiesConfig lantern1 = new UtilitiesConfig();
 
-        // Ever Winter Lantern
         public static string lantern2Name = "Everwinter Lantern";
         public static string lantern2Recipe = "MMU_MythicalLantern:1, Silver:6, Crystal:10, DragonEgg:1";
         public static UtilitiesConfig lantern2 = new UtilitiesConfig();
 
-        // Black Core Lantern
         public static string lantern3Name = "Mistcaller Lantern";
         public static string lantern3Recipe = "MMU_EverwinterLantern:1, BlackCore:6, BlackMarble:12, Eitr:6";
         public static UtilitiesConfig lantern3 = new UtilitiesConfig();

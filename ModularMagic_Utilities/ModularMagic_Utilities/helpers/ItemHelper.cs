@@ -6,11 +6,11 @@ using ModularMagic_Utilities.Models;
 using ModularMagic_Utilities.StatusEffects;
 using UnityEngine;
 
-namespace ModularMagic_Utilities.helpers
+namespace ModularMagic_Utilities.Helpers
 {
     internal class ItemHelper
     {
-        public static void create(GameObject prefab, UtilitiesConfig config, bool hasDemister = false)
+        public static void Create(GameObject prefab, UtilitiesConfig config, bool hasDemister = false)
         {
             ItemConfig itemConfig = new ItemConfig();
             itemConfig.Name = config.name.Value;
@@ -33,7 +33,7 @@ namespace ModularMagic_Utilities.helpers
 
             simpleDrop.m_itemData.m_shared.m_equipStatusEffect = simpleStatusEffect;
 
-            ConfigHelper.UpdateItemDropStats(prefab, new UpdateItemDropStatsOptions()
+            UpdateHelper.UpdateItemDropStats(prefab, new UpdateItemDropStatsOptions()
             {
                 description = config.description.Value,
                 eitrRegen = config.eitrRegen.Value,

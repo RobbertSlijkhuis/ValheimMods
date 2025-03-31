@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1920
     height: 997
   m_ShowMode: 4
-  m_Title: Scene
+  m_Title: Inspector
   m_RootView: {fileID: 6}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -48,7 +48,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 108
+  controlID: 99
   draggingID: 0
 --- !u!114 &3
 MonoBehaviour:
@@ -361,7 +361,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Custom/Material/Lanterns
+    - Assets/Custom/MonoBehaviour
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -369,16 +369,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 16
   m_LastFolders:
-  - Assets/Custom/Material/Lanterns
+  - Assets/Custom/MonoBehaviour
   m_LastFoldersGridSize: 16
   m_LastProjectPath: C:\Source-Robbert\Valheim modding\ModularMagic_Utilities\ModularMagic_Utilities_Unity
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 17}
-    m_SelectedIDs: 10560000
-    m_LastClickedID: 22032
-    m_ExpandedIDs: 0000000092550000dc550000e4550000e6550000ea550000
+    scrollPos: {x: 0, y: 0}
+    m_SelectedIDs: 26b20000
+    m_LastClickedID: 45606
+    m_ExpandedIDs: 000000009a550000e4550000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -406,7 +406,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 0000000092550000
+    m_ExpandedIDs: 000000009a550000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -433,7 +433,7 @@ MonoBehaviour:
   m_ListAreaState:
     m_SelectedInstanceIDs: 
     m_LastClickedInstanceID: 0
-    m_HadKeyboardFocusLastEvent: 1
+    m_HadKeyboardFocusLastEvent: 0
     m_ExpandedInstanceIDs: c6230000948a0000b8650000b06500006296000004ad00002a560100f0a8000044cc000080bf000036090100a071000094a701008473000070620000067c00007eb40000f8ba0000a02e01005c78000010b400007e0a0100947b0000ea9300000a9c01007e9d01001cca0100949f0000f8ea0000f01d00001e7200001a7200002e720000906900009cbc0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
@@ -548,23 +548,23 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: ba600000
-      m_LastClickedID: 24762
-      m_ExpandedIDs: c0e3ffff6460000066600000ba60000036610000566100006e610000
+      m_SelectedIDs: 2ab20000
+      m_LastClickedID: 0
+      m_ExpandedIDs: e8e8feffbeb00000c0b0000014b100008eb10000acb10000c6b10000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
-        m_Name: 
-        m_OriginalName: 
+        m_Name: MMU_Lantern flare
+        m_OriginalName: MMU_Lantern flare
         m_EditFieldRect:
           serializedVersion: 2
           x: 0
           y: 0
           width: 0
           height: 0
-        m_UserData: 0
+        m_UserData: 40988
         m_IsWaitingForDelay: 0
         m_IsRenaming: 0
-        m_OriginalEventType: 11
+        m_OriginalEventType: 0
         m_IsRenamingFilename: 0
         m_ClientGUIView: {fileID: 4}
       m_SearchString: 
@@ -918,9 +918,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: -1.2872219, y: -0.7864014, z: 2.1493697}
+    m_Target: {x: 0, y: 0, z: 0}
     speed: 2
-    m_Value: {x: -1.2872219, y: -0.7864014, z: 2.1493697}
+    m_Value: {x: 0.23900001, y: 1.0680008, z: -0.0200001}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -966,13 +966,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: 0.38130698, y: -0.04988641, z: 0.020614523, w: 0.92287904}
+    m_Target: {x: -0.08717229, y: 0.89959055, z: -0.21045254, w: -0.3726226}
     speed: 2
-    m_Value: {x: 0.37490353, y: -0.008345877, z: 0.0033781065, w: 0.92702013}
+    m_Value: {x: 0.0013289262, y: -0.9978575, z: 0.061754826, w: 0.021565322}
   m_Size:
-    m_Target: 1.5706685
+    m_Target: 1.3302451
     speed: 2
-    m_Value: 1.503032
+    m_Value: 10
   m_Ortho:
     m_Target: 0
     speed: 2

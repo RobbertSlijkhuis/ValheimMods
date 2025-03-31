@@ -3,7 +3,7 @@ using Jotunn.Configs;
 using Jotunn.Managers;
 using Jotunn.Utils;
 using ModularMagic_Utilities.Configs;
-using ModularMagic_Utilities.helpers;
+using ModularMagic_Utilities.Helpers;
 using ModularMagic_Utilities.Models;
 using System;
 using System.Reflection;
@@ -78,15 +78,15 @@ namespace ModularMagic_Utilities
 
                             if (itemData.m_shared.m_name == ConfigUtilities.lantern1.name.Value)
                             {
-                                UpdateHelper.updateLanternMode(ModularMagic_Utilities.Instance.materials.lantern1Mat, ModularMagic_Utilities.Instance.materials.lantern1OffMat);
+                                UpdateHelper.UpdateLanternMode(ModularMagic_Utilities.Instance.materials.lantern1Mat, ModularMagic_Utilities.Instance.materials.lantern1OffMat);
                             }
                             else if (itemData.m_shared.m_name == ConfigUtilities.lantern2.name.Value)
                             {
-                                UpdateHelper.updateLanternMode(ModularMagic_Utilities.Instance.materials.lantern2Mat, ModularMagic_Utilities.Instance.materials.lantern2OffMat);
+                                UpdateHelper.UpdateLanternMode(ModularMagic_Utilities.Instance.materials.lantern2Mat, ModularMagic_Utilities.Instance.materials.lantern2OffMat);
                             }
                             else if (itemData.m_shared.m_name == ConfigUtilities.lantern3.name.Value)
                             {
-                               UpdateHelper.updateLanternMode(ModularMagic_Utilities.Instance.materials.lantern3Mat, ModularMagic_Utilities.Instance.materials.lantern3OffMat);
+                               UpdateHelper.UpdateLanternMode(ModularMagic_Utilities.Instance.materials.lantern3Mat, ModularMagic_Utilities.Instance.materials.lantern3OffMat);
                             }
                         }
                     }
@@ -98,12 +98,12 @@ namespace ModularMagic_Utilities
         {
             try
             {
-                ItemHelper.create(prefabs.spellbook1Prefab, ConfigUtilities.spellbook1);
-                ItemHelper.create(prefabs.spellbook2Prefab, ConfigUtilities.spellbook2);
-                ItemHelper.create(prefabs.spellbook3Prefab, ConfigUtilities.spellbook3);
-                ItemHelper.create(prefabs.lantern1Prefab, ConfigUtilities.lantern1, true);
-                ItemHelper.create(prefabs.lantern2Prefab, ConfigUtilities.lantern2, true);
-                ItemHelper.create(prefabs.lantern3Prefab, ConfigUtilities.lantern3, true);
+                ItemHelper.Create(prefabs.spellbook1Prefab, ConfigUtilities.spellbook1);
+                ItemHelper.Create(prefabs.spellbook2Prefab, ConfigUtilities.spellbook2);
+                ItemHelper.Create(prefabs.spellbook3Prefab, ConfigUtilities.spellbook3);
+                ItemHelper.Create(prefabs.lantern1Prefab, ConfigUtilities.lantern1, true);
+                ItemHelper.Create(prefabs.lantern2Prefab, ConfigUtilities.lantern2, true);
+                ItemHelper.Create(prefabs.lantern3Prefab, ConfigUtilities.lantern3, true);
 
                 PrefabManager.OnVanillaPrefabsAvailable -= AddUtilities;
             }

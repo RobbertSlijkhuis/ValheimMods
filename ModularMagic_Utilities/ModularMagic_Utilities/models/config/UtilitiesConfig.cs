@@ -1,8 +1,6 @@
 ﻿using BepInEx.Configuration;
-using ModularMagic_Utilities.helpers;
 using ModularMagic_Utilities.Helpers;
 using ModularMagic_Utilities.StatusEffects;
-using UnityEngine;
 
 namespace ModularMagic_Utilities.Models
 {
@@ -52,7 +50,7 @@ namespace ModularMagic_Utilities.Models
               new ConfigurationManagerAttributes { IsAdminOnly = true }));
             this.name.SettingChanged += (obj, attr) =>
             {
-                ConfigHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
+                UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
                 {
                     name = this.name.Value,
                 });
@@ -63,7 +61,7 @@ namespace ModularMagic_Utilities.Models
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             this.description.SettingChanged += (obj, attr) =>
             {
-                ConfigHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
+                UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
                 {
                     description = this.description.Value,
                 });
@@ -128,12 +126,12 @@ namespace ModularMagic_Utilities.Models
             this.eitrRegen.SettingChanged += (obj, attr) =>
             {
                 Jotunn.Logger.LogWarning("eitreRegen: " + this.eitrRegen.Value);
-                ConfigHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
+                UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
                 {
                     eitrRegen = this.eitrRegen.Value,
                 });
 
-                UpdateHelper.updateEitrRegenOnPlayer(options.name, this.eitrRegen.Value);
+                UpdateHelper.UpdateEitrRegenOnPlayer(options.name, this.eitrRegen.Value);
             };
 
             this.elementalMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Elemental magic"), (float)options.elementalMagic,
@@ -168,7 +166,7 @@ namespace ModularMagic_Utilities.Models
                 this.demister.SettingChanged += (obj, attr) =>
                 {
                     Jotunn.Logger.LogWarning("demister: " + this.demister.Value);
-                    UpdateHelper.updateDemisterOnBoth(options.prefab, this.demister.Value);
+                    UpdateHelper.UpdateDemisterOnBoth(options.prefab, this.demister.Value);
                 };
             }
         }
