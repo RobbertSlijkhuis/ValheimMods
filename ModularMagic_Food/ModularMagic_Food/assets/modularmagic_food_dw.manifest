@@ -1,0 +1,111 @@
+ManifestFileVersion: 0
+CRC: 250225231
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 7f2cea5acad3c9e0b27fde7c1068ad47
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: f9604785e8759b74d4bfb94e6ef22167
+  IncrementalBuildHash:
+    serializedVersion: 2
+    Hash: 7f2cea5acad3c9e0b27fde7c1068ad47
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 54
+  Script: {instanceID: 0}
+- Class: 64
+  Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
+- Class: 82
+  Script: {instanceID: 0}
+- Class: 83
+  Script: {instanceID: 0}
+- Class: 108
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 2106984268, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 2094620348, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 895252998, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 313648218, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 135
+  Script: {instanceID: 0}
+- Class: 198
+  Script: {instanceID: 0}
+- Class: 199
+  Script: {instanceID: 0}
+- Class: 205
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+- Class: 241
+  Script: {instanceID: 0}
+- Class: 243
+  Script: {instanceID: 0}
+- Class: 245
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers:
+- AssemblyName: assembly_valheim
+  ClassName: Attack
+- AssemblyName: assembly_valheim
+  ClassName: DropTable
+- AssemblyName: assembly_valheim
+  ClassName: EffectList
+- AssemblyName: assembly_valheim
+  ClassName: EffectList/EffectData
+- AssemblyName: assembly_valheim
+  ClassName: HitData/DamageModifiers
+- AssemblyName: assembly_valheim
+  ClassName: HitData/DamageTypes
+- AssemblyName: assembly_valheim
+  ClassName: ItemDrop/ItemData
+- AssemblyName: assembly_valheim
+  ClassName: ItemDrop/ItemData/SharedData
+Assets:
+- Assets/Custom/PrefabInstance/Food/Cooked/MMF_GribSnowMushroomSoup.prefab
+- Assets/Custom/PrefabInstance/Food/Cooked/MMF_PircedMushroomSoup.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_Pickable_PircedMushroom.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_GribSnow.prefab
+- Assets/Custom/PrefabInstance/Food/Cooked/MMF_MagicalMushroomSoup.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_Pickable_GribSnow.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_MagicalMushroom.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_CookedMagicalMushroom.prefab
+- Assets/Custom/PrefabInstance/Food/Cooked/MMF_BogMushroomSoup.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_Pickable_BogMushroom.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_Pickable_VioletCloudMushroom.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_VioletCloudMushroom.prefab
+- Assets/Custom/PrefabInstance/Food/Cooked/MMF_VioletCloudMushroomSoup.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_PircedMushroom.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_Pickable_MagicalMushroom.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_BogMushroom.prefab
+Dependencies: []
