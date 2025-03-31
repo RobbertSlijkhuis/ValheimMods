@@ -56,15 +56,15 @@ namespace MagicExtended
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             PrefabManager.OnVanillaPrefabsAvailable += AddMaterials;
-            PrefabManager.OnVanillaPrefabsAvailable += AddFood;
+            // PrefabManager.OnVanillaPrefabsAvailable += AddFood;
             PrefabManager.OnVanillaPrefabsAvailable += AddEarthStaffs;
             PrefabManager.OnVanillaPrefabsAvailable += AddFireStaffs;
             PrefabManager.OnVanillaPrefabsAvailable += AddFrostStaffs;
             PrefabManager.OnVanillaPrefabsAvailable += AddLightningStaffs;
-            //PrefabManager.OnVanillaPrefabsAvailable += AddSpellbooks;
+            // PrefabManager.OnVanillaPrefabsAvailable += AddSpellbooks;
             PrefabManager.OnVanillaPrefabsAvailable += AddArmor;
-            PrefabManager.OnVanillaPrefabsAvailable += AddFenringArmor;
-            ZoneManager.OnVanillaVegetationAvailable += AddLocations;
+            // PrefabManager.OnVanillaPrefabsAvailable += AddFenringArmor;
+            // ZoneManager.OnVanillaVegetationAvailable += AddLocations;
 
             //ZoneManager.OnVegetationRegistered += CheckLocations;
             //ItemManager.OnItemsRegistered += LogRecipes;
