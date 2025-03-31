@@ -117,8 +117,8 @@ namespace ModularMagic_Utilities.Models
             {
                 if (this.eitr.Value < 0f) return;
 
-                ItemDrop spellBookDrop = options.prefab.GetComponent<ItemDrop>();
-                MagicStatusEffect statusEffect = (MagicStatusEffect)spellBookDrop.m_itemData.m_shared.m_equipStatusEffect;
+                ItemDrop itemDrop = options.prefab.GetComponent<ItemDrop>();
+                MagicStatusEffect statusEffect = (MagicStatusEffect)itemDrop.m_itemData.m_shared.m_equipStatusEffect;
                 statusEffect.SetEitr(this.eitr.Value);
             };
 
@@ -141,7 +141,11 @@ namespace ModularMagic_Utilities.Models
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             this.elementalMagic.SettingChanged += (obj, attr) =>
             {
-                Jotunn.Logger.LogWarning("ElementalMagic: " + this.elementalMagic.Value);
+                if (this.elementalMagic.Value < 0f) return;
+
+                ItemDrop itemDrop = options.prefab.GetComponent<ItemDrop>();
+                MagicStatusEffect statusEffect = (MagicStatusEffect)itemDrop.m_itemData.m_shared.m_equipStatusEffect;
+                statusEffect.SetElementalMagic(this.elementalMagic.Value);
             };
 
             this.bloodMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Blood magic"), (float)options.bloodMagic,
@@ -149,7 +153,11 @@ namespace ModularMagic_Utilities.Models
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             this.bloodMagic.SettingChanged += (obj, attr) =>
             {
-                Jotunn.Logger.LogWarning("BloodMagic: " + this.bloodMagic.Value);
+                if (this.bloodMagic.Value < 0f) return;
+
+                ItemDrop itemDrop = options.prefab.GetComponent<ItemDrop>();
+                MagicStatusEffect statusEffect = (MagicStatusEffect)itemDrop.m_itemData.m_shared.m_equipStatusEffect;
+                statusEffect.SetBloodMagic(this.bloodMagic.Value);
             };
 
             if (options.demister != null)
