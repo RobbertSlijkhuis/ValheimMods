@@ -22,7 +22,6 @@ namespace ModularMagic_Food
         public const string PluginName = "ModularMagic_Food";
         public const string PluginVersion = "0.0.1";
         public static ModularMagic_Food Instance;
-        private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
 
         private AssetBundle assetBundle;
         public CustomPrefabs prefabs = new CustomPrefabs();
@@ -36,7 +35,6 @@ namespace ModularMagic_Food
             Instance = this;
             InitAssetBundle();
             ConfigFood.Init();
-            harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             PrefabManager.OnVanillaPrefabsAvailable += AddFood;
             ZoneManager.OnVanillaVegetationAvailable += AddLocations;
