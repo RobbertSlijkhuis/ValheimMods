@@ -40,7 +40,7 @@ namespace ModularMagic_EarthStaffs
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             PrefabManager.OnVanillaPrefabsAvailable += AddEarthStaffs;
-            Jotunn.Logger.LogInfo("ModularMagic_Food has been initialised");
+            Jotunn.Logger.LogInfo("ModularMagic_EarthStaffs has been initialised");
             ItemManager.OnItemsRegistered += LogRecipes;
         }
 
@@ -48,7 +48,7 @@ namespace ModularMagic_EarthStaffs
         {
             ObjectDB.instance.m_recipes.ForEach(r =>
             {
-                if (r.name.Contains("_DW"))
+                if (r.name.Contains("MMES"))
                     Jotunn.Logger.LogInfo(r.name);
             });
 

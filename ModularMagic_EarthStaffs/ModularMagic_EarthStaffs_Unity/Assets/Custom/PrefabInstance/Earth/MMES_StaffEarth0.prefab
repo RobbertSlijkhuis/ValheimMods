@@ -258,7 +258,7 @@ MonoBehaviour:
         m_reloadEitrDrain: 0
         m_bowDraw: 0
         m_drawDurationMin: 0
-        m_drawStaminaDrain: 8900
+        m_drawStaminaDrain: 0
         m_drawEitrDrain: 0
         m_drawAnimationState: 
         m_drawVelocityCurve:

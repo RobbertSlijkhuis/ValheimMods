@@ -16,12 +16,12 @@ namespace ModularMagic_EarthStaffs.Configs
         public static StaffConfig staffEarth1 = new StaffConfig();
 
         public static string staff2Name = "Staff of Boulders";
-        public static string staff2Recipe = "StaffEarth1_DW:1, FineWood:20, Root:10, Crystal:20";
+        public static string staff2Recipe = $"{ModularMagic_EarthStaffs.Instance.prefabs.staffEarth1Prefab.name}:1, FineWood:20, Root:10, Crystal:20";
         public static string staff2UpgradeRecipe = "FineWood:10, Root:4, Crystal:8";
         public static StaffConfig staffEarth2 = new StaffConfig();
 
         public static string staff3Name = "Staff of Earth";
-        public static string staff3Recipe = "StaffEarth2_DW:1, YggdrasilWood:20, Sap:10, Eitr:16";
+        public static string staff3Recipe = $"{ModularMagic_EarthStaffs.Instance.prefabs.staffEarth2Prefab.name}:1, YggdrasilWood:20, Sap:10, Eitr:16";
         public static string staff3UpgradeRecipe = "YggdrasilWood:10, Sap:4, Eitr:8";
         // public static string staff3CooldownStatusEffectName = "StaffEarth3Cooldown_DW";
         public static StaffConfig staffEarth3 = new StaffConfig();
@@ -107,8 +107,7 @@ namespace ModularMagic_EarthStaffs.Configs
                     blockArmor = 48,
                     deflectionForce = 20,
                     attackForce = 35,
-                    useEitr = 5,
-                    useEitrSecondary = 100,
+                    useEitr = 7,
                 };
                 staffEarth2.GenerateConfig(options);
             }
@@ -135,9 +134,7 @@ namespace ModularMagic_EarthStaffs.Configs
                     blockArmor = 48,
                     deflectionForce = 20,
                     attackForce = 35,
-                    useEitr = 5,
-                    useEitrSecondary = 100,
-                    secondaryCooldown = 20f,
+                    useEitr = 10,
                 };
                 staffEarth3.GenerateConfig(options);
             }
