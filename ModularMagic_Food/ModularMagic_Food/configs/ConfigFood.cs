@@ -28,23 +28,23 @@ namespace ModularMagic_Food.Configs
         public static string mushroom5Recipe = "MMF_VioletCloudMushroom:2";
         public static FoodConfig mushroom5 = new FoodConfig();
 
-        public static string mushroom1SoupName = "Magical Mushroom soup";
+        public static string mushroom1SoupName = "Magical Mushroom Soup";
         public static string mushroom1SoupRecipe = "MMF_MagicalMushroom:2";
         public static FoodConfig mushroom1Soup = new FoodConfig();
 
-        public static string mushroom2SoupName = "GribSnow soup";
+        public static string mushroom2SoupName = "GribSnow Soup";
         public static string mushroom2SoupRecipe = "MMF_GribSnow:2";
         public static FoodConfig mushroom2Soup = new FoodConfig();
 
-        public static string mushroom3SoupName = "Bog Mushroom soup";
+        public static string mushroom3SoupName = "Bog Mushroom Soup";
         public static string mushroom3SoupRecipe = "MMF_BogMushroom:2";
         public static FoodConfig mushroom3Soup = new FoodConfig();
 
-        public static string mushroom4SoupName = "Pirced Mushroom soup";
+        public static string mushroom4SoupName = "Pirced Mushroom Soup";
         public static string mushroom4SoupRecipe = "MMF_PircedMushroom:2";
         public static FoodConfig mushroom4Soup = new FoodConfig();
 
-        public static string mushroom5SoupName = "Violet Cloud Mushroom soup";
+        public static string mushroom5SoupName = "Violet Cloud Mushroom Soup";
         public static string mushroom5SoupRecipe = "MMF_VioletCloudMushroom:2";
         public static FoodConfig mushroom5Soup = new FoodConfig();
 
