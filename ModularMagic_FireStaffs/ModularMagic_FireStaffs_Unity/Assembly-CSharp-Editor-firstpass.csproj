@@ -411,140 +411,140 @@
       <HintPath>C:\Program Files\Unity\Hub\Editor\2022.3.50f1\Editor\Data\PlaybackEngines\WindowsStandaloneSupport\UnityEditor.WindowsStandalone.Extensions.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="assembly_googleanalytics">
-      <HintPath>Assets\Assemblies\assembly_googleanalytics.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PlayFab">
-      <HintPath>Assets\Assemblies\PlayFab.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="assembly_postprocessing">
-      <HintPath>Assets\Assemblies\assembly_postprocessing.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="ConnectedStorage">
       <HintPath>Assets\Assemblies\ConnectedStorage.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="assembly_valheim">
-      <HintPath>Assets\Assemblies\assembly_valheim.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="assembly_sunshafts">
-      <HintPath>Assets\Assemblies\assembly_sunshafts.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="assembly_lux">
-      <HintPath>Assets\Assemblies\assembly_lux.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PlayFabParty">
-      <HintPath>Assets\Assemblies\PlayFabParty.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>Assets\Assemblies\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="assembly_utils">
-      <HintPath>Assets\Assemblies\assembly_utils.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="assembly_guiutils">
-      <HintPath>Assets\Assemblies\assembly_guiutils.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="assembly_simplemeshcombine">
-      <HintPath>Assets\Assemblies\assembly_simplemeshcombine.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Mono.WebBrowser">
-      <HintPath>Assets\Plugins\Mono.WebBrowser.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PlatformTools.Platform.Playstation">
-      <HintPath>Assets\Plugins\PlatformTools.Platform.Playstation.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="XblPCSandbox">
-      <HintPath>Assets\Plugins\XblPCSandbox.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.MemoryProfiler">
-      <HintPath>Assets\Plugins\Unity.MemoryProfiler.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Accessibility">
-      <HintPath>Assets\Plugins\Accessibility.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="XGamingRuntime">
       <HintPath>Assets\Plugins\XGamingRuntime.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.Timeline">
-      <HintPath>Assets\Plugins\Unity.Timeline.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.ScriptableBuildPipeline">
-      <HintPath>Assets\Plugins\Unity.ScriptableBuildPipeline.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PlatformTools.Common">
-      <HintPath>Assets\Plugins\PlatformTools.Common.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="NGLicenses">
-      <HintPath>Assets\Plugins\NGTools\NGCore\Editor\NGLicenses.dll</HintPath>
+    <Reference Include="assembly_googleanalytics">
+      <HintPath>Assets\Plugins\assembly_googleanalytics.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PlatformToolsWrapper">
       <HintPath>Assets\Plugins\PlatformToolsWrapper.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="NGMissingScriptRecoveryEditor">
-      <HintPath>Assets\Plugins\NGTools\NGMissingScriptRecovery\Editor\NGMissingScriptRecoveryEditor.dll</HintPath>
+    <Reference Include="Mono.WebBrowser">
+      <HintPath>Assets\Plugins\Mono.WebBrowser.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="PlatformTools.Core">
-      <HintPath>Assets\Plugins\PlatformTools.Core.dll</HintPath>
+    <Reference Include="assembly_valheim">
+      <HintPath>Assets\Plugins\assembly_valheim.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="NGCore">
-      <HintPath>Assets\Plugins\NGTools\NGCore\NGCore.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PlatformTools.Platform.Dev">
-      <HintPath>Assets\Plugins\PlatformTools.Platform.Dev.dll</HintPath>
+    <Reference Include="assembly_guiutils">
+      <HintPath>Assets\Assemblies\assembly_guiutils.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SoftReferenceableAssets">
       <HintPath>Assets\Plugins\SoftReferenceableAssets.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="PlatformTools.Platform.Steam">
-      <HintPath>Assets\Plugins\PlatformTools.Platform.Steam.dll</HintPath>
+    <Reference Include="assembly_utils">
+      <HintPath>Assets\Assemblies\assembly_utils.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="com.rlabrecque.steamworks.net">
-      <HintPath>Assets\Plugins\com.rlabrecque.steamworks.net.dll</HintPath>
+    <Reference Include="NGCore">
+      <HintPath>Assets\Plugins\NGTools\NGCore\NGCore.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Mono.Posix">
-      <HintPath>Assets\Plugins\Mono.Posix.dll</HintPath>
+    <Reference Include="Accessibility">
+      <HintPath>Assets\Plugins\Accessibility.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="assembly_simplemeshcombine">
+      <HintPath>Assets\Plugins\assembly_simplemeshcombine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="assembly_lux">
+      <HintPath>Assets\Plugins\assembly_lux.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="assembly_sunshafts">
+      <HintPath>Assets\Assemblies\assembly_sunshafts.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="PlatformTools.Platform.Dev">
+      <HintPath>Assets\Plugins\PlatformTools.Platform.Dev.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="gui_framework">
+      <HintPath>Assets\Plugins\gui_framework.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="NGCoreEditor">
       <HintPath>Assets\Plugins\NGTools\NGCore\Editor\NGCoreEditor.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.AI.Navigation">
-      <HintPath>Assets\Plugins\Unity.AI.Navigation.dll</HintPath>
+    <Reference Include="PlatformTools.Common">
+      <HintPath>Assets\Plugins\PlatformTools.Common.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="gui_framework">
-      <HintPath>Assets\Plugins\gui_framework.dll</HintPath>
+    <Reference Include="PlatformTools.Core">
+      <HintPath>Assets\Plugins\PlatformTools.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>Assets\Plugins\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="com.rlabrecque.steamworks.net">
+      <HintPath>Assets\Plugins\com.rlabrecque.steamworks.net.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.ScriptableBuildPipeline">
+      <HintPath>Assets\Plugins\Unity.ScriptableBuildPipeline.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="NGLicenses">
+      <HintPath>Assets\Plugins\NGTools\NGCore\Editor\NGLicenses.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="NGMissingScriptRecoveryEditor">
+      <HintPath>Assets\Plugins\NGTools\NGMissingScriptRecovery\Editor\NGMissingScriptRecoveryEditor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="XblPCSandbox">
+      <HintPath>Assets\Plugins\XblPCSandbox.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.Posix">
+      <HintPath>Assets\Plugins\Mono.Posix.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.MemoryProfiler">
+      <HintPath>Assets\Plugins\Unity.MemoryProfiler.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="PlatformTools.Platform.Playstation">
+      <HintPath>Assets\Plugins\PlatformTools.Platform.Playstation.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="PlayFab">
+      <HintPath>Assets\Plugins\PlayFab.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="PlatformTools.Platform.Steam">
+      <HintPath>Assets\Plugins\PlatformTools.Platform.Steam.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="assembly_postprocessing">
+      <HintPath>Assets\Plugins\assembly_postprocessing.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="PlayFabParty">
+      <HintPath>Assets\Assemblies\PlayFabParty.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Timeline">
+      <HintPath>Assets\Plugins\Unity.Timeline.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.AI.Navigation">
+      <HintPath>Assets\Plugins\Unity.AI.Navigation.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="nunit.framework">

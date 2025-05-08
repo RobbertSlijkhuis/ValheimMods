@@ -2495,7 +2495,7 @@ GameObject:
   - component: {fileID: 114464504130644461}
   - component: {fileID: 114445623045558624}
   m_Layer: 0
-  m_Name: MMFS_staff_fire_projectile
+  m_Name: staff_fire_projectile_MMFS
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

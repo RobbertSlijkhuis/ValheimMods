@@ -65,15 +65,15 @@ namespace ModularMagic_FireStaffs
             assetBundle = AssetUtils.LoadAssetBundleFromResources("modularmagic_firestaffs_dw");
 
             // Fire assets
-            prefabs.staffFire1Prefab = assetBundle.LoadAsset<GameObject>("MMFS_StaffFire1");
-            prefabs.staffFire2Prefab = assetBundle.LoadAsset<GameObject>("MMFS_StaffFire2");
-            prefabs.staffFire3Prefab = assetBundle.LoadAsset<GameObject>("MMFS_StaffFire3");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("MMFS_staff_fire_projectile"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("MMFS_cinder"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("MMFS_fx_staff_fire_windup"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("MMFS_fx_staff_fire_nova"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("MMFS_fx_staff_fire_spores"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("MMFS_fx_staff_fire_spikes"), true));
+            prefabs.staffFire1Prefab = assetBundle.LoadAsset<GameObject>("MMFS_EmberspireTheFlamebinder");
+            prefabs.staffFire2Prefab = assetBundle.LoadAsset<GameObject>("MMFS_WyrmflareOfTheCindercoil");
+            prefabs.staffFire3Prefab = assetBundle.LoadAsset<GameObject>("MMFS_IgnivarFangOfSurtur");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("staff_fire_projectile_MMFS"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("cinder_MMFS"), true));
+            //PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_fire_windup_MMFS"), true));
+            //PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_fire_nova_MMFS"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_fire_spores_MMFS"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_fire_spikes_MMFS"), true));
         }
     }
 }

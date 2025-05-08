@@ -4945,7 +4945,7 @@ GameObject:
   - component: {fileID: 114017368781218418}
   - component: {fileID: 114483416460513287}
   m_Layer: 8
-  m_Name: MMFS_fx_staff_fire_windup
+  m_Name: fx_staff_fire_windup_MMFS
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

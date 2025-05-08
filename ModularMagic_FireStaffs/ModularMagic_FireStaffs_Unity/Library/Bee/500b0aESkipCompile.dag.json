@@ -24,23 +24,22 @@
     {
       "Annotation": "BuildPlayerDataGenerator Library/BuildPlayerData/Editor/TypeDb-All.json",
       "DisplayName": "BuildPlayerDataGenerator TypeDb-All",
-      "Action": "\"C:/Program Files/Unity/Hub/Editor/2022.3.50f1/Editor/Data\\Tools\\netcorerun\\netcorerun.exe\" \"C:/Program Files/Unity/Hub/Editor/2022.3.50f1/Editor/Data/Tools/BuildPlayerDataGenerator/BuildPlayerDataGenerator.exe\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\\assembly_googleanalytics.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\\assembly_guiutils.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\\assembly_lux.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\\assembly_postprocessing.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\\assembly_simplemeshcombine.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\\assembly_sunshafts.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\\assembly_utils.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\\assembly_valheim.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\\Assembly-CSharp.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\\ConnectedStorage.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\\PlayFab.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\\PlayFabParty.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\Accessibility.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\com.rlabrecque.steamworks.net.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\gui_framework.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\Mono.Posix.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\Mono.WebBrowser.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\NGTools\\NGCore\\NGCore.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\PlatformTools.Common.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\PlatformTools.Core.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\PlatformTools.Platform.Dev.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\PlatformTools.Platform.Playstation.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\PlatformTools.Platform.Steam.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\PlatformToolsWrapper.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\SoftReferenceableAssets.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\Unity.AI.Navigation.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\Unity.MemoryProfiler.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\Unity.ScriptableBuildPipeline.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\Unity.Timeline.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\XblPCSandbox.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\XGamingRuntime.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\ScriptAssemblies\\Unity.AI.Navigation.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\ScriptAssemblies\\Unity.InputSystem.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\ScriptAssemblies\\Unity.InputSystem.ForUI.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\ScriptAssemblies\\Unity.InputSystem.TestFramework.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\ScriptAssemblies\\Unity.TextMeshPro.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\ScriptAssemblies\\Unity.Timeline.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\ScriptAssemblies\\UnityEngine.TestRunner.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\ScriptAssemblies\\UnityEngine.UI.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\PackageCache\\com.unity.ext.nunit@1.0.6\\net35\\unity-custom\\nunit.framework.dll\" -s=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\" -s=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\" -s=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\NGTools\\NGCore\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.50f1\\Editor\\Data\\Managed\\UnityEngine\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.50f1\\Editor\\Data\\UnityReferenceAssemblies\\unity-4.8-api\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.50f1\\Editor\\Data\\UnityReferenceAssemblies\\unity-4.8-api\\Facades\" -s=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\ScriptAssemblies\" -s=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\PackageCache\\com.unity.ext.nunit@1.0.6\\net35\\unity-custom\" -o=\"Library/BuildPlayerData/Editor\" -rn=\"\" -tn=\"TypeDb-All.json\"",
+      "Action": "\"C:/Program Files/Unity/Hub/Editor/2022.3.50f1/Editor/Data\\Tools\\netcorerun\\netcorerun.exe\" \"C:/Program Files/Unity/Hub/Editor/2022.3.50f1/Editor/Data/Tools/BuildPlayerDataGenerator/BuildPlayerDataGenerator.exe\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\\assembly_guiutils.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\\assembly_sunshafts.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\\assembly_utils.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\\ConnectedStorage.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\\PlayFabParty.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\Accessibility.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\assembly_googleanalytics.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\assembly_lux.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\assembly_postprocessing.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\assembly_simplemeshcombine.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\assembly_valheim.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\Assembly-CSharp.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\com.rlabrecque.steamworks.net.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\gui_framework.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\Mono.Posix.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\Mono.WebBrowser.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\NGTools\\NGCore\\NGCore.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\PlatformTools.Common.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\PlatformTools.Core.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\PlatformTools.Platform.Dev.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\PlatformTools.Platform.Playstation.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\PlatformTools.Platform.Steam.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\PlatformToolsWrapper.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\PlayFab.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\SoftReferenceableAssets.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\Unity.AI.Navigation.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\Unity.MemoryProfiler.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\Unity.ScriptableBuildPipeline.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\Unity.Timeline.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\XblPCSandbox.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\XGamingRuntime.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\ScriptAssemblies\\Unity.AI.Navigation.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\ScriptAssemblies\\Unity.InputSystem.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\ScriptAssemblies\\Unity.InputSystem.ForUI.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\ScriptAssemblies\\Unity.InputSystem.TestFramework.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\ScriptAssemblies\\Unity.TextMeshPro.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\ScriptAssemblies\\Unity.Timeline.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\ScriptAssemblies\\UnityEngine.TestRunner.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\ScriptAssemblies\\UnityEngine.UI.dll\" -a=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\PackageCache\\com.unity.ext.nunit@1.0.6\\net35\\unity-custom\\nunit.framework.dll\" -s=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Assemblies\" -s=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\" -s=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Assets\\Plugins\\NGTools\\NGCore\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.50f1\\Editor\\Data\\Managed\\UnityEngine\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.50f1\\Editor\\Data\\UnityReferenceAssemblies\\unity-4.8-api\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.50f1\\Editor\\Data\\UnityReferenceAssemblies\\unity-4.8-api\\Facades\" -s=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\ScriptAssemblies\" -s=\"C:\\Source-Robbert\\Valheim modding\\ModularMagic_FireStaffs\\ModularMagic_FireStaffs_Unity\\Library\\PackageCache\\com.unity.ext.nunit@1.0.6\\net35\\unity-custom\" -o=\"Library/BuildPlayerData/Editor\" -rn=\"\" -tn=\"TypeDb-All.json\"",
       "Inputs": [
         "C:/Program Files/Unity/Hub/Editor/2022.3.50f1/Editor/Data/Tools/netcorerun/netcorerun.exe",
         "C:/Program Files/Unity/Hub/Editor/2022.3.50f1/Editor/Data/Tools/BuildPlayerDataGenerator/BuildPlayerDataGenerator.exe",
-        "Assets/Assemblies/assembly_googleanalytics.dll",
         "Assets/Assemblies/assembly_guiutils.dll",
-        "Assets/Assemblies/assembly_lux.dll",
-        "Assets/Assemblies/assembly_postprocessing.dll",
-        "Assets/Assemblies/assembly_simplemeshcombine.dll",
         "Assets/Assemblies/assembly_sunshafts.dll",
         "Assets/Assemblies/assembly_utils.dll",
-        "Assets/Assemblies/assembly_valheim.dll",
-        "Assets/Assemblies/Assembly-CSharp.dll",
         "Assets/Assemblies/ConnectedStorage.dll",
-        "Assets/Assemblies/PlayFab.dll",
         "Assets/Assemblies/PlayFabParty.dll",
         "Assets/Plugins/Accessibility.dll",
+        "Assets/Plugins/assembly_googleanalytics.dll",
+        "Assets/Plugins/assembly_lux.dll",
+        "Assets/Plugins/assembly_postprocessing.dll",
+        "Assets/Plugins/assembly_simplemeshcombine.dll",
+        "Assets/Plugins/assembly_valheim.dll",
+        "Assets/Plugins/Assembly-CSharp.dll",
         "Assets/Plugins/com.rlabrecque.steamworks.net.dll",
         "Assets/Plugins/gui_framework.dll",
         "Assets/Plugins/Mono.Posix.dll",
@@ -52,6 +51,7 @@
         "Assets/Plugins/PlatformTools.Platform.Playstation.dll",
         "Assets/Plugins/PlatformTools.Platform.Steam.dll",
         "Assets/Plugins/PlatformToolsWrapper.dll",
+        "Assets/Plugins/PlayFab.dll",
         "Assets/Plugins/SoftReferenceableAssets.dll",
         "Assets/Plugins/Unity.AI.Navigation.dll",
         "Assets/Plugins/Unity.MemoryProfiler.dll",
@@ -198,22 +198,7 @@
   ],
   "StatSignatures": [
     {
-      "File": "Assets/Assemblies/Assembly-CSharp.dll"
-    },
-    {
-      "File": "Assets/Assemblies/assembly_googleanalytics.dll"
-    },
-    {
       "File": "Assets/Assemblies/assembly_guiutils.dll"
-    },
-    {
-      "File": "Assets/Assemblies/assembly_lux.dll"
-    },
-    {
-      "File": "Assets/Assemblies/assembly_postprocessing.dll"
-    },
-    {
-      "File": "Assets/Assemblies/assembly_simplemeshcombine.dll"
     },
     {
       "File": "Assets/Assemblies/assembly_sunshafts.dll"
@@ -222,13 +207,7 @@
       "File": "Assets/Assemblies/assembly_utils.dll"
     },
     {
-      "File": "Assets/Assemblies/assembly_valheim.dll"
-    },
-    {
       "File": "Assets/Assemblies/ConnectedStorage.dll"
-    },
-    {
-      "File": "Assets/Assemblies/PlayFab.dll"
     },
     {
       "File": "Assets/Assemblies/PlayFabParty.dll"
@@ -241,6 +220,24 @@
     },
     {
       "File": "Assets/Plugins/Accessibility.dll"
+    },
+    {
+      "File": "Assets/Plugins/Assembly-CSharp.dll"
+    },
+    {
+      "File": "Assets/Plugins/assembly_googleanalytics.dll"
+    },
+    {
+      "File": "Assets/Plugins/assembly_lux.dll"
+    },
+    {
+      "File": "Assets/Plugins/assembly_postprocessing.dll"
+    },
+    {
+      "File": "Assets/Plugins/assembly_simplemeshcombine.dll"
+    },
+    {
+      "File": "Assets/Plugins/assembly_valheim.dll"
     },
     {
       "File": "Assets/Plugins/com.rlabrecque.steamworks.net.dll"
@@ -274,6 +271,9 @@
     },
     {
       "File": "Assets/Plugins/PlatformToolsWrapper.dll"
+    },
+    {
+      "File": "Assets/Plugins/PlayFab.dll"
     },
     {
       "File": "Assets/Plugins/SoftReferenceableAssets.dll"

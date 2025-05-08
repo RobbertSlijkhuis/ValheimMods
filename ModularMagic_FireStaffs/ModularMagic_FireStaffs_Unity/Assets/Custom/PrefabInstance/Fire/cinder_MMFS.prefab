@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 114499038059852944}
   - component: {fileID: 114406674390698318}
   m_Layer: 0
-  m_Name: MMFS_cinder
+  m_Name: cinder_MMFS
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

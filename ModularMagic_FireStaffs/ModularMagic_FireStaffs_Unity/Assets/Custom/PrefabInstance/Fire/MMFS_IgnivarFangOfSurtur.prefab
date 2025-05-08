@@ -2355,7 +2355,7 @@ GameObject:
   - component: {fileID: 198032724660952642}
   - component: {fileID: 205037843049065786}
   m_Layer: 12
-  m_Name: MMFS_StaffFire3
+  m_Name: MMFS_IgnivarFangOfSurtur
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

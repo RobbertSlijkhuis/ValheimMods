@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 3282768500
+CRC: 984159976
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 92dc5ba776e9b00e2d8bcf74577ba48c
+    Hash: dcaa8c1a4531ddfa45dc0bfca3f9de81
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 58331cd485cca1bb95e6471e783bd163
+    Hash: e95ef270fd552f7b9e7c65ce635e5434
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 92dc5ba776e9b00e2d8bcf74577ba48c
+    Hash: dcaa8c1a4531ddfa45dc0bfca3f9de81
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -32,41 +32,27 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 65
   Script: {instanceID: 0}
-- Class: 82
-  Script: {instanceID: 0}
-- Class: 83
-  Script: {instanceID: 0}
 - Class: 108
   Script: {instanceID: 0}
-- Class: 114
-  Script: {fileID: 313648218, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 2140874873, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 971010301, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
   Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: -1044604064, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 69470131, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+  Script: {fileID: 897279685, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 1999586283, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 897279685, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 69470131, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 115
-  Script: {instanceID: 0}
-- Class: 135
   Script: {instanceID: 0}
 - Class: 198
   Script: {instanceID: 0}
@@ -75,12 +61,6 @@ ClassTypes:
 - Class: 205
   Script: {instanceID: 0}
 - Class: 213
-  Script: {instanceID: 0}
-- Class: 241
-  Script: {instanceID: 0}
-- Class: 243
-  Script: {instanceID: 0}
-- Class: 245
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
@@ -96,15 +76,11 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: ItemDrop/ItemData/SharedData
 Assets:
-- Assets/Custom/PrefabInstance/Fire/MMFS_StaffFire1.prefab
-- Assets/Custom/PrefabInstance/Fire/MMFS_staff_fire_projectile.prefab
-- Assets/Custom/PrefabInstance/Fire/MMFS_cinder.prefab
-- Assets/Custom/PrefabInstance/Fire/MMFS_fx_staff_fire_spikes 1.prefab
-- Assets/Custom/PrefabInstance/Fire/MMFS_fx_staff_fire_spores 1.prefab
-- Assets/Custom/PrefabInstance/Fire/MMFS_fx_staff_fire_nova.prefab
-- Assets/Custom/PrefabInstance/Fire/MMFS_fx_staff_fire_windup.prefab
-- Assets/Custom/PrefabInstance/Fire/MMFS_fx_staff_fire_spores.prefab
-- Assets/Custom/PrefabInstance/Fire/MMFS_StaffFire3.prefab
-- Assets/Custom/PrefabInstance/Fire/MMFS_fx_staff_fire_spikes.prefab
-- Assets/Custom/PrefabInstance/Fire/MMFS_StaffFire2.prefab
+- Assets/Custom/PrefabInstance/Fire/MMFS_EmberspireTheFlamebinder.prefab
+- Assets/Custom/PrefabInstance/Fire/staff_fire_projectile_MMFS.prefab
+- Assets/Custom/PrefabInstance/Fire/cinder_MMFS.prefab
+- Assets/Custom/PrefabInstance/Fire/fx_staff_fire_spores_MMFS.prefab
+- Assets/Custom/PrefabInstance/Fire/MMFS_IgnivarFangOfSurtur.prefab
+- Assets/Custom/PrefabInstance/Fire/fx_staff_fire_spikes_MMFS.prefab
+- Assets/Custom/PrefabInstance/Fire/MMFS_WyrmflareOfTheCindercoil.prefab
 Dependencies: []
