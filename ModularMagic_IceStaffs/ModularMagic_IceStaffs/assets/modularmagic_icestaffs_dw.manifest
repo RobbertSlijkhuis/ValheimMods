@@ -1,0 +1,95 @@
+ManifestFileVersion: 0
+CRC: 1901100327
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: ebcd94d261b2ce5898e244dbcc3a27c3
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: b628e01009fc2c394956bca91709ca5c
+  IncrementalBuildHash:
+    serializedVersion: 2
+    Hash: ebcd94d261b2ce5898e244dbcc3a27c3
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 54
+  Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
+- Class: 82
+  Script: {instanceID: 0}
+- Class: 83
+  Script: {instanceID: 0}
+- Class: 108
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 69470131, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 313648218, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 198
+  Script: {instanceID: 0}
+- Class: 199
+  Script: {instanceID: 0}
+- Class: 205
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+- Class: 241
+  Script: {instanceID: 0}
+- Class: 243
+  Script: {instanceID: 0}
+- Class: 245
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers:
+- AssemblyName: assembly_valheim
+  ClassName: Attack
+- AssemblyName: assembly_valheim
+  ClassName: EffectList
+- AssemblyName: assembly_valheim
+  ClassName: EffectList/EffectData
+- AssemblyName: assembly_valheim
+  ClassName: HitData/DamageTypes
+- AssemblyName: assembly_valheim
+  ClassName: ItemDrop/ItemData
+- AssemblyName: assembly_valheim
+  ClassName: ItemDrop/ItemData/SharedData
+Assets:
+- Assets/Custom/PrefabInstance/Frost/MMIS_staffIce3.prefab
+- Assets/Custom/PrefabInstance/Frost/MMIS_staffIce1.prefab
+- Assets/Custom/PrefabInstance/Frost/staff_ice_projectile_MMIS.prefab
+- Assets/Custom/PrefabInstance/Frost/MMIS_staffIce2.prefab
+- Assets/Custom/PrefabInstance/Frost/fx_staff_ice_spores_MMIS.prefab
+- Assets/Custom/PrefabInstance/Frost/fx_iceshard_launch_smoke_MMIS.prefab
+- Assets/Custom/PrefabInstance/Frost/fx_staff_ice_spikes_MMIS.prefab
+- Assets/Custom/PrefabInstance/Frost/fx_iceshard_launch_MMIS.prefab
+Dependencies: []
