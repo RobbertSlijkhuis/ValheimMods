@@ -4601,7 +4601,7 @@ GameObject:
   - component: {fileID: 114590079865984979}
   - component: {fileID: 114148700589613667}
   m_Layer: 0
-  m_Name: MMES_fx_mushroom_projectile_hit
+  m_Name: fx_mushroom_projectile_hit_MMES
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

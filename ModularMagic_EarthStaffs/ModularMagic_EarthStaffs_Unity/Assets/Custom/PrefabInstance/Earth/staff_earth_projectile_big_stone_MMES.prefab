@@ -30,6 +30,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4956300710283685}
+  - {fileID: 4484478345953043}
   m_Father: {fileID: 4300383442519023}
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
 --- !u!1 &1827402336280744
@@ -45,7 +46,7 @@ GameObject:
   - component: {fileID: 114845020818883937}
   - component: {fileID: 114531279676916530}
   m_Layer: 0
-  m_Name: MMES_staff_earth_projectile_spawn
+  m_Name: staff_earth_projectile_big_stone_MMES
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -81,29 +82,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_damage:
     m_damage: 0
-    m_blunt: 0
+    m_blunt: 90
     m_slash: 0
     m_pierce: 0
-    m_chop: 0
-    m_pickaxe: 0
+    m_chop: 30
+    m_pickaxe: 30
     m_fire: 0
     m_frost: 0
     m_lightning: 0
     m_poison: 0
     m_spirit: 0
-  m_aoe: 0
+  m_aoe: 4.5
   m_dodgeable: 1
   m_blockable: 1
-  m_attackForce: 0
-  m_backstabBonus: 0
+  m_attackForce: 100
+  m_backstabBonus: 1
   m_statusEffect: 
   m_healthReturn: 0
-  m_canHitWater: 1
+  m_canHitWater: 0
   m_ttl: 8
   m_gravity: 0
   m_drag: 0
   m_rayRadius: 1
-  m_hitNoise: 0
+  m_hitNoise: 70
   m_doOwnerRaytest: 0
   m_stayAfterHitStatic: 1
   m_stayAfterHitDynamic: 0
@@ -126,8 +127,7 @@ MonoBehaviour:
   m_minBounceVel: 0.25
   m_respawnItemOnHit: 0
   m_spawnOnTtl: 0
-  m_spawnOnHit: {fileID: 1252823542582167, guid: 81e89dddab08592478724164e70a0a5b,
-    type: 3}
+  m_spawnOnHit: {fileID: 0}
   m_spawnOnHitChance: 1
   m_spawnCount: 1
   m_randomSpawnOnHit: []
@@ -189,6 +189,89 @@ MonoBehaviour:
   m_syncScale: 0
   m_syncBodyVelocity: 0
   m_characterParentSync: 0
+--- !u!1 &1944648967170952
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4484478345953043}
+  - component: {fileID: 33649136397014050}
+  - component: {fileID: 23620763632412413}
+  m_Layer: 0
+  m_Name: stone
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4484478345953043
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1944648967170952}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 1, w: 0}
+  m_LocalPosition: {x: 0, y: -0.22000122, z: 0}
+  m_LocalScale: {x: 2.25, y: 2.25, z: 2.25}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4917831886495070}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 180}
+--- !u!33 &33649136397014050
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1944648967170952}
+  m_Mesh: {fileID: 4300000, guid: 01b6f36ff2dac884f8acd2e707636098, type: 2}
+--- !u!23 &23620763632412413
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1944648967170952}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 8c3347217a4a49b4794d6b7e24a61d38, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &1956263592517148
 GameObject:
   m_ObjectHideFlags: 0
@@ -234,7 +317,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 0.63529414, g: 1, b: 0.61960787, a: 1}
   m_Intensity: 2
-  m_Range: 20
+  m_Range: 13
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10

@@ -190,7 +190,7 @@ GameObject:
   - component: {fileID: 114798641496478176}
   - component: {fileID: 114746949832933959}
   m_Layer: 0
-  m_Name: MMES_staff_earth_projectile
+  m_Name: staff_earth_projectile_MMES
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -58,7 +58,7 @@ namespace ModularMagic_EarthStaffs
         private void AddEarthStaffs()
         {
             //// Create a copy of the demolisher hit fx and make it bigger and more awesome
-            //GameObject earthSledgePrefab = PrefabManager.Instance.CreateClonedPrefab("MMES_fx_staff_earth_impact", "fx_sledge_demolisher_hit");
+            //GameObject earthSledgePrefab = PrefabManager.Instance.CreateClonedPrefab("fx_staff_earth_impact_MMES", "fx_sledge_demolisher_hit");
             //Transform bubble = earthSledgePrefab.transform.Find("bubble wave");
             //Transform cloud = earthSledgePrefab.transform.Find("Cloud");
             //Transform rocks = earthSledgePrefab.transform.Find("vfx_troll_rock_destroyed");
@@ -70,7 +70,7 @@ namespace ModularMagic_EarthStaffs
             //PrefabManager.Instance.AddPrefab(earthSledgePrefab);
 
             //// Get the prefab used for the big rock (secondary attack) and apply our fx
-            //GameObject secondaryProjectilePrefab = PrefabManager.Instance.GetPrefab(prefabs.projectileSecondaryPrefab.name);
+            //GameObject secondaryProjectilePrefab = PrefabManager.Instance.GetPrefab(prefabs.projectileBigStonePrefab.name);
             //Projectile projComp = secondaryProjectilePrefab.GetComponent<Projectile>();
             //EffectData effect = new EffectData();
             //effect.m_prefab = earthSledgePrefab;
@@ -122,23 +122,23 @@ namespace ModularMagic_EarthStaffs
             assetBundle = AssetUtils.LoadAssetBundleFromResources("modularmagic_earthstaffs_dw");
 
             // Earth assets
-            prefabs.staffEarth0Prefab = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth0");
-            prefabs.staffEarth1Prefab = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth1");
-            prefabs.staffEarth2Prefab = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth2");
-            prefabs.staffEarth3Prefab = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth3");
-            prefabs.projectileMushroomPrefab = assetBundle.LoadAsset<GameObject>("MMES_staff_earth_projectile_mushroom");
-            prefabs.projectileSecondaryPrefab = assetBundle.LoadAsset<GameObject>("MMES_staff_earth_projectile_secondary");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("MMES_staff_earth_projectile"), true));
+            prefabs.staffEarth0Prefab = assetBundle.LoadAsset<GameObject>("MMES_TheForestFlinger");
+            prefabs.staffEarth1Prefab = assetBundle.LoadAsset<GameObject>("MMES_Tremorbranch");
+            prefabs.staffEarth2Prefab = assetBundle.LoadAsset<GameObject>("MMES_EarthwhorlTheAvalanche");
+            prefabs.staffEarth3Prefab = assetBundle.LoadAsset<GameObject>("MMES_OakrendTheEarthcaller");
+            prefabs.projectileMushroomPrefab = assetBundle.LoadAsset<GameObject>("staff_earth_projectile_mushroom_MMES");
+            //prefabs.projectileBigStonePrefab = assetBundle.LoadAsset<GameObject>("staff_earth_projectile_big_stone_MMES");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("staff_earth_projectile_MMES"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.projectileMushroomPrefab, true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.projectileSecondaryPrefab, true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("MMES_staff_earth_projectile_spawn"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("MMES_staff_earth_script_big_stone"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("MMES_staff_earth_script_roots"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("MMES_TentaRoot"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("MMES_fx_staff_earth_spores"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("MMES_fx_staff_earth_spikes"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("MMES_fx_staff_earth_windup"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("MMES_fx_mushroom_projectile_hit"), true));
+            //PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.projectileBigStonePrefab, true));
+            //PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("staff_earth_projectile_spawn_MMES"), true));
+            //PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("staff_earth_script_big_stone_MMES"), true));
+            //PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("staff_earth_script_roots_MMES"), true));
+            //PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("tenta_root_MMES"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_earth_spores_MMES"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_earth_spikes_MMES"), true));
+            //PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_earth_windup_MMES"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_mushroom_projectile_hit_MMES"), true));
         }
     }
 }

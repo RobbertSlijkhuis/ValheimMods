@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 198469181622894547}
   - component: {fileID: 205362594320213934}
   m_Layer: 12
-  m_Name: MMES_StaffEarth2
+  m_Name: MMES_EarthwhorlTheAvalanche
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

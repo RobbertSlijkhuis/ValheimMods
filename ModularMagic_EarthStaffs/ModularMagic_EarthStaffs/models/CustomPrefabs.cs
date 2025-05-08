@@ -12,6 +12,6 @@ namespace ModularMagic_EarthStaffs.Models
 
         // Projectiles
         public GameObject projectileMushroomPrefab;
-        public GameObject projectileSecondaryPrefab;
+        public GameObject projectileBigStonePrefab;
     }
 }

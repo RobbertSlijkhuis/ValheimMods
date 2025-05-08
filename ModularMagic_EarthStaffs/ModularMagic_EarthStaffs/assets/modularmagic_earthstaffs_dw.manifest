@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 2788898676
+CRC: 3257469126
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: f4738b237b48664cb941c95d5bb8dd19
+    Hash: 424cdfc18afb12ffd7122e125d454be8
   TypeTreeHash:
     serializedVersion: 2
-    Hash: a6194cc7eac2f69c94660c56ec06876d
+    Hash: 133b91dc77c3387a1a86f4a79a2eec5b
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: f4738b237b48664cb941c95d5bb8dd19
+    Hash: 424cdfc18afb12ffd7122e125d454be8
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -32,18 +32,6 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 65
   Script: {instanceID: 0}
-- Class: 74
-  Script: {instanceID: 0}
-- Class: 82
-  Script: {instanceID: 0}
-- Class: 83
-  Script: {instanceID: 0}
-- Class: 90
-  Script: {instanceID: 0}
-- Class: 91
-  Script: {instanceID: 0}
-- Class: 95
-  Script: {instanceID: 0}
 - Class: 108
   Script: {instanceID: 0}
 - Class: 114
@@ -55,34 +43,14 @@ ClassTypes:
 - Class: 114
   Script: {fileID: -1044604064, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 1137906148, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: -959589234, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: -1421768954, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
   Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 829610738, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
   Script: {fileID: 69470131, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: -179248876, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
   Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 313648218, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: -917656959, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 115
-  Script: {instanceID: 0}
-- Class: 134
-  Script: {instanceID: 0}
-- Class: 136
-  Script: {instanceID: 0}
-- Class: 137
   Script: {instanceID: 0}
 - Class: 198
   Script: {instanceID: 0}
@@ -100,30 +68,19 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: EffectList/EffectData
 - AssemblyName: assembly_valheim
-  ClassName: HitData/DamageModifiers
-- AssemblyName: assembly_valheim
   ClassName: HitData/DamageTypes
 - AssemblyName: assembly_valheim
   ClassName: ItemDrop/ItemData
 - AssemblyName: assembly_valheim
   ClassName: ItemDrop/ItemData/SharedData
 Assets:
-- Assets/Custom/PrefabInstance/Earth/MMES_staff_earth_script_roots.prefab
-- Assets/Custom/PrefabInstance/Earth/MMES_staff_earth_projectile.prefab
-- Assets/Custom/PrefabInstance/Earth/MMES_StaffEarth2_WITH_SECONDARY.prefab
-- Assets/Custom/PrefabInstance/Earth/MMES_staff_earth_script_big_stone.prefab
-- Assets/Custom/PrefabInstance/Earth/MMES_StaffEarth3.prefab
-- Assets/Custom/PrefabInstance/Earth/MMES_StaffEarth2.prefab
-- Assets/Custom/PrefabInstance/Earth/MMES_staff_earth_projectile_secondary.prefab
-- Assets/Custom/PrefabInstance/Earth/MMES_fx_staff_earth_windup.prefab
-- Assets/Custom/PrefabInstance/Earth/MMES_StaffEarth1.prefab
-- Assets/Custom/PrefabInstance/Earth/MMES_fx_staff_earth_spores.prefab
-- Assets/Custom/PrefabInstance/Earth/MMES_fx_mushroom_projectile_hit.prefab
-- Assets/Custom/Sprite/Earth/MMES_StaffEarth3Sprite.png
-- Assets/Custom/PrefabInstance/Earth/MMES_fx_staff_earth_spikes.prefab
-- Assets/Custom/PrefabInstance/Earth/MMES_staff_earth_projectile_spawn.prefab
-- Assets/Custom/PrefabInstance/Earth/MMES_TentaRoot.prefab
-- Assets/Custom/PrefabInstance/Earth/MMES_staff_earth_projectile_mushroom.prefab
-- Assets/Custom/PrefabInstance/Earth/MMES_StaffEarth0.prefab
-- Assets/Custom/PrefabInstance/Earth/MMES_StaffEarth3_WITH_SECONDARY.prefab
+- Assets/Custom/PrefabInstance/Earth/staff_earth_projectile_MMES.prefab
+- Assets/Custom/PrefabInstance/Earth/MMES_OakrendTheEarthcaller.prefab
+- Assets/Custom/PrefabInstance/Earth/MMES_EarthwhorlTheAvalanche.prefab
+- Assets/Custom/PrefabInstance/Earth/MMES_Tremorbranch.prefab
+- Assets/Custom/PrefabInstance/Earth/fx_staff_earth_spores_MMES.prefab
+- Assets/Custom/PrefabInstance/Earth/fx_mushroom_projectile_hit_MMES.prefab
+- Assets/Custom/PrefabInstance/Earth/fx_staff_earth_spikes_MMES.prefab
+- Assets/Custom/PrefabInstance/Earth/staff_earth_projectile_mushroom_MMES.prefab
+- Assets/Custom/PrefabInstance/Earth/MMES_TheForestFlinger.prefab
 Dependencies: []

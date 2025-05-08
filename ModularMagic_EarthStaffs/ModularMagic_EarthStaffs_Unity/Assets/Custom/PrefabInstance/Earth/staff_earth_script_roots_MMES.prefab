@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4034508971615446}
   - component: {fileID: 114874486196054551}
   m_Layer: 22
-  m_Name: MMES_staff_earth_script_roots
+  m_Name: staff_earth_script_roots_MMES
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

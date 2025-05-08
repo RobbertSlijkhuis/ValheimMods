@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4692324899874451}
   - component: {fileID: 114573320437719872}
   m_Layer: 22
-  m_Name: MMES_staff_earth_script_big_stone
+  m_Name: staff_earth_script_big_stone_MMES
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

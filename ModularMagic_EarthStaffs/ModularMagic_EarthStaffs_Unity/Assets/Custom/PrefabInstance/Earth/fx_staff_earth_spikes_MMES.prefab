@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3528812406131483420}
   - component: {fileID: 6068532394081779549}
   m_Layer: 0
-  m_Name: MMES_fx_staff_earth_spikes
+  m_Name: fx_staff_earth_spikes_MMES
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

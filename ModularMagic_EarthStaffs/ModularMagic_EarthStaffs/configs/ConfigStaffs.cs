@@ -5,22 +5,22 @@ namespace ModularMagic_EarthStaffs.Configs
 {
     internal static class ConfigStaffs
     {
-        public static string staff0Name = "Staff of Mushrooms";
+        public static string staff0Name = "The Forest Flinger";
         public static string staff0Recipe = "Wood:20, Stone:20, Resin:20, DeerHide:6";
         public static string staff0UpgradeRecipe = "Wood:10, Stone:10, DeerHide:2";
         public static StaffConfig staffEarth0 = new StaffConfig();
 
-        public static string staff1Name = "Staff of Stone";
+        public static string staff1Name = "Tremorbranch";
         public static string staff1Recipe = "RoundLog:20, Stone:20, Resin:20, Thistle:10";
         public static string staff1UpgradeRecipe = "RoundLog:10, Stone:10, Thistle:4";
         public static StaffConfig staffEarth1 = new StaffConfig();
 
-        public static string staff2Name = "Staff of Boulders";
+        public static string staff2Name = "Earthwhorl the Avalanche";
         public static string staff2Recipe = $"{ModularMagic_EarthStaffs.Instance.prefabs.staffEarth1Prefab.name}:1, FineWood:20, Root:10, Crystal:20";
         public static string staff2UpgradeRecipe = "FineWood:10, Root:4, Crystal:8";
         public static StaffConfig staffEarth2 = new StaffConfig();
 
-        public static string staff3Name = "Staff of Earth";
+        public static string staff3Name = "Oakrend the Earthcaller";
         public static string staff3Recipe = $"{ModularMagic_EarthStaffs.Instance.prefabs.staffEarth2Prefab.name}:1, YggdrasilWood:20, Sap:10, Eitr:16";
         public static string staff3UpgradeRecipe = "YggdrasilWood:10, Sap:4, Eitr:8";
         // public static string staff3CooldownStatusEffectName = "StaffEarth3Cooldown_DW";
@@ -42,7 +42,7 @@ namespace ModularMagic_EarthStaffs.Configs
             {
                 StaffConfigOptions options = new StaffConfigOptions(ModularMagic_EarthStaffs.Instance.prefabs.staffEarth0Prefab, staff0Name, staff0Recipe, staff0UpgradeRecipe, sectionIndex)
                 {
-                    description = "You feel weird holding this staff... its as if everything seems different but you can put your finger on it. Finger! Haha!",
+                    description = "Held together by nothing but wishful thinking, this staff hurls whatever the forest has lying around. Mushrooms? Sure. Berrie bushes? Why not!",
                     craftingStation = "Workbench",
                     minStationLevel = 1,
                     recipeMultiplier = 1,
@@ -69,18 +69,18 @@ namespace ModularMagic_EarthStaffs.Configs
             {
                 StaffConfigOptions options = new StaffConfigOptions(ModularMagic_EarthStaffs.Instance.prefabs.staffEarth1Prefab, staff1Name, staff1Recipe, staff1UpgradeRecipe, sectionIndex)
                 {
-                    description = "Insert cringy description about getting stoned or something",
+                    description = "The staff equivalent of shouting ‘rock!’ and hoping for the best! Chance for broken limbs: optimal",
                     craftingStation = "Workbench",
                     minStationLevel = 3,
                     recipeMultiplier = 1,
                     maxQuality = 4,
                     movementSpeed = -0.05f,
-                    damageBlunt = 15f,
-                    damageSpirit = 1f,
+                    damageBlunt = 13f,
+                    damageSpirit = 3f,
                     blockArmor = 48,
                     deflectionForce = 20,
                     attackForce = 35,
-                    useEitr = 5,
+                    useEitr = 3,
                 };
                 staffEarth1.GenerateConfig(options);
             }
@@ -96,18 +96,18 @@ namespace ModularMagic_EarthStaffs.Configs
             {
                 StaffConfigOptions options = new StaffConfigOptions(ModularMagic_EarthStaffs.Instance.prefabs.staffEarth2Prefab, staff2Name, staff2Recipe, staff2UpgradeRecipe, sectionIndex)
                 {
-                    description = "Something with bing stones",
+                    description = "This staff flings boulders with all the subtlety of an avalanche. Not great for diplomacy. Excellent for everything else!",
                     craftingStation = "Workbench",
                     minStationLevel = 5,
                     recipeMultiplier = 1,
                     maxQuality = 4,
                     movementSpeed = -0.05f,
-                    damageBlunt = 21f,
-                    damageSpirit = 2f,
+                    damageBlunt = 19f,
+                    damageSpirit = 4f,
                     blockArmor = 48,
                     deflectionForce = 20,
                     attackForce = 35,
-                    useEitr = 7,
+                    useEitr = 5,
                 };
                 staffEarth2.GenerateConfig(options);
             }
@@ -123,18 +123,18 @@ namespace ModularMagic_EarthStaffs.Configs
             {
                 StaffConfigOptions options = new StaffConfigOptions(ModularMagic_EarthStaffs.Instance.prefabs.staffEarth3Prefab, staff3Name, staff3Recipe, staff3UpgradeRecipe, sectionIndex)
                 {
-                    description = "Your foes will bend to natures will... or they will get bend!",
+                    description = "Side effects may include dizziness, confusion, and being buried under several metric tons of stone. Nature just doesn’t negotiate. It bends, breaks, and buries!",
                     craftingStation = "GaldrTable",
                     minStationLevel = 1,
                     recipeMultiplier = 1,
                     maxQuality = 4,
                     movementSpeed = -0.05f,
-                    damageBlunt = 27f,
-                    damageSpirit = 3f,
+                    damageBlunt = 25f,
+                    damageSpirit = 5f,
                     blockArmor = 48,
                     deflectionForce = 20,
                     attackForce = 35,
-                    useEitr = 10,
+                    useEitr = 7,
                 };
                 staffEarth3.GenerateConfig(options);
             }

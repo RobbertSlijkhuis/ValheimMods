@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 198469181622894547}
   - component: {fileID: 205362594320213934}
   m_Layer: 12
-  m_Name: MMES_StaffEarth3
+  m_Name: MMES_Tremorbranch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -121,13 +121,13 @@ MonoBehaviour:
     m_worldLevel: 0
     m_pickedUp: 0
     m_shared:
-      m_name: $item_staffearth
+      m_name: $item_staffstone
       m_dlc: 
       m_itemType: 14
       m_icons:
-      - {fileID: 21300000, guid: 3cea6dd44ccd0e34c925fcb2bff654f7, type: 3}
+      - {fileID: 21300000, guid: ef88ad83d74d63b449ae8eb644372bce, type: 3}
       m_attachOverride: 4
-      m_description: $item_staffearth_description
+      m_description: $item_staffstone_description
       m_maxStackSize: 1
       m_autoStack: 1
       m_maxQuality: 4
@@ -180,19 +180,19 @@ MonoBehaviour:
       m_toolTier: 5
       m_damages:
         m_damage: 0
-        m_blunt: 27
+        m_blunt: 15
         m_slash: 0
         m_pierce: 0
-        m_chop: 12
-        m_pickaxe: 5
+        m_chop: 3
+        m_pickaxe: 2
         m_fire: 0
         m_frost: 0
         m_lightning: 0
         m_poison: 0
-        m_spirit: 3
+        m_spirit: 1
       m_damagesPerLevel:
         m_damage: 0
-        m_blunt: 2
+        m_blunt: 1
         m_slash: 0
         m_pierce: 0
         m_chop: 0
@@ -303,10 +303,10 @@ MonoBehaviour:
         m_specialHitType: 0
         m_attackProjectile: {fileID: 1837339956046829, guid: 29a7e02c9176eef49b46bfb6487a1969,
           type: 3}
-        m_projectileVel: 30
-        m_projectileVelMin: 30
+        m_projectileVel: 20
+        m_projectileVelMin: 20
         m_randomVelocity: 0
-        m_projectileAccuracy: 2
+        m_projectileAccuracy: 4
         m_projectileAccuracyMin: 0
         m_circularProjectileLaunch: 0
         m_distributeProjectilesAroundCircle: 0
@@ -316,7 +316,7 @@ MonoBehaviour:
         m_launchAngle: -4
         m_projectiles: 1
         m_projectileBursts: 999
-        m_burstInterval: 0.3
+        m_burstInterval: 0.4
         m_destroyPreviousProjectile: 0
         m_perBurstResourceUsage: 1
         m_hitEffect:
@@ -2975,6 +2975,7 @@ Transform:
   m_LocalScale: {x: 1.2, y: 1.55, z: 1.2}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 3373740938661587883}
   - {fileID: 5279100377738466993}
   m_Father: {fileID: 4130065762552394}
   m_LocalEulerAnglesHint: {x: 90, y: -0, z: -0}
@@ -2985,7 +2986,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1135464228477389487}
-  m_Mesh: {fileID: 2254779756693615983, guid: 3cb5ea2dbe040bf4698a129aab7b78f4, type: 3}
+  m_Mesh: {fileID: 3123725527629298634, guid: 6895caa25b7dfbe41b6e4f018242f330, type: 3}
 --- !u!23 &6371151896883332112
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -3006,7 +3007,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: d55bccdd29e56fe44919c6f20bc79399, type: 2}
+  - {fileID: 2100000, guid: f1a4e7d64c69d09468bba8dad906c796, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -7811,3 +7812,86 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!1 &8830322792266552797
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3373740938661587883}
+  - component: {fileID: 7164792702940905229}
+  - component: {fileID: 943003791127267913}
+  m_Layer: 12
+  m_Name: stone
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3373740938661587883
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8830322792266552797}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9011154909060702986}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &7164792702940905229
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8830322792266552797}
+  m_Mesh: {fileID: 4300000, guid: c8c3d9ac54cd6884fac43ccda8256c89, type: 2}
+--- !u!23 &943003791127267913
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8830322792266552797}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 0f177a36ac8468645b29c9c30520702a, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}

@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3285389019741989799}
   - component: {fileID: 2297032830201190997}
   m_Layer: 0
-  m_Name: MMES_fx_staff_earth_spores
+  m_Name: fx_staff_earth_spores_MMES
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
