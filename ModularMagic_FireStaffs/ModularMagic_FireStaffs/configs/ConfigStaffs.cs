@@ -6,18 +6,18 @@ namespace ModularMagic_FireStaffs.Configs
     internal static class ConfigStaffs
     {
         public static string staff1Name = "Emberspire the Flamebinder";
-        public static string staff1Recipe = "Iron:20, ElderBark:20, Chain:10, SurtlingCore:10";
-        public static string staff1UpgradeRecipe = "ElderBark:10, Chain:5, SurtlingCore:4";
+        public static string staff1Recipe = "Bronze:10, RoundLog:20, Coal:10, SurtlingCore:6";
+        public static string staff1UpgradeRecipe = "Bronze:2, RoundLog:5, Coal:2, SurtlingCore:2";
         public static StaffConfig staffFire1 = new StaffConfig();
 
         public static string staff2Name = "Wyrmflare of the Cindercoil";
         public static string staff2Recipe = $"{ModularMagic_FireStaffs.Instance.prefabs.staffFire1Prefab.name}:1, FineWood:20, SurtlingCore:10, Crystal:20";
-        public static string staff2UpgradeRecipe = "FineWood:10, SurtlingCore:4, Crystal:8";
+        public static string staff2UpgradeRecipe = "FineWood:5, SurtlingCore:4, Crystal:8";
         public static StaffConfig staffFire2 = new StaffConfig();
 
         public static string staff3Name = "Ignivar, fang of Surtur";
         public static string staff3Recipe = $"{ModularMagic_FireStaffs.Instance.prefabs.staffFire2Prefab.name}:1, YggdrasilWood:20, Sap:10, Eitr:16";
-        public static string staff3UpgradeRecipe = "YggdrasilWood:10, Sap:4, Eitr:8";
+        public static string staff3UpgradeRecipe = "YggdrasilWood:5, Sap:2, Eitr:8";
         public static StaffConfig staffFire3 = new StaffConfig();
 
         private static int sectionIndex = 1;
