@@ -6,18 +6,18 @@ namespace ModularMagic_LightningStaffs.Configs
     internal static class ConfigStaffs
     {
         public static string staff1Name = "Staff of Lightning";
-        public static string staff1Recipe = "Iron:20, ElderBark:20, Chain:10, SurtlingCore:10";
-        public static string staff1UpgradeRecipe = "ElderBark:10, Chain:5, SurtlingCore:4";
+        public static string staff1Recipe = "Bronze:10, BoneFragments:20, HardAntler:4, GreydwarfEye:20";
+        public static string staff1UpgradeRecipe = "Bronze:2, BoneFragments:4, HardAntler:1, GreydwarfEye:4";
         public static StaffConfig staffLightning1 = new StaffConfig();
 
         public static string staff2Name = "Staff of Thunder";
-        public static string staff2Recipe = $"{ModularMagic_LightningStaffs.Instance.prefabs.staffLightning1Prefab.name}:1, FineWood:20, SurtlingCore:10, Crystal:20";
-        public static string staff2UpgradeRecipe = "FineWood:10, SurtlingCore:4, Crystal:8";
+        public static string staff2Recipe = $"{ModularMagic_LightningStaffs.Instance.prefabs.staffLightning1Prefab.name}:1, FineWood:20, Thunderstone:4, Crystal:20";
+        public static string staff2UpgradeRecipe = "FineWood:5, Thunderstone:1, Crystal:8";
         public static StaffConfig staffLightning2 = new StaffConfig();
 
         public static string staff3Name = "Staff of Storms";
         public static string staff3Recipe = $"{ModularMagic_LightningStaffs.Instance.prefabs.staffLightning2Prefab.name}:1, YggdrasilWood:20, Sap:10, Eitr:16";
-        public static string staff3UpgradeRecipe = "YggdrasilWood:10, Sap:4, Eitr:8";
+        public static string staff3UpgradeRecipe = "YggdrasilWood:10, Sap:2, Eitr:8";
         public static StaffConfig staffLightning3 = new StaffConfig();
 
         private static int sectionIndex = 1;

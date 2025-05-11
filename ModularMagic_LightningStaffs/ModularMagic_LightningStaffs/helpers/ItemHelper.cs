@@ -23,8 +23,6 @@ namespace ModularMagic_LightningStaffs.Helpers
             else
                 itemConfig.Requirements = simpleRequirements;
 
-            Jotunn.Logger.LogWarning("Pickaxe damage should be: " + config.damagePickaxe.Value);
-
             UpdateHelper.UpdateItemDropStats(prefab, new UpdateItemDropStatsOptions()
             {
                 maxQuality = config.maxQuality.Value,

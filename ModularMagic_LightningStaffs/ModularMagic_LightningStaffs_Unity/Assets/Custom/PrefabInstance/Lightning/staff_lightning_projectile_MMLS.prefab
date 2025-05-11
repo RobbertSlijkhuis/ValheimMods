@@ -364,14 +364,14 @@ MonoBehaviour:
   m_cinderPrefab: {fileID: 1176109225305799, guid: de693684817b8564db22f7e74f3c661c,
     type: 3}
   m_cinderInterval: 0
-  m_cinderChance: 1
+  m_cinderChance: 0
   m_cinderVel: 6
   m_spawnOffset: 1
   m_spawnOffsetPoint: {x: 0, y: 0, z: 0}
   m_spread: 4
   m_instancesPerSpawn: 6
   m_spawnOnAwake: 0
-  m_spawnOnProjectileHit: 1
+  m_spawnOnProjectileHit: 0
 --- !u!1 &763037875365094607
 GameObject:
   m_ObjectHideFlags: 0
