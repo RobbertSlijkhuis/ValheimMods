@@ -56,15 +56,15 @@ namespace MagicExtended
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             PrefabManager.OnVanillaPrefabsAvailable += AddMaterials;
-            // PrefabManager.OnVanillaPrefabsAvailable += AddFood;
+            PrefabManager.OnVanillaPrefabsAvailable += AddFood;
             PrefabManager.OnVanillaPrefabsAvailable += AddEarthStaffs;
             PrefabManager.OnVanillaPrefabsAvailable += AddFireStaffs;
             PrefabManager.OnVanillaPrefabsAvailable += AddFrostStaffs;
             PrefabManager.OnVanillaPrefabsAvailable += AddLightningStaffs;
-            // PrefabManager.OnVanillaPrefabsAvailable += AddSpellbooks;
+            PrefabManager.OnVanillaPrefabsAvailable += AddSpellbooks;
             PrefabManager.OnVanillaPrefabsAvailable += AddArmor;
-            // PrefabManager.OnVanillaPrefabsAvailable += AddFenringArmor;
-            // ZoneManager.OnVanillaVegetationAvailable += AddLocations;
+            PrefabManager.OnVanillaPrefabsAvailable += AddFenringArmor;
+            ZoneManager.OnVanillaVegetationAvailable += AddLocations;
 
             //ZoneManager.OnVegetationRegistered += CheckLocations;
             //ItemManager.OnItemsRegistered += LogRecipes;
@@ -1236,6 +1236,14 @@ namespace MagicExtended
             ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("ArmorFenringChestPlains_DW"), true, testConfig));
             testConfig.Name = "Fenring Green Legs";
             ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("ArmorFenringLegsPlains_DW"), true, testConfig));
+
+            testConfig.Name = "Charred Helmet";
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("HelmetCharredRoot_DW"), true, testConfig));
+            testConfig.Name = "Charred Chest";
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("ArmorCharredRootChest_DW"), true, testConfig));
+            testConfig.Name = "Charred Legs";
+            ItemManager.Instance.AddItem(new CustomItem(magicExtendedBundle.LoadAsset<GameObject>("ArmorCharredRootLegs_DW"), true, testConfig));
+
             PrefabManager.OnVanillaPrefabsAvailable -= AddFenringArmor;
         }
 
