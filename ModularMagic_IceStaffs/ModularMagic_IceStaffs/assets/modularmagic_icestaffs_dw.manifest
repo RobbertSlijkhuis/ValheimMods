@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 1901100327
+CRC: 73927927
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: ebcd94d261b2ce5898e244dbcc3a27c3
+    Hash: a017186f01fea47ad09e521cd7a20755
   TypeTreeHash:
     serializedVersion: 2
-    Hash: b628e01009fc2c394956bca91709ca5c
+    Hash: 2508dd67ab84f36990185366b51ebef6
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: ebcd94d261b2ce5898e244dbcc3a27c3
+    Hash: a017186f01fea47ad09e521cd7a20755
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -30,6 +30,8 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 54
   Script: {instanceID: 0}
+- Class: 64
+  Script: {instanceID: 0}
 - Class: 65
   Script: {instanceID: 0}
 - Class: 82
@@ -39,9 +41,19 @@ ClassTypes:
 - Class: 108
   Script: {instanceID: 0}
 - Class: 114
-  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+  Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: -1044604064, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: -347224168, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1541706127, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -49,11 +61,7 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
   Script: {fileID: 313648218, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 115
   Script: {instanceID: 0}
 - Class: 198
@@ -78,6 +86,8 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: EffectList/EffectData
 - AssemblyName: assembly_valheim
+  ClassName: HitData/DamageModifiers
+- AssemblyName: assembly_valheim
   ClassName: HitData/DamageTypes
 - AssemblyName: assembly_valheim
   ClassName: ItemDrop/ItemData
@@ -86,8 +96,10 @@ SerializeReferenceClassIdentifiers:
 Assets:
 - Assets/Custom/PrefabInstance/Frost/MMIS_staffIce3.prefab
 - Assets/Custom/PrefabInstance/Frost/MMIS_staffIce1.prefab
+- Assets/Custom/PrefabInstance/Frost/fx_IceSheetSpawn_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/staff_ice_projectile_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/MMIS_staffIce2.prefab
+- Assets/Custom/PrefabInstance/Frost/IceSheet_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/fx_staff_ice_spores_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/fx_iceshard_launch_smoke_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/fx_staff_ice_spikes_MMIS.prefab

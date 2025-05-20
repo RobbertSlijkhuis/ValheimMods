@@ -5,6 +5,7 @@ using Jotunn.Utils;
 using ModularMagic_IceStaffs.Configs;
 using ModularMagic_IceStaffs.Helpers;
 using ModularMagic_IceStaffs.Models;
+using System.Reflection;
 using UnityEngine;
 
 namespace ModularMagic_IceStaffs
@@ -33,7 +34,6 @@ namespace ModularMagic_IceStaffs
             ConfigStaffs.Init();
 
             PrefabManager.OnVanillaPrefabsAvailable += AddIceStaffs;
-            Jotunn.Logger.LogInfo("ModularMagic_IceStaffs has been initialised");
             ItemManager.OnItemsRegistered += LogRecipes;
         }
 
@@ -73,6 +73,8 @@ namespace ModularMagic_IceStaffs
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_ice_spikes_MMIS"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_iceshard_launch_MMIS"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_iceshard_launch_smoke_MMIS"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("IceSheet_MMIS"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_IceSheetSpawn_MMIS"), true));
         }
     }
 }

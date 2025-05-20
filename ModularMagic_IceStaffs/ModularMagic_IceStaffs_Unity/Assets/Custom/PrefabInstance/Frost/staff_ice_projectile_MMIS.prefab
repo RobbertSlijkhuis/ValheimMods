@@ -69,16 +69,16 @@ MonoBehaviour:
   m_backstabBonus: 3
   m_statusEffect: 
   m_healthReturn: 0
-  m_canHitWater: 0
-  m_ttl: 6
+  m_canHitWater: 1
+  m_ttl: 20
   m_gravity: 4
   m_drag: 0
   m_rayRadius: 0.1
-  m_hitNoise: 0
+  m_hitNoise: 25
   m_doOwnerRaytest: 1
   m_stayAfterHitStatic: 0
   m_stayAfterHitDynamic: 0
-  m_stayTTL: 1
+  m_stayTTL: 0
   m_attachToRigidBody: 0
   m_attachToClosestBone: 0
   m_attachPenetration: 0
@@ -100,7 +100,31 @@ MonoBehaviour:
       m_scale: 0
       m_childTransform: 
   m_hitWaterEffects:
-    m_effectPrefabs: []
+    m_effectPrefabs:
+    - m_prefab: {fileID: 1843119151319614, guid: fec34e7645efe2c4080f6ef0bec26260,
+        type: 3}
+      m_enabled: 1
+      m_variant: 0
+      m_attach: 0
+      m_follow: 0
+      m_inheritParentRotation: 0
+      m_inheritParentScale: 0
+      m_multiplyParentVisualScale: 0
+      m_randomRotation: 0
+      m_scale: 0
+      m_childTransform: 
+    - m_prefab: {fileID: 1591162795152099, guid: 27e5aead18edc704782417caf99cd812,
+        type: 3}
+      m_enabled: 1
+      m_variant: 0
+      m_attach: 0
+      m_follow: 0
+      m_inheritParentRotation: 0
+      m_inheritParentScale: 0
+      m_multiplyParentVisualScale: 0
+      m_randomRotation: 0
+      m_scale: 0
+      m_childTransform: 
   m_bounce: 0
   m_bounceOnWater: 0
   m_bouncePower: 0.85
@@ -134,8 +158,8 @@ MonoBehaviour:
   m_divideDamageBetweenProjectiles: 0
   m_rotateVisual: 0
   m_rotateVisualY: 0
-  m_rotateVisualZ: 0
-  m_visual: {fileID: 0}
+  m_rotateVisualZ: 500
+  m_visual: {fileID: 4917467187783329812}
   m_canChangeVisuals: 0
   m_startPoint: {x: 0, y: 0, z: 0}
 --- !u!114 &114213904677614578
