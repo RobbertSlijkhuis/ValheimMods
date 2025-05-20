@@ -16,6 +16,9 @@ namespace ModularMagic_EarthStaffs.Harmony
 
             ItemDrop.ItemData weapon = character.GetCurrentWeapon();
 
+            if (weapon == null || weapon.m_dropPrefab == null) 
+                return true;
+
             if (weapon.m_dropPrefab.name == ModularMagic_EarthStaffs.Instance.prefabs.staffEarth0Prefab.name)
             {
                 RandomizeMushroom();

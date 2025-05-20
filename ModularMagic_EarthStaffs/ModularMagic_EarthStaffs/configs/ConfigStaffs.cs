@@ -6,23 +6,23 @@ namespace ModularMagic_EarthStaffs.Configs
     internal static class ConfigStaffs
     {
         public static string staff0Name = "The Forest Flinger";
-        public static string staff0Recipe = "Wood:20, Stone:20, Resin:20, DeerHide:6";
-        public static string staff0UpgradeRecipe = "Wood:10, Stone:10, DeerHide:2";
+        public static string staff0Recipe = "Wood:20, Stone:20, Resin:20, LeatherScraps:6";
+        public static string staff0UpgradeRecipe = "Wood:5, Stone:5, DeerHide:2";
         public static StaffConfig staffEarth0 = new StaffConfig();
 
         public static string staff1Name = "Tremorbranch";
         public static string staff1Recipe = "RoundLog:20, Stone:20, Resin:20, Thistle:10";
-        public static string staff1UpgradeRecipe = "RoundLog:10, Stone:10, Thistle:4";
+        public static string staff1UpgradeRecipe = "RoundLog:5, Stone:5, Thistle:3";
         public static StaffConfig staffEarth1 = new StaffConfig();
 
         public static string staff2Name = "Earthwhorl the Avalanche";
-        public static string staff2Recipe = $"{ModularMagic_EarthStaffs.Instance.prefabs.staffEarth1Prefab.name}:1, FineWood:20, Root:10, Crystal:20";
-        public static string staff2UpgradeRecipe = "FineWood:10, Root:4, Crystal:8";
+        public static string staff2Recipe = $"{ModularMagic_EarthStaffs.Instance.prefabs.staffEarth1Prefab.name}:1, FineWood:20, Root:10, Guck:10";
+        public static string staff2UpgradeRecipe = "FineWood:5, Root:3, Guck:3";
         public static StaffConfig staffEarth2 = new StaffConfig();
 
         public static string staff3Name = "Oakrend the Earthcaller";
-        public static string staff3Recipe = $"{ModularMagic_EarthStaffs.Instance.prefabs.staffEarth2Prefab.name}:1, YggdrasilWood:20, Sap:10, Eitr:16";
-        public static string staff3UpgradeRecipe = "YggdrasilWood:10, Sap:4, Eitr:8";
+        public static string staff3Recipe = $"{ModularMagic_EarthStaffs.Instance.prefabs.staffEarth2Prefab.name}:1, ElderBark:20, FineWood:20, YmirRemains:5";
+        public static string staff3UpgradeRecipe = "ElderBark:5, FineWood:5, YmirRemains:1";
         // public static string staff3CooldownStatusEffectName = "StaffEarth3Cooldown_DW";
         public static StaffConfig staffEarth3 = new StaffConfig();
 
