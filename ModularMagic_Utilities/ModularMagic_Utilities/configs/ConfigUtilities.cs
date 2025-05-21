@@ -49,7 +49,7 @@ namespace ModularMagic_Utilities.Configs
         private static void InitGeneralConfig()
         {
             configUtilityModeKey = ModularMagic_Utilities.Instance.Config.Bind($"{sectionIndex}. General", "Utility mode key", new KeyboardShortcut(KeyCode.Y),
-                new ConfigDescription("Key to change the mode on utilities (applies to lanterns)", null));
+                new ConfigDescription("Key to toggle the light on/off of lanterns)", null));
             configUtilityModeKey.SettingChanged += (obj, attr) =>
             {
                 Jotunn.Logger.LogWarning("key has been changed to: " + configUtilityModeKey.Value);

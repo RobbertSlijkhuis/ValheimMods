@@ -96,7 +96,7 @@
     <CallTarget Targets="CopyToUnity" Condition="Exists('$(UNITY_FOLDER)')" />
   </Target>
 
-  <Target Name="JotunnPostBuildTaskWin" BeforeTargets="CopyToUnity" Condition=" '$(OS)' == 'Windows_NT' ">
+  <Target Name="JotunnPostBuildTaskWin" AfterTargets="Build" Condition=" '$(OS)' == 'Windows_NT' ">
     <Exec Command="powershell.exe -ExecutionPolicy RemoteSigned -File &quot;$(SolutionDir)publish.ps1&quot; -Target &quot;$(ConfigurationName)&quot; -TargetPath &quot;$(TargetDir.TrimEnd('\'))&quot; -TargetAssembly &quot;$(TargetFileName)&quot; -ValheimPath &quot;$(VALHEIM_INSTALL.TrimEnd('\'))&quot; -DeployPath &quot;$(MOD_DEPLOYPATH.TrimEnd('\'))&quot; -ProjectPath &quot;$(ProjectDir.TrimEnd('\'))&quot; " />
   </Target>
 </Project>

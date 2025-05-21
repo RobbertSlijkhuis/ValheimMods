@@ -1,11 +1,14 @@
 using BepInEx;
 using Jotunn.Configs;
+using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
 using ModularMagic_Utilities.Configs;
 using ModularMagic_Utilities.Helpers;
 using ModularMagic_Utilities.Models;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
@@ -23,10 +26,13 @@ namespace ModularMagic_Utilities
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
 
         private AssetBundle assetBundle;
+        public CustomRPC lanternRPC;
         public CustomPrefabs prefabs = new CustomPrefabs();
         public CustomMaterials materials = new CustomMaterials();
 
         private ButtonConfig utilityModeButton;
+
+        public Dictionary<long, bool> lanternStatusDictionary = new Dictionary<long, bool>();
 
         private void Awake()
         {
@@ -35,22 +41,35 @@ namespace ModularMagic_Utilities
             ConfigUtilities.Init();
             InitInputs();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
+            lanternRPC = NetworkManager.Instance.AddRPC("RPC_Lantern_MMU", OnServerReceive, OnClientReceive);
 
             PrefabManager.OnVanillaPrefabsAvailable += AddUtilities;
-            Jotunn.Logger.LogInfo("ModularMagic_Utilities has been initialised");
-            // ItemManager.OnItemsRegistered += LogRecipes;
+            ItemManager.OnItemsRegistered += LogRecipes;
         }
 
-        //private void LogRecipes()
-        //{
-        //    ObjectDB.instance.m_recipes.ForEach(r =>
-        //    {
-        //        if (r.name.Contains("MMU_"))
-        //        Jotunn.Logger.LogInfo(r.name);
-        //    });
+        private IEnumerator OnServerReceive(long sender, ZPackage package)
+        {
+            yield return new WaitForSeconds(0.1f);
+            UpdateHelper.UpdateLanternMode(RPCHelper.ReadLanternPackage(package));
+            lanternRPC.SendPackage(ZNet.instance.m_peers, new ZPackage(package.GetArray()));
+        }
 
-        //    ItemManager.OnItemsRegistered -= LogRecipes;
-        //}
+        private IEnumerator OnClientReceive(long sender, ZPackage package)
+        {
+            yield return new WaitForSeconds(0.1f);
+            UpdateHelper.UpdateLanternMode(RPCHelper.ReadLanternPackage(package));
+        }
+
+        private void LogRecipes()
+        {
+            ObjectDB.instance.m_recipes.ForEach(r =>
+            {
+                if (r.name.Contains("MMU_"))
+                    Jotunn.Logger.LogInfo(r.name);
+            });
+
+            ItemManager.OnItemsRegistered -= LogRecipes;
+        }
 
         /**
          * Called on every update
@@ -68,25 +87,29 @@ namespace ModularMagic_Utilities
                     {
                         if (Player.m_localPlayer)
                         {
-                            ItemDrop.ItemData itemData = Player.m_localPlayer.m_utilityItem;
+                            try
+                            {
+                                ItemDrop.ItemData itemData = Player.m_localPlayer.m_utilityItem;
 
-                            if (itemData == null || itemData.m_shared == null)
-                            {
-                                Jotunn.Logger.LogWarning("Item Data is null");
-                                return;
-                            }
+                                if (itemData == null || itemData.m_shared == null)
+                                {
+                                    Jotunn.Logger.LogWarning("Item Data is null");
+                                    return;
+                                }
 
-                            if (itemData.m_shared.m_name == ConfigUtilities.lantern1.name.Value)
-                            {
-                                UpdateHelper.UpdateLanternMode(ModularMagic_Utilities.Instance.materials.lantern1Mat, ModularMagic_Utilities.Instance.materials.lantern1OffMat);
+                                ZPackage package = new ZPackage();
+                                int type = RPCHelper.GetLanternType(itemData);
+
+                                if (type != 0)
+                                {
+                                    long playerId = Player.m_localPlayer.GetPlayerID();
+                                    package.Write($"{playerId},{type},{!lanternStatusDictionary[playerId]},true");
+                                    lanternRPC.SendPackage(ZRoutedRpc.instance.GetServerPeerID(), package);
+                                }
                             }
-                            else if (itemData.m_shared.m_name == ConfigUtilities.lantern2.name.Value)
+                            catch (Exception error)
                             {
-                                UpdateHelper.UpdateLanternMode(ModularMagic_Utilities.Instance.materials.lantern2Mat, ModularMagic_Utilities.Instance.materials.lantern2OffMat);
-                            }
-                            else if (itemData.m_shared.m_name == ConfigUtilities.lantern3.name.Value)
-                            {
-                               UpdateHelper.UpdateLanternMode(ModularMagic_Utilities.Instance.materials.lantern3Mat, ModularMagic_Utilities.Instance.materials.lantern3OffMat);
+                                Jotunn.Logger.LogError(error);
                             }
                         }
                     }
@@ -122,7 +145,7 @@ namespace ModularMagic_Utilities
             {
                 utilityModeButton = new ButtonConfig
                 {
-                    Name = "Weapon mode",
+                    Name = "Lantern mode",
                     ShortcutConfig = ConfigUtilities.configUtilityModeKey,
                 };
 

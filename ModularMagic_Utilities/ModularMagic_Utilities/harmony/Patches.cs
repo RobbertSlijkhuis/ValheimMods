@@ -1,8 +1,12 @@
 ﻿using HarmonyLib;
 using ModularMagic_Utilities.Configs;
+using ModularMagic_Utilities.Helpers;
 using ModularMagic_Utilities.Models;
+using System;
+using System.Linq;
+using static ItemDrop;
 
-namespace MagicExtended.Harmony
+namespace ModularMagic_Utilities.Harmony
 {
     [HarmonyPatch]
     public class Patches
@@ -67,6 +71,73 @@ namespace MagicExtended.Harmony
             float newLevel = currentLevel + value;
             __instance.m_player.GetSEMan().ModifySkillLevel(skillType, ref newLevel);
             __result = newLevel;
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Player), "SetPlayerID")]
+        public static void SetPlayerID_Postfix(ref Player __instance)
+        {
+            try
+            {
+                if (__instance == null)
+                    return;
+
+                if (__instance.GetPlayerID() == 0 || __instance.GetPlayerName() == "") 
+                    return;
+
+                if (!ModularMagic_Utilities.Instance.lanternStatusDictionary.ContainsKey(__instance.GetPlayerID()))
+                {
+                    Jotunn.Logger.LogWarning($"Adding {__instance.GetPlayerName()} to lantern dictionary! {__instance.GetPlayerID()}");
+                    ModularMagic_Utilities.Instance.lanternStatusDictionary.Add(__instance.GetPlayerID(), true);
+                }
+
+                //Jotunn.Logger.LogWarning("Created new player: " + __instance.GetPlayerName());
+                //var inventory = __instance.GetInventory();
+                //var equipedItems = inventory.GetEquippedItems();
+
+                //var lantern = equipedItems.Find(item => 
+                //    item.m_shared.m_name == ConfigUtilities.lantern1.name.Value ||
+                //    item.m_shared.m_name == ConfigUtilities.lantern2.name.Value || 
+                //    item.m_shared.m_name == ConfigUtilities.lantern3.name.Value);
+
+                //if (lantern != null)
+                //{
+
+                //}
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError(error);
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Humanoid), "UnequipItem")]
+        public static void UnequipItem_Postfix(ItemData item)
+        {
+            try
+            {
+                if (item == null) 
+                    return;
+
+                long playerId = Player.m_localPlayer.GetPlayerID();
+
+                if (ModularMagic_Utilities.Instance.lanternStatusDictionary[playerId]) 
+                    return;
+
+                ZPackage package = new ZPackage();
+                int type = RPCHelper.GetLanternType(item);
+
+                if (type != 0)
+                {
+                    package.Write($"{playerId},{type},true,false");
+                    ModularMagic_Utilities.Instance.lanternRPC.SendPackage(ZRoutedRpc.instance.GetServerPeerID(), package);
+                }
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError(error);
+            }
         }
 
         private static void SetEitr(Player player, string name, float amount, ref float eitr)

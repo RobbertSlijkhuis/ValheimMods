@@ -1,6 +1,7 @@
 ﻿using ModularMagic_Utilities.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace ModularMagic_Utilities.Helpers
@@ -54,44 +55,37 @@ namespace ModularMagic_Utilities.Helpers
             }
         }
 
-        public static void UpdateLanternMode(Material mat, Material matOff)
+        public static void UpdateLanternMode(LanternPackageResult result)
         {
-            if (Player.m_localPlayer == null)
+            Player player = Player.GetPlayer(result.playerId);
+
+            if (player == null)
             {
-                Jotunn.Logger.LogWarning("Could not find local Player object");
+                Jotunn.Logger.LogWarning("Could not find Player object");
                 return;
             }
 
-            GameObject lightObj = Player.m_localPlayer.transform.Find("Visual/attach_skin(Clone)/equiped/MMU_Lantern Point Light").gameObject;
-            GameObject flareObj = Player.m_localPlayer.transform.Find("Visual/attach_skin(Clone)/Lantern/MMU_Lantern flare").gameObject;
-            GameObject demisterObj = Player.m_localPlayer.transform.Find("Visual/attach_skin(Clone)/equiped/MMU_Lantern Demister").gameObject;
-            GameObject lanternObj = Player.m_localPlayer.transform.Find("Visual/attach_skin(Clone)/Lantern").gameObject;
+            bool active = ModularMagic_Utilities.Instance.lanternStatusDictionary[result.playerId];
+            Jotunn.Logger.LogWarning($"Lantern of {player.GetPlayerName()} is currently {active}");
 
-            //Jotunn.Logger.LogWarning($"{lightObj.name}");
-            //Jotunn.Logger.LogWarning($"{flareObj.name}");
-            //Jotunn.Logger.LogWarning($"{demisterObj.name}");
-            //Jotunn.Logger.LogWarning($"Active: {lightObj.activeSelf}");
-
-            if (lightObj.activeSelf)
+            if (result.applyLanternChanges)
             {
-                lightObj.SetActive(false);
-                flareObj.SetActive(false);
-                demisterObj.SetActive(false);
+                GameObject lightObj = player.transform.Find("Visual/attach_skin(Clone)/equiped/MMU_Lantern Point Light").gameObject;
+                GameObject flareObj = player.transform.Find("Visual/attach_skin(Clone)/Lantern/MMU_Lantern flare").gameObject;
+                GameObject demisterObj = player.transform.Find("Visual/attach_skin(Clone)/equiped/MMU_Lantern Demister").gameObject;
+                GameObject lanternObj = player.transform.Find("Visual/attach_skin(Clone)/Lantern").gameObject;
+
+                lightObj.SetActive(result.value);
+                flareObj.SetActive(result.value);
+                demisterObj.SetActive(result.value);
 
                 SkinnedMeshRenderer meshObj = lanternObj.GetComponent<SkinnedMeshRenderer>();
-                List<Material> materialList = new List<Material> { matOff };
+                List<Material> materialList = new List<Material> { result.value ? result.lanternOn : result.lanternOff };
                 meshObj.materials = materialList.ToArray();
             }
-            else
-            {
-                lightObj.SetActive(true);
-                flareObj.SetActive(true);
-                demisterObj.SetActive(true);
 
-                SkinnedMeshRenderer meshObj = lanternObj.GetComponent<SkinnedMeshRenderer>();
-                List<Material> materialList = new List<Material> { mat };
-                meshObj.materials = materialList.ToArray();
-            }
+            ModularMagic_Utilities.Instance.lanternStatusDictionary[result.playerId] = result.value;
+            Jotunn.Logger.LogWarning($"Lantern of {player.GetPlayerName()} is now {result.value}");
         }
 
         public static void UpdateDemisterOnPrefab(GameObject prefab, float value)

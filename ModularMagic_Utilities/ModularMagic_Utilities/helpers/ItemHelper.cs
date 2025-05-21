@@ -1,7 +1,6 @@
 ﻿using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
-using ModularMagic_Utilities.Helpers;
 using ModularMagic_Utilities.Models;
 using ModularMagic_Utilities.StatusEffects;
 using UnityEngine;
