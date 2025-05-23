@@ -21,6 +21,11 @@ namespace ModularMagic_Utilities.Models
         public ConfigEntry<float> elementalMagic;
         public ConfigEntry<float> bloodMagic;
         public ConfigEntry <int> demister;
+        public ConfigEntry<string> flareColor;
+        public ConfigEntry<string> lightColor;
+        public ConfigEntry<float> lightIntensity;
+        public ConfigEntry<float> lightRange;
+        public ConfigEntry<string> materialColor;
 
         // Other
         public string cooldownStatusEffectName;
@@ -167,6 +172,61 @@ namespace ModularMagic_Utilities.Models
                 {
                     Jotunn.Logger.LogWarning("demister: " + this.demister.Value);
                     UpdateHelper.UpdateDemisterOnBoth(options.prefab, this.demister.Value);
+                };
+            }
+
+            if (options.flareColor != null)
+            {
+                this.flareColor = Config.Bind(new ConfigDefinition(options.sectionName, "Light flare color"), options.flareColor,
+                    new ConfigDescription("The color of the lantern light", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                this.flareColor.SettingChanged += (obj, attr) =>
+                {
+                    Jotunn.Logger.LogWarning("New flare color: " + this.flareColor.Value);
+                };
+            }
+
+            if (options.lightColor != null)
+            {
+                this.lightColor = Config.Bind(new ConfigDefinition(options.sectionName, "Light color"), options.lightColor,
+                    new ConfigDescription("The color of the lantern light", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                this.lightColor.SettingChanged += (obj, attr) =>
+                {
+                    Jotunn.Logger.LogWarning("New color: " + this.lightColor.Value);
+                };
+            }
+
+            if (options.lightRange != null) 
+            {
+                this.lightRange = Config.Bind(new ConfigDefinition(options.sectionName, "Light range"), (float)options.lightRange,
+                    new ConfigDescription("The range of the lantern light", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                this.lightRange.SettingChanged += (obj, attr) =>
+                {
+                    Jotunn.Logger.LogWarning("New range: " + this.lightRange.Value);
+                };
+            }
+
+            if (options.lightIntensity != null)
+            {
+                this.lightIntensity = Config.Bind(new ConfigDefinition(options.sectionName, "Light intensity"), (float)options.lightIntensity,
+                    new ConfigDescription("The intensity of the lantern light", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                this.lightIntensity.SettingChanged += (obj, attr) =>
+                {
+                    Jotunn.Logger.LogWarning("New intensity: " + this.lightIntensity.Value);
+                };
+            }
+
+            if (options.materialColor != null)
+            {
+                this.materialColor = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern material color"), options.materialColor,
+                    new ConfigDescription("The color of the lantern light", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                this.materialColor.SettingChanged += (obj, attr) =>
+                {
+                    Jotunn.Logger.LogWarning("New material color: " + this.materialColor.Value);
                 };
             }
         }

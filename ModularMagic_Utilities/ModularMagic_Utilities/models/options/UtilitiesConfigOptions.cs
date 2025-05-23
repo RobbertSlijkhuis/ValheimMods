@@ -24,6 +24,12 @@ namespace ModularMagic_Utilities.Models
 
         public float? demister;
 
+        public string flareColor;
+        public string lightColor;
+        public float? lightIntensity;
+        public float? lightRange;
+        public string materialColor;
+
         public string cooldownStatusEffectName;
         public string magicStatusEffectName;
 

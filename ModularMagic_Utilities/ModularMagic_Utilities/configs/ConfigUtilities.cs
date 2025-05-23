@@ -140,7 +140,11 @@ namespace ModularMagic_Utilities.Configs
                     elementalMagic = 3f,
                     bloodMagic = 3f,
                     demister = 0f,
-
+                    flareColor = "#FF7D3619",
+                    lightColor = "#FFC849",
+                    lightRange = 32f,
+                    lightIntensity = 1.5f,
+                    materialColor = "1.97667456, 1.14168906, 0.131697819, 1",
                 };
                 lantern1.GenerateConfig(options);
                 IncrementSectionIndex();
@@ -165,6 +169,11 @@ namespace ModularMagic_Utilities.Configs
                     elementalMagic = 6f,
                     bloodMagic = 6f,
                     demister = 0f,
+                    flareColor = "#94DBFF19",
+                    lightColor = "#D5F1FF",
+                    lightRange = 32f,
+                    lightIntensity = 1.5f,
+                    materialColor = "1.26792896, 1.7979852, 1.96205056, 1",
                 };
                 lantern2.GenerateConfig(options);
                 IncrementSectionIndex();
@@ -189,6 +198,11 @@ namespace ModularMagic_Utilities.Configs
                     elementalMagic = 8f,
                     bloodMagic = 8f,
                     demister = 6f,
+                    flareColor = "#FF7AB819",
+                    lightColor = "#FFC4E2",
+                    lightRange = 32f,
+                    lightIntensity = 1.5f,
+                    materialColor = "1.97667456, 0, 1.39524257, 1",
                 };
                 lantern3.GenerateConfig(options);
                 IncrementSectionIndex();

@@ -1,6 +1,8 @@
-﻿using ModularMagic_Utilities.Models;
+﻿using ModularMagic_Utilities.Configs;
+using ModularMagic_Utilities.Models;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using UnityEngine;
 
@@ -65,19 +67,50 @@ namespace ModularMagic_Utilities.Helpers
                 return;
             }
 
-            bool active = ModularMagic_Utilities.Instance.lanternStatusDictionary[result.playerId];
-            Jotunn.Logger.LogWarning($"Lantern of {player.GetPlayerName()} is currently {active}");
-
             if (result.applyLanternChanges)
             {
                 GameObject lightObj = player.transform.Find("Visual/attach_skin(Clone)/equiped/MMU_Lantern Point Light").gameObject;
                 GameObject flareObj = player.transform.Find("Visual/attach_skin(Clone)/Lantern/MMU_Lantern flare").gameObject;
                 GameObject demisterObj = player.transform.Find("Visual/attach_skin(Clone)/equiped/MMU_Lantern Demister").gameObject;
                 GameObject lanternObj = player.transform.Find("Visual/attach_skin(Clone)/Lantern").gameObject;
+                Light lightComp = lightObj.GetComponent<Light>();
+                ParticleSystem flareComp = flareObj.GetComponent<ParticleSystem>();
 
+                Color flareColor;
+                Color lightColor;
+                Color materialColor;
+
+                if (ColorUtility.TryParseHtmlString(result.lightColor, out lightColor))
+                    lightComp.color = lightColor;
+                
+                lightComp.range = (float)result.lightRange;
+                lightComp.intensity = (float)result.lightIntensity;
                 lightObj.SetActive(result.value);
+
+                if (ColorUtility.TryParseHtmlString(result.flareColor, out flareColor))
+                {
+                    flareComp.startColor = flareColor;
+                    flareComp.startSize = 2f;
+                }
+
                 flareObj.SetActive(result.value);
                 demisterObj.SetActive(result.value);
+
+                if (result.value)
+                {
+                    Jotunn.Logger.LogWarning("materialColor: " + result.materialColor);
+                    string[] colorData = result.materialColor.Trim().Split(',');
+                    Jotunn.Logger.LogWarning(float.Parse(colorData[0], NumberStyles.Any, CultureInfo.InvariantCulture));
+                    materialColor = new Color(
+                        float.Parse(colorData[0], NumberStyles.Any, CultureInfo.InvariantCulture),
+                        float.Parse(colorData[1], NumberStyles.Any, CultureInfo.InvariantCulture),
+                        float.Parse(colorData[2], NumberStyles.Any, CultureInfo.InvariantCulture),
+                        float.Parse(colorData[3], NumberStyles.Any, CultureInfo.InvariantCulture));
+
+                    Jotunn.Logger.LogWarning("Old Emission color: "+ result.lanternOn.GetColor("_EmissionColor").ToString());
+                    Jotunn.Logger.LogWarning("New Emission color: " + materialColor.ToString());
+                    result.lanternOn.SetColor("_EmissionColor", materialColor);
+                }
 
                 SkinnedMeshRenderer meshObj = lanternObj.GetComponent<SkinnedMeshRenderer>();
                 List<Material> materialList = new List<Material> { result.value ? result.lanternOn : result.lanternOff };
@@ -173,6 +206,33 @@ namespace ModularMagic_Utilities.Helpers
                 Jotunn.Logger.LogWarning("Update Eitr regen to: " + value);
                 item.m_shared.m_eitrRegenModifier = value;
             }
+        }
+
+        public static Color32? HexToColor32(string hex)
+        {
+            Jotunn.Logger.LogWarning("Value: " + hex);
+            if (hex.Length < 6)
+            {
+                throw new FormatException("Needs a string with a length of at least 6");
+            }
+
+            var r = hex.Substring(0, 2);
+            var g = hex.Substring(2, 2);
+            var b = hex.Substring(4, 2);
+            string a;
+            if (hex.Length >= 8)
+                a = hex.Substring(6, 2);
+            else
+                a = "FF";
+
+            int red = int.Parse(r, NumberStyles.HexNumber) / 255;
+            int green = int.Parse(g, NumberStyles.HexNumber) / 255;
+            int blue = int.Parse(b, NumberStyles.HexNumber) / 255;
+            int alpha = int.Parse(a, NumberStyles.HexNumber) / 255;
+
+            Jotunn.Logger.LogWarning($"Color: rgba({red}, {green}, {blue}, {alpha})");
+
+            return new Color(red, green, blue, alpha);
         }
     }
 }

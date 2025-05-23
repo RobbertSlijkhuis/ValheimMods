@@ -74,21 +74,36 @@ namespace ModularMagic_Utilities.Harmony
         }
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(Player), "SetPlayerID")]
-        public static void SetPlayerID_Postfix(ref Player __instance)
+        [HarmonyPatch(typeof(Game), "SpawnPlayer")]
+        public static void SpawnPlayer_Postfix()
+        {
+            try
+            {
+                Jotunn.Logger.LogWarning($"Player is spawned!");
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError(error);
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Player), "OnSpawned")]
+        public static void OnSpawned_Postfix(ref Player __instance)
         {
             try
             {
                 if (__instance == null)
                     return;
 
-                if (__instance.GetPlayerID() == 0 || __instance.GetPlayerName() == "") 
-                    return;
-
                 if (!ModularMagic_Utilities.Instance.lanternStatusDictionary.ContainsKey(__instance.GetPlayerID()))
                 {
                     Jotunn.Logger.LogWarning($"Adding {__instance.GetPlayerName()} to lantern dictionary! {__instance.GetPlayerID()}");
                     ModularMagic_Utilities.Instance.lanternStatusDictionary.Add(__instance.GetPlayerID(), true);
+                }
+                else
+                {
+                    Jotunn.Logger.LogWarning($"{__instance.GetPlayerName()} is already in the to lantern dictionary!");
                 }
 
                 //Jotunn.Logger.LogWarning("Created new player: " + __instance.GetPlayerName());
