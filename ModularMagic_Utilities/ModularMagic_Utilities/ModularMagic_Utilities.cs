@@ -43,7 +43,6 @@ namespace ModularMagic_Utilities
             InitInputs();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             lanternRPC = NetworkManager.Instance.AddRPC("RPC_Lantern_MMU", OnServerReceive, OnClientReceive);
-            // AzuEPISlotHelper.AddSlot();
 
             PrefabManager.OnVanillaPrefabsAvailable += AddUtilities;
             ItemManager.OnItemsRegistered += LogRecipes;

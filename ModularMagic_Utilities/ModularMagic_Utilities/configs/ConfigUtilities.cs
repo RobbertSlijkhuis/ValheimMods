@@ -1,5 +1,4 @@
 ﻿using BepInEx.Configuration;
-using ModularMagic_Utilities.Helpers;
 using ModularMagic_Utilities.Models;
 using System;
 using UnityEngine;
@@ -33,7 +32,6 @@ namespace ModularMagic_Utilities.Configs
         public static UtilitiesConfig lantern3 = new UtilitiesConfig();
 
         // Other
-        public static  ConfigEntry<bool> configEnableSlot;
         public static  ConfigEntry<KeyboardShortcut> configLanternModKey;
         private static int sectionIndex = 1;
 
@@ -50,19 +48,9 @@ namespace ModularMagic_Utilities.Configs
 
         private static void InitGeneralConfig()
         {
-            configEnableSlot = ModularMagic_Utilities.Instance.Config.Bind($"{sectionIndex}. General", "Enable AzuEPI slot", true,
-                new ConfigDescription("Adds a custom slot for spellbooks/lanterns when AzuEPI is installed", null));
-            configEnableSlot.SettingChanged += (obj, attr) =>
-            {
-                //if (configEnableSlot.Value)
-                //    AzuEPISlotHelper.AddSlot();
-                //else
-                //    AzuEPISlotHelper.RemoveSlot();
-                CustomSlot.AddCustomSlot(configEnableSlot);
-            };
-
             configLanternModKey = ModularMagic_Utilities.Instance.Config.Bind($"{sectionIndex}. General", "Lantern on/off key", new KeyboardShortcut(KeyCode.Y),
                 new ConfigDescription("Key to toggle the light on/off of lanterns)", null));
+
             IncrementSectionIndex();
         }
 
