@@ -7,8 +7,8 @@ namespace ModularMagic_Utilities.Models
         public bool applyLanternChanges;
         public Material lanternOn;
         public Material lanternOff;
-        public string flareColor;
-        public string lightColor;
+        public Color flareColor;
+        public Color lightColor;
         public float? lightRange;
         public float? lightIntensity;
         public string materialColor;
@@ -16,7 +16,7 @@ namespace ModularMagic_Utilities.Models
         public int type;
         public bool value;
 
-        public LanternPackageResult(Material lanternOn, Material lanternOff, long playerId, int type, bool value, bool applyLanternChanges, string flareColor, string lightColor, float? lightRange, float? lightIntensity, string materialColor)
+        public LanternPackageResult(Material lanternOn, Material lanternOff, long playerId, int type, bool value, bool applyLanternChanges, Color flareColor, Color lightColor, float? lightRange, float? lightIntensity, string materialColor)
         {
             this.applyLanternChanges = applyLanternChanges;
             this.lanternOn = lanternOn;

@@ -1,4 +1,5 @@
 ﻿using BepInEx.Configuration;
+using ModularMagic_Utilities.Helpers;
 using ModularMagic_Utilities.Models;
 using System;
 using UnityEngine;
@@ -12,27 +13,28 @@ namespace ModularMagic_Utilities.Configs
         public static UtilitiesConfig spellbook1 = new UtilitiesConfig();
 
         public static string book2Name = "Grimoire of the Storm";
-        public static string book2Recipe = "MMU_SpellbookOfTheHearth:1, Silver:4, Thunderstone:2, Chitin:10";
+        public static string book2Recipe = $"{ModularMagic_Utilities.Instance.prefabs.spellbook1Prefab.name}:1, Silver:4, Thunderstone:2, Chitin:10";
         public static UtilitiesConfig spellbook2 = new UtilitiesConfig();
 
         public static string book3Name = "Codex of the Asgardian Sorcerer";
-        public static string book3Recipe = "MMU_GrimoireOfTheStorm:1, BlackCore:6, Sap:10, Eitr:8";
+        public static string book3Recipe = $"{ModularMagic_Utilities.Instance.prefabs.spellbook2Prefab.name}:1, BlackCore:6, Sap:10, Eitr:8";
         public static UtilitiesConfig spellbook3 = new UtilitiesConfig();
 
-        public static string lantern1Name = "Mystical Lantern";
+        public static string lantern1Name = "Mythical Lantern";
         public static string lantern1Recipe = "RoundLog: 10, Bronze:4, Resin:8, SurtlingCore:2";
         public static UtilitiesConfig lantern1 = new UtilitiesConfig();
 
         public static string lantern2Name = "Everwinter Lantern";
-        public static string lantern2Recipe = "MMU_MythicalLantern:1, Silver:6, Crystal:10, DragonEgg:1";
+        public static string lantern2Recipe = $"{ModularMagic_Utilities.Instance.prefabs.lantern1Prefab.name}:1, Silver:6, Crystal:10, DragonEgg:1";
         public static UtilitiesConfig lantern2 = new UtilitiesConfig();
 
         public static string lantern3Name = "Mistcaller Lantern";
-        public static string lantern3Recipe = "MMU_EverwinterLantern:1, BlackCore:6, BlackMarble:12, Eitr:6";
+        public static string lantern3Recipe = $"{ModularMagic_Utilities.Instance.prefabs.lantern2Prefab.name}:1, BlackCore:6, BlackMarble:12, Eitr:6";
         public static UtilitiesConfig lantern3 = new UtilitiesConfig();
 
         // Other
-        public static  ConfigEntry<KeyboardShortcut> configUtilityModeKey;
+        public static  ConfigEntry<bool> configEnableSlot;
+        public static  ConfigEntry<KeyboardShortcut> configLanternModKey;
         private static int sectionIndex = 1;
 
         public static void Init()
@@ -48,12 +50,19 @@ namespace ModularMagic_Utilities.Configs
 
         private static void InitGeneralConfig()
         {
-            configUtilityModeKey = ModularMagic_Utilities.Instance.Config.Bind($"{sectionIndex}. General", "Utility mode key", new KeyboardShortcut(KeyCode.Y),
-                new ConfigDescription("Key to toggle the light on/off of lanterns)", null));
-            configUtilityModeKey.SettingChanged += (obj, attr) =>
+            configEnableSlot = ModularMagic_Utilities.Instance.Config.Bind($"{sectionIndex}. General", "Enable AzuEPI slot", true,
+                new ConfigDescription("Adds a custom slot for spellbooks/lanterns when AzuEPI is installed", null));
+            configEnableSlot.SettingChanged += (obj, attr) =>
             {
-                Jotunn.Logger.LogWarning("key has been changed to: " + configUtilityModeKey.Value);
+                //if (configEnableSlot.Value)
+                //    AzuEPISlotHelper.AddSlot();
+                //else
+                //    AzuEPISlotHelper.RemoveSlot();
+                CustomSlot.AddCustomSlot(configEnableSlot);
             };
+
+            configLanternModKey = ModularMagic_Utilities.Instance.Config.Bind($"{sectionIndex}. General", "Lantern on/off key", new KeyboardShortcut(KeyCode.Y),
+                new ConfigDescription("Key to toggle the light on/off of lanterns)", null));
             IncrementSectionIndex();
         }
 
@@ -140,9 +149,9 @@ namespace ModularMagic_Utilities.Configs
                     elementalMagic = 3f,
                     bloodMagic = 3f,
                     demister = 0f,
-                    flareColor = "#FF7D3619",
-                    lightColor = "#FFC849",
-                    lightRange = 32f,
+                    flareColor = new Color(1f, 0.4901961f, 0.2117647f, 0.09803922f), // #FF7D3619
+                    lightColor = new Color(1f, 0.7845517f, 0.2877358f, 1f), // #FFC849
+                    lightRange = 8f,
                     lightIntensity = 1.5f,
                     materialColor = "1.97667456, 1.14168906, 0.131697819, 1",
                 };
@@ -169,9 +178,9 @@ namespace ModularMagic_Utilities.Configs
                     elementalMagic = 6f,
                     bloodMagic = 6f,
                     demister = 0f,
-                    flareColor = "#94DBFF19",
-                    lightColor = "#D5F1FF",
-                    lightRange = 32f,
+                    flareColor = new Color(0.5801887f, 0.8593694f, 1f, 0.09803922f), // #94DBFF19
+                    lightColor = new Color(0.8349056f, 0.9467509f, 1f, 1f), // #D5F1FF
+                    lightRange = 8f,
                     lightIntensity = 1.5f,
                     materialColor = "1.26792896, 1.7979852, 1.96205056, 1",
                 };
@@ -198,9 +207,9 @@ namespace ModularMagic_Utilities.Configs
                     elementalMagic = 8f,
                     bloodMagic = 8f,
                     demister = 6f,
-                    flareColor = "#FF7AB819",
-                    lightColor = "#FFC4E2",
-                    lightRange = 32f,
+                    flareColor = new Color(1f, 0.4784314f, 0.7215686f, 0.09803922f), // #FF7AB819
+                    lightColor = new Color(1f, 0.7688679f, 0.8862273f, 1f), // #FFC4E2
+                    lightRange = 8f,
                     lightIntensity = 1.5f,
                     materialColor = "1.97667456, 0, 1.39524257, 1",
                 };

@@ -1,9 +1,7 @@
-﻿using ModularMagic_Utilities.Configs;
-using ModularMagic_Utilities.Models;
+﻿using ModularMagic_Utilities.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using UnityEngine;
 
 namespace ModularMagic_Utilities.Helpers
@@ -59,110 +57,133 @@ namespace ModularMagic_Utilities.Helpers
 
         public static void UpdateLanternMode(LanternPackageResult result)
         {
-            Player player = Player.GetPlayer(result.playerId);
-
-            if (player == null)
+            try
             {
-                Jotunn.Logger.LogWarning("Could not find Player object");
-                return;
-            }
+                Player player = Player.GetPlayer(result.playerId);
 
-            if (result.applyLanternChanges)
-            {
-                GameObject lightObj = player.transform.Find("Visual/attach_skin(Clone)/equiped/MMU_Lantern Point Light").gameObject;
-                GameObject flareObj = player.transform.Find("Visual/attach_skin(Clone)/Lantern/MMU_Lantern flare").gameObject;
-                GameObject demisterObj = player.transform.Find("Visual/attach_skin(Clone)/equiped/MMU_Lantern Demister").gameObject;
-                GameObject lanternObj = player.transform.Find("Visual/attach_skin(Clone)/Lantern").gameObject;
-                Light lightComp = lightObj.GetComponent<Light>();
-                ParticleSystem flareComp = flareObj.GetComponent<ParticleSystem>();
-
-                Color flareColor;
-                Color lightColor;
-                Color materialColor;
-
-                if (ColorUtility.TryParseHtmlString(result.lightColor, out lightColor))
-                    lightComp.color = lightColor;
-                
-                lightComp.range = (float)result.lightRange;
-                lightComp.intensity = (float)result.lightIntensity;
-                lightObj.SetActive(result.value);
-
-                if (ColorUtility.TryParseHtmlString(result.flareColor, out flareColor))
+                if (player == null)
                 {
-                    flareComp.startColor = flareColor;
-                    flareComp.startSize = 2f;
+                    Jotunn.Logger.LogWarning("Could not find Player object");
+                    return;
                 }
 
-                flareObj.SetActive(result.value);
-                demisterObj.SetActive(result.value);
-
-                if (result.value)
+                if (result.applyLanternChanges)
                 {
-                    Jotunn.Logger.LogWarning("materialColor: " + result.materialColor);
-                    string[] colorData = result.materialColor.Trim().Split(',');
-                    Jotunn.Logger.LogWarning(float.Parse(colorData[0], NumberStyles.Any, CultureInfo.InvariantCulture));
-                    materialColor = new Color(
-                        float.Parse(colorData[0], NumberStyles.Any, CultureInfo.InvariantCulture),
-                        float.Parse(colorData[1], NumberStyles.Any, CultureInfo.InvariantCulture),
-                        float.Parse(colorData[2], NumberStyles.Any, CultureInfo.InvariantCulture),
-                        float.Parse(colorData[3], NumberStyles.Any, CultureInfo.InvariantCulture));
+                    GameObject lightObj = player.transform.Find("Visual/attach_skin(Clone)/equiped/MMU_Lantern Point Light").gameObject;
+                    GameObject flareObj = player.transform.Find("Visual/attach_skin(Clone)/Lantern/MMU_Lantern flare").gameObject;
+                    GameObject demisterObj = player.transform.Find("Visual/attach_skin(Clone)/equiped/MMU_Lantern Demister").gameObject;
+                    GameObject lanternObj = player.transform.Find("Visual/attach_skin(Clone)/Lantern").gameObject;
+                    Light lightComp = lightObj.GetComponent<Light>();
+                    LightLod lightLodComp = lightObj.GetComponent<LightLod>();
+                    ParticleSystem flareComp = flareObj.GetComponent<ParticleSystem>();
+                    Color materialColor;
 
-                    Jotunn.Logger.LogWarning("Old Emission color: "+ result.lanternOn.GetColor("_EmissionColor").ToString());
-                    Jotunn.Logger.LogWarning("New Emission color: " + materialColor.ToString());
-                    result.lanternOn.SetColor("_EmissionColor", materialColor);
+                    if (result.lightColor != null)
+                        lightComp.color = result.lightColor;
+
+                    Jotunn.Logger.LogWarning($"{lightComp.range} - {result.lightRange}");
+                    lightComp.range = (float)result.lightRange;
+                    lightLodComp.m_baseRange = (float)result.lightRange;
+                    lightComp.intensity = (float)result.lightIntensity;
+                    lightObj.SetActive(result.value);
+
+                    if (result.flareColor != null)
+                    {
+                        flareComp.startColor = result.flareColor;
+                        flareComp.startSize = 2f;
+                    }
+
+                    flareObj.SetActive(result.value);
+                    demisterObj.SetActive(result.value);
+
+                    if (result.value)
+                    {
+                        Jotunn.Logger.LogWarning("materialColor: " + result.materialColor);
+                        string[] colorData = result.materialColor.Trim().Split(',');
+                        Jotunn.Logger.LogWarning(float.Parse(colorData[0], NumberStyles.Any, CultureInfo.InvariantCulture));
+                        materialColor = new Color(
+                            float.Parse(colorData[0], NumberStyles.Any, CultureInfo.InvariantCulture),
+                            float.Parse(colorData[1], NumberStyles.Any, CultureInfo.InvariantCulture),
+                            float.Parse(colorData[2], NumberStyles.Any, CultureInfo.InvariantCulture),
+                            float.Parse(colorData[3], NumberStyles.Any, CultureInfo.InvariantCulture));
+
+                        Jotunn.Logger.LogWarning("Old Emission color: " + result.lanternOn.GetColor("_EmissionColor").ToString());
+                        Jotunn.Logger.LogWarning("New Emission color: " + materialColor.ToString());
+                        result.lanternOn.SetColor("_EmissionColor", materialColor);
+                    }
+
+                    SkinnedMeshRenderer meshObj = lanternObj.GetComponent<SkinnedMeshRenderer>();
+                    List<Material> materialList = new List<Material> { result.value ? result.lanternOn : result.lanternOff };
+                    meshObj.materials = materialList.ToArray();
                 }
 
-                SkinnedMeshRenderer meshObj = lanternObj.GetComponent<SkinnedMeshRenderer>();
-                List<Material> materialList = new List<Material> { result.value ? result.lanternOn : result.lanternOff };
-                meshObj.materials = materialList.ToArray();
+                ModularMagic_Utilities.Instance.lanternStatusDictionary[result.playerId] = result.value;
+                Jotunn.Logger.LogWarning($"Lantern of {player.GetPlayerName()} is now {result.value}");
             }
-
-            ModularMagic_Utilities.Instance.lanternStatusDictionary[result.playerId] = result.value;
-            Jotunn.Logger.LogWarning($"Lantern of {player.GetPlayerName()} is now {result.value}");
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not update lantern on Player: " + error);
+            }
         }
 
         public static void UpdateDemisterOnPrefab(GameObject prefab, float value)
         {
-            GameObject demisterPrefab = prefab.transform.Find("attach_skin/equiped/MMU_Lantern Demister").gameObject;
-
-            if (demisterPrefab == null)
+            try
             {
-                Jotunn.Logger.LogWarning("Could not find demister obj on prefab: " + prefab.name);
-                return;
+                GameObject demisterPrefab = prefab.transform.Find("attach_skin/equiped/MMU_Lantern Demister").gameObject;
+
+                if (demisterPrefab == null)
+                {
+                    Jotunn.Logger.LogWarning("Could not find demister obj on prefab: " + prefab.name);
+                    return;
+                }
+
+                if (value > 50)
+                    value = 50;
+                else if (value < 0) 
+                    value = 0;
+
+                Jotunn.Logger.LogWarning("demister: " + value);
+                ParticleSystemForceField comp = demisterPrefab.GetComponent<ParticleSystemForceField>();
+                comp.endRange = value;
             }
-
-            if (value > 50)
-                value = 50;
-            else if (value < 0) 
-                value = 0;
-
-            ParticleSystemForceField comp = demisterPrefab.GetComponent<ParticleSystemForceField>();
-            comp.endRange = value;
-        }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not alter demister effect on prefab: " + error);
+            }
+}
 
         public static void UpdateDemisterOnPlayer(float value)
         {
-            if (Player.m_localPlayer == null)
+            try
             {
-                Jotunn.Logger.LogWarning("Could not find local Player object");
-                return;
+                if (Player.m_localPlayer == null)
+                {
+                    Jotunn.Logger.LogWarning("Could not find local Player object");
+                    return;
+                }
+
+                GameObject demisterPlayerObj = Player.m_localPlayer.transform.Find("Visual/attach_skin(Clone)/equiped/MMU_Lantern Demister").gameObject;
+
+                if (demisterPlayerObj == null)
+                {
+                    Jotunn.Logger.LogWarning("Could not find demister obj on Player");
+                    return;
+                }
+
+                if (value > 50)
+                    value = 50;
+                else if (value < 0)
+                    value = 0;
+
+                Jotunn.Logger.LogWarning("demister: " + value);
+                ParticleSystemForceField comp = demisterPlayerObj.GetComponent<ParticleSystemForceField>();
+                comp.endRange = value;
             }
-
-            GameObject demisterPlayerObj = Player.m_localPlayer.transform.Find("Visual/attach_skin(Clone)/equiped/MMU_Lantern Demister").gameObject;
-
-            if (demisterPlayerObj == null)
+            catch (Exception error)
             {
-                Jotunn.Logger.LogWarning("Could not find demister obj on Player");
-                return;
+                Jotunn.Logger.LogError("Could not alter demister effect on player: " + error);
             }
-
-            if (value > 50)
-                value = 50;
-            else if (value < 0)
-                value = 0;
-
-            ParticleSystemForceField comp = demisterPlayerObj.GetComponent<ParticleSystemForceField>();
-            comp.endRange = value;
         }
 
         public static void UpdateDemisterOnBoth(GameObject prefab, float value)
@@ -173,66 +194,46 @@ namespace ModularMagic_Utilities.Helpers
 
         public static void UpdateEitrRegenOnPlayer(string name, float value)
         {
-            if (Player.m_localPlayer == null)
+            try
             {
-                Jotunn.Logger.LogWarning("Could not find local player object to update Eitr regen");
-                return;
-            }
-
-            Inventory inv = Player.m_localPlayer.GetInventory();
-
-            if (inv == null)
-            {
-                Jotunn.Logger.LogWarning("Could not find local player's inventory to update Eitr regen");
-                return;
-            }
-
-            if (!inv.ContainsItemByName(name))
-            {
-                return;
-            }
-
-            List<ItemDrop.ItemData> list = inv.GetAllItems();
-            List<ItemDrop.ItemData> items = list.FindAll(item => item.m_shared.m_name == name);
-
-            foreach (ItemDrop.ItemData item in items)
-            {
-                if (item == null || item.m_shared == null)
+                if (Player.m_localPlayer == null)
                 {
-                    Jotunn.Logger.LogWarning("Could not find " + name + " in inventory list to update Eitr regen");
-                    continue;
+                    Jotunn.Logger.LogWarning("Could not find local player object to update Eitr regen");
+                    return;
                 }
 
-                Jotunn.Logger.LogWarning("Update Eitr regen to: " + value);
-                item.m_shared.m_eitrRegenModifier = value;
-            }
-        }
+                Inventory inv = Player.m_localPlayer.GetInventory();
 
-        public static Color32? HexToColor32(string hex)
-        {
-            Jotunn.Logger.LogWarning("Value: " + hex);
-            if (hex.Length < 6)
+                if (inv == null)
+                {
+                    Jotunn.Logger.LogWarning("Could not find local player's inventory to update Eitr regen");
+                    return;
+                }
+
+                if (!inv.ContainsItemByName(name))
+                {
+                    return;
+                }
+
+                List<ItemDrop.ItemData> list = inv.GetAllItems();
+                List<ItemDrop.ItemData> items = list.FindAll(item => item.m_shared.m_name == name);
+
+                foreach (ItemDrop.ItemData item in items)
+                {
+                    if (item == null || item.m_shared == null)
+                    {
+                        Jotunn.Logger.LogWarning("Could not find " + name + " in inventory list to update Eitr regen");
+                        continue;
+                    }
+
+                    Jotunn.Logger.LogWarning("Update Eitr regen to: " + value);
+                    item.m_shared.m_eitrRegenModifier = value;
+                }
+            }
+            catch (Exception error)
             {
-                throw new FormatException("Needs a string with a length of at least 6");
+                Jotunn.Logger.LogError("Could not update eitr regen on player: " + error);
             }
-
-            var r = hex.Substring(0, 2);
-            var g = hex.Substring(2, 2);
-            var b = hex.Substring(4, 2);
-            string a;
-            if (hex.Length >= 8)
-                a = hex.Substring(6, 2);
-            else
-                a = "FF";
-
-            int red = int.Parse(r, NumberStyles.HexNumber) / 255;
-            int green = int.Parse(g, NumberStyles.HexNumber) / 255;
-            int blue = int.Parse(b, NumberStyles.HexNumber) / 255;
-            int alpha = int.Parse(a, NumberStyles.HexNumber) / 255;
-
-            Jotunn.Logger.LogWarning($"Color: rgba({red}, {green}, {blue}, {alpha})");
-
-            return new Color(red, green, blue, alpha);
         }
     }
 }

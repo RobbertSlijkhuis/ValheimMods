@@ -3,7 +3,6 @@ using ModularMagic_Utilities.Configs;
 using ModularMagic_Utilities.Helpers;
 using ModularMagic_Utilities.Models;
 using System;
-using System.Linq;
 using static ItemDrop;
 
 namespace ModularMagic_Utilities.Harmony

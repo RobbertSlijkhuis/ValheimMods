@@ -16,6 +16,7 @@ namespace ModularMagic_Utilities
 {
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
+    [BepInDependency("Azumatt.AzuExtendedPlayerInventory", BepInDependency.DependencyFlags.SoftDependency)]
     //[NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     internal class ModularMagic_Utilities : BaseUnityPlugin
     {
@@ -42,6 +43,7 @@ namespace ModularMagic_Utilities
             InitInputs();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             lanternRPC = NetworkManager.Instance.AddRPC("RPC_Lantern_MMU", OnServerReceive, OnClientReceive);
+            // AzuEPISlotHelper.AddSlot();
 
             PrefabManager.OnVanillaPrefabsAvailable += AddUtilities;
             ItemManager.OnItemsRegistered += LogRecipes;
@@ -70,7 +72,7 @@ namespace ModularMagic_Utilities
 
             ItemManager.OnItemsRegistered -= LogRecipes;
         }
-
+        
         /**
          * Called on every update
          */
@@ -146,7 +148,7 @@ namespace ModularMagic_Utilities
                 utilityModeButton = new ButtonConfig
                 {
                     Name = "Lantern mode",
-                    ShortcutConfig = ConfigUtilities.configUtilityModeKey,
+                    ShortcutConfig = ConfigUtilities.configLanternModKey,
                 };
 
                 InputManager.Instance.AddButton(PluginGUID, utilityModeButton);

@@ -1,6 +1,7 @@
 ﻿using BepInEx.Configuration;
 using ModularMagic_Utilities.Helpers;
 using ModularMagic_Utilities.StatusEffects;
+using UnityEngine;
 
 namespace ModularMagic_Utilities.Models
 {
@@ -20,9 +21,9 @@ namespace ModularMagic_Utilities.Models
         public ConfigEntry<float> eitrRegen;
         public ConfigEntry<float> elementalMagic;
         public ConfigEntry<float> bloodMagic;
-        public ConfigEntry <int> demister;
-        public ConfigEntry<string> flareColor;
-        public ConfigEntry<string> lightColor;
+        public ConfigEntry<int> demister;
+        public ConfigEntry<Color> flareColor;
+        public ConfigEntry<Color> lightColor;
         public ConfigEntry<float> lightIntensity;
         public ConfigEntry<float> lightRange;
         public ConfigEntry<string> materialColor;
@@ -37,8 +38,8 @@ namespace ModularMagic_Utilities.Models
             cooldownStatusEffectName = options.cooldownStatusEffectName;
             magicStatusEffectName = options.magicStatusEffectName;
 
-            this.enable = Config.Bind(new ConfigDefinition(options.sectionName, "Enable"), (bool)options.enable,
-               new ConfigDescription("Enable " + this.name, null,
+            this.enable = Config.Bind(new ConfigDefinition(options.sectionName, "Item: Enable"), (bool)options.enable,
+               new ConfigDescription("Wether the recipe for this item is enabled" + this.name, null,
                new ConfigurationManagerAttributes { IsAdminOnly = true }));
             this.enable.SettingChanged += (obj, attr) =>
             {
@@ -50,7 +51,7 @@ namespace ModularMagic_Utilities.Models
                 });
             };
 
-            this.name = Config.Bind(new ConfigDefinition(options.sectionName, "Name"), options.name,
+            this.name = Config.Bind(new ConfigDefinition(options.sectionName, "Item: Name"), options.name,
               new ConfigDescription("The name given to the item", null,
               new ConfigurationManagerAttributes { IsAdminOnly = true }));
             this.name.SettingChanged += (obj, attr) =>
@@ -61,7 +62,7 @@ namespace ModularMagic_Utilities.Models
                 });
             };
 
-            this.description = Config.Bind(new ConfigDefinition(options.sectionName, "Description"), options.description,
+            this.description = Config.Bind(new ConfigDefinition(options.sectionName, "Item: Description"), options.description,
                 new ConfigDescription("The description given to the item", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             this.description.SettingChanged += (obj, attr) =>
@@ -72,7 +73,7 @@ namespace ModularMagic_Utilities.Models
                 });
             }; ;
 
-            this.craftingStation = Config.Bind(new ConfigDefinition(options.sectionName, "Crafting station"), options.craftingStation,
+            this.craftingStation = Config.Bind(new ConfigDefinition(options.sectionName, "Recipe: Crafting station"), options.craftingStation,
                 new ConfigDescription("The crafting station the item can be created in",
                 new AcceptableValueList<string>(craftingStationOptions),
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
@@ -86,8 +87,8 @@ namespace ModularMagic_Utilities.Models
                 });
             };
 
-            this.minStationLevel = Config.Bind(new ConfigDefinition(options.sectionName, "Required station level to craft"), (int)options.minStationLevel,
-                new ConfigDescription("The required station level to craft", null,
+            this.minStationLevel = Config.Bind(new ConfigDefinition(options.sectionName, "Recipe: Required station level"), (int)options.minStationLevel,
+                new ConfigDescription("The required station level to craft this item", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             this.minStationLevel.SettingChanged += (obj, attr) =>
             {
@@ -100,8 +101,8 @@ namespace ModularMagic_Utilities.Models
                 });
             };
 
-            this.recipe = Config.Bind(new ConfigDefinition(options.sectionName, "Crafting costs"), options.recipe,
-                new ConfigDescription("The items required to craft", null,
+            this.recipe = Config.Bind(new ConfigDefinition(options.sectionName, "Recipe"), options.recipe,
+                new ConfigDescription("The items required to craft this item", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             this.recipe.SettingChanged += (obj, attr) =>
             {
@@ -113,7 +114,7 @@ namespace ModularMagic_Utilities.Models
                 });
             };
 
-            this.eitr = Config.Bind(new ConfigDefinition(options.sectionName, "Eitr"), (float)options.eitr,
+            this.eitr = Config.Bind(new ConfigDefinition(options.sectionName, "Stat: Eitr"), (float)options.eitr,
                 new ConfigDescription("The amount of eitr the item gives", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             this.eitr.SettingChanged += (obj, attr) =>
@@ -125,8 +126,8 @@ namespace ModularMagic_Utilities.Models
                 statusEffect.SetEitr(this.eitr.Value);
             };
 
-            this.eitrRegen = Config.Bind(new ConfigDefinition(options.sectionName, "Eitr regen"), (float)options.eitrRegen,
-                new ConfigDescription("The amount of eitr regen the item has", null,
+            this.eitrRegen = Config.Bind(new ConfigDefinition(options.sectionName, "Stat: Eitr regen"), (float)options.eitrRegen,
+                new ConfigDescription("The amount of eitr regen the item gives", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             this.eitrRegen.SettingChanged += (obj, attr) =>
             {
@@ -139,8 +140,8 @@ namespace ModularMagic_Utilities.Models
                 UpdateHelper.UpdateEitrRegenOnPlayer(options.name, this.eitrRegen.Value);
             };
 
-            this.elementalMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Elemental magic"), (float)options.elementalMagic,
-                new ConfigDescription("The amount of Elemental magic the item has", null,
+            this.elementalMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Skill: Elemental magic"), (float)options.elementalMagic,
+                new ConfigDescription("The amount of Elemental magic skill the item gives", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             this.elementalMagic.SettingChanged += (obj, attr) =>
             {
@@ -151,8 +152,8 @@ namespace ModularMagic_Utilities.Models
                 statusEffect.SetElementalMagic(this.elementalMagic.Value);
             };
 
-            this.bloodMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Blood magic"), (float)options.bloodMagic,
-                new ConfigDescription("The amount of Blood magic the item has", null,
+            this.bloodMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Skill: Blood magic"), (float)options.bloodMagic,
+                new ConfigDescription("The amount of Blood magic skill the item gives", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             this.bloodMagic.SettingChanged += (obj, attr) =>
             {
@@ -165,20 +166,19 @@ namespace ModularMagic_Utilities.Models
 
             if (options.demister != null)
             {
-                this.demister = Config.Bind(new ConfigDefinition(options.sectionName, "Demister effect range"), (int)options.demister,
-                    new ConfigDescription("The range of the demister effect (push mist away), 0 disables this effect", null,
+                this.demister = Config.Bind(new ConfigDefinition(options.sectionName, "Stat: Demister effect range"), (int)options.demister,
+                    new ConfigDescription("The range of the demister effect (push mist away). 0 disables this effect, maximum 50 for performance reasons", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
                 this.demister.SettingChanged += (obj, attr) =>
                 {
-                    Jotunn.Logger.LogWarning("demister: " + this.demister.Value);
                     UpdateHelper.UpdateDemisterOnBoth(options.prefab, this.demister.Value);
                 };
             }
 
             if (options.flareColor != null)
             {
-                this.flareColor = Config.Bind(new ConfigDefinition(options.sectionName, "Light flare color"), options.flareColor,
-                    new ConfigDescription("The color of the lantern light", null,
+                this.flareColor = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern: Flare color"), (Color)options.flareColor,
+                    new ConfigDescription("The color of the flare effect around the lantern (This will be updated when you turn off/on the lantern)", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
                 this.flareColor.SettingChanged += (obj, attr) =>
                 {
@@ -188,8 +188,8 @@ namespace ModularMagic_Utilities.Models
 
             if (options.lightColor != null)
             {
-                this.lightColor = Config.Bind(new ConfigDefinition(options.sectionName, "Light color"), options.lightColor,
-                    new ConfigDescription("The color of the lantern light", null,
+                this.lightColor = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern: Light Color"), (Color)options.lightColor,
+                    new ConfigDescription("The color of the light emitted by the lantern (This will be updated when you turn off/on the lantern)", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
                 this.lightColor.SettingChanged += (obj, attr) =>
                 {
@@ -199,8 +199,8 @@ namespace ModularMagic_Utilities.Models
 
             if (options.lightRange != null) 
             {
-                this.lightRange = Config.Bind(new ConfigDefinition(options.sectionName, "Light range"), (float)options.lightRange,
-                    new ConfigDescription("The range of the lantern light", null,
+                this.lightRange = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern: Light Range"), (float)options.lightRange,
+                    new ConfigDescription("The range of the light emitted by the lantern (This will be updated when you turn off/on the lantern)", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
                 this.lightRange.SettingChanged += (obj, attr) =>
                 {
@@ -210,8 +210,8 @@ namespace ModularMagic_Utilities.Models
 
             if (options.lightIntensity != null)
             {
-                this.lightIntensity = Config.Bind(new ConfigDefinition(options.sectionName, "Light intensity"), (float)options.lightIntensity,
-                    new ConfigDescription("The intensity of the lantern light", null,
+                this.lightIntensity = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern: Light Intensity"), (float)options.lightIntensity,
+                    new ConfigDescription("The intensity of the light emitted by the lantern (This will be updated when you turn off/on the lantern)", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
                 this.lightIntensity.SettingChanged += (obj, attr) =>
                 {
@@ -221,8 +221,8 @@ namespace ModularMagic_Utilities.Models
 
             if (options.materialColor != null)
             {
-                this.materialColor = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern material color"), options.materialColor,
-                    new ConfigDescription("The color of the lantern light", null,
+                this.materialColor = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern: Light glass color"), options.materialColor,
+                    new ConfigDescription("The color of the lantern glass (This will be updated when you turn off/on the lantern)", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
                 this.materialColor.SettingChanged += (obj, attr) =>
                 {
