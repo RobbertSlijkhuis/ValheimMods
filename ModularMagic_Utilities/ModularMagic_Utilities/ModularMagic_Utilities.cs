@@ -37,17 +37,17 @@ namespace ModularMagic_Utilities
         private void Awake()
         {
             Instance = this;
-            InitAssetBundle();
+            _InitAssetBundle();
             PluginConfig.Init();
-            InitInputs();
+            _InitInputs();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             // lanternRPC = RPCHelper.Init();
 
-            PrefabManager.OnVanillaPrefabsAvailable += AddUtilities;
-            ItemManager.OnItemsRegistered += LogRecipes;
+            PrefabManager.OnVanillaPrefabsAvailable += _AddUtilities;
+            ItemManager.OnItemsRegistered += _LogRecipes;
         }
 
-        private void LogRecipes()
+        private void _LogRecipes()
         {
             ObjectDB.instance.m_recipes.ForEach(r =>
             {
@@ -55,7 +55,7 @@ namespace ModularMagic_Utilities
                     Jotunn.Logger.LogInfo(r.name);
             });
 
-            ItemManager.OnItemsRegistered -= LogRecipes;
+            ItemManager.OnItemsRegistered -= _LogRecipes;
         }
         
         /**
@@ -102,9 +102,9 @@ namespace ModularMagic_Utilities
                                     comp.SetPlayerStatus(playerId, !playerStatus.status);
                                 }
                             }
-                            catch (Exception error)
+                            catch (Exception e)
                             {
-                                Jotunn.Logger.LogError(error);
+                                Jotunn.Logger.LogError(e);
                             }
                         }
                     }
@@ -112,7 +112,7 @@ namespace ModularMagic_Utilities
             }
         }
 
-        private void AddUtilities()
+        private void _AddUtilities()
         {
             try
             {
@@ -123,18 +123,18 @@ namespace ModularMagic_Utilities
                 ItemHelper.Create(prefabs.lantern2Prefab, PluginConfig.lantern2, true);
                 ItemHelper.Create(prefabs.lantern3Prefab, PluginConfig.lantern3, true);
 
-                PrefabManager.OnVanillaPrefabsAvailable -= AddUtilities;
+                PrefabManager.OnVanillaPrefabsAvailable -= _AddUtilities;
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not add utilities: " + error);
+                Jotunn.Logger.LogError("Could not add utilities: " + e);
             }
         }
 
         /**
          * Initialise the inputs of this mod
          */
-        private void InitInputs()
+        private void _InitInputs()
         {
             try
             {
@@ -146,16 +146,16 @@ namespace ModularMagic_Utilities
 
                 InputManager.Instance.AddButton(PluginGUID, utilityModeButton);
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not initialise inputs: " + error);
+                Jotunn.Logger.LogError("Could not initialise inputs: " + e);
             }
         }
 
         /**
          * Initialise the asset bundle of the mod
          */
-        private void InitAssetBundle()
+        private void _InitAssetBundle()
         {
             assetBundle = AssetUtils.LoadAssetBundleFromResources("modularmagic_utilities_dw");
 

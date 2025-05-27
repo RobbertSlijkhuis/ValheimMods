@@ -36,22 +36,22 @@ namespace ModularMagic_Utilities.Configs
 
         public static void Init()
         {
-            InitGeneralConfig();
-            InitSpellbook1Config();
-            InitSpellbook2Config();
-            InitSpellbook3Config();
-            InitLantern1Config();
-            InitLantern2Config();
-            InitLantern3Config();
+            _InitGeneralConfig();
+            _InitSpellbook1Config();
+            _InitSpellbook2Config();
+            _InitSpellbook3Config();
+            _InitLantern1Config();
+            _InitLantern2Config();
+            _InitLantern3Config();
         }
 
-        private static void InitGeneralConfig()
+        private static void _InitGeneralConfig()
         {
             configLanternModKey = ModularMagic_Utilities.Instance.Config.Bind("General", "Lantern on/off key", new KeyboardShortcut(KeyCode.Y),
                 new ConfigDescription("Key to toggle the light on/off of lanterns)", null));
         }
 
-        private static void InitSpellbook1Config()
+        private static void _InitSpellbook1Config()
         {
             try
             {
@@ -67,13 +67,13 @@ namespace ModularMagic_Utilities.Configs
                 };
                 spellbook1.GenerateConfig(options);
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not initialise " + book1Name + " config: " + error);
+                Jotunn.Logger.LogError("Could not initialise " + book1Name + " config: " + e);
             }
         }
 
-        private static void InitSpellbook2Config()
+        private static void _InitSpellbook2Config()
         {
             try
             {
@@ -89,13 +89,13 @@ namespace ModularMagic_Utilities.Configs
                 };
                 spellbook2.GenerateConfig(options);
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not initialise " + book2Name + " config: " + error);
+                Jotunn.Logger.LogError("Could not initialise " + book2Name + " config: " + e);
             }
         }
 
-        private static void InitSpellbook3Config()
+        private static void _InitSpellbook3Config()
         {
             try
             {
@@ -111,13 +111,13 @@ namespace ModularMagic_Utilities.Configs
                 };
                 spellbook3.GenerateConfig(options);
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not initialise " + book3Name + " config: " + error);
+                Jotunn.Logger.LogError("Could not initialise " + book3Name + " config: " + e);
             }
         }
 
-        private static void InitLantern1Config()
+        private static void _InitLantern1Config()
         {
             try
             {
@@ -137,13 +137,13 @@ namespace ModularMagic_Utilities.Configs
                 };
                 lantern1.GenerateConfig(options);
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not initialise " + lantern1Name + " config: " + error);
+                Jotunn.Logger.LogError("Could not initialise " + lantern1Name + " config: " + e);
             }
         }
 
-        private static void InitLantern2Config()
+        private static void _InitLantern2Config()
         {
             try
             {
@@ -163,13 +163,13 @@ namespace ModularMagic_Utilities.Configs
                 };
                 lantern2.GenerateConfig(options);
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not initialise " + lantern2Name + " config: " + error);
+                Jotunn.Logger.LogError("Could not initialise " + lantern2Name + " config: " + e);
             }
         }
 
-        private static void InitLantern3Config()
+        private static void _InitLantern3Config()
         {
             try
             {
@@ -189,9 +189,9 @@ namespace ModularMagic_Utilities.Configs
                 };
                 lantern3.GenerateConfig(options);
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not initialise " + lantern3Name + " config: " + error);
+                Jotunn.Logger.LogError("Could not initialise " + lantern3Name + " config: " + e);
             }
         }
     }

@@ -91,9 +91,9 @@ namespace ModularMagic_Utilities.Harmony
         //    {
         //        Jotunn.Logger.LogWarning($"Player is spawned!");
         //    }
-        //    catch (Exception error)
+        //    catch (Exception e)
         //    {
-        //        Jotunn.Logger.LogError(error);
+        //        Jotunn.Logger.LogError(e);
         //    }
         //}
 
@@ -130,9 +130,9 @@ namespace ModularMagic_Utilities.Harmony
 
         //        //}
         //    }
-        //    catch (Exception error)
+        //    catch (Exception e)
         //    {
-        //        Jotunn.Logger.LogError(error);
+        //        Jotunn.Logger.LogError(e);
         //    }
         //}
 
@@ -159,9 +159,9 @@ namespace ModularMagic_Utilities.Harmony
         //            ModularMagic_Utilities.Instance.lanternRPC.SendPackage(ZRoutedRpc.instance.GetServerPeerID(), package);
         //        }
         //    }
-        //    catch (Exception error)
+        //    catch (Exception e)
         //    {
-        //        Jotunn.Logger.LogError(error);
+        //        Jotunn.Logger.LogError(e);
         //    }
         //}
 
