@@ -41,8 +41,8 @@ namespace ModularMagic_Armors.Configs
             cooldownStatusEffectName = options.cooldownStatusEffectName;
             magicStatusEffectName = options.magicStatusEffectName;
 
-            enable = Config.Bind(new ConfigDefinition(options.sectionName, "Enable"), options.enable,
-               new ConfigDescription("Enable " + name, null,
+            enable = Config.Bind(new ConfigDefinition(options.sectionName, "Item: Enable"), options.enable,
+               new ConfigDescription("Wether the recipe for this item is enabled", null,
                new ConfigurationManagerAttributes { IsAdminOnly = true }));
             enable.SettingChanged += (obj, attr) =>
             {
@@ -54,8 +54,8 @@ namespace ModularMagic_Armors.Configs
                 });
             };
 
-            name = Config.Bind(new ConfigDefinition(options.sectionName, "Name"), options.name,
-              new ConfigDescription("The name given to the item", null,
+            name = Config.Bind(new ConfigDefinition(options.sectionName, "Item: Name"), options.name,
+              new ConfigDescription("The name of the item", null,
               new ConfigurationManagerAttributes { IsAdminOnly = true }));
             name.SettingChanged += (obj, attr) =>
             {
@@ -65,8 +65,8 @@ namespace ModularMagic_Armors.Configs
                 });
             };
 
-            description = Config.Bind(new ConfigDefinition(options.sectionName, "Description"), options.description,
-                new ConfigDescription("The description given to the item", null,
+            description = Config.Bind(new ConfigDefinition(options.sectionName, "Item: Description"), options.description,
+                new ConfigDescription("The description of the item", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             description.SettingChanged += (obj, attr) =>
             {
@@ -76,8 +76,8 @@ namespace ModularMagic_Armors.Configs
                 });
             }; ;
 
-            craftingStation = Config.Bind(new ConfigDefinition(options.sectionName, "Crafting station"), options.craftingStation,
-                new ConfigDescription("The crafting station the item can be created in",
+            craftingStation = Config.Bind(new ConfigDefinition(options.sectionName, "Recipe: Crafting station"), options.craftingStation,
+                new ConfigDescription("The crafting station the item can be crafted in",
                 new AcceptableValueList<string>(craftingStationOptions),
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             craftingStation.SettingChanged += (obj, attr) =>
@@ -90,8 +90,8 @@ namespace ModularMagic_Armors.Configs
                 });
             };
 
-            minStationLevel = Config.Bind(new ConfigDefinition(options.sectionName, "Required station level to craft"), options.minStationLevel,
-                new ConfigDescription("The required station level to craft", null,
+            minStationLevel = Config.Bind(new ConfigDefinition(options.sectionName, "Recipe: Required station level"), options.minStationLevel,
+                new ConfigDescription("The required station level to craft this item", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             minStationLevel.SettingChanged += (obj, attr) =>
             {
@@ -104,8 +104,8 @@ namespace ModularMagic_Armors.Configs
                 });
             };
 
-            recipe = Config.Bind(new ConfigDefinition(options.sectionName, "Crafting costs"), options.recipe,
-                new ConfigDescription("The items required to craft", null,
+            recipe = Config.Bind(new ConfigDefinition(options.sectionName, "Recipe"), options.recipe,
+                new ConfigDescription("The items required to craft this item", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             recipe.SettingChanged += (obj, attr) =>
             {
@@ -117,8 +117,8 @@ namespace ModularMagic_Armors.Configs
                 });
             };
 
-            recipeUpgrade = Config.Bind(new ConfigDefinition(options.sectionName, "Upgrade costs"), options.recipeUpgrade,
-                new ConfigDescription("The costs to upgrade the item", null,
+            recipeUpgrade = Config.Bind(new ConfigDefinition(options.sectionName, "Recipe upgrade"), options.recipeUpgrade,
+                new ConfigDescription("The items required to upgrade this item", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             recipeUpgrade.SettingChanged += (obj, attr) =>
             {
@@ -132,7 +132,7 @@ namespace ModularMagic_Armors.Configs
                 });
             };
 
-            recipeMultiplier = Config.Bind(new ConfigDefinition(options.sectionName, "Upgrade multiplier"), options.recipeMultiplier,
+            recipeMultiplier = Config.Bind(new ConfigDefinition(options.sectionName, "Recipe upgrade multiplier"), options.recipeMultiplier,
                 new ConfigDescription("The multiplier applied to the upgrade costs", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             recipeMultiplier.SettingChanged += (obj, attr) =>
@@ -147,8 +147,8 @@ namespace ModularMagic_Armors.Configs
                 });
             };
 
-            armor = Config.Bind(new ConfigDefinition(options.sectionName, "Armor"), options.armor,
-                new ConfigDescription("The armor given to the item", null,
+            armor = Config.Bind(new ConfigDefinition(options.sectionName, "Stat: Armor"), options.armor,
+                new ConfigDescription("The armor of the item", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             armor.SettingChanged += (obj, attr) =>
             {
@@ -158,8 +158,8 @@ namespace ModularMagic_Armors.Configs
                 });
             };
 
-            armorPerLevel = Config.Bind(new ConfigDefinition(options.sectionName, "Armor per level"), options.armorPerLevel,
-                new ConfigDescription("The armor per level given to the item", null,
+            armorPerLevel = Config.Bind(new ConfigDefinition(options.sectionName, "Stat: Armor per level"), options.armorPerLevel,
+                new ConfigDescription("The armor per level of the item", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             armorPerLevel.SettingChanged += (obj, attr) =>
             {
@@ -169,8 +169,8 @@ namespace ModularMagic_Armors.Configs
                 });
             };
 
-            weight = Config.Bind(new ConfigDefinition(options.sectionName, "Weight"), options.weight,
-                new ConfigDescription("The weight applied to the item", null,
+            weight = Config.Bind(new ConfigDefinition(options.sectionName, "Stat: Weight"), options.weight,
+                new ConfigDescription("The weight of the item", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             weight.SettingChanged += (obj, attr) =>
             {
@@ -180,8 +180,8 @@ namespace ModularMagic_Armors.Configs
                 });
             };
 
-            maxDurability = Config.Bind(new ConfigDefinition(options.sectionName, "Max durability"), options.maxDurability,
-                new ConfigDescription("The maximum durability applied to the item", null,
+            maxDurability = Config.Bind(new ConfigDefinition(options.sectionName, "Stat: Max durability"), options.maxDurability,
+                new ConfigDescription("The maximum durability of the item", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             maxDurability.SettingChanged += (obj, attr) =>
             {
@@ -191,7 +191,7 @@ namespace ModularMagic_Armors.Configs
                 });
             };
 
-            maxQuality = Config.Bind(new ConfigDefinition(options.sectionName, "Max quality"), options.maxQuality,
+            maxQuality = Config.Bind(new ConfigDefinition(options.sectionName, "Stat: Max quality"), options.maxQuality,
                     new ConfigDescription("The maximum quality the item can become", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
             maxQuality.SettingChanged += (obj, attr) =>
@@ -202,7 +202,7 @@ namespace ModularMagic_Armors.Configs
                 });
             };
 
-            movementSpeed = Config.Bind(new ConfigDefinition(options.sectionName, "Movement speed"), options.movementSpeed,
+            movementSpeed = Config.Bind(new ConfigDefinition(options.sectionName, "Stat: Movement speed"), options.movementSpeed,
                 new ConfigDescription("The movement speed stat on the item", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             movementSpeed.SettingChanged += (obj, attr) =>
@@ -213,7 +213,7 @@ namespace ModularMagic_Armors.Configs
                 });
             };
 
-            eitr = Config.Bind(new ConfigDefinition(options.sectionName, "Eitr"), options.eitr,
+            eitr = Config.Bind(new ConfigDefinition(options.sectionName, "Stat: Eitr"), options.eitr,
                 new ConfigDescription("The amount of eitr the item gives", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             eitr.SettingChanged += (obj, attr) =>
@@ -225,8 +225,8 @@ namespace ModularMagic_Armors.Configs
                 statusEffect.SetEitr(eitr.Value);
             };
 
-            eitrRegen = Config.Bind(new ConfigDefinition(options.sectionName, "Eitr regen"), options.eitrRegen,
-                new ConfigDescription("The amount of eitr regen the item has", null,
+            eitrRegen = Config.Bind(new ConfigDefinition(options.sectionName, "Stat: Eitr regen"), options.eitrRegen,
+                new ConfigDescription("The amount of eitr regen the item gives", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             eitrRegen.SettingChanged += (obj, attr) =>
             {
@@ -239,8 +239,8 @@ namespace ModularMagic_Armors.Configs
                 UpdateHelper.UpdateEitrRegenOnPlayer(options.name, eitrRegen.Value);
             };
 
-            elementalMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Elemental magic"), options.elementalMagic,
-                new ConfigDescription("The amount of Elemental magic the item has", null,
+            elementalMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Skill: Elemental magic"), options.elementalMagic,
+                new ConfigDescription("The amount of Elemental magic skill the item gives", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             elementalMagic.SettingChanged += (obj, attr) =>
             {
@@ -251,8 +251,8 @@ namespace ModularMagic_Armors.Configs
                 statusEffect.SetElementalMagic(elementalMagic.Value);
             };
 
-            bloodMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Blood magic"), options.bloodMagic,
-                new ConfigDescription("The amount of Blood magic the item has", null,
+            bloodMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Skill: Blood magic"), options.bloodMagic,
+                new ConfigDescription("The amount of Blood magic skill the item gives", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             bloodMagic.SettingChanged += (obj, attr) =>
             {

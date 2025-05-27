@@ -33,7 +33,7 @@ namespace ModularMagic_Utilities.Configs
 
         // Other
         public static string generalSectionname = "General";
-        public static  ConfigEntry<KeyboardShortcut> configLanternModKey;
+        public static ConfigEntry<KeyboardShortcut> configLanternModKey;
 
         public static void Init()
         {

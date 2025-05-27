@@ -44,7 +44,7 @@ namespace ModularMagic_Utilities.Configs
             magicStatusEffectName = options.magicStatusEffectName;
 
             enable = Config.Bind(new ConfigDefinition(options.sectionName, "Item: Enable"), options.enable,
-               new ConfigDescription("Wether the recipe for this item is enabled" + name, null,
+               new ConfigDescription("Wether the recipe for this item is enabled", null,
                new ConfigurationManagerAttributes { IsAdminOnly = true }));
             enable.SettingChanged += (obj, attr) =>
             {
@@ -57,7 +57,7 @@ namespace ModularMagic_Utilities.Configs
             };
 
             name = Config.Bind(new ConfigDefinition(options.sectionName, "Item: Name"), options.name,
-              new ConfigDescription("The name given to the item", null,
+              new ConfigDescription("The name of the item", null,
               new ConfigurationManagerAttributes { IsAdminOnly = true }));
             name.SettingChanged += (obj, attr) =>
             {
@@ -68,7 +68,7 @@ namespace ModularMagic_Utilities.Configs
             };
 
             description = Config.Bind(new ConfigDefinition(options.sectionName, "Item: Description"), options.description,
-                new ConfigDescription("The description given to the item", null,
+                new ConfigDescription("The description of the item", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             description.SettingChanged += (obj, attr) =>
             {
@@ -79,7 +79,7 @@ namespace ModularMagic_Utilities.Configs
             }; ;
 
             craftingStation = Config.Bind(new ConfigDefinition(options.sectionName, "Recipe: Crafting station"), options.craftingStation,
-                new ConfigDescription("The crafting station the item can be created in",
+                new ConfigDescription("The crafting station the item can be crafted in",
                 new AcceptableValueList<string>(craftingStationOptions),
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             craftingStation.SettingChanged += (obj, attr) =>
@@ -118,7 +118,7 @@ namespace ModularMagic_Utilities.Configs
                 });
             };
 
-            weight = Config.Bind(new ConfigDefinition(options.sectionName, "Weight"), options.weight,
+            weight = Config.Bind(new ConfigDefinition(options.sectionName, "Stat: Weight"), options.weight,
                 new ConfigDescription("The weight applied to the item", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
             weight.SettingChanged += (obj, attr) =>
@@ -217,7 +217,7 @@ namespace ModularMagic_Utilities.Configs
                 lightColorPreset = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern: Color preset"), options.lightColorPreset,
                     new ConfigDescription("A preset of light, flare and glass color (This will be updated when you turn off/on the lantern)",
                     new AcceptableValueList<string>(lanterColorOptions),
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                    new ConfigurationManagerAttributes { IsAdminOnly = false }));
                 lightColorPreset.SettingChanged += (obj, attr) =>
                 {
                     Jotunn.Logger.LogWarning("New light color preset: " + lightColorPreset.Value);
@@ -228,14 +228,14 @@ namespace ModularMagic_Utilities.Configs
             {
                 lightRange = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern: Light Range"), (float)options.lightRange,
                     new ConfigDescription("The range of the light emitted by the lantern (This will be updated when you turn off/on the lantern)", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                    new ConfigurationManagerAttributes { IsAdminOnly = false }));
             }
 
             if (options.lightIntensity != null)
             {
                 lightIntensity = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern: Light Intensity"), (float)options.lightIntensity,
                     new ConfigDescription("The intensity of the light emitted by the lantern (This will be updated when you turn off/on the lantern)", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                    new ConfigurationManagerAttributes { IsAdminOnly = false }));
             }
 
             //if (options.enableCustomGlassColor != null)
