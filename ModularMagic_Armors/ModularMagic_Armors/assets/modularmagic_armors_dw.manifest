@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 2815546373
+CRC: 317052482
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 09812a0fcbfc05b788b93cfb5e0b41a0
+    Hash: 23ef1f8b0e8c9516ddac564f2af3bfa6
   TypeTreeHash:
     serializedVersion: 2
     Hash: 0f4172a80d024eab33ca90a755a61bfc
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 09812a0fcbfc05b788b93cfb5e0b41a0
+    Hash: 23ef1f8b0e8c9516ddac564f2af3bfa6
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -96,7 +96,7 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: ItemDrop/ItemData/SharedData
 Assets:
-- Assets/Custom/PrefabInstance/Armor/Shaman/shaman_armor_set_effect_MMA.prefab
+- Assets/Custom/PrefabInstance/Armor/Shaman/Shaman_armor_set_effect_MMA.prefab
 - Assets/Custom/PrefabInstance/Armor/Shaman/MMA_ShamanChest.prefab
 - Assets/Custom/PrefabInstance/Armor/Shaman/MMA_ShamanCape.prefab
 - Assets/Custom/Sprite/Armor/Embla/EmblaLegs_MMA.png
@@ -104,12 +104,12 @@ Assets:
 - Assets/Custom/PrefabInstance/Armor/DarkWizard/MMA_DarkWizardLegs.prefab
 - Assets/Custom/PrefabInstance/Armor/Embla/MMA_EmblaCape.prefab
 - Assets/Custom/PrefabInstance/Armor/Shaman/MMA_ShamanLegs.prefab
-- Assets/Custom/PrefabInstance/Armor/Wolf/MMA_WolfChest.prefab
+- Assets/Custom/PrefabInstance/Armor/FrostWolf/MMA_FrostWolfChest.prefab
 - Assets/Custom/PrefabInstance/Armor/DarkWizard/MMA_DarkWizardCape.prefab
 - Assets/Custom/PrefabInstance/Armor/Wraith/MMA_WraithChest.prefab
 - Assets/Custom/MonoBehaviour/NoFallDamage.asset
 - Assets/Custom/MonoBehaviour/Armor/SetEffect_EmblaArmor_MMA.asset
-- Assets/Custom/MonoBehaviour/Armor/SetEffect_WolfArmor_MMA.asset
+- Assets/Custom/MonoBehaviour/Armor/SetEffect_FrostWolfArmor_MMA.asset
 - Assets/PrefabInstance/CapeAsh_MMA.prefab
 - Assets/Custom/MonoBehaviour/Armor/SetEffect_EitrWeaveArmor_MMA.asset
 - Assets/Custom/PrefabInstance/Armor/DarkWizard/MMA_DarkWizardHelmet.prefab
@@ -117,16 +117,16 @@ Assets:
 - Assets/Custom/MonoBehaviour/SlowFallAndNoFallDamage.asset
 - Assets/Custom/PrefabInstance/Armor/Shaman/MMA_ShamanHelmet.prefab
 - Assets/Custom/Material/Armor/DarkWizard/DarkWizardEye_MMA.mat
-- Assets/Custom/PrefabInstance/Armor/Wolf/wolf_armor_set_effect_MMA.prefab
+- Assets/Custom/PrefabInstance/Armor/FrostWolf/FrostWolf_armor_set_effect_MMA.prefab
 - Assets/PrefabInstance/AudaciousTiara_MMA.prefab
 - Assets/Custom/Material/Armor/Embla/AshlandsMageArmor_red_MMA.mat
-- Assets/Custom/PrefabInstance/Armor/Wolf/MMA_WolfHelmet.prefab
+- Assets/Custom/PrefabInstance/Armor/FrostWolf/MMA_FrostWolfHelmet.prefab
 - Assets/Custom/Material/Armor/Embla/AshlandsMageArmorLegs_red_MMA.mat
 - Assets/Custom/MonoBehaviour/Armor/SetEffect_DarkWizardArmor_MMA.asset
 - Assets/Custom/PrefabInstance/Armor/Embla/EmblaHood_Effects_MMA.prefab
 - Assets/Custom/MonoBehaviour/Armor/SetEffect_WraithArmor_MMA.asset
 - Assets/Custom/PrefabInstance/Armor/Wraith/MMA_WraithLegs.prefab
-- Assets/Custom/PrefabInstance/Armor/Wolf/MMA_WolfCape.prefab
+- Assets/Custom/PrefabInstance/Armor/FrostWolf/MMA_FrostWolfCape.prefab
 - Assets/Custom/Sprite/Armor/Embla/EmblaHelmet_MMA.png
 - Assets/Custom/PrefabInstance/Armor/Wraith/MMA_WraithCape.prefab
 - Assets/Custom/Material/Armor/Wraith/WraithEye_MMA.mat
@@ -135,6 +135,6 @@ Assets:
 - Assets/Custom/PrefabInstance/Armor/Wraith/MMA_WraithHelmet.prefab
 - Assets/Custom/MonoBehaviour/Armor/SetEffect_ShamanArmor_MMA.asset
 - Assets/Custom/Material/Armor/Embla/AshlandsMageArmorChest_red_MMA.mat
-- Assets/Custom/PrefabInstance/Armor/Wolf/MMA_WolfLegs.prefab
-- Assets/Custom/PrefabInstance/Armor/Wraith/wraith_armor_set_effect_MMA.prefab
+- Assets/Custom/PrefabInstance/Armor/FrostWolf/MMA_FrostWolfLegs.prefab
+- Assets/Custom/PrefabInstance/Armor/Wraith/Wraith_armor_set_effect_MMA.prefab
 Dependencies: []

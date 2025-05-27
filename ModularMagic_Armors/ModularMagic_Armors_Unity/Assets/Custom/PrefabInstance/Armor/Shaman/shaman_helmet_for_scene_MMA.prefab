@@ -1237,7 +1237,7 @@ GameObject:
   - component: {fileID: 114738374973422603}
   - component: {fileID: 114679942720631815}
   m_Layer: 12
-  m_Name: shaman_helmet_for_scene_MMA
+  m_Name: Shaman_helmet_for_scene_MMA
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

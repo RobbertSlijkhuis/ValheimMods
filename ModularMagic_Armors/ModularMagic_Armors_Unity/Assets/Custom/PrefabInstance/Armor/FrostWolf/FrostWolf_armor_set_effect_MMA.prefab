@@ -2316,7 +2316,7 @@ GameObject:
   - component: {fileID: 114033816034306348}
   - component: {fileID: 114396035433945637}
   m_Layer: 0
-  m_Name: wolf_armor_set_effect_MMA
+  m_Name: FrostWolf_armor_set_effect_MMA
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

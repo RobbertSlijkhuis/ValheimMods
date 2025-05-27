@@ -7,12 +7,18 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: WolfMageLegs_MMA
-  m_Shader: {fileID: 4800000, guid: f2cd1ad2e6953684e8f26f3aae35b766, type: 3}
+  m_Name: FrostWolfCape_MMA
+  m_Shader: {fileID: 4800000, guid: 5a36a9f472e9c1349b04a07ce8d60067, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords: []
+  m_InvalidKeywords:
+  - _ADDRAIN_ON
+  - _GLOSSYREFLECTIONS_OFF
+  - _METALLICGLOSSMAP
+  - _NORMALMAP
+  - _SNAPNOISETOPIXEL_ON
+  - _TWOSIDEDNORMALS_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
@@ -24,19 +30,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BumpMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _ChestBumpMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _ChestMetal:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _ChestTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 7110f3931a2e66a4a95c5d63f5579952, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -52,26 +46,18 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _LegsBumpMap:
-        m_Texture: {fileID: 2800000, guid: 214212b988d2a9744919ad6d274140c8, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _LegsMetal:
-        m_Texture: {fileID: 2800000, guid: 0fbe4113e8da23f4e9e616ff4efdb911, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _LegsTex:
-        m_Texture: {fileID: 2800000, guid: dd0940b8f8b9e4546bc4967dafc90d69, type: 3}
+        m_Texture: {fileID: 2800000, guid: 617d06d65b104ed428ab18e40452b488, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 059cd60d47c65be4bb95bf24454700e0, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
+        m_Texture: {fileID: 2800000, guid: a3d230b8503d8aa409ef3c63258f858c, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NoiseGlowTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -83,41 +69,60 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _SkinBumpMap:
+    - _StyleTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AddRain: 0
+    - _AddRain: 1
+    - _AddSnow: 0
     - _BumpScale: 1
+    - _CamCull: 0
     - _Cull: 0
-    - _Cutoff: 0
+    - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _GlossMapScale: 0.902
-    - _Glossiness: 0
-    - _GlossyReflections: 1
+    - _GlossMapScale: 1
+    - _Glossiness: 0.27
+    - _GlossyReflections: 0
+    - _Height: 15
     - _Hue: 0
-    - _MetalGloss: 1
-    - _MetalGlossiness: 0
-    - _Metallic: 1
+    - _MetalGloss: 0
+    - _Metallic: 0
     - _Mode: 0
+    - _MossAlpha: 0
+    - _MossBlend: 0
+    - _MossNormal: 0.5
+    - _MossTransition: 0.1
+    - _NoiseGlowEdge: 0
+    - _NoiseGlowEnabled: 0
+    - _NoiseGlowSize: 3
     - _OcclusionStrength: 1
     - _Parallax: 0.02
+    - _RippleDeadzoneMax: 2
+    - _RippleDeadzoneMin: 0.3
+    - _RippleDistance: 0
+    - _RippleSpeed: 100
     - _Saturation: 0
     - _SmoothnessTextureChannel: 0
+    - _SnapNoiseToPixel: 1
     - _SpecularHighlights: 1
+    - _SphereNormals: 0
+    - _SphereOffset: 0
     - _SrcBlend: 1
-    - _TwoSidedNormals: 0
+    - _Style: 0
+    - _SwayDistance: 0
+    - _SwaySpeed: 15
+    - _TwoSidedNormals: 1
     - _UVSec: 0
+    - _UseGlossmap: 0
+    - _UseStyles: 0
     - _Value: 0
     - _ZWrite: 1
     m_Colors:
-    - _ChestColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _LegsColor: {r: 1, g: 1, b: 1, a: 1}
-    - _MetalColor: {r: 1, g: 1, b: 1, a: 1}
-    - _SkinColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+    - _EmissionColor: {r: 0.6173726, g: 0.98644423, b: 2.3796904, a: 1}
+    - _MetalColor: {r: 0, g: 0, b: 0, a: 1}
+    - _NoiseGlowColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []

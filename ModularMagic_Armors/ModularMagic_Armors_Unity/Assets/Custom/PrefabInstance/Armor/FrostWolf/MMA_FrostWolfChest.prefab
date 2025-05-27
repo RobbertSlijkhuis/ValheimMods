@@ -1293,7 +1293,7 @@ GameObject:
   - component: {fileID: 199376518933588668}
   - component: {fileID: 198890179579733089}
   m_Layer: 12
-  m_Name: MMA_WolfChest
+  m_Name: MMA_FrostWolfChest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

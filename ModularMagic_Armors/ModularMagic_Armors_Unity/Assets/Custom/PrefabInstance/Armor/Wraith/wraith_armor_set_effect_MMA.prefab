@@ -2351,7 +2351,7 @@ GameObject:
   - component: {fileID: 6321051542509236303}
   - component: {fileID: 5169062749005222561}
   m_Layer: 0
-  m_Name: wraith_armor_set_effect_MMA
+  m_Name: Wraith_armor_set_effect_MMA
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -106,10 +106,11 @@ namespace ModularMagic_Armors.Harmony
             try
             {
                 _UpdateItemEffects(item, true);
+                _UpdateSetEffects();
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not item effects in EquipItem_Postfix: " + e);
+                Jotunn.Logger.LogError("Could not update item/set effects in EquipItem_Postfix: " + e);
             }
         }
 
@@ -120,22 +121,22 @@ namespace ModularMagic_Armors.Harmony
             try
             {
                 _UpdateItemEffects(item, false);
+                _UpdateSetEffects();
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not item effects in UnequipItem_Postfix: " + e);
+                Jotunn.Logger.LogError("Could not update item/sets effects in UnequipItem_Postfix: " + e);
             }
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Humanoid), "UpdateEquipmentStatusEffects")]
-        public static void UpdateEquipmentStatusEffects_Postfix()
+        public static void _UpdateSetEffects()
         {
             try
             {
+                Jotunn.Logger.LogWarning("UpdateEquipmentStatusEffects_Postfix");
                 if (Player.m_localPlayer == null) return;
 
-                if (Player.m_localPlayer.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode(ModularMagic_Armors.Instance.effects.shamanArmorSetSE.name)))
+                if (Player.m_localPlayer.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode(ModularMagic_Armors.Instance.effects.ShamanArmorSetSE.name)))
                 {
                     Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_blackforest_effect_head").gameObject.SetActive(true);
                     Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_blackforest_effect_antler_left").gameObject.SetActive(true);
@@ -156,20 +157,26 @@ namespace ModularMagic_Armors.Harmony
                     Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.kneeRightPath + "/ME_blackforest_effect_knee_right").gameObject.SetActive(false);
                 }
 
-                if (Player.m_localPlayer.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode(ModularMagic_Armors.Instance.effects.wraithArmorSetSE.name)))
+                if (Player.m_localPlayer.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode(ModularMagic_Armors.Instance.effects.WraithArmorSetSE.name)))
                 {
+
                     Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.bodyPath).gameObject.SetActive(false);
-                    Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.helmetAttachPath).gameObject.SetActive(false);
                     Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_swamp_effect_face").gameObject.SetActive(true);
+                    if (Player.m_localPlayer.GetBeard() != "")
+                    {
+                        ModularMagic_Armors.Instance.playerBeard = Player.m_localPlayer.GetBeard();
+                        Player.m_localPlayer.SetBeard("BeardNone");
+                    }
                 }
                 else
                 {
                     Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.bodyPath).gameObject.SetActive(true);
-                    Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.helmetAttachPath).gameObject.SetActive(true);
                     Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_swamp_effect_face").gameObject.SetActive(false);
+                    if (ModularMagic_Armors.Instance.playerBeard != null)
+                        Player.m_localPlayer.SetBeard(ModularMagic_Armors.Instance.playerBeard);
                 }
 
-                if (Player.m_localPlayer.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode(ModularMagic_Armors.Instance.effects.wolfArmorSetSE.name)))
+                if (Player.m_localPlayer.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode(ModularMagic_Armors.Instance.effects.FrostWolfArmorSetSE.name)))
                 {
                     Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_mountain_effect_head").gameObject.SetActive(true);
                     Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.spine2Path + "/ME_mountain_effect_spine2").gameObject.SetActive(true);
@@ -188,7 +195,7 @@ namespace ModularMagic_Armors.Harmony
                     Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.kneeRightPath + "/ME_mountain_effect_knee_right").gameObject.SetActive(false);
                 }
 
-                if (Player.m_localPlayer.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode(ModularMagic_Armors.Instance.effects.darkWizardArmorSetSE.name)))
+                if (Player.m_localPlayer.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode(ModularMagic_Armors.Instance.effects.DarkWizardArmorSetSE.name)))
                 {
                     Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_eye_left/flames").gameObject.SetActive(true);
                     Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_eye_right/flames").gameObject.SetActive(true);

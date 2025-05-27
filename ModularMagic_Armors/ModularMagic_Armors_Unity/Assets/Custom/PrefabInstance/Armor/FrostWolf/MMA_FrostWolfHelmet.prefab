@@ -48,7 +48,7 @@ GameObject:
   - component: {fileID: 199410037099036026}
   - component: {fileID: 198266841453475113}
   m_Layer: 12
-  m_Name: MMA_WolfHelmet
+  m_Name: MMA_FrostWolfHelmet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -197,7 +197,7 @@ MonoBehaviour:
       m_foodBurnTime: 0
       m_foodRegen: 0
       m_armorMaterial: {fileID: 2100000, guid: 57d2fc9c23e5a47489b164d5e36ab82f, type: 2}
-      m_helmetHideHair: 0
+      m_helmetHideHair: 1
       m_helmetHideBeard: 1
       m_helmetHairSettings: []
       m_helmetBeardSettings: []

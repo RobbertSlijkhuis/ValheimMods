@@ -5,28 +5,28 @@ namespace ModularMagic_Armors.Models
     class CustomPrefabs
     {
         // Shaman set
-        public GameObject shamanHelmetPrefab;
-        public GameObject shamanCapePrefab;
-        public GameObject shamanChestPrefab;
-        public GameObject shamanLegsPrefab;
+        public GameObject ShamanHelmetPrefab;
+        public GameObject ShamanCapePrefab;
+        public GameObject ShamanChestPrefab;
+        public GameObject ShamanLegsPrefab;
 
         // Wraith set
-        public GameObject wraithHelmetPrefab;
-        public GameObject wraithCapePrefab;
-        public GameObject wraithChestPrefab;
-        public GameObject wraithLegsPrefab;
+        public GameObject WraithHelmetPrefab;
+        public GameObject WraithCapePrefab;
+        public GameObject WraithChestPrefab;
+        public GameObject WraithLegsPrefab;
 
         // Wolf set
-        public GameObject wolfHelmetPrefab;
-        public GameObject wolfCapePrefab;
-        public GameObject wolfChestPrefab;
-        public GameObject wolfLegsPrefab;
+        public GameObject FrostWolfHelmetPrefab;
+        public GameObject FrostWolfCapePrefab;
+        public GameObject FrostWolfChestPrefab;
+        public GameObject FrostWolfLegsPrefab;
 
         // DarkWizard set
-        public GameObject darkWizardHelmetPrefab;
-        public GameObject darkWizardCapePrefab;
-        public GameObject darkWizardChestPrefab;
-        public GameObject darkWizardLegsPrefab;
+        public GameObject DarkWizardHelmetPrefab;
+        public GameObject DarkWizardCapePrefab;
+        public GameObject DarkWizardChestPrefab;
+        public GameObject DarkWizardLegsPrefab;
 
         // Embla
         public GameObject EmblaCape;

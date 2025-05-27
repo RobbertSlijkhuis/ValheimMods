@@ -1729,7 +1729,7 @@ GameObject:
   - component: {fileID: 199240275813743365}
   - component: {fileID: 198755499505489559}
   m_Layer: 12
-  m_Name: MMA_WolfCape
+  m_Name: MMA_FrostWolfCape
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

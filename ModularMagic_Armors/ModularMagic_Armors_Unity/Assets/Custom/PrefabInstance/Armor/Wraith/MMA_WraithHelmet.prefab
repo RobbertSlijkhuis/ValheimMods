@@ -2288,7 +2288,7 @@ MonoBehaviour:
       m_foodBurnTime: 0
       m_foodRegen: 0
       m_armorMaterial: {fileID: 0}
-      m_helmetHideHair: 0
+      m_helmetHideHair: 1
       m_helmetHideBeard: 0
       m_helmetHairSettings: []
       m_helmetBeardSettings: []

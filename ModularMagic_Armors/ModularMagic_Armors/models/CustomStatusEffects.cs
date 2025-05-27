@@ -2,10 +2,10 @@
 {
     internal class CustomStatusEffects
     {
-        public StatusEffect shamanArmorSetSE;
-        public StatusEffect wraithArmorSetSE;
-        public StatusEffect wolfArmorSetSE;
-        public StatusEffect darkWizardArmorSetSE;
+        public StatusEffect ShamanArmorSetSE;
+        public StatusEffect WraithArmorSetSE;
+        public StatusEffect FrostWolfArmorSetSE;
+        public StatusEffect DarkWizardArmorSetSE;
         public StatusEffect EitrWeaveArmorSetSE;
         public StatusEffect EmblaArmorSetSE;
 

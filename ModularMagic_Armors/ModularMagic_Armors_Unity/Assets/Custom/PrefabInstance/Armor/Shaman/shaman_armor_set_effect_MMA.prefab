@@ -127,7 +127,7 @@ GameObject:
   - component: {fileID: 114684654054764903}
   - component: {fileID: 114765748671430859}
   m_Layer: 22
-  m_Name: shaman_armor_set_effect_MMA
+  m_Name: Shaman_armor_set_effect_MMA
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

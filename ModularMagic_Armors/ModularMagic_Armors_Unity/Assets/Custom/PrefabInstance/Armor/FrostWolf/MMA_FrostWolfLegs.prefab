@@ -1540,7 +1540,7 @@ GameObject:
   - component: {fileID: 199544766116086042}
   - component: {fileID: 198020423639053386}
   m_Layer: 12
-  m_Name: MMA_WolfLegs
+  m_Name: MMA_FrostWolfLegs
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

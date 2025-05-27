@@ -128,7 +128,7 @@ namespace ModularMagic_Armors.Configs
         {
             try
             {
-                ArmorConfigOptions optionsHelmet = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.shamanHelmetPrefab, armor1HelmetName, armor1HelmetRecipe, armor1HelmetRecipeUpgrade)
+                ArmorConfigOptions optionsHelmet = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.ShamanHelmetPrefab, armor1HelmetName, armor1HelmetRecipe, armor1HelmetRecipeUpgrade)
                 {
                     description = "A hood crafted from tough troll hide, adorned with a shaman mask. When worn, the whispers of the wilds echo softly in your ears.",
                     craftingStation = "Workbench",
@@ -140,7 +140,7 @@ namespace ModularMagic_Armors.Configs
                 };
                 armor1Helmet.GenerateConfig(optionsHelmet);
 
-                ArmorConfigOptions optionsCape = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.shamanCapePrefab, armor1CapeName, armor1CapeRecipe, armor1CapeRecipeUpgrade)
+                ArmorConfigOptions optionsCape = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.ShamanCapePrefab, armor1CapeName, armor1CapeRecipe, armor1CapeRecipeUpgrade)
                 {
                     description = "A tattered cloak crafted from troll leather. Ancient seeds, embedded within the fabric, pulse with a faint glow, drawing power from the very heart of the forest’s magic.",
                     craftingStation = "Workbench",
@@ -152,7 +152,7 @@ namespace ModularMagic_Armors.Configs
                 };
                 armor1Cape.GenerateConfig(optionsCape);
 
-                ArmorConfigOptions optionsChest = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.shamanChestPrefab, armor1ChestName, armor1ChestRecipe, armor1ChestRecipeUpgrade)
+                ArmorConfigOptions optionsChest = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.ShamanChestPrefab, armor1ChestName, armor1ChestRecipe, armor1ChestRecipeUpgrade)
                 {
                     description = "A rugged chestpiece crafted from tough troll leather. Embedded with ancient seeds, enhancing the wearer’s connection to the wild magic of the forest.",
                     craftingStation = "Workbench",
@@ -165,7 +165,7 @@ namespace ModularMagic_Armors.Configs
                 };
                 armor1Chest.GenerateConfig(optionsChest);
 
-                ArmorConfigOptions optionsLegs = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.shamanLegsPrefab, armor1LegsName, armor1LegsRecipe, armor1LegsRecipeUpgrade)
+                ArmorConfigOptions optionsLegs = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.ShamanLegsPrefab, armor1LegsName, armor1LegsRecipe, armor1LegsRecipeUpgrade)
                 {
                     description = "A rugged leggings craft from troll leather, reinforced with ancient seeds. Each step draws strength from the earth, grounding the wearer in the forest’s power.",
                     craftingStation = "Workbench",
@@ -188,7 +188,7 @@ namespace ModularMagic_Armors.Configs
         {
             try
             {
-                ArmorConfigOptions optionsHelmet = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.wraithHelmetPrefab, armor2HelmetName, armor2HelmetRecipe, armor2HelmetRecipeUpgrade)
+                ArmorConfigOptions optionsHelmet = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.WraithHelmetPrefab, armor2HelmetName, armor2HelmetRecipe, armor2HelmetRecipeUpgrade)
                 {
                     description = "A dark hood crafted from shadowed cloth, its deep black fabric almost swallowing light. Faint whispers seem to stir when worn...",
                     craftingStation = "Workbench",
@@ -200,7 +200,7 @@ namespace ModularMagic_Armors.Configs
                 };
                 armor2Helmet.GenerateConfig(optionsHelmet);
 
-                ArmorConfigOptions optionsCape = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.wraithCapePrefab, armor2CapeName, armor2CapeRecipe, armor2CapeRecipeUpgrade)
+                ArmorConfigOptions optionsCape = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.WraithCapePrefab, armor2CapeName, armor2CapeRecipe, armor2CapeRecipeUpgrade)
                 {
                     description = "A sleek, flowing cloak made from deep, shadowy fabric that seems to absorb light. It drapes smoothly over the wearer, emanating an aura of foreboding.",
                     craftingStation = "Workbench",
@@ -212,7 +212,7 @@ namespace ModularMagic_Armors.Configs
                 };
                 armor2Cape.GenerateConfig(optionsCape);
 
-                ArmorConfigOptions optionsChest = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.wraithChestPrefab, armor2ChestName, armor2ChestRecipe, armor2ChestRecipeUpgrade)
+                ArmorConfigOptions optionsChest = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.WraithChestPrefab, armor2ChestName, armor2ChestRecipe, armor2ChestRecipeUpgrade)
                 {
                     description = "A chestpiece made from, shadowy cloth, imbued with the lingering power of Wraiths. The fabric pulses with dark energy, enhancing the wearer’s magic as it draws upon the restless spirits of the past.",
                     craftingStation = "Workbench",
@@ -225,7 +225,7 @@ namespace ModularMagic_Armors.Configs
                 };
                 armor2Chest.GenerateConfig(optionsChest);
 
-                ArmorConfigOptions optionsLegs = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.wraithLegsPrefab, armor2LegsName, armor2LegsRecipe, armor2LegsRecipeUpgrade)
+                ArmorConfigOptions optionsLegs = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.WraithLegsPrefab, armor2LegsName, armor2LegsRecipe, armor2LegsRecipeUpgrade)
                 {
                     description = "Durable leggings crafted from shadowy cloth, infused with the essence of Wraiths. The fabric emanates dark energy, like the restless spirits that haunt the night.",
                     craftingStation = "Workbench",
@@ -248,7 +248,7 @@ namespace ModularMagic_Armors.Configs
         {
             try
             {
-                ArmorConfigOptions optionsHelmet = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.wolfHelmetPrefab, armor3HelmetName, armor3HelmetRecipe, armor3HelmetRecipeUpgrade)
+                ArmorConfigOptions optionsHelmet = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.FrostWolfHelmetPrefab, armor3HelmetName, armor3HelmetRecipe, armor3HelmetRecipeUpgrade)
                 {
                     description = "A hood crafted from enchanted wolf pelt, trimmed with shimmering silver chainmail. Infused with ancient magic, it draws on the wolf’s legendary endurance.",
                     craftingStation = "Forge",
@@ -259,7 +259,7 @@ namespace ModularMagic_Armors.Configs
                 };
                 armor3Helmet.GenerateConfig(optionsHelmet);
 
-                ArmorConfigOptions optionsCape = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.wolfCapePrefab, armor3CapeName, armor3CapeRecipe, armor3CapeRecipeUpgrade)
+                ArmorConfigOptions optionsCape = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.FrostWolfCapePrefab, armor3CapeName, armor3CapeRecipe, armor3CapeRecipeUpgrade)
                 {
                     description = "A cape crafted from wolf pelts granting protection from the elements. It enhances the wearer’s speed and agility, allowing them to move with the swiftness and grace of a wolf.",
                     craftingStation = "Forge",
@@ -270,7 +270,7 @@ namespace ModularMagic_Armors.Configs
                 };
                 armor3Cape.GenerateConfig(optionsCape);
 
-                ArmorConfigOptions optionsChest = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.wolfChestPrefab, armor3ChestName, armor3ChestRecipe, armor3ChestRecipeUpgrade)
+                ArmorConfigOptions optionsChest = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.FrostWolfChestPrefab, armor3ChestName, armor3ChestRecipe, armor3ChestRecipeUpgrade)
                 {
                     description = "A chestpiece made of silver chainmail and adorned with wolf pelt, enchanted with strength and endurance. The robe channels the power of the wolf.",
                     craftingStation = "Forge",
@@ -283,7 +283,7 @@ namespace ModularMagic_Armors.Configs
                 };
                 armor3Chest.GenerateConfig(optionsChest);
 
-                ArmorConfigOptions optionsLegs = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.wolfLegsPrefab, armor3LegsName, armor3LegsRecipe, armor3LegsRecipeUpgrade)
+                ArmorConfigOptions optionsLegs = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.FrostWolfLegsPrefab, armor3LegsName, armor3LegsRecipe, armor3LegsRecipeUpgrade)
                 {
                     description = "Leggings crafted from silver chainmail and reinforced with wolf pelt, imbued with magical energy to enhance speed and agility.",
                     craftingStation = "Forge",
@@ -306,7 +306,7 @@ namespace ModularMagic_Armors.Configs
         {
             try
             {
-                ArmorConfigOptions optionsHelmet = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.darkWizardHelmetPrefab, armor4HelmetName, armor4HelmetRecipe, armor4HelmetRecipeUpgrade)
+                ArmorConfigOptions optionsHelmet = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.DarkWizardHelmetPrefab, armor4HelmetName, armor4HelmetRecipe, armor4HelmetRecipeUpgrade)
                 {
                     description = "A tall, pointed hat crafted from black fabric, embroidered with arcane runes of forbidden magic. The hat enhances the wearer’s focus and concentration, amplifying their spellcasting abilities.",
                     craftingStation = "Forge",
@@ -317,7 +317,7 @@ namespace ModularMagic_Armors.Configs
                 };
                 armor4Helmet.GenerateConfig(optionsHelmet);
 
-                ArmorConfigOptions optionsCape = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.darkWizardCapePrefab, armor4CapeName, armor4CapeRecipe, armor4CapeRecipeUpgrade)
+                ArmorConfigOptions optionsCape = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.DarkWizardCapePrefab, armor4CapeName, armor4CapeRecipe, armor4CapeRecipeUpgrade)
                 {
                     description = "A cape made from black fabric, adorned with arcane symbols boosting the wearer’s magical power. A constant reminder of the forbidden magic that courses through them.",
                     craftingStation = "Forge",
@@ -328,7 +328,7 @@ namespace ModularMagic_Armors.Configs
                 };
                 armor4Cape.GenerateConfig(optionsCape);
 
-                ArmorConfigOptions optionsChest = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.darkWizardChestPrefab, armor4ChestName, armor4ChestRecipe, armor4ChestRecipeUpgrade)
+                ArmorConfigOptions optionsChest = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.DarkWizardChestPrefab, armor4ChestName, armor4ChestRecipe, armor4ChestRecipeUpgrade)
                 {
                     description = "A chestpiece crafted from black fabric, woven with arcane symbols and infused with forbidden runes. The robe enhances the wearer’s mastery over dark magic.",
                     craftingStation = "Forge",
@@ -341,7 +341,7 @@ namespace ModularMagic_Armors.Configs
                 };
                 armor4Chest.GenerateConfig(optionsChest);
 
-                ArmorConfigOptions optionsLegs = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.darkWizardLegsPrefab, armor4LegsName, armor4LegsRecipe, armor4LegsRecipeUpgrade)
+                ArmorConfigOptions optionsLegs = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.DarkWizardLegsPrefab, armor4LegsName, armor4LegsRecipe, armor4LegsRecipeUpgrade)
                 {
                     description = "Leggings crafted from black fabric, reinforced with dark runes. Infused with forbidden power, they grant the wearer greater control over their magic, making their spells more precise and potent.",
                     craftingStation = "Forge",
