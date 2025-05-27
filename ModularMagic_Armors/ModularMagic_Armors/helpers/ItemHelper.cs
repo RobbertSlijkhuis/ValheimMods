@@ -1,14 +1,16 @@
 ﻿using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
+using ModularMagic_Armors.Configs;
 using ModularMagic_Armors.Models;
+using ModularMagic_Armors.StatusEffects;
 using UnityEngine;
 
 namespace ModularMagic_Armors.Helpers
 {
     internal class ItemHelper
     {
-        public static void CreateStaff(GameObject prefab, StaffConfig config)
+        public static void Create(GameObject prefab, ArmorConfig config)
         {
             ItemConfig itemConfig = new ItemConfig();
             itemConfig.Name = config.name.Value;
@@ -23,18 +25,23 @@ namespace ModularMagic_Armors.Helpers
             else
                 itemConfig.Requirements = simpleRequirements;
 
-            Jotunn.Logger.LogWarning("Pickaxe damage should be: " + config.damagePickaxe.Value);
+            ItemDrop simpleDrop = prefab.GetComponent<ItemDrop>();
+            MagicStatusEffect simpleStatusEffect = ScriptableObject.CreateInstance<MagicStatusEffect>();
+            simpleStatusEffect.name = config.magicStatusEffectName;
+            simpleStatusEffect.m_name = config.name.Value;
+            simpleStatusEffect.SetAll(config.eitr.Value, config.elementalMagic.Value, config.bloodMagic.Value);
+            simpleDrop.m_itemData.m_shared.m_equipStatusEffect = simpleStatusEffect;
 
             UpdateHelper.UpdateItemDropStats(prefab, new UpdateItemDropStatsOptions()
             {
+                description = config.description.Value,
+                armor = config.armor.Value,
+                armorPerLevel = config.armorPerLevel.Value,
+                weight = config.weight.Value,
+                maxDurability = config.maxDurability.Value,
                 maxQuality = config.maxQuality.Value,
-                movementModifier = config.movementSpeed.Value,
-                blockPower = config.blockArmor.Value,
-                deflectionForce = config.deflectionForce.Value,
-                attackForce = config.attackForce.Value,
-                damageLightning = config.damageLightning.Value,
-                damagePickaxe = config.damagePickaxe.Value,
-                attackEitr = config.useEitr.Value,
+                movementSpeed = config.movementSpeed.Value,
+                eitrRegen = config.eitrRegen.Value,
             });
 
             ItemManager.Instance.AddItem(new CustomItem(prefab, true, itemConfig));
