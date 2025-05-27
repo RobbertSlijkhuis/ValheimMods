@@ -1,9 +1,11 @@
 ﻿using HarmonyLib;
+using ModularMagic_Utilities.Components;
 using ModularMagic_Utilities.Configs;
-using ModularMagic_Utilities.Helpers;
-using ModularMagic_Utilities.Models;
 using System;
-using static ItemDrop;
+//using System;
+//using ModularMagic_Utilities.Helpers;
+//using System;
+//using static ItemDrop;
 
 namespace ModularMagic_Utilities.Harmony
 {
@@ -14,147 +16,156 @@ namespace ModularMagic_Utilities.Harmony
         [HarmonyPatch(typeof(Player), "GetTotalFoodValue")]
         public static void GetTotalFoodValue_Postfix(ref Player __instance, ref float eitr)
         {
-            if (__instance == null)
-                return;
+            try
+            {
+                if (__instance == null)
+                    return;
 
-            SetEitr(__instance, ConfigUtilities.spellbook1.magicStatusEffectName, ConfigUtilities.spellbook1.eitr.Value, ref eitr);
-            SetEitr(__instance, ConfigUtilities.spellbook2.magicStatusEffectName, ConfigUtilities.spellbook2.eitr.Value, ref eitr);
-            SetEitr(__instance, ConfigUtilities.spellbook3.magicStatusEffectName, ConfigUtilities.spellbook3.eitr.Value, ref eitr);
-            SetEitr(__instance, ConfigUtilities.lantern1.magicStatusEffectName, ConfigUtilities.lantern1.eitr.Value, ref eitr);
-            SetEitr(__instance, ConfigUtilities.lantern2.magicStatusEffectName, ConfigUtilities.lantern2.eitr.Value, ref eitr);
-            SetEitr(__instance, ConfigUtilities.lantern3.magicStatusEffectName, ConfigUtilities.lantern3.eitr.Value, ref eitr);
+                _SetEitr(__instance, PluginConfig.spellbook1.magicStatusEffectName, PluginConfig.spellbook1.eitr.Value, ref eitr);
+                _SetEitr(__instance, PluginConfig.spellbook2.magicStatusEffectName, PluginConfig.spellbook2.eitr.Value, ref eitr);
+                _SetEitr(__instance, PluginConfig.spellbook3.magicStatusEffectName, PluginConfig.spellbook3.eitr.Value, ref eitr);
+                _SetEitr(__instance, PluginConfig.lantern1.magicStatusEffectName, PluginConfig.lantern1.eitr.Value, ref eitr);
+                _SetEitr(__instance, PluginConfig.lantern2.magicStatusEffectName, PluginConfig.lantern2.eitr.Value, ref eitr);
+                _SetEitr(__instance, PluginConfig.lantern3.magicStatusEffectName, PluginConfig.lantern3.eitr.Value, ref eitr);
+            }
+            catch (Exception e) 
+            {
+                Jotunn.Logger.LogError("Could not update Eitr in GetTotalFoodValue_Postfix: " + e);
+            }
         }
 
         [HarmonyPatch(typeof(Skills), "GetSkillLevel")]
         [HarmonyPostfix]
         public static void GetSkillLevel_Postfix(Skills __instance, Skills.SkillType skillType, ref float __result)
         {
-            if (skillType != Skills.SkillType.ElementalMagic && skillType != Skills.SkillType.BloodMagic)
-                return;
+            try
+            {
+                if (skillType != Skills.SkillType.ElementalMagic && skillType != Skills.SkillType.BloodMagic)
+                    return;
 
-            float value = 0f;
-            float currentLevel = __instance.GetSkill(skillType).m_level;
+                float value = 0f;
 
-            if (HaveStatusEffect(__instance, ConfigUtilities.spellbook1.magicStatusEffectName))
-            {
-                value = GetValueFromConfig(skillType, ConfigUtilities.spellbook1);
-            }
-            else if (HaveStatusEffect(__instance, ConfigUtilities.spellbook2.magicStatusEffectName))
-            {
-                value = GetValueFromConfig(skillType, ConfigUtilities.spellbook2);
-            }
-            else if (HaveStatusEffect(__instance, ConfigUtilities.spellbook3.magicStatusEffectName))
-            {
-                value = GetValueFromConfig(skillType, ConfigUtilities.spellbook3);
-            }
-            else if (HaveStatusEffect(__instance, ConfigUtilities.lantern1.magicStatusEffectName))
-            {
-                value = GetValueFromConfig(skillType, ConfigUtilities.lantern1);
-            }
-            else if (HaveStatusEffect(__instance, ConfigUtilities.lantern2.magicStatusEffectName))
-            {
-               value = GetValueFromConfig(skillType, ConfigUtilities.lantern2);
-            }
-            else if (HaveStatusEffect(__instance, ConfigUtilities.lantern3.magicStatusEffectName))
-            {
-                value = GetValueFromConfig(skillType, ConfigUtilities.lantern3);
-            }
+                if (_HaveStatusEffect(__instance, PluginConfig.spellbook1.magicStatusEffectName))
+                    value = _GetValueFromConfig(skillType, PluginConfig.spellbook1);
+                else if (_HaveStatusEffect(__instance, PluginConfig.spellbook2.magicStatusEffectName))
+                    value = _GetValueFromConfig(skillType, PluginConfig.spellbook2);
+                else if (_HaveStatusEffect(__instance, PluginConfig.spellbook3.magicStatusEffectName))
+                    value = _GetValueFromConfig(skillType, PluginConfig.spellbook3);
+                else if (_HaveStatusEffect(__instance, PluginConfig.lantern1.magicStatusEffectName))
+                    value = _GetValueFromConfig(skillType, PluginConfig.lantern1);
+                else if (_HaveStatusEffect(__instance, PluginConfig.lantern2.magicStatusEffectName))
+                    value = _GetValueFromConfig(skillType, PluginConfig.lantern2);
+                else if (_HaveStatusEffect(__instance, PluginConfig.lantern3.magicStatusEffectName))
+                    value = _GetValueFromConfig(skillType, PluginConfig.lantern3);
 
-            if (value == 0f)
-            {
-                __instance.m_player.GetSEMan().ModifySkillLevel(skillType, ref currentLevel);
-                __result = currentLevel;
-                return;
+                float newLevel = __result + value;
+                __instance.m_player.GetSEMan().ModifySkillLevel(skillType, ref newLevel);
+                __result = newLevel;
             }
-
-            float newLevel = currentLevel + value;
-            __instance.m_player.GetSEMan().ModifySkillLevel(skillType, ref newLevel);
-            __result = newLevel;
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not update skills in GetSkillLevel_Postfix: " + e);
+            }
         }
 
+
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(Game), "SpawnPlayer")]
-        public static void SpawnPlayer_Postfix()
+        [HarmonyPatch(typeof(PlayerController), "Awake")]
+        public static void AwakePlayerController_Postfix(ref PlayerController __instance)
         {
             try
             {
-                Jotunn.Logger.LogWarning($"Player is spawned!");
+                __instance.gameObject.AddComponent<LanternMMU>();
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError(error);
+                Jotunn.Logger.LogError("Could not add component in AwakePlayerController_Postfix: " + e);
             }
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Player), "OnSpawned")]
-        public static void OnSpawned_Postfix(ref Player __instance)
-        {
-            try
-            {
-                if (__instance == null)
-                    return;
+        //[HarmonyPostfix]
+        //[HarmonyPatch(typeof(Game), "SpawnPlayer")]
+        //public static void SpawnPlayer_Postfix()
+        //{
+        //    try
+        //    {
+        //        Jotunn.Logger.LogWarning($"Player is spawned!");
+        //    }
+        //    catch (Exception error)
+        //    {
+        //        Jotunn.Logger.LogError(error);
+        //    }
+        //}
 
-                if (!ModularMagic_Utilities.Instance.lanternStatusDictionary.ContainsKey(__instance.GetPlayerID()))
-                {
-                    Jotunn.Logger.LogWarning($"Adding {__instance.GetPlayerName()} to lantern dictionary! {__instance.GetPlayerID()}");
-                    ModularMagic_Utilities.Instance.lanternStatusDictionary.Add(__instance.GetPlayerID(), true);
-                }
-                else
-                {
-                    Jotunn.Logger.LogWarning($"{__instance.GetPlayerName()} is already in the to lantern dictionary!");
-                }
+        //[HarmonyPostfix]
+        //[HarmonyPatch(typeof(Player), "OnSpawned")]
+        //public static void OnSpawned_Postfix(ref Player __instance)
+        //{
+        //    try
+        //    {
+        //        if (__instance == null)
+        //            return;
 
-                //Jotunn.Logger.LogWarning("Created new player: " + __instance.GetPlayerName());
-                //var inventory = __instance.GetInventory();
-                //var equipedItems = inventory.GetEquippedItems();
+        //        if (!ModularMagic_Utilities.Instance.lanternStatusDict.ContainsKey(__instance.GetPlayerID()))
+        //        {
+        //            Jotunn.Logger.LogWarning($"Adding {__instance.GetPlayerName()} to lantern dictionary! {__instance.GetPlayerID()}");
+        //            ModularMagic_Utilities.Instance.lanternStatusDict.Add(__instance.GetPlayerID(), true);
+        //        }
+        //        else
+        //        {
+        //            Jotunn.Logger.LogWarning($"{__instance.GetPlayerName()} is already in the to lantern dictionary!");
+        //        }
 
-                //var lantern = equipedItems.Find(item => 
-                //    item.m_shared.m_name == ConfigUtilities.lantern1.name.Value ||
-                //    item.m_shared.m_name == ConfigUtilities.lantern2.name.Value || 
-                //    item.m_shared.m_name == ConfigUtilities.lantern3.name.Value);
+        //        //Jotunn.Logger.LogWarning("Created new player: " + __instance.GetPlayerName());
+        //        //var inventory = __instance.GetInventory();
+        //        //var equipedItems = inventory.GetEquippedItems();
 
-                //if (lantern != null)
-                //{
+        //        //var lantern = equipedItems.Find(item => 
+        //        //    item.m_shared.m_name == ConfigUtilities.lantern1.name.Value ||
+        //        //    item.m_shared.m_name == ConfigUtilities.lantern2.name.Value || 
+        //        //    item.m_shared.m_name == ConfigUtilities.lantern3.name.Value);
 
-                //}
-            }
-            catch (Exception error)
-            {
-                Jotunn.Logger.LogError(error);
-            }
-        }
+        //        //if (lantern != null)
+        //        //{
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Humanoid), "UnequipItem")]
-        public static void UnequipItem_Postfix(ItemData item)
-        {
-            try
-            {
-                if (item == null) 
-                    return;
+        //        //}
+        //    }
+        //    catch (Exception error)
+        //    {
+        //        Jotunn.Logger.LogError(error);
+        //    }
+        //}
 
-                long playerId = Player.m_localPlayer.GetPlayerID();
+        //[HarmonyPostfix]
+        //[HarmonyPatch(typeof(Humanoid), "UnequipItem")]
+        //public static void UnequipItem_Postfix(ItemData item)
+        //{
+        //    try
+        //    {
+        //        if (item == null) 
+        //            return;
 
-                if (ModularMagic_Utilities.Instance.lanternStatusDictionary[playerId]) 
-                    return;
+        //        long playerId = Player.m_localPlayer.GetPlayerID();
 
-                ZPackage package = new ZPackage();
-                int type = RPCHelper.GetLanternType(item);
+        //        if (ModularMagic_Utilities.Instance.lanternStatusDictionary[playerId]) 
+        //            return;
 
-                if (type != 0)
-                {
-                    package.Write($"{playerId},{type},true,false");
-                    ModularMagic_Utilities.Instance.lanternRPC.SendPackage(ZRoutedRpc.instance.GetServerPeerID(), package);
-                }
-            }
-            catch (Exception error)
-            {
-                Jotunn.Logger.LogError(error);
-            }
-        }
+        //        ZPackage package = new ZPackage();
+        //        int type = UpdateHelper.GetLanternType(item);
 
-        private static void SetEitr(Player player, string name, float amount, ref float eitr)
+        //        if (type != 0)
+        //        {
+        //            package.Write($"{playerId},{type},true,false");
+        //            ModularMagic_Utilities.Instance.lanternRPC.SendPackage(ZRoutedRpc.instance.GetServerPeerID(), package);
+        //        }
+        //    }
+        //    catch (Exception error)
+        //    {
+        //        Jotunn.Logger.LogError(error);
+        //    }
+        //}
+
+        private static void _SetEitr(Player player, string name, float amount, ref float eitr)
         {
             if (player == null)
                 return;
@@ -167,12 +178,12 @@ namespace ModularMagic_Utilities.Harmony
             eitr += amount;
         }
 
-        private static bool HaveStatusEffect(Skills __instance, string statusEffect)
+        private static bool _HaveStatusEffect(Skills __instance, string name)
         {
-            return __instance.m_player.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode(statusEffect));
+            return __instance.m_player.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode(name));
         }
 
-        private static float GetValueFromConfig(Skills.SkillType skillType, UtilitiesConfig config)
+        private static float _GetValueFromConfig(Skills.SkillType skillType, UtilitiesConfig config)
         {
             if (skillType == Skills.SkillType.ElementalMagic)
                 return config.elementalMagic.Value;

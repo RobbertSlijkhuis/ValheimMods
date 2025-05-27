@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 2542936555
+CRC: 1045632527
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 25dcde8b33129cb9a69000467a483441
+    Hash: e6777b7f0891e9666a4c565c57c54eb2
   TypeTreeHash:
     serializedVersion: 2
     Hash: 32d6b12a4a31547ce73b6eac550ce762
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 25dcde8b33129cb9a69000467a483441
+    Hash: e6777b7f0891e9666a4c565c57c54eb2
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -77,14 +77,14 @@ Assets:
 - Assets/Custom/PrefabInstance/Books/MMU_CodexOfTheAsgardianSorcerer.prefab
 - Assets/Custom/Material/Lanterns/MMU_EverwinterLanternMat.mat
 - Assets/Custom/PrefabInstance/Lantern/MMU_MistcallerLantern.prefab
-- Assets/Custom/Material/Lanterns/MMU_MysticalLanternMat_Off.mat
+- Assets/Custom/Material/Lanterns/MMU_MythicalLanternMat_Off.mat
 - Assets/Custom/PrefabInstance/Lantern/MMU_EverwinterLantern.prefab
 - Assets/Custom/Material/Lanterns/MMU_EverwinterLanternMat_Off.mat
 - Assets/Custom/PrefabInstance/Books/MMU_SpellbookOfTheHearth.prefab
 - Assets/Custom/Material/Lanterns/MMU_MistcallerLanternMat_Off.mat
 - Assets/Custom/PrefabInstance/Lantern/MMU_MythicalLantern.prefab
 - Assets/Custom/PrefabInstance/Books/MMU_GrimoireOfTheStorm.prefab
-- Assets/Custom/Material/Lanterns/MMU_MysticalLanternMat.mat
+- Assets/Custom/Material/Lanterns/MMU_MythicalLanternMat.mat
 - Assets/Custom/MonoBehaviour/MMU_SE_ElementalMagic.asset
 - Assets/Custom/Material/Lanterns/MMU_MistcallerLanternMat.mat
 Dependencies: []

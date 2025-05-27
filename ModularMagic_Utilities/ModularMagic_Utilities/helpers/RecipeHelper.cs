@@ -14,8 +14,8 @@ namespace ModularMagic_Utilities.Helpers
 {
     internal class RecipeHelper
     {
-        private static readonly Regex nukeWhiteSpaceRegex = new Regex(@"\s+");
-        private static readonly Regex recipeEntryRegex = new Regex(@"^([a-zA-Z0-9_]+:[0-9]+)$");
+        private static readonly Regex _nukeWhiteSpaceRegex = new Regex(@"\s+");
+        private static readonly Regex _recipeEntryRegex = new Regex(@"^([a-zA-Z0-9_]+:[0-9]+)$");
 
         /**
          * Convert the recipe and return a RequirementConfig array
@@ -63,9 +63,9 @@ namespace ModularMagic_Utilities.Helpers
 
                 return pieceList.ToArray();
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not convert recipe to Piece.Requirement array: " + error);
+                Jotunn.Logger.LogError("Could not convert recipe to Piece.Requirement array: " + e);
                 return null;
             }
         }
@@ -77,10 +77,10 @@ namespace ModularMagic_Utilities.Helpers
         {
             try
             {
-                configRecipe = nukeWhiteSpaceRegex.Replace(configRecipe, "");
+                configRecipe = _nukeWhiteSpaceRegex.Replace(configRecipe, "");
 
                 if (upgradeRecipe != null)
-                    upgradeRecipe = nukeWhiteSpaceRegex.Replace(upgradeRecipe, "");
+                    upgradeRecipe = _nukeWhiteSpaceRegex.Replace(upgradeRecipe, "");
 
                 if (!IsConfigRecipeValid(configRecipe, upgradeRecipe))
                 {
@@ -119,9 +119,9 @@ namespace ModularMagic_Utilities.Helpers
 
                 return list;
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not convert recipe to RequirementConfig list: " + error);
+                Jotunn.Logger.LogError("Could not convert recipe to RequirementConfig list: " + e);
                 return null;
             }
         }
@@ -138,7 +138,7 @@ namespace ModularMagic_Utilities.Helpers
                 string[] recipeEntries = configRecipe.Split(',');
                 foreach (string entry in recipeEntries)
                 {
-                    bool isMatch = recipeEntryRegex.IsMatch(entry);
+                    bool isMatch = _recipeEntryRegex.IsMatch(entry);
                     if (!isMatch)
                     {
                         isValid = false;
@@ -152,7 +152,7 @@ namespace ModularMagic_Utilities.Helpers
                 string[] upgradeEntries = upgradeRecipe.Split(',');
                 foreach (string entry in upgradeEntries)
                 {
-                    bool isMatch = recipeEntryRegex.IsMatch(entry);
+                    bool isMatch = _recipeEntryRegex.IsMatch(entry);
                     if (!isMatch)
                     {
                         isValid = false;
@@ -162,9 +162,9 @@ namespace ModularMagic_Utilities.Helpers
 
                 return isValid;
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not validate recipe due to an error: " + error);
+                Jotunn.Logger.LogError("Could not validate recipe due to an error: " + e);
                 return false;
             }
         }
@@ -233,9 +233,9 @@ namespace ModularMagic_Utilities.Helpers
                         break;
                 }
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not update recipe: " + error);
+                Jotunn.Logger.LogError("Could not update recipe: " + e);
             }
         }
     }

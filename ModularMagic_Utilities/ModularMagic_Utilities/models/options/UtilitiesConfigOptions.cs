@@ -16,28 +16,30 @@ namespace ModularMagic_Utilities.Models
         public int minStationLevel = 1;
         public string recipe;
         public string? recipeUpgrade;
-        public int? recipeMultiplier;
-        public float? eitr;
-        public float? eitrRegen;
-        public float? elementalMagic;
-        public float? bloodMagic;
-
+        public int recipeMultiplier = 1;
+        public float weight = 1f;
+        public float eitr = 0f;
+        public float eitrRegen = 0f;
+        public float elementalMagic = 0f;
+        public float bloodMagic = 0f;
         public float? demister;
 
-        public Color? flareColor;
-        public Color? lightColor;
+        //public Color? flareColor;
+        //public Color? lightColor;
+        public string? lightColorPreset;
         public float? lightIntensity;
         public float? lightRange;
-        public string? materialColor;
+        //public bool? enableCustomGlassColor;
+        //public string? customGlassColor;
 
         public string cooldownStatusEffectName;
         public string magicStatusEffectName;
 
-        public UtilitiesConfigOptions(GameObject prefab, string name, string recipe, int sectionIndex)
+        public UtilitiesConfigOptions(GameObject prefab, string name, string recipe)
         {
             this.prefab = prefab;
             this.name = name;
-            this.sectionName = $"{sectionIndex}. {name.Replace("'", "")}";
+            this.sectionName = $"{name.Replace("'", "")}";
             this.recipe = recipe;
             this.recipeName = $"Recipe_{prefab.name}";
             this.magicStatusEffectName = $"{prefab.name}MagicStatusEffect";

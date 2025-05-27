@@ -3,11 +3,11 @@ using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
+using ModularMagic_Utilities.Components;
 using ModularMagic_Utilities.Configs;
 using ModularMagic_Utilities.Helpers;
 using ModularMagic_Utilities.Models;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -23,6 +23,7 @@ namespace ModularMagic_Utilities
         public const string PluginGUID = "DeathWizsh.ModularMagic_Utilities";
         public const string PluginName = "ModularMagic_Utilities";
         public const string PluginVersion = "0.0.1";
+        public static readonly int lanternStatusHashCode = "LanternStatus_MMU".GetStableHashCode();
         public static ModularMagic_Utilities Instance;
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
 
@@ -30,35 +31,20 @@ namespace ModularMagic_Utilities
         public CustomRPC lanternRPC;
         public CustomPrefabs prefabs = new CustomPrefabs();
         public CustomMaterials materials = new CustomMaterials();
-
         private ButtonConfig utilityModeButton;
-
-        public Dictionary<long, bool> lanternStatusDictionary = new Dictionary<long, bool>();
+        public Dictionary<long, bool> lanternStatusDict = new Dictionary<long, bool>();
 
         private void Awake()
         {
             Instance = this;
             InitAssetBundle();
-            ConfigUtilities.Init();
+            PluginConfig.Init();
             InitInputs();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
-            lanternRPC = NetworkManager.Instance.AddRPC("RPC_Lantern_MMU", OnServerReceive, OnClientReceive);
+            // lanternRPC = RPCHelper.Init();
 
             PrefabManager.OnVanillaPrefabsAvailable += AddUtilities;
             ItemManager.OnItemsRegistered += LogRecipes;
-        }
-
-        private IEnumerator OnServerReceive(long sender, ZPackage package)
-        {
-            yield return new WaitForSeconds(0.1f);
-            UpdateHelper.UpdateLanternMode(RPCHelper.ReadLanternPackage(package));
-            lanternRPC.SendPackage(ZNet.instance.m_peers, new ZPackage(package.GetArray()));
-        }
-
-        private IEnumerator OnClientReceive(long sender, ZPackage package)
-        {
-            yield return new WaitForSeconds(0.1f);
-            UpdateHelper.UpdateLanternMode(RPCHelper.ReadLanternPackage(package));
         }
 
         private void LogRecipes()
@@ -98,14 +84,22 @@ namespace ModularMagic_Utilities
                                     return;
                                 }
 
-                                ZPackage package = new ZPackage();
-                                int type = RPCHelper.GetLanternType(itemData);
+                                // ZPackage package = new ZPackage();
+                                int type = UpdateHelper.GetLanternType(itemData);
+
+                                Jotunn.Logger.LogWarning("Type: " + type);
 
                                 if (type != 0)
                                 {
+                                    //long playerId = Player.m_localPlayer.GetPlayerID();
+                                    //package.Write($"{playerId},{type},{!lanternStatusDictionary[playerId]},true");
+                                    //lanternRPC.SendPackage(ZRoutedRpc.instance.GetServerPeerID(), package);
+
+                                    LanternMMU comp = Player.m_localPlayer.GetComponent<LanternMMU>();
                                     long playerId = Player.m_localPlayer.GetPlayerID();
-                                    package.Write($"{playerId},{type},{!lanternStatusDictionary[playerId]},true");
-                                    lanternRPC.SendPackage(ZRoutedRpc.instance.GetServerPeerID(), package);
+                                    LanternStatus playerStatus = comp.GetPlayerStatus(playerId);
+
+                                    comp.SetPlayerStatus(playerId, !playerStatus.status);
                                 }
                             }
                             catch (Exception error)
@@ -122,12 +116,12 @@ namespace ModularMagic_Utilities
         {
             try
             {
-                ItemHelper.Create(prefabs.spellbook1Prefab, ConfigUtilities.spellbook1);
-                ItemHelper.Create(prefabs.spellbook2Prefab, ConfigUtilities.spellbook2);
-                ItemHelper.Create(prefabs.spellbook3Prefab, ConfigUtilities.spellbook3);
-                ItemHelper.Create(prefabs.lantern1Prefab, ConfigUtilities.lantern1, true);
-                ItemHelper.Create(prefabs.lantern2Prefab, ConfigUtilities.lantern2, true);
-                ItemHelper.Create(prefabs.lantern3Prefab, ConfigUtilities.lantern3, true);
+                ItemHelper.Create(prefabs.spellbook1Prefab, PluginConfig.spellbook1);
+                ItemHelper.Create(prefabs.spellbook2Prefab, PluginConfig.spellbook2);
+                ItemHelper.Create(prefabs.spellbook3Prefab, PluginConfig.spellbook3);
+                ItemHelper.Create(prefabs.lantern1Prefab, PluginConfig.lantern1, true);
+                ItemHelper.Create(prefabs.lantern2Prefab, PluginConfig.lantern2, true);
+                ItemHelper.Create(prefabs.lantern3Prefab, PluginConfig.lantern3, true);
 
                 PrefabManager.OnVanillaPrefabsAvailable -= AddUtilities;
             }
@@ -147,7 +141,7 @@ namespace ModularMagic_Utilities
                 utilityModeButton = new ButtonConfig
                 {
                     Name = "Lantern mode",
-                    ShortcutConfig = ConfigUtilities.configLanternModKey,
+                    ShortcutConfig = Configs.PluginConfig.configLanternModKey,
                 };
 
                 InputManager.Instance.AddButton(PluginGUID, utilityModeButton);
@@ -166,8 +160,8 @@ namespace ModularMagic_Utilities
             assetBundle = AssetUtils.LoadAssetBundleFromResources("modularmagic_utilities_dw");
 
             // Materials
-            materials.lantern1Mat = assetBundle.LoadAsset<Material>("MMU_MysticalLanternMat");
-            materials.lantern1OffMat = assetBundle.LoadAsset<Material>("MMU_MysticalLanternMat_Off");
+            materials.lantern1Mat = assetBundle.LoadAsset<Material>("MMU_MythicalLanternMat");
+            materials.lantern1OffMat = assetBundle.LoadAsset<Material>("MMU_MythicalLanternMat_Off");
             materials.lantern2Mat = assetBundle.LoadAsset<Material>("MMU_EverwinterLanternMat");
             materials.lantern2OffMat = assetBundle.LoadAsset<Material>("MMU_EverwinterLanternMat_Off");
             materials.lantern3Mat = assetBundle.LoadAsset<Material>("MMU_MistcallerLanternMat");

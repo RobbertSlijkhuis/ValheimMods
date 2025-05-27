@@ -43,8 +43,6 @@ namespace ModularMagic_Utilities.StatusEffects
         {
             string tooltip = "";
 
-
-
             if (this.m_elementalMagic > 0)
                 tooltip += $"ElementalMagic: <color=orange>+{this.m_elementalMagic}</color>" + (this.m_bloodMagic > 0 || this.m_eitr > 0 ? "\n" : "");
 
