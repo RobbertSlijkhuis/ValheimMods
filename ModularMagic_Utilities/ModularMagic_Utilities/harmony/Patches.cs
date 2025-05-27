@@ -34,8 +34,8 @@ namespace ModularMagic_Utilities.Harmony
             }
         }
 
-        [HarmonyPatch(typeof(Skills), "GetSkillLevel")]
         [HarmonyPostfix]
+        [HarmonyPatch(typeof(Skills), "GetSkillLevel")]
         public static void GetSkillLevel_Postfix(Skills __instance, Skills.SkillType skillType, ref float __result)
         {
             try

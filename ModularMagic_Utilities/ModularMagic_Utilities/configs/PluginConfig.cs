@@ -32,6 +32,7 @@ namespace ModularMagic_Utilities.Configs
         public static UtilitiesConfig lantern3 = new UtilitiesConfig();
 
         // Other
+        public static string generalSectionname = "General";
         public static  ConfigEntry<KeyboardShortcut> configLanternModKey;
 
         public static void Init()
@@ -47,7 +48,7 @@ namespace ModularMagic_Utilities.Configs
 
         private static void _InitGeneralConfig()
         {
-            configLanternModKey = ModularMagic_Utilities.Instance.Config.Bind("General", "Lantern on/off key", new KeyboardShortcut(KeyCode.Y),
+            configLanternModKey = ModularMagic_Utilities.Instance.Config.Bind(generalSectionname, "Lantern on/off key", new KeyboardShortcut(KeyCode.Y),
                 new ConfigDescription("Key to toggle the light on/off of lanterns)", null));
         }
 

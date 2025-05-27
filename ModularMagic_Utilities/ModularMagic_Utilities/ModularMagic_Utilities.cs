@@ -25,9 +25,9 @@ namespace ModularMagic_Utilities
         public const string PluginVersion = "0.0.1";
         public static readonly int lanternStatusHashCode = "LanternStatus_MMU".GetStableHashCode();
         public static ModularMagic_Utilities Instance;
-        private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
+        private static readonly HarmonyLib.Harmony _harmony = new HarmonyLib.Harmony(PluginGUID);
 
-        private AssetBundle assetBundle;
+        private AssetBundle _assetBundle;
         public CustomRPC lanternRPC;
         public CustomPrefabs prefabs = new CustomPrefabs();
         public CustomMaterials materials = new CustomMaterials();
@@ -40,7 +40,7 @@ namespace ModularMagic_Utilities
             _InitAssetBundle();
             PluginConfig.Init();
             _InitInputs();
-            harmony.PatchAll(Assembly.GetExecutingAssembly());
+            _harmony.PatchAll(Assembly.GetExecutingAssembly());
             // lanternRPC = RPCHelper.Init();
 
             PrefabManager.OnVanillaPrefabsAvailable += _AddUtilities;
@@ -157,25 +157,25 @@ namespace ModularMagic_Utilities
          */
         private void _InitAssetBundle()
         {
-            assetBundle = AssetUtils.LoadAssetBundleFromResources("modularmagic_utilities_dw");
+            _assetBundle = AssetUtils.LoadAssetBundleFromResources("modularmagic_utilities_dw");
 
             // Materials
-            materials.lantern1Mat = assetBundle.LoadAsset<Material>("MMU_MythicalLanternMat");
-            materials.lantern1OffMat = assetBundle.LoadAsset<Material>("MMU_MythicalLanternMat_Off");
-            materials.lantern2Mat = assetBundle.LoadAsset<Material>("MMU_EverwinterLanternMat");
-            materials.lantern2OffMat = assetBundle.LoadAsset<Material>("MMU_EverwinterLanternMat_Off");
-            materials.lantern3Mat = assetBundle.LoadAsset<Material>("MMU_MistcallerLanternMat");
-            materials.lantern3OffMat = assetBundle.LoadAsset<Material>("MMU_MistcallerLanternMat_Off");
+            materials.lantern1Mat = _assetBundle.LoadAsset<Material>("MMU_MythicalLanternMat");
+            materials.lantern1OffMat = _assetBundle.LoadAsset<Material>("MMU_MythicalLanternMat_Off");
+            materials.lantern2Mat = _assetBundle.LoadAsset<Material>("MMU_EverwinterLanternMat");
+            materials.lantern2OffMat = _assetBundle.LoadAsset<Material>("MMU_EverwinterLanternMat_Off");
+            materials.lantern3Mat = _assetBundle.LoadAsset<Material>("MMU_MistcallerLanternMat");
+            materials.lantern3OffMat = _assetBundle.LoadAsset<Material>("MMU_MistcallerLanternMat_Off");
 
             // Books
-            prefabs.spellbook1Prefab = assetBundle.LoadAsset<GameObject>("MMU_SpellbookOfTheHearth");
-            prefabs.spellbook2Prefab = assetBundle.LoadAsset<GameObject>("MMU_GrimoireOfTheStorm");
-            prefabs.spellbook3Prefab = assetBundle.LoadAsset<GameObject>("MMU_CodexOfTheAsgardianSorcerer");
+            prefabs.spellbook1Prefab = _assetBundle.LoadAsset<GameObject>("MMU_SpellbookOfTheHearth");
+            prefabs.spellbook2Prefab = _assetBundle.LoadAsset<GameObject>("MMU_GrimoireOfTheStorm");
+            prefabs.spellbook3Prefab = _assetBundle.LoadAsset<GameObject>("MMU_CodexOfTheAsgardianSorcerer");
 
             // Lanterns
-            prefabs.lantern1Prefab = assetBundle.LoadAsset<GameObject>("MMU_MythicalLantern");
-            prefabs.lantern2Prefab = assetBundle.LoadAsset<GameObject>("MMU_EverwinterLantern");
-            prefabs.lantern3Prefab = assetBundle.LoadAsset<GameObject>("MMU_MistcallerLantern");
+            prefabs.lantern1Prefab = _assetBundle.LoadAsset<GameObject>("MMU_MythicalLantern");
+            prefabs.lantern2Prefab = _assetBundle.LoadAsset<GameObject>("MMU_EverwinterLantern");
+            prefabs.lantern3Prefab = _assetBundle.LoadAsset<GameObject>("MMU_MistcallerLantern");
         }
     }
 }

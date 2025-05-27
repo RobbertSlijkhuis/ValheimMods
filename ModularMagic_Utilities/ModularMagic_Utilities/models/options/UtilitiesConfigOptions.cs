@@ -39,11 +39,11 @@ namespace ModularMagic_Utilities.Models
         {
             this.prefab = prefab;
             this.name = name;
-            this.sectionName = $"{name.Replace("'", "")}";
+            sectionName = $"{name.Replace("'", "")}";
             this.recipe = recipe;
-            this.recipeName = $"Recipe_{prefab.name}";
-            this.magicStatusEffectName = $"{prefab.name}MagicStatusEffect";
-            this.cooldownStatusEffectName = $"{prefab.name}CooldownStatusEffect";
+            recipeName = $"Recipe_{prefab.name}";
+            magicStatusEffectName = $"{prefab.name}MagicStatusEffect";
+            cooldownStatusEffectName = $"{prefab.name}CooldownStatusEffect";
         }
     }
 }

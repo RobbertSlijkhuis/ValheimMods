@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace ModularMagic_Utilities.StatusEffects
+﻿namespace ModularMagic_Utilities.StatusEffects
 {
     internal class MagicStatusEffect : StatusEffect
     {
@@ -15,42 +13,42 @@ namespace ModularMagic_Utilities.StatusEffects
 
         public void SetEitr(float value)
         {
-            this.m_eitr = value;
+            m_eitr = value;
             UpdateTooltip();
         }
 
         public void SetElementalMagic(float value)
         {
-            this.m_elementalMagic = value;
+            m_elementalMagic = value;
             UpdateTooltip();
         }
 
         public void SetBloodMagic(float value)
         {
-            this.m_bloodMagic = value;
+            m_bloodMagic = value;
             UpdateTooltip();
         }
 
         public void SetAll(float eitr, float elementalMagic, float bloodMagic)
         {
-            this.m_eitr = eitr;
-            this.m_elementalMagic = elementalMagic;
-            this.m_bloodMagic = bloodMagic;
+            m_eitr = eitr;
+            m_elementalMagic = elementalMagic;
+            m_bloodMagic = bloodMagic;
             UpdateTooltip();
         }
 
-        private void UpdateTooltip()
+        public void UpdateTooltip()
         {
             string tooltip = "";
 
-            if (this.m_elementalMagic > 0)
-                tooltip += $"ElementalMagic: <color=orange>+{this.m_elementalMagic}</color>" + (this.m_bloodMagic > 0 || this.m_eitr > 0 ? "\n" : "");
+            if (m_elementalMagic > 0)
+                tooltip += $"ElementalMagic: <color=orange>+{m_elementalMagic}</color>" + (m_bloodMagic > 0 || m_eitr > 0 ? "\n" : "");
 
-            if (this.m_bloodMagic > 0)
-                tooltip += $"BloodMagic: <color=orange>+{this.m_bloodMagic}</color>" + (this.m_eitr > 0 ? "\n" : "");
+            if (m_bloodMagic > 0)
+                tooltip += $"BloodMagic: <color=orange>+{m_bloodMagic}</color>" + (m_eitr > 0 ? "\n" : "");
 
-            if (this.m_eitr > 0)
-                tooltip += $"Eitr: <color=orange>+{this.m_eitr}</color>";
+            if (m_eitr > 0)
+                tooltip += $"Eitr: <color=orange>+{m_eitr}</color>";
 
             this.m_tooltip = tooltip;
         }
