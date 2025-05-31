@@ -19,7 +19,7 @@ namespace LegendaryWeapons
     {
         public const string PluginGUID = "DeathWizsh.LegendaryWeapons";
         public const string PluginName = "Legendary Weapons";
-        public const string PluginVersion = "1.0.3";
+        public const string PluginVersion = "1.0.4";
         private static string configFileName = PluginGUID + ".cfg";
         private static string configFileFullPath = BepInEx.Paths.ConfigPath + Path.DirectorySeparatorChar.ToString() + configFileName;
 
@@ -43,8 +43,8 @@ namespace LegendaryWeapons
         private string[] configCraftingStationOptions = new string[] { "None", "Disabled", "Workbench", "Forge", "Stonecutter", "Cauldron", "ArtisanTable", "BlackForge", "GaldrTable" };
         private string defaultRecipeDemoHammer = "YggdrasilWood:15, BlackMarble:20, Eitr:15, Thunderstone:10";
         private string defaultUpgradeRecipeDemoHammer = "YggdrasilWood:5,BlackMarble:5,Eitr:5,Thunderstone:5";
-        private string defaultRecipeTriSword = "YggdrasilWood:10,Thunderstone:10,Flametal:10,FreezeGland:30";
-        private string defaultUpgradeRecipeTriSword = "YggdrasilWood:5,Thunderstone:5,Flametal:2,FreezeGland:10";
+        private string defaultRecipeTriSword = "YggdrasilWood:10,Thunderstone:10,Bilebag:10,FreezeGland:30";
+        private string defaultUpgradeRecipeTriSword = "YggdrasilWood:5,Thunderstone:5,Bilebag:2,FreezeGland:10";
         private string defaultRecipeCultivatorAtgeir = "YggdrasilWood:15,Silver:25,Eitr:15,Thunderstone:10";
         private string defaultUpgradeRecipeCultivatorAtgeir = "YggdrasilWood:5,Silver:5,Eitr:5,Thunderstone:5";
 
@@ -1096,6 +1096,7 @@ namespace LegendaryWeapons
                 cultivatorAtgeirAtgeirPrefab = legendaryWeaponsBundle.LoadAsset<GameObject>("Cultivator_Atgeir_Atgeir_DW");
                 cultivatorAtgeirSpearPrefab = legendaryWeaponsBundle.LoadAsset<GameObject>("Cultivator_Atgeir_Spear_DW");
                 cultivatorProjectilePrefab = legendaryWeaponsBundle.LoadAsset<GameObject>("projectile_cultivator_DW");
+                PrefabManager.Instance.AddPrefab(new CustomPrefab(cultivatorProjectilePrefab, true));
                 triSwordLightningPrefab = legendaryWeaponsBundle.LoadAsset<GameObject>("TriSword_Lightning_DW");
                 triSwordFirePrefab = legendaryWeaponsBundle.LoadAsset<GameObject>("TriSword_Fire_DW");
                 triSwordFrostPrefab = legendaryWeaponsBundle.LoadAsset<GameObject>("TriSword_Frost_DW");

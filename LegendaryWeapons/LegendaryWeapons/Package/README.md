@@ -26,8 +26,7 @@ The following options are available for each weapon:
 - **Secondary (weaponmode) ability stamina**: The secondary attack stamina usage (Some weapons have multiple of this)
 
 ## Roadmap
-There are still some features planned to be implemented:
-- Improve AssetBundle size even more
+There are currently no features planned
 
 ## Bug/Suggestion
 Found a bug or have some suggestions? You can leave a post or bug report here: https://www.nexusmods.com/valheim/mods/2522/
@@ -45,12 +44,17 @@ Found a bug or have some suggestions? You can leave a post or bug report here: h
 ![Sword_1](https://robhost.nl/img/valheim/Sword_3.jpg)
 
 ## Changelog
-### 1.0.3
-- Fixed recipe upgrade multiplier not being applied
+### 1.0.4
+- Fixed constant MessageHud.ShowMessage is not a function spam
+- Fixed Lynrake projectile not showing the correct model in Multiplayer
+- Updated default recipe for Tresverd to reflect changes made to Ashlands (replaced Flametal with Bilebags)
 
 <details>
     <summary>Click to view previous versions</summary>
     <!-- have to be followed by an empty line! -->
+
+### 1.0.3
+- Fixed recipe upgrade multiplier not being applied
 
 ### 1.0.2
 - Enabled client/server requiring the mod and same version
