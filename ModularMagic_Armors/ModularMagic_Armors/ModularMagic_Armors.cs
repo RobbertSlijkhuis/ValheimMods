@@ -83,58 +83,6 @@ namespace ModularMagic_Armors
                     Jotunn.Logger.LogInfo(r.name);
             });
 
-            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            
-            //Jotunn.Logger.LogInfo($"Modded prefabs:");
-            //foreach (var moddedPrefab in ModQuery.GetPrefabs())
-            //{
-            //    // Jotunn.Logger.LogInfo($"  {moddedPrefab.Prefab.name} added by {moddedPrefab.SourceMod.Name}");
-
-            //    if (moddedPrefab.Prefab.name == "MMES_TheForestFlinger")
-            //    {
-            //        ItemDrop itemDrop = moddedPrefab.Prefab.GetComponent<ItemDrop>();
-            //    }
-            //}
-
-            //var helmet = ItemManager.Instance.GetItem("DeathWizshHelmet");
-            //var chest = ItemManager.Instance.GetItem("DeathWizshChest");
-            //var legs = ItemManager.Instance.GetItem("DeathWizshLegs");
-            //var axe = ItemManager.Instance.GetItem("DeathWizshAxe");
-            //var shield = ItemManager.Instance.GetItem("DeathWizshShield");
-
-            //var helmetShared = helmet.ItemDrop.m_itemData.m_shared;
-            //helmetShared.m_sneakStaminaModifier = -2f;
-            //helmetShared.m_runStaminaModifier = -2f;
-            //helmetShared.m_swimStaminaModifier = -2f;
-            //helmetShared.m_jumpStaminaModifier = -2f;
-            //helmetShared.m_attackStaminaModifier = -2f;
-            //helmetShared.m_dodgeStaminaModifier = -2f;
-            //helmetShared.m_blockStaminaModifier = -2f;
-            //helmetShared.m_maxDurability = 10000f;
-
-            //var chestShared = chest.ItemDrop.m_itemData.m_shared;
-            //chestShared.m_armor = 130;
-            //chestShared.m_maxDurability = 10000f;
-
-            //var legsShared = legs.ItemDrop.m_itemData.m_shared;
-            //// legsShared.m_movementModifier = 1f;
-            //legsShared.m_maxDurability = 10000f;
-            //legsShared.m_equipStatusEffect = effects.NoFallDamage;
-
-            //var axeShared = axe.ItemDrop.m_itemData.m_shared;
-            //axeShared.m_damages.m_slash = 115;
-            //axeShared.m_damages.m_chop = 60;
-            //axeShared.m_attackForce = 60;
-            //axeShared.m_backstabBonus = 3;
-            //axeShared.m_maxDurability = 10000f;
-
-            //var shieldShared = shield.ItemDrop.m_itemData.m_shared;
-            //shieldShared.m_blockPower = 126;
-            //shieldShared.m_deflectionForce = 60;
-            //shieldShared.m_maxDurability = 10000f;
-
-            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
             ItemManager.OnItemsRegistered -= _LogRecipes;
         }
 
@@ -142,35 +90,6 @@ namespace ModularMagic_Armors
         {
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            //ItemConfig DWHelmetConfig = new ItemConfig();
-            //DWHelmetConfig.Name = "DeathWizsh's Helmet";
-            //DWHelmetConfig.Description = "Hacler Chet!";
-            //CustomItem DWHelmet = new CustomItem("DeathWizshHelmet", "HelmetLeather", DWHelmetConfig);
-            //ItemManager.Instance.AddItem(DWHelmet);
-
-            //ItemConfig DWChestConfig = new ItemConfig();
-            //DWChestConfig.Name = "DeathWizsh's Chest";
-            //DWChestConfig.Description = "Hacler Chet!";
-            //CustomItem DWChest = new CustomItem("DeathWizshChest", "ArmorLeatherChest", DWChestConfig);
-            //ItemManager.Instance.AddItem(DWChest);
-
-            //ItemConfig DWLegsConfig = new ItemConfig();
-            //DWLegsConfig.Name = "DeathWizsh's Legs";
-            //DWLegsConfig.Description = "Hacler Chet!";
-            //CustomItem DWLegs = new CustomItem("DeathWizshLegs", "ArmorLeatherLegs", DWLegsConfig);
-            //ItemManager.Instance.AddItem(DWLegs);
-
-            //ItemConfig DWFlintAxeConfig = new ItemConfig();
-            //DWFlintAxeConfig.Name = "DeathWizsh's Axe";
-            //DWFlintAxeConfig.Description = "Hacler Chet!";
-            //CustomItem DWFlintAxe = new CustomItem("DeathWizshAxe", "AxeFlint", DWFlintAxeConfig);
-            //ItemManager.Instance.AddItem(DWFlintAxe);
-
-            //ItemConfig DWShieldConfig = new ItemConfig();
-            //DWShieldConfig.Name = "DeathWizsh's Shield";
-            //DWShieldConfig.Description = "Hacler Chet!";
-            //CustomItem DWShield = new CustomItem("DeathWizshShield", "ShieldWood", DWShieldConfig);
-            //ItemManager.Instance.AddItem(DWShield);
             ArmorConfig tiara = PluginConfig.armor1Helmet;
             ArmorConfig tutu = PluginConfig.armor1Chest;
             tiara.name.Value = "Audacious Tiara";
@@ -639,9 +558,6 @@ namespace ModularMagic_Armors
 
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            //effects.NoFallDamage = _assetBundle.LoadAsset<StatusEffect>("NoFallDamage");
-            //effects.SlowFallAndNoFallDamage = _assetBundle.LoadAsset<StatusEffect>("SlowFallAndNoFallDamage");
-            //prefabs.AudaciousMaskPrefab = _assetBundle.LoadAsset<GameObject>("MMA_AudacityMask");
             prefabs.AudaciousTiara = _assetBundle.LoadAsset<GameObject>("AudaciousTiara_MMA");
             prefabs.AudaciousTutu = _assetBundle.LoadAsset<GameObject>("AudaciousTutu_MMA");
             prefabs.AudaciousSFX = _assetBundle.LoadAsset<GameObject>("sfx_audacity_MMA");

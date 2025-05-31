@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace ModularMagic_Armors.Models
+﻿namespace ModularMagic_Armors.Models
 {
     class ItemSnapShots
     {
