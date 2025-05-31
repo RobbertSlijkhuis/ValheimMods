@@ -1,4 +1,3 @@
-## Changelog
 ### 1.0.6
 - Updated to Bog Witch update
 

@@ -17,7 +17,7 @@ namespace UpgradeAntlerPickaxe
     {
         public const string PluginGUID = "DeathWizsh.UpgradeAntlerPickaxe";
         public const string PluginName = "Upgrade Antler Pickaxe";
-        public const string PluginVersion = "1.1.2";
+        public const string PluginVersion = "1.1.3";
         private static string configFileName = PluginGUID + ".cfg";
         private static string configFileFullPath = BepInEx.Paths.ConfigPath + Path.DirectorySeparatorChar.ToString() + configFileName;
 
@@ -282,7 +282,7 @@ namespace UpgradeAntlerPickaxe
                     new ConfigDescription("Wether to patch the original Antler Pickaxe or to create a clone instead (requires restart)", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
 
-                configName = Config.Bind(new ConfigDefinition("General", "Name"), "Antler pickaxe+",
+                configName = Config.Bind(new ConfigDefinition("General", "Name"), "Antler Pickaxe",
                     new ConfigDescription("The name given to the item", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
                 configName.SettingChanged += (obj, attr) => { PatchStats(); };
