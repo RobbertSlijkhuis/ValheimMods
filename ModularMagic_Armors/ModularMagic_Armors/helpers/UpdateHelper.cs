@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static Mono.Security.X509.X520;
 
 namespace ModularMagic_Armors.Helpers
 {
@@ -23,6 +24,12 @@ namespace ModularMagic_Armors.Helpers
                 if (options.description != null) { itemDrop.m_itemData.m_shared.m_description = options.description; }
                 if (options.armor != null) { itemDrop.m_itemData.m_shared.m_armor = (float)options.armor; }
                 if (options.armorPerLevel != null) { itemDrop.m_itemData.m_shared.m_armorPerLevel = (float)options.armorPerLevel; }
+                if (options.armorSetOptions != null) {
+                    itemDrop.m_itemData.m_shared.m_setName = options.armorSetOptions.name;
+                    itemDrop.m_itemData.m_shared.m_setSize = options.armorSetOptions.size;
+                    itemDrop.m_itemData.m_shared.m_setStatusEffect = options.armorSetOptions.statusEffect;
+                }
+                if (options.equipStatusEffect == null || options.equipStatusEffect.name != "empty_MMA") { itemDrop.m_itemData.m_shared.m_equipStatusEffect = options.equipStatusEffect; }
                 if (options.weight != null) { itemDrop.m_itemData.m_shared.m_weight = (float)options.weight; }
                 if (options.maxDurability != null) { itemDrop.m_itemData.m_shared.m_maxDurability = (float)options.maxDurability; }
                 if (options.maxQuality > 0) { itemDrop.m_itemData.m_shared.m_maxQuality = (int)options.maxQuality; }
@@ -32,6 +39,47 @@ namespace ModularMagic_Armors.Helpers
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not update ItemDrop stats: " + e);
+            }
+        }
+
+        public static UpdateItemDropStatsOptions TakeSnapShot(GameObject prefab)
+        {
+            try
+            {
+                if (prefab == null)
+                    throw new Exception("Prefab is null");
+
+                ItemDrop itemDrop = prefab.GetComponent<ItemDrop>();
+
+                if (itemDrop == null)
+                    throw new Exception("ItemDrop is null");
+
+                ArmorSetOptions armorSetOptions = new ArmorSetOptions()
+                {
+                    name = itemDrop.m_itemData.m_shared.m_setName,
+                    size = itemDrop.m_itemData.m_shared.m_setSize,
+                    statusEffect = itemDrop.m_itemData.m_shared.m_setStatusEffect,
+                };
+
+                return new UpdateItemDropStatsOptions()
+                {
+                    name = itemDrop.m_itemData.m_shared.m_name,
+                    description = itemDrop.m_itemData.m_shared.m_description,
+                    armor = itemDrop.m_itemData.m_shared.m_armor,
+                    armorPerLevel = itemDrop.m_itemData.m_shared.m_armorPerLevel,
+                    armorSetOptions = armorSetOptions,
+                    equipStatusEffect = itemDrop.m_itemData.m_shared.m_equipStatusEffect,
+                    weight = itemDrop.m_itemData.m_shared.m_weight,
+                    maxDurability = itemDrop.m_itemData.m_shared.m_maxDurability,
+                    maxQuality = itemDrop.m_itemData.m_shared.m_maxQuality,
+                    movementSpeed = itemDrop.m_itemData.m_shared.m_movementModifier,
+                    eitrRegen = itemDrop.m_itemData.m_shared.m_eitrRegenModifier,
+                };
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not create snapshot of stats: " + e);
+                return null;
             }
         }
 

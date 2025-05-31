@@ -1,4 +1,5 @@
 ﻿using BepInEx.Configuration;
+using ModularMagic_Armors.Helpers;
 using ModularMagic_Armors.Models;
 using System;
 
@@ -90,9 +91,43 @@ namespace ModularMagic_Armors.Configs
         public static string armor4LegsRecipeUpgrade = "BlackMetal:2, LinenThread:2, LoxPelt:2, Tar:2";
         public static ArmorConfig armor4Legs = new ArmorConfig();
 
+        // Eitr-weave
+        public static string armor5HelmetName = "Eitr-weave Hood";
+        public static string armor5HelmetRecipe = "LinenThread:16, Eitr:15, Iron:2";
+        public static string armor5HelmetRecipeUpgrade = "LinenThread:8, Eitr:5";
+        public static ArmorConfig armor5Helmet;
+
+        public static string armor5ChestName = "Eitr-weave Robes";
+        public static string armor5ChestRecipe = "LinenThread:20, Eitr:20, Feathers:10, ScaleHide:5";
+        public static string armor5ChestRecipeUpgrade = "LinenThread:10, Eitr:5";
+        public static ArmorConfig armor5Chest;
+
+        public static string armor5LegsName = "Eitr-weave Trousers";
+        public static string armor5LegsRecipe = "LinenThread:20, Eitr:20, ScaleHide:10";
+        public static string armor5LegsRecipeUpgrade = "LinenThread:10, Eitr:5";
+        public static ArmorConfig armor5Legs;
+
+        // Embla
+        public static string armor6HelmetName = "Hood of Embla";
+        public static string armor6HelmetRecipe = "LinenThread:16, Eitr:15, AskHide:2";
+        public static string armor6HelmetRecipeUpgrade = "LinenThread:8, Eitr:5";
+        public static ArmorConfig armor6Helmet = new ArmorConfig();
+
+        public static string armor6ChestName = "Robes of Embla";
+        public static string armor6ChestRecipe = "LinenThread:20, Eitr:20, AskHide:10, FlametalNew:5";
+        public static string armor6ChestRecipeUpgrade = "LinenThread:10, Eitr:5, FlametalNew:2";
+        public static ArmorConfig armor6Chest = new ArmorConfig();
+
+        public static string armor6LegsName = "Trousers of Embla";
+        public static string armor6LegsRecipe = "LinenThread:20, Eitr:20, AskHide:10";
+        public static string armor6LegsRecipeUpgrade = "LinenThread:10, Eitr:5";
+        public static ArmorConfig armor6Legs = new ArmorConfig();
+
         // Other
         public static string generalSectionname = "General";
-        public static ConfigEntry<string> emblaHoodName;
+        public static ConfigEntry<bool> adjustEitrWeave;
+        public static ConfigEntry<bool> adjustEmbla;
+        public static ConfigEntry<bool> reskinEmbla;
 
         public static void Init()
         {
@@ -107,16 +142,73 @@ namespace ModularMagic_Armors.Configs
         {
             try
             {
-                //emblaHoodName = ModularMagic_Armors.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Name"), "Hood of Embla",
-                //  new ConfigDescription("The name of the Embla hood to bind visial effects to", null,
-                //  new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                //this.emblaHoodName.SettingChanged += (obj, attr) =>
-                //{
-                //    UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
-                //    {
-                //        name = this.name.Value,
-                //    });
-                //};
+                adjustEitrWeave = ModularMagic_Armors.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Adjust Eitr-weave set"), true,
+                  new ConfigDescription("Adjust the Eitr-weave set to be in line with the rest. Will apply the set bonus effect and config settings. If disabled the set will be as vanilla (requires restart)", null,
+                  new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 3 }));
+                adjustEitrWeave.SettingChanged += (obj, attr) =>
+                {
+                    if (adjustEitrWeave.Value)
+                    {
+                        ArmorSetOptions armorSetOptions = new ArmorSetOptions()
+                        {
+                            name = "EitrWeaveSet_MMA",
+                            size = 3,
+                            statusEffect = ModularMagic_Armors.Instance.effects.EitrWeaveArmorSetSE,
+                        };
+
+                        ItemHelper.Adjust(ModularMagic_Armors.Instance.prefabs.EitrWeaveHelmetPrefab, armor5Helmet, armorSetOptions);
+                        ItemHelper.Adjust(ModularMagic_Armors.Instance.prefabs.EitrWeaveChestPrefab, armor5Chest, armorSetOptions);
+                        ItemHelper.Adjust(ModularMagic_Armors.Instance.prefabs.EitrWeaveLegsPrefab, armor5Legs, armorSetOptions);
+                    }
+                    else
+                    {
+                        ItemHelper.ResetToVanilla(ModularMagic_Armors.Instance.prefabs.EitrWeaveHelmetPrefab, ModularMagic_Armors.Instance.itemSnapShots.EitrWeaveHelmetStats, ModularMagic_Armors.Instance.itemSnapShots.EitrWeaveHelmetRecipe);
+                        ItemHelper.ResetToVanilla(ModularMagic_Armors.Instance.prefabs.EitrWeaveChestPrefab, ModularMagic_Armors.Instance.itemSnapShots.EitrWeaveChestStats, ModularMagic_Armors.Instance.itemSnapShots.EitrWeaveChestRecipe);
+                        ItemHelper.ResetToVanilla(ModularMagic_Armors.Instance.prefabs.EitrWeaveLegsPrefab, ModularMagic_Armors.Instance.itemSnapShots.EitrWeaveLegsStats, ModularMagic_Armors.Instance.itemSnapShots.EitrWeaveLegsRecipe);
+                    }
+
+                    armor5Helmet.ShowConfig(adjustEitrWeave.Value);
+                    armor5Chest.ShowConfig(adjustEitrWeave.Value);
+                    armor5Legs.ShowConfig(adjustEitrWeave.Value, true);
+                };
+
+                adjustEmbla = ModularMagic_Armors.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Adjust Embla set"), true,
+                  new ConfigDescription("Adjust the Embla set to be in line with the rest. Will apply the set bonus effect and config settings. If disabled the set will be as vanilla (requires restart)", null,
+                  new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 2 }));
+                adjustEmbla.SettingChanged += (obj, attr) =>
+                {
+                    if (adjustEmbla.Value)
+                    {
+                        ArmorSetOptions armorSetOptions = new ArmorSetOptions()
+                        {
+                            name = "EmblaSet_MMA",
+                            size = 3,
+                            statusEffect = ModularMagic_Armors.Instance.effects.EmblaArmorSetSE,
+                        };
+
+                        ItemHelper.Adjust(ModularMagic_Armors.Instance.prefabs.EmblaHelmetPrefab, armor6Helmet, armorSetOptions);
+                        ItemHelper.Adjust(ModularMagic_Armors.Instance.prefabs.EmblaChestPrefab, armor6Chest, armorSetOptions);
+                        ItemHelper.Adjust(ModularMagic_Armors.Instance.prefabs.EmblaLegsPrefab, armor6Legs, armorSetOptions);
+                    }
+                    else
+                    {
+                        ItemHelper.ResetToVanilla(ModularMagic_Armors.Instance.prefabs.EmblaHelmetPrefab, ModularMagic_Armors.Instance.itemSnapShots.EmblaHelmetStats, ModularMagic_Armors.Instance.itemSnapShots.EmblaHelmetRecipe);
+                        ItemHelper.ResetToVanilla(ModularMagic_Armors.Instance.prefabs.EmblaChestPrefab, ModularMagic_Armors.Instance.itemSnapShots.EmblaChestStats, ModularMagic_Armors.Instance.itemSnapShots.EmblaChestRecipe);
+                        ItemHelper.ResetToVanilla(ModularMagic_Armors.Instance.prefabs.EmblaLegsPrefab, ModularMagic_Armors.Instance.itemSnapShots.EmblaLegsStats, ModularMagic_Armors.Instance.itemSnapShots.EmblaLegsRecipe);
+                    }
+
+                    armor6Helmet.ShowConfig(adjustEmbla.Value);
+                    armor6Chest.ShowConfig(adjustEmbla.Value);
+                    armor6Legs.ShowConfig(adjustEmbla.Value, true);
+                };
+
+                reskinEmbla = ModularMagic_Armors.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Retexture Embla set"), true,
+                  new ConfigDescription("Due to the FrostWolf set using the same models this mod retextures the Embla set to be red with dark gray ash. If disabled the set will look as vanilla (requires restart)", null,
+                  new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 1 }));
+                reskinEmbla.SettingChanged += (obj, attr) =>
+                {
+                    Jotunn.Logger.LogWarning("ReskinEmbla: " + reskinEmbla.Value);
+                };
             }
             catch (Exception e)
             {
@@ -357,6 +449,106 @@ namespace ModularMagic_Armors.Configs
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not initialise " + armor4HelmetName + " config: " + e);
+            }
+        }
+
+        public static void InitArmor5Config(bool browsable = true)
+        {
+            try
+            {
+                ArmorConfigOptions optionsHelmet = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.EitrWeaveHelmetPrefab, armor5HelmetName, armor5HelmetRecipe, armor5HelmetRecipeUpgrade)
+                {
+                    description = "$item_helmet_mage_description",
+                    craftingStation = "GaldrTable",
+                    minStationLevel = 1,
+                    armor = 16,
+                    eitr = 20f,
+                    eitrRegen = 0.2f,
+                };
+                armor5Helmet = new ArmorConfig(browsable);
+                armor5Helmet.GenerateConfig(optionsHelmet);
+
+                ArmorConfigOptions optionsChest = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.EitrWeaveChestPrefab, armor5ChestName, armor5ChestRecipe, armor5ChestRecipeUpgrade)
+                {
+                    description = "$item_chest_mage_description",
+                    craftingStation = "GaldrTable",
+                    minStationLevel = 1,
+                    armor = 16,
+                    weight = 5f,
+                    movementSpeed = -0.02f,
+                    eitr = 20f,
+                    eitrRegen = 0.4f,
+                };
+                armor5Chest = new ArmorConfig(browsable);
+                armor5Chest.GenerateConfig(optionsChest);
+
+                ArmorConfigOptions optionsLegs = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.EitrWeaveLegsPrefab, armor5LegsName, armor5LegsRecipe, armor5LegsRecipeUpgrade)
+                {
+                    description = "$item_legs_mage_description",
+                    craftingStation = "GaldrTable",
+                    minStationLevel = 1,
+                    armor = 16,
+                    weight = 5f,
+                    movementSpeed = -0.02f,
+                    eitr = 20f,
+                    eitrRegen = 0.4f,
+                };
+                armor5Legs = new ArmorConfig(browsable);
+                armor5Legs.GenerateConfig(optionsLegs);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + armor5HelmetName + " config: " + e);
+            }
+        }
+
+        public static void InitArmor6Config(bool browsable = true)
+        {
+            try
+            {
+                ArmorConfigOptions optionsHelmet = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.EmblaHelmetPrefab, armor6HelmetName, armor6HelmetRecipe, armor6HelmetRecipeUpgrade)
+                {
+                    description = "$item_helmet_mage_ashlands_description",
+                    craftingStation = "GaldrTable",
+                    minStationLevel = 1,
+                    armor = 19,
+                    eitr = 24f,
+                    eitrRegen = 0.3f,
+                };
+                armor6Helmet = new ArmorConfig(browsable);
+                armor6Helmet.GenerateConfig(optionsHelmet);
+
+                ArmorConfigOptions optionsChest = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.EmblaChestPrefab, armor6ChestName, armor6ChestRecipe, armor6ChestRecipeUpgrade)
+                {
+                    description = "$item_chest_mage_ashlands_description",
+                    craftingStation = "GaldrTable",
+                    minStationLevel = 1,
+                    armor = 19,
+                    weight = 5f,
+                    movementSpeed = -0.02f,
+                    eitr = 24f,
+                    eitrRegen = 0.5f,
+                };
+                armor6Chest = new ArmorConfig(browsable);
+                armor6Chest.GenerateConfig(optionsChest);
+
+                ArmorConfigOptions optionsLegs = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.EmblaLegsPrefab, armor6LegsName, armor6LegsRecipe, armor6LegsRecipeUpgrade)
+                {
+                    description = "$item_legs_mage_ashlands_description",
+                    craftingStation = "GaldrTable",
+                    minStationLevel = 1,
+                    armor = 19,
+                    weight = 5f,
+                    movementSpeed = -0.02f,
+                    eitr = 24f,
+                    eitrRegen = 0.5f,
+                };
+                armor6Legs = new ArmorConfig(browsable);
+                armor6Legs.GenerateConfig(optionsLegs);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + armor6HelmetName + " config: " + e);
             }
         }
     }

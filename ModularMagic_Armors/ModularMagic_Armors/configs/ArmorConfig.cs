@@ -29,25 +29,67 @@ namespace ModularMagic_Armors.Configs
         public ConfigEntry<float> eitrRegen;
         public ConfigEntry<float> elementalMagic;
         public ConfigEntry<float> bloodMagic;
-        public ConfigEntry<int> demister;
+
+        public ConfigurationManagerAttributes enableAttributes;
+        public ConfigurationManagerAttributes nameAttributes;
+        public ConfigurationManagerAttributes descriptionAttributes;
+        public ConfigurationManagerAttributes craftingStationAttributes;
+        public ConfigurationManagerAttributes minStationLevelAttributes;
+        public ConfigurationManagerAttributes recipeAttributes;
+        public ConfigurationManagerAttributes recipeUpgradeAttributes;
+        public ConfigurationManagerAttributes recipeMultiplierAttributes;
+        public ConfigurationManagerAttributes armorAttributes;
+        public ConfigurationManagerAttributes armorPerLevelAttributes;
+        public ConfigurationManagerAttributes weightAttributes;
+        public ConfigurationManagerAttributes maxDurabilityAttributes;
+        public ConfigurationManagerAttributes maxQualityAttributes;
+        public ConfigurationManagerAttributes movementSpeedAttributes;
+        public ConfigurationManagerAttributes eitrAttributes;
+        public ConfigurationManagerAttributes eitrRegenAttributes;
+        public ConfigurationManagerAttributes elementalMagicAttributes;
+        public ConfigurationManagerAttributes bloodMagicAttributes;
 
         // Other
         public string cooldownStatusEffectName;
         public string magicStatusEffectName;
 
-        public void GenerateConfig(ArmorConfigOptions options)
+        public ArmorConfig(bool browsable = true)
+        {
+            enableAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 18, Browsable = browsable };
+            nameAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 17, Browsable = browsable };
+            descriptionAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 16, Browsable = browsable };
+            craftingStationAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 15, Browsable = browsable };
+            minStationLevelAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 14, Browsable = browsable };
+            recipeAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 13, Browsable = browsable };
+            recipeUpgradeAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 12, Browsable = browsable };
+            recipeMultiplierAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 11, Browsable = browsable };
+            armorAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 10, Browsable = browsable };
+            armorPerLevelAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 9, Browsable = browsable };
+            weightAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 8, Browsable = browsable };
+            maxDurabilityAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 7, Browsable = browsable };
+            maxQualityAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 6, Browsable = browsable };
+            movementSpeedAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 5, Browsable = browsable };
+            eitrAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 4, Browsable = browsable };
+            eitrRegenAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 3, Browsable = browsable };
+            elementalMagicAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 2, Browsable = browsable };
+            bloodMagicAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 1, Browsable = browsable };
+        }
+
+        public void GenerateConfig(ArmorConfigOptions options, bool browsable = true)
         {
             ConfigFile Config = ModularMagic_Armors.Instance.Config;
             cooldownStatusEffectName = options.cooldownStatusEffectName;
             magicStatusEffectName = options.magicStatusEffectName;
 
             enable = Config.Bind(new ConfigDefinition(options.sectionName, "Enable"), options.enable,
-               new ConfigDescription("Wether the recipe for this item is enabled", null,
-               new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 18 }));
+                new ConfigDescription("Wether the recipe for this item is enabled", null,
+                enableAttributes));
             enable.SettingChanged += (obj, attr) =>
             {
+                Jotunn.Logger.LogInfo(options.recipeName);
                 RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
                 {
+                    prefab = options.prefab,
                     name = options.recipeName,
                     updateType = RecipeUpdateType.ENABLE,
                     enable = enable.Value,
@@ -55,8 +97,8 @@ namespace ModularMagic_Armors.Configs
             };
 
             name = Config.Bind(new ConfigDefinition(options.sectionName, "Name"), options.name,
-              new ConfigDescription("The name of the item", null,
-              new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 17 }));
+                new ConfigDescription("The name of the item", null,
+                nameAttributes));
             name.SettingChanged += (obj, attr) =>
             {
                 UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
@@ -67,7 +109,7 @@ namespace ModularMagic_Armors.Configs
 
             description = Config.Bind(new ConfigDefinition(options.sectionName, "Description"), options.description,
                 new ConfigDescription("The description of the item", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 16 }));
+                descriptionAttributes));
             description.SettingChanged += (obj, attr) =>
             {
                 UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
@@ -79,11 +121,12 @@ namespace ModularMagic_Armors.Configs
             craftingStation = Config.Bind(new ConfigDefinition(options.sectionName, "Crafting station"), options.craftingStation,
                 new ConfigDescription("The crafting station the item can be crafted in",
                 new AcceptableValueList<string>(craftingStationOptions),
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 15 }));
+                craftingStationAttributes));
             craftingStation.SettingChanged += (obj, attr) =>
             {
                 RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
                 {
+                    prefab = options.prefab,
                     name = options.recipeName,
                     updateType = RecipeUpdateType.CRAFTINGSTATION,
                     craftingStation = craftingStation.Value,
@@ -92,12 +135,12 @@ namespace ModularMagic_Armors.Configs
 
             minStationLevel = Config.Bind(new ConfigDefinition(options.sectionName, "Required station level"), options.minStationLevel,
                 new ConfigDescription("The required station level to craft this item", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 14 }));
+                minStationLevelAttributes));
             minStationLevel.SettingChanged += (obj, attr) =>
             {
-                Jotunn.Logger.LogWarning("demister: " + minStationLevel.Value);
                 RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
                 {
+                    prefab = options.prefab,
                     name = options.recipeName,
                     updateType = RecipeUpdateType.MINREQUIREDSTATIONLEVEL,
                     requiredStationLevel = minStationLevel.Value,
@@ -106,11 +149,12 @@ namespace ModularMagic_Armors.Configs
 
             recipe = Config.Bind(new ConfigDefinition(options.sectionName, "Recipe"), options.recipe,
                 new ConfigDescription("The items required to craft this item", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 13 }));
+                recipeAttributes));
             recipe.SettingChanged += (obj, attr) =>
             {
                 RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
                 {
+                    prefab = options.prefab,
                     name = options.recipeName,
                     updateType = RecipeUpdateType.RECIPE,
                     requirements = recipe.Value,
@@ -119,11 +163,12 @@ namespace ModularMagic_Armors.Configs
 
             recipeUpgrade = Config.Bind(new ConfigDefinition(options.sectionName, "Upgrade recipe"), options.recipeUpgrade,
                 new ConfigDescription("The items required to upgrade this item", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 12 }));
+                recipeUpgradeAttributes));
             recipeUpgrade.SettingChanged += (obj, attr) =>
             {
                 RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
                 {
+                    prefab = options.prefab,
                     name = options.recipeName,
                     updateType = RecipeUpdateType.RECIPE,
                     requirements = recipe.Value,
@@ -134,11 +179,12 @@ namespace ModularMagic_Armors.Configs
 
             recipeMultiplier = Config.Bind(new ConfigDefinition(options.sectionName, "Upgrade recipe multiplier"), options.recipeMultiplier,
                 new ConfigDescription("The multiplier applied to the upgrade costs", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 11 }));
+                recipeMultiplierAttributes));
             recipeMultiplier.SettingChanged += (obj, attr) =>
             {
                 RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
                 {
+                    prefab = options.prefab,
                     name = options.recipeName,
                     updateType = RecipeUpdateType.RECIPE,
                     requirements = recipe.Value,
@@ -149,7 +195,7 @@ namespace ModularMagic_Armors.Configs
 
             armor = Config.Bind(new ConfigDefinition(options.sectionName, "Armor"), options.armor,
                 new ConfigDescription("The armor of the item", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 10 }));
+                armorAttributes));
             armor.SettingChanged += (obj, attr) =>
             {
                 UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
@@ -160,7 +206,7 @@ namespace ModularMagic_Armors.Configs
 
             armorPerLevel = Config.Bind(new ConfigDefinition(options.sectionName, "Armor per level"), options.armorPerLevel,
                 new ConfigDescription("The armor per level of the item", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 9 }));
+                armorPerLevelAttributes));
             armorPerLevel.SettingChanged += (obj, attr) =>
             {
                 UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
@@ -171,7 +217,7 @@ namespace ModularMagic_Armors.Configs
 
             weight = Config.Bind(new ConfigDefinition(options.sectionName, "Weight"), options.weight,
                 new ConfigDescription("The weight of the item", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 8 }));
+                weightAttributes));
             weight.SettingChanged += (obj, attr) =>
             {
                 UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
@@ -182,7 +228,7 @@ namespace ModularMagic_Armors.Configs
 
             maxDurability = Config.Bind(new ConfigDefinition(options.sectionName, "Max durability"), options.maxDurability,
                 new ConfigDescription("The maximum durability of the item", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 7 }));
+                maxDurabilityAttributes));
             maxDurability.SettingChanged += (obj, attr) =>
             {
                 UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
@@ -192,8 +238,8 @@ namespace ModularMagic_Armors.Configs
             };
 
             maxQuality = Config.Bind(new ConfigDefinition(options.sectionName, "Max quality"), options.maxQuality,
-                    new ConfigDescription("The maximum quality the item can become", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 6 }));
+                new ConfigDescription("The maximum quality the item can become", null,
+                maxQualityAttributes));
             maxQuality.SettingChanged += (obj, attr) =>
             {
                 UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
@@ -204,7 +250,7 @@ namespace ModularMagic_Armors.Configs
 
             movementSpeed = Config.Bind(new ConfigDefinition(options.sectionName, "Movement speed"), options.movementSpeed,
                 new ConfigDescription("The movement speed stat on the item (example: 1 = 100% or 0.05 = 5% etc.)", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 5 }));
+                movementSpeedAttributes));
             movementSpeed.SettingChanged += (obj, attr) =>
             {
                 UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
@@ -215,7 +261,7 @@ namespace ModularMagic_Armors.Configs
 
             eitr = Config.Bind(new ConfigDefinition(options.sectionName, "Eitr"), options.eitr,
                 new ConfigDescription("The amount of eitr the item gives", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 4 }));
+                eitrAttributes));
             eitr.SettingChanged += (obj, attr) =>
             {
                 if (eitr.Value < 0f) return;
@@ -227,10 +273,9 @@ namespace ModularMagic_Armors.Configs
 
             eitrRegen = Config.Bind(new ConfigDefinition(options.sectionName, "Eitr regen"), options.eitrRegen,
                 new ConfigDescription("The amount of eitr regen the item gives (example: 1 = 100% or 0.05 = 5% etc.)", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 3 }));
+                eitrRegenAttributes));
             eitrRegen.SettingChanged += (obj, attr) =>
             {
-                Jotunn.Logger.LogWarning("eitreRegen: " + eitrRegen.Value);
                 UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
                 {
                     eitrRegen = eitrRegen.Value,
@@ -241,10 +286,11 @@ namespace ModularMagic_Armors.Configs
 
             elementalMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Elemental magic"), options.elementalMagic,
                 new ConfigDescription("The amount of Elemental magic skill the item gives", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 2 }));
+                elementalMagicAttributes));
             elementalMagic.SettingChanged += (obj, attr) =>
             {
-                if (elementalMagic.Value < 0f) return;
+                if (elementalMagic.Value < 0f)
+                    return;
 
                 ItemDrop itemDrop = options.prefab.GetComponent<ItemDrop>();
                 MagicStatusEffect statusEffect = (MagicStatusEffect)itemDrop.m_itemData.m_shared.m_equipStatusEffect;
@@ -253,15 +299,40 @@ namespace ModularMagic_Armors.Configs
 
             bloodMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Blood magic"), options.bloodMagic,
                 new ConfigDescription("The amount of Blood magic skill the item gives", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 1 }));
+                bloodMagicAttributes));
             bloodMagic.SettingChanged += (obj, attr) =>
             {
-                if (bloodMagic.Value < 0f) return;
+                if (bloodMagic.Value < 0f)
+                    return;
 
                 ItemDrop itemDrop = options.prefab.GetComponent<ItemDrop>();
                 MagicStatusEffect statusEffect = (MagicStatusEffect)itemDrop.m_itemData.m_shared.m_equipStatusEffect;
                 statusEffect.SetBloodMagic(bloodMagic.Value);
             };
+        }
+        public void ShowConfig(bool value, bool refreshConfigManager = false)
+        {
+            enableAttributes.Browsable = value;
+            nameAttributes.Browsable = value;
+            descriptionAttributes.Browsable = value;
+            craftingStationAttributes.Browsable = value;
+            minStationLevelAttributes.Browsable = value;
+            recipeAttributes.Browsable = value;
+            recipeUpgradeAttributes.Browsable = value;
+            recipeMultiplierAttributes.Browsable = value;
+            armorAttributes.Browsable = value;
+            armorPerLevelAttributes.Browsable = value;
+            weightAttributes.Browsable = value;
+            maxDurabilityAttributes.Browsable = value;
+            maxQualityAttributes.Browsable = value;
+            movementSpeedAttributes.Browsable = value;
+            eitrAttributes.Browsable = value;
+            eitrRegenAttributes.Browsable = value;
+            elementalMagicAttributes.Browsable = value;
+            bloodMagicAttributes.Browsable = value;
+
+            if (refreshConfigManager)
+                ModularMagic_Armors.Instance.RefreshConfigManager();
         }
     }
 }

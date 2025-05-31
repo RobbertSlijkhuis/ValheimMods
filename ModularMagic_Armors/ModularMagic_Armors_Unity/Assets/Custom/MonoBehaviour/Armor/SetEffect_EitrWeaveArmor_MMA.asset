@@ -12,14 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 1345532120, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
   m_Name: SetEffect_EitrWeaveArmor_MMA
   m_EditorClassIdentifier: 
-  m_name: EitrWeave
+  m_name: Yggdrasil's Blessing
   m_category: 
   m_icon: {fileID: 21300000, guid: ed479622ac0db9c4188a96d5227febc4, type: 3}
   m_flashIcon: 0
   m_cooldownIcon: 0
-  m_tooltip: 'Tooltop
-
-'
+  m_tooltip: Woven from threads touched by the World Tree, the Eitr-weave set is
+    impossibly light. With each step, Yggdrasil's breath fills your lungs, renewing
+    your strength.
   m_attributes: 0
   m_startMessageType: 1
   m_startMessage: 
@@ -57,7 +57,7 @@ MonoBehaviour:
   m_eitrOverTime: 0
   m_eitrOverTimeDuration: 0
   m_healthRegenMultiplier: 1
-  m_staminaRegenMultiplier: 1
+  m_staminaRegenMultiplier: 1.2
   m_eitrRegenMultiplier: 1
   m_raiseSkill: 0
   m_raiseSkillModifier: 0
@@ -84,7 +84,7 @@ MonoBehaviour:
   m_stealthModifier: 0
   m_addMaxCarryWeight: 0
   m_speedModifier: 0
-  m_jumpModifier: {x: 0, y: 0, z: 0}
+  m_jumpModifier: {x: 0, y: 0.2, z: 0}
   m_maxMaxFallSpeed: 0
   m_fallDamageModifier: 0
   m_windMovementModifier: 0

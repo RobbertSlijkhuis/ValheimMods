@@ -12,12 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 1345532120, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
   m_Name: SetEffect_EmblaArmor_MMA
   m_EditorClassIdentifier: 
-  m_name: Embla
+  m_name: Legacy of the First Flame
   m_category: 
   m_icon: {fileID: 21300000, guid: ac9b068ddfc4c974f93269ac663cd736, type: 3}
   m_flashIcon: 0
   m_cooldownIcon: 0
-  m_tooltip: Tooltip
+  m_tooltip: The Embla set awakens ancient power within you. Your spells strike with
+    heightened force, you have become the echo of the First Sorceress.
   m_attributes: 0
   m_startMessageType: 1
   m_startMessage: 

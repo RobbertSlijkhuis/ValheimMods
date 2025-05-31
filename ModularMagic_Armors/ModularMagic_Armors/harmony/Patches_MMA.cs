@@ -8,7 +8,7 @@ using UnityEngine;
 namespace ModularMagic_Armors.Harmony
 {
     [HarmonyPatch]
-    public class Patches
+    public class Patches_MMA
     {
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Player), "GetTotalFoodValue")]
@@ -133,7 +133,7 @@ namespace ModularMagic_Armors.Harmony
         {
             try
             {
-                Jotunn.Logger.LogWarning("UpdateEquipmentStatusEffects_Postfix");
+                // Jotunn.Logger.LogWarning("UpdateEquipmentStatusEffects_Postfix");
                 if (Player.m_localPlayer == null) return;
 
                 if (Player.m_localPlayer.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode(ModularMagic_Armors.Instance.effects.ShamanArmorSetSE.name)))
@@ -255,12 +255,18 @@ namespace ModularMagic_Armors.Harmony
                             eyeLeft.SetActive(enable);
                             eyeRight.SetActive(enable);
                             break;
-                        case "$item_helmet_mage_ashlands":
-                            Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.helmetAttachPath + "/EmblaHood_Effects_MMA").gameObject.SetActive(enable);
+                        case var value when value != null && value == PluginConfig.armor6Helmet.name.Value:
+                            if (!PluginConfig.adjustEmbla.Value)
+                                return;
+
+                            Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.helmetAttachPath + "/EmblaHood_Effects_MMA")?.gameObject.SetActive(enable);
                             break;
-                        case "$item_chest_mage_ashlands":
-                            Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.shoulderLeftPath + "/EmblaChest_Left_Effects_MMA").gameObject.SetActive(enable);
-                            Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.shoulderRightPath + "/EmblaChest_Right_Effects_MMA").gameObject.SetActive(enable);
+                        case var value when value != null && value == PluginConfig.armor6Chest.name.Value:
+                            if (!PluginConfig.adjustEmbla.Value)
+                                return;
+
+                            Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.shoulderLeftPath + "/EmblaChest_Left_Effects_MMA")?.gameObject.SetActive(enable);
+                            Player.m_localPlayer.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.shoulderRightPath + "/EmblaChest_Right_Effects_MMA")?.gameObject.SetActive(enable);
                             break;
                         case "Audacious Tiara":
                             GameObject prefab = PrefabManager.Instance.GetPrefab("MMES_TheForestFlinger");

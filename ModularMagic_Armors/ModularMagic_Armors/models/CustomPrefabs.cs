@@ -28,12 +28,19 @@ namespace ModularMagic_Armors.Models
         public GameObject DarkWizardChestPrefab;
         public GameObject DarkWizardLegsPrefab;
 
+        // Eitr-weave set
+        public GameObject EitrWeaveHelmetPrefab;
+        public GameObject EitrWeaveChestPrefab;
+        public GameObject EitrWeaveLegsPrefab;
+
         // Embla
-        public GameObject EmblaCape;
+        public GameObject EmblaHelmetPrefab;
+        public GameObject EmblaChestPrefab;
+        public GameObject EmblaLegsPrefab;
         public GameObject EmblaEffects;
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        
+
         public GameObject AudaciousTiara;
         public GameObject AudaciousTutu;
         public GameObject AudaciousSFX;

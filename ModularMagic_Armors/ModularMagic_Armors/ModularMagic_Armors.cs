@@ -1,13 +1,14 @@
 using BepInEx;
 using Jotunn;
-using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
 using ModularMagic_Armors.Configs;
 using ModularMagic_Armors.Helpers;
 using ModularMagic_Armors.Models;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -26,12 +27,14 @@ namespace ModularMagic_Armors
 
         private AssetBundle _assetBundle;
         public PlayerArmatureHelper playerArmature;
+        public ItemSnapShots itemSnapShots = new ItemSnapShots();
         public CustomPrefabs prefabs = new CustomPrefabs();
         public CustomMaterials materials = new CustomMaterials();
         public CustomStatusEffects effects = new CustomStatusEffects();
         public CustomSprites sprites = new CustomSprites();
-        public bool gameIsReady;
         public string playerBeard;
+
+        public object? configManager;
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -41,12 +44,16 @@ namespace ModularMagic_Armors
         {
             Instance = this;
 
-            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            
-            ModQuery.Enable();
+            Assembly? bepinexConfigManager = System.AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == "ConfigurationManager");
+            Type? configManagerType = bepinexConfigManager?.GetType("ConfigurationManager.ConfigurationManager");
+            configManager = configManagerType == null ? null : BepInEx.Bootstrap.Chainloader.ManagerObject.GetComponent(configManagerType);
 
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            
+
+            // ModQuery.Enable();
+
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
             playerArmature = new PlayerArmatureHelper();
             _InitAssetBundle();
             _InitStatusEffects();
@@ -57,9 +64,15 @@ namespace ModularMagic_Armors
             PrefabManager.OnVanillaPrefabsAvailable += _AddWraithArmor;
             PrefabManager.OnVanillaPrefabsAvailable += _AddFrostWolfArmor;
             PrefabManager.OnVanillaPrefabsAvailable += _AddDarkWizardArmor;
-            PrefabManager.OnVanillaPrefabsAvailable += _AdjustEitrWeaveArmor;
-            PrefabManager.OnVanillaPrefabsAvailable += _AdjustEmblaArmor;
+            PrefabManager.OnVanillaPrefabsAvailable += _ApplyEffectsEmblaArmor;
+            ItemManager.OnItemsRegistered += _AdjustEitrWeaveArmor;
+            ItemManager.OnItemsRegistered += _AdjustEmblaArmor;
             ItemManager.OnItemsRegistered += _LogRecipes;
+        }
+
+        public void RefreshConfigManager()
+        {
+            configManager?.GetType().GetMethod("BuildSettingList")!.Invoke(configManager, Array.Empty<object>());
         }
 
         private void _LogRecipes()
@@ -72,16 +85,16 @@ namespace ModularMagic_Armors
 
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             
-            Jotunn.Logger.LogInfo($"Modded prefabs:");
-            foreach (var moddedPrefab in ModQuery.GetPrefabs())
-            {
-                // Jotunn.Logger.LogInfo($"  {moddedPrefab.Prefab.name} added by {moddedPrefab.SourceMod.Name}");
+            //Jotunn.Logger.LogInfo($"Modded prefabs:");
+            //foreach (var moddedPrefab in ModQuery.GetPrefabs())
+            //{
+            //    // Jotunn.Logger.LogInfo($"  {moddedPrefab.Prefab.name} added by {moddedPrefab.SourceMod.Name}");
 
-                if (moddedPrefab.Prefab.name == "MMES_TheForestFlinger")
-                {
-                    ItemDrop itemDrop = moddedPrefab.Prefab.GetComponent<ItemDrop>();
-                }
-            }
+            //    if (moddedPrefab.Prefab.name == "MMES_TheForestFlinger")
+            //    {
+            //        ItemDrop itemDrop = moddedPrefab.Prefab.GetComponent<ItemDrop>();
+            //    }
+            //}
 
             //var helmet = ItemManager.Instance.GetItem("DeathWizshHelmet");
             //var chest = ItemManager.Instance.GetItem("DeathWizshChest");
@@ -414,99 +427,116 @@ namespace ModularMagic_Armors
 
         private void _AdjustEitrWeaveArmor()
         {
-            string setName = "EitrWeaveSet_MMA";
-            int setSize = 3;
-            GameObject helmet = PrefabManager.Instance.GetPrefab("HelmetMage");
-            GameObject chestPrefab = PrefabManager.Instance.GetPrefab("ArmorMageChest");
-            GameObject legsPrefab = PrefabManager.Instance.GetPrefab("ArmorMageLegs");
-            ItemDrop helmetItemDrop = helmet.GetComponent<ItemDrop>();
-            ItemDrop chestItemDrop = chestPrefab.GetComponent<ItemDrop>();
-            ItemDrop legsItemDrop = legsPrefab.GetComponent<ItemDrop>();
+            prefabs.EitrWeaveHelmetPrefab = PrefabManager.Instance.GetPrefab("HelmetMage");
+            prefabs.EitrWeaveChestPrefab = PrefabManager.Instance.GetPrefab("ArmorMageChest");
+            prefabs.EitrWeaveLegsPrefab = PrefabManager.Instance.GetPrefab("ArmorMageLegs");
 
-            helmetItemDrop.m_itemData.m_shared.m_setName = setName;
-            helmetItemDrop.m_itemData.m_shared.m_setSize = setSize;
-            helmetItemDrop.m_itemData.m_shared.m_setStatusEffect = effects.EitrWeaveArmorSetSE;
+            itemSnapShots.EitrWeaveHelmetStats = UpdateHelper.TakeSnapShot(prefabs.EitrWeaveHelmetPrefab);
+            itemSnapShots.EitrWeaveChestStats = UpdateHelper.TakeSnapShot(prefabs.EitrWeaveChestPrefab);
+            itemSnapShots.EitrWeaveLegsStats = UpdateHelper.TakeSnapShot(prefabs.EitrWeaveLegsPrefab);
 
-            // chestItemDrop.m_itemData.m_shared.m_eitrRegenModifier = 0.30f;
-            chestItemDrop.m_itemData.m_shared.m_setName = setName;
-            chestItemDrop.m_itemData.m_shared.m_setSize = setSize;
-            chestItemDrop.m_itemData.m_shared.m_setStatusEffect = effects.EitrWeaveArmorSetSE;
+            itemSnapShots.EitrWeaveHelmetRecipe = RecipeHelper.TakeSnapShot(prefabs.EitrWeaveHelmetPrefab);
+            itemSnapShots.EitrWeaveChestRecipe = RecipeHelper.TakeSnapShot(prefabs.EitrWeaveChestPrefab);
+            itemSnapShots.EitrWeaveLegsRecipe = RecipeHelper.TakeSnapShot(prefabs.EitrWeaveLegsPrefab);
 
-            // legsItemDrop.m_itemData.m_shared.m_eitrRegenModifier = 0.30f;
-            legsItemDrop.m_itemData.m_shared.m_setName = setName;
-            legsItemDrop.m_itemData.m_shared.m_setSize = setSize;
-            legsItemDrop.m_itemData.m_shared.m_setStatusEffect = effects.EitrWeaveArmorSetSE;
+            PluginConfig.InitArmor5Config(PluginConfig.adjustEitrWeave.Value);
+
+            if (!PluginConfig.adjustEitrWeave.Value)
+                return;
+
+            ArmorSetOptions armorSetOptions = new ArmorSetOptions()
+            {
+                name = "EitrWeaveSet_MMA",
+                size = 3,
+                statusEffect = effects.EitrWeaveArmorSetSE,
+            };
+
+            ItemHelper.Adjust(prefabs.EitrWeaveHelmetPrefab, PluginConfig.armor5Helmet, armorSetOptions);
+            ItemHelper.Adjust(prefabs.EitrWeaveChestPrefab, PluginConfig.armor5Chest, armorSetOptions);
+            ItemHelper.Adjust(prefabs.EitrWeaveLegsPrefab, PluginConfig.armor5Legs, armorSetOptions);
 
             PrefabManager.OnVanillaPrefabsAvailable -= _AdjustEitrWeaveArmor;
         }
 
         private void _AdjustEmblaArmor()
         {
+            itemSnapShots.EmblaHelmetStats = UpdateHelper.TakeSnapShot(prefabs.EmblaHelmetPrefab);
+            itemSnapShots.EmblaChestStats = UpdateHelper.TakeSnapShot(prefabs.EmblaChestPrefab);
+            itemSnapShots.EmblaLegsStats = UpdateHelper.TakeSnapShot(prefabs.EmblaLegsPrefab);
+
+            itemSnapShots.EmblaHelmetRecipe = RecipeHelper.TakeSnapShot(prefabs.EmblaHelmetPrefab);
+            itemSnapShots.EmblaChestRecipe = RecipeHelper.TakeSnapShot(prefabs.EmblaChestPrefab);
+            itemSnapShots.EmblaLegsRecipe = RecipeHelper.TakeSnapShot(prefabs.EmblaLegsPrefab);
+
+            PluginConfig.InitArmor6Config(PluginConfig.adjustEmbla.Value);
+
+            if (!PluginConfig.adjustEmbla.Value)
+                return;
+
+            ArmorSetOptions armorSetOptions = new ArmorSetOptions()
+            {
+                name = "EmblaSet_MMA",
+                size = 3,
+                statusEffect = effects.EmblaArmorSetSE,
+            };
+
+            ItemHelper.Adjust(prefabs.EmblaHelmetPrefab, PluginConfig.armor6Helmet, armorSetOptions);
+            ItemHelper.Adjust(prefabs.EmblaChestPrefab, PluginConfig.armor6Chest, armorSetOptions);
+            ItemHelper.Adjust(prefabs.EmblaLegsPrefab, PluginConfig.armor6Legs, armorSetOptions);
+
+            ItemManager.OnItemsRegistered -= _AdjustEmblaArmor;
+        }
+
+        private void _ApplyEffectsEmblaArmor()
+        {
+            prefabs.EmblaHelmetPrefab = PrefabManager.Instance.GetPrefab("HelmetMage_Ashlands");
+            prefabs.EmblaChestPrefab = PrefabManager.Instance.GetPrefab("ArmorMageChest_Ashlands");
+            prefabs.EmblaLegsPrefab = PrefabManager.Instance.GetPrefab("ArmorMageLegs_Ashlands");
+
+            if (!PluginConfig.reskinEmbla.Value)
+                return;
+
             materials.EmblaArmor.FixReferences();
             materials.EmblaChest.FixReferences();
             materials.EmblaLegs.FixReferences();
 
-            ItemConfig emblaCapeConfig = new ItemConfig();
-            emblaCapeConfig.Name = "Embla Cape";
-            CustomItem emblaCape = new CustomItem(prefabs.EmblaCape, true, emblaCapeConfig);
-            ItemManager.Instance.AddItem(emblaCape);
-
-            string setName = "EmblaSet_MMA";
-            int setSize = 3;
             List<Material> armorMaterials = new List<Material>();
             armorMaterials.Add(materials.EmblaArmor);
 
-            GameObject helmetPrefab = PrefabManager.Instance.GetPrefab("HelmetMage_Ashlands");
-            ItemDrop helmetItemDrop = helmetPrefab.GetComponent<ItemDrop>();
-            Transform helmet = helmetPrefab.transform.Find("attach_skin/AshlandsHood");
-            Transform helmetFlat = helmetPrefab.transform.Find("hood");
+            ItemDrop helmetItemDrop = prefabs.EmblaHelmetPrefab.GetComponent<ItemDrop>();
+            ItemDrop chestItemDrop = prefabs.EmblaChestPrefab.GetComponent<ItemDrop>();
+            ItemDrop legsItemDrop = prefabs.EmblaLegsPrefab.GetComponent<ItemDrop>();
 
-            GameObject chestPrefab = PrefabManager.Instance.GetPrefab("ArmorMageChest_Ashlands");
-            ItemDrop chestItemDrop = chestPrefab.GetComponent<ItemDrop>();
-            Transform chest = chestPrefab.transform.Find("attach_skin/AshlandsMageChest");
-            Transform chestFlat = chestPrefab.transform.Find("model");
-
-            GameObject legsPrefab = PrefabManager.Instance.GetPrefab("ArmorMageLegs_Ashlands");
-            ItemDrop legsItemDrop = legsPrefab.GetComponent<ItemDrop>();
-            Transform legs = legsPrefab.transform.Find("attach_skin/AshlandsMageLegs");
-            Transform legsFlat = legsPrefab.transform.Find("log");
+            Transform helmet = prefabs.EmblaHelmetPrefab.transform.Find("attach_skin/AshlandsHood");
+            Transform helmetFlat = prefabs.EmblaHelmetPrefab.transform.Find("hood");
+            Transform chest = prefabs.EmblaChestPrefab.transform.Find("attach_skin/AshlandsMageChest");
+            Transform chestFlat = prefabs.EmblaChestPrefab.transform.Find("model");
+            Transform legs = prefabs.EmblaLegsPrefab.transform.Find("attach_skin/AshlandsMageLegs");
+            Transform legsFlat = prefabs.EmblaLegsPrefab.transform.Find("log");
 
             SkinnedMeshRenderer helmetMesh = helmet.gameObject.GetComponent<SkinnedMeshRenderer>();
             MeshRenderer helmetFlatMesh = helmetFlat.gameObject.GetComponent<MeshRenderer>();
+            SkinnedMeshRenderer chestMesh = chest.gameObject.GetComponent<SkinnedMeshRenderer>();
+            MeshRenderer chestFlatMesh = chestFlat.gameObject.GetComponent<MeshRenderer>();
+            SkinnedMeshRenderer legsMesh = legs.gameObject.GetComponent<SkinnedMeshRenderer>();
+            MeshRenderer legsFlatMesh = legsFlat.gameObject.GetComponent<MeshRenderer>();
 
             List<Sprite> helmetSpriteList = new List<Sprite>();
             helmetSpriteList.Add(sprites.EmblaHood);
             helmetItemDrop.m_itemData.m_shared.m_icons = helmetSpriteList.ToArray();
-            helmetItemDrop.m_itemData.m_shared.m_setName = setName;
-            helmetItemDrop.m_itemData.m_shared.m_setSize = setSize;
-            helmetItemDrop.m_itemData.m_shared.m_setStatusEffect = effects.EmblaArmorSetSE;
             helmetMesh.materials = armorMaterials.ToArray();
             helmetFlatMesh.materials = armorMaterials.ToArray();
-
-            SkinnedMeshRenderer chestMesh = chest.gameObject.GetComponent<SkinnedMeshRenderer>();
-            MeshRenderer chestFlatMesh = chestFlat.gameObject.GetComponent<MeshRenderer>();
 
             List<Sprite> chestSpriteList = new List<Sprite>();
             chestSpriteList.Add(sprites.EmblaChest);
             chestItemDrop.m_itemData.m_shared.m_icons = chestSpriteList.ToArray();
-            chestItemDrop.m_itemData.m_shared.m_setName = setName;
-            chestItemDrop.m_itemData.m_shared.m_setSize = setSize;
-            chestItemDrop.m_itemData.m_shared.m_setStatusEffect = effects.EmblaArmorSetSE;
-            // chestItemDrop.m_itemData.m_shared.m_eitrRegenModifier = 0.40f;
             chestItemDrop.m_itemData.m_shared.m_armorMaterial = materials.EmblaChest;
             chestMesh.materials = armorMaterials.ToArray();
             chestFlatMesh.materials = armorMaterials.ToArray();
 
-            SkinnedMeshRenderer legsMesh = legs.gameObject.GetComponent<SkinnedMeshRenderer>();
-            MeshRenderer legsFlatMesh = legsFlat.gameObject.GetComponent<MeshRenderer>();
-
             List<Sprite> legsSpriteList = new List<Sprite>();
             legsSpriteList.Add(sprites.EmblaLegs);
             legsItemDrop.m_itemData.m_shared.m_icons = legsSpriteList.ToArray();
-            legsItemDrop.m_itemData.m_shared.m_setName = setName;
-            legsItemDrop.m_itemData.m_shared.m_setSize = setSize;
-            legsItemDrop.m_itemData.m_shared.m_setStatusEffect = effects.EmblaArmorSetSE;
-            // legsItemDrop.m_itemData.m_shared.m_eitrRegenModifier = 0.40f;
             legsItemDrop.m_itemData.m_shared.m_armorMaterial = materials.EmblaLegs;
             legsMesh.materials = armorMaterials.ToArray();
             legsFlatMesh.materials = armorMaterials.ToArray();
@@ -535,7 +565,7 @@ namespace ModularMagic_Armors
             shoulderRightEffect.transform.localPosition = new Vector3(0.002f, 0f, -0.0001f);
             shoulderRightEffect.SetActive(false);
 
-            PrefabManager.OnVanillaPrefabsAvailable -= _AdjustEmblaArmor;
+            PrefabManager.OnVanillaPrefabsAvailable -= _ApplyEffectsEmblaArmor;
         }
 
         private void _InitStatusEffects()
@@ -603,7 +633,6 @@ namespace ModularMagic_Armors
             effects.EitrWeaveArmorSetSE = _assetBundle.LoadAsset<StatusEffect>("SetEffect_EitrWeaveArmor_MMA");
 
             // Embla armor
-            prefabs.EmblaCape = _assetBundle.LoadAsset<GameObject>("MMA_EmblaCape");
             prefabs.EmblaEffects = _assetBundle.LoadAsset<GameObject>("EmblaHood_Effects_MMA");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.EmblaEffects, true));
             effects.EmblaArmorSetSE = _assetBundle.LoadAsset<StatusEffect>("SetEffect_EmblaArmor_MMA");
