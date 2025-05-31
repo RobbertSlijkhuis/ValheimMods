@@ -207,7 +207,6 @@ namespace ModularMagic_Armors.Configs
                   new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 1 }));
                 reskinEmbla.SettingChanged += (obj, attr) =>
                 {
-                    Jotunn.Logger.LogWarning("ReskinEmbla: " + reskinEmbla.Value);
                 };
             }
             catch (Exception e)

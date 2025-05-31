@@ -109,7 +109,6 @@ namespace ModularMagic_Armors.Helpers
                         continue;
                     }
 
-                    Jotunn.Logger.LogWarning("Update Eitr regen to: " + value);
                     item.m_shared.m_eitrRegenModifier = value;
                 }
             }

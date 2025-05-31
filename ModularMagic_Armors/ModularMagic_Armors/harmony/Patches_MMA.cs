@@ -133,7 +133,6 @@ namespace ModularMagic_Armors.Harmony
         {
             try
             {
-                // Jotunn.Logger.LogWarning("UpdateEquipmentStatusEffects_Postfix");
                 if (Player.m_localPlayer == null) return;
 
                 if (Player.m_localPlayer.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode(ModularMagic_Armors.Instance.effects.ShamanArmorSetSE.name)))

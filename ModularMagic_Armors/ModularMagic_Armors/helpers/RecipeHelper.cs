@@ -215,7 +215,6 @@ namespace ModularMagic_Armors.Helpers
                         return;
                     }
 
-                    Jotunn.Logger.LogWarning("Requirements added");
                     recipe.m_resources = requirementsAll;
 
                     if (options.craftingStation == null || options.craftingStation == "")
@@ -236,20 +235,16 @@ namespace ModularMagic_Armors.Helpers
                         string pieceName = CraftingStations.GetInternalName(options.craftingStation);
                         recipe.m_enabled = true;
                         recipe.m_craftingStation = PrefabManager.Instance.GetPrefab(pieceName).GetComponent<CraftingStation>();
-
-                        Jotunn.Logger.LogWarning("CraftingStation: " + options.craftingStation);
                     }
 
                     if (options.requiredStationLevel == null || options.requiredStationLevel < 1)
                         throw new Exception("Required station level is null or lower then 1");
 
-                    Jotunn.Logger.LogWarning("RequiredStationLevel: " + options.requiredStationLevel);
                     recipe.m_minStationLevel = (int)options.requiredStationLevel;
 
                     if (options.enable == null)
                         throw new Exception("Enable is null");
 
-                    Jotunn.Logger.LogWarning("Enable: " + options.enable);
                     recipe.m_enabled = (bool)options.enable;
                     break;
                 case RecipeUpdateType.ENABLE:
