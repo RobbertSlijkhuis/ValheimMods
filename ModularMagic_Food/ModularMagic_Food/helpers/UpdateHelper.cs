@@ -20,8 +20,8 @@ namespace ModularMagic_Food.Helpers
 
                 if (options.name != null) { itemDrop.m_itemData.m_shared.m_name = options.name; }
                 if (options.description != null) { itemDrop.m_itemData.m_shared.m_description = options.description; }
-                if (options.movementModifier != null) { itemDrop.m_itemData.m_shared.m_movementModifier = (float)options.movementModifier; }
                 if (options.weight != null) { itemDrop.m_itemData.m_shared.m_weight = (float)options.weight; }
+                if (options.maxStackSize != null) { itemDrop.m_itemData.m_shared.m_maxStackSize = (int)options.maxStackSize; }
                 if (options.health != null) { itemDrop.m_itemData.m_shared.m_food = (float)options.health; }
                 if (options.healthRegen != null) { itemDrop.m_itemData.m_shared.m_foodRegen = (float)options.healthRegen; }
                 if (options.stamina != null) { itemDrop.m_itemData.m_shared.m_foodStamina = (float)options.stamina; }

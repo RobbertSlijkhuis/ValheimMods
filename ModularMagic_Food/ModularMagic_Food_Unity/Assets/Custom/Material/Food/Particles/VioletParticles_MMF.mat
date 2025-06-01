@@ -7,15 +7,14 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MMF_GribSnow
-  m_Shader: {fileID: 4800000, guid: b87a14c803e5f294798d8028435f814f, type: 3}
+  m_Name: VioletParticles_MMF
+  m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords:
-  - _EMISSIONSWITCH_ON
-  - _SMOOTHFROMMAPSWITCH_ON
-  m_LightmapFlags: 4
+  m_ValidKeywords:
+  - _EMISSION
+  m_InvalidKeywords: []
+  m_LightmapFlags: 2
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
@@ -25,19 +24,11 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _Albedo:
-        m_Texture: {fileID: 2800000, guid: 7ade2e369f325a44e84cea5e3a29aff6, type: 3}
+    - _AlbedoMap:
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _CubemapBlured:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _Cubmap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -54,10 +45,6 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
-        m_Texture: {fileID: 2800000, guid: 014c3a5f398246f4c988af9ca8c46072, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _HeightMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -69,14 +56,6 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _MetallicMap:
-        m_Texture: {fileID: 2800000, guid: 24c5046ce8bea874081ec929d03c7b10, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: 19f2e908ff36c654fa3fe7926c4af751, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -85,46 +64,43 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _SmoothnessMap:
-        m_Texture: {fileID: 2800000, guid: 9e95f4a81926f3e438b69f32f93a6c6c, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _texcoord:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AddLightsPerPixel: 0
+    - _AlphaInfluence: 1.75
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _EmissionMultiplayer: 0.79
-    - _EmissionSwitch: 1
+    - _EmissionScale: 1
+    - _EnableAlbedo: 0
+    - _EnableEmission: 0
+    - _EnableFlipbookBlending: 0
+    - _EnableShadows: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _MetalicBrightnes: 0.3
-    - _Metallic: 0.51
+    - _HelpFlip: 0
+    - _InvFade: 0.21
+    - _LocalAmbientLighting: 0
+    - _Metallic: 0
     - _Mode: 0
-    - _NormalMapDepth: 1
     - _OcclusionStrength: 1
-    - _ParalaxOffset: 0.001
     - _Parallax: 0.02
-    - _SmoothFromMapSwitch: 1
-    - _SmoothRough: 0
+    - _PerPixelAmbientLighting: 0
+    - _ShadowDensity: 1.375
+    - _ShadowExtrude: 5.29
+    - _ShadowsPerPixel: 0
     - _SmoothnessTextureChannel: 0
-    - _Snoothness: 1
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TilingX: 1
-    - _TilingY: 1
+    - _Translucency: 0.437
     - _UVSec: 0
+    - _WrappedDiffuse: 0.483
     - _ZWrite: 1
-    - __dirty: 1
     m_Colors:
-    - _AlbedoColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _CubemapColor: {r: 0, g: 0, b: 0, a: 1}
-    - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
+    - _CamFadeDistance: {r: 4, g: 150, b: 25, a: 0}
+    - _Color: {r: 0.5137255, g: 0.42352942, b: 0.83137256, a: 1}
+    - _EmissionColor: {r: 0.5137255, g: 0.42352942, b: 0.83137256, a: 1}
+    - _TintColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
   m_BuildTextureStacks: []

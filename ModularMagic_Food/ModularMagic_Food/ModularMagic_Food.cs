@@ -7,7 +7,6 @@ using ModularMagic_Food.Models;
 using ModularMagic_Food.Configs;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 using ModularMagic_Food.Helpers;
 
@@ -38,7 +37,6 @@ namespace ModularMagic_Food
 
             PrefabManager.OnVanillaPrefabsAvailable += AddFood;
             ZoneManager.OnVanillaVegetationAvailable += AddLocations;
-            Jotunn.Logger.LogInfo("ModularMagic_Food has been initialised");
             ItemManager.OnItemsRegistered += LogRecipes;
         }
 
@@ -69,17 +67,17 @@ namespace ModularMagic_Food
                 //visualBog.localScale = new Vector3(3, 3, 3);
                 //visualBogFoot.localScale = new Vector3(3, 3, 3);
 
-                ItemHelper.CreateFoodItem(prefabs.mushroom1Prefab, ConfigFood.mushroom1);
-                ItemHelper.CreateFoodItem(prefabs.mushroom1CookedPrefab, ConfigFood.mushroom1Cooked);
-                ItemHelper.CreateFoodItem(prefabs.mushroom2Prefab, ConfigFood.mushroom2);
-                ItemHelper.CreateFoodItem(prefabs.mushroom3Prefab, ConfigFood.mushroom3);
-                ItemHelper.CreateFoodItem(prefabs.mushroom4Prefab, ConfigFood.mushroom4);
-                ItemHelper.CreateFoodItem(prefabs.mushroom5Prefab, ConfigFood.mushroom5);
-                ItemHelper.CreateFoodItem(prefabs.mushroom1SoupPrefab, ConfigFood.mushroom1Soup);
-                ItemHelper.CreateFoodItem(prefabs.mushroom2SoupPrefab, ConfigFood.mushroom2Soup);
-                ItemHelper.CreateFoodItem(prefabs.mushroom3SoupPrefab, ConfigFood.mushroom3Soup);
-                ItemHelper.CreateFoodItem(prefabs.mushroom4SoupPrefab, ConfigFood.mushroom4Soup);
-                ItemHelper.CreateFoodItem(prefabs.mushroom5SoupPrefab, ConfigFood.mushroom5Soup);
+                ItemHelper.Create(prefabs.mushroom1Prefab, ConfigFood.mushroom1);
+                ItemHelper.Create(prefabs.mushroom1CookedPrefab, ConfigFood.mushroom1Cooked);
+                ItemHelper.Create(prefabs.mushroom2Prefab, ConfigFood.mushroom2);
+                ItemHelper.Create(prefabs.mushroom3Prefab, ConfigFood.mushroom3);
+                ItemHelper.Create(prefabs.mushroom4Prefab, ConfigFood.mushroom4);
+                ItemHelper.Create(prefabs.mushroom5Prefab, ConfigFood.mushroom5);
+                ItemHelper.Create(prefabs.mushroom1SoupPrefab, ConfigFood.mushroom1Soup);
+                ItemHelper.Create(prefabs.mushroom2SoupPrefab, ConfigFood.mushroom2Soup);
+                ItemHelper.Create(prefabs.mushroom3SoupPrefab, ConfigFood.mushroom3Soup);
+                ItemHelper.Create(prefabs.mushroom4SoupPrefab, ConfigFood.mushroom4Soup);
+                ItemHelper.Create(prefabs.mushroom5SoupPrefab, ConfigFood.mushroom5Soup);
 
                 CookingConversionConfig cookedMushroomConfig = new CookingConversionConfig();
                 cookedMushroomConfig.FromItem = prefabs.mushroom1Prefab.name;
@@ -256,8 +254,8 @@ namespace ModularMagic_Food
             prefabs.mushroom1Prefab = assetBundle.LoadAsset<GameObject>("MMF_MagicalMushroom");
             prefabs.mushroom1CookedPrefab = assetBundle.LoadAsset<GameObject>("MMF_CookedMagicalMushroom");
             prefabs.mushroom1PickablePrefab = assetBundle.LoadAsset<GameObject>("MMF_Pickable_MagicalMushroom");
-            prefabs.mushroom2Prefab = assetBundle.LoadAsset<GameObject>("MMF_GribSnow");
-            prefabs.mushroom2PickablePrefab = assetBundle.LoadAsset<GameObject>("MMF_Pickable_GribSnow");
+            prefabs.mushroom2Prefab = assetBundle.LoadAsset<GameObject>("MMF_GribSnowMushroom");
+            prefabs.mushroom2PickablePrefab = assetBundle.LoadAsset<GameObject>("MMF_Pickable_GribSnowMushroom");
             prefabs.mushroom3Prefab = assetBundle.LoadAsset<GameObject>("MMF_BogMushroom");
             prefabs.mushroom3PickablePrefab = assetBundle.LoadAsset<GameObject>("MMF_Pickable_BogMushroom");
             prefabs.mushroom4Prefab = assetBundle.LoadAsset<GameObject>("MMF_PircedMushroom");

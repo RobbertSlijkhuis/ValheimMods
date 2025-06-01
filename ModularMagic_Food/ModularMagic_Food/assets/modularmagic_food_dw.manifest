@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 250225231
+CRC: 844020800
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 7f2cea5acad3c9e0b27fde7c1068ad47
+    Hash: bda8ce298e2b8a9012d5a432d65986c9
   TypeTreeHash:
     serializedVersion: 2
-    Hash: f9604785e8759b74d4bfb94e6ef22167
+    Hash: 49996c426eeb57e4a8c551cbccdf323f
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 7f2cea5acad3c9e0b27fde7c1068ad47
+    Hash: bda8ce298e2b8a9012d5a432d65986c9
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -34,10 +34,6 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 65
   Script: {instanceID: 0}
-- Class: 82
-  Script: {instanceID: 0}
-- Class: 83
-  Script: {instanceID: 0}
 - Class: 108
   Script: {instanceID: 0}
 - Class: 114
@@ -51,11 +47,7 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 2094620348, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
   Script: {fileID: 895252998, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 313648218, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 115
   Script: {instanceID: 0}
 - Class: 135
@@ -67,12 +59,6 @@ ClassTypes:
 - Class: 205
   Script: {instanceID: 0}
 - Class: 213
-  Script: {instanceID: 0}
-- Class: 241
-  Script: {instanceID: 0}
-- Class: 243
-  Script: {instanceID: 0}
-- Class: 245
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
@@ -95,9 +81,9 @@ Assets:
 - Assets/Custom/PrefabInstance/Food/Cooked/MMF_GribSnowMushroomSoup.prefab
 - Assets/Custom/PrefabInstance/Food/Cooked/MMF_PircedMushroomSoup.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_Pickable_PircedMushroom.prefab
-- Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_GribSnow.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_GribSnowMushroom.prefab
 - Assets/Custom/PrefabInstance/Food/Cooked/MMF_MagicalMushroomSoup.prefab
-- Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_Pickable_GribSnow.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_Pickable_GribSnowMushroom.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_MagicalMushroom.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_CookedMagicalMushroom.prefab
 - Assets/Custom/PrefabInstance/Food/Cooked/MMF_BogMushroomSoup.prefab

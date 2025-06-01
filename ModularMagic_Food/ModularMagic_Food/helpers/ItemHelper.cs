@@ -8,7 +8,7 @@ namespace ModularMagic_Food.Helpers
 {
     internal class ItemHelper
     {
-        public static void CreateFoodItem(GameObject prefab, FoodConfig config)
+        public static void Create(GameObject prefab, FoodConfig config)
         {
             ItemConfig itemConfig = new ItemConfig();
             itemConfig.Name = config.name.Value;
@@ -31,6 +31,7 @@ namespace ModularMagic_Food.Helpers
 
             UpdateHelper.UpdateItemDropStats(prefab, new UpdateItemDropStatsOptions()
             {
+                maxStackSize = config.maxStackSize.Value,
                 health = config.health.Value,
                 healthRegen = config.healthRegen.Value,
                 stamina = config.stamina.Value,

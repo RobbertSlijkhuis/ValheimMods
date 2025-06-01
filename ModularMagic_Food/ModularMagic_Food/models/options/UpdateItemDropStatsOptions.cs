@@ -6,8 +6,8 @@ namespace ModularMagic_Food.Models
     {
         public string? name = null;
         public string? description = null;
-        public float? movementModifier = null;
         public float? weight = null;
+        public int? maxStackSize = null;
         public float? health = null;
         public float? healthRegen = null;
         public float? stamina = null;
