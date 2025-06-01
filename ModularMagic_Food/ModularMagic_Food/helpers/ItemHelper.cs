@@ -1,6 +1,7 @@
 ﻿using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
+using ModularMagic_Food.Configs;
 using ModularMagic_Food.Models;
 using UnityEngine;
 

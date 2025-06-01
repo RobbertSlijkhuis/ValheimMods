@@ -1,7 +1,8 @@
 ﻿using BepInEx.Configuration;
 using ModularMagic_Food.Helpers;
+using ModularMagic_Food.Models;
 
-namespace ModularMagic_Food.Models
+namespace ModularMagic_Food.Configs
 {
     internal class FoodConfig
     {

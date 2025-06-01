@@ -1,9 +1,10 @@
 ﻿using ModularMagic_Food.Models;
 using System;
+using System.Threading.Tasks;
 
 namespace ModularMagic_Food.Configs
 {
-    internal static class ConfigFood
+    internal static class PluginConfig
     {
         public static string mushroom1Name = "Magical Mushroom";
         public static FoodConfig mushroom1 = new FoodConfig();
@@ -27,7 +28,7 @@ namespace ModularMagic_Food.Configs
         public static string mushroom1SoupRecipe = $"{ModularMagic_Food.Instance.prefabs.mushroom1Prefab.name}:3";
         public static FoodConfig mushroom1Soup = new FoodConfig();
 
-        public static string mushroom2SoupName = "GribSnow Mushroom Soup";
+        public static string mushroom2SoupName = "Gribsnow Mushroom Soup";
         public static string mushroom2SoupRecipe = $"Carrot:2, {ModularMagic_Food.Instance.prefabs.mushroom2Prefab.name}:2";
         public static FoodConfig mushroom2Soup = new FoodConfig();
 
@@ -85,7 +86,7 @@ namespace ModularMagic_Food.Configs
             {
                 FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.mushroom1CookedPrefab, mushroom1CookedName)
                 {
-                    description = "They say you should be carefull eating unknown mushrooms... but it looks so delicious!",
+                    description = "Saturated with raw magic and a nice sear. Consuming it may open your mind... or melt it.",
                     health = 20f,
                     stamina = 20f,
                     eitr = 25f,
@@ -106,7 +107,7 @@ namespace ModularMagic_Food.Configs
             {
                 FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.mushroom2Prefab, mushroom2Name)
                 {
-                    description = "The name completely does not imply its effect... does it?",
+                    description = "The green glow is natural. The nausea isn’t!",
                     health = 17f,
                     stamina = 17f,
                     eitr = 17f,
@@ -169,7 +170,7 @@ namespace ModularMagic_Food.Configs
             {
                 FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.mushroom5Prefab, mushroom5Name)
                 {
-                    description = "A distinct violet mushroom with swirls!",
+                    description = "A distinct violet mushroom with a swirling cap pulsing with latent magic!",
                     health = 25f,
                     stamina = 25f,
                     eitr = 25f,
@@ -190,7 +191,7 @@ namespace ModularMagic_Food.Configs
             {
                 FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.mushroom1SoupPrefab, mushroom1SoupName, mushroom1SoupRecipe)
                 {
-                    description = $"A soup made of ${mushroom1Name}s",
+                    description = "A warm tasty soup made of mostly of " + mushroom1Name + "s.",
                     craftingStation = "Cauldron",
                     minStationLevel = 1,
                     maxStackSize = 10,
@@ -214,7 +215,7 @@ namespace ModularMagic_Food.Configs
             {
                 FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.mushroom2SoupPrefab, mushroom2SoupName, mushroom2SoupRecipe)
                 {
-                    description = $"A soup made of ${mushroom2Name}s",
+                    description = "A warm tasty soup made of mostly of " + mushroom2Name + "s.",
                     craftingStation = "Cauldron",
                     minStationLevel = 1,
                     maxStackSize = 10,
@@ -238,7 +239,7 @@ namespace ModularMagic_Food.Configs
             {
                 FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.mushroom3SoupPrefab, mushroom3SoupName, mushroom3SoupRecipe)
                 {
-                    description = $"A soup made of ${mushroom3Name}s",
+                    description = "A warm tasty soup made of mostly of " + mushroom3Name + "s.",
                     craftingStation = "Cauldron",
                     minStationLevel = 1,
                     maxStackSize = 10,
@@ -262,7 +263,7 @@ namespace ModularMagic_Food.Configs
             {
                 FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.mushroom4SoupPrefab, mushroom4SoupName, mushroom4SoupRecipe)
                 {
-                    description = $"A soup made of ${mushroom4Name}s",
+                    description = "A warm tasty soup made of mostly of " + mushroom4Name + "s.",
                     craftingStation = "Cauldron",
                     minStationLevel = 1,
                     maxStackSize = 10,
@@ -286,7 +287,7 @@ namespace ModularMagic_Food.Configs
             {
                 FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.mushroom5SoupPrefab, mushroom5SoupName, mushroom5SoupRecipe)
                 {
-                    description = $"A soup made of ${mushroom5Name}s",
+                    description = "A warm tasty soup made of mostly of " + mushroom5Name + "s.",
                     craftingStation = "Cauldron",
                     minStationLevel = 1,
                     maxStackSize = 10,

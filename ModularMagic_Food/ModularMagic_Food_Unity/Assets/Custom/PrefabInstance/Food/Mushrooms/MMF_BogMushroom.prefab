@@ -486,7 +486,8 @@ MonoBehaviour:
         m_effectPrefabs: []
       m_trailStartEffect:
         m_effectPrefabs: []
-      m_consumeStatusEffect: {fileID: 0}
+      m_consumeStatusEffect: {fileID: 11400000, guid: bcd33706d4bc4ff41923103d9f992c82,
+        type: 2}
 --- !u!199 &199982483485282401
 ParticleSystemRenderer:
   serializedVersion: 6

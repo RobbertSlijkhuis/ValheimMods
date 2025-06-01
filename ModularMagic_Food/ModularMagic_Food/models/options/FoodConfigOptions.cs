@@ -14,14 +14,14 @@ namespace ModularMagic_Food.Models
         public string? description;
         public string? craftingStation;
         public int minStationLevel = 1;
-        public string? recipe = null;
+        public string? recipe;
         public float weight = 1;
         public int maxStackSize = 50;
-        public float? health = null;
-        public float? healthRegen = null;
-        public float? stamina = null;
-        public float? eitr = null;
-        public float? burnTime = null;
+        public float health = 0;
+        public float healthRegen = 0;
+        public float stamina = 0;
+        public float eitr = 0;
+        public float burnTime = 600;
 
         public FoodConfigOptions(GameObject prefab, string name, string? recipe = null)
         {
