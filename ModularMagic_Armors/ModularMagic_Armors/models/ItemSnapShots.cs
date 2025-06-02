@@ -10,6 +10,7 @@
         public RecipeSnapShot EitrWeaveChestRecipe;
         public RecipeSnapShot EitrWeaveLegsRecipe;
 
+        // Embla
         public UpdateItemDropStatsOptions EmblaHelmetStats;
         public UpdateItemDropStatsOptions EmblaChestStats;
         public UpdateItemDropStatsOptions EmblaLegsStats;

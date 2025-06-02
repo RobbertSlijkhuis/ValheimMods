@@ -251,7 +251,7 @@ namespace ModularMagic_Armors.Configs
                     armor = 6,
                     weight = 5f,
                     maxDurability = 500,
-                    eitr = 2f,
+                    eitr = 3f,
                     eitrRegen = 0.05f,
                 };
                 armor1Chest.GenerateConfig(optionsChest);
@@ -264,7 +264,7 @@ namespace ModularMagic_Armors.Configs
                     armor = 6,
                     weight = 5f,
                     maxDurability = 500,
-                    eitr = 2f,
+                    eitr = 3f,
                     eitrRegen = 0.05f,
                 };
                 armor1Legs.GenerateConfig(optionsLegs);
@@ -345,8 +345,8 @@ namespace ModularMagic_Armors.Configs
                     craftingStation = "Forge",
                     minStationLevel = 3,
                     armor = 10,
-                    eitr = 8f,
-                    eitrRegen = 0.1f,
+                    eitr = 6f,
+                    eitrRegen = 0.12f,
                 };
                 armor3Helmet.GenerateConfig(optionsHelmet);
 
@@ -356,8 +356,8 @@ namespace ModularMagic_Armors.Configs
                     craftingStation = "Forge",
                     minStationLevel = 3,
                     weight = 4f,
-                    eitr = 8f,
-                    eitrRegen = 0.1f,
+                    eitr = 6f,
+                    eitrRegen = 0.12f,
                 };
                 armor3Cape.GenerateConfig(optionsCape);
 
@@ -369,8 +369,8 @@ namespace ModularMagic_Armors.Configs
                     weight = 5f,
                     armor = 10,
                     movementSpeed = -0.02f,
-                    eitr = 8f,
-                    eitrRegen = 0.1f,
+                    eitr = 6f,
+                    eitrRegen = 0.13f,
                 };
                 armor3Chest.GenerateConfig(optionsChest);
 
@@ -382,8 +382,8 @@ namespace ModularMagic_Armors.Configs
                     armor = 10,
                     weight = 5f,
                     movementSpeed = -0.02f,
-                    eitr = 8f,
-                    eitrRegen = 0.1f,
+                    eitr = 6f,
+                    eitrRegen = 0.13f,
                 };
                 armor3Legs.GenerateConfig(optionsLegs);
             }
@@ -403,8 +403,8 @@ namespace ModularMagic_Armors.Configs
                     craftingStation = "Forge",
                     minStationLevel = 3,
                     armor = 13,
-                    eitr = 12f,
-                    eitrRegen = 0.15f,
+                    eitr = 8f,
+                    eitrRegen = 0.17f,
                 };
                 armor4Helmet.GenerateConfig(optionsHelmet);
 
@@ -414,8 +414,8 @@ namespace ModularMagic_Armors.Configs
                     craftingStation = "Forge",
                     minStationLevel = 3,
                     weight = 4f,
-                    eitr = 12f,
-                    eitrRegen = 0.15f,
+                    eitr = 8f,
+                    eitrRegen = 0.17f,
                 };
                 armor4Cape.GenerateConfig(optionsCape);
 
@@ -427,8 +427,8 @@ namespace ModularMagic_Armors.Configs
                     armor = 13,
                     weight = 5f,
                     movementSpeed = -0.02f,
-                    eitr = 12f,
-                    eitrRegen = 0.15f,
+                    eitr = 8f,
+                    eitrRegen = 0.18f,
                 };
                 armor4Chest.GenerateConfig(optionsChest);
 
@@ -440,8 +440,8 @@ namespace ModularMagic_Armors.Configs
                     armor = 13,
                     weight = 5f,
                     movementSpeed = -0.02f,
-                    eitr = 12f,
-                    eitrRegen = 0.15f,
+                    eitr = 8f,
+                    eitrRegen = 0.18f,
                 };
                 armor4Legs.GenerateConfig(optionsLegs);
             }
@@ -461,7 +461,7 @@ namespace ModularMagic_Armors.Configs
                     craftingStation = "GaldrTable",
                     minStationLevel = 1,
                     armor = 16,
-                    eitr = 20f,
+                    eitr = 13f,
                     eitrRegen = 0.2f,
                 };
                 armor5Helmet = new ArmorConfig(browsable);
@@ -475,7 +475,7 @@ namespace ModularMagic_Armors.Configs
                     armor = 16,
                     weight = 5f,
                     movementSpeed = -0.02f,
-                    eitr = 20f,
+                    eitr = 14f,
                     eitrRegen = 0.4f,
                 };
                 armor5Chest = new ArmorConfig(browsable);
@@ -489,7 +489,7 @@ namespace ModularMagic_Armors.Configs
                     armor = 16,
                     weight = 5f,
                     movementSpeed = -0.02f,
-                    eitr = 20f,
+                    eitr = 13f,
                     eitrRegen = 0.4f,
                 };
                 armor5Legs = new ArmorConfig(browsable);
@@ -511,7 +511,7 @@ namespace ModularMagic_Armors.Configs
                     craftingStation = "GaldrTable",
                     minStationLevel = 1,
                     armor = 19,
-                    eitr = 24f,
+                    eitr = 16f,
                     eitrRegen = 0.3f,
                 };
                 armor6Helmet = new ArmorConfig(browsable);
@@ -525,7 +525,7 @@ namespace ModularMagic_Armors.Configs
                     armor = 19,
                     weight = 5f,
                     movementSpeed = -0.02f,
-                    eitr = 24f,
+                    eitr = 17f,
                     eitrRegen = 0.5f,
                 };
                 armor6Chest = new ArmorConfig(browsable);
@@ -539,7 +539,7 @@ namespace ModularMagic_Armors.Configs
                     armor = 19,
                     weight = 5f,
                     movementSpeed = -0.02f,
-                    eitr = 24f,
+                    eitr = 16f,
                     eitrRegen = 0.5f,
                 };
                 armor6Legs = new ArmorConfig(browsable);
