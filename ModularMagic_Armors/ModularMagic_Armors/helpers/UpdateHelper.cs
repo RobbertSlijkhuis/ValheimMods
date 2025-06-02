@@ -1,13 +1,21 @@
-﻿using ModularMagic_Armors.Models;
+﻿using Jotunn.Managers;
+using ModularMagic_Armors.Configs;
+using ModularMagic_Armors.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using static Mono.Security.X509.X520;
 
 namespace ModularMagic_Armors.Helpers
 {
     internal class UpdateHelper
     {
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        public static EffectList.EffectData[] OriginalEffects;
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         public static void UpdateItemDropStats(GameObject prefab, UpdateItemDropStatsOptions options)
         {
             try
@@ -39,6 +47,190 @@ namespace ModularMagic_Armors.Helpers
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not update ItemDrop stats: " + e);
+            }
+        }
+
+        public static void UpdateItemEffects(long playerId, List<int> items)
+        {
+            try
+            {
+                Player player = Player.GetPlayer(playerId);
+
+                if (player == null)
+                    return;
+
+                GameObject eyeLeft;
+                GameObject eyeRight;
+
+                bool wraithHelmet = items.Contains(ModularMagic_Armors.WraithHelmetHashCode);
+                bool wraithChest = items.Contains(ModularMagic_Armors.WraithChestHashCode);
+                bool wraithLegs = items.Contains(ModularMagic_Armors.WraithLegsHashCode);
+                bool darkWizardHelmet = items.Contains(ModularMagic_Armors.DarkWizardHelmetHashCode);
+                bool emblaHelmet = items.Contains(ModularMagic_Armors.EmblaHelmetHashCode);
+                bool emblaChest = items.Contains(ModularMagic_Armors.EmblaChestHashCode);
+                bool tiara = items.Contains(ModularMagic_Armors.TiaraHashCode);
+
+                eyeLeft = player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_eye_left").gameObject;
+                eyeRight = player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_eye_right").gameObject;
+                eyeLeft.GetComponent<MeshRenderer>().material = ModularMagic_Armors.Instance.materials.WraithArmorEye;
+                eyeRight.GetComponent<MeshRenderer>().material = ModularMagic_Armors.Instance.materials.WraithArmorEye;
+                eyeLeft.SetActive(wraithHelmet);
+                eyeRight.SetActive(wraithHelmet);
+                player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_swamp_effect_head").gameObject.SetActive(wraithHelmet);
+
+                player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.spine1Path + "/ME_swamp_effect_spine1").gameObject.SetActive(wraithChest);
+                player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.handLeftPath + "/ME_swamp_effect_hand_left").gameObject.SetActive(wraithChest);
+                player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.handRightPath + "/ME_swamp_effect_hand_right").gameObject.SetActive(wraithChest);
+
+                player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.kneeLeftPath + "/ME_swamp_effect_knee_left").gameObject.SetActive(wraithLegs);
+                player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.kneeRightPath + "/ME_swamp_effect_knee_right").gameObject.SetActive(wraithLegs);
+
+                eyeLeft = player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_eye_left").gameObject;
+                eyeRight = player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_eye_right").gameObject;
+                eyeLeft.GetComponent<MeshRenderer>().material = ModularMagic_Armors.Instance.materials.DarkWizardArmorEye;
+                eyeRight.GetComponent<MeshRenderer>().material = ModularMagic_Armors.Instance.materials.DarkWizardArmorEye;
+                eyeLeft.SetActive(darkWizardHelmet);
+                eyeRight.SetActive(darkWizardHelmet);
+
+                if (!PluginConfig.adjustEmbla.Value)
+                {
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.helmetAttachPath + "/EmblaHood_Effects_MMA")?.gameObject.SetActive(emblaHelmet);
+                }
+
+                if (!PluginConfig.adjustEmbla.Value)
+                {
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.shoulderLeftPath + "/EmblaChest_Left_Effects_MMA")?.gameObject.SetActive(emblaChest);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.shoulderRightPath + "/EmblaChest_Right_Effects_MMA")?.gameObject.SetActive(emblaChest);
+                }
+
+                GameObject prefab = PrefabManager.Instance.GetPrefab("MMES_TheForestFlinger");
+                ItemDrop itemDrop = prefab.GetComponent<ItemDrop>();
+                List<EffectList.EffectData> effectList = new List<EffectList.EffectData>();
+                EffectList.EffectData effectData = new EffectList.EffectData();
+                effectData.m_prefab = ModularMagic_Armors.Instance.prefabs.AudaciousSFX;
+                effectData.m_variant = -1;
+                effectData.m_enabled = true;
+                effectList.Add(effectData);
+
+                if (OriginalEffects == null)
+                    OriginalEffects = itemDrop.m_itemData.m_shared.m_startEffect.m_effectPrefabs;
+
+                itemDrop.m_itemData.m_shared.m_startEffect.m_effectPrefabs = tiara ? effectList.ToArray() : OriginalEffects;
+
+                List<Player> players = Player.GetAllPlayers();
+
+                foreach (Player p in players)
+                {
+                    Inventory inv = p.GetInventory();
+
+                    if (!inv.ContainsItemByName("The Forest Flinger"))
+                        continue;
+
+                    var staffs = inv.GetAllItemsOfType(ItemDrop.ItemData.ItemType.TwoHandedWeapon);
+
+                    foreach (ItemDrop.ItemData staff in staffs)
+                    {
+                        if (staff.m_dropPrefab.name != "MMES_TheForestFlinger")
+                            continue;
+
+                        staff.m_shared.m_startEffect.m_effectPrefabs = tiara ? effectList.ToArray() : OriginalEffects;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not de/activate item effects: " + e);
+            }
+        }
+
+        public static void UpdateSetEffects(long playerId, int? setHash)
+        {
+            try
+            {
+                Player player = Player.GetPlayer(playerId);
+
+                if (player == null)
+                    return;
+
+                if (setHash == ModularMagic_Armors.ShamanArmorSetHashCode)
+                {
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_blackforest_effect_head").gameObject.SetActive(true);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_blackforest_effect_antler_left").gameObject.SetActive(true);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_blackforest_effect_antler_right").gameObject.SetActive(true);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.wristLeftPath + "/ME_blackforest_effect_wrist_left").gameObject.SetActive(true);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.wristRightPath + "/ME_blackforest_effect_wrist_right").gameObject.SetActive(true);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.kneeLeftPath + "/ME_blackforest_effect_knee_left").gameObject.SetActive(true);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.kneeRightPath + "/ME_blackforest_effect_knee_right").gameObject.SetActive(true);
+                }
+                else
+                {
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_blackforest_effect_head").gameObject.SetActive(false);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_blackforest_effect_antler_left").gameObject.SetActive(false);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_blackforest_effect_antler_right").gameObject.SetActive(false);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.wristLeftPath + "/ME_blackforest_effect_wrist_left").gameObject.SetActive(false);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.wristRightPath + "/ME_blackforest_effect_wrist_right").gameObject.SetActive(false);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.kneeLeftPath + "/ME_blackforest_effect_knee_left").gameObject.SetActive(false);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.kneeRightPath + "/ME_blackforest_effect_knee_right").gameObject.SetActive(false);
+                }
+
+                if (setHash == ModularMagic_Armors.WraithArmorSetHashCode)
+                {
+
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.bodyPath).gameObject.SetActive(false);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_swamp_effect_face").gameObject.SetActive(true);
+                    if (player.GetBeard() != "")
+                    {
+                        ModularMagic_Armors.Instance.playerBeard = player.GetBeard();
+                        player.SetBeard("BeardNone");
+                    }
+                }
+                else
+                {
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.bodyPath).gameObject.SetActive(true);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_swamp_effect_face").gameObject.SetActive(false);
+                    if (ModularMagic_Armors.Instance.playerBeard != null)
+                        player.SetBeard(ModularMagic_Armors.Instance.playerBeard);
+                }
+
+                if (setHash == ModularMagic_Armors.FrostWolfArmorSetHashCode)
+                {
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_mountain_effect_head").gameObject.SetActive(true);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.spine2Path + "/ME_mountain_effect_spine2").gameObject.SetActive(true);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.handLeftPath + "/ME_mountain_effect_hand_left").gameObject.SetActive(true);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.handRightPath + "/ME_mountain_effect_hand_right").gameObject.SetActive(true);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.kneeLeftPath + "/ME_mountain_effect_knee_left").gameObject.SetActive(true);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.kneeRightPath + "/ME_mountain_effect_knee_right").gameObject.SetActive(true);
+                }
+                else
+                {
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_mountain_effect_head").gameObject.SetActive(false);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.spine2Path + "/ME_mountain_effect_spine2").gameObject.SetActive(false);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.handLeftPath + "/ME_mountain_effect_hand_left").gameObject.SetActive(false);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.handRightPath + "/ME_mountain_effect_hand_right").gameObject.SetActive(false);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.kneeLeftPath + "/ME_mountain_effect_knee_left").gameObject.SetActive(false);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.kneeRightPath + "/ME_mountain_effect_knee_right").gameObject.SetActive(false);
+                }
+
+                if (setHash == ModularMagic_Armors.DarkWizardArmorSetHashCode)
+                {
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_eye_left/flames").gameObject.SetActive(true);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_eye_right/flames").gameObject.SetActive(true);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.shoulderLeftPath + "/ME_plains_effect_shoulder_left").gameObject.SetActive(true);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.shoulderRightPath + "/ME_plains_effect_shoulder_right").gameObject.SetActive(true);
+                    // ModularMagic_Armors.Instance.prefabs.PlainsMageFootStepsPrefab.SetActive(true);
+                }
+                else
+                {
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_eye_left/flames").gameObject.SetActive(false);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.headPath + "/ME_eye_right/flames").gameObject.SetActive(false);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.shoulderLeftPath + "/ME_plains_effect_shoulder_left").gameObject.SetActive(false);
+                    player.gameObject.transform.Find(ModularMagic_Armors.Instance.playerArmature.shoulderRightPath + "/ME_plains_effect_shoulder_right").gameObject.SetActive(false);
+                    // ModularMagic_Armors.Instance.prefabs.PlainsMageFootStepsPrefab.SetActive(false);
+                }
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not de/activate set effects: " + e);
             }
         }
 

@@ -24,6 +24,7 @@ namespace ModularMagic_Armors
         public const string PluginVersion = "0.0.1";
         public static ModularMagic_Armors Instance;
         private static readonly HarmonyLib.Harmony _harmony = new HarmonyLib.Harmony(PluginGUID);
+        public object configManager;
 
         private AssetBundle _assetBundle;
         public PlayerArmatureHelper playerArmature;
@@ -32,9 +33,30 @@ namespace ModularMagic_Armors
         public CustomMaterials materials = new CustomMaterials();
         public CustomStatusEffects effects = new CustomStatusEffects();
         public CustomSprites sprites = new CustomSprites();
+
+        public static bool gameIsReady = false;
         public string playerBeard;
 
-        public object? configManager;
+        public static readonly int armorStatusHashCode = "ArmorStatus_MMA".GetStableHashCode();
+        public static int ShamanArmorSetHashCode;
+        public static int WraithArmorSetHashCode;
+        public static int FrostWolfArmorSetHashCode;
+        public static int DarkWizardArmorSetHashCode;
+        public static int EitrWeaveArmorSetHashCode;
+        public static int EmblaArmorSetHashCode;
+
+        public static int WraithHelmetHashCode;
+        public static int WraithChestHashCode;
+        public static int WraithLegsHashCode;
+        public static int DarkWizardHelmetHashCode;
+        public static int EmblaHelmetHashCode;
+        public static int EmblaChestHashCode;
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        public static int TiaraHashCode = "Audacious Tiara".GetStableHashCode();
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -43,18 +65,12 @@ namespace ModularMagic_Armors
         private void Awake()
         {
             Instance = this;
+            playerArmature = new PlayerArmatureHelper();
 
             Assembly? bepinexConfigManager = System.AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == "ConfigurationManager");
             Type? configManagerType = bepinexConfigManager?.GetType("ConfigurationManager.ConfigurationManager");
             configManager = configManagerType == null ? null : BepInEx.Bootstrap.Chainloader.ManagerObject.GetComponent(configManagerType);
 
-            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            // ModQuery.Enable();
-
-            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            playerArmature = new PlayerArmatureHelper();
             _InitAssetBundle();
             _InitStatusEffects();
             PluginConfig.Init();
@@ -67,6 +83,7 @@ namespace ModularMagic_Armors
             PrefabManager.OnVanillaPrefabsAvailable += _ApplyEffectsEmblaArmor;
             ItemManager.OnItemsRegistered += _AdjustEitrWeaveArmor;
             ItemManager.OnItemsRegistered += _AdjustEmblaArmor;
+            ItemManager.OnItemsRegistered += _InitHashes;
             ItemManager.OnItemsRegistered += _LogRecipes;
         }
 
@@ -487,6 +504,25 @@ namespace ModularMagic_Armors
             PrefabManager.OnVanillaPrefabsAvailable -= _ApplyEffectsEmblaArmor;
         }
 
+        private void _InitHashes()
+        {
+            ShamanArmorSetHashCode = effects.ShamanArmorSetSE.name.GetStableHashCode();
+            WraithArmorSetHashCode = effects.WraithArmorSetSE.name.GetStableHashCode();
+            FrostWolfArmorSetHashCode = effects.FrostWolfArmorSetSE.name.GetStableHashCode();
+            DarkWizardArmorSetHashCode = effects.DarkWizardArmorSetSE.name.GetStableHashCode();
+            EitrWeaveArmorSetHashCode = effects.EitrWeaveArmorSetSE.name.GetStableHashCode();
+            EmblaArmorSetHashCode = effects.EmblaArmorSetSE.name.GetStableHashCode();
+
+            WraithHelmetHashCode = PluginConfig.armor2Helmet.name.Value.GetStableHashCode();
+            WraithChestHashCode = PluginConfig.armor2Chest.name.Value.GetStableHashCode();
+            WraithLegsHashCode = PluginConfig.armor2Legs.name.Value.GetStableHashCode();
+            DarkWizardHelmetHashCode = PluginConfig.armor4Helmet.name.Value.GetStableHashCode();
+            EmblaHelmetHashCode = PluginConfig.armor6Helmet.name.Value.GetStableHashCode();
+            EmblaChestHashCode = PluginConfig.armor6Chest.name.Value.GetStableHashCode();
+
+            ItemManager.OnItemsRegistered -= _InitHashes;
+        }
+
         private void _InitStatusEffects()
         {
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.ShamanArmorSetSE, true));
@@ -522,7 +558,7 @@ namespace ModularMagic_Armors
             prefabs.ShamanCapePrefab = _assetBundle.LoadAsset<GameObject>("MMA_ShamanCape");
             prefabs.ShamanChestPrefab = _assetBundle.LoadAsset<GameObject>("MMA_ShamanChest");
             prefabs.ShamanLegsPrefab = _assetBundle.LoadAsset<GameObject>("MMA_ShamanLegs");
-            // PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("shaman_armor_set_effect_MMA"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("Shaman_armor_set_effect_MMA"), true));
             effects.ShamanArmorSetSE = _assetBundle.LoadAsset<StatusEffect>("SetEffect_ShamanArmor_MMA");
 
             // Wraith armor
