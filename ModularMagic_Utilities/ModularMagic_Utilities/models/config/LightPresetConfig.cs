@@ -12,7 +12,5 @@ namespace ModularMagic_Utilities.Models
         public string lightColorPreset;
         public float lightRange;
         public float lightIntensity;
-        //public bool enableCustomGlassColor;
-        //public string customGlassColor;
     }
 }

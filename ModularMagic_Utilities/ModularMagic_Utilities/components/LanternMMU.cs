@@ -65,11 +65,6 @@ namespace ModularMagic_Utilities.Components
             return true;
         }
 
-        public bool ContainsPlayer(long playerId)
-        {
-            return status.Contains(playerId.ToString());
-        }
-
         private LanternStatus _statusStringToObject(string value)
         {
             string[] data = status.Split(':');

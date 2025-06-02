@@ -13,6 +13,38 @@ namespace ModularMagic_Utilities.Harmony
     public class PatchesMMU
     {
         [HarmonyPostfix]
+        [HarmonyPatch(typeof(PlayerController), "Awake")]
+        public static void AwakePlayerController_Postfix(ref PlayerController __instance)
+        {
+            try
+            {
+                __instance.gameObject.AddComponent<LanternMMU>();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not add component in AwakePlayerController_Postfix: " + e);
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Player), "OnSpawned")]
+        public static void OnSpawned_Postfix(ref Player __instance)
+        {
+            try
+            {
+                if (__instance == null)
+                    return;
+
+                LanternMMU comp = __instance.GetComponent<LanternMMU>();
+                comp.SetPlayerStatus(__instance.GetPlayerID(), true);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError(e);
+            }
+        }
+
+        [HarmonyPostfix]
         [HarmonyPatch(typeof(Player), "GetTotalFoodValue")]
         public static void GetTotalFoodValue_Postfix(ref Player __instance, ref float eitr)
         {
@@ -65,39 +97,6 @@ namespace ModularMagic_Utilities.Harmony
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not update skills in GetSkillLevel_Postfix: " + e);
-            }
-        }
-
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(PlayerController), "Awake")]
-        public static void AwakePlayerController_Postfix(ref PlayerController __instance)
-        {
-            try
-            {
-                __instance.gameObject.AddComponent<LanternMMU>();
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Could not add component in AwakePlayerController_Postfix: " + e);
-            }
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Player), "OnSpawned")]
-        public static void OnSpawned_Postfix(ref Player __instance)
-        {
-            try
-            {
-                if (__instance == null)
-                    return;
-
-                LanternMMU comp = __instance.GetComponent<LanternMMU>();
-                comp.SetPlayerStatus(__instance.GetPlayerID(), true);
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError(e);
             }
         }
 

@@ -22,7 +22,6 @@ namespace ModularMagic_Utilities
         public const string PluginGUID = "DeathWizsh.ModularMagic_Utilities";
         public const string PluginName = "ModularMagic_Utilities";
         public const string PluginVersion = "0.0.1";
-        public static readonly int lanternStatusHashCode = "LanternStatus_MMU".GetStableHashCode();
         public static ModularMagic_Utilities Instance;
         private static readonly HarmonyLib.Harmony _harmony = new HarmonyLib.Harmony(PluginGUID);
 
@@ -31,7 +30,8 @@ namespace ModularMagic_Utilities
         public CustomPrefabs prefabs = new CustomPrefabs();
         public CustomMaterials materials = new CustomMaterials();
         private ButtonConfig utilityModeButton;
-        public Dictionary<long, bool> lanternStatusDict = new Dictionary<long, bool>();
+
+        public static readonly int lanternStatusHashCode = "LanternStatus_MMU".GetStableHashCode();
 
         private void Awake()
         {

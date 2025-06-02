@@ -24,13 +24,9 @@ namespace ModularMagic_Utilities.Models
         public float bloodMagic = 0f;
         public float? demister;
 
-        //public Color? flareColor;
-        //public Color? lightColor;
         public string? lightColorPreset;
         public float? lightIntensity;
         public float? lightRange;
-        //public bool? enableCustomGlassColor;
-        //public string? customGlassColor;
 
         public string cooldownStatusEffectName;
         public string magicStatusEffectName;

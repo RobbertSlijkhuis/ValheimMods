@@ -3,6 +3,22 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+## Valheim specific files
+ModularMagic_Armors/ModularMagic_Armors_Unity/
+!ModularMagic_Armors/ModularMagic_Armors_Unity/Assets
+ModularMagic_Food/ModularMagic_Food_Unity/
+!ModularMagic_Food/ModularMagic_Food_Unity/Assets
+ModularMagic_Utilities/ModularMagic_Utilities_Unity/
+!ModularMagic_Utilities/ModularMagic_Utilities_Unity/Assets
+ModularMagic_EarthStaffs/ModularMagic_EarthStaffs_Unity/
+!ModularMagic_EarthStaffs/ModularMagic_EarthStaffs_Unity/Assets
+ModularMagic_IceStaffs/ModularMagic_IceStaffs_Unity/
+!ModularMagic_IceStaffs/ModularMagic_IceStaffs_Unity/Assets
+ModularMagic_FireStaffs/ModularMagic_FireStaffs_Unity/
+!ModularMagic_FireStaffs/ModularMagic_FireStaffs_Unity/Assets
+ModularMagic_LightningStaffs/ModularMagic_LightningStaffs_Unity/
+!ModularMagic_LightningStaffs/ModularMagic_LightningStaffs_Unity/Assets
+
 # User-specific files
 *.rsuser
 *.suo
@@ -373,3 +389,4 @@ Environment.props
 
 # not the generated dll for thunderstore
 */Package/plugins/*
+
