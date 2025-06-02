@@ -2,7 +2,6 @@
 using ModularMagic_Utilities.Helpers;
 using ModularMagic_Utilities.Models;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace ModularMagic_Utilities.Components
@@ -31,25 +30,15 @@ namespace ModularMagic_Utilities.Components
                 }
 
                 if (!Player.m_localPlayer)
-                {
                     return;
-                }
 
                 status = _netView.m_zdo.GetString(ModularMagic_Utilities.lanternStatusHashCode, "");
-
-                if (!ContainsPlayer(Player.m_localPlayer.GetPlayerID()))
-                    SetPlayerStatus(Player.m_localPlayer.GetPlayerID(), true);
 
                 if (status == "")
                     return;
 
-                List<LanternStatus> list = _StatusStringToList(status);
-
-                foreach (LanternStatus item in list)
-                {
-                    //Jotunn.Logger.LogWarning($"Updating {item.playerId} - {item.status}");
-                    UpdateHelper.UpdateLanternMode(item.playerId, item.status);
-                }
+                LanternStatus current = _statusStringToObject(status);
+                UpdateHelper.UpdateLanternMode(current.playerId, current.status);
             }
             catch (Exception e)
             {
@@ -57,10 +46,12 @@ namespace ModularMagic_Utilities.Components
             }
         }
 
-        public LanternStatus GetPlayerStatus(long playerId)
+        public LanternStatus GetPlayerStatus()
         {
-            List<LanternStatus> list = _StatusStringToList(status);
-            return list.Find(item => item.playerId == playerId);
+            if (status == "")
+                return null;
+
+            return _statusStringToObject(status);
         }
 
         public bool SetPlayerStatus(long playerId, bool value)
@@ -68,27 +59,7 @@ namespace ModularMagic_Utilities.Components
             if (!_netView || !_netView.IsValid() || !Player.m_localPlayer)
                 return false;
 
-            bool hasPlayer = ContainsPlayer(playerId);
-            string newStatus = "";
-
-            if (hasPlayer)
-            {
-                List<LanternStatus> list = _StatusStringToList(status);
-                LanternStatus entry = list.Find(item => item.playerId == playerId);
-                entry.status = value;
-                newStatus = _StatusListToString(list);
-            }
-            else
-            {
-                string currentStatus = status == "" ? "" : status + ",";
-                newStatus = $"{currentStatus}{playerId}:{value}";
-            }
-
-            if (newStatus == "")
-            {
-                Jotunn.Logger.LogError("New status is empty!");
-                return false;
-            }
+            string newStatus = _statusObjectToString(new LanternStatus(playerId, value));
             
             _netView.m_zdo.Set(ModularMagic_Utilities.lanternStatusHashCode, newStatus);
             return true;
@@ -99,30 +70,15 @@ namespace ModularMagic_Utilities.Components
             return status.Contains(playerId.ToString());
         }
 
-        private List<LanternStatus> _StatusStringToList(string status)
+        private LanternStatus _statusStringToObject(string value)
         {
-            List<LanternStatus> list = new List<LanternStatus>();
-            string[] result = status.Split(',');
-
-            foreach (string item in result)
-            {
-                string[] keyValuePair = item.Split(':');
-                list.Add(new LanternStatus(long.Parse(keyValuePair[0]), bool.Parse(keyValuePair[1])));
-            }
-
-            return list;
+            string[] data = status.Split(':');
+            return new LanternStatus(long.Parse(data[0]), data[1].ToLower() == "true" ? true : false);
         }
 
-        private string _StatusListToString(List<LanternStatus> status)
+        private string _statusObjectToString(LanternStatus item)
         {
-            string result = "";
-
-            foreach (LanternStatus item in status)
-            {
-                result += $"{item.playerId}:{item.status}";
-            }
-
-            return result;
+            return item.playerId + ":" + item.status;
         }
     }
 }

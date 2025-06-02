@@ -10153,12 +10153,12 @@ Light:
   m_Shape: 0
   m_Color: {r: 1, g: 0.7688679, b: 0.8862273, a: 1}
   m_Intensity: 1.5
-  m_Range: 32
+  m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 2
+    m_Type: 0
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -10235,7 +10235,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_lightLod: 1
-  m_lightDistance: 30
+  m_lightDistance: 10
   m_shadowLod: 1
   m_shadowDistance: 10
 --- !u!1 &8399595445082662310
@@ -10444,7 +10444,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 1, g: 0.77254903, b: 0.8862745, a: 1}
   m_Intensity: 1.5
-  m_Range: 32
+  m_Range: 30
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10

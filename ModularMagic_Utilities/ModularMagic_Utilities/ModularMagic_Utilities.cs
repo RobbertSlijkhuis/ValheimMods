@@ -16,7 +16,6 @@ namespace ModularMagic_Utilities
 {
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
-    [BepInDependency("Azumatt.AzuExtendedPlayerInventory", BepInDependency.DependencyFlags.SoftDependency)]
     //[NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     internal class ModularMagic_Utilities : BaseUnityPlugin
     {
@@ -41,7 +40,6 @@ namespace ModularMagic_Utilities
             PluginConfig.Init();
             _InitInputs();
             _harmony.PatchAll(Assembly.GetExecutingAssembly());
-            // lanternRPC = RPCHelper.Init();
 
             PrefabManager.OnVanillaPrefabsAvailable += _AddUtilities;
             ItemManager.OnItemsRegistered += _LogRecipes;
@@ -63,52 +61,33 @@ namespace ModularMagic_Utilities
          */
         private void Update()
         {
-            // Since our Update function in our BepInEx mod class will load BEFORE Valheim loads,
-            // we need to check that ZInput is ready to use first.
-            if (ZInput.instance != null)
+            try
             {
-                // KeyboardShortcuts are also injected into the ZInput system
-                if (utilityModeButton != null && MessageHud.instance != null)
+                if (ZInput.instance == null || utilityModeButton == null || !ZInput.GetButtonDown(utilityModeButton.Name) || !Player.m_localPlayer)
+                    return;
+
+                ItemDrop.ItemData itemData = Player.m_localPlayer.m_utilityItem;
+
+                if (itemData == null || itemData.m_shared == null)
                 {
-                    if (ZInput.GetButtonDown(utilityModeButton.Name) && MessageHud.instance.m_msgQeue.Count == 0)
-                    {
-                        if (Player.m_localPlayer)
-                        {
-                            try
-                            {
-                                ItemDrop.ItemData itemData = Player.m_localPlayer.m_utilityItem;
-
-                                if (itemData == null || itemData.m_shared == null)
-                                {
-                                    Jotunn.Logger.LogWarning("Item Data is null");
-                                    return;
-                                }
-
-                                // ZPackage package = new ZPackage();
-                                int type = UpdateHelper.GetLanternType(itemData);
-
-                                Jotunn.Logger.LogWarning("Type: " + type);
-
-                                if (type != 0)
-                                {
-                                    //long playerId = Player.m_localPlayer.GetPlayerID();
-                                    //package.Write($"{playerId},{type},{!lanternStatusDictionary[playerId]},true");
-                                    //lanternRPC.SendPackage(ZRoutedRpc.instance.GetServerPeerID(), package);
-
-                                    LanternMMU comp = Player.m_localPlayer.GetComponent<LanternMMU>();
-                                    long playerId = Player.m_localPlayer.GetPlayerID();
-                                    LanternStatus playerStatus = comp.GetPlayerStatus(playerId);
-
-                                    comp.SetPlayerStatus(playerId, !playerStatus.status);
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Jotunn.Logger.LogError(e);
-                            }
-                        }
-                    }
+                    Jotunn.Logger.LogWarning("Item Data is null");
+                    return;
                 }
+
+                // ZPackage package = new ZPackage();
+                int type = LanternHelper.GetLanternType(itemData);
+
+                if (type != 0)
+                {
+                    long playerId = Player.m_localPlayer.GetPlayerID();
+                    LanternMMU comp = Player.m_localPlayer.GetComponent<LanternMMU>();
+                    LanternStatus playerStatus = comp.GetPlayerStatus();
+                    comp.SetPlayerStatus(playerId, playerStatus != null ? !playerStatus.status : false);
+                }
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not change lantern mode: " + e);
             }
         }
 
@@ -141,7 +120,7 @@ namespace ModularMagic_Utilities
                 utilityModeButton = new ButtonConfig
                 {
                     Name = "Lantern mode",
-                    ShortcutConfig = Configs.PluginConfig.configLanternModKey,
+                    ShortcutConfig = PluginConfig.configLanternModKey,
                 };
 
                 InputManager.Instance.AddButton(PluginGUID, utilityModeButton);
