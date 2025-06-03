@@ -102,6 +102,15 @@ namespace ModularMagic_Utilities
                 ItemHelper.Create(prefabs.lantern2Prefab, PluginConfig.lantern2, true);
                 ItemHelper.Create(prefabs.lantern3Prefab, PluginConfig.lantern3, true);
 
+                GameObject itemStand = PrefabManager.Instance.GetPrefab("itemstandh");
+                ItemStand comp = itemStand.GetComponent<ItemStand>();
+                comp.m_supportedItems.Add(prefabs.spellbook1Prefab.GetComponent<ItemDrop>());
+                comp.m_supportedItems.Add(prefabs.spellbook2Prefab.GetComponent<ItemDrop>());
+                comp.m_supportedItems.Add(prefabs.spellbook3Prefab.GetComponent<ItemDrop>());
+                comp.m_supportedItems.Add(prefabs.lantern1Prefab.GetComponent<ItemDrop>());
+                comp.m_supportedItems.Add(prefabs.lantern2Prefab.GetComponent<ItemDrop>());
+                comp.m_supportedItems.Add(prefabs.lantern3Prefab.GetComponent<ItemDrop>());
+
                 PrefabManager.OnVanillaPrefabsAvailable -= _AddUtilities;
             }
             catch (Exception e)
