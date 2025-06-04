@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 73927927
+CRC: 2618478651
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: a017186f01fea47ad09e521cd7a20755
+    Hash: 1c106e7d8fb24e9ade61fc2130babf22
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 2508dd67ab84f36990185366b51ebef6
+    Hash: a0d122f8704af7bd5c7c272371fe0e1c
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: a017186f01fea47ad09e521cd7a20755
+    Hash: 1c106e7d8fb24e9ade61fc2130babf22
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -47,6 +47,10 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 2140874873, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: -1044604064, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: -347224168, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
@@ -59,7 +63,9 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 69470131, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+  Script: {fileID: 1345532120, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: -1693878703, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 313648218, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 115
@@ -95,12 +101,16 @@ SerializeReferenceClassIdentifiers:
   ClassName: ItemDrop/ItemData/SharedData
 Assets:
 - Assets/Custom/PrefabInstance/Frost/MMIS_staffIce3.prefab
+- Assets/Custom/MonoBehaviour/FasterWalk_MMIS.asset
+- Assets/PrefabInstance/MMIS_StaffIceAOE.prefab
 - Assets/Custom/PrefabInstance/Frost/MMIS_staffIce1.prefab
 - Assets/Custom/PrefabInstance/Frost/fx_IceSheetSpawn_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/staff_ice_projectile_MMIS.prefab
+- Assets/Custom/PrefabInstance/Frost/fx_staff_ice_nova_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/MMIS_staffIce2.prefab
 - Assets/Custom/PrefabInstance/Frost/IceSheet_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/fx_staff_ice_spores_MMIS.prefab
+- Assets/Custom/PrefabInstance/Frost/staff_ice_nova_AOE_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/fx_iceshard_launch_smoke_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/fx_staff_ice_spikes_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/fx_iceshard_launch_MMIS.prefab

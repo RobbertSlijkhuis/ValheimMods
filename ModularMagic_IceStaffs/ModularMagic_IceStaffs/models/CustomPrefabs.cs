@@ -5,8 +5,9 @@ namespace ModularMagic_IceStaffs.Models
     class CustomPrefabs
     {
         // Staffs
-        public GameObject staffIce1Prefab;
-        public GameObject staffIce2Prefab;
-        public GameObject staffIce3Prefab;
+        public GameObject StaffIce1Prefab;
+        public GameObject StaffIce2Prefab;
+        public GameObject StaffIce3Prefab;
+        public GameObject StaffIceAOEPrefab;
     }
 }

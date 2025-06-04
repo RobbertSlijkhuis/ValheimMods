@@ -1,6 +1,7 @@
 ﻿using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
+using ModularMagic_IceStaffs.configs;
 using ModularMagic_IceStaffs.Models;
 using UnityEngine;
 
@@ -26,7 +27,7 @@ namespace ModularMagic_IceStaffs.Helpers
             UpdateHelper.UpdateItemDropStats(prefab, new UpdateItemDropStatsOptions()
             {
                 maxQuality = config.maxQuality.Value,
-                movementModifier = config.movementSpeed.Value,
+                movementSpeed = config.movementSpeed.Value,
                 blockPower = config.blockArmor.Value,
                 deflectionForce = config.deflectionForce.Value,
                 attackForce = config.attackForce.Value,

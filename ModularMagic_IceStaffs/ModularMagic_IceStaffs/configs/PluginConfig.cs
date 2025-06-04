@@ -1,9 +1,10 @@
-﻿using ModularMagic_IceStaffs.Models;
+﻿using ModularMagic_IceStaffs.configs;
+using ModularMagic_IceStaffs.Models;
 using System;
 
 namespace ModularMagic_IceStaffs.Configs
 {
-    internal static class ConfigStaffs
+    internal static class PluginConfig
     {
         public static string staff1Name = "Staff of Frost";
         public static string staff1Recipe = "Bronze:10, RoundLog:20, Blueberries:10, GreydwarfEye:20";
@@ -11,14 +12,19 @@ namespace ModularMagic_IceStaffs.Configs
         public static StaffConfig staffIce1 = new StaffConfig();
 
         public static string staff2Name = "Staff of Ice";
-        public static string staff2Recipe = $"{ModularMagic_IceStaffs.Instance.prefabs.staffIce1Prefab.name}:1, FineWood:20, FreezeGland:10, Crystal:20";
+        public static string staff2Recipe = $"{ModularMagic_IceStaffs.Instance.prefabs.StaffIce1Prefab.name}:1, FineWood:20, FreezeGland:10, Crystal:20";
         public static string staff2UpgradeRecipe = "FineWood:5, FreezeGland:4, Crystal:8";
         public static StaffConfig staffIce2 = new StaffConfig();
 
         public static string staff3Name = "Staff of Permafrost";
-        public static string staff3Recipe = $"{ModularMagic_IceStaffs.Instance.prefabs.staffIce2Prefab.name}:1, YggdrasilWood:20, Sap:10, Eitr:16";
+        public static string staff3Recipe = $"{ModularMagic_IceStaffs.Instance.prefabs.StaffIce2Prefab.name}:1, YggdrasilWood:20, Sap:10, Eitr:16";
         public static string staff3UpgradeRecipe = "YggdrasilWood:10, Sap:2, Eitr:8";
         public static StaffConfig staffIce3 = new StaffConfig();
+
+        public static string staff4Name = "Skull of Frost";
+        public static string staff4Recipe = "YggdrasilWood:20, Sap:10, Eitr:16";
+        public static string staff4UpgradeRecipe = "YggdrasilWood:10, Sap:2, Eitr:8";
+        public static StaffConfig staffIce4 = new StaffConfig();
 
         private static int sectionIndex = 1;
 
@@ -27,13 +33,14 @@ namespace ModularMagic_IceStaffs.Configs
             InitStaffIce1Config();
             InitStaffIce2Config();
             InitStaffIce3Config();
+            InitStaffIceAOEConfig();
         }
 
         private static void InitStaffIce1Config()
         {
             try
             {
-                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_IceStaffs.Instance.prefabs.staffIce1Prefab, staff1Name, staff1Recipe, staff1UpgradeRecipe, sectionIndex)
+                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_IceStaffs.Instance.prefabs.StaffIce1Prefab, staff1Name, staff1Recipe, staff1UpgradeRecipe, sectionIndex)
                 {
                     description = "Ice staff 1",
                     craftingStation = "Workbench",
@@ -60,7 +67,7 @@ namespace ModularMagic_IceStaffs.Configs
         {
             try
             {
-                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_IceStaffs.Instance.prefabs.staffIce2Prefab, staff2Name, staff2Recipe, staff2UpgradeRecipe, sectionIndex)
+                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_IceStaffs.Instance.prefabs.StaffIce2Prefab, staff2Name, staff2Recipe, staff2UpgradeRecipe, sectionIndex)
                 {
                     description = "Ice staff 2",
                     craftingStation = "Workbench",
@@ -87,7 +94,7 @@ namespace ModularMagic_IceStaffs.Configs
         {
             try
             {
-                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_IceStaffs.Instance.prefabs.staffIce3Prefab, staff3Name, staff3Recipe, staff3UpgradeRecipe, sectionIndex)
+                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_IceStaffs.Instance.prefabs.StaffIce3Prefab, staff3Name, staff3Recipe, staff3UpgradeRecipe, sectionIndex)
                 {
                     description = "Ice staff 3",
                     craftingStation = "GaldrTable",
@@ -107,6 +114,34 @@ namespace ModularMagic_IceStaffs.Configs
             catch (Exception error)
             {
                 Jotunn.Logger.LogError("Could not initialise " + staff3Name  + " config: " + error);
+            }
+        }
+
+
+        private static void InitStaffIceAOEConfig()
+        {
+            try
+            {
+                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_IceStaffs.Instance.prefabs.StaffIceAOEPrefab, staff4Name, staff4Recipe, staff4UpgradeRecipe, sectionIndex)
+                {
+                    description = "Ice staff AOE",
+                    craftingStation = "GaldrTable",
+                    minStationLevel = 1,
+                    recipeMultiplier = 1,
+                    maxQuality = 4,
+                    movementSpeed = -0.05f,
+                    damageFrost = 40f,
+                    damagePierce = 0f,
+                    blockArmor = 48,
+                    deflectionForce = 20,
+                    attackForce = 35,
+                    useEitr = 10,
+                };
+                staffIce4.GenerateConfig(options);
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + staff4Name + " config: " + error);
             }
         }
     }

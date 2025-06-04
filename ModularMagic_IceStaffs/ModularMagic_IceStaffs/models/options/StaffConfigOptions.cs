@@ -14,12 +14,12 @@ namespace ModularMagic_IceStaffs.Models
         public string name;
         public string? description;
         public string? craftingStation;
-        public int? minStationLevel = 1;
+        public int minStationLevel = 1;
         public string? recipe;
         public string? recipeUpgrade;
-        public int? recipeMultiplier;
-        public int? maxQuality;
-        public float? movementSpeed;
+        public int recipeMultiplier = 1;
+        public int maxQuality = 4;
+        public float movementSpeed = -0.05f;
         public float? damageBlunt;
         public float? damageChop;
         public float? damageFire;
@@ -40,11 +40,11 @@ namespace ModularMagic_IceStaffs.Models
         {
             this.prefab = prefab;
             this.name = name;
-            this.sectionName = $"{sectionIndex}. {name.Replace("'", "")}";
+            sectionName = $"{sectionIndex}. {name.Replace("'", "")}";
             this.recipe = recipe;
-            this.recipeName = $"Recipe_{prefab.name}";
-            this.recipeUpgrade = upgradeRecipe;
-            this.cooldownStatusEffectName = $"{prefab.name}CooldownStatusEffect";
+            recipeName = $"Recipe_{prefab.name}";
+            recipeUpgrade = upgradeRecipe;
+            cooldownStatusEffectName = $"{prefab.name}CooldownStatusEffect";
         }
     }
 }

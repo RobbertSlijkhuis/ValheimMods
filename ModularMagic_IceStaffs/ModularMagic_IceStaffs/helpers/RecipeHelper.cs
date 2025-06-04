@@ -63,9 +63,9 @@ namespace ModularMagic_IceStaffs.Helpers
 
                 return pieceList.ToArray();
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not convert recipe to Piece.Requirement array: " + error);
+                Jotunn.Logger.LogError("Could not convert recipe to Piece.Requirement array: " + e);
                 return null;
             }
         }
@@ -119,9 +119,9 @@ namespace ModularMagic_IceStaffs.Helpers
 
                 return list;
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not convert recipe to RequirementConfig list: " + error);
+                Jotunn.Logger.LogError("Could not convert recipe to RequirementConfig list: " + e);
                 return null;
             }
         }
@@ -162,9 +162,9 @@ namespace ModularMagic_IceStaffs.Helpers
 
                 return isValid;
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not validate recipe due to an error: " + error);
+                Jotunn.Logger.LogError("Could not validate recipe due to an e: " + e);
                 return false;
             }
         }
@@ -233,9 +233,9 @@ namespace ModularMagic_IceStaffs.Helpers
                         break;
                 }
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not update recipe: " + error);
+                Jotunn.Logger.LogError("Could not update recipe: " + e);
             }
         }
     }

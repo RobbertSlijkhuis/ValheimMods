@@ -19,9 +19,11 @@ namespace ModularMagic_IceStaffs
         public const string PluginName = "ModularMagic_IceStaffs";
         public const string PluginVersion = "0.0.1";
         public static ModularMagic_IceStaffs Instance;
+        private static readonly HarmonyLib.Harmony _harmony = new HarmonyLib.Harmony(PluginGUID);
 
-        private AssetBundle assetBundle;
+        private AssetBundle _assetBundle;
         public CustomPrefabs prefabs = new CustomPrefabs();
+        public CustomStatusEffects effects = new CustomStatusEffects();
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -30,14 +32,16 @@ namespace ModularMagic_IceStaffs
         private void Awake()
         {
             Instance = this;
-            InitAssetBundle();
-            ConfigStaffs.Init();
+            _InitAssetBundle();
+            _InitStatusEffects();
+            PluginConfig.Init();
+            _harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            PrefabManager.OnVanillaPrefabsAvailable += AddIceStaffs;
-            ItemManager.OnItemsRegistered += LogRecipes;
+            PrefabManager.OnVanillaPrefabsAvailable += _AddIceStaffs;
+            ItemManager.OnItemsRegistered += _LogRecipes;
         }
 
-        private void LogRecipes()
+        private void _LogRecipes()
         {
             ObjectDB.instance.m_recipes.ForEach(r =>
             {
@@ -45,36 +49,46 @@ namespace ModularMagic_IceStaffs
                     Jotunn.Logger.LogInfo(r.name);
             });
 
-            ItemManager.OnItemsRegistered -= LogRecipes;
+            ItemManager.OnItemsRegistered -= _LogRecipes;
         }
 
-        private void AddIceStaffs()
+        private void _AddIceStaffs()
         {
-            ItemHelper.CreateStaff(prefabs.staffIce1Prefab, ConfigStaffs.staffIce1);
-            ItemHelper.CreateStaff(prefabs.staffIce2Prefab, ConfigStaffs.staffIce2);
-            ItemHelper.CreateStaff(prefabs.staffIce3Prefab, ConfigStaffs.staffIce3);
+            ItemHelper.CreateStaff(prefabs.StaffIce1Prefab, PluginConfig.staffIce1);
+            ItemHelper.CreateStaff(prefabs.StaffIce2Prefab, PluginConfig.staffIce2);
+            ItemHelper.CreateStaff(prefabs.StaffIce3Prefab, PluginConfig.staffIce3);
+            ItemHelper.CreateStaff(prefabs.StaffIceAOEPrefab, PluginConfig.staffIce4);
 
-            PrefabManager.OnVanillaPrefabsAvailable -= AddIceStaffs;
+            PrefabManager.OnVanillaPrefabsAvailable -= _AddIceStaffs;
+        }
+
+        private void _InitStatusEffects()
+        {
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.WalkFastSE, true));
         }
 
         /**
          * Initialise the asset bundle of the mod
          */
-        private void InitAssetBundle()
+        private void _InitAssetBundle()
         {
-            assetBundle = AssetUtils.LoadAssetBundleFromResources("modularmagic_icestaffs_dw");
+            _assetBundle = AssetUtils.LoadAssetBundleFromResources("modularmagic_icestaffs_dw");
 
             // Ice assets
-            prefabs.staffIce1Prefab = assetBundle.LoadAsset<GameObject>("MMIS_staffIce1");
-            prefabs.staffIce2Prefab = assetBundle.LoadAsset<GameObject>("MMIS_staffIce2");
-            prefabs.staffIce3Prefab = assetBundle.LoadAsset<GameObject>("MMIS_staffIce3");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("staff_ice_projectile_MMIS"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_ice_spores_MMIS"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_ice_spikes_MMIS"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_iceshard_launch_MMIS"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_iceshard_launch_smoke_MMIS"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("IceSheet_MMIS"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_IceSheetSpawn_MMIS"), true));
+            prefabs.StaffIce1Prefab = _assetBundle.LoadAsset<GameObject>("MMIS_staffIce1");
+            prefabs.StaffIce2Prefab = _assetBundle.LoadAsset<GameObject>("MMIS_staffIce2");
+            prefabs.StaffIce3Prefab = _assetBundle.LoadAsset<GameObject>("MMIS_staffIce3");
+            prefabs.StaffIceAOEPrefab = _assetBundle.LoadAsset<GameObject>("MMIS_StaffIceAOE");
+            effects.WalkFastSE = _assetBundle.LoadAsset<StatusEffect>("FasterWalk_MMIS");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("staff_ice_projectile_MMIS"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("fx_staff_ice_spores_MMIS"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("fx_staff_ice_spikes_MMIS"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("fx_iceshard_launch_MMIS"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("fx_iceshard_launch_smoke_MMIS"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("IceSheet_MMIS"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("fx_IceSheetSpawn_MMIS"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("staff_ice_nova_AOE_MMIS"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("fx_staff_ice_nova_MMIS"), true));
         }
     }
 }
