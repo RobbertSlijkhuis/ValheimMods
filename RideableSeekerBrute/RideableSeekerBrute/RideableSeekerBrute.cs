@@ -222,7 +222,7 @@ namespace RideableSeekerBrute
             tameable.MakeTameable(bunny, tameableConfig);
             tameable.MakeTameable(deer, tameableConfig);
             tameable.MakeTameable(abomination, tameableConfig);
-            //tameable.MakeTameable(drake, tameableConfig);
+            tameable.MakeTameable(drake, tameableConfig);
 
             // Mount stuff
             SaddleConfig saddleConfigHeavy = new SaddleConfig(heavySaddle.ItemPrefab, "Visual");
@@ -288,18 +288,18 @@ namespace RideableSeekerBrute
             abomAttachConfig.saddleAttach.position = new Vector3(0, -0.0033f, -0.0025f);
             abomAttachConfig.saddleAttach.scale = new Vector3(0.006f, 0.006f, 0.006f);
 
-            //MountableConfig drakeAttachConfig = new MountableConfig("Neck2");
-            //drakeAttachConfig.characterAttach.position = new Vector3(0, -0.001f, -0.005f);
-            //drakeAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(285, 0, 180);
+            MountableConfig drakeAttachConfig = new MountableConfig("Neck2");
+            drakeAttachConfig.characterAttach.position = new Vector3(0, -0.001f, -0.005f);
+            drakeAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(285, 0, 180);
+            drakeAttachConfig.characterAttach.scale = new Vector3(1, 1, 1);
+            drakeAttachConfig.saddleAttach.position = new Vector3(0, 0, 0);
+            //drakeAttachConfig.saddleAttach.scale = new Vector3(0.01f, 0.01f, 0.01f);
+            drakeAttachConfig.saddleAttach.scale = new Vector3(0, 0, 0);
+            //drakeAttachConfig.characterAttach.position = new Vector3(0, 0, 0);
+            //drakeAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(-90, 0, 0);
             //drakeAttachConfig.characterAttach.scale = new Vector3(1, 1, 1);
             //drakeAttachConfig.saddleAttach.position = new Vector3(0, 0, 0);
-            //// drakeAttachConfig.saddleAttach.scale = new Vector3(0.01f, 0.01f, 0.01f);
-            //drakeAttachConfig.saddleAttach.scale = new Vector3(0, 0, 0);
-            ////drakeAttachConfig.characterAttach.position = new Vector3(0, 0, 0);
-            ////drakeAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(-90, 0, 0);
-            ////drakeAttachConfig.characterAttach.scale = new Vector3(1, 1, 1);
-            ////drakeAttachConfig.saddleAttach.position = new Vector3(0, 0, 0);
-            ////drakeAttachConfig.saddleAttach.scale = new Vector3(0.008f, 0.008f, 0.008f);
+            //drakeAttachConfig.saddleAttach.scale = new Vector3(0.008f, 0.008f, 0.008f);
 
             MountableManager.Instance.MakeMountable(seekerBrute, saddleConfigHeavy, bruteAttachConfig);
 
@@ -328,11 +328,11 @@ namespace RideableSeekerBrute
             saddleConfigHeavy.attach.position = new Vector3(0, 2.5f, 1.5f);
             MountableManager.Instance.MakeMountable(abomination, saddleConfigHeavy, abomAttachConfig);
 
-            //// saddleConfig.sphereRadius = 0.9f;
-            //saddleConfigHeavy.maxUseRange = 20;
-            //saddleConfigSimple.sphereRadius = 1;
-            //saddleConfigSimple.attach.position = new Vector3(0, 2, 1);
-            //MountableManager.Instance.MakeMountable(drake, saddleConfigSimple, drakeAttachConfig);
+            // saddleConfig.sphereRadius = 0.9f;
+            saddleConfigHeavy.maxUseRange = 20;
+            saddleConfigSimple.sphereRadius = 1;
+            saddleConfigSimple.attach.position = new Vector3(0, 2, 1);
+            MountableManager.Instance.MakeMountable(drake, saddleConfigSimple, drakeAttachConfig);
 
             PrefabManager.OnVanillaPrefabsAvailable -= InitMountable;
         }
