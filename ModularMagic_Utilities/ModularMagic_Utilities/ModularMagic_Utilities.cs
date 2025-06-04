@@ -41,6 +41,7 @@ namespace ModularMagic_Utilities
             _InitInputs();
             _harmony.PatchAll(Assembly.GetExecutingAssembly());
 
+            PrefabManager.OnVanillaPrefabsAvailable += _AddPieces;
             PrefabManager.OnVanillaPrefabsAvailable += _AddUtilities;
             ItemManager.OnItemsRegistered += _LogRecipes;
         }
@@ -102,20 +103,53 @@ namespace ModularMagic_Utilities
                 ItemHelper.Create(prefabs.lantern2Prefab, PluginConfig.lantern2, true);
                 ItemHelper.Create(prefabs.lantern3Prefab, PluginConfig.lantern3, true);
 
-                GameObject itemStand = PrefabManager.Instance.GetPrefab("itemstandh");
-                ItemStand comp = itemStand.GetComponent<ItemStand>();
-                comp.m_supportedItems.Add(prefabs.spellbook1Prefab.GetComponent<ItemDrop>());
-                comp.m_supportedItems.Add(prefabs.spellbook2Prefab.GetComponent<ItemDrop>());
-                comp.m_supportedItems.Add(prefabs.spellbook3Prefab.GetComponent<ItemDrop>());
-                comp.m_supportedItems.Add(prefabs.lantern1Prefab.GetComponent<ItemDrop>());
-                comp.m_supportedItems.Add(prefabs.lantern2Prefab.GetComponent<ItemDrop>());
-                comp.m_supportedItems.Add(prefabs.lantern3Prefab.GetComponent<ItemDrop>());
-
                 PrefabManager.OnVanillaPrefabsAvailable -= _AddUtilities;
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not add utilities: " + e);
+                PrefabManager.OnVanillaPrefabsAvailable -= _AddUtilities;
+            }
+        }
+
+        private void _AddPieces()
+        {
+            try
+            {
+                GameObject itemStand = PrefabManager.Instance.GetPrefab("itemstandh");
+                ItemStand itemStandcomp = itemStand.GetComponent<ItemStand>();
+                itemStandcomp.m_supportedItems.Add(prefabs.spellbook1Prefab.GetComponent<ItemDrop>());
+                itemStandcomp.m_supportedItems.Add(prefabs.spellbook2Prefab.GetComponent<ItemDrop>());
+                itemStandcomp.m_supportedItems.Add(prefabs.spellbook3Prefab.GetComponent<ItemDrop>());
+                itemStandcomp.m_supportedItems.Add(prefabs.lantern1Prefab.GetComponent<ItemDrop>());
+                itemStandcomp.m_supportedItems.Add(prefabs.lantern2Prefab.GetComponent<ItemDrop>());
+                itemStandcomp.m_supportedItems.Add(prefabs.lantern3Prefab.GetComponent<ItemDrop>());
+
+                ItemStand marbleItemStandcomp = prefabs.MarbleItemstand.gameObject.GetComponent<ItemStand>();
+                marbleItemStandcomp.m_supportedItems.Add(prefabs.spellbook1Prefab.GetComponent<ItemDrop>());
+                marbleItemStandcomp.m_supportedItems.Add(prefabs.spellbook2Prefab.GetComponent<ItemDrop>());
+                marbleItemStandcomp.m_supportedItems.Add(prefabs.spellbook3Prefab.GetComponent<ItemDrop>());
+                marbleItemStandcomp.m_supportedItems.Add(prefabs.lantern1Prefab.GetComponent<ItemDrop>());
+                marbleItemStandcomp.m_supportedItems.Add(prefabs.lantern2Prefab.GetComponent<ItemDrop>());
+                marbleItemStandcomp.m_supportedItems.Add(prefabs.lantern3Prefab.GetComponent<ItemDrop>());
+
+                prefabs.MarbleItemstand.transform.Find("weatherstone").gameObject.AddComponent<WeatherStone>();
+
+               PieceConfig config = new PieceConfig();
+                config.Name = "Marble Item Stand";
+                config.Description = "$piece_horizontal";
+                config.PieceTable = PieceTables.Hammer;
+                config.CraftingStation = CraftingStations.Workbench;
+                config.Category = PieceCategories.Furniture;
+                config.AddRequirement("Wood", 2);
+
+                PieceManager.Instance.AddPiece(new CustomPiece(prefabs.MarbleItemstand, true, config));
+                PrefabManager.OnVanillaPrefabsAvailable -= _AddPieces;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not add pieces: " + e);
+                PrefabManager.OnVanillaPrefabsAvailable -= _AddPieces;
             }
         }
 
@@ -164,6 +198,9 @@ namespace ModularMagic_Utilities
             prefabs.lantern1Prefab = _assetBundle.LoadAsset<GameObject>("MMU_MythicalLantern");
             prefabs.lantern2Prefab = _assetBundle.LoadAsset<GameObject>("MMU_EverwinterLantern");
             prefabs.lantern3Prefab = _assetBundle.LoadAsset<GameObject>("MMU_MistcallerLantern");
+
+            // Pieces
+            prefabs.MarbleItemstand = _assetBundle.LoadAsset<GameObject>("MMU_MarbleItemstand");
         }
     }
 }

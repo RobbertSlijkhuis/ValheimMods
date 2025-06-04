@@ -13,5 +13,8 @@ namespace ModularMagic_Utilities.Models
         public GameObject lantern1Prefab;
         public GameObject lantern2Prefab;
         public GameObject lantern3Prefab;
+
+        // Pieces
+        public GameObject MarbleItemstand;
     }
 }
