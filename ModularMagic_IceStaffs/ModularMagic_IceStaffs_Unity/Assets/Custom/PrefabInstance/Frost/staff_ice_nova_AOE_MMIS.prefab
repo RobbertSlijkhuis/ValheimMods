@@ -80,7 +80,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_name: 
-  m_useAttackSettings: 0
+  m_useAttackSettings: 1
   m_damage:
     m_damage: 0
     m_blunt: 0
@@ -89,7 +89,7 @@ MonoBehaviour:
     m_chop: 0
     m_pickaxe: 0
     m_fire: 0
-    m_frost: 100
+    m_frost: 0
     m_lightning: 0
     m_poison: 0
     m_spirit: 0
