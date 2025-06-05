@@ -16,28 +16,29 @@ namespace ModularMagic_Utilities.Helpers
             try
             {
                 ItemConfig itemConfig = new ItemConfig();
-                itemConfig.Name = config.name.Value;
+                
                 itemConfig.Enabled = config.enable.Value;
+                itemConfig.Name = config.name.Value;
+                itemConfig.Description = config.description.Value;
                 itemConfig.CraftingStation = config.craftingStation.Value;
                 itemConfig.MinStationLevel = config.minStationLevel.Value;
-                RequirementConfig[] simpleRequirements = RecipeHelper.GetAsRequirementConfigArray(config.recipe.Value, null, null);
+                RequirementConfig[] requirements = RecipeHelper.GetAsRequirementConfigArray(config.recipe.Value, null, null);
 
-                if (simpleRequirements == null || simpleRequirements.Length == 0)
+                if (requirements == null || requirements.Length == 0)
                     Jotunn.Logger.LogWarning($"Could not resolve recipe for: {prefab.name}");
                 else
-                    itemConfig.Requirements = simpleRequirements;
+                    itemConfig.Requirements = requirements;
 
                 ItemDrop simpleDrop = prefab.GetComponent<ItemDrop>();
-                MagicStatusEffect simpleStatusEffect = ScriptableObject.CreateInstance<MagicStatusEffect>();
-                simpleStatusEffect.name = config.magicStatusEffectName;
-                simpleStatusEffect.m_name = simpleDrop.m_itemData.m_shared.m_name;
-                simpleStatusEffect.m_icon = simpleDrop.m_itemData.GetIcon();
-                simpleStatusEffect.SetAll(config.eitr.Value, config.elementalMagic.Value, config.bloodMagic.Value);
-                simpleDrop.m_itemData.m_shared.m_equipStatusEffect = simpleStatusEffect;
+                MagicStatusEffect equipStatusEffect = ScriptableObject.CreateInstance<MagicStatusEffect>();
+                equipStatusEffect.name = config.magicStatusEffectName;
+                equipStatusEffect.m_name = simpleDrop.m_itemData.m_shared.m_name;
+                equipStatusEffect.m_icon = simpleDrop.m_itemData.GetIcon();
+                equipStatusEffect.SetAll(config.eitr.Value, config.elementalMagic.Value, config.bloodMagic.Value);
 
-                UpdateHelper.UpdateItemDropStats(prefab, new UpdateItemDropStatsOptions()
+                UpdateHelper.UpdateItemDropStats(prefab, new UpdateItemDropOptions()
                 {
-                    description = config.description.Value,
+                    equipStatusEffect = equipStatusEffect,
                     weight = config.weight.Value,
                     eitrRegen = config.eitrRegen.Value,
                     demister = isLantern ? config.demister.Value : null,

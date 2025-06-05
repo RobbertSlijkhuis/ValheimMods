@@ -1,4 +1,4 @@
-﻿namespace ModularMagic_Utilities
+﻿namespace ModularMagic_Utilities.Types
 {
     enum RecipeUpdateType
     {

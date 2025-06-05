@@ -2,15 +2,20 @@
 using ModularMagic_Utilities.Helpers;
 using ModularMagic_Utilities.Models;
 using ModularMagic_Utilities.StatusEffects;
-//using UnityEngine;
+using ModularMagic_Utilities.Types;
 
 namespace ModularMagic_Utilities.Configs
 {
     internal class UtilitiesConfig
     {
         // General options
-        public static string[] craftingStationOptions = new string[] { "None", "Disabled", "Workbench", "Forge", "Stonecutter", "Cauldron", "ArtisanTable", "BlackForge", "GaldrTable" };
-        public static string[] lanterColorOptions = new string[] { "Red", "Orange", "Yellow", "Green", "LemonGreen", "LightBlue", "Blue", "Pink", "Purple", "White" };
+        public static string[] craftingStationOptions = new string[] { 
+            CraftingStationType.None, CraftingStationType.Disabled, CraftingStationType.Workbench, CraftingStationType.Forge, CraftingStationType.Stonecutter, 
+            CraftingStationType.Cauldron, CraftingStationType.ArtisanTable, CraftingStationType.BlackForge, CraftingStationType.GaldrTable };
+
+        public static string[] lanterColorOptions = new string[] { 
+            LightPresetType.Red, LightPresetType.Orange, LightPresetType.Yellow, LightPresetType.Green, LightPresetType.LemonGreen,
+            LightPresetType.LightBlue, LightPresetType.Blue, LightPresetType.Purple, LightPresetType.Pink, LightPresetType.White };
 
         // The  fields to generate
         public ConfigEntry<bool> enable;
@@ -25,17 +30,15 @@ namespace ModularMagic_Utilities.Configs
         public ConfigEntry<float> elementalMagic;
         public ConfigEntry<float> bloodMagic;
         public ConfigEntry<float> demister;
-        //public ConfigEntry<Color> flareColor;
-        //public ConfigEntry<Color> lightColor;
         public ConfigEntry<string> lightColorPreset;
         public ConfigEntry<float> lightIntensity;
         public ConfigEntry<float> lightRange;
-        //public ConfigEntry<bool> enableCustomGlassColor;
-        //public ConfigEntry<string> customGlassColor;
 
         // Other
+        private int entryCount = 15;
         public string cooldownStatusEffectName;
         public string magicStatusEffectName;
+
 
         public void GenerateConfig(UtilitiesConfigOptions options)
         {
@@ -45,7 +48,7 @@ namespace ModularMagic_Utilities.Configs
 
             enable = Config.Bind(new ConfigDefinition(options.sectionName, "Enable"), options.enable,
                new ConfigDescription("Wether the recipe for this item is enabled", null,
-               new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 15 }));
+               new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
             enable.SettingChanged += (obj, attr) =>
             {
                 RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
@@ -58,10 +61,10 @@ namespace ModularMagic_Utilities.Configs
 
             name = Config.Bind(new ConfigDefinition(options.sectionName, "Name"), options.name,
               new ConfigDescription("The name of the item", null,
-              new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 14 }));
+              new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
             name.SettingChanged += (obj, attr) =>
             {
-                UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
+                UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropOptions()
                 {
                     name = name.Value,
                 });
@@ -69,10 +72,10 @@ namespace ModularMagic_Utilities.Configs
 
             description = Config.Bind(new ConfigDefinition(options.sectionName, "Description"), options.description,
                 new ConfigDescription("The description of the item", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 13 }));
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
             description.SettingChanged += (obj, attr) =>
             {
-                UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
+                UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropOptions()
                 {
                     description = description.Value,
                 });
@@ -81,7 +84,7 @@ namespace ModularMagic_Utilities.Configs
             craftingStation = Config.Bind(new ConfigDefinition(options.sectionName, "Crafting station"), options.craftingStation,
                 new ConfigDescription("The crafting station the item can be crafted in",
                 new AcceptableValueList<string>(craftingStationOptions),
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 12 }));
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
             craftingStation.SettingChanged += (obj, attr) =>
             {
                 RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
@@ -94,7 +97,7 @@ namespace ModularMagic_Utilities.Configs
 
             minStationLevel = Config.Bind(new ConfigDefinition(options.sectionName, "Required station level"), options.minStationLevel,
                 new ConfigDescription("The required station level to craft this item", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 11 }));
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
             minStationLevel.SettingChanged += (obj, attr) =>
             {
                 RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
@@ -107,7 +110,7 @@ namespace ModularMagic_Utilities.Configs
 
             recipe = Config.Bind(new ConfigDefinition(options.sectionName, "Recipe"), options.recipe,
                 new ConfigDescription("The items required to craft this item", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 10 }));
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
             recipe.SettingChanged += (obj, attr) =>
             {
                 RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
@@ -120,10 +123,10 @@ namespace ModularMagic_Utilities.Configs
 
             weight = Config.Bind(new ConfigDefinition(options.sectionName, "Weight"), options.weight,
                 new ConfigDescription("The weight applied to the item", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 9 }));
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
             weight.SettingChanged += (obj, attr) =>
             {
-                UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
+                UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropOptions()
                 {
                     weight = weight.Value,
                 });
@@ -131,7 +134,7 @@ namespace ModularMagic_Utilities.Configs
 
             eitr = Config.Bind(new ConfigDefinition(options.sectionName, "Eitr"), options.eitr,
                 new ConfigDescription("The amount of eitr the item gives", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 8 }));
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
             eitr.SettingChanged += (obj, attr) =>
             {
                 if (eitr.Value < 0f) return;
@@ -143,11 +146,11 @@ namespace ModularMagic_Utilities.Configs
 
             eitrRegen = Config.Bind(new ConfigDefinition(options.sectionName, "Eitr regen"), options.eitrRegen,
                 new ConfigDescription("The amount of eitr regen the item gives (example: 1 = 100% or 0.05 = 5% etc.)", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 7 }));
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
             eitrRegen.SettingChanged += (obj, attr) =>
             {
                 Jotunn.Logger.LogWarning("eitreRegen: " + eitrRegen.Value);
-                UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
+                UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropOptions()
                 {
                     eitrRegen = eitrRegen.Value,
                 });
@@ -157,7 +160,7 @@ namespace ModularMagic_Utilities.Configs
 
             elementalMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Elemental magic"), options.elementalMagic,
                 new ConfigDescription("The amount of Elemental magic skill the item gives", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 6 }));
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
             elementalMagic.SettingChanged += (obj, attr) =>
             {
                 if (elementalMagic.Value < 0f) return;
@@ -169,7 +172,7 @@ namespace ModularMagic_Utilities.Configs
 
             bloodMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Blood magic"), options.bloodMagic,
                 new ConfigDescription("The amount of Blood magic skill the item gives", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 5 }));
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
             bloodMagic.SettingChanged += (obj, attr) =>
             {
                 if (bloodMagic.Value < 0f) return;
@@ -184,45 +187,19 @@ namespace ModularMagic_Utilities.Configs
                 demister = Config.Bind(new ConfigDefinition(options.sectionName, "Demister range"), (float)options.demister,
                     new ConfigDescription("The range of the demister effect (push mist away). 0 disables this effect, maximum 50 for performance reasons",
                     new AcceptableValueRange<float>(0f, 50f),
-                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 4 }));
+                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
                 demister.SettingChanged += (obj, attr) =>
                 {
                     UpdateHelper.UpdateDemisterOnBoth(options.prefab, demister.Value);
                 };
             }
 
-            //if (options.flareColor != null)
-            //{
-            //    flareColor = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern: Flare color"), (Color)options.flareColor,
-            //        new ConfigDescription("The color of the flare effect around the lantern (This will be updated when you turn off/on the lantern)", null,
-            //        new ConfigurationManagerAttributes { IsAdminOnly = true }));
-            //    flareColor.SettingChanged += (obj, attr) =>
-            //    {
-            //        Jotunn.Logger.LogWarning("New flare color: " + flareColor.Value);
-            //    };
-            //}
-
-            //if (options.lightColor != null)
-            //{
-            //    lightColor = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern: Light Color"), (Color)options.lightColor,
-            //        new ConfigDescription("The color of the light emitted by the lantern (This will be updated when you turn off/on the lantern)", null,
-            //        new ConfigurationManagerAttributes { IsAdminOnly = true }));
-            //    lightColor.SettingChanged += (obj, attr) =>
-            //    {
-            //        Jotunn.Logger.LogWarning("New color: " + lightColor.Value);
-            //    };
-            //}
-
             if (options.lightColorPreset != null)
             {
                 lightColorPreset = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern color preset"), options.lightColorPreset,
                     new ConfigDescription("A preset of light, flare and glass color (This will be updated when you turn off/on the lantern)",
                     new AcceptableValueList<string>(lanterColorOptions),
-                    new ConfigurationManagerAttributes { IsAdminOnly = false, Order = 3 }));
-                lightColorPreset.SettingChanged += (obj, attr) =>
-                {
-                    Jotunn.Logger.LogWarning("New light color preset: " + lightColorPreset.Value);
-                };
+                    new ConfigurationManagerAttributes { IsAdminOnly = false, Order = _HandleOrder() }));
             }
 
             if (options.lightRange != null)
@@ -230,37 +207,21 @@ namespace ModularMagic_Utilities.Configs
                 lightRange = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern light range"), (float)options.lightRange,
                     new ConfigDescription("The range of the light emitted by the lantern (This will be updated when you turn off/on the lantern)",
                     new AcceptableValueRange<float>(0f, 50f),
-                    new ConfigurationManagerAttributes { IsAdminOnly = false, Order = 2 }));
+                    new ConfigurationManagerAttributes { IsAdminOnly = false, Order = _HandleOrder() }));
             }
 
             if (options.lightIntensity != null)
             {
                 lightIntensity = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern light intensity"), (float)options.lightIntensity,
                     new ConfigDescription("The intensity of the light emitted by the lantern (This will be updated when you turn off/on the lantern)", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = false, Order = 1 }));
+                    new ConfigurationManagerAttributes { IsAdminOnly = false, Order = _HandleOrder() }));
             }
+        }
 
-            //if (options.enableCustomGlassColor != null)
-            //{
-            //    enableCustomGlassColor = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern custom: Enable custom glass color"), (bool)options.enableCustomGlassColor,
-            //        new ConfigDescription("Apply the custom glass color instead", null,
-            //        new ConfigurationManagerAttributes { IsAdminOnly = true }));
-            //    enableCustomGlassColor.SettingChanged += (obj, attr) =>
-            //    {
-            //        Jotunn.Logger.LogWarning("New material color: " + enableCustomGlassColor.Value);
-            //    };
-            //}
-
-            //if (options.customGlassColor != null)
-            //{
-            //    customGlassColor = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern custom: Glass color"), options.customGlassColor,
-            //        new ConfigDescription("A custom glass color from a RGB float/unit string USE AT OWN RISK (This will be updated when you turn off/on the lantern)", null,
-            //        new ConfigurationManagerAttributes { IsAdminOnly = true }));
-            //    customGlassColor.SettingChanged += (obj, attr) =>
-            //    {
-            //        Jotunn.Logger.LogWarning("New material color: " + customGlassColor.Value);
-            //    };
-            //}
+        private int _HandleOrder()
+        {
+            entryCount = entryCount - 1;
+            return entryCount;
         }
     }
 }

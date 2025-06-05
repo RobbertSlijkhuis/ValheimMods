@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 1949293303
+CRC: 2111753075
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 56863bb11e83cfef28113db958a95872
+    Hash: 75e93f5543017fae5e6aabcf6d27209c
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 5ca779c1bb9c02880e6ec7adb3f2d0eb
+    Hash: 527ebe427645916d2d28c108f78ed578
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 56863bb11e83cfef28113db958a95872
+    Hash: 75e93f5543017fae5e6aabcf6d27209c
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -35,9 +35,19 @@ ClassTypes:
 - Class: 108
   Script: {instanceID: 0}
 - Class: 114
+  Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: 489050665, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: -1044604064, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: -870746866, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 269728403, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -45,19 +55,11 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 463273065, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
   Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 2094620348, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 1345532120, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: -1045064129, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
   Script: {fileID: 895252998, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 115
   Script: {instanceID: 0}
 - Class: 135
@@ -92,18 +94,17 @@ SerializeReferenceClassIdentifiers:
 Assets:
 - Assets/Custom/Material/Itemstand/Rune_deathwizsh_MMU.mat
 - Assets/Custom/PrefabInstance/Books/MMU_CodexOfTheAsgardianSorcerer.prefab
-- Assets/Custom/Material/Lanterns/MMU_EverwinterLanternMat.mat
+- Assets/Custom/Material/Lanterns/EverwinterLanternMat_MMU.mat
 - Assets/Custom/PrefabInstance/Lantern/MMU_MistcallerLantern.prefab
-- Assets/Custom/Material/Lanterns/MMU_MythicalLanternMat_Off.mat
+- Assets/Custom/Material/Lanterns/MythicalLanternMat_Off_MMU.mat
 - Assets/Custom/PrefabInstance/Lantern/MMU_EverwinterLantern.prefab
-- Assets/Custom/Material/Lanterns/MMU_EverwinterLanternMat_Off.mat
-- Assets/Custom/Material/Itemstand/MMU_AltarEmission.mat
+- Assets/Custom/Material/Lanterns/EverwinterLanternMat_Off_MMU.mat
+- Assets/Custom/PrefabInstance/Itemstand/fx_activation_MMU.prefab
 - Assets/Custom/PrefabInstance/Books/MMU_SpellbookOfTheHearth.prefab
-- Assets/Custom/Material/Lanterns/MMU_MistcallerLanternMat_Off.mat
+- Assets/Custom/Material/Lanterns/MistcallerLanternMat_Off_MMU.mat
 - Assets/Custom/PrefabInstance/Lantern/MMU_MythicalLantern.prefab
 - Assets/Custom/PrefabInstance/Books/MMU_GrimoireOfTheStorm.prefab
 - Assets/Custom/PrefabInstance/Itemstand/MMU_MarbleItemstand.prefab
-- Assets/Custom/Material/Lanterns/MMU_MythicalLanternMat.mat
-- Assets/Custom/MonoBehaviour/MMU_SE_ElementalMagic.asset
-- Assets/Custom/Material/Lanterns/MMU_MistcallerLanternMat.mat
+- Assets/Custom/Material/Lanterns/MythicalLanternMat_MMU.mat
+- Assets/Custom/Material/Lanterns/MistcallerLanternMat_MMU.mat
 Dependencies: []

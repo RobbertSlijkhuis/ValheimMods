@@ -1,5 +1,6 @@
 ﻿using BepInEx.Configuration;
 using ModularMagic_Utilities.Models;
+using ModularMagic_Utilities.Types;
 using System;
 using UnityEngine;
 
@@ -31,6 +32,10 @@ namespace ModularMagic_Utilities.Configs
         public static string lantern3Recipe = $"{ModularMagic_Utilities.Instance.prefabs.lantern2Prefab.name}:1, BlackCore:1, BlackMarble:12, Eitr:6";
         public static UtilitiesConfig lantern3 = new UtilitiesConfig();
 
+        public static string piece1Name = "Marble Item Stand";
+        public static string piece1Recipe = "BlackMarble:10";
+        public static BuildPieceConfig piece1 = new BuildPieceConfig();
+
         // Other
         public static string generalSectionname = "General";
         public static ConfigEntry<KeyboardShortcut> configLanternModKey;
@@ -44,6 +49,7 @@ namespace ModularMagic_Utilities.Configs
             _InitLantern1Config();
             _InitLantern2Config();
             _InitLantern3Config();
+            _InitPiece1Config();
         }
 
         private static void _InitGeneralConfig()
@@ -59,7 +65,7 @@ namespace ModularMagic_Utilities.Configs
                 UtilitiesConfigOptions options = new UtilitiesConfigOptions(ModularMagic_Utilities.Instance.prefabs.spellbook1Prefab, book1Name, book1Recipe)
                 {
                     description = "The first step on the path to wielding the arcane arts. This humble tome contains some crudely written instructions on how to attune one self to the use of magic.",
-                    craftingStation = "Workbench",
+                    craftingStation = CraftingStationType.Workbench,
                     minStationLevel = 3,
                     eitr = 35f,
                     eitrRegen = 0.1f,
@@ -81,7 +87,7 @@ namespace ModularMagic_Utilities.Configs
                 UtilitiesConfigOptions options = new UtilitiesConfigOptions(ModularMagic_Utilities.Instance.prefabs.spellbook2Prefab, book2Name, book2Recipe)
                 {
                     description = "As you journey further into the realms of magic, this tome reveals more complex spells, drawn from the primal forces of the world. The Grimoire of the Storm holds the secrets of the gods themselves!",
-                    craftingStation = "Workbench",
+                    craftingStation = CraftingStationType.Workbench,
                     minStationLevel = 5,
                     eitr = 50f,
                     eitrRegen = 0.15f,
@@ -103,7 +109,7 @@ namespace ModularMagic_Utilities.Configs
                 UtilitiesConfigOptions options = new UtilitiesConfigOptions(ModularMagic_Utilities.Instance.prefabs.spellbook3Prefab, book3Name, book3Recipe)
                 {
                     description = "A tome of unimaginable power, said to have been written by the greatest mages of Asgard. The Codex holds the most potent and intricate spells, woven with the threads of fate itself.\r\n",
-                    craftingStation = "GaldrTable",
+                    craftingStation = CraftingStationType.GaldrTable,
                     minStationLevel = 1,
                     eitr = 65f,
                     eitrRegen = 0.2f,
@@ -125,14 +131,14 @@ namespace ModularMagic_Utilities.Configs
                 UtilitiesConfigOptions options = new UtilitiesConfigOptions(ModularMagic_Utilities.Instance.prefabs.lantern1Prefab, lantern1Name, lantern1Recipe)
                 {
                     description = "Carved with ancient runes, this lantern channels the power of the gods themselves. Its light flickers with a divine glow, illuminating the paths of those who seek wisdom and courage in the realms.",
-                    craftingStation = "Forge",
+                    craftingStation = CraftingStationType.Forge,
                     minStationLevel = 1,
                     eitr = 30f,
                     eitrRegen = 0.15f,
                     elementalMagic = 3f,
                     bloodMagic = 3f,
                     demister = 0f,
-                    lightColorPreset = "Yellow",
+                    lightColorPreset = LightPresetType.Yellow,
                     lightRange = 30f,
                     lightIntensity = 1.5f,
                 };
@@ -151,14 +157,14 @@ namespace ModularMagic_Utilities.Configs
                 UtilitiesConfigOptions options = new UtilitiesConfigOptions(ModularMagic_Utilities.Instance.prefabs.lantern2Prefab, lantern2Name, lantern2Recipe)
                 {
                     description = "This lantern’s light glows like the pale blue of the northern ice. Said to be crafted by the dwarves who once guarded the icy mountains.",
-                    craftingStation = "Forge",
+                    craftingStation = CraftingStationType.Forge,
                     minStationLevel = 5,
                     eitr = 45f,
                     eitrRegen = 0.2f,
                     elementalMagic = 6f,
                     bloodMagic = 6f,
                     demister = 0f,
-                    lightColorPreset = "LightBlue",
+                    lightColorPreset = LightPresetType.LightBlue,
                     lightRange = 30f,
                     lightIntensity = 1.5f,
                 };
@@ -177,14 +183,14 @@ namespace ModularMagic_Utilities.Configs
                 UtilitiesConfigOptions options = new UtilitiesConfigOptions(ModularMagic_Utilities.Instance.prefabs.lantern3Prefab, lantern3Name, lantern3Recipe)
                 {
                     description = "A lantern woven from the essence of the mists that shroud the edges of Valheim. The soft glow is calming, though its true power lies in its ability to guide those lost in the fog.",
-                    craftingStation = "BlackForge",
+                    craftingStation = CraftingStationType.BlackForge,
                     minStationLevel = 1,
                     eitr = 60f,
                     eitrRegen = 0.25f,
                     elementalMagic = 9f,
                     bloodMagic = 9f,
                     demister = 6f,
-                    lightColorPreset = "Pink",
+                    lightColorPreset = LightPresetType.Pink,
                     lightRange = 30f,
                     lightIntensity = 1.5f,
                 };
@@ -193,6 +199,26 @@ namespace ModularMagic_Utilities.Configs
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not initialise " + lantern3Name + " config: " + e);
+            }
+        }
+
+        private static void _InitPiece1Config()
+        {
+            try
+            {
+                BuildPieceConfigOptions options = new BuildPieceConfigOptions(ModularMagic_Utilities.Instance.prefabs.MarbleItemstand, piece1Name, piece1Recipe)
+                {
+                    description = "$piece_horizontal",
+                    craftingStation = CraftingStationType.Stonecutter,
+                    weatherZoneRadius = 30f,
+                    enableDome = false,
+                    enableProjector = false,
+                };
+                piece1.GenerateConfig(options);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + piece1Name + " config: " + e);
             }
         }
     }

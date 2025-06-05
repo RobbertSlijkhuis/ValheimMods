@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using static EffectList;
 
 namespace ModularMagic_Utilities
 {
@@ -75,7 +76,6 @@ namespace ModularMagic_Utilities
                     return;
                 }
 
-                // ZPackage package = new ZPackage();
                 int type = LanternHelper.GetLanternType(itemData);
 
                 if (type != 0)
@@ -132,18 +132,33 @@ namespace ModularMagic_Utilities
                 marbleItemStandcomp.m_supportedItems.Add(prefabs.lantern1Prefab.GetComponent<ItemDrop>());
                 marbleItemStandcomp.m_supportedItems.Add(prefabs.lantern2Prefab.GetComponent<ItemDrop>());
                 marbleItemStandcomp.m_supportedItems.Add(prefabs.lantern3Prefab.GetComponent<ItemDrop>());
+                WeatherZone weatherZone = prefabs.MarbleItemstand.transform.Find("weatherzone").gameObject.AddComponent<WeatherZone>();
 
-                prefabs.MarbleItemstand.transform.Find("weatherstone").gameObject.AddComponent<WeatherStone>();
+                List<EffectData> startList = new List<EffectData>();
+                EffectData startSFX = new EffectData();
+                startSFX.m_prefab = PrefabManager.Instance.GetPrefab("sfx_shieldgenerator_startup");
+                startSFX.m_enabled = true;
+                startSFX.m_variant = -1;
 
-               PieceConfig config = new PieceConfig();
-                config.Name = "Marble Item Stand";
-                config.Description = "$piece_horizontal";
-                config.PieceTable = PieceTables.Hammer;
-                config.CraftingStation = CraftingStations.Workbench;
-                config.Category = PieceCategories.Furniture;
-                config.AddRequirement("Wood", 2);
+                EffectData startVFX = new EffectData();
+                startVFX.m_prefab = prefabs.ActivationFX;
+                startVFX.m_enabled = true;
+                startVFX.m_variant = -1;
+                startList.Add(startSFX);
+                startList.Add(startVFX);
 
-                PieceManager.Instance.AddPiece(new CustomPiece(prefabs.MarbleItemstand, true, config));
+                List<EffectData> stopList = new List<EffectData>();
+                EffectData stopSFX = new EffectData();
+                stopSFX.m_prefab = PrefabManager.Instance.GetPrefab("sfx_shieldgenerator_shutdown");
+                stopSFX.m_enabled = true;
+                stopSFX.m_variant = -1;
+                stopList.Add(stopSFX);
+
+                weatherZone.startEffects.m_effectPrefabs = startList.ToArray();
+                weatherZone.stopEffects.m_effectPrefabs = stopList.ToArray();
+
+                PieceHelper.Create(prefabs.MarbleItemstand, PluginConfig.piece1);
+                
                 PrefabManager.OnVanillaPrefabsAvailable -= _AddPieces;
             }
             catch (Exception e)
@@ -201,6 +216,9 @@ namespace ModularMagic_Utilities
 
             // Pieces
             prefabs.MarbleItemstand = _assetBundle.LoadAsset<GameObject>("MMU_MarbleItemstand");
+            prefabs.ActivationFX = _assetBundle.LoadAsset<GameObject>("fx_activation_MMU");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ActivationFX, true));
+            //prefabs.ShieldGen = _assetBundle.LoadAsset<GameObject>("piece_shieldgenerator_MMU");
         }
     }
 }

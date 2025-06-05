@@ -16,7 +16,7 @@ namespace ModularMagic_Utilities.Components
             _netView = base.gameObject.GetComponent<ZNetView>();
             status = "";
 
-            InvokeRepeating(nameof(_UpdateStatus), 0f, 1f);
+            InvokeRepeating(nameof(_UpdateStatus), 0f, 0.3f);
         }
 
         private void _UpdateStatus()
@@ -38,7 +38,7 @@ namespace ModularMagic_Utilities.Components
                     return;
 
                 LanternStatus current = _statusStringToObject(status);
-                UpdateHelper.UpdateLanternMode(current.playerId, current.status);
+                LanternHelper.UpdateLanternMode(current.playerId, current.status);
             }
             catch (Exception e)
             {

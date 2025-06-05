@@ -41,7 +41,7 @@ namespace ModularMagic_Utilities.Harmony
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not add component in AwakePlayerController_Postfix: " + e);
+                Jotunn.Logger.LogError("Could not add lantern component in AwakePlayerController_Postfix: " + e);
             }
         }
 
@@ -54,34 +54,17 @@ namespace ModularMagic_Utilities.Harmony
                 if (__instance == null && __instance.m_currentItemName == "")
                     return;
 
-                Transform weatherStoneTrans = __instance.gameObject.transform.Find("weatherstone");
+                Transform weatherZoneTrans = __instance.gameObject.transform.Find("weatherzone");
 
-                if (weatherStoneTrans == null)
+                if (weatherZoneTrans == null)
                     return;
 
-                WeatherStone weatherStone = weatherStoneTrans.gameObject.GetComponent<WeatherStone>();
-                EnvZone envZone = weatherStoneTrans.gameObject?.GetComponent<EnvZone>();
+                WeatherZone weatherZone = weatherZoneTrans.gameObject.GetComponent<WeatherZone>();
 
-                if (weatherStone == null || weatherStone.isInitialised || envZone == null)
+                if (weatherZone == null || weatherZone.isInitialised)
                     return;
 
-                weatherStone.isInitialised = true;
-                string newEnv = "";
-
-                if (__instance.m_currentItemName == PluginConfig.spellbook1.name.Value)
-                    newEnv = "Clear";
-
-                if (__instance.m_currentItemName == PluginConfig.spellbook2.name.Value)
-                    newEnv = "ThunderStorm";
-
-                if (__instance.m_currentItemName == PluginConfig.lantern2.name.Value)
-                    newEnv = "SnowStorm";
-
-                if (envZone.m_environment == newEnv)
-                    return;
-
-                envZone.m_environment = newEnv;
-                _ActivateMarbleItemStandEffects(__instance, true);
+                weatherZone.InitWeather(__instance.m_currentItemName);
 
             }
             catch (Exception e)
@@ -100,49 +83,16 @@ namespace ModularMagic_Utilities.Harmony
                 if (__instance == null)
                     return;
 
-                Transform weatherStoneTrans = __instance.gameObject.transform.Find("weatherstone");
+                Transform weatherZoneTrans = __instance.gameObject.transform.Find("weatherzone");
 
-                if (weatherStoneTrans == null)
+                if (weatherZoneTrans == null)
                     return;
 
-                EnvZone envZone = weatherStoneTrans.gameObject?.GetComponent<EnvZone>();
-
-                if (envZone == null)
-                    return;
-
-                List<string> nameList = new List<string>()
-                {
-                    PluginConfig.spellbook1.name.Value,
-                    PluginConfig.spellbook2.name.Value,
-                    PluginConfig.spellbook3.name.Value,
-                    PluginConfig.lantern1.name.Value,
-                    PluginConfig.lantern2.name.Value,
-                    PluginConfig.lantern3.name.Value,
-                };
-
-                if (!nameList.Contains(item.m_shared.m_name))
-                    return;
-
-                string newEnv = "";
-
-                if (item.m_shared.m_name == PluginConfig.spellbook1.name.Value)
-                    newEnv = "Clear";
-
-                if (item.m_shared.m_name == PluginConfig.spellbook2.name.Value)
-                    newEnv = "ThunderStorm";
-
-                if (item.m_shared.m_name == PluginConfig.lantern2.name.Value)
-                    newEnv = "SnowStorm";
-
-                if (newEnv == "")
-                    return;
-
-                envZone.m_environment = newEnv;
-                _ActivateMarbleItemStandEffects(__instance, true);
+                weatherZoneTrans.gameObject.GetComponent<WeatherZone>().EnableWeather(item);
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not set item on itemstand: " + e);
+                Jotunn.Logger.LogError("Could not enable weather in UseItem_Postfix: " + e);
             }
         }
 
@@ -155,25 +105,16 @@ namespace ModularMagic_Utilities.Harmony
                 if (__instance == null)
                     return;
 
-                Transform weatherStoneTrans = __instance.gameObject.transform.Find("weatherstone");
+                Transform weatherZoneTrans = __instance.gameObject.transform.Find("weatherzone");
 
-                if (weatherStoneTrans == null)
+                if (weatherZoneTrans == null)
                     return;
 
-                EnvZone envZone = weatherStoneTrans.gameObject?.GetComponent<EnvZone>();
-
-                if (envZone == null)
-                    return;
-
-                if (envZone.m_environment == "")
-                    return;
-
-                envZone.m_environment = "";
-                _ActivateMarbleItemStandEffects(__instance, false);
+                weatherZoneTrans.gameObject.GetComponent<WeatherZone>().DisableWeather();
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not take item from itemstand: " + e);
+                Jotunn.Logger.LogError("Could not disable weather in Interact_Postfix: " + e);
             }
         }
 
@@ -230,70 +171,6 @@ namespace ModularMagic_Utilities.Harmony
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not update skills in GetSkillLevel_Postfix: " + e);
-            }
-        }
-
-        private static void _ActivateMarbleItemStandEffects(ItemStand itemStand, bool value)
-        {
-            Jotunn.Logger.LogWarning("_ActivateMarbleItemStandEffects() " + value);
-            try
-            {
-                Color emissionColor = new Color(0f, 0.5676858f, 1.294612f, 1f);
-                Color emissionOffColor = new Color(0f, 0f, 0f, 1f);
-                Color emissionRuneOffColor = new Color(0.2f, 0.2f, 0.2f, 1f);
-                Transform rimTrans = itemStand.gameObject.transform.Find("New/emission");
-                Transform shieldTrans = itemStand.gameObject.transform.Find("New/forcefield");
-                Transform runesTrans = itemStand.gameObject.transform.Find("New/runes emission");
-                Transform weatherStonrTrans = itemStand.gameObject.transform.Find("weatherstone");
-                WeatherStone weatherStone = weatherStonrTrans.GetComponent<WeatherStone>();
-
-                if (rimTrans != null)
-                {
-                    MeshRenderer meshRendererComp = rimTrans.gameObject.GetComponent<MeshRenderer>();
-                    Material mat = meshRendererComp.materials[0];
-
-                    if (mat != null)
-                    {
-                        // mat.SetColor("_EmissionColor", value ? emissionColor : emissionOffColor);
-                        weatherStone.StartLerpColor(mat, value ? emissionOffColor : emissionColor, value ? emissionColor : emissionOffColor, 3f);
-                    }
-
-                    Transform particleTrans = rimTrans.gameObject.transform.Find("particles");
-
-                    if (particleTrans != null)
-                    {
-                        particleTrans.gameObject.SetActive(value);
-                    }
-
-                    Transform lightsTrans = rimTrans.gameObject.transform.Find("light");
-
-                    if (lightsTrans == null)
-                        return;
-
-                    lightsTrans.gameObject.SetActive(value);
-                }
-
-                if (runesTrans != null)
-                {
-                    MeshRenderer meshRendererComp = runesTrans.gameObject.GetComponent<MeshRenderer>();
-                    Material mat = meshRendererComp.materials[0];
-
-                    if (mat == null)
-                        return;
-
-                    //mat.SetColor("_EmissionColor", value ? emissionColor : emissionRuneOffColor);
-                    weatherStone.StartLerpColor(mat, value ? emissionRuneOffColor : emissionColor, value ? emissionColor : emissionRuneOffColor, 1.5f);
-
-                }
-
-                if (shieldTrans != null)
-                {
-                    shieldTrans.gameObject.SetActive(value);
-                }
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Could not enable/disable Marble Item Stand effects: " + e);
             }
         }
 

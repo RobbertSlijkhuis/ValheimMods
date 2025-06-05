@@ -1,5 +1,7 @@
 ﻿#nullable enable
 
+using ModularMagic_Utilities.Types;
+
 namespace ModularMagic_Utilities.Models
 {
     internal class UpdateRecipeOptions
