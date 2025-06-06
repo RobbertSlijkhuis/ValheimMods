@@ -17,6 +17,7 @@ namespace ModularMagic_Utilities.Models
         public float? weatherZoneRadius;
         public bool? enableDome;
         public bool? enableProjector;
+        public string? lightColorPreset;
 
         public BuildPieceConfigOptions(GameObject prefab, string name, string recipe)
         {

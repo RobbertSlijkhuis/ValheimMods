@@ -6,9 +6,7 @@ namespace ModularMagic_Utilities.Models
     {
         public Material lanternOn;
         public Material lanternOff;
-        public Color flareColor;
-        public Color glassColor;
-        public Color lightColor;
+        public LightPresetColors presetColors;
         public string lightColorPreset;
         public float lightRange;
         public float lightIntensity;

@@ -96,12 +96,12 @@ namespace ModularMagic_Utilities
         {
             try
             {
-                ItemHelper.Create(prefabs.spellbook1Prefab, PluginConfig.spellbook1);
-                ItemHelper.Create(prefabs.spellbook2Prefab, PluginConfig.spellbook2);
-                ItemHelper.Create(prefabs.spellbook3Prefab, PluginConfig.spellbook3);
-                ItemHelper.Create(prefabs.lantern1Prefab, PluginConfig.lantern1, true);
-                ItemHelper.Create(prefabs.lantern2Prefab, PluginConfig.lantern2, true);
-                ItemHelper.Create(prefabs.lantern3Prefab, PluginConfig.lantern3, true);
+                ItemHelper.Create(prefabs.Spellbook1, PluginConfig.spellbook1);
+                ItemHelper.Create(prefabs.Spellbook2, PluginConfig.spellbook2);
+                ItemHelper.Create(prefabs.Spellbook3, PluginConfig.spellbook3);
+                ItemHelper.Create(prefabs.Lantern1, PluginConfig.lantern1, true);
+                ItemHelper.Create(prefabs.Lantern2, PluginConfig.lantern2, true);
+                ItemHelper.Create(prefabs.Lantern3, PluginConfig.lantern3, true);
 
                 PrefabManager.OnVanillaPrefabsAvailable -= _AddUtilities;
             }
@@ -118,20 +118,23 @@ namespace ModularMagic_Utilities
             {
                 GameObject itemStand = PrefabManager.Instance.GetPrefab("itemstandh");
                 ItemStand itemStandcomp = itemStand.GetComponent<ItemStand>();
-                itemStandcomp.m_supportedItems.Add(prefabs.spellbook1Prefab.GetComponent<ItemDrop>());
-                itemStandcomp.m_supportedItems.Add(prefabs.spellbook2Prefab.GetComponent<ItemDrop>());
-                itemStandcomp.m_supportedItems.Add(prefabs.spellbook3Prefab.GetComponent<ItemDrop>());
-                itemStandcomp.m_supportedItems.Add(prefabs.lantern1Prefab.GetComponent<ItemDrop>());
-                itemStandcomp.m_supportedItems.Add(prefabs.lantern2Prefab.GetComponent<ItemDrop>());
-                itemStandcomp.m_supportedItems.Add(prefabs.lantern3Prefab.GetComponent<ItemDrop>());
+                itemStandcomp.m_supportedItems.Add(prefabs.Spellbook1.GetComponent<ItemDrop>());
+                itemStandcomp.m_supportedItems.Add(prefabs.Spellbook2.GetComponent<ItemDrop>());
+                itemStandcomp.m_supportedItems.Add(prefabs.Spellbook3.GetComponent<ItemDrop>());
+                itemStandcomp.m_supportedItems.Add(prefabs.Lantern1.GetComponent<ItemDrop>());
+                itemStandcomp.m_supportedItems.Add(prefabs.Lantern2.GetComponent<ItemDrop>());
+                itemStandcomp.m_supportedItems.Add(prefabs.Lantern3.GetComponent<ItemDrop>());
 
-                ItemStand marbleItemStandcomp = prefabs.MarbleItemstand.gameObject.GetComponent<ItemStand>();
-                marbleItemStandcomp.m_supportedItems.Add(prefabs.spellbook1Prefab.GetComponent<ItemDrop>());
-                marbleItemStandcomp.m_supportedItems.Add(prefabs.spellbook2Prefab.GetComponent<ItemDrop>());
-                marbleItemStandcomp.m_supportedItems.Add(prefabs.spellbook3Prefab.GetComponent<ItemDrop>());
-                marbleItemStandcomp.m_supportedItems.Add(prefabs.lantern1Prefab.GetComponent<ItemDrop>());
-                marbleItemStandcomp.m_supportedItems.Add(prefabs.lantern2Prefab.GetComponent<ItemDrop>());
-                marbleItemStandcomp.m_supportedItems.Add(prefabs.lantern3Prefab.GetComponent<ItemDrop>());
+                ZNetView netView = prefabs.MarbleItemstand.GetComponent<ZNetView>();
+                ItemStand marbleItemStandcomp = prefabs.MarbleItemstand.transform.Find("itemstand").gameObject.GetComponent<ItemStand>();
+                marbleItemStandcomp.m_netViewOverride = netView;
+                marbleItemStandcomp.m_supportedItems.Add(prefabs.Spellbook1.GetComponent<ItemDrop>());
+                marbleItemStandcomp.m_supportedItems.Add(prefabs.Spellbook2.GetComponent<ItemDrop>());
+                marbleItemStandcomp.m_supportedItems.Add(prefabs.Spellbook3.GetComponent<ItemDrop>());
+                marbleItemStandcomp.m_supportedItems.Add(prefabs.Lantern1.GetComponent<ItemDrop>());
+                marbleItemStandcomp.m_supportedItems.Add(prefabs.Lantern2.GetComponent<ItemDrop>());
+                marbleItemStandcomp.m_supportedItems.Add(prefabs.Lantern3.GetComponent<ItemDrop>());
+                marbleItemStandcomp.m_unsupportedItems.Add(PrefabManager.Instance.GetPrefab("Hammer").GetComponent<ItemDrop>());
                 WeatherZone weatherZone = prefabs.MarbleItemstand.transform.Find("weatherzone").gameObject.AddComponent<WeatherZone>();
 
                 List<EffectData> startList = new List<EffectData>();
@@ -197,28 +200,28 @@ namespace ModularMagic_Utilities
             _assetBundle = AssetUtils.LoadAssetBundleFromResources("modularmagic_utilities_dw");
 
             // Materials
-            materials.lantern1Mat = _assetBundle.LoadAsset<Material>("MMU_MythicalLanternMat");
-            materials.lantern1OffMat = _assetBundle.LoadAsset<Material>("MMU_MythicalLanternMat_Off");
-            materials.lantern2Mat = _assetBundle.LoadAsset<Material>("MMU_EverwinterLanternMat");
-            materials.lantern2OffMat = _assetBundle.LoadAsset<Material>("MMU_EverwinterLanternMat_Off");
-            materials.lantern3Mat = _assetBundle.LoadAsset<Material>("MMU_MistcallerLanternMat");
-            materials.lantern3OffMat = _assetBundle.LoadAsset<Material>("MMU_MistcallerLanternMat_Off");
+            materials.Lantern1 = _assetBundle.LoadAsset<Material>("MythicalLanternMat_MMU");
+            materials.Lantern1Off = _assetBundle.LoadAsset<Material>("MythicalLanternMat_Off_MMU");
+            materials.Lantern2 = _assetBundle.LoadAsset<Material>("EverwinterLanternMat_MMU");
+            materials.Lantern2Off = _assetBundle.LoadAsset<Material>("EverwinterLanternMat_Off_MMU");
+            materials.Lantern3 = _assetBundle.LoadAsset<Material>("MistcallerLanternMat_MMU");
+            materials.Lantern3Off = _assetBundle.LoadAsset<Material>("MistcallerLanternMat_Off_MMU");
+            materials.AltarParticles = _assetBundle.LoadAsset<Material>("AltarParticals_MMU");
 
             // Books
-            prefabs.spellbook1Prefab = _assetBundle.LoadAsset<GameObject>("MMU_SpellbookOfTheHearth");
-            prefabs.spellbook2Prefab = _assetBundle.LoadAsset<GameObject>("MMU_GrimoireOfTheStorm");
-            prefabs.spellbook3Prefab = _assetBundle.LoadAsset<GameObject>("MMU_CodexOfTheAsgardianSorcerer");
+            prefabs.Spellbook1 = _assetBundle.LoadAsset<GameObject>("MMU_SpellbookOfTheHearth");
+            prefabs.Spellbook2 = _assetBundle.LoadAsset<GameObject>("MMU_GrimoireOfTheStorm");
+            prefabs.Spellbook3 = _assetBundle.LoadAsset<GameObject>("MMU_CodexOfTheAsgardianSorcerer");
 
             // Lanterns
-            prefabs.lantern1Prefab = _assetBundle.LoadAsset<GameObject>("MMU_MythicalLantern");
-            prefabs.lantern2Prefab = _assetBundle.LoadAsset<GameObject>("MMU_EverwinterLantern");
-            prefabs.lantern3Prefab = _assetBundle.LoadAsset<GameObject>("MMU_MistcallerLantern");
+            prefabs.Lantern1 = _assetBundle.LoadAsset<GameObject>("MMU_MythicalLantern");
+            prefabs.Lantern2 = _assetBundle.LoadAsset<GameObject>("MMU_EverwinterLantern");
+            prefabs.Lantern3 = _assetBundle.LoadAsset<GameObject>("MMU_MistcallerLantern");
 
             // Pieces
             prefabs.MarbleItemstand = _assetBundle.LoadAsset<GameObject>("MMU_MarbleItemstand");
             prefabs.ActivationFX = _assetBundle.LoadAsset<GameObject>("fx_activation_MMU");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ActivationFX, true));
-            //prefabs.ShieldGen = _assetBundle.LoadAsset<GameObject>("piece_shieldgenerator_MMU");
         }
     }
 }

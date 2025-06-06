@@ -11,7 +11,7 @@ namespace ModularMagic_Utilities.Helpers
 {
     internal class PieceHelper
     {
-        public static void Create(GameObject prefab, BuildPieceConfig config)
+        public static void Create(GameObject prefab, BuildPieceConfig config, bool isWeatherZone = false)
         {
             try
             {
@@ -29,12 +29,13 @@ namespace ModularMagic_Utilities.Helpers
                 else
                     pieceConfig.Requirements = requirements;
 
-                UpdateHelper.UpdateWeatherZone(prefab, new UpdateWeatherZoneOptions()
+                if (isWeatherZone)
                 {
-                    radius = config.weatherZoneRadius.Value,
-                    enableDome = config.enableDome.Value,
-                    enableProjector = config.enableProjector.Value,
-                });
+                    UpdateHelper.UpdateWeatherZone(prefab, new UpdateWeatherZoneOptions()
+                    {
+                        radius = config.weatherZoneRadius.Value,
+                    });
+                }
 
                 PieceManager.Instance.AddPiece(new CustomPiece(prefab, true, pieceConfig));
             }

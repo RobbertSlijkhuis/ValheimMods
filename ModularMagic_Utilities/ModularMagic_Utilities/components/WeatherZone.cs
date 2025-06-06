@@ -1,14 +1,17 @@
-﻿using ModularMagic_Utilities.Configs;
+﻿using Jotunn;
+using ModularMagic_Utilities.Configs;
 using ModularMagic_Utilities.Helpers;
 using ModularMagic_Utilities.Models;
+using ModularMagic_Utilities.Types;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static EffectList;
 
 namespace ModularMagic_Utilities.Components
 {
-    internal class WeatherZone : MonoBehaviour
+    internal class WeatherZone : MonoBehaviour, Interactable, TextReceiver
     {
         public EnvZone envZone;
         public CircleProjector projector;
@@ -22,7 +25,7 @@ namespace ModularMagic_Utilities.Components
         public Color emissionColor = new Color(0f, 0.5676858f, 1.294612f, 1f);
         public Color emissionOffColor = new Color(0f, 0f, 0f, 1f);
         public Color emissionRuneOffColor = new Color(0.2f, 0.2f, 0.2f, 1f);
-        public float projectorMultiplier = 2.6f;
+        public float projectorSegmentMultiplier = 4f;
 
         private void Awake()
         {
@@ -40,6 +43,17 @@ namespace ModularMagic_Utilities.Components
             {
                 Jotunn.Logger.LogError("Could not finish WeatherZone Awake: "+ e);
             }
+        }
+
+        public void SetText(string value)
+        {
+            Jotunn.Logger.LogWarning("SetText() " + value);
+        }
+
+        public string GetText()
+        {
+            Jotunn.Logger.LogWarning("GetText()");
+            return "Test";
         }
 
         public void InitWeather(string itemName)
@@ -61,7 +75,7 @@ namespace ModularMagic_Utilities.Components
                 return;
 
             envZone.m_environment = newEnv;
-            _SetEffects(true);
+            SetEffects(true);
         }
 
         public void EnableWeather(ItemDrop.ItemData item)
@@ -97,7 +111,7 @@ namespace ModularMagic_Utilities.Components
                     return;
 
                 envZone.m_environment = newEnv;
-                _SetEffects(true);
+                SetEffects(true);
             }
             catch (Exception e)
             {
@@ -112,12 +126,11 @@ namespace ModularMagic_Utilities.Components
                 return;
 
             envZone.m_environment = "";
-            _SetEffects(false);
+            SetEffects(false);
         }
 
         public void SetRadius(float value)
         {
-            Jotunn.Logger.LogWarning("WeatherZone.SetRadius() " + value);
             Transform weatherZoneTrans = transform.parent.Find("weatherzone");
             Transform forceFieldTrans = transform.parent.Find("New/forcefield");
             Transform projectorTrans = transform.parent.Find("New/projector");
@@ -125,9 +138,7 @@ namespace ModularMagic_Utilities.Components
 
             if (weatherZoneTrans != null)
             {
-                Jotunn.Logger.LogWarning("Change weatherzone radius...");
                 weatherZoneTrans.gameObject.GetComponent<SphereCollider>().radius = radius;
-                Jotunn.Logger.LogWarning("Radius is now: " + weatherZoneTrans.gameObject.GetComponent<SphereCollider>().radius);
             }
 
             if (forceFieldTrans != null)
@@ -137,13 +148,49 @@ namespace ModularMagic_Utilities.Components
             {
                 CircleProjector projector = projectorTrans.gameObject.GetComponent<CircleProjector>();
                 projector.m_radius = radius;
-                projector.m_nrOfSegments = Mathf.FloorToInt(radius * projectorMultiplier);
+                projector.m_nrOfSegments = Mathf.FloorToInt(radius * projectorSegmentMultiplier);
             }
+        }
+
+        public bool UseItem(Humanoid user, ItemDrop.ItemData item)
+        {
+            Jotunn.Logger.LogWarning("WeatherZone.UseItem()");
+            return true;
+        }
+
+        public bool Interact(Humanoid user, bool hold, bool alt)
+        {
+            Jotunn.Logger.LogWarning("WeatherZone.Interact()");
+            if (hold)
+                return false;
+            
+            Transform projectorTrans = transform.parent.Find("New/projector");
+
+            if (projectorTrans != null)
+            {
+                enableProjector = !enableProjector;
+                projectorTrans.gameObject.SetActive(enableProjector);
+                CircleProjector projector = projectorTrans.gameObject.GetComponent<CircleProjector>();
+                projector.m_radius = PluginConfig.piece1.weatherZoneRadius.Value;
+                projector.m_nrOfSegments = Mathf.FloorToInt(radius * projectorSegmentMultiplier);
+                return true;
+            }
+
+            return false;
+        }
+
+        public string GetHoverText()
+        {
+            return (enableProjector ? "Disable" : "Enable") + "radius check";
+        }
+
+        public string GetHoverName()
+        {
+            return PluginConfig.piece1.name.Value;
         }
 
         public void SetEnableDome(bool value)
         {
-            Jotunn.Logger.LogWarning("WeatherZone.SetEnableDome() " + value);
             Transform forceFieldTrans = transform.parent.Find("New/forcefield");
 
             if (forceFieldTrans != null)
@@ -152,7 +199,6 @@ namespace ModularMagic_Utilities.Components
 
         public void SetEnableProjector(bool value)
         {
-            Jotunn.Logger.LogWarning("WeatherZone.SetEnableProjector() " + value);
             Transform projectorTrans = transform.parent.Find("New/projector");
 
             if (projectorTrans != null)
@@ -160,11 +206,16 @@ namespace ModularMagic_Utilities.Components
         }
 
 
-        private void _SetEffects(bool value)
+        private void SetEffects(bool value)
         {
             Jotunn.Logger.LogWarning("WeatherZone._SetEffects() " + value);
             try
             {
+                LightPresetColors presetColors = LightPresetHelper.GetColors(PluginConfig.piece1.lightColorPreset.Value);
+                Jotunn.Logger.LogWarning("Emission: " + presetColors.emissionColor.ToString());
+                presetColors.emissionColor = LightPresetHelper.ApplyMultiplierToColor(presetColors.emissionColor, 0.8f);
+                Jotunn.Logger.LogWarning("New: " + presetColors.emissionColor.ToString());
+
                 Transform emissionTrans = transform.parent.Find("New/emission");
                 Transform runesTrans = transform.parent.Find("New/runes emission");
                 Transform forceFieldTrans = transform.parent.Find("New/forcefield");
@@ -176,13 +227,19 @@ namespace ModularMagic_Utilities.Components
                 {
                     MeshRenderer meshRendererComp = emissionTrans.gameObject.GetComponent<MeshRenderer>();
                     Material mat = meshRendererComp.materials[0];
-                    StartLerpColor(mat, value ? emissionOffColor : emissionColor, value ? emissionColor : emissionOffColor, 3f);
+                    StartLerpColor(mat, value ? emissionOffColor : presetColors.emissionColor, value ? presetColors.emissionColor : emissionOffColor, 3f);
 
                     Transform particleTrans = emissionTrans.gameObject.transform.Find("particles");
                     ParticleSystem particles = particleTrans.gameObject.GetComponent<ParticleSystem>();
+                    ParticleSystemRenderer particlesRenderer = particleTrans.gameObject.GetComponent<ParticleSystemRenderer>();
+                    particlesRenderer.sharedMaterial.SetColor("_EmissionColor", presetColors.emissionColor);
+                    particles.startColor = presetColors.emissionColor;
 
                     Transform particleFastTrans = emissionTrans.gameObject.transform.Find("particles_fast");
                     ParticleSystem particlesFast = particleFastTrans.gameObject.GetComponent<ParticleSystem>();
+                    ParticleSystemRenderer particlesFastRenderer = particleFastTrans.gameObject.GetComponent<ParticleSystemRenderer>();
+                    particlesFastRenderer.sharedMaterial.SetColor("_EmissionColor", presetColors.emissionColor);
+                    particlesFast.startColor = presetColors.emissionColor;
 
                     if (value)
                     {
@@ -197,13 +254,17 @@ namespace ModularMagic_Utilities.Components
 
                     Transform lightsTrans = emissionTrans.gameObject.transform.Find("light");
                     lightsTrans.gameObject.SetActive(value);
+                    lightsTrans.gameObject.GetComponent<Light>().color = presetColors.lightColor;
+                    ParticleSystem.MainModule flareMain = lightsTrans.gameObject.GetComponent<ParticleSystem>().main;
+                    flareMain.startColor = presetColors.flareColor;
+
                 }
 
                 if (runesTrans != null)
                 {
                     MeshRenderer meshRendererComp = runesTrans.gameObject.GetComponent<MeshRenderer>();
                     Material mat = meshRendererComp.materials[0];
-                    StartLerpColor(mat, value ? emissionRuneOffColor : emissionColor, value ? emissionColor : emissionRuneOffColor, 1.5f);
+                    StartLerpColor(mat, value ? emissionRuneOffColor : presetColors.emissionColor, value ? presetColors.emissionColor : emissionRuneOffColor, 1.5f);
                 }
 
                 if (forceFieldTrans != null)
@@ -213,13 +274,15 @@ namespace ModularMagic_Utilities.Components
                     forceFieldTrans.localScale = new Vector3(newRadius, newRadius, newRadius);
                 }
 
-                if (projectorTrans != null)
-                {
-                    projectorTrans.gameObject.SetActive(PluginConfig.piece1.enableProjector.Value ? value : false);
-                    CircleProjector projector = projectorTrans.gameObject.GetComponent<CircleProjector>();
-                    projector.m_radius = PluginConfig.piece1.weatherZoneRadius.Value;
-                    projector.m_nrOfSegments = Mathf.FloorToInt(radius * projectorMultiplier);
-                }
+                //if (projectorTrans != null)
+                //{
+                //    projectorTrans.gameObject.SetActive(PluginConfig.piece1.enableProjector.Value ? value : false);
+                //    CircleProjector projector = projectorTrans.gameObject.GetComponent<CircleProjector>();
+                //    projector.m_radius = PluginConfig.piece1.weatherZoneRadius.Value;
+                //    projector.m_nrOfSegments = Mathf.FloorToInt(radius * projectorSegmentMultiplier);
+                //}
+
+                SetColorsOnActivationFX(presetColors);
 
                 if (value)
                     startEffects.Create(startEffectTrans.position, startEffectTrans.rotation);
@@ -229,6 +292,55 @@ namespace ModularMagic_Utilities.Components
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not enable/disable Marble Item Stand effects: " + e);
+            }
+        }
+
+        private void SetColorsOnActivationFX(LightPresetColors presetColors)
+        {
+            try
+            {
+                EffectData startVFX = startEffects.m_effectPrefabs[1];
+
+                if (startVFX == null)
+                    throw new Exception("Effect is null");
+
+                GameObject activationFX = startVFX.m_prefab;
+
+                if (activationFX == null)
+                    throw new Exception("prefab is null");
+
+                Transform particleExplTrans = activationFX.transform.Find("Particle System _expl");
+                Transform trailsExplTrans = activationFX.transform.Find("trails _expl");
+                Transform gloriaTrans = activationFX.transform.Find("gloria");
+                Transform lightTrans = activationFX.transform.Find("Point light");
+                float multiplier = 0.3f;
+
+                if (presetColors.lightPreset == LightPresetType.Green || presetColors.lightPreset == LightPresetType.Blue)
+                    multiplier = 0.1f;
+
+                if (presetColors.lightPreset == LightPresetType.Pink)
+                    multiplier = 0.6f;
+
+                Jotunn.Logger.LogWarning("Emission ActivationFX: " + LightPresetHelper.ApplyMultiplierToColor(presetColors.emissionColor, multiplier));
+
+                ParticleSystem.MainModule particleMain = particleExplTrans.gameObject.GetComponent<ParticleSystem>().main;
+                particleMain.startColor = LightPresetHelper.ApplyMultiplierToColor(presetColors.emissionColor, multiplier);
+
+                ParticleSystem.MainModule trailsMain = trailsExplTrans.gameObject.GetComponent<ParticleSystem>().main;
+                trailsMain.startColor = LightPresetHelper.ApplyMultiplierToColor(presetColors.emissionColor, multiplier);
+
+                ParticleSystem.MainModule gloriaMain = gloriaTrans.gameObject.GetComponent<ParticleSystem>().main;
+                Color gloriaColor = LightPresetHelper.ApplyMultiplierToColor(presetColors.emissionColor, multiplier);
+                gloriaColor.a = 0.5607843f;
+                gloriaMain.startColor = gloriaColor;
+
+                lightTrans.gameObject.GetComponent<Light>().color = presetColors.lightColor;
+
+                startEffects.m_effectPrefabs[1].m_prefab = activationFX;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not set colors on ActivationFX: " + e);
             }
         }
 

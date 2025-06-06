@@ -48,7 +48,7 @@ namespace ModularMagic_Utilities.Configs
 
             enable = Config.Bind(new ConfigDefinition(options.sectionName, "Enable"), options.enable,
                new ConfigDescription("Wether the recipe for this item is enabled", null,
-               new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
+               new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             enable.SettingChanged += (obj, attr) =>
             {
                 RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
@@ -61,7 +61,7 @@ namespace ModularMagic_Utilities.Configs
 
             name = Config.Bind(new ConfigDefinition(options.sectionName, "Name"), options.name,
               new ConfigDescription("The name of the item", null,
-              new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
+              new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             name.SettingChanged += (obj, attr) =>
             {
                 UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropOptions()
@@ -72,7 +72,7 @@ namespace ModularMagic_Utilities.Configs
 
             description = Config.Bind(new ConfigDefinition(options.sectionName, "Description"), options.description,
                 new ConfigDescription("The description of the item", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             description.SettingChanged += (obj, attr) =>
             {
                 UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropOptions()
@@ -84,7 +84,7 @@ namespace ModularMagic_Utilities.Configs
             craftingStation = Config.Bind(new ConfigDefinition(options.sectionName, "Crafting station"), options.craftingStation,
                 new ConfigDescription("The crafting station the item can be crafted in",
                 new AcceptableValueList<string>(craftingStationOptions),
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             craftingStation.SettingChanged += (obj, attr) =>
             {
                 RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
@@ -97,7 +97,7 @@ namespace ModularMagic_Utilities.Configs
 
             minStationLevel = Config.Bind(new ConfigDefinition(options.sectionName, "Required station level"), options.minStationLevel,
                 new ConfigDescription("The required station level to craft this item", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             minStationLevel.SettingChanged += (obj, attr) =>
             {
                 RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
@@ -110,7 +110,7 @@ namespace ModularMagic_Utilities.Configs
 
             recipe = Config.Bind(new ConfigDefinition(options.sectionName, "Recipe"), options.recipe,
                 new ConfigDescription("The items required to craft this item", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             recipe.SettingChanged += (obj, attr) =>
             {
                 RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
@@ -123,7 +123,7 @@ namespace ModularMagic_Utilities.Configs
 
             weight = Config.Bind(new ConfigDefinition(options.sectionName, "Weight"), options.weight,
                 new ConfigDescription("The weight applied to the item", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             weight.SettingChanged += (obj, attr) =>
             {
                 UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropOptions()
@@ -134,7 +134,7 @@ namespace ModularMagic_Utilities.Configs
 
             eitr = Config.Bind(new ConfigDefinition(options.sectionName, "Eitr"), options.eitr,
                 new ConfigDescription("The amount of eitr the item gives", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             eitr.SettingChanged += (obj, attr) =>
             {
                 if (eitr.Value < 0f) return;
@@ -146,7 +146,7 @@ namespace ModularMagic_Utilities.Configs
 
             eitrRegen = Config.Bind(new ConfigDefinition(options.sectionName, "Eitr regen"), options.eitrRegen,
                 new ConfigDescription("The amount of eitr regen the item gives (example: 1 = 100% or 0.05 = 5% etc.)", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             eitrRegen.SettingChanged += (obj, attr) =>
             {
                 Jotunn.Logger.LogWarning("eitreRegen: " + eitrRegen.Value);
@@ -160,7 +160,7 @@ namespace ModularMagic_Utilities.Configs
 
             elementalMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Elemental magic"), options.elementalMagic,
                 new ConfigDescription("The amount of Elemental magic skill the item gives", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             elementalMagic.SettingChanged += (obj, attr) =>
             {
                 if (elementalMagic.Value < 0f) return;
@@ -172,7 +172,7 @@ namespace ModularMagic_Utilities.Configs
 
             bloodMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Blood magic"), options.bloodMagic,
                 new ConfigDescription("The amount of Blood magic skill the item gives", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             bloodMagic.SettingChanged += (obj, attr) =>
             {
                 if (bloodMagic.Value < 0f) return;
@@ -187,7 +187,7 @@ namespace ModularMagic_Utilities.Configs
                 demister = Config.Bind(new ConfigDefinition(options.sectionName, "Demister range"), (float)options.demister,
                     new ConfigDescription("The range of the demister effect (push mist away). 0 disables this effect, maximum 50 for performance reasons",
                     new AcceptableValueRange<float>(0f, 50f),
-                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = _HandleOrder() }));
+                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 demister.SettingChanged += (obj, attr) =>
                 {
                     UpdateHelper.UpdateDemisterOnBoth(options.prefab, demister.Value);
@@ -199,7 +199,7 @@ namespace ModularMagic_Utilities.Configs
                 lightColorPreset = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern color preset"), options.lightColorPreset,
                     new ConfigDescription("A preset of light, flare and glass color (This will be updated when you turn off/on the lantern)",
                     new AcceptableValueList<string>(lanterColorOptions),
-                    new ConfigurationManagerAttributes { IsAdminOnly = false, Order = _HandleOrder() }));
+                    new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
             }
 
             if (options.lightRange != null)
@@ -207,18 +207,18 @@ namespace ModularMagic_Utilities.Configs
                 lightRange = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern light range"), (float)options.lightRange,
                     new ConfigDescription("The range of the light emitted by the lantern (This will be updated when you turn off/on the lantern)",
                     new AcceptableValueRange<float>(0f, 50f),
-                    new ConfigurationManagerAttributes { IsAdminOnly = false, Order = _HandleOrder() }));
+                    new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
             }
 
             if (options.lightIntensity != null)
             {
                 lightIntensity = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern light intensity"), (float)options.lightIntensity,
                     new ConfigDescription("The intensity of the light emitted by the lantern (This will be updated when you turn off/on the lantern)", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = false, Order = _HandleOrder() }));
+                    new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
             }
         }
 
-        private int _HandleOrder()
+        private int HandleOrder()
         {
             entryCount = entryCount - 1;
             return entryCount;

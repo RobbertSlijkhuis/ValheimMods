@@ -16,16 +16,16 @@ namespace ModularMagic_Utilities.Components
             _netView = base.gameObject.GetComponent<ZNetView>();
             status = "";
 
-            InvokeRepeating(nameof(_UpdateStatus), 0f, 0.3f);
+            InvokeRepeating(nameof(UpdateStatus), 0f, 0.3f);
         }
 
-        private void _UpdateStatus()
+        private void UpdateStatus()
         {
             try
             {
                 if (!_netView || !_netView.IsValid() || (!PluginConfig.lantern1.enable.Value && !PluginConfig.lantern2.enable.Value && !PluginConfig.lantern3.enable.Value))
                 {
-                    CancelInvoke(nameof(_UpdateStatus));
+                    CancelInvoke(nameof(UpdateStatus));
                     return;
                 }
 
@@ -37,7 +37,7 @@ namespace ModularMagic_Utilities.Components
                 if (status == "")
                     return;
 
-                LanternStatus current = _statusStringToObject(status);
+                LanternStatus current = StatusStringToObject(status);
                 LanternHelper.UpdateLanternMode(current.playerId, current.status);
             }
             catch (Exception e)
@@ -51,7 +51,7 @@ namespace ModularMagic_Utilities.Components
             if (status == "")
                 return null;
 
-            return _statusStringToObject(status);
+            return StatusStringToObject(status);
         }
 
         public bool SetPlayerStatus(long playerId, bool value)
@@ -59,19 +59,19 @@ namespace ModularMagic_Utilities.Components
             if (!_netView || !_netView.IsValid() || !Player.m_localPlayer)
                 return false;
 
-            string newStatus = _statusObjectToString(new LanternStatus(playerId, value));
+            string newStatus = StatusObjectToString(new LanternStatus(playerId, value));
             
             _netView.m_zdo.Set(ModularMagic_Utilities.lanternStatusHashCode, newStatus);
             return true;
         }
 
-        private LanternStatus _statusStringToObject(string value)
+        private LanternStatus StatusStringToObject(string value)
         {
             string[] data = status.Split(':');
             return new LanternStatus(long.Parse(data[0]), data[1].ToLower() == "true" ? true : false);
         }
 
-        private string _statusObjectToString(LanternStatus item)
+        private string StatusObjectToString(LanternStatus item)
         {
             return item.playerId + ":" + item.status;
         }

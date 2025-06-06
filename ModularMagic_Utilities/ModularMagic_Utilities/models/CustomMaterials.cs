@@ -4,11 +4,12 @@ namespace ModularMagic_Utilities.Models
 {
     class CustomMaterials
     {
-        public Material lantern1Mat;
-        public Material lantern1OffMat;
-        public Material lantern2Mat;
-        public Material lantern2OffMat;
-        public Material lantern3Mat;
-        public Material lantern3OffMat;
+        public Material Lantern1;
+        public Material Lantern1Off;
+        public Material Lantern2;
+        public Material Lantern2Off;
+        public Material Lantern3;
+        public Material Lantern3Off;
+        public Material AltarParticles;
     }
 }

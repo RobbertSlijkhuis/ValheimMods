@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 2111753075
+CRC: 750773366
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 75e93f5543017fae5e6aabcf6d27209c
+    Hash: 5f5a1f49759ff761c27f92c587b98144
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 527ebe427645916d2d28c108f78ed578
+    Hash: 6a81401a32f8d60f3260978bb1a30842
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 75e93f5543017fae5e6aabcf6d27209c
+    Hash: 5f5a1f49759ff761c27f92c587b98144
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -29,6 +29,8 @@ ClassTypes:
 - Class: 48
   Script: {instanceID: 0}
 - Class: 54
+  Script: {instanceID: 0}
+- Class: 64
   Script: {instanceID: 0}
 - Class: 65
   Script: {instanceID: 0}
@@ -99,6 +101,7 @@ Assets:
 - Assets/Custom/Material/Lanterns/MythicalLanternMat_Off_MMU.mat
 - Assets/Custom/PrefabInstance/Lantern/MMU_EverwinterLantern.prefab
 - Assets/Custom/Material/Lanterns/EverwinterLanternMat_Off_MMU.mat
+- Assets/Custom/Material/Itemstand/AltarParticals_MMU.mat
 - Assets/Custom/PrefabInstance/Itemstand/fx_activation_MMU.prefab
 - Assets/Custom/PrefabInstance/Books/MMU_SpellbookOfTheHearth.prefab
 - Assets/Custom/Material/Lanterns/MistcallerLanternMat_Off_MMU.mat

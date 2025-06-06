@@ -54,7 +54,7 @@ namespace ModularMagic_Utilities.Harmony
                 if (__instance == null && __instance.m_currentItemName == "")
                     return;
 
-                Transform weatherZoneTrans = __instance.gameObject.transform.Find("weatherzone");
+                Transform weatherZoneTrans = __instance.transform.parent.Find("weatherzone");
 
                 if (weatherZoneTrans == null)
                     return;
@@ -83,9 +83,12 @@ namespace ModularMagic_Utilities.Harmony
                 if (__instance == null)
                     return;
 
-                Transform weatherZoneTrans = __instance.gameObject.transform.Find("weatherzone");
+                Transform weatherZoneTrans = __instance.gameObject.transform.parent.Find("weatherzone");
 
                 if (weatherZoneTrans == null)
+                    return;
+
+                if (__instance.m_currentItemName != "")
                     return;
 
                 weatherZoneTrans.gameObject.GetComponent<WeatherZone>().EnableWeather(item);
@@ -105,7 +108,7 @@ namespace ModularMagic_Utilities.Harmony
                 if (__instance == null)
                     return;
 
-                Transform weatherZoneTrans = __instance.gameObject.transform.Find("weatherzone");
+                Transform weatherZoneTrans = __instance.gameObject.transform.parent.Find("weatherzone");
 
                 if (weatherZoneTrans == null)
                     return;
@@ -127,12 +130,12 @@ namespace ModularMagic_Utilities.Harmony
                 if (__instance == null)
                     return;
 
-                _SetEitr(__instance, PluginConfig.spellbook1.magicStatusEffectName, PluginConfig.spellbook1.eitr.Value, ref eitr);
-                _SetEitr(__instance, PluginConfig.spellbook2.magicStatusEffectName, PluginConfig.spellbook2.eitr.Value, ref eitr);
-                _SetEitr(__instance, PluginConfig.spellbook3.magicStatusEffectName, PluginConfig.spellbook3.eitr.Value, ref eitr);
-                _SetEitr(__instance, PluginConfig.lantern1.magicStatusEffectName, PluginConfig.lantern1.eitr.Value, ref eitr);
-                _SetEitr(__instance, PluginConfig.lantern2.magicStatusEffectName, PluginConfig.lantern2.eitr.Value, ref eitr);
-                _SetEitr(__instance, PluginConfig.lantern3.magicStatusEffectName, PluginConfig.lantern3.eitr.Value, ref eitr);
+                SetEitr(__instance, PluginConfig.spellbook1.magicStatusEffectName, PluginConfig.spellbook1.eitr.Value, ref eitr);
+                SetEitr(__instance, PluginConfig.spellbook2.magicStatusEffectName, PluginConfig.spellbook2.eitr.Value, ref eitr);
+                SetEitr(__instance, PluginConfig.spellbook3.magicStatusEffectName, PluginConfig.spellbook3.eitr.Value, ref eitr);
+                SetEitr(__instance, PluginConfig.lantern1.magicStatusEffectName, PluginConfig.lantern1.eitr.Value, ref eitr);
+                SetEitr(__instance, PluginConfig.lantern2.magicStatusEffectName, PluginConfig.lantern2.eitr.Value, ref eitr);
+                SetEitr(__instance, PluginConfig.lantern3.magicStatusEffectName, PluginConfig.lantern3.eitr.Value, ref eitr);
             }
             catch (Exception e) 
             {
@@ -151,18 +154,18 @@ namespace ModularMagic_Utilities.Harmony
 
                 float value = 0f;
 
-                if (_HaveStatusEffect(__instance, PluginConfig.spellbook1.magicStatusEffectName))
-                    value = _GetValueFromConfig(skillType, PluginConfig.spellbook1);
-                else if (_HaveStatusEffect(__instance, PluginConfig.spellbook2.magicStatusEffectName))
-                    value = _GetValueFromConfig(skillType, PluginConfig.spellbook2);
-                else if (_HaveStatusEffect(__instance, PluginConfig.spellbook3.magicStatusEffectName))
-                    value = _GetValueFromConfig(skillType, PluginConfig.spellbook3);
-                else if (_HaveStatusEffect(__instance, PluginConfig.lantern1.magicStatusEffectName))
-                    value = _GetValueFromConfig(skillType, PluginConfig.lantern1);
-                else if (_HaveStatusEffect(__instance, PluginConfig.lantern2.magicStatusEffectName))
-                    value = _GetValueFromConfig(skillType, PluginConfig.lantern2);
-                else if (_HaveStatusEffect(__instance, PluginConfig.lantern3.magicStatusEffectName))
-                    value = _GetValueFromConfig(skillType, PluginConfig.lantern3);
+                if (HaveStatusEffect(__instance, PluginConfig.spellbook1.magicStatusEffectName))
+                    value = GetValueFromConfig(skillType, PluginConfig.spellbook1);
+                else if (HaveStatusEffect(__instance, PluginConfig.spellbook2.magicStatusEffectName))
+                    value = GetValueFromConfig(skillType, PluginConfig.spellbook2);
+                else if (HaveStatusEffect(__instance, PluginConfig.spellbook3.magicStatusEffectName))
+                    value = GetValueFromConfig(skillType, PluginConfig.spellbook3);
+                else if (HaveStatusEffect(__instance, PluginConfig.lantern1.magicStatusEffectName))
+                    value = GetValueFromConfig(skillType, PluginConfig.lantern1);
+                else if (HaveStatusEffect(__instance, PluginConfig.lantern2.magicStatusEffectName))
+                    value = GetValueFromConfig(skillType, PluginConfig.lantern2);
+                else if (HaveStatusEffect(__instance, PluginConfig.lantern3.magicStatusEffectName))
+                    value = GetValueFromConfig(skillType, PluginConfig.lantern3);
 
                 float newLevel = __result + value;
                 __instance.m_player.GetSEMan().ModifySkillLevel(skillType, ref newLevel);
@@ -174,7 +177,7 @@ namespace ModularMagic_Utilities.Harmony
             }
         }
 
-        private static void _SetEitr(Player player, string name, float amount, ref float eitr)
+        private static void SetEitr(Player player, string name, float amount, ref float eitr)
         {
             if (player == null)
                 return;
@@ -187,12 +190,12 @@ namespace ModularMagic_Utilities.Harmony
             eitr += amount;
         }
 
-        private static bool _HaveStatusEffect(Skills __instance, string name)
+        private static bool HaveStatusEffect(Skills __instance, string name)
         {
             return __instance.m_player.GetSEMan().HaveStatusEffect(StringExtensionMethods.GetStableHashCode(name));
         }
 
-        private static float _GetValueFromConfig(Skills.SkillType skillType, UtilitiesConfig config)
+        private static float GetValueFromConfig(Skills.SkillType skillType, UtilitiesConfig config)
         {
             if (skillType == Skills.SkillType.ElementalMagic)
                 return config.elementalMagic.Value;
