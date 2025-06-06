@@ -4918,7 +4918,7 @@ GameObject:
   - component: {fileID: 5844707395254002415}
   - component: {fileID: 6475145821262303280}
   m_Layer: 0
-  m_Name: ME_mountain_effect_spine2
+  m_Name: MMA_frostwolf_chest_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7222,7 +7222,7 @@ GameObject:
   - component: {fileID: 5855102096156662176}
   - component: {fileID: 5156356893770741297}
   m_Layer: 0
-  m_Name: ME_mountain_effect_hand_left
+  m_Name: MMA_frostwolf_hand_left_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9664,7 +9664,7 @@ GameObject:
   - component: {fileID: 2470635933047771782}
   - component: {fileID: 5328050320578950737}
   m_Layer: 0
-  m_Name: ME_mountain_effect_hand_right
+  m_Name: MMA_frostwolf_hand_right_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

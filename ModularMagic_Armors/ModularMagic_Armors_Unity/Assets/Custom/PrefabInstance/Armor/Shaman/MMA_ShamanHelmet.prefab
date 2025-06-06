@@ -469,7 +469,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4694389727516079
 Transform:
   m_ObjectHideFlags: 0
@@ -5282,7 +5282,7 @@ GameObject:
   - component: {fileID: 7657293068937750583}
   - component: {fileID: 7898102165113840370}
   m_Layer: 22
-  m_Name: ME_blackforest_effect_head
+  m_Name: MMA_shaman_head_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7752,7 +7752,7 @@ GameObject:
   - component: {fileID: 4618082608034389862}
   - component: {fileID: 7385046208345965711}
   m_Layer: 0
-  m_Name: ME_blackforest_effect_antler_left
+  m_Name: MMA_shaman_antler_left_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12585,7 +12585,7 @@ GameObject:
   - component: {fileID: 2115832820674126982}
   - component: {fileID: 7833521808669188645}
   m_Layer: 0
-  m_Name: ME_blackforest_effect_antler_right
+  m_Name: MMA_shaman_antler_right_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

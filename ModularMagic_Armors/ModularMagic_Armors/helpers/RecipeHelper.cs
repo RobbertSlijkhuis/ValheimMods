@@ -5,6 +5,7 @@ using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using ModularMagic_Armors.Models;
+using ModularMagic_Armors.Types;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;

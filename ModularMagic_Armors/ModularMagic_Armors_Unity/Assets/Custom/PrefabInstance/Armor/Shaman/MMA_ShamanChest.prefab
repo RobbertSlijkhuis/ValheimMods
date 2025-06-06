@@ -5333,7 +5333,7 @@ GameObject:
   - component: {fileID: 961086458834682994}
   - component: {fileID: 5176809608646653001}
   m_Layer: 0
-  m_Name: ME_blackforest_effect_wrist_right
+  m_Name: MMA_shaman_wrist_right_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10166,7 +10166,7 @@ GameObject:
   - component: {fileID: 5214868189059784849}
   - component: {fileID: 7116218593265727437}
   m_Layer: 0
-  m_Name: ME_blackforest_effect_wrist_left
+  m_Name: MMA_shaman_wrist_left_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

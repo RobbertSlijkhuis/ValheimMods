@@ -4,6 +4,7 @@ using Jotunn.Managers;
 using ModularMagic_Armors.Configs;
 using ModularMagic_Armors.Models;
 using ModularMagic_Armors.StatusEffects;
+using ModularMagic_Armors.Types;
 using UnityEngine;
 
 namespace ModularMagic_Armors.Helpers

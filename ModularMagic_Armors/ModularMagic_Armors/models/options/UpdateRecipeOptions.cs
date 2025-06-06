@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using ModularMagic_Armors.Types;
 using UnityEngine;
 
 namespace ModularMagic_Armors.Models

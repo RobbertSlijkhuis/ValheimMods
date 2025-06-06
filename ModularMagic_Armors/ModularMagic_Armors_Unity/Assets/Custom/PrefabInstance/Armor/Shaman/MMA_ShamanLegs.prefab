@@ -2943,7 +2943,7 @@ GameObject:
   - component: {fileID: 230786432389031124}
   - component: {fileID: 7541010695605169953}
   m_Layer: 0
-  m_Name: ME_blackforest_effect_knee_left
+  m_Name: MMA_shaman_knee_left_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8000,7 +8000,7 @@ GameObject:
   - component: {fileID: 4612499676228329144}
   - component: {fileID: 9156206819167178756}
   m_Layer: 0
-  m_Name: ME_blackforest_effect_knee_right
+  m_Name: MMA_shaman_knee_right_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

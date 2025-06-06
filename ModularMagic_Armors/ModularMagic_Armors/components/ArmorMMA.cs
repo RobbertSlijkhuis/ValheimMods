@@ -21,16 +21,16 @@ namespace ModularMagic_Armors.Components
             _netView = base.gameObject.GetComponent<ZNetView>();
             status = "";
 
-            InvokeRepeating(nameof(_UpdateStatus), 0f, 0.3f);
+            InvokeRepeating(nameof(UpdateStatus), 0f, 0.3f);
         }
 
-        private void _UpdateStatus()
+        private void UpdateStatus()
         {
             try
             {
                 if (!_netView || !_netView.IsValid())
                 {
-                    CancelInvoke(nameof(_UpdateStatus));
+                    CancelInvoke(nameof(UpdateStatus));
                     return;
                 }
 
@@ -42,7 +42,7 @@ namespace ModularMagic_Armors.Components
                 if (status == "")
                     return;
 
-                ArmorStatus current = _statusStringToObject(status);
+                ArmorStatus current = StatusStringToObject(status);
                 UpdateHelper.UpdateItemEffects(current.playerId, current.items);
                 UpdateHelper.UpdateSetEffects(current.playerId, current.set);
             }
@@ -57,7 +57,7 @@ namespace ModularMagic_Armors.Components
             if (status == "")
                 return null;
 
-            return _statusStringToObject(status);
+            return StatusStringToObject(status);
         }
 
         public bool SetPlayerStatus(long playerId, ArmorStatus status)
@@ -65,19 +65,19 @@ namespace ModularMagic_Armors.Components
             if (!_netView || !_netView.IsValid() || !Player.m_localPlayer)
                 return false;
 
-            string newStatus = _statusObjectToString(status);
+            string newStatus = StatusObjectToString(status);
 
             _netView.m_zdo.Set(ModularMagic_Armors.armorStatusHashCode, newStatus);
             return true;
         }
 
-        public int? GetArmorSetFromPlayer(long playerId)
+        public int? GetArmorSetHashFromPlayer(long playerId)
         {
             Player player = Player.GetPlayer(playerId);
-            return GetArmorSetFromPlayer(player);
+            return GetArmorSetHashFromPlayer(player);
         }
 
-        public int? GetArmorSetFromPlayer(Player player)
+        public int? GetArmorSetHashFromPlayer(Player player)
         {
             if (player == null) 
                 return null;
@@ -103,13 +103,13 @@ namespace ModularMagic_Armors.Components
             return null;
         }
 
-        public List<int> GetArmorPiecesFromPlayer(long playerId)
+        public List<int> GetArmorHashesFromPlayer(long playerId)
         {
             Player player = Player.GetPlayer(playerId);
-            return GetArmorPiecesFromPlayer(player);
+            return GetArmorHashesFromPlayer(player);
         }
 
-        public List<int> GetArmorPiecesFromPlayer(Player player)
+        public List<int> GetArmorHashesFromPlayer(Player player)
         {
             if (player == null)
                 return null;
@@ -135,13 +135,10 @@ namespace ModularMagic_Armors.Components
             if (equiped.Find(item => item.m_shared.m_name == PluginConfig.armor6Chest.name.Value) != null)
                list.Add(ModularMagic_Armors.EmblaChestHashCode);
 
-            if (equiped.Find(item => item.m_shared.m_name == "Audacious Tiara") != null)
-               list.Add(ModularMagic_Armors.TiaraHashCode);
-
             return list;
         }
 
-        private ArmorStatus _statusStringToObject(string value)
+        private ArmorStatus StatusStringToObject(string value)
         {
             List<int> itemList = new List<int>();
             string[] data = status.Split(':');
@@ -159,7 +156,7 @@ namespace ModularMagic_Armors.Components
             return new ArmorStatus(long.Parse(data[0]), data[1] == "null" ? null : int.Parse(data[1]), itemList);
         }
 
-        private string _statusObjectToString(ArmorStatus status)
+        private string StatusObjectToString(ArmorStatus status)
         {
             string items = "";
 

@@ -1,4 +1,4 @@
-﻿namespace ModularMagic_Armors
+﻿namespace ModularMagic_Armors.Types
 {
     enum RecipeUpdateType
     {

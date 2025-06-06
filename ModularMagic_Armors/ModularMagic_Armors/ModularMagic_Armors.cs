@@ -16,26 +16,27 @@ namespace ModularMagic_Armors
 {
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
-    //[NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
+    [NetworkCompatibility(CompatibilityLevel.ClientMustHaveMod, VersionStrictness.Minor)]
     internal class ModularMagic_Armors : BaseUnityPlugin
     {
         public const string PluginGUID = "DeathWizsh.ModularMagic_Armors";
         public const string PluginName = "ModularMagic_Armors";
         public const string PluginVersion = "0.0.1";
         public static ModularMagic_Armors Instance;
-        private static readonly HarmonyLib.Harmony _harmony = new HarmonyLib.Harmony(PluginGUID);
+        private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
         public object configManager;
 
-        private AssetBundle _assetBundle;
-        public PlayerArmatureHelper playerArmature;
+        private AssetBundle assetBundle;
+        public PathHelper pathHelper;
         public ItemSnapShots itemSnapShots = new ItemSnapShots();
         public CustomPrefabs prefabs = new CustomPrefabs();
         public CustomMaterials materials = new CustomMaterials();
         public CustomStatusEffects effects = new CustomStatusEffects();
         public CustomSprites sprites = new CustomSprites();
 
-        public static bool gameIsReady = false;
+        public bool gameIsReady = false;
         public string playerBeard;
+        public bool updatePlayerBeard = true;
 
         public static readonly int armorStatusHashCode = "ArmorStatus_MMA".GetStableHashCode();
         public static int ShamanArmorSetHashCode;
@@ -52,12 +53,6 @@ namespace ModularMagic_Armors
         public static int EmblaHelmetHashCode;
         public static int EmblaChestHashCode;
 
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        public static int TiaraHashCode = "Audacious Tiara".GetStableHashCode();
-
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
         public static CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();
@@ -65,26 +60,26 @@ namespace ModularMagic_Armors
         private void Awake()
         {
             Instance = this;
-            playerArmature = new PlayerArmatureHelper();
+            pathHelper = new PathHelper();
 
             Assembly? bepinexConfigManager = System.AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == "ConfigurationManager");
             Type? configManagerType = bepinexConfigManager?.GetType("ConfigurationManager.ConfigurationManager");
             configManager = configManagerType == null ? null : BepInEx.Bootstrap.Chainloader.ManagerObject.GetComponent(configManagerType);
 
-            _InitAssetBundle();
-            _InitStatusEffects();
+            InitAssetBundle();
+            InitStatusEffects();
             PluginConfig.Init();
-            _harmony.PatchAll(Assembly.GetExecutingAssembly());
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            PrefabManager.OnVanillaPrefabsAvailable += _AddShamanArmor;
-            PrefabManager.OnVanillaPrefabsAvailable += _AddWraithArmor;
-            PrefabManager.OnVanillaPrefabsAvailable += _AddFrostWolfArmor;
-            PrefabManager.OnVanillaPrefabsAvailable += _AddDarkWizardArmor;
-            PrefabManager.OnVanillaPrefabsAvailable += _ApplyEffectsEmblaArmor;
-            ItemManager.OnItemsRegistered += _AdjustEitrWeaveArmor;
-            ItemManager.OnItemsRegistered += _AdjustEmblaArmor;
-            ItemManager.OnItemsRegistered += _InitHashes;
-            ItemManager.OnItemsRegistered += _LogRecipes;
+            PrefabManager.OnVanillaPrefabsAvailable += AddShamanArmor;
+            PrefabManager.OnVanillaPrefabsAvailable += AddWraithArmor;
+            PrefabManager.OnVanillaPrefabsAvailable += AddFrostWolfArmor;
+            PrefabManager.OnVanillaPrefabsAvailable += AddDarkWizardArmor;
+            PrefabManager.OnVanillaPrefabsAvailable += ApplyEffectsEmblaArmor;
+            ItemManager.OnItemsRegistered += AdjustEitrWeaveArmor;
+            ItemManager.OnItemsRegistered += AdjustEmblaArmor;
+            ItemManager.OnItemsRegistered += InitHashes;
+            // ItemManager.OnItemsRegistered += LogRecipes;
         }
 
         public void RefreshConfigManager()
@@ -92,49 +87,38 @@ namespace ModularMagic_Armors
             configManager?.GetType().GetMethod("BuildSettingList")!.Invoke(configManager, Array.Empty<object>());
         }
 
-        private void _LogRecipes()
-        {
-            ObjectDB.instance.m_recipes.ForEach(r =>
-            {
-                if (r.name.Contains("MMA"))
-                    Jotunn.Logger.LogInfo(r.name);
-            });
+        //private void LogRecipes()
+        //{
+        //    ObjectDB.instance.m_recipes.ForEach(r =>
+        //    {
+        //        if (r.name.Contains("MMA"))
+        //            Jotunn.Logger.LogInfo(r.name);
+        //    });
 
-            ItemManager.OnItemsRegistered -= _LogRecipes;
-        }
+        //    ItemManager.OnItemsRegistered -= LogRecipes;
+        //}
 
-        private void _AddShamanArmor()
-        {
-            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            ArmorConfig tiara = PluginConfig.armor1Helmet;
-            ArmorConfig tutu = PluginConfig.armor1Chest;
-            tiara.name.Value = "Audacious Tiara";
-            tutu.name.Value = "Audacious Tutu";
-            ItemHelper.Create(prefabs.AudaciousTiara, tiara);
-            ItemHelper.Create(prefabs.AudaciousTutu, tutu);
-
-            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            
+        private void AddShamanArmor()
+        {            
             ItemHelper.Create(prefabs.ShamanHelmetPrefab, PluginConfig.armor1Helmet);
             ItemHelper.Create(prefabs.ShamanCapePrefab, PluginConfig.armor1Cape);
             ItemHelper.Create(prefabs.ShamanChestPrefab, PluginConfig.armor1Chest);
             ItemHelper.Create(prefabs.ShamanLegsPrefab, PluginConfig.armor1Legs);
 
             GameObject player = PrefabManager.Instance.GetPrefab("Player");
-            GameObject playerHead = player.transform.Find(playerArmature.headPath).gameObject;
-            GameObject playerWristLeft = player.transform.Find(playerArmature.wristLeftPath).gameObject;
-            GameObject playerWristRight = player.transform.Find(playerArmature.wristRightPath).gameObject;
-            GameObject playerKneeLeft = player.transform.Find(playerArmature.kneeLeftPath).gameObject;
-            GameObject playerKneeRight = player.transform.Find(playerArmature.kneeRightPath).gameObject;
+            GameObject playerHead = player.transform.Find(pathHelper.headPath).gameObject;
+            GameObject playerWristLeft = player.transform.Find(pathHelper.wristLeftPath).gameObject;
+            GameObject playerWristRight = player.transform.Find(pathHelper.wristRightPath).gameObject;
+            GameObject playerKneeLeft = player.transform.Find(pathHelper.kneeLeftPath).gameObject;
+            GameObject playerKneeRight = player.transform.Find(pathHelper.kneeRightPath).gameObject;
 
-            GameObject helmetEffectHead = prefabs.ShamanHelmetPrefab.transform.Find("ME_blackforest_effect_head").gameObject;
-            GameObject HelmetEffectAntlerLeft = prefabs.ShamanHelmetPrefab.transform.Find("ME_blackforest_effect_antler_left").gameObject;
-            GameObject helmetEffectAntlerRight = prefabs.ShamanHelmetPrefab.transform.Find("ME_blackforest_effect_antler_right").gameObject;
-            GameObject chestEffectWristLeft = prefabs.ShamanChestPrefab.transform.Find("ME_blackforest_effect_wrist_left").gameObject;
-            GameObject chestEffectWristRight = prefabs.ShamanChestPrefab.transform.Find("ME_blackforest_effect_wrist_right").gameObject;
-            GameObject legsEffectKneeLeft = prefabs.ShamanLegsPrefab.transform.Find("ME_blackforest_effect_knee_left").gameObject;
-            GameObject legsEffectKneeRight = prefabs.ShamanLegsPrefab.transform.Find("ME_blackforest_effect_knee_right").gameObject;
+            GameObject helmetEffectHead = prefabs.ShamanHelmetPrefab.transform.Find(pathHelper.ShamanHeadEffectPath).gameObject;
+            GameObject HelmetEffectAntlerLeft = prefabs.ShamanHelmetPrefab.transform.Find(pathHelper.ShamanAntlerLefEffectPath).gameObject;
+            GameObject helmetEffectAntlerRight = prefabs.ShamanHelmetPrefab.transform.Find(pathHelper.ShamanAntlerRightEffectPath).gameObject;
+            GameObject chestEffectWristLeft = prefabs.ShamanChestPrefab.transform.Find(pathHelper.ShamanWristLeftEffectPath).gameObject;
+            GameObject chestEffectWristRight = prefabs.ShamanChestPrefab.transform.Find(pathHelper.ShamanWristRightEffectPath).gameObject;
+            GameObject legsEffectKneeLeft = prefabs.ShamanLegsPrefab.transform.Find(pathHelper.ShamanKneeLeftEffectPath).gameObject;
+            GameObject legsEffectKneeRight = prefabs.ShamanLegsPrefab.transform.Find(pathHelper.ShamanKneeRightEffectPath).gameObject;
 
             helmetEffectHead.FixReferences();
             HelmetEffectAntlerLeft.FixReferences();
@@ -186,10 +170,10 @@ namespace ModularMagic_Armors
             legsEffectKneeRight.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
             legsEffectKneeRight.SetActive(false);
 
-            PrefabManager.OnVanillaPrefabsAvailable -= _AddShamanArmor;
+            PrefabManager.OnVanillaPrefabsAvailable -= AddShamanArmor;
         }
 
-        private void _AddWraithArmor()
+        private void AddWraithArmor()
         {
             ItemHelper.Create(prefabs.WraithHelmetPrefab, PluginConfig.armor2Helmet);
             ItemHelper.Create(prefabs.WraithCapePrefab, PluginConfig.armor2Cape);
@@ -197,22 +181,22 @@ namespace ModularMagic_Armors
             ItemHelper.Create(prefabs.WraithLegsPrefab, PluginConfig.armor2Legs);
 
             GameObject player = PrefabManager.Instance.GetPrefab("Player");
-            GameObject playerHead = player.transform.Find(playerArmature.headPath).gameObject;
-            GameObject playerSpine1 = player.transform.Find(playerArmature.spine1Path).gameObject;
-            GameObject playerHandLeft = player.transform.Find(playerArmature.handLeftPath).gameObject;
-            GameObject playerHandRight = player.transform.Find(playerArmature.handRightPath).gameObject;
-            GameObject playerKneeLeft = player.transform.Find(playerArmature.kneeLeftPath).gameObject;
-            GameObject playerKneeRight = player.transform.Find(playerArmature.kneeRightPath).gameObject;
+            GameObject playerHead = player.transform.Find(pathHelper.headPath).gameObject;
+            GameObject playerSpine1 = player.transform.Find(pathHelper.spine1Path).gameObject;
+            GameObject playerHandLeft = player.transform.Find(pathHelper.handLeftPath).gameObject;
+            GameObject playerHandRight = player.transform.Find(pathHelper.handRightPath).gameObject;
+            GameObject playerKneeLeft = player.transform.Find(pathHelper.kneeLeftPath).gameObject;
+            GameObject playerKneeRight = player.transform.Find(pathHelper.kneeRightPath).gameObject;
 
-            GameObject eyeLeft = prefabs.WraithHelmetPrefab.transform.Find("ME_eye_left").gameObject;
-            GameObject eyeRight = prefabs.WraithHelmetPrefab.transform.Find("ME_eye_right").gameObject;
-            GameObject helmetEffectHead = prefabs.WraithHelmetPrefab.transform.Find("ME_swamp_effect_head").gameObject;
-            GameObject helmetEffectHeadFace = prefabs.WraithHelmetPrefab.transform.Find("ME_swamp_effect_face").gameObject;
-            GameObject chestEffectSpine1 = prefabs.WraithChestPrefab.transform.Find("ME_swamp_effect_spine1").gameObject;
-            GameObject chestEffectHandLeft = prefabs.WraithChestPrefab.transform.Find("ME_swamp_effect_hand_left").gameObject;
-            GameObject chestEffectHandRight = prefabs.WraithChestPrefab.transform.Find("ME_swamp_effect_hand_right").gameObject;
-            GameObject legsEffectKneeLeft = prefabs.WraithLegsPrefab.transform.Find("ME_swamp_effect_knee_left").gameObject;
-            GameObject legsEffectKneeRight = prefabs.WraithLegsPrefab.transform.Find("ME_swamp_effect_knee_right").gameObject;
+            GameObject eyeLeft = prefabs.WraithHelmetPrefab.transform.Find(pathHelper.EyeLeftPath).gameObject;
+            GameObject eyeRight = prefabs.WraithHelmetPrefab.transform.Find(pathHelper.EyeRightPath).gameObject;
+            GameObject helmetEffectHead = prefabs.WraithHelmetPrefab.transform.Find(pathHelper.WraithHeadEffectPath).gameObject;
+            GameObject helmetEffectHeadFace = prefabs.WraithHelmetPrefab.transform.Find(pathHelper.WraithFaceEffectPath).gameObject;
+            GameObject chestEffectSpine1 = prefabs.WraithChestPrefab.transform.Find(pathHelper.WraithChestEffectPath).gameObject;
+            GameObject chestEffectHandLeft = prefabs.WraithChestPrefab.transform.Find(pathHelper.WraithHandLeftEffectPath).gameObject;
+            GameObject chestEffectHandRight = prefabs.WraithChestPrefab.transform.Find(pathHelper.WraithHandRightEffectPath).gameObject;
+            GameObject legsEffectKneeLeft = prefabs.WraithLegsPrefab.transform.Find(pathHelper.WraithKneeLeftEffectPath).gameObject;
+            GameObject legsEffectKneeRight = prefabs.WraithLegsPrefab.transform.Find(pathHelper.WraithKneeRightEffectPath).gameObject;
 
             eyeLeft.FixReferences();
             eyeRight.FixReferences();
@@ -264,10 +248,10 @@ namespace ModularMagic_Armors
             legsEffectKneeRight.transform.localPosition = new Vector3(0f, 0f, 0f);
             legsEffectKneeRight.SetActive(false);
 
-            PrefabManager.OnVanillaPrefabsAvailable -= _AddWraithArmor;
+            PrefabManager.OnVanillaPrefabsAvailable -= AddWraithArmor;
         }
 
-        private void _AddFrostWolfArmor()
+        private void AddFrostWolfArmor()
         {
             ItemHelper.Create(prefabs.FrostWolfHelmetPrefab, PluginConfig.armor3Helmet);
             ItemHelper.Create(prefabs.FrostWolfCapePrefab, PluginConfig.armor3Cape);
@@ -275,19 +259,19 @@ namespace ModularMagic_Armors
             ItemHelper.Create(prefabs.FrostWolfLegsPrefab, PluginConfig.armor3Legs);
 
             GameObject player = PrefabManager.Instance.GetPrefab("Player");
-            GameObject playerHead = player.transform.Find(playerArmature.headPath).gameObject;
-            GameObject playerSpine2 = player.transform.Find(playerArmature.spine2Path).gameObject;
-            GameObject playerHandLeft = player.transform.Find(playerArmature.handLeftPath).gameObject;
-            GameObject playerHandRight = player.transform.Find(playerArmature.handRightPath).gameObject;
-            GameObject playerKneeLeft = player.transform.Find(playerArmature.kneeLeftPath).gameObject;
-            GameObject playerKneeRight = player.transform.Find(playerArmature.kneeRightPath).gameObject;
+            GameObject playerHead = player.transform.Find(pathHelper.headPath).gameObject;
+            GameObject playerSpine2 = player.transform.Find(pathHelper.spine2Path).gameObject;
+            GameObject playerHandLeft = player.transform.Find(pathHelper.handLeftPath).gameObject;
+            GameObject playerHandRight = player.transform.Find(pathHelper.handRightPath).gameObject;
+            GameObject playerKneeLeft = player.transform.Find(pathHelper.kneeLeftPath).gameObject;
+            GameObject playerKneeRight = player.transform.Find(pathHelper.kneeRightPath).gameObject;
 
-            GameObject helmetEffectHead = prefabs.FrostWolfHelmetPrefab.transform.Find("ME_mountain_effect_head").gameObject;
-            GameObject chestEffectSpine2 = prefabs.FrostWolfChestPrefab.transform.Find("ME_mountain_effect_spine2").gameObject;
-            GameObject chestEffectHandLeft = prefabs.FrostWolfChestPrefab.transform.Find("ME_mountain_effect_hand_left").gameObject;
-            GameObject chestEffectHandRight = prefabs.FrostWolfChestPrefab.transform.Find("ME_mountain_effect_hand_right").gameObject;
-            GameObject legsEffectKneeLeft = prefabs.FrostWolfLegsPrefab.transform.Find("ME_mountain_effect_knee_left").gameObject;
-            GameObject legsEffectKneeRight = prefabs.FrostWolfLegsPrefab.transform.Find("ME_mountain_effect_knee_right").gameObject;
+            GameObject helmetEffectHead = prefabs.FrostWolfHelmetPrefab.transform.Find(pathHelper.FrostwolfHeadEffectPath).gameObject;
+            GameObject chestEffectSpine2 = prefabs.FrostWolfChestPrefab.transform.Find(pathHelper.FrostwolfChestEffectPath).gameObject;
+            GameObject chestEffectHandLeft = prefabs.FrostWolfChestPrefab.transform.Find(pathHelper.FrostwolfHandLeftEffectPath).gameObject;
+            GameObject chestEffectHandRight = prefabs.FrostWolfChestPrefab.transform.Find(pathHelper.FrostwolfHandRightEffectPath).gameObject;
+            GameObject legsEffectKneeLeft = prefabs.FrostWolfLegsPrefab.transform.Find(pathHelper.FrostwolfKneeLeftEffectPath).gameObject;
+            GameObject legsEffectKneeRight = prefabs.FrostWolfLegsPrefab.transform.Find(pathHelper.FrostwolfKneeRightEffectPath).gameObject;
 
             helmetEffectHead.FixReferences();
             chestEffectSpine2.FixReferences();
@@ -326,10 +310,10 @@ namespace ModularMagic_Armors
             legsEffectKneeRight.transform.localScale = new Vector3(1f, 1f, 1f);
             legsEffectKneeRight.SetActive(false);
 
-            PrefabManager.OnVanillaPrefabsAvailable -= _AddFrostWolfArmor;
+            PrefabManager.OnVanillaPrefabsAvailable -= AddFrostWolfArmor;
         }
 
-        private void _AddDarkWizardArmor()
+        private void AddDarkWizardArmor()
         {
             ItemHelper.Create(prefabs.DarkWizardHelmetPrefab, PluginConfig.armor4Helmet);
             ItemHelper.Create(prefabs.DarkWizardCapePrefab, PluginConfig.armor4Cape);
@@ -337,11 +321,11 @@ namespace ModularMagic_Armors
             ItemHelper.Create(prefabs.DarkWizardLegsPrefab, PluginConfig.armor4Legs);
 
             GameObject player = PrefabManager.Instance.GetPrefab("Player");
-            GameObject playerShoulderLeft = player.transform.Find(playerArmature.shoulderLeftPath).gameObject;
-            GameObject playerShoulderRight = player.transform.Find(playerArmature.shoulderRightPath).gameObject;
+            GameObject playerShoulderLeft = player.transform.Find(pathHelper.shoulderLeftPath).gameObject;
+            GameObject playerShoulderRight = player.transform.Find(pathHelper.shoulderRightPath).gameObject;
 
-            GameObject chestEffectShoulderLeft = prefabs.DarkWizardChestPrefab.transform.Find("ME_plains_effect_shoulder_left").gameObject;
-            GameObject chestEffectShoulderRight = prefabs.DarkWizardChestPrefab.transform.Find("ME_plains_effect_shoulder_right").gameObject;
+            GameObject chestEffectShoulderLeft = prefabs.DarkWizardChestPrefab.transform.Find(pathHelper.DarkWizardShoulderLeftEffectPath).gameObject;
+            GameObject chestEffectShoulderRight = prefabs.DarkWizardChestPrefab.transform.Find(pathHelper.DarkWizardShoulderRightEffectPath).gameObject;
 
             chestEffectShoulderLeft.FixReferences();
             chestEffectShoulderRight.FixReferences();
@@ -358,10 +342,10 @@ namespace ModularMagic_Armors
             chestEffectShoulderRight.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
             chestEffectShoulderRight.SetActive(false);
 
-            PrefabManager.OnVanillaPrefabsAvailable -= _AddDarkWizardArmor;
+            PrefabManager.OnVanillaPrefabsAvailable -= AddDarkWizardArmor;
         }
 
-        private void _AdjustEitrWeaveArmor()
+        private void AdjustEitrWeaveArmor()
         {
             prefabs.EitrWeaveHelmetPrefab = PrefabManager.Instance.GetPrefab("HelmetMage");
             prefabs.EitrWeaveChestPrefab = PrefabManager.Instance.GetPrefab("ArmorMageChest");
@@ -391,10 +375,10 @@ namespace ModularMagic_Armors
             ItemHelper.Adjust(prefabs.EitrWeaveChestPrefab, PluginConfig.armor5Chest, armorSetOptions);
             ItemHelper.Adjust(prefabs.EitrWeaveLegsPrefab, PluginConfig.armor5Legs, armorSetOptions);
 
-            PrefabManager.OnVanillaPrefabsAvailable -= _AdjustEitrWeaveArmor;
+            PrefabManager.OnVanillaPrefabsAvailable -= AdjustEitrWeaveArmor;
         }
 
-        private void _AdjustEmblaArmor()
+        private void AdjustEmblaArmor()
         {
             itemSnapShots.EmblaHelmetStats = UpdateHelper.TakeSnapShot(prefabs.EmblaHelmetPrefab);
             itemSnapShots.EmblaChestStats = UpdateHelper.TakeSnapShot(prefabs.EmblaChestPrefab);
@@ -420,10 +404,10 @@ namespace ModularMagic_Armors
             ItemHelper.Adjust(prefabs.EmblaChestPrefab, PluginConfig.armor6Chest, armorSetOptions);
             ItemHelper.Adjust(prefabs.EmblaLegsPrefab, PluginConfig.armor6Legs, armorSetOptions);
 
-            ItemManager.OnItemsRegistered -= _AdjustEmblaArmor;
+            ItemManager.OnItemsRegistered -= AdjustEmblaArmor;
         }
 
-        private void _ApplyEffectsEmblaArmor()
+        private void ApplyEffectsEmblaArmor()
         {
             prefabs.EmblaHelmetPrefab = PrefabManager.Instance.GetPrefab("HelmetMage_Ashlands");
             prefabs.EmblaChestPrefab = PrefabManager.Instance.GetPrefab("ArmorMageChest_Ashlands");
@@ -478,12 +462,12 @@ namespace ModularMagic_Armors
             legsFlatMesh.materials = armorMaterials.ToArray();
 
             GameObject player = PrefabManager.Instance.GetPrefab("Player");
-            GameObject playerHelmetAttach = player.transform.Find(playerArmature.helmetAttachPath).gameObject;
-            GameObject playerShoulderLeft = player.transform.Find(playerArmature.shoulderLeftPath).gameObject;
-            GameObject playerShoulderRight = player.transform.Find(playerArmature.shoulderRightPath).gameObject;
+            GameObject playerHelmetAttach = player.transform.Find(pathHelper.helmetAttachPath).gameObject;
+            GameObject playerShoulderLeft = player.transform.Find(pathHelper.shoulderLeftPath).gameObject;
+            GameObject playerShoulderRight = player.transform.Find(pathHelper.shoulderRightPath).gameObject;
 
-            GameObject shoulderLeftEffect = PrefabManager.Instance.CreateClonedPrefab("EmblaChest_Left_Effects_MMA", prefabs.EmblaEffects.name);
-            GameObject shoulderRightEffect = PrefabManager.Instance.CreateClonedPrefab("EmblaChest_Right_Effects_MMA", prefabs.EmblaEffects.name);
+            GameObject shoulderLeftEffect = PrefabManager.Instance.CreateClonedPrefab(pathHelper.EmblaShoulderLeftEffectPath, prefabs.EmblaEffects.name);
+            GameObject shoulderRightEffect = PrefabManager.Instance.CreateClonedPrefab(pathHelper.EmblaShoulderRightEffectPath, prefabs.EmblaEffects.name);
             PrefabManager.Instance.AddPrefab(new CustomPrefab(shoulderLeftEffect, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(shoulderRightEffect, true));
             Transform flare = prefabs.EmblaEffects.transform.Find("equiped/flare");
@@ -501,10 +485,10 @@ namespace ModularMagic_Armors
             shoulderRightEffect.transform.localPosition = new Vector3(0.002f, 0f, -0.0001f);
             shoulderRightEffect.SetActive(false);
 
-            PrefabManager.OnVanillaPrefabsAvailable -= _ApplyEffectsEmblaArmor;
+            PrefabManager.OnVanillaPrefabsAvailable -= ApplyEffectsEmblaArmor;
         }
 
-        private void _InitHashes()
+        private void InitHashes()
         {
             ShamanArmorSetHashCode = effects.ShamanArmorSetSE.name.GetStableHashCode();
             WraithArmorSetHashCode = effects.WraithArmorSetSE.name.GetStableHashCode();
@@ -520,10 +504,10 @@ namespace ModularMagic_Armors
             EmblaHelmetHashCode = PluginConfig.armor6Helmet.name.Value.GetStableHashCode();
             EmblaChestHashCode = PluginConfig.armor6Chest.name.Value.GetStableHashCode();
 
-            ItemManager.OnItemsRegistered -= _InitHashes;
+            ItemManager.OnItemsRegistered -= InitHashes;
         }
 
-        private void _InitStatusEffects()
+        private void InitStatusEffects()
         {
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.ShamanArmorSetSE, true));
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.WraithArmorSetSE, true));
@@ -537,68 +521,60 @@ namespace ModularMagic_Armors
         /**
          * Initialise the asset bundle of the mod
          */
-        private void _InitAssetBundle()
+        private void InitAssetBundle()
         {
-            _assetBundle = AssetUtils.LoadAssetBundleFromResources("modularmagic_armors_dw");
+            assetBundle = AssetUtils.LoadAssetBundleFromResources("modularmagic_armors_dw");
 
             // Sprites
-            sprites.EmblaHood = _assetBundle.LoadAsset<Sprite>("EmblaHelmet_MMA");
-            sprites.EmblaChest = _assetBundle.LoadAsset<Sprite>("EmblaChest_MMA");
-            sprites.EmblaLegs = _assetBundle.LoadAsset<Sprite>("EmblaLegs_MMA");
+            sprites.EmblaHood = assetBundle.LoadAsset<Sprite>("EmblaHelmet_MMA");
+            sprites.EmblaChest = assetBundle.LoadAsset<Sprite>("EmblaChest_MMA");
+            sprites.EmblaLegs = assetBundle.LoadAsset<Sprite>("EmblaLegs_MMA");
 
             // Materials
-            materials.WraithArmorEye = _assetBundle.LoadAsset<Material>("WraithEye_MMA");
-            materials.DarkWizardArmorEye = _assetBundle.LoadAsset<Material>("DarkWizardEye_MMA");
-            materials.EmblaArmor = _assetBundle.LoadAsset<Material>("AshlandsMageArmor_red_MMA");
-            materials.EmblaChest = _assetBundle.LoadAsset<Material>("AshlandsMageArmorChest_red_MMA");
-            materials.EmblaLegs = _assetBundle.LoadAsset<Material>("AshlandsMageArmorLegs_red_MMA");
+            materials.WraithArmorEye = assetBundle.LoadAsset<Material>("WraithEye_MMA");
+            materials.DarkWizardArmorEye = assetBundle.LoadAsset<Material>("DarkWizardEye_MMA");
+            materials.EmblaArmor = assetBundle.LoadAsset<Material>("AshlandsMageArmor_red_MMA");
+            materials.EmblaChest = assetBundle.LoadAsset<Material>("AshlandsMageArmorChest_red_MMA");
+            materials.EmblaLegs = assetBundle.LoadAsset<Material>("AshlandsMageArmorLegs_red_MMA");
 
             // Shaman armor
-            prefabs.ShamanHelmetPrefab = _assetBundle.LoadAsset<GameObject>("MMA_ShamanHelmet");
-            prefabs.ShamanCapePrefab = _assetBundle.LoadAsset<GameObject>("MMA_ShamanCape");
-            prefabs.ShamanChestPrefab = _assetBundle.LoadAsset<GameObject>("MMA_ShamanChest");
-            prefabs.ShamanLegsPrefab = _assetBundle.LoadAsset<GameObject>("MMA_ShamanLegs");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("Shaman_armor_set_effect_MMA"), true));
-            effects.ShamanArmorSetSE = _assetBundle.LoadAsset<StatusEffect>("SetEffect_ShamanArmor_MMA");
+            prefabs.ShamanHelmetPrefab = assetBundle.LoadAsset<GameObject>("MMA_ShamanHelmet");
+            prefabs.ShamanCapePrefab = assetBundle.LoadAsset<GameObject>("MMA_ShamanCape");
+            prefabs.ShamanChestPrefab = assetBundle.LoadAsset<GameObject>("MMA_ShamanChest");
+            prefabs.ShamanLegsPrefab = assetBundle.LoadAsset<GameObject>("MMA_ShamanLegs");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("Shaman_armor_set_effect_MMA"), true));
+            effects.ShamanArmorSetSE = assetBundle.LoadAsset<StatusEffect>("SetEffect_ShamanArmor_MMA");
 
             // Wraith armor
-            prefabs.WraithHelmetPrefab = _assetBundle.LoadAsset<GameObject>("MMA_WraithHelmet");
-            prefabs.WraithCapePrefab = _assetBundle.LoadAsset<GameObject>("MMA_WraithCape");
-            prefabs.WraithChestPrefab = _assetBundle.LoadAsset<GameObject>("MMA_WraithChest");
-            prefabs.WraithLegsPrefab = _assetBundle.LoadAsset<GameObject>("MMA_WraithLegs");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("Wraith_armor_set_effect_MMA"), true));
-            effects.WraithArmorSetSE = _assetBundle.LoadAsset<StatusEffect>("SetEffect_WraithArmor_MMA");
+            prefabs.WraithHelmetPrefab = assetBundle.LoadAsset<GameObject>("MMA_WraithHelmet");
+            prefabs.WraithCapePrefab = assetBundle.LoadAsset<GameObject>("MMA_WraithCape");
+            prefabs.WraithChestPrefab = assetBundle.LoadAsset<GameObject>("MMA_WraithChest");
+            prefabs.WraithLegsPrefab = assetBundle.LoadAsset<GameObject>("MMA_WraithLegs");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("Wraith_armor_set_effect_MMA"), true));
+            effects.WraithArmorSetSE = assetBundle.LoadAsset<StatusEffect>("SetEffect_WraithArmor_MMA");
 
             // Wolf armor
-            prefabs.FrostWolfHelmetPrefab = _assetBundle.LoadAsset<GameObject>("MMA_FrostWolfHelmet");
-            prefabs.FrostWolfCapePrefab = _assetBundle.LoadAsset<GameObject>("MMA_FrostWolfCape");
-            prefabs.FrostWolfChestPrefab = _assetBundle.LoadAsset<GameObject>("MMA_FrostWolfChest");
-            prefabs.FrostWolfLegsPrefab = _assetBundle.LoadAsset<GameObject>("MMA_FrostWolfLegs");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("FrostWolf_armor_set_effect_MMA"), true));
-            effects.FrostWolfArmorSetSE = _assetBundle.LoadAsset<StatusEffect>("SetEffect_FrostWolfArmor_MMA");
+            prefabs.FrostWolfHelmetPrefab = assetBundle.LoadAsset<GameObject>("MMA_FrostWolfHelmet");
+            prefabs.FrostWolfCapePrefab = assetBundle.LoadAsset<GameObject>("MMA_FrostWolfCape");
+            prefabs.FrostWolfChestPrefab = assetBundle.LoadAsset<GameObject>("MMA_FrostWolfChest");
+            prefabs.FrostWolfLegsPrefab = assetBundle.LoadAsset<GameObject>("MMA_FrostWolfLegs");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("FrostWolf_armor_set_effect_MMA"), true));
+            effects.FrostWolfArmorSetSE = assetBundle.LoadAsset<StatusEffect>("SetEffect_FrostWolfArmor_MMA");
 
             // DarkWizard armor
-            prefabs.DarkWizardHelmetPrefab = _assetBundle.LoadAsset<GameObject>("MMA_DarkWizardHelmet");
-            prefabs.DarkWizardCapePrefab = _assetBundle.LoadAsset<GameObject>("MMA_DarkWizardCape");
-            prefabs.DarkWizardChestPrefab = _assetBundle.LoadAsset<GameObject>("MMA_DarkWizardChest");
-            prefabs.DarkWizardLegsPrefab = _assetBundle.LoadAsset<GameObject>("MMA_DarkWizardLegs");
-            effects.DarkWizardArmorSetSE = _assetBundle.LoadAsset<StatusEffect>("SetEffect_DarkWizardArmor_MMA");
+            prefabs.DarkWizardHelmetPrefab = assetBundle.LoadAsset<GameObject>("MMA_DarkWizardHelmet");
+            prefabs.DarkWizardCapePrefab = assetBundle.LoadAsset<GameObject>("MMA_DarkWizardCape");
+            prefabs.DarkWizardChestPrefab = assetBundle.LoadAsset<GameObject>("MMA_DarkWizardChest");
+            prefabs.DarkWizardLegsPrefab = assetBundle.LoadAsset<GameObject>("MMA_DarkWizardLegs");
+            effects.DarkWizardArmorSetSE = assetBundle.LoadAsset<StatusEffect>("SetEffect_DarkWizardArmor_MMA");
 
             // Eitr-weave armor
-            effects.EitrWeaveArmorSetSE = _assetBundle.LoadAsset<StatusEffect>("SetEffect_EitrWeaveArmor_MMA");
+            effects.EitrWeaveArmorSetSE = assetBundle.LoadAsset<StatusEffect>("SetEffect_EitrWeaveArmor_MMA");
 
             // Embla armor
-            prefabs.EmblaEffects = _assetBundle.LoadAsset<GameObject>("EmblaHood_Effects_MMA");
+            prefabs.EmblaEffects = assetBundle.LoadAsset<GameObject>("EmblaHood_Effects_MMA");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.EmblaEffects, true));
-            effects.EmblaArmorSetSE = _assetBundle.LoadAsset<StatusEffect>("SetEffect_EmblaArmor_MMA");
-
-            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            prefabs.AudaciousTiara = _assetBundle.LoadAsset<GameObject>("AudaciousTiara_MMA");
-            prefabs.AudaciousTutu = _assetBundle.LoadAsset<GameObject>("AudaciousTutu_MMA");
-            prefabs.AudaciousSFX = _assetBundle.LoadAsset<GameObject>("sfx_audacity_MMA");
-
-            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            effects.EmblaArmorSetSE = assetBundle.LoadAsset<StatusEffect>("SetEffect_EmblaArmor_MMA");
         }
     }
 }

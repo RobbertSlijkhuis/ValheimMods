@@ -2,13 +2,17 @@
 using ModularMagic_Armors.Helpers;
 using ModularMagic_Armors.Models;
 using ModularMagic_Armors.StatusEffects;
+using ModularMagic_Armors.Types;
+using ModularMagic_Utilities.Types;
 
 namespace ModularMagic_Armors.Configs
 {
     internal class ArmorConfig
     {
         // General options
-        public static string[] craftingStationOptions = new string[] { "None", "Disabled", "Workbench", "Forge", "Stonecutter", "Cauldron", "ArtisanTable", "BlackForge", "GaldrTable" };
+        public static string[] craftingStationOptions = new string[] { 
+            CraftingStationType.None, CraftingStationType.Disabled, CraftingStationType.Workbench, CraftingStationType.Forge, CraftingStationType.Stonecutter,
+            CraftingStationType.Cauldron, CraftingStationType.ArtisanTable, CraftingStationType.BlackForge, CraftingStationType.GaldrTable };
 
         // The  fields to generate
         public ConfigEntry<bool> enable;
@@ -52,27 +56,28 @@ namespace ModularMagic_Armors.Configs
         // Other
         public string cooldownStatusEffectName;
         public string magicStatusEffectName;
+        private int entryCount = 18;
 
         public ArmorConfig(bool browsable = true)
         {
-            enableAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 18, Browsable = browsable };
-            nameAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 17, Browsable = browsable };
-            descriptionAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 16, Browsable = browsable };
-            craftingStationAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 15, Browsable = browsable };
-            minStationLevelAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 14, Browsable = browsable };
-            recipeAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 13, Browsable = browsable };
-            recipeUpgradeAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 12, Browsable = browsable };
-            recipeMultiplierAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 11, Browsable = browsable };
-            armorAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 10, Browsable = browsable };
-            armorPerLevelAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 9, Browsable = browsable };
-            weightAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 8, Browsable = browsable };
-            maxDurabilityAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 7, Browsable = browsable };
-            maxQualityAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 6, Browsable = browsable };
-            movementSpeedAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 5, Browsable = browsable };
-            eitrAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 4, Browsable = browsable };
-            eitrRegenAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 3, Browsable = browsable };
-            elementalMagicAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 2, Browsable = browsable };
-            bloodMagicAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 1, Browsable = browsable };
+            enableAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder(), Browsable = browsable };
+            nameAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder(), Browsable = browsable };
+            descriptionAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder(), Browsable = browsable };
+            craftingStationAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder(), Browsable = browsable };
+            minStationLevelAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder(), Browsable = browsable };
+            recipeAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder(), Browsable = browsable };
+            recipeUpgradeAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder(), Browsable = browsable };
+            recipeMultiplierAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder(), Browsable = browsable };
+            armorAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder(), Browsable = browsable };
+            armorPerLevelAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder(), Browsable = browsable };
+            weightAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder(), Browsable = browsable };
+            maxDurabilityAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder(), Browsable = browsable };
+            maxQualityAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder(), Browsable = browsable };
+            movementSpeedAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder(), Browsable = browsable };
+            eitrAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder(), Browsable = browsable };
+            eitrRegenAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder(), Browsable = browsable };
+            elementalMagicAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder(), Browsable = browsable };
+            bloodMagicAttributes = new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder(), Browsable = browsable };
         }
 
         public void GenerateConfig(ArmorConfigOptions options, bool browsable = true)
@@ -333,6 +338,12 @@ namespace ModularMagic_Armors.Configs
 
             if (refreshConfigManager)
                 ModularMagic_Armors.Instance.RefreshConfigManager();
+        }
+
+        private int HandleOrder()
+        {
+            entryCount = entryCount - 1;
+            return entryCount;
         }
     }
 }

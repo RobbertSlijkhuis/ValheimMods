@@ -7499,7 +7499,7 @@ GameObject:
   - component: {fileID: 5539707439950861411}
   - component: {fileID: 3602716935936114763}
   m_Layer: 12
-  m_Name: ME_eye_right
+  m_Name: MMA_eye_right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7771,7 +7771,7 @@ GameObject:
   - component: {fileID: 552042207815988411}
   - component: {fileID: 3810287333619543007}
   m_Layer: 9
-  m_Name: ME_swamp_effect_face
+  m_Name: MMA_wraith_face_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10112,7 +10112,7 @@ GameObject:
   - component: {fileID: 6862957855636811621}
   - component: {fileID: 560413396091913116}
   m_Layer: 12
-  m_Name: ME_eye_left
+  m_Name: MMA_eye_left
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10196,7 +10196,7 @@ GameObject:
   - component: {fileID: 4055005732100942187}
   - component: {fileID: 1126644965610785028}
   m_Layer: 9
-  m_Name: ME_swamp_effect_head
+  m_Name: MMA_wraith_head_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

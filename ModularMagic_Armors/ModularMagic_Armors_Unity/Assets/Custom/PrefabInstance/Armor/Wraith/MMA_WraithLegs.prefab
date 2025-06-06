@@ -4871,7 +4871,7 @@ GameObject:
   - component: {fileID: 2449142507009000416}
   - component: {fileID: 8007276642626178476}
   m_Layer: 9
-  m_Name: ME_swamp_effect_knee_right
+  m_Name: MMA_wraith_knee_right_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7212,7 +7212,7 @@ GameObject:
   - component: {fileID: 181349169364016070}
   - component: {fileID: 958014252964781298}
   m_Layer: 9
-  m_Name: ME_swamp_effect_knee_left
+  m_Name: MMA_wraith_knee_left_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

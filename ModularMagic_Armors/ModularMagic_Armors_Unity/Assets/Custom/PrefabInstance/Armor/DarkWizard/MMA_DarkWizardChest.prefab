@@ -194,8 +194,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 4743198587486697926}
   - {fileID: 6422058626548259127}
+  - {fileID: 4743198587486697926}
   - {fileID: 4941268640024129}
   - {fileID: 4336692634367659}
   m_Father: {fileID: 0}
@@ -4896,7 +4896,7 @@ GameObject:
   - component: {fileID: 4224354309500558247}
   - component: {fileID: 4606903585736213781}
   m_Layer: 22
-  m_Name: ME_plains_effect_shoulder_right
+  m_Name: MMA_darkwizard_shoulder_right_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7591,7 +7591,7 @@ GameObject:
   - component: {fileID: 8328025722580872805}
   - component: {fileID: 9108174682224574343}
   m_Layer: 22
-  m_Name: ME_plains_effect_shoulder_left
+  m_Name: MMA_darkwizard_shoulder_left_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

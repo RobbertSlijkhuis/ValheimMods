@@ -4966,7 +4966,7 @@ GameObject:
   - component: {fileID: 855578266607635061}
   - component: {fileID: 3165270034298570891}
   m_Layer: 9
-  m_Name: ME_swamp_effect_hand_right
+  m_Name: MMA_wraith_hand_right_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7307,7 +7307,7 @@ GameObject:
   - component: {fileID: 883865154788825243}
   - component: {fileID: 121532154296629794}
   m_Layer: 9
-  m_Name: ME_swamp_effect_hand_left
+  m_Name: MMA_wraith_hand_left_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9648,7 +9648,7 @@ GameObject:
   - component: {fileID: 7062348117301158688}
   - component: {fileID: 8460854446623109009}
   m_Layer: 9
-  m_Name: ME_swamp_effect_spine1
+  m_Name: MMA_wraith_chest_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

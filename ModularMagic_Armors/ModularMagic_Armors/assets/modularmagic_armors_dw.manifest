@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 2739981787
+CRC: 375199292
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 91cdb2588c341a17a7ae30a31f3a1b4e
+    Hash: 0569dfa671f6dc2e6aad8931b330dae8
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 0f4172a80d024eab33ca90a755a61bfc
+    Hash: 12902360dc5b72512b1b09e51673070c
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 91cdb2588c341a17a7ae30a31f3a1b4e
+    Hash: 0569dfa671f6dc2e6aad8931b330dae8
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -34,10 +34,6 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 65
   Script: {instanceID: 0}
-- Class: 82
-  Script: {instanceID: 0}
-- Class: 83
-  Script: {instanceID: 0}
 - Class: 90
   Script: {instanceID: 0}
 - Class: 95
@@ -60,8 +56,6 @@ ClassTypes:
   Script: {fileID: 1345532120, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 313648218, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 115
   Script: {instanceID: 0}
 - Class: 137
@@ -73,12 +67,6 @@ ClassTypes:
 - Class: 199
   Script: {instanceID: 0}
 - Class: 213
-  Script: {instanceID: 0}
-- Class: 241
-  Script: {instanceID: 0}
-- Class: 243
-  Script: {instanceID: 0}
-- Class: 245
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
@@ -100,25 +88,20 @@ Assets:
 - Assets/Custom/PrefabInstance/Armor/Shaman/MMA_ShamanChest.prefab
 - Assets/Custom/PrefabInstance/Armor/Shaman/MMA_ShamanCape.prefab
 - Assets/Custom/Sprite/Armor/Embla/EmblaLegs_MMA.png
-- Assets/PrefabInstance/sfx_audacity_MMA.prefab
 - Assets/Custom/PrefabInstance/Armor/DarkWizard/MMA_DarkWizardLegs.prefab
-- Assets/Custom/PrefabInstance/Armor/Embla/MMA_EmblaCape.prefab
+- Assets/Custom/Sprite/Armor/Embla/EmblaHelmet_MMA.png
 - Assets/Custom/PrefabInstance/Armor/Shaman/MMA_ShamanLegs.prefab
 - Assets/Custom/PrefabInstance/Armor/FrostWolf/MMA_FrostWolfChest.prefab
 - Assets/Custom/PrefabInstance/Armor/DarkWizard/MMA_DarkWizardCape.prefab
 - Assets/Custom/PrefabInstance/Armor/Wraith/MMA_WraithChest.prefab
-- Assets/Custom/MonoBehaviour/NoFallDamage.asset
 - Assets/Custom/MonoBehaviour/Armor/SetEffect_EmblaArmor_MMA.asset
 - Assets/Custom/MonoBehaviour/Armor/SetEffect_FrostWolfArmor_MMA.asset
-- Assets/PrefabInstance/CapeAsh_MMA.prefab
 - Assets/Custom/MonoBehaviour/Armor/SetEffect_EitrWeaveArmor_MMA.asset
 - Assets/Custom/PrefabInstance/Armor/DarkWizard/MMA_DarkWizardHelmet.prefab
 - Assets/Custom/Sprite/Armor/Embla/EmblaChest_MMA.png
-- Assets/Custom/MonoBehaviour/SlowFallAndNoFallDamage.asset
 - Assets/Custom/PrefabInstance/Armor/Shaman/MMA_ShamanHelmet.prefab
 - Assets/Custom/Material/Armor/DarkWizard/DarkWizardEye_MMA.mat
 - Assets/Custom/PrefabInstance/Armor/FrostWolf/FrostWolf_armor_set_effect_MMA.prefab
-- Assets/PrefabInstance/AudaciousTiara_MMA.prefab
 - Assets/Custom/Material/Armor/Embla/AshlandsMageArmor_red_MMA.mat
 - Assets/Custom/PrefabInstance/Armor/FrostWolf/MMA_FrostWolfHelmet.prefab
 - Assets/Custom/Material/Armor/Embla/AshlandsMageArmorLegs_red_MMA.mat
@@ -127,14 +110,12 @@ Assets:
 - Assets/Custom/MonoBehaviour/Armor/SetEffect_WraithArmor_MMA.asset
 - Assets/Custom/PrefabInstance/Armor/Wraith/MMA_WraithLegs.prefab
 - Assets/Custom/PrefabInstance/Armor/FrostWolf/MMA_FrostWolfCape.prefab
-- Assets/Custom/Sprite/Armor/Embla/EmblaHelmet_MMA.png
+- Assets/Custom/Material/Armor/Embla/AshlandsMageArmorChest_red_MMA.mat
 - Assets/Custom/PrefabInstance/Armor/Wraith/MMA_WraithCape.prefab
 - Assets/Custom/Material/Armor/Wraith/WraithEye_MMA.mat
 - Assets/Custom/PrefabInstance/Armor/DarkWizard/MMA_DarkWizardChest.prefab
-- Assets/PrefabInstance/AudaciousTutu_MMA.prefab
 - Assets/Custom/PrefabInstance/Armor/Wraith/MMA_WraithHelmet.prefab
 - Assets/Custom/MonoBehaviour/Armor/SetEffect_ShamanArmor_MMA.asset
-- Assets/Custom/Material/Armor/Embla/AshlandsMageArmorChest_red_MMA.mat
 - Assets/Custom/PrefabInstance/Armor/FrostWolf/MMA_FrostWolfLegs.prefab
 - Assets/Custom/PrefabInstance/Armor/Wraith/Wraith_armor_set_effect_MMA.prefab
 Dependencies: []

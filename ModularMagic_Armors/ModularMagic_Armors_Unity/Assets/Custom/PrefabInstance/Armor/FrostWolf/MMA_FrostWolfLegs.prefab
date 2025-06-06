@@ -1559,8 +1559,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1985090632614851015}
   - {fileID: 840489044903137786}
+  - {fileID: 1985090632614851015}
   - {fileID: 4241400698056616}
   - {fileID: 4985303891985587}
   m_Father: {fileID: 0}
@@ -4777,7 +4777,7 @@ GameObject:
   - component: {fileID: 940714237671053941}
   - component: {fileID: 816856121542766196}
   m_Layer: 0
-  m_Name: ME_mountain_effect_knee_right
+  m_Name: MMA_frostwolf_knee_right_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7081,7 +7081,7 @@ GameObject:
   - component: {fileID: 3203150626223303666}
   - component: {fileID: 6723610124297459034}
   m_Layer: 0
-  m_Name: ME_mountain_effect_knee_left
+  m_Name: MMA_frostwolf_knee_left_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
