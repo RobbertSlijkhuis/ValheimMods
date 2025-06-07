@@ -3,6 +3,7 @@ using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
+using ModularMagic_Utilities.components;
 using ModularMagic_Utilities.Components;
 using ModularMagic_Utilities.Configs;
 using ModularMagic_Utilities.Helpers;
@@ -136,6 +137,10 @@ namespace ModularMagic_Utilities
                 marbleItemStandcomp.m_supportedItems.Add(prefabs.Lantern3.GetComponent<ItemDrop>());
                 marbleItemStandcomp.m_unsupportedItems.Add(PrefabManager.Instance.GetPrefab("Hammer").GetComponent<ItemDrop>());
                 WeatherZone weatherZone = prefabs.MarbleItemstand.transform.Find("weatherzone").gameObject.AddComponent<WeatherZone>();
+                prefabs.MarbleItemstand.transform.Find("radius_controls").gameObject.AddComponent<WeatherZoneRadiusControls>();
+                prefabs.MarbleItemstand.transform.Find("projector_controls").gameObject.AddComponent<WeatherZoneProjectorControls>();
+                prefabs.MarbleItemstand.transform.Find("dome_controls").gameObject.AddComponent<WeatherZoneDomeControls>();
+
 
                 List<EffectData> startList = new List<EffectData>();
                 EffectData startSFX = new EffectData();
