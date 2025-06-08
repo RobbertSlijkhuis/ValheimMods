@@ -25,30 +25,32 @@ namespace ModularMagic_Utilities
         public const string PluginName = "ModularMagic_Utilities";
         public const string PluginVersion = "0.0.1";
         public static ModularMagic_Utilities Instance;
-        private static readonly HarmonyLib.Harmony _harmony = new HarmonyLib.Harmony(PluginGUID);
+        private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
 
-        private AssetBundle _assetBundle;
+        private AssetBundle assetBundle;
         public CustomRPC lanternRPC;
         public CustomPrefabs prefabs = new CustomPrefabs();
         public CustomMaterials materials = new CustomMaterials();
         private ButtonConfig utilityModeButton;
 
         public static readonly int lanternStatusHashCode = "LanternStatus_MMU".GetStableHashCode();
+        public static readonly int weatherZoneRadiusHashCode = "WeatherZoneRadius_MMU".GetStableHashCode();
+        public static readonly int weatherZoneEnableDomeHashCode = "WeatherZoneDome_MMU".GetStableHashCode();
 
         private void Awake()
         {
             Instance = this;
-            _InitAssetBundle();
+            InitAssetBundle();
             PluginConfig.Init();
-            _InitInputs();
-            _harmony.PatchAll(Assembly.GetExecutingAssembly());
+            InitInputs();
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            PrefabManager.OnVanillaPrefabsAvailable += _AddPieces;
-            PrefabManager.OnVanillaPrefabsAvailable += _AddUtilities;
-            ItemManager.OnItemsRegistered += _LogRecipes;
+            PrefabManager.OnVanillaPrefabsAvailable += AddPieces;
+            PrefabManager.OnVanillaPrefabsAvailable += AddUtilities;
+            ItemManager.OnItemsRegistered += LogRecipes;
         }
 
-        private void _LogRecipes()
+        private void LogRecipes()
         {
             ObjectDB.instance.m_recipes.ForEach(r =>
             {
@@ -56,7 +58,7 @@ namespace ModularMagic_Utilities
                     Jotunn.Logger.LogInfo(r.name);
             });
 
-            ItemManager.OnItemsRegistered -= _LogRecipes;
+            ItemManager.OnItemsRegistered -= LogRecipes;
         }
         
         /**
@@ -93,7 +95,7 @@ namespace ModularMagic_Utilities
             }
         }
 
-        private void _AddUtilities()
+        private void AddUtilities()
         {
             try
             {
@@ -104,16 +106,16 @@ namespace ModularMagic_Utilities
                 ItemHelper.Create(prefabs.Lantern2, PluginConfig.lantern2, true);
                 ItemHelper.Create(prefabs.Lantern3, PluginConfig.lantern3, true);
 
-                PrefabManager.OnVanillaPrefabsAvailable -= _AddUtilities;
+                PrefabManager.OnVanillaPrefabsAvailable -= AddUtilities;
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not add utilities: " + e);
-                PrefabManager.OnVanillaPrefabsAvailable -= _AddUtilities;
+                PrefabManager.OnVanillaPrefabsAvailable -= AddUtilities;
             }
         }
 
-        private void _AddPieces()
+        private void AddPieces()
         {
             try
             {
@@ -167,19 +169,19 @@ namespace ModularMagic_Utilities
 
                 PieceHelper.Create(prefabs.MarbleItemstand, PluginConfig.piece1);
                 
-                PrefabManager.OnVanillaPrefabsAvailable -= _AddPieces;
+                PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not add pieces: " + e);
-                PrefabManager.OnVanillaPrefabsAvailable -= _AddPieces;
+                PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
             }
         }
 
         /**
          * Initialise the inputs of this mod
          */
-        private void _InitInputs()
+        private void InitInputs()
         {
             try
             {
@@ -200,32 +202,32 @@ namespace ModularMagic_Utilities
         /**
          * Initialise the asset bundle of the mod
          */
-        private void _InitAssetBundle()
+        private void InitAssetBundle()
         {
-            _assetBundle = AssetUtils.LoadAssetBundleFromResources("modularmagic_utilities_dw");
+            assetBundle = AssetUtils.LoadAssetBundleFromResources("modularmagic_utilities_dw");
 
             // Materials
-            materials.Lantern1 = _assetBundle.LoadAsset<Material>("MythicalLanternMat_MMU");
-            materials.Lantern1Off = _assetBundle.LoadAsset<Material>("MythicalLanternMat_Off_MMU");
-            materials.Lantern2 = _assetBundle.LoadAsset<Material>("EverwinterLanternMat_MMU");
-            materials.Lantern2Off = _assetBundle.LoadAsset<Material>("EverwinterLanternMat_Off_MMU");
-            materials.Lantern3 = _assetBundle.LoadAsset<Material>("MistcallerLanternMat_MMU");
-            materials.Lantern3Off = _assetBundle.LoadAsset<Material>("MistcallerLanternMat_Off_MMU");
-            materials.AltarParticles = _assetBundle.LoadAsset<Material>("AltarParticals_MMU");
+            materials.Lantern1 = assetBundle.LoadAsset<Material>("MythicalLanternMat_MMU");
+            materials.Lantern1Off = assetBundle.LoadAsset<Material>("MythicalLanternMat_Off_MMU");
+            materials.Lantern2 = assetBundle.LoadAsset<Material>("EverwinterLanternMat_MMU");
+            materials.Lantern2Off = assetBundle.LoadAsset<Material>("EverwinterLanternMat_Off_MMU");
+            materials.Lantern3 = assetBundle.LoadAsset<Material>("MistcallerLanternMat_MMU");
+            materials.Lantern3Off = assetBundle.LoadAsset<Material>("MistcallerLanternMat_Off_MMU");
+            materials.AltarParticles = assetBundle.LoadAsset<Material>("AltarParticals_MMU");
 
             // Books
-            prefabs.Spellbook1 = _assetBundle.LoadAsset<GameObject>("MMU_SpellbookOfTheHearth");
-            prefabs.Spellbook2 = _assetBundle.LoadAsset<GameObject>("MMU_GrimoireOfTheStorm");
-            prefabs.Spellbook3 = _assetBundle.LoadAsset<GameObject>("MMU_CodexOfTheAsgardianSorcerer");
+            prefabs.Spellbook1 = assetBundle.LoadAsset<GameObject>("MMU_SpellbookOfTheHearth");
+            prefabs.Spellbook2 = assetBundle.LoadAsset<GameObject>("MMU_GrimoireOfTheStorm");
+            prefabs.Spellbook3 = assetBundle.LoadAsset<GameObject>("MMU_CodexOfTheAsgardianSorcerer");
 
             // Lanterns
-            prefabs.Lantern1 = _assetBundle.LoadAsset<GameObject>("MMU_MythicalLantern");
-            prefabs.Lantern2 = _assetBundle.LoadAsset<GameObject>("MMU_EverwinterLantern");
-            prefabs.Lantern3 = _assetBundle.LoadAsset<GameObject>("MMU_MistcallerLantern");
+            prefabs.Lantern1 = assetBundle.LoadAsset<GameObject>("MMU_MythicalLantern");
+            prefabs.Lantern2 = assetBundle.LoadAsset<GameObject>("MMU_EverwinterLantern");
+            prefabs.Lantern3 = assetBundle.LoadAsset<GameObject>("MMU_MistcallerLantern");
 
             // Pieces
-            prefabs.MarbleItemstand = _assetBundle.LoadAsset<GameObject>("MMU_MarbleItemstand");
-            prefabs.ActivationFX = _assetBundle.LoadAsset<GameObject>("fx_activation_MMU");
+            prefabs.MarbleItemstand = assetBundle.LoadAsset<GameObject>("MMU_MarbleItemstand");
+            prefabs.ActivationFX = assetBundle.LoadAsset<GameObject>("fx_activation_MMU");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ActivationFX, true));
         }
     }

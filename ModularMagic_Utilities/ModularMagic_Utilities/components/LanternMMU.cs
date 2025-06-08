@@ -8,12 +8,12 @@ namespace ModularMagic_Utilities.Components
 {
     internal class LanternMMU : MonoBehaviour
     {
-        private ZNetView _netView;
+        private ZNetView netView;
         public string status;
 
         private void Awake()
         {
-            _netView = base.gameObject.GetComponent<ZNetView>();
+            netView = base.gameObject.GetComponent<ZNetView>();
             status = "";
 
             InvokeRepeating(nameof(UpdateStatus), 0f, 0.3f);
@@ -23,7 +23,7 @@ namespace ModularMagic_Utilities.Components
         {
             try
             {
-                if (!_netView || !_netView.IsValid() || (!PluginConfig.lantern1.enable.Value && !PluginConfig.lantern2.enable.Value && !PluginConfig.lantern3.enable.Value))
+                if (!netView || !netView.IsValid() || (!PluginConfig.lantern1.enable.Value && !PluginConfig.lantern2.enable.Value && !PluginConfig.lantern3.enable.Value))
                 {
                     CancelInvoke(nameof(UpdateStatus));
                     return;
@@ -32,7 +32,7 @@ namespace ModularMagic_Utilities.Components
                 if (!Player.m_localPlayer)
                     return;
 
-                status = _netView.m_zdo.GetString(ModularMagic_Utilities.lanternStatusHashCode, "");
+                status = netView.m_zdo.GetString(ModularMagic_Utilities.lanternStatusHashCode, "");
 
                 if (status == "")
                     return;
@@ -56,12 +56,12 @@ namespace ModularMagic_Utilities.Components
 
         public bool SetPlayerStatus(long playerId, bool value)
         {
-            if (!_netView || !_netView.IsValid() || !Player.m_localPlayer)
+            if (!netView || !netView.IsValid() || !Player.m_localPlayer)
                 return false;
 
             string newStatus = StatusObjectToString(new LanternStatus(playerId, value));
             
-            _netView.m_zdo.Set(ModularMagic_Utilities.lanternStatusHashCode, newStatus);
+            netView.m_zdo.Set(ModularMagic_Utilities.lanternStatusHashCode, newStatus);
             return true;
         }
 

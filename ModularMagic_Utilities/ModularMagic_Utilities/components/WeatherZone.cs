@@ -14,32 +14,36 @@ namespace ModularMagic_Utilities.Components
 {
     internal class WeatherZone : MonoBehaviour, Hoverable
     {
+        public ZNetView netView;
         public EnvZone envZone;
         public Transform startEffectTrans;
         public float radius;
         public bool isInitialised = false;
         public bool domeEnabled;
         public bool projectorEnabled;
-        public EffectList startEffects = new EffectList();
-        public EffectList stopEffects = new EffectList();
+        public float projectorSegmentMultiplier = 4f;
         //public Color emissionColor = new Color(0f, 0.5676858f, 1.294612f, 1f);
         public Color emissionOffColor = new Color(0f, 0f, 0f, 1f);
         public Color emissionRuneOffColor = new Color(0.2f, 0.2f, 0.2f, 1f);
-        public float projectorSegmentMultiplier = 4f;
+        public EffectList startEffects = new EffectList();
+        public EffectList stopEffects = new EffectList();
 
         private void Awake()
         {
             try
             {
-                startEffectTrans = transform.parent.Find("drop_spawn");
-                envZone = GetComponent<EnvZone>();
-                envZone.m_force = false;
-                radius = 30f;
-                domeEnabled = false;
-                projectorEnabled = false;
-                Sign sign;
-                HoverText hover;
-                ItemStand itemstand;
+                netView = transform.parent.GetComponent<ZNetView>();
+                if (netView != null && netView.GetZDO() != null)
+                {
+                    startEffectTrans = transform.parent.Find("drop_spawn");
+                    envZone = GetComponent<EnvZone>();
+                    envZone.m_force = false;
+
+                    radius = netView.m_zdo.GetFloat(ModularMagic_Utilities.weatherZoneRadiusHashCode, 30f);
+                    domeEnabled = netView.m_zdo.GetBool(ModularMagic_Utilities.weatherZoneEnableDomeHashCode, false);
+                    projectorEnabled = false;
+                    SetRadius(radius);
+                }
             }
             catch (Exception e)
             {
@@ -64,7 +68,6 @@ namespace ModularMagic_Utilities.Components
 
         public void InitWeather(string itemName)
         {
-            Jotunn.Logger.LogWarning("WeatherZone.InitWeather");
             string newEnv = "";
             isInitialised = true;
 
@@ -88,7 +91,6 @@ namespace ModularMagic_Utilities.Components
         {
             try
             {
-                Jotunn.Logger.LogWarning("WeatherZone.EnableWeather");
                 List<string> nameList = new List<string>()
                 {
                     PluginConfig.spellbook1.name.Value,
@@ -127,7 +129,9 @@ namespace ModularMagic_Utilities.Components
 
         public void DisableWeather()
         {
-            Jotunn.Logger.LogWarning("WeatherZone.DisableWeather");
+            if (netView != null && netView.GetZDO() != null)
+                return;
+
             if (envZone.m_environment == "")
                 return;
 
@@ -141,6 +145,7 @@ namespace ModularMagic_Utilities.Components
             Transform forceFieldTrans = transform.parent.Find("New/forcefield");
             Transform projectorTrans = transform.parent.Find("New/projector");
             radius = value;
+            netView.m_zdo.Set(ModularMagic_Utilities.weatherZoneRadiusHashCode, radius);
 
             if (sphereCollider != null)
             {
@@ -163,6 +168,7 @@ namespace ModularMagic_Utilities.Components
         {
             Transform forceFieldTrans = transform.parent.Find("New/forcefield");
             domeEnabled = value;
+            netView.m_zdo.Set(ModularMagic_Utilities.weatherZoneEnableDomeHashCode, domeEnabled);
 
             if (forceFieldTrans != null && envZone.m_environment != "")
                 forceFieldTrans.gameObject.SetActive(domeEnabled);
@@ -180,7 +186,6 @@ namespace ModularMagic_Utilities.Components
 
         private void SetEffects(bool value)
         {
-            Jotunn.Logger.LogWarning("WeatherZone._SetEffects() " + value);
             try
             {
                 LightPresetColors presetColors = LightPresetHelper.GetColors(PluginConfig.piece1.lightColorPreset.Value);

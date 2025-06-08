@@ -83,7 +83,7 @@ namespace ModularMagic_Utilities.Harmony
                 if (__instance == null)
                     return;
 
-                Transform weatherZoneTrans = __instance.gameObject.transform.parent.Find("weatherzone");
+                Transform weatherZoneTrans = __instance.transform.parent.Find("weatherzone");
 
                 if (weatherZoneTrans == null)
                     return;
@@ -108,7 +108,7 @@ namespace ModularMagic_Utilities.Harmony
                 if (__instance == null)
                     return;
 
-                Transform weatherZoneTrans = __instance.gameObject.transform.parent.Find("weatherzone");
+                Transform weatherZoneTrans = __instance.transform.parent.Find("weatherzone");
 
                 if (weatherZoneTrans == null)
                     return;
@@ -120,6 +120,28 @@ namespace ModularMagic_Utilities.Harmony
                 Jotunn.Logger.LogError("Could not disable weather in Interact_Postfix: " + e);
             }
         }
+
+        //[HarmonyPostfix]
+        //[HarmonyPatch(typeof(Piece), "DropResources")]
+        //public static void DropResources_Postfix(ref Piece __instance, HitData hitData = null)
+        //{
+        //    try
+        //    {
+        //        if (__instance == null)
+        //            return;
+
+        //        Transform weatherZoneTrans = __instance.transform.Find("weatherzone");
+
+        //        if (weatherZoneTrans == null)
+        //            return;
+
+        //        Transform itemStand = __instance.transform.Find("itemstand");
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Jotunn.Logger.LogError("Could not drop itemstand item in DropResources_Postfix: " + e);
+        //    }
+        //}
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Player), "GetTotalFoodValue")]
