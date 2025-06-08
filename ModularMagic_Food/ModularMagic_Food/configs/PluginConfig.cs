@@ -44,26 +44,31 @@ namespace ModularMagic_Food.Configs
         public static string mushroom5SoupRecipe = $"Cloudberry:3, {ModularMagic_Food.Instance.prefabs.mushroom5Prefab.name}:2";
         public static FoodConfig mushroom5Soup = new FoodConfig();
 
+        public static string jerky1Name = "Seeker T-bone";
+        public static string jerky1Recipe = $"BugMeat:1, Honey:2";
+        public static FoodConfig jerky1 = new FoodConfig();
+
         public static void Init()
         {
             InitMushroom1Config();
-            InitMushroom1CookedConfig();
             InitMushroom2Config();
             InitMushroom3Config();
             InitMushroom4Config();
             InitMushroom5Config();
+            InitMushroom1CookedConfig();
             InitMushroomSoup1Config();
             InitMushroomSoup2Config();
             InitMushroomSoup3Config();
             InitMushroomSoup4Config();
             InitMushroomSoup5Config();
+            InitJerky1Config();
         }
 
         private static void InitMushroom1Config()
         {
             try
             {
-                FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.mushroom1Prefab, mushroom1Name)
+                FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.mushroom1Prefab, mushroom1Name, null, ModularMagic_Food.Instance.prefabs.mushroom1PickablePrefab)
                 {
                     description = "An oddly blue colored mushroom with a soft glow.",
                     health = 15f,
@@ -71,12 +76,136 @@ namespace ModularMagic_Food.Configs
                     eitr = 15f,
                     healthRegen = 1f,
                     burnTime = 600f,
+                    groupMin = 3,
+                    groupMax = 5,
+                    scaleMin = 1f,
+                    scaleMax = 1.5f,
+                    minAltitude = 0f,
+                    maxAltitude = 1000f,
+                    amount = 1,
+                    respawnTimeMinutes = 240f,
                 };
                 mushroom1.GenerateConfig(options);
             }
             catch (Exception error)
             {
                 Jotunn.Logger.LogError("Could not initialise " + mushroom1Name + " config: " + error);
+            }
+        }
+
+        private static void InitMushroom2Config()
+        {
+            try
+            {
+                FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.mushroom2Prefab, mushroom2Name, null, ModularMagic_Food.Instance.prefabs.mushroom2PickablePrefab)
+                {
+                    description = "The green glow is natural. The nausea isn’t!",
+                    health = 17f,
+                    stamina = 17f,
+                    eitr = 17f,
+                    healthRegen = 1f,
+                    burnTime = 600f,
+                    groupMin = 2,
+                    groupMax = 4,
+                    scaleMin = 1f,
+                    scaleMax = 1.5f,
+                    minAltitude = 0f,
+                    maxAltitude = 1000f,
+                    amount = 1,
+                    respawnTimeMinutes = 240f,
+                };
+                mushroom2.GenerateConfig(options);
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + mushroom2Name + " config: " + error);
+            }
+        }
+
+        private static void InitMushroom3Config()
+        {
+            try
+            {
+                FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.mushroom3Prefab, mushroom3Name, null, ModularMagic_Food.Instance.prefabs.mushroom3PickablePrefab)
+                {
+                    description = "They taste as vile as they look, you better cook these first!",
+                    health = 19f,
+                    stamina = 19f,
+                    eitr = 19f,
+                    healthRegen = 1f,
+                    burnTime = 900f,
+                    groupMin = 2,
+                    groupMax = 5,
+                    scaleMin = 1f,
+                    scaleMax = 1f,
+                    minAltitude = 0f,
+                    maxAltitude = 1000f,
+                    amount = 1,
+                    respawnTimeMinutes = 240f,
+                };
+                mushroom3.GenerateConfig(options);
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + mushroom3Name + " config: " + error);
+            }
+        }
+
+        private static void InitMushroom4Config()
+        {
+            try
+            {
+                FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.mushroom4Prefab, mushroom4Name, null, ModularMagic_Food.Instance.prefabs.mushroom4PickablePrefab)
+                {
+                    description = "They have a nice crunch and taste oddly sweet.",
+                    health = 22f,
+                    stamina = 22f,
+                    eitr = 22,
+                    healthRegen = 1f,
+                    burnTime = 900f,
+                    groupMin = 2,
+                    groupMax = 5,
+                    scaleMin = 0.7f, 
+                    scaleMax = 1f,
+                    minAltitude = 0f,
+                    maxAltitude = 1000f,
+                    amount = 1,
+                    respawnTimeMinutes = 240f,
+                };
+                mushroom4.GenerateConfig(options);
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + mushroom4Name + " config: " + error);
+            }
+        }
+
+        private static void InitMushroom5Config()
+        {
+            try
+            {
+                FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.mushroom5Prefab, mushroom5Name, null, ModularMagic_Food.Instance.prefabs.mushroom5PickablePrefab)
+                {
+                    description = "A distinct violet mushroom with a swirling cap pulsing with latent magic!",
+                    health = 25f,
+                    stamina = 25f,
+                    eitr = 25f,
+                    healthRegen = 1f,
+                    burnTime = 900f,
+                    groupMin = 2,
+                    groupMax = 5,
+                    scaleMin = 0.7f,
+                    scaleMax = 1f,
+                    minAltitude = 0f,
+                    maxAltitude = 1000f,
+                    amount = 1,
+                    respawnTimeMinutes = 240f,
+                };
+                mushroom5.GenerateConfig(options);
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + mushroom5Name + " config: " + error);
             }
         }
 
@@ -98,90 +227,6 @@ namespace ModularMagic_Food.Configs
             catch (Exception error)
             {
                 Jotunn.Logger.LogError("Could not initialise " + mushroom1CookedName + " config: " + error);
-            }
-        }
-
-        private static void InitMushroom2Config()
-        {
-            try
-            {
-                FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.mushroom2Prefab, mushroom2Name)
-                {
-                    description = "The green glow is natural. The nausea isn’t!",
-                    health = 17f,
-                    stamina = 17f,
-                    eitr = 17f,
-                    healthRegen = 1f,
-                    burnTime = 600f,
-                };
-                mushroom2.GenerateConfig(options);
-            }
-            catch (Exception error)
-            {
-                Jotunn.Logger.LogError("Could not initialise " + mushroom2Name + " config: " + error);
-            }
-        }
-
-        private static void InitMushroom3Config()
-        {
-            try
-            {
-                FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.mushroom3Prefab, mushroom3Name)
-                {
-                    description = "They taste as vile as they look, you better cook these first!",
-                    health = 19f,
-                    stamina = 19f,
-                    eitr = 19f,
-                    healthRegen = 1f,
-                    burnTime = 900f,
-                };
-                mushroom3.GenerateConfig(options);
-            }
-            catch (Exception error)
-            {
-                Jotunn.Logger.LogError("Could not initialise " + mushroom3Name + " config: " + error);
-            }
-        }
-
-        private static void InitMushroom4Config()
-        {
-            try
-            {
-                FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.mushroom4Prefab, mushroom4Name)
-                {
-                    description = "They have a nice crunch and taste oddly sweet.",
-                    health = 22f,
-                    stamina = 22f,
-                    eitr = 22,
-                    healthRegen = 1f,
-                    burnTime = 900f,
-                };
-                mushroom4.GenerateConfig(options);
-            }
-            catch (Exception error)
-            {
-                Jotunn.Logger.LogError("Could not initialise " + mushroom4Name + " config: " + error);
-            }
-        }
-
-        private static void InitMushroom5Config()
-        {
-            try
-            {
-                FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.mushroom5Prefab, mushroom5Name)
-                {
-                    description = "A distinct violet mushroom with a swirling cap pulsing with latent magic!",
-                    health = 25f,
-                    stamina = 25f,
-                    eitr = 25f,
-                    healthRegen = 1f,
-                    burnTime = 900f,
-                };
-                mushroom5.GenerateConfig(options);
-            }
-            catch (Exception error)
-            {
-                Jotunn.Logger.LogError("Could not initialise " + mushroom5Name + " config: " + error);
             }
         }
 
@@ -241,7 +286,7 @@ namespace ModularMagic_Food.Configs
                 {
                     description = "A warm tasty soup made of mostly of " + mushroom3Name + "s.",
                     craftingStation = "Cauldron",
-                    minStationLevel = 1,
+                    minStationLevel = 2,
                     maxStackSize = 10,
                     health = 18f,
                     stamina = 10f,
@@ -265,7 +310,7 @@ namespace ModularMagic_Food.Configs
                 {
                     description = "A warm tasty soup made of mostly of " + mushroom4Name + "s.",
                     craftingStation = "Cauldron",
-                    minStationLevel = 1,
+                    minStationLevel = 3,
                     maxStackSize = 10,
                     health = 20f,
                     stamina = 10f,
@@ -289,7 +334,7 @@ namespace ModularMagic_Food.Configs
                 {
                     description = "A warm tasty soup made of mostly of " + mushroom5Name + "s.",
                     craftingStation = "Cauldron",
-                    minStationLevel = 1,
+                    minStationLevel = 4,
                     maxStackSize = 10,
                     health = 23f,
                     stamina = 12f,
@@ -302,6 +347,30 @@ namespace ModularMagic_Food.Configs
             catch (Exception error)
             {
                 Jotunn.Logger.LogError("Could not initialise " + mushroom5SoupName + " config: " + error);
+            }
+        }
+
+        private static void InitJerky1Config()
+        {
+            try
+            {
+                FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.jerky1Prefab, jerky1Name, jerky1Recipe)
+                {
+                    description = "Lean and salty... hmmmmmm",
+                    craftingStation = "Cauldron",
+                    minStationLevel = 5,
+                    maxStackSize = 20,
+                    health = 53f,
+                    stamina = 53f,
+                    eitr = 0f,
+                    healthRegen = 3f,
+                    burnTime = 1800f,
+                };
+                jerky1.GenerateConfig(options);
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + jerky1Name + " config: " + error);
             }
         }
     }

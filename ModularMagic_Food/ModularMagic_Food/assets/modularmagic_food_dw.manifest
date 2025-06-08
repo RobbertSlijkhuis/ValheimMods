@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 2270021763
+CRC: 1286759523
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: b53d6cad200098d29c91798f64983eee
+    Hash: 1a62b0dd9b2825071c18e3520cf78e0b
   TypeTreeHash:
     serializedVersion: 2
     Hash: 0115d419bbc21defd99fb752b81dfc7f
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: b53d6cad200098d29c91798f64983eee
+    Hash: 1a62b0dd9b2825071c18e3520cf78e0b
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -85,6 +85,7 @@ Assets:
 - Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_Pickable_PircedMushroom.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_GribSnowMushroom.prefab
 - Assets/Custom/PrefabInstance/Food/Cooked/MMF_MagicalMushroomSoup.prefab
+- Assets/Custom/PrefabInstance/Food/Cooked/MMF_SeekerTBone.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_Pickable_GribSnowMushroom.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_MagicalMushroom.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_CookedMagicalMushroom.prefab

@@ -23,5 +23,6 @@ namespace ModularMagic_Food.Models
         public GameObject mushroom3SoupPrefab;
         public GameObject mushroom4SoupPrefab;
         public GameObject mushroom5SoupPrefab;
+        public GameObject jerky1Prefab;
     }
 }

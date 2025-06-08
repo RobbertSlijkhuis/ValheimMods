@@ -2,7 +2,7 @@
 
 namespace ModularMagic_Food.Models
 {
-    internal class UpdateItemDropStatsOptions
+    internal class UpdateItemDropOptions
     {
         public string? name = null;
         public string? description = null;

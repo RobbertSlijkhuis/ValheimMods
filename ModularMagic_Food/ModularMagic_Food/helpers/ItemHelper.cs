@@ -9,7 +9,7 @@ namespace ModularMagic_Food.Helpers
 {
     internal class ItemHelper
     {
-        public static void Create(GameObject prefab, FoodConfig config)
+        public static void Create(GameObject prefab, FoodConfig config, GameObject pickablePrefab = null)
         {
             ItemConfig itemConfig = new ItemConfig();
             itemConfig.Name = config.name.Value;
@@ -30,7 +30,7 @@ namespace ModularMagic_Food.Helpers
 
             }
 
-            UpdateHelper.UpdateItemDropStats(prefab, new UpdateItemDropStatsOptions()
+            UpdateHelper.UpdateItemDrop(prefab, new UpdateItemDropOptions()
             {
                 maxStackSize = config.maxStackSize.Value,
                 health = config.health.Value,
@@ -39,6 +39,15 @@ namespace ModularMagic_Food.Helpers
                 eitr = config.eitr.Value,
                 burnTime = config.burnTime.Value,
             });
+
+            if (pickablePrefab != null)
+            {
+                UpdateHelper.UpdatePickable(pickablePrefab, new UpdatePickableOptions()
+                {
+                    amount = config.amount.Value,
+                    respawnTimeMinutes = config.respawnTimeMinutes.Value,
+                });
+            }
 
             ItemManager.Instance.AddItem(new CustomItem(prefab, true, itemConfig));
         }

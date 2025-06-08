@@ -6,6 +6,7 @@ namespace ModularMagic_Food.Models
     internal class FoodConfigOptions
     {
         public GameObject prefab;
+        public GameObject? pickablePrefab;
         public string sectionName;
         public string? recipeName = null;
 
@@ -22,10 +23,19 @@ namespace ModularMagic_Food.Models
         public float stamina = 0;
         public float eitr = 0;
         public float burnTime = 600;
+        public int? groupMin;
+        public int? groupMax;
+        public float? scaleMin;
+        public float? scaleMax;
+        public float? minAltitude;
+        public float? maxAltitude;
+        public int? amount;
+        public float? respawnTimeMinutes;
 
-        public FoodConfigOptions(GameObject prefab, string name, string? recipe = null)
+        public FoodConfigOptions(GameObject prefab, string name, string? recipe = null, GameObject? pickablePrefab = null)
         {
             this.prefab = prefab;
+            this.pickablePrefab = pickablePrefab;
             this.name = name;
             sectionName = $"{name.Replace("'", "")}";
 

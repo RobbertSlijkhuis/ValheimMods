@@ -1,4 +1,5 @@
-﻿using ModularMagic_Food.Models;
+﻿using Jotunn.Managers;
+using ModularMagic_Food.Models;
 using System;
 using UnityEngine;
 
@@ -6,7 +7,7 @@ namespace ModularMagic_Food.Helpers
 {
     internal class UpdateHelper
     {
-        public static void UpdateItemDropStats(GameObject prefab, UpdateItemDropStatsOptions options)
+        public static void UpdateItemDrop(GameObject prefab, UpdateItemDropOptions options)
         {
             try
             {
@@ -28,9 +29,30 @@ namespace ModularMagic_Food.Helpers
                 if (options.eitr != null) { itemDrop.m_itemData.m_shared.m_foodEitr = (float)options.eitr; }
                 if (options.burnTime != null) { itemDrop.m_itemData.m_shared.m_foodBurnTime = (float)options.burnTime; }
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not update ItemDrop stats: " + error);
+                Jotunn.Logger.LogError("Could not update ItemDrop stats: " + e);
+            }
+        }
+
+        public static void UpdatePickable(GameObject prefab, UpdatePickableOptions options)
+        {
+            try
+            {
+                if (prefab == null)
+                    throw new Exception("Prefab is null");
+
+                Pickable pickable = prefab.GetComponent<Pickable>();
+
+                if (pickable == null)
+                    throw new Exception("Pickable is null");
+
+                if (options.amount != null) { pickable.m_amount = (int)options.amount; }
+                if (options.respawnTimeMinutes != null) { pickable.m_respawnTimeMinutes = (float)options.respawnTimeMinutes; }
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not update pickable: " + e);
             }
         }
     }
