@@ -221,7 +221,7 @@ namespace ModularMagic_Utilities.Configs
         private int HandleOrder()
         {
             entryCount = entryCount - 1;
-            return entryCount;
+            return entryCount < 0 ? 0 : entryCount;
         }
     }
 }
