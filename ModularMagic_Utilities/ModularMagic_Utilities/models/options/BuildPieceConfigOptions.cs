@@ -15,8 +15,9 @@ namespace ModularMagic_Utilities.Models
         public string? craftingStation;
         public string recipe;
         public float? weatherZoneRadius;
-        public bool? enableDome;
-        public bool? enableProjector;
+        public bool? enableDomeVisual;
+        public bool? enableDomeParticles;
+        public float? domeParticlesAmount;
         public string? lightColorPreset;
 
         public BuildPieceConfigOptions(GameObject prefab, string name, string recipe)

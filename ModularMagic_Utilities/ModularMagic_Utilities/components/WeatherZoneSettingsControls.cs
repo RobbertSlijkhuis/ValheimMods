@@ -7,29 +7,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using static UnityEngine.ParticleSystem;
+using static UnityEngine.GraphicsBuffer;
 
 namespace ModularMagic_Utilities.components
 {
-    internal class WeatherZoneProjectorControls : MonoBehaviour, Hoverable, Interactable
+    internal class WeatherZoneSettingsControls : MonoBehaviour, Hoverable, Interactable
     {
         public WeatherZone weatherZone;
-        public ParticleSystem particleSystem;
+        public Transform cogTransform;
         public bool isRotating;
 
         private void Awake ()
         {
             weatherZone = transform.parent.parent.Find("weatherzone").gameObject.GetComponent<WeatherZone>();
-            particleSystem = transform.Find("circle").gameObject.GetComponent<ParticleSystem>();
-            isRotating = false;
-
-            Invoke(nameof(InitParticleSystem), 1f);
+            cogTransform = transform.Find("cog");
         }
 
         public string GetHoverText()
         {
-            StartRotateCircle();
-            return "[<color=yellow>E</color>] " + (weatherZone.projectorEnabled ? "Disable" : "Enable") + " radius projector";
+            StartRotateCog(cogTransform, 5f);
+            return "[<color=yellow>E</color>] Settings";
         }
         public string GetHoverName()
         {
@@ -46,30 +43,35 @@ namespace ModularMagic_Utilities.components
             if (hold)
                 return false;
 
-            weatherZone.SetEnableProjector(!weatherZone.projectorEnabled);
+            weatherZone.ShowWeatherZoneGUI();
             return true;
         }
 
-        public void InitParticleSystem()
-        {
-            particleSystem.Pause();
-            VelocityOverLifetimeModule velocityOverLifeTime = particleSystem.velocityOverLifetime;
-            velocityOverLifeTime.enabled = true;
-        }
-
-        public void StartRotateCircle()
+        public void StartRotateCog(Transform trans, float duration)
         {
             if (!isRotating)
             {
-                particleSystem.Play();
+                StartCoroutine(LerpTransform(trans, duration));
                 isRotating = true;
                 Invoke(nameof(resetIsRotating), 5f);
             }
         }
 
+        private IEnumerator LerpTransform(Transform trans, float duration)
+        {
+            float timestep = 0;
+
+            while (timestep <= duration)
+            {
+                timestep = timestep + Time.deltaTime;
+                float step = Mathf.Clamp01(timestep / duration);
+                trans.RotateAround(trans.position, Vector3.forward, step);
+                yield return null;
+            }
+        }
+
         public void resetIsRotating()
         {
-            particleSystem.Pause();
             isRotating = false;
         }
     }

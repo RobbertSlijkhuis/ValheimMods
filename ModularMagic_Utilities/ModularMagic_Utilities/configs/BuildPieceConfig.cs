@@ -3,6 +3,8 @@ using ModularMagic_Utilities.Helpers;
 using ModularMagic_Utilities.Models;
 using ModularMagic_Utilities.StatusEffects;
 using ModularMagic_Utilities.Types;
+using static Jotunn.Utils.GameConstants;
+using System.Security.Policy;
 
 namespace ModularMagic_Utilities.Configs
 {
@@ -23,21 +25,19 @@ namespace ModularMagic_Utilities.Configs
         public ConfigEntry<string> description;
         public ConfigEntry<string> craftingStation;
         public ConfigEntry<string> recipe;
-        public ConfigEntry<float> weatherZoneRadius;
-        public ConfigEntry<bool> enableDome;
-        public ConfigEntry<bool> enableProjector;
         public ConfigEntry<string> lightColorPreset;
+        public ConfigEntry<float> weatherZoneRadius;
+        public ConfigEntry<bool> enableDomeVisual;
+        public ConfigEntry<float> domeSmoothness;
+        public ConfigEntry<bool> enableDomeParticles;
+        public ConfigEntry<float> domeParticlesAmount;
 
         // Other
-        private int entryCount = 5;
+        private int entryCount = 11;
 
         public void GenerateConfig(BuildPieceConfigOptions options)
         {
             ConfigFile Config = ModularMagic_Utilities.Instance.Config;
-
-            if (options.weatherZoneRadius != null) entryCount = entryCount + 1;
-            if (options.enableDome != null) entryCount = entryCount + 1;
-            if (options.enableProjector != null) entryCount = entryCount + 1;
 
             enable = Config.Bind(new ConfigDefinition(options.sectionName, "Enable"), options.enable,
                new ConfigDescription("Wether the recipe for this item is enabled", null,
@@ -53,7 +53,7 @@ namespace ModularMagic_Utilities.Configs
             };
 
             name = Config.Bind(new ConfigDefinition(options.sectionName, "Name"), options.name,
-              new ConfigDescription("The name of the build piece", null,
+              new ConfigDescription("The name of this build piece", null,
               new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             name.SettingChanged += (obj, attr) =>
             {
@@ -64,7 +64,7 @@ namespace ModularMagic_Utilities.Configs
             };
 
             description = Config.Bind(new ConfigDefinition(options.sectionName, "Description"), options.description,
-                new ConfigDescription("The description of the build piece", null,
+                new ConfigDescription("The description of this build piece", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             description.SettingChanged += (obj, attr) =>
             {
@@ -75,7 +75,7 @@ namespace ModularMagic_Utilities.Configs
             }; ;
 
             craftingStation = Config.Bind(new ConfigDefinition(options.sectionName, "Crafting station"), options.craftingStation,
-                new ConfigDescription("The crafting station required to build this piece",
+                new ConfigDescription("The crafting station required to place this piece",
                 new AcceptableValueList<string>(craftingStationOptions),
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             craftingStation.SettingChanged += (obj, attr) =>
@@ -104,7 +104,7 @@ namespace ModularMagic_Utilities.Configs
             if (options.lightColorPreset != null)
             {
                 lightColorPreset = Config.Bind(new ConfigDefinition(options.sectionName, "Effects color preset"), options.lightColorPreset,
-                    new ConfigDescription("A preset of light colors applied to this piece (This will be updated when you turn off/on the piece)",
+                    new ConfigDescription("Light preset applied to this piece, updates when the piece is toggled off and on",
                     new AcceptableValueList<string>(lanterColorOptions),
                     new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
             }
@@ -112,7 +112,7 @@ namespace ModularMagic_Utilities.Configs
             if (options.weatherZoneRadius != null)
             {
                 weatherZoneRadius = Config.Bind(new ConfigDefinition(options.sectionName, "Weather zone radius"), (float)options.weatherZoneRadius,
-                    new ConfigDescription("Wether this piece will render a dome (size determined by radius)",
+                    new ConfigDescription("Default radius for the weather zone",
                     new AcceptableValueRange<float>(10f, 100f),
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 weatherZoneRadius.SettingChanged += (obj, attr) =>
@@ -120,38 +120,53 @@ namespace ModularMagic_Utilities.Configs
                     if (weatherZoneRadius.Value <= 0f)
                         return;
 
-                    UpdateHelper.UpdateWeatherZone(options.prefab, new UpdateWeatherZoneOptions()
-                    {
-                        radius = weatherZoneRadius.Value,
-                    });
+                    //UpdateHelper.UpdateWeatherZone(options.prefab, new UpdateWeatherZoneOptions()
+                    //{
+                    //    radius = weatherZoneRadius.Value,
+                    //});
                 };
             }
 
-            if (options.enableDome != null)
+            if (options.enableDomeVisual != null)
             {
-                enableDome = Config.Bind(new ConfigDefinition(options.sectionName, "Enable dome"), (bool)options.enableDome,
-                    new ConfigDescription("Wether this piece will render a dome (size determined by radius)", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
-                enableDome.SettingChanged += (obj, attr) =>
+                enableDomeVisual = Config.Bind(new ConfigDefinition(options.sectionName, "Dome sphere visibility"), (bool)options.enableDomeVisual,
+                    new ConfigDescription("Specifies whether the dome sphere is visible by default", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+                enableDomeVisual.SettingChanged += (obj, attr) =>
                 {
-                    UpdateHelper.UpdateWeatherZone(options.prefab, new UpdateWeatherZoneOptions()
-                    {
-                        enableDome = enableDome.Value,
-                    });
+                    //UpdateHelper.UpdateWeatherZone(options.prefab, new UpdateWeatherZoneOptions()
+                    //{
+                    //    enableDomeVisual = enableDomeVisual.Value,
+                    //});
                 };
             }
 
-            if (options.enableProjector != null)
+            if (options.enableDomeParticles != null)
             {
-                enableProjector = Config.Bind(new ConfigDefinition(options.sectionName, "Enable radius terrain projector"), (bool)options.enableProjector,
-                    new ConfigDescription("Wether this piece will render the radius on terrain (like the workbench radius visual)", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
-                enableProjector.SettingChanged += (obj, attr) =>
+                enableDomeParticles = Config.Bind(new ConfigDefinition(options.sectionName, "Dome particles visibility"), (bool)options.enableDomeParticles,
+                    new ConfigDescription("Specifies whether the dome particles are visible by default", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+                enableDomeParticles.SettingChanged += (obj, attr) =>
                 {
-                    UpdateHelper.UpdateWeatherZone(options.prefab, new UpdateWeatherZoneOptions()
-                    {
-                        enableProjector = enableProjector.Value,
-                    });
+                    //UpdateHelper.UpdateWeatherZone(options.prefab, new UpdateWeatherZoneOptions()
+                    //{
+                    //    enableDomeParticles = enableDomeParticles.Value,
+                    //});
+                };
+            }
+
+            if (options.domeParticlesAmount != null)
+            {
+                domeParticlesAmount = Config.Bind(new ConfigDefinition(options.sectionName, "Dome particles amount"), (float)options.domeParticlesAmount,
+                    new ConfigDescription("Default number of particles rendered by the dome",
+                    new AcceptableValueRange<float>(0f, 1000f),
+                    new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+                domeParticlesAmount.SettingChanged += (obj, attr) =>
+                {
+                    //UpdateHelper.UpdateWeatherZone(options.prefab, new UpdateWeatherZoneOptions()
+                    //{
+                    //    domeParticlesAmount = domeParticlesAmount.Value,
+                    //});
                 };
             }
         }

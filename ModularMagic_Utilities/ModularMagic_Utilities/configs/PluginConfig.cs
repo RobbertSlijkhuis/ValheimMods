@@ -210,10 +210,11 @@ namespace ModularMagic_Utilities.Configs
                 {
                     description = "$piece_horizontal",
                     craftingStation = CraftingStationType.Stonecutter,
-                    weatherZoneRadius = 30f,
-                    enableDome = false,
-                    enableProjector = false,
                     lightColorPreset = LightPresetType.Blue,
+                    weatherZoneRadius = 30f,
+                    enableDomeVisual = true,
+                    enableDomeParticles = true,
+                    domeParticlesAmount = 100f,
                 };
                 piece1.GenerateConfig(options);
             }

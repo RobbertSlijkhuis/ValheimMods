@@ -22,7 +22,7 @@ namespace ModularMagic_Utilities.Harmony
                 if (__instance == null)
                     return;
 
-                LanternMMU comp = __instance.GetComponent<LanternMMU>();
+                LanternMMU comp = __instance.gameObject.GetComponent<LanternMMU>();
                 comp.SetPlayerStatus(__instance.GetPlayerID(), true);
             }
             catch (Exception e)
@@ -54,7 +54,7 @@ namespace ModularMagic_Utilities.Harmony
                 if (__instance == null && __instance.m_currentItemName == "")
                     return;
 
-                Transform weatherZoneTrans = __instance.transform.parent.Find("weatherzone");
+                Transform weatherZoneTrans = __instance.transform?.parent?.Find("weatherzone");
 
                 if (weatherZoneTrans == null)
                     return;
@@ -83,7 +83,7 @@ namespace ModularMagic_Utilities.Harmony
                 if (__instance == null)
                     return;
 
-                Transform weatherZoneTrans = __instance.transform.parent.Find("weatherzone");
+                Transform weatherZoneTrans = __instance.transform?.parent?.Find("weatherzone");
 
                 if (weatherZoneTrans == null)
                     return;
@@ -108,7 +108,7 @@ namespace ModularMagic_Utilities.Harmony
                 if (__instance == null)
                     return;
 
-                Transform weatherZoneTrans = __instance.transform.parent.Find("weatherzone");
+                Transform weatherZoneTrans = __instance.transform?.parent?.Find("weatherzone");
 
                 if (weatherZoneTrans == null)
                     return;
@@ -121,27 +121,27 @@ namespace ModularMagic_Utilities.Harmony
             }
         }
 
-        //[HarmonyPostfix]
-        //[HarmonyPatch(typeof(Piece), "DropResources")]
-        //public static void DropResources_Postfix(ref Piece __instance, HitData hitData = null)
-        //{
-        //    try
-        //    {
-        //        if (__instance == null)
-        //            return;
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Piece), "DropResources")]
+        public static void DropResources_Postfix(ref Piece __instance, HitData hitData = null)
+        {
+            try
+            {
+                if (__instance == null)
+                    return;
 
-        //        Transform weatherZoneTrans = __instance.transform.Find("weatherzone");
+                Transform weatherZoneTrans = __instance.transform.Find("weatherzone");
 
-        //        if (weatherZoneTrans == null)
-        //            return;
+                if (weatherZoneTrans == null)
+                    return;
 
-        //        Transform itemStand = __instance.transform.Find("itemstand");
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Jotunn.Logger.LogError("Could not drop itemstand item in DropResources_Postfix: " + e);
-        //    }
-        //}
+                weatherZoneTrans.gameObject.GetComponent<WeatherZone>().OnPieceDestroyed();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not drop itemstand item in DropResources_Postfix: " + e);
+            }
+        }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Player), "GetTotalFoodValue")]

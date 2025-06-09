@@ -48,6 +48,10 @@ namespace ModularMagic_Utilities.Helpers
                     throw new Exception("WeatherZone is null");
 
                 if (options.radius != null) { weatherZone.SetRadius((float)options.radius); }
+                if (options.enableDomeVisual != null) { weatherZone.SetEnableDomeVisual((bool)options.enableDomeVisual); }
+                if (options.enableDomeParticles != null) { weatherZone.SetEnableDomeParticles((bool)options.enableDomeParticles); }
+                if (options.domeParticlesAmount != null) { weatherZone.SetDomeParticlesAmount((float)options.domeParticlesAmount); }
+
             }
             catch (Exception e)
             {
