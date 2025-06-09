@@ -30,9 +30,7 @@ namespace ModularMagic_Utilities.Helpers
             tf.anchorMax = anchorMax;
 
             // Margmas: You need the transform component. Maybe even RectTransform, so ((RectTransform)sliderField.transform)
-
-            // sliderField.transform.localScale = new Vector2(2f, 2f);
-            // Optionally set width and height
+            //// Optionally set width and height
             //if (width > 0f)
             //{
             //    sliderField.SetWidth(width);

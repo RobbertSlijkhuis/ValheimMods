@@ -29,18 +29,6 @@ namespace ModularMagic_Utilities.Helpers
                 else
                     pieceConfig.Requirements = requirements;
 
-                //if (isWeatherZone)
-                //{
-                //    UpdateHelper.UpdateWeatherZone(prefab, new UpdateWeatherZoneOptions()
-                //    {
-                //        radius = config.weatherZoneRadius.Value,
-                //        enableDomeVisual = config.enableDomeVisual.Value,
-                //        //domeSmoothness = config.domeSmoothness.Value,
-                //        enableDomeParticles = config.enableDomeParticles.Value,
-                //        domeParticlesAmount = config.domeParticlesAmount.Value,
-                //    });
-                //}
-
                 PieceManager.Instance.AddPiece(new CustomPiece(prefab, true, pieceConfig));
             }
             catch (Exception e)

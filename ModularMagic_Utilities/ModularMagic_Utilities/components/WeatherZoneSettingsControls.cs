@@ -43,7 +43,7 @@ namespace ModularMagic_Utilities.components
             if (hold)
                 return false;
 
-            weatherZone.ShowWeatherZoneGUI();
+            weatherZone.weatherZoneSettingsGUI.ShowGUI();
             return true;
         }
 

@@ -35,30 +35,6 @@ namespace ModularMagic_Utilities.Helpers
             }
         }
 
-        public static void UpdateWeatherZone(GameObject prefab, UpdateWeatherZoneOptions options)
-        {
-            try
-            {
-                if (prefab == null)
-                    throw new Exception("Prefab is null");
-
-                WeatherZone weatherZone = prefab.transform.Find("weatherzone").GetComponent<WeatherZone>();
-
-                if (weatherZone == null)
-                    throw new Exception("WeatherZone is null");
-
-                if (options.radius != null) { weatherZone.SetRadius((float)options.radius); }
-                if (options.enableDomeVisual != null) { weatherZone.SetEnableDomeVisual((bool)options.enableDomeVisual); }
-                if (options.enableDomeParticles != null) { weatherZone.SetEnableDomeParticles((bool)options.enableDomeParticles); }
-                if (options.domeParticlesAmount != null) { weatherZone.SetDomeParticlesAmount((float)options.domeParticlesAmount); }
-
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Could not update WeatherZone: " + e);
-            }
-        }
-
         public static void UpdateDemisterOnPrefab(GameObject prefab, float value)
         {
             try

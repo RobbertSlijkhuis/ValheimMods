@@ -49,7 +49,8 @@ namespace ModularMagic_Utilities.Helpers
                 if (status)
                     flareObj.SetActive(!status);
 
-                flareComp.startColor = config.presetColors.flareColor;
+                ParticleSystem.MainModule flareMain = flareComp.main;
+                flareMain.startColor = config.presetColors.flareColor;
                 flareObj.SetActive(status);
 
                 demisterObj.SetActive(status);
@@ -103,7 +104,7 @@ namespace ModularMagic_Utilities.Helpers
                         break;
                 }
 
-                presetColors = LightPresetHelper.GetColors(lightColorPreset);
+                presetColors = LightColorPresetHelper.GetColors(lightColorPreset);
 
                 return new LanternConfig
                 {

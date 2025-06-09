@@ -138,7 +138,7 @@ namespace ModularMagic_Utilities.Configs
                     elementalMagic = 3f,
                     bloodMagic = 3f,
                     demister = 0f,
-                    lightColorPreset = LightPresetType.Yellow,
+                    lightColorPreset = LightColorPresetType.Yellow,
                     lightRange = 30f,
                     lightIntensity = 1.5f,
                 };
@@ -164,7 +164,7 @@ namespace ModularMagic_Utilities.Configs
                     elementalMagic = 6f,
                     bloodMagic = 6f,
                     demister = 0f,
-                    lightColorPreset = LightPresetType.LightBlue,
+                    lightColorPreset = LightColorPresetType.LightBlue,
                     lightRange = 30f,
                     lightIntensity = 1.5f,
                 };
@@ -190,7 +190,7 @@ namespace ModularMagic_Utilities.Configs
                     elementalMagic = 9f,
                     bloodMagic = 9f,
                     demister = 6f,
-                    lightColorPreset = LightPresetType.Pink,
+                    lightColorPreset = LightColorPresetType.Pink,
                     lightRange = 30f,
                     lightIntensity = 1.5f,
                 };
@@ -210,11 +210,7 @@ namespace ModularMagic_Utilities.Configs
                 {
                     description = "$piece_horizontal",
                     craftingStation = CraftingStationType.Stonecutter,
-                    lightColorPreset = LightPresetType.Blue,
-                    weatherZoneRadius = 30f,
-                    enableDomeVisual = true,
-                    enableDomeParticles = true,
-                    domeParticlesAmount = 100f,
+                    lightColorPreset = LightColorPresetType.Blue,
                 };
                 piece1.GenerateConfig(options);
             }

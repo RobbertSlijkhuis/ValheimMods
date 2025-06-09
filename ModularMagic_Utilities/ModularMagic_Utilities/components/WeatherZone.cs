@@ -2,6 +2,7 @@
 using Jotunn.GUI;
 using Jotunn.Managers;
 using ModularMagic_Utilities.Configs;
+using ModularMagic_Utilities.GUI;
 using ModularMagic_Utilities.Helpers;
 using ModularMagic_Utilities.Models;
 using ModularMagic_Utilities.Types;
@@ -28,27 +29,26 @@ namespace ModularMagic_Utilities.Components
         public Transform projectorTrans;
         public Transform controlsTrans;
         public Transform startEffectTrans;
+
         public long creator;
         public bool isInitialised = false;
-        public bool isLocked = false;
         public bool isMoving = false;
-        public float radius;
-        public bool domeEnabled;
-        public bool domeVisualEnabled;
-        public bool domeParticlesEnabled;
-        public float domeParticlesAmount;
+        public bool isLocked;
         public bool projectorEnabled;
-        public string lightColorPreset;
+        public bool domeEnabled;
+        public float radius;
+        public float particleAmount;
         public float projectorSegmentMultiplier = 4f;
+        public string lightColorPreset;
+
         public Color emissionOffColor = new Color(0f, 0f, 0f, 1f);
         public Color emissionRuneOffColor = new Color(0.2f, 0.2f, 0.2f, 1f);
         public Vector3 hiddenPos = new Vector3(0f, 0f, -0.45f);
         public Vector3 shownPos = new Vector3(0f, 0f, 0f);
         public EffectList startEffects = new EffectList();
         public EffectList stopEffects = new EffectList();
-        public GameObject weatherZonePanel;
-        public UpdateWeatherZoneOptions currentFormValues;
-        public Piece piece; 
+
+        public WeatherZoneSettingsGUI weatherZoneSettingsGUI;
 
         private void Awake()
         {
@@ -72,17 +72,25 @@ namespace ModularMagic_Utilities.Components
                     itemStand = transform.parent.Find("itemstand").gameObject.GetComponent<ItemStand>();
                     circleProjector = projectorTrans.gameObject.GetComponent<CircleProjector>();
 
-                    radius = netView.GetZDO().GetFloat(ModularMagic_Utilities.weatherZoneRadiusHashCode, PluginConfig.piece1.weatherZoneRadius.Value);
-                    domeEnabled = true;
+                    isLocked = netView.GetZDO().GetBool(ModularMagic_Utilities.weatherZoneLockedHash, false);
                     projectorEnabled = false;
-                    domeVisualEnabled = netView.GetZDO().GetBool(ModularMagic_Utilities.weatherZoneEnableDomeVisualHashCode, PluginConfig.piece1.enableDomeVisual.Value);
-                    domeParticlesEnabled = netView.GetZDO().GetBool(ModularMagic_Utilities.weatherZoneEnableDomeParticlesHashCode, PluginConfig.piece1.enableDomeParticles.Value);
-                    domeParticlesAmount = netView.GetZDO().GetFloat(ModularMagic_Utilities.weatherZoneDomeParticlesAmountHashCode, PluginConfig.piece1.domeParticlesAmount.Value);
-                    lightColorPreset = netView.GetZDO().GetString(ModularMagic_Utilities.weatherZoneLightPresetHashCode, PluginConfig.piece1.lightColorPreset.Value);
-                    SetRadius(radius);
-                    ApplyDomeEffects();
+                    domeEnabled = netView.GetZDO().GetBool(ModularMagic_Utilities.weatherZoneDomeHash, false);
+                    radius = netView.GetZDO().GetFloat(ModularMagic_Utilities.weatherZoneRadiusHash, 30f);
+                    particleAmount = netView.GetZDO().GetFloat(ModularMagic_Utilities.weatherZoneParticlesHash, 100);
+                    lightColorPreset = netView.GetZDO().GetString(ModularMagic_Utilities.weatherZoneLightPresetHash, LightColorPresetType.Blue);
 
-                    Jotunn.Logger.LogWarning("Awake, domeParticlesEnabled: "+ domeParticlesEnabled);
+                    SetDome(domeEnabled, false);
+                    SetRadius(radius, false);
+                    SetParticles(particleAmount, false);
+
+                    weatherZoneSettingsGUI = new WeatherZoneSettingsGUI(new UpdateWeatherZoneOptions()
+                    {
+                        radius = radius,
+                        domeEnabled = domeEnabled,
+                        particleAmount = particleAmount,
+                        lightColorPreset = lightColorPreset,
+                    });
+                    weatherZoneSettingsGUI.onAccept.AddListener(OnAcceptSettings);
                 }
             }
             catch (Exception e)
@@ -93,16 +101,17 @@ namespace ModularMagic_Utilities.Components
 
         public string GetHoverText()
         {
+            if (envZone.m_environment == "")
+                return "";
+
             string name = PluginConfig.piece1.name.Value;
             string radiusString = "\nRadius: <color=yellow>" + radius + "</color>";
-            string projector = "\nRadius projector: <color=yellow>" + (projectorEnabled ? "On" : "Off") + "</color>";
             string dome = "\nShow Dome: <color=yellow>" + (domeEnabled ? "On" : "Off") + "</color>";
-            string sphereVisible = "\nShow sphere: <color=yellow>" + (domeVisualEnabled ? "On" : "Off") + "</color>";
-            string particlesVisible = "\nShow particles: <color=yellow>" + (domeParticlesEnabled ? "On" : "Off") + "</color>";
-            string particleAmount = "\nParticle amount: <color=yellow>" + domeParticlesAmount + "</color>";
+            string amount = "\nParticle amount: <color=yellow>" + particleAmount + "</color>";
+            string projector = "\nRadius projector: <color=yellow>" + (projectorEnabled ? "On" : "Off") + "</color>";
             string lockControls = "\n\n[<color=yellow>E</color>] "+ (isLocked ? "Unlock" : "Lock") + " controls";
 
-            return name + radiusString + projector + dome + sphereVisible + particlesVisible + particleAmount + lockControls;
+            return name + radiusString + dome + particleAmount + projector + lockControls;
         }
 
         public string GetHoverName()
@@ -124,6 +133,7 @@ namespace ModularMagic_Utilities.Components
                 return false;
 
             isLocked = !isLocked;
+            netView.GetZDO().Set(ModularMagic_Utilities.weatherZoneLockedHash, isLocked);
 
             if (isLocked)
                 MoveControls(shownPos, hiddenPos, 1f);
@@ -139,7 +149,6 @@ namespace ModularMagic_Utilities.Components
                 return;
 
             string newEnv = "";
-            isInitialised = true;
 
             if (itemName == PluginConfig.spellbook1.name.Value)
                 newEnv = "Clear";
@@ -150,12 +159,10 @@ namespace ModularMagic_Utilities.Components
             if (itemName == PluginConfig.lantern2.name.Value)
                 newEnv = "SnowStorm";
 
-            if (envZone.m_environment == newEnv)
-                return;
-
             envZone.m_environment = newEnv;
             sphereCollider.enabled = true;
-            ShowEffects(true);
+            isInitialised = true;
+            UpdateEffects(newEnv != "", true, true, true, false, true);
         }
 
         public void EnableWeather(ItemDrop.ItemData item)
@@ -194,7 +201,7 @@ namespace ModularMagic_Utilities.Components
 
                 envZone.m_environment = newEnv;
                 sphereCollider.enabled = true;
-                ShowEffects(true);
+                UpdateEffects(true, true, true, false, true, true);
             }
             catch (Exception e)
             {
@@ -207,30 +214,63 @@ namespace ModularMagic_Utilities.Components
             if (envZone == null || envZone.m_environment == "" || sphereCollider == null)
                 return;
 
-            Jotunn.Logger.LogWarning("DisableWeather");
-
             envZone.m_environment = "";
             sphereCollider.enabled = false;
-            ShowEffects(false);
+            UpdateEffects(false, true, true, false, true, true);
         }
 
         public void OnPieceDestroyed()
         {
-            Jotunn.Logger.LogWarning("OnPieceDestroyed(), " + (itemStand != null ? itemStand.m_currentItemName : "None"));
             if (itemStand == null)
                 return;
 
             itemStand.DropItem();
-            SetEnableDome(false);
+            SetDome(false, false);
         }
 
-        public void SetRadius(float value)
+        public void OnAcceptSettings(UpdateWeatherZoneOptions values)
+        {
+            radius = values.radius;
+            domeEnabled = values.domeEnabled;
+            particleAmount = values.particleAmount;
+            lightColorPreset = values.lightColorPreset;
+            netView.GetZDO().Set(ModularMagic_Utilities.weatherZoneLightPresetHash, lightColorPreset);
+
+            SetDome(domeEnabled);
+            SetRadius(radius);
+            SetParticles(particleAmount);
+            UpdateEffects(envZone.m_environment != "", true, true, true, false, false);
+        }
+
+        public void SetProjector(bool value)
+        {
+            if (projectorTrans == null)
+                return;
+
+            projectorEnabled = value;
+            projectorTrans.gameObject.SetActive(projectorEnabled);
+        }
+
+        public void SetDome(bool value, bool updateZDO = true)
+        {
+            if (netView == null || netView.GetZDO() == null || domeTrans == null)
+                return;
+
+            if (updateZDO)
+                netView.GetZDO().Set(ModularMagic_Utilities.weatherZoneDomeHash, value);
+
+            domeEnabled = value;
+        }
+
+        public void SetRadius(float value, bool updateZDO = true)
         {
             if (netView == null || netView.GetZDO() == null)
                 return;
 
+            if (updateZDO)
+                netView.GetZDO().Set(ModularMagic_Utilities.weatherZoneRadiusHash, value);
+
             radius = value;
-            netView.GetZDO().Set(ModularMagic_Utilities.weatherZoneRadiusHashCode, radius);
 
             if (sphereCollider != null)
                 sphereCollider.radius = radius;
@@ -245,155 +285,44 @@ namespace ModularMagic_Utilities.Components
             }
         }
 
-        public void SetEnableDome(bool value)
+        public void SetParticles(float value, bool updateZDO = true)
         {
-            if (netView == null || netView.GetZDO() == null)
-                return;
-
-            domeEnabled = value;
-            netView.GetZDO().Set(ModularMagic_Utilities.weatherZoneEnableDomeHashCode, domeEnabled);
-
-            if (domeTrans != null && envZone.m_environment != "")
-                domeTrans.gameObject.SetActive(domeEnabled);
-        }
-
-        public void SetEnableProjector(bool value)
-        {
-            projectorEnabled = value;
-            projectorTrans.gameObject.SetActive(projectorEnabled);
-        }
-
-        public void SetEnableDomeVisual(bool value)
-        {
-            domeVisualEnabled = value;
-            ApplyDomeEffects();
-        }
-
-        public void SetEnableDomeParticles(bool value)
-        {
-            domeParticlesEnabled = value;
-            ApplyDomeEffects();
-        }
-
-        public void SetDomeParticlesAmount(float value)
-        {
-            domeParticlesAmount = value;
-            ApplyDomeEffects();
-        }
-
-        public void ApplyDomeEffects()
-        {
-            if (domeTrans == null) domeTrans = transform.parent.Find("New/dome");
-            if (domeTrans == null)
-            {
-                Jotunn.Logger.LogWarning("Dome trans is null");
-                return;
-            }
-
-            Jotunn.Logger.LogWarning("ApplyDomeEffects, domeParticlesEnabled: " + domeParticlesEnabled);
-
-            MeshRenderer meshRenderer = domeTrans.gameObject.GetComponent<MeshRenderer>();
-
-            if (meshRenderer != null)
-                meshRenderer.enabled = domeVisualEnabled;
-
             ParticleSystem particleSystem = domeTrans.gameObject.GetComponent<ParticleSystem>();
 
-            if (particleSystem != null)
-            {
-                EmissionModule emission = particleSystem.emission;
-                emission.rateOverTime = domeParticlesAmount;
+            if (particleSystem == null)
+                return;
 
-                if (domeParticlesEnabled)
-                    particleSystem.Play();
-                else
-                    particleSystem.Stop();
-            }
+            if (updateZDO)
+                netView.GetZDO().Set(ModularMagic_Utilities.weatherZoneParticlesHash, value);
+
+            particleAmount = value;
         }
 
-        private void ShowEffects(bool value)
+        private void UpdateEffects(bool enabled, bool updateEmission, bool updateDome, bool updateActionFX, bool playEffects, bool moveControls)
         {
             try
             {
-                if (!isLocked)
-                    MoveControls(value ? hiddenPos : shownPos, value ? shownPos : hiddenPos, 1f);
+                LightPresetColors presetColors = LightColorPresetHelper.GetColors(lightColorPreset);
+                presetColors.emissionColor = LightColorPresetHelper.ApplyMultiplierToColor(presetColors.emissionColor, 0.8f);
 
-                LightPresetColors presetColors = LightPresetHelper.GetColors(lightColorPreset);
-                presetColors.emissionColor = LightPresetHelper.ApplyMultiplierToColor(presetColors.emissionColor, 0.8f);
+                if (updateEmission)
+                    UpdateEmissions(enabled, playEffects, presetColors);
 
-                if (emissionTrans != null)
-                {
-                    MeshRenderer meshRendererComp = emissionTrans.gameObject.gameObject.GetComponent<MeshRenderer>();
-                    Material mat = meshRendererComp.materials[0];
-                    StartLerpColor(mat, value ? emissionOffColor : presetColors.emissionColor, value ? presetColors.emissionColor : emissionOffColor, 3f);
+                if (updateDome)
+                    UpdateDome(enabled, presetColors);
 
-                    Transform particleTrans = emissionTrans.Find("particles");
-                    ParticleSystem particles = particleTrans.gameObject.GetComponent<ParticleSystem>();
-                    ParticleSystem.MainModule particlesMain = particles.main;
-                    ParticleSystemRenderer particlesRenderer = particleTrans.gameObject.GetComponent<ParticleSystemRenderer>();
-                    particlesMain.startColor = presetColors.emissionColor;
-                    particlesRenderer.materials[0].SetColor("_EmissionColor", presetColors.emissionColor);
+                if (updateActionFX)
+                    UpdateActivationFX(presetColors);
 
-                    Transform particleFastTrans = emissionTrans.Find("particles_fast");
-                    ParticleSystem particlesFast = particleFastTrans.gameObject.GetComponent<ParticleSystem>();
-                    ParticleSystem.MainModule particlesFastMain = particles.main;
-                    ParticleSystemRenderer particlesFastRenderer = particleFastTrans.gameObject.GetComponent<ParticleSystemRenderer>();
-                    particlesFastMain.startColor = presetColors.emissionColor;
-                    particlesFastRenderer.materials[0].SetColor("_EmissionColor", presetColors.emissionColor);
-                    
-                    if (value)
-                    {
-                        particles.Play();
-                        particlesFast.Play();
-                    }
-                    else
-                    {
-                        particles.Stop();
-                        particlesFast.Stop();
-                    }
-
-                    Transform lightsTrans = emissionTrans.Find("light");
-                    lightsTrans.gameObject.GetComponent<Light>().color = presetColors.lightColor;
-                    ParticleSystem flare = lightsTrans.gameObject.GetComponent<ParticleSystem>();
-                    ParticleSystem.MainModule flareMain = flare.main;
-                    flareMain.startColor = presetColors.flareColor;
-                    
-                    if (value)
-                        lightsTrans.gameObject.SetActive(false);
-
-                    lightsTrans.gameObject.SetActive(value);
-                }
-
-                if (emissionRunesTrans != null)
-                {
-                    MeshRenderer meshRendererComp = emissionRunesTrans.gameObject.GetComponent<MeshRenderer>();
-                    Material mat = meshRendererComp.materials[0];
-                    StartLerpColor(mat, value ? emissionRuneOffColor : presetColors.emissionColor, value ? presetColors.emissionColor : emissionRuneOffColor, 1.5f);
-                }
-
-                if (domeTrans != null)
-                {
-                    ParticleSystem particles = domeTrans.gameObject.GetComponent<ParticleSystem>();
-                    ParticleSystem.MainModule particlesMain = particles.main;
-                    ParticleSystemRenderer particlesRenderer = domeTrans.gameObject.GetComponent<ParticleSystemRenderer>();
-                    particlesMain.startColor = presetColors.emissionColor;
-                    particlesRenderer.materials[0].SetColor("_EmissionColor", presetColors.emissionColor);
-
-                    domeTrans.gameObject.SetActive(domeEnabled ? value : false);
-                }
-
-                if (projectorTrans != null)
-                {
-                    projectorTrans.gameObject.SetActive(projectorEnabled ? value : false);
-                }
-
-                ApplyDomeEffects();
-                SetColorsOnActivationFX(presetColors);
-
-                if (value)
+                if (enabled)
                     startEffects.Create(startEffectTrans.position, startEffectTrans.rotation);
                 else
                     stopEffects.Create(startEffectTrans.position, startEffectTrans.rotation);
+
+
+
+                if (!isLocked)
+                    MoveControls(enabled ? hiddenPos : shownPos, enabled ? shownPos : hiddenPos, 1f);
             }
             catch (Exception e)
             {
@@ -401,7 +330,93 @@ namespace ModularMagic_Utilities.Components
             }
         }
 
-        private void SetColorsOnActivationFX(LightPresetColors presetColors)
+        private void UpdateEmissions(bool enabled, bool playEffects, LightPresetColors presetColors)
+        {
+            if (emissionTrans != null)
+            {
+                MeshRenderer meshRendererComp = emissionTrans.gameObject.gameObject.GetComponent<MeshRenderer>();
+                Material mat = meshRendererComp.materials[0];
+                
+                if (playEffects)
+                    ChangeColor(mat, enabled ? emissionOffColor : presetColors.emissionColor, enabled ? presetColors.emissionColor : emissionOffColor, 3f);
+                else if (enabled)
+                    mat.SetColor("_EmissionColor", presetColors.emissionColor);
+
+                Transform particleTrans = emissionTrans.Find("particles");
+                ParticleSystem particles = particleTrans.gameObject.GetComponent<ParticleSystem>();
+                ParticleSystem.MainModule particlesMain = particles.main;
+                ParticleSystemRenderer particlesRenderer = particleTrans.gameObject.GetComponent<ParticleSystemRenderer>();
+                particlesMain.startColor = presetColors.emissionColor;
+                particlesRenderer.materials[0].SetColor("_EmissionColor", presetColors.emissionColor);
+
+                Transform particleFastTrans = emissionTrans.Find("particles_fast");
+                ParticleSystem particlesFast = particleFastTrans.gameObject.GetComponent<ParticleSystem>();
+                ParticleSystem.MainModule particlesFastMain = particles.main;
+                ParticleSystemRenderer particlesFastRenderer = particleFastTrans.gameObject.GetComponent<ParticleSystemRenderer>();
+                particlesFastMain.startColor = presetColors.emissionColor;
+                particlesFastRenderer.materials[0].SetColor("_EmissionColor", presetColors.emissionColor);
+
+                if (enabled)
+                {
+                    particles.Play();
+                    particlesFast.Play();
+                }
+                else
+                {
+                    particles.Stop();
+                    particlesFast.Stop();
+                }
+
+                Transform lightsTrans = emissionTrans.Find("light");
+                lightsTrans.gameObject.GetComponent<Light>().color = presetColors.lightColor;
+                ParticleSystem flare = lightsTrans.gameObject.GetComponent<ParticleSystem>();
+                ParticleSystem.MainModule flareMain = flare.main;
+                flareMain.startColor = presetColors.flareColor;
+
+                if (enabled)
+                    lightsTrans.gameObject.SetActive(false);
+
+                lightsTrans.gameObject.SetActive(enabled);
+            }
+
+            if (emissionRunesTrans != null)
+            {
+                MeshRenderer meshRendererComp = emissionRunesTrans.gameObject.GetComponent<MeshRenderer>();
+                Material mat = meshRendererComp.materials[0];
+
+                if (playEffects)
+                    ChangeColor(mat, enabled ? emissionRuneOffColor : presetColors.emissionColor, enabled ? presetColors.emissionColor : emissionRuneOffColor, 1.5f);
+                else if (enabled)
+                    mat.SetColor("_EmissionColor", presetColors.emissionColor);
+            }
+        }
+
+        private void UpdateDome(bool enabled, LightPresetColors presetColors)
+        {
+            if (domeTrans != null)
+            {
+                ParticleSystem particleSystem = domeTrans.gameObject.GetComponent<ParticleSystem>();
+                ParticleSystem.MainModule particlesMain = particleSystem.main;
+                ParticleSystemRenderer particlesRenderer = domeTrans.gameObject.GetComponent<ParticleSystemRenderer>();
+                particlesMain.startColor = presetColors.emissionColor;
+                particlesRenderer.materials[0].SetColor("_EmissionColor", presetColors.emissionColor);
+
+                EmissionModule emission = particleSystem.emission;
+                emission.rateOverTime = enabled ? particleAmount : 0;
+
+                if (enabled)
+                    particleSystem.Play();
+                else
+                    particleSystem.Stop();
+
+                MeshRenderer meshRenderer = domeTrans.gameObject.GetComponent<MeshRenderer>();
+
+                if (meshRenderer != null)
+                    meshRenderer.enabled = enabled ? domeEnabled : false;
+            }
+        }
+
+        private void UpdateActivationFX(LightPresetColors presetColors)
         {
             try
             {
@@ -421,20 +436,20 @@ namespace ModularMagic_Utilities.Components
                 Transform lightTrans = activationFX.transform.Find("Point light");
                 float multiplier = 0.3f;
 
-                if (presetColors.lightPreset == LightPresetType.Green || presetColors.lightPreset == LightPresetType.Blue)
+                if (presetColors.lightPreset == LightColorPresetType.Green || presetColors.lightPreset == LightColorPresetType.Blue)
                     multiplier = 0.1f;
 
-                if (presetColors.lightPreset == LightPresetType.Pink)
+                if (presetColors.lightPreset == LightColorPresetType.Pink)
                     multiplier = 0.6f;
 
                 ParticleSystem.MainModule particleMain = particleExplTrans.gameObject.GetComponent<ParticleSystem>().main;
-                particleMain.startColor = LightPresetHelper.ApplyMultiplierToColor(presetColors.emissionColor, multiplier);
+                particleMain.startColor = LightColorPresetHelper.ApplyMultiplierToColor(presetColors.emissionColor, multiplier);
 
                 ParticleSystem.MainModule trailsMain = trailsExplTrans.gameObject.GetComponent<ParticleSystem>().main;
-                trailsMain.startColor = LightPresetHelper.ApplyMultiplierToColor(presetColors.emissionColor, multiplier);
+                trailsMain.startColor = LightColorPresetHelper.ApplyMultiplierToColor(presetColors.emissionColor, multiplier);
 
                 ParticleSystem.MainModule gloriaMain = gloriaTrans.gameObject.GetComponent<ParticleSystem>().main;
-                Color gloriaColor = LightPresetHelper.ApplyMultiplierToColor(presetColors.emissionColor, multiplier);
+                Color gloriaColor = LightColorPresetHelper.ApplyMultiplierToColor(presetColors.emissionColor, multiplier);
                 gloriaColor.a = 0.5607843f;
                 gloriaMain.startColor = gloriaColor;
 
@@ -444,7 +459,7 @@ namespace ModularMagic_Utilities.Components
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not set colors on ActivationFX: " + e);
+                Jotunn.Logger.LogError("Could not update colors on ActivationFX: " + e);
             }
         }
 
@@ -477,12 +492,12 @@ namespace ModularMagic_Utilities.Components
             isMoving = false;
         }
 
-        public void StartLerpColor(Material mat, Color fromColor, Color toColor, float duration)
+        public void ChangeColor(Material mat, Color fromColor, Color toColor, float duration)
         {
-            StartCoroutine(_LerpColor(mat, fromColor, toColor, duration));
+            StartCoroutine(LerpColor(mat, fromColor, toColor, duration));
         }
 
-        private IEnumerator _LerpColor(Material mat, Color fromColor, Color toColor, float duration)
+        private IEnumerator LerpColor(Material mat, Color fromColor, Color toColor, float duration)
         {
             float timestep = 0;
 
@@ -494,386 +509,6 @@ namespace ModularMagic_Utilities.Components
                 mat.SetColor("_EmissionColor", color);
                 yield return null;
             }
-        }
-
-        public string GetLightPresetByInt(int value)
-        {
-            switch (value)
-            {
-                case 0:
-                    return LightPresetType.Red;
-                case 1:
-                    return LightPresetType.Orange;
-                case 2:
-                    return LightPresetType.Yellow;
-                case 3:
-                    return LightPresetType.LemonGreen;
-                case 4:
-                    return LightPresetType.Green;
-                case 5:
-                    return LightPresetType.LightBlue;
-                case 6:
-                    return LightPresetType.Blue;
-                case 7:
-                    return LightPresetType.Pink;
-                case 8:
-                    return LightPresetType.Purple;
-                case 9:
-                    return LightPresetType.White;
-                default:
-                    return LightPresetType.Blue;
-            }
-        }
-
-        public int GetIntByLightPreset(string value)
-        {
-            switch (value)
-            {
-                case nameof(LightPresetType.Red):
-                    return 0;
-                case nameof(LightPresetType.Orange):
-                    return 1;
-                case nameof(LightPresetType.Yellow):
-                    return 2;
-                case nameof(LightPresetType.LemonGreen):
-                    return 3;
-                case nameof(LightPresetType.Green):
-                    return 4;
-                case nameof(LightPresetType.LightBlue):
-                    return 5;
-                case nameof(LightPresetType.Blue):
-                    return 6;
-                case nameof(LightPresetType.Pink):
-                    return 7;
-                case nameof(LightPresetType.Purple):
-                    return 8;
-                case nameof(LightPresetType.White):
-                    return 9;
-                default:
-                    return 6;
-            }
-        }
-
-        public void RadiusChanged(string value)
-        {
-            Jotunn.Logger.LogWarning("RadiusChanged(), " + value);
-            currentFormValues.radius = float.Parse(value);
-        }
-
-        public void ShowSphereChanged(bool value)
-        {
-            Jotunn.Logger.LogWarning("ShowSphereChanged(), " + value);
-            currentFormValues.enableDomeVisual = value;
-        }
-
-        public void ShowParticlesChanged(bool value)
-        {
-            Jotunn.Logger.LogWarning("ShowParticlesChanged(), " + value);
-            currentFormValues.enableDomeParticles = value;
-        }
-
-        public void AmountChanged(string value)
-        {
-            Jotunn.Logger.LogWarning("AmountChanged(), " + value);
-            currentFormValues.domeParticlesAmount = int.Parse(value);
-        }
-
-        public void lightPresetChanged(int value)
-        {
-            Jotunn.Logger.LogWarning("lightPresetChanged(), " + value);
-            switch (value)
-            {
-                case 0:
-                    currentFormValues.lightPreset = LightPresetType.Red;
-                    break;
-                case 1:
-                    currentFormValues.lightPreset = LightPresetType.Orange;
-                    break;
-                case 2:
-                    currentFormValues.lightPreset = LightPresetType.Yellow;
-                    break;
-                case 3:
-                    currentFormValues.lightPreset = LightPresetType.LemonGreen;
-                    break;
-                case 4:
-                    currentFormValues.lightPreset = LightPresetType.Green;
-                    break;
-                case 5:
-                    currentFormValues.lightPreset = LightPresetType.LightBlue;
-                    break;
-                case 6:
-                    currentFormValues.lightPreset = LightPresetType.Blue;
-                    break;
-                case 7:
-                    currentFormValues.lightPreset = LightPresetType.Pink;
-                    break;
-                case 8:
-                    currentFormValues.lightPreset = LightPresetType.Purple;
-                    break;
-                case 9:
-                    currentFormValues.lightPreset = LightPresetType.White;
-                    break;
-                default:
-                    currentFormValues.lightPreset = LightPresetType.Blue;
-                    break;
-            }
-        }
-
-        public void ShowWeatherZoneGUI()
-        {
-            // Create the panel if it does not exist
-            if (!weatherZonePanel)
-            {
-                if (GUIManager.Instance == null)
-                {
-                    Jotunn.Logger.LogError("GUIManager instance is null");
-                    return;
-                }
-
-                if (!GUIManager.CustomGUIFront)
-                {
-                    Jotunn.Logger.LogError("GUIManager CustomGUI is null");
-                    return;
-                }
-
-                // Create the panel object
-                weatherZonePanel = GUIManager.Instance.CreateWoodpanel(
-                    parent: GUIManager.CustomGUIFront.transform,
-                    anchorMin: new Vector2(0.5f, 0.5f),
-                    anchorMax: new Vector2(0.5f, 0.5f),
-                    position: new Vector2(0, 0),
-                    width: 500,
-                    height: 500,
-                    draggable: false
-                );
-                weatherZonePanel.SetActive(false);
-
-                GUIManager.Instance.CreateText(
-                    text: "Radius",
-                    parent: weatherZonePanel.transform,
-                    anchorMin: new Vector2(.5f, 1f),
-                    anchorMax: new Vector2(.5f, 1f),
-                    position: new Vector2(0f, -40f),
-                    font: GUIManager.Instance.AveriaSerifBold,
-                    fontSize: 18,
-                    color: GUIManager.Instance.ValheimOrange,
-                    outline: true,
-                    outlineColor: Color.black,
-                    width: 460f,
-                    height: 30f,
-                    addContentSizeFitter: false
-                );
-
-                GameObject radiusField = GUIManager.Instance.CreateInputField(
-                    parent: weatherZonePanel.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(0f, -70f),
-                    contentType: InputField.ContentType.IntegerNumber,
-                    placeholderText: "Radius",
-                    fontSize: 18,
-                    width: 460f,
-                    height: 30f
-                );
-                InputField radiusInput = radiusField.GetComponent<InputField>();
-                radiusInput.text = radius.ToString();
-                radiusInput.onValueChanged.AddListener(RadiusChanged);
-
-                GUIManager.Instance.CreateText(
-                    text: "Show dome sphere",
-                    parent: weatherZonePanel.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(0f, -110f),
-                    font: GUIManager.Instance.AveriaSerifBold,
-                    fontSize: 18,
-                    color: GUIManager.Instance.ValheimOrange,
-                    outline: true,
-                    outlineColor: Color.black,
-                    width: 460f,
-                    height: 30f,
-                    addContentSizeFitter: false
-                );
-
-                GameObject checkboxShowSphere = GUIHelper.CreateToggle(
-                    parent: weatherZonePanel.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(-200f, -150f),
-                    width: 30f,
-                    height: 30f
-                );
-                Toggle toggleShowSphere = checkboxShowSphere.GetComponent<Toggle>();
-                toggleShowSphere.isOn = domeVisualEnabled;
-                toggleShowSphere.onValueChanged.AddListener(ShowSphereChanged);
-
-                GUIManager.Instance.CreateText(
-                    text: "Show dome particles",
-                    parent: weatherZonePanel.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(0f, -190f),
-                    font: GUIManager.Instance.AveriaSerifBold,
-                    fontSize: 18,
-                    color: GUIManager.Instance.ValheimOrange,
-                    outline: true,
-                    outlineColor: Color.black,
-                    width: 460f,
-                    height: 30f,
-                    addContentSizeFitter: false
-                );
-
-                GameObject checkboxShowParticles = GUIHelper.CreateToggle(
-                    parent: weatherZonePanel.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(-200f, -230f),
-                    width: 30f,
-                    height: 30f
-                );
-                Toggle toggleShowParticles = checkboxShowParticles.GetComponent<Toggle>();
-                toggleShowParticles.isOn = domeParticlesEnabled;
-                toggleShowParticles.onValueChanged.AddListener(ShowParticlesChanged);
-
-                GUIManager.Instance.CreateText(
-                    text: "Dome particles amount",
-                    parent: weatherZonePanel.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(0f, -265f),
-                    font: GUIManager.Instance.AveriaSerifBold,
-                    fontSize: 18,
-                    color: GUIManager.Instance.ValheimOrange,
-                    outline: true,
-                    outlineColor: Color.black,
-                    width: 460f,
-                    height: 30f,
-                    addContentSizeFitter: false
-                );
-
-                GameObject amountField = GUIManager.Instance.CreateInputField(
-                    parent: weatherZonePanel.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(0f, -300f),
-                    contentType: InputField.ContentType.IntegerNumber,
-                    placeholderText: "Amount",
-                    fontSize: 18,
-                    width: 460f,
-                    height: 30f
-                );
-                InputField amountInput = amountField.GetComponent<InputField>();
-                amountInput.text = domeParticlesAmount.ToString();
-                amountInput.onValueChanged.AddListener(AmountChanged);
-
-                GUIManager.Instance.CreateText(
-                    text: "Light color preset",
-                    parent: weatherZonePanel.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(0f, -340f),
-                    font: GUIManager.Instance.AveriaSerifBold,
-                    fontSize: 18,
-                    color: GUIManager.Instance.ValheimOrange,
-                    outline: true,
-                    outlineColor: Color.black,
-                    width: 460f,
-                    height: 30f,
-                    addContentSizeFitter: false
-                );
-
-                GameObject lightPresetField = GUIManager.Instance.CreateDropDown(
-                    parent: weatherZonePanel.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(0f, -380f),
-                    fontSize: 18,
-                    width: 460f,
-                    height: 30f
-                );
-                Dropdown lightPresetDropdown = lightPresetField.GetComponent<Dropdown>();
-                lightPresetDropdown.GetComponent<Dropdown>().AddOptions(new List<string>
-                {
-                    LightPresetType.Red, LightPresetType.Orange, LightPresetType.Yellow, LightPresetType.LemonGreen, LightPresetType.Green,
-                    LightPresetType.LightBlue, LightPresetType.Blue, LightPresetType.Pink, LightPresetType.Purple, LightPresetType.White,
-                });
-                lightPresetDropdown.value = GetIntByLightPreset(lightColorPreset);
-                lightPresetDropdown.onValueChanged.AddListener(lightPresetChanged);
-
-                GameObject buttonObject = GUIManager.Instance.CreateButton(
-                    text: "Cancel",
-                    parent: weatherZonePanel.transform,
-                    anchorMin: new Vector2(0.5f, 0f),
-                    anchorMax: new Vector2(0.5f, 0f),
-                    position: new Vector2(-120f, 50f),
-                    width: 225f,
-                    height: 60f
-                );
-                buttonObject.SetActive(true);
-                Button button = buttonObject.GetComponent<Button>();
-                button.onClick.AddListener(ShowWeatherZoneGUI);
-
-                GameObject buttonObject2 = GUIManager.Instance.CreateButton(
-                    text: "Accept",
-                    parent: weatherZonePanel.transform,
-                    anchorMin: new Vector2(0.5f, 0f),
-                    anchorMax: new Vector2(0.5f, 0f),
-                    position: new Vector2(120f, 50f),
-                    width: 225f,
-                    height: 60f
-                );
-                buttonObject2.SetActive(true);
-                Button button2 = buttonObject2.GetComponent<Button>();
-                button2.onClick.AddListener(AcceptPanelValues);
-            }
-
-            currentFormValues = new UpdateWeatherZoneOptions();
-            currentFormValues.radius = radius;
-            currentFormValues.enableDomeVisual = domeVisualEnabled;
-            currentFormValues.enableDomeParticles = domeParticlesEnabled;
-            currentFormValues.domeParticlesAmount = domeParticlesAmount;
-            currentFormValues.lightPreset = lightColorPreset;
-
-            // Switch the current state
-            bool state = !weatherZonePanel.activeSelf;
-
-            // Set the active state of the panel
-            weatherZonePanel.SetActive(state);
-
-            // Toggle input for the player and camera while displaying the GUI
-            GUIManager.BlockInput(state);
-        }
-
-        public void AcceptPanelValues()
-        {
-            radius = (float)currentFormValues.radius;
-            domeVisualEnabled = (bool)currentFormValues.enableDomeVisual;
-            domeParticlesEnabled = (bool)currentFormValues.enableDomeParticles;
-            domeParticlesAmount = (float)currentFormValues.domeParticlesAmount;
-            lightColorPreset = (string)currentFormValues.lightPreset;
-
-            if (radius < 10f)
-                radius = 10f;
-            else if (radius > 100f)
-                radius = 100f;
-
-            netView.GetZDO().Set(ModularMagic_Utilities.weatherZoneEnableDomeVisualHashCode, domeVisualEnabled);
-            netView.GetZDO().Set(ModularMagic_Utilities.weatherZoneEnableDomeParticlesHashCode, domeParticlesEnabled);
-            netView.GetZDO().Set(ModularMagic_Utilities.weatherZoneDomeParticlesAmountHashCode, domeParticlesAmount);
-            netView.GetZDO().Set(ModularMagic_Utilities.weatherZoneLightPresetHashCode, lightColorPreset);
-
-            SetRadius(radius);
-            ShowEffects(envZone.m_environment != "" ? true : false);
-
-            Jotunn.Logger.LogWarning("AcceptPanelValues, domeParticlesEnabled: " + domeParticlesEnabled);
-
-            currentFormValues = null;
-
-            // Set the active state of the panel
-            weatherZonePanel.SetActive(false);
-
-            // Toggle input for the player and camera while displaying the GUI
-            GUIManager.BlockInput(false);
         }
     }
 }

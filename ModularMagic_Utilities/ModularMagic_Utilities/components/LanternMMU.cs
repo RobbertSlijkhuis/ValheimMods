@@ -32,7 +32,7 @@ namespace ModularMagic_Utilities.Components
                 if (!Player.m_localPlayer)
                     return;
 
-                status = netView.m_zdo.GetString(ModularMagic_Utilities.lanternStatusHashCode, "");
+                status = netView.m_zdo.GetString(ModularMagic_Utilities.lanternStatusHash, "");
 
                 if (status == "")
                     return;
@@ -61,7 +61,7 @@ namespace ModularMagic_Utilities.Components
 
             string newStatus = StatusObjectToString(new LanternStatus(playerId, value));
             
-            netView.m_zdo.Set(ModularMagic_Utilities.lanternStatusHashCode, newStatus);
+            netView.m_zdo.Set(ModularMagic_Utilities.lanternStatusHash, newStatus);
             return true;
         }
 

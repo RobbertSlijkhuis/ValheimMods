@@ -46,7 +46,7 @@ namespace ModularMagic_Utilities.components
             if (hold)
                 return false;
 
-            weatherZone.SetEnableProjector(!weatherZone.projectorEnabled);
+            weatherZone.SetProjector(!weatherZone.projectorEnabled);
             return true;
         }
 

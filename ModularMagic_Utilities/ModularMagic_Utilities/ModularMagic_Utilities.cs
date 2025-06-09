@@ -33,13 +33,12 @@ namespace ModularMagic_Utilities
         public CustomMaterials materials = new CustomMaterials();
         private ButtonConfig utilityModeButton;
 
-        public static readonly int lanternStatusHashCode = "LanternStatus_MMU".GetStableHashCode();
-        public static readonly int weatherZoneRadiusHashCode = "WeatherZoneRadius_MMU".GetStableHashCode();
-        public static readonly int weatherZoneEnableDomeHashCode = "WeatherZoneDome_MMU".GetStableHashCode();
-        public static readonly int weatherZoneLightPresetHashCode = "WeatherZoneLightPreset_MMU".GetStableHashCode();
-        public static readonly int weatherZoneEnableDomeVisualHashCode = "WeatherZoneDomeVisual_MMU".GetStableHashCode();
-        public static readonly int weatherZoneEnableDomeParticlesHashCode = "WeatherZoneDomeParticles_MMU".GetStableHashCode();
-        public static readonly int weatherZoneDomeParticlesAmountHashCode = "WeatherZoneDomeParticlesAmount_MMU".GetStableHashCode();
+        public static readonly int lanternStatusHash = "LanternStatus_MMU".GetStableHashCode();
+        public static readonly int weatherZoneLockedHash = "WeatherZoneLocked_MMU".GetStableHashCode();
+        public static readonly int weatherZoneDomeHash = "WeatherZoneDome_MMU".GetStableHashCode();
+        public static readonly int weatherZoneRadiusHash = "WeatherZoneRadius_MMU".GetStableHashCode();
+        public static readonly int weatherZoneParticlesHash = "WeatherZoneDomeParticles_MMU".GetStableHashCode();
+        public static readonly int weatherZoneLightPresetHash = "WeatherZoneLightPreset_MMU".GetStableHashCode();
 
         private void Awake()
         {

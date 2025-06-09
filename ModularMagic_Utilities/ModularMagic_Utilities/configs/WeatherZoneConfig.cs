@@ -3,12 +3,11 @@ using ModularMagic_Utilities.Helpers;
 using ModularMagic_Utilities.Models;
 using ModularMagic_Utilities.StatusEffects;
 using ModularMagic_Utilities.Types;
-using static Jotunn.Utils.GameConstants;
 using System.Security.Policy;
 
 namespace ModularMagic_Utilities.Configs
 {
-    internal class BuildPieceConfig
+    internal class WeatherZoneConfig
     {
         // General options
         public static string[] craftingStationOptions = new string[] { 
