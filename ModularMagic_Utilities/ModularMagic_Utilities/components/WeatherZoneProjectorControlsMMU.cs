@@ -11,15 +11,15 @@ using static UnityEngine.ParticleSystem;
 
 namespace ModularMagic_Utilities.components
 {
-    internal class WeatherZoneProjectorControls : MonoBehaviour, Hoverable, Interactable
+    internal class WeatherZoneProjectorControlsMMU : MonoBehaviour, Hoverable, Interactable
     {
-        public WeatherZone weatherZone;
+        public WeatherZoneMMU weatherZone;
         public ParticleSystem particleSystem;
         public bool isRotating;
 
         private void Awake ()
         {
-            weatherZone = transform.parent.parent.Find("weatherzone").gameObject.GetComponent<WeatherZone>();
+            weatherZone = transform.parent.parent.Find("weatherzone").gameObject.GetComponent<WeatherZoneMMU>();
             particleSystem = transform.Find("circle").gameObject.GetComponent<ParticleSystem>();
             isRotating = false;
 

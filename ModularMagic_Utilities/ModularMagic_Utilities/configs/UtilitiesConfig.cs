@@ -13,7 +13,7 @@ namespace ModularMagic_Utilities.Configs
             CraftingStationType.None, CraftingStationType.Disabled, CraftingStationType.Workbench, CraftingStationType.Forge, CraftingStationType.Stonecutter, 
             CraftingStationType.Cauldron, CraftingStationType.ArtisanTable, CraftingStationType.BlackForge, CraftingStationType.GaldrTable };
 
-        public static string[] lanterColorOptions = new string[] { 
+        public static string[] lightColorPresetOptions = new string[] { 
             LightColorPresetType.Red, LightColorPresetType.Orange, LightColorPresetType.Yellow, LightColorPresetType.Green, LightColorPresetType.LemonGreen,
             LightColorPresetType.LightBlue, LightColorPresetType.Blue, LightColorPresetType.Purple, LightColorPresetType.Pink, LightColorPresetType.White };
 
@@ -198,7 +198,7 @@ namespace ModularMagic_Utilities.Configs
             {
                 lightColorPreset = Config.Bind(new ConfigDefinition(options.sectionName, "Lantern color preset"), options.lightColorPreset,
                     new ConfigDescription("A preset of light, flare and glass color (This will be updated when you turn off/on the lantern)",
-                    new AcceptableValueList<string>(lanterColorOptions),
+                    new AcceptableValueList<string>(lightColorPresetOptions),
                     new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
             }
 

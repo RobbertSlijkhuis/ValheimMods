@@ -38,7 +38,7 @@ namespace ModularMagic_Utilities
         public static readonly int weatherZoneDomeHash = "WeatherZoneDome_MMU".GetStableHashCode();
         public static readonly int weatherZoneRadiusHash = "WeatherZoneRadius_MMU".GetStableHashCode();
         public static readonly int weatherZoneParticlesHash = "WeatherZoneDomeParticles_MMU".GetStableHashCode();
-        public static readonly int weatherZoneLightPresetHash = "WeatherZoneLightPreset_MMU".GetStableHashCode();
+        public static readonly int weatherZoneLightColorPresetHash = "WeatherZoneLightColorPreset_MMU".GetStableHashCode();
 
         private void Awake()
         {
@@ -141,9 +141,9 @@ namespace ModularMagic_Utilities
                 marbleItemStandcomp.m_supportedItems.Add(prefabs.Lantern2.GetComponent<ItemDrop>());
                 marbleItemStandcomp.m_supportedItems.Add(prefabs.Lantern3.GetComponent<ItemDrop>());
                 marbleItemStandcomp.m_unsupportedItems.Add(PrefabManager.Instance.GetPrefab("Hammer").GetComponent<ItemDrop>());
-                WeatherZone weatherZone = prefabs.MarbleItemstand.transform.Find("weatherzone").gameObject.AddComponent<WeatherZone>();
-                prefabs.MarbleItemstand.transform.Find("controls/settings").gameObject.AddComponent<WeatherZoneSettingsControls>();
-                prefabs.MarbleItemstand.transform.Find("controls/projector").gameObject.AddComponent<WeatherZoneProjectorControls>();
+                WeatherZoneMMU weatherZone = prefabs.MarbleItemstand.transform.Find("weatherzone").gameObject.AddComponent<WeatherZoneMMU>();
+                prefabs.MarbleItemstand.transform.Find("controls/settings").gameObject.AddComponent<WeatherZoneSettingsControlsMMU>();
+                prefabs.MarbleItemstand.transform.Find("controls/projector").gameObject.AddComponent<WeatherZoneProjectorControlsMMU>();
 
                 List<EffectData> startList = new List<EffectData>();
                 EffectData startSFX = new EffectData();

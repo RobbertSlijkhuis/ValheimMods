@@ -15,10 +15,6 @@ namespace ModularMagic_Utilities.Configs
             CraftingStationType.None, CraftingStationType.Disabled, CraftingStationType.Workbench, CraftingStationType.Forge, CraftingStationType.Stonecutter, 
             CraftingStationType.Cauldron, CraftingStationType.ArtisanTable, CraftingStationType.BlackForge, CraftingStationType.GaldrTable };
 
-        public static string[] lanterColorOptions = new string[] {
-            LightColorPresetType.Red, LightColorPresetType.Orange, LightColorPresetType.Yellow, LightColorPresetType.Green, LightColorPresetType.LemonGreen,
-            LightColorPresetType.LightBlue, LightColorPresetType.Blue, LightColorPresetType.Purple, LightColorPresetType.Pink, LightColorPresetType.White };
-
         // The  fields to generate
         public ConfigEntry<bool> enable;
         public ConfigEntry<string> name;

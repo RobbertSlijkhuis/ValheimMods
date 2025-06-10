@@ -15,6 +15,7 @@ namespace ModularMagic_Utilities.GUI
         public GameObject weatherZonePanel;
         public UpdateWeatherZoneOptions currentValues;
         public UpdateWeatherZoneOptions currentFormValues;
+
         public UnityEvent<UpdateWeatherZoneOptions> onAccept = new UnityEvent<UpdateWeatherZoneOptions>();
         public UnityEvent onCancel = new UnityEvent();
 
@@ -50,37 +51,40 @@ namespace ModularMagic_Utilities.GUI
             switch (value)
             {
                 case 0:
-                    currentFormValues.lightColorPreset = LightColorPresetType.Red;
+                    currentFormValues.lightColorPresetOverride = LightColorPresetType.None;
                     break;
                 case 1:
-                    currentFormValues.lightColorPreset = LightColorPresetType.Orange;
+                    currentFormValues.lightColorPresetOverride = LightColorPresetType.Red;
                     break;
                 case 2:
-                    currentFormValues.lightColorPreset = LightColorPresetType.Yellow;
+                    currentFormValues.lightColorPresetOverride = LightColorPresetType.Orange;
                     break;
                 case 3:
-                    currentFormValues.lightColorPreset = LightColorPresetType.LemonGreen;
+                    currentFormValues.lightColorPresetOverride = LightColorPresetType.Yellow;
                     break;
                 case 4:
-                    currentFormValues.lightColorPreset = LightColorPresetType.Green;
+                    currentFormValues.lightColorPresetOverride = LightColorPresetType.LemonGreen;
                     break;
                 case 5:
-                    currentFormValues.lightColorPreset = LightColorPresetType.LightBlue;
+                    currentFormValues.lightColorPresetOverride = LightColorPresetType.Green;
                     break;
                 case 6:
-                    currentFormValues.lightColorPreset = LightColorPresetType.Blue;
+                    currentFormValues.lightColorPresetOverride = LightColorPresetType.LightBlue;
                     break;
                 case 7:
-                    currentFormValues.lightColorPreset = LightColorPresetType.Pink;
+                    currentFormValues.lightColorPresetOverride = LightColorPresetType.Blue;
                     break;
                 case 8:
-                    currentFormValues.lightColorPreset = LightColorPresetType.Purple;
+                    currentFormValues.lightColorPresetOverride = LightColorPresetType.Pink;
                     break;
                 case 9:
-                    currentFormValues.lightColorPreset = LightColorPresetType.White;
+                    currentFormValues.lightColorPresetOverride = LightColorPresetType.Purple;
+                    break;
+                case 10:
+                    currentFormValues.lightColorPresetOverride = LightColorPresetType.White;
                     break;
                 default:
-                    currentFormValues.lightColorPreset = LightColorPresetType.Blue;
+                    currentFormValues.lightColorPresetOverride = LightColorPresetType.Blue;
                     break;
             }
         }
@@ -230,10 +234,10 @@ namespace ModularMagic_Utilities.GUI
             Dropdown lightPresetDropdown = lightPresetField.GetComponent<Dropdown>();
             lightPresetDropdown.GetComponent<Dropdown>().AddOptions(new List<string>
             {
-                LightColorPresetType.Red, LightColorPresetType.Orange, LightColorPresetType.Yellow, LightColorPresetType.LemonGreen, LightColorPresetType.Green,
+                LightColorPresetType.None, LightColorPresetType.Red, LightColorPresetType.Orange, LightColorPresetType.Yellow, LightColorPresetType.LemonGreen, LightColorPresetType.Green,
                 LightColorPresetType.LightBlue, LightColorPresetType.Blue, LightColorPresetType.Pink, LightColorPresetType.Purple, LightColorPresetType.White,
             });
-            lightPresetDropdown.value = LightColorPresetHelper.GetIntByLightPreset(currentValues.lightColorPreset);
+            lightPresetDropdown.value = LightColorPresetHelper.GetIntByLightPreset(currentValues.lightColorPresetOverride);
             lightPresetDropdown.onValueChanged.AddListener(OnlightPresetChanged);
 
             GameObject buttonObject = GUIManager.Instance.CreateButton(
@@ -266,7 +270,7 @@ namespace ModularMagic_Utilities.GUI
             currentFormValues.radius = currentValues.radius;
             currentFormValues.domeEnabled = currentValues.domeEnabled;
             currentFormValues.particleAmount = currentValues.particleAmount;
-            currentFormValues.lightColorPreset = currentValues.lightColorPreset;
+            currentFormValues.lightColorPresetOverride = currentValues.lightColorPresetOverride;
 
             weatherZonePanel.SetActive(true);
             GUIManager.BlockInput(true);

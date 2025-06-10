@@ -2,39 +2,90 @@
 using ModularMagic_Utilities.Models;
 using ModularMagic_Utilities.Types;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using UnityEngine;
 
 namespace ModularMagic_Utilities.Configs
 {
     internal static class PluginConfig
     {
-        public static string book1Name = "Spellbook of the Hearth";
-        public static string book1Recipe = "Bronze:4, TrollHide:6, Resin:8, Coal:10";
+        private static string book1Name = "Spellbook of the Hearth";
+        private static string book1Recipe = "Bronze:4, TrollHide:6, Resin:8, Coal:10";
         public static UtilitiesConfig spellbook1 = new UtilitiesConfig();
 
-        public static string book2Name = "Grimoire of the Storm";
-        public static string book2Recipe = $"{ModularMagic_Utilities.Instance.prefabs.Spellbook1.name}:1, Silver:4, Thunderstone:2, Chitin:10";
+        private static string book2Name = "Grimoire of the Storm";
+        private static string book2Recipe = $"{ModularMagic_Utilities.Instance.prefabs.Spellbook1.name}:1, Silver:4, Thunderstone:2, Chitin:10";
         public static UtilitiesConfig spellbook2 = new UtilitiesConfig();
 
-        public static string book3Name = "Codex of the Asgardian Sorcerer";
-        public static string book3Recipe = $"{ModularMagic_Utilities.Instance.prefabs.Spellbook2.name}:1, BlackCore:1, Sap:10, Eitr:8";
+        private static string book3Name = "Codex of the Asgardian Sorcerer";
+        private static string book3Recipe = $"{ModularMagic_Utilities.Instance.prefabs.Spellbook2.name}:1, BlackCore:1, Sap:10, Eitr:8";
         public static UtilitiesConfig spellbook3 = new UtilitiesConfig();
 
-        public static string lantern1Name = "Mythical Lantern";
-        public static string lantern1Recipe = "Bronze:4, RoundLog: 10, Resin:8, SurtlingCore:2";
+        private static string lantern1Name = "Mythical Lantern";
+        private static string lantern1Recipe = "Bronze:4, RoundLog: 10, Resin:8, SurtlingCore:2";
         public static UtilitiesConfig lantern1 = new UtilitiesConfig();
 
-        public static string lantern2Name = "Everwinter Lantern";
-        public static string lantern2Recipe = $"{ModularMagic_Utilities.Instance.prefabs.Lantern1.name}:1, Silver:4, DragonEgg:1, Crystal:10";
+        private static string lantern2Name = "Everwinter Lantern";
+        private static string lantern2Recipe = $"{ModularMagic_Utilities.Instance.prefabs.Lantern1.name}:1, Silver:4, DragonEgg:1, Crystal:10";
         public static UtilitiesConfig lantern2 = new UtilitiesConfig();
 
-        public static string lantern3Name = "Mistcaller Lantern";
-        public static string lantern3Recipe = $"{ModularMagic_Utilities.Instance.prefabs.Lantern2.name}:1, BlackCore:1, BlackMarble:12, Eitr:6";
+        private static string lantern3Name = "Mistcaller Lantern";
+        private static string lantern3Recipe = $"{ModularMagic_Utilities.Instance.prefabs.Lantern2.name}:1, BlackCore:1, BlackMarble:12, Eitr:6";
         public static UtilitiesConfig lantern3 = new UtilitiesConfig();
 
-        public static string piece1Name = "Marble Item Stand";
-        public static string piece1Recipe = "BlackMarble:10";
+        private static string piece1Name = "Marble Item Stand";
+        private static string piece1Recipe = "BlackMarble:10";
         public static BuildPieceConfig piece1 = new BuildPieceConfig();
+
+        public static List<WeatherZoneConfig> weatherConfigList = new List<WeatherZoneConfig>();
+        private static string SectorNameWeatherNormal = "Normal environments";
+        public static WeatherZoneConfig weatherZoneClear = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneHeathClear = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneLightRain = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneRain = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneSwampRain = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneThunderStorm = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneNoFogThunderStorm = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneMisty = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneSnow = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneSnowStorm = new WeatherZoneConfig();
+
+        private static string SectorNameWeatherMistlands = "Mislands environments";
+        public static WeatherZoneConfig weatherZoneMistlandsClear = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneMistlandsRain = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneMistlandsThunder = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneDarklandsDark = new WeatherZoneConfig();
+
+        private static string SectorNameWeatherAshlands = "Ashlands environments";
+        public static WeatherZoneConfig weatherZoneAshlandsAshRain = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneAshlandsCinderRain = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneAshlandsMisty = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneAshlandsMeteorShower = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneAshlandsStorm = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneAshlandsSeastorm = new WeatherZoneConfig();
+
+        private static string SectorNameWeatherTwilight = "Twilight (Deep North) environments";
+        public static WeatherZoneConfig weatherZoneTwilightClear = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneTwilightSnow = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneTwilightSnowStorm = new WeatherZoneConfig();
+
+        private static string SectorNameWeatherBosses = "Bosses environments";
+        public static WeatherZoneConfig weatherZoneEikthyr = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneElder = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneBonemass = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneModer = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneYagluth = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneQueen = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneFader = new WeatherZoneConfig();
+
+        private static string SectorNameWeatherDungeons = "Dungeons environments";
+        public static WeatherZoneConfig weatherZoneCrypt = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneSunkenCrypt = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneCavesHildir = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneCryptHildir = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneGhosts = new WeatherZoneConfig();
+        public static WeatherZoneConfig weatherZoneInfectedMine = new WeatherZoneConfig();
 
         // Other
         public static string generalSectionname = "General";
@@ -50,15 +101,16 @@ namespace ModularMagic_Utilities.Configs
             InitLantern2Config();
             InitLantern3Config();
             InitPiece1Config();
+            InitWeatherConfig();
         }
 
-        private static void InitGeneralConfig()
+        public static void InitGeneralConfig()
         {
             configLanternModKey = ModularMagic_Utilities.Instance.Config.Bind(generalSectionname, "Lantern on/off key", new KeyboardShortcut(KeyCode.Y),
                 new ConfigDescription("Key to toggle the light on/off of lanterns)", null));
         }
 
-        private static void InitSpellbook1Config()
+        public static void InitSpellbook1Config()
         {
             try
             {
@@ -80,7 +132,7 @@ namespace ModularMagic_Utilities.Configs
             }
         }
 
-        private static void InitSpellbook2Config()
+        public static void InitSpellbook2Config()
         {
             try
             {
@@ -102,7 +154,7 @@ namespace ModularMagic_Utilities.Configs
             }
         }
 
-        private static void InitSpellbook3Config()
+        public static void InitSpellbook3Config()
         {
             try
             {
@@ -124,7 +176,7 @@ namespace ModularMagic_Utilities.Configs
             }
         }
 
-        private static void InitLantern1Config()
+        public static void InitLantern1Config()
         {
             try
             {
@@ -150,7 +202,7 @@ namespace ModularMagic_Utilities.Configs
             }
         }
 
-        private static void InitLantern2Config()
+        public static void InitLantern2Config()
         {
             try
             {
@@ -176,7 +228,7 @@ namespace ModularMagic_Utilities.Configs
             }
         }
 
-        private static void InitLantern3Config()
+        public static void InitLantern3Config()
         {
             try
             {
@@ -202,7 +254,7 @@ namespace ModularMagic_Utilities.Configs
             }
         }
 
-        private static void InitPiece1Config()
+        public static void InitPiece1Config()
         {
             try
             {
@@ -217,6 +269,392 @@ namespace ModularMagic_Utilities.Configs
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not initialise " + piece1Name + " config: " + e);
+            }
+        }
+
+        public static void InitWeatherConfig()
+        {
+            try
+            {
+                WeatherZoneConfigOptions optionsClear = new WeatherZoneConfigOptions(SectorNameWeatherNormal)
+                {
+                    weatherName = "Clear",
+                    prefabName = ModularMagic_Utilities.Instance.prefabs.Spellbook1.name,
+                    lightColorPreset = LightColorPresetType.Yellow,
+                    order = 10,
+                };
+                weatherZoneClear.GenerateConfig(optionsClear);
+                weatherConfigList.Add(weatherZoneClear);
+
+                WeatherZoneConfigOptions optionsHeathClear = new WeatherZoneConfigOptions(SectorNameWeatherNormal)
+                {
+                    weatherName = "Heath_clear",
+                    prefabName = ModularMagic_Utilities.Instance.prefabs.Lantern1.name,
+                    lightColorPreset = LightColorPresetType.Yellow,
+                    order = 9,
+                };
+                weatherZoneHeathClear.GenerateConfig(optionsHeathClear);
+                weatherConfigList.Add(weatherZoneHeathClear);
+
+                WeatherZoneConfigOptions optionsLightRain = new WeatherZoneConfigOptions(SectorNameWeatherNormal)
+                {
+                    weatherName = "LightRain",
+                    prefabName = "TrophyNeck",
+                    lightColorPreset = LightColorPresetType.Blue,
+                    order = 8,
+                };
+                weatherZoneLightRain.GenerateConfig(optionsLightRain);
+                weatherConfigList.Add(weatherZoneLightRain);
+
+                WeatherZoneConfigOptions optionsRain = new WeatherZoneConfigOptions(SectorNameWeatherNormal)
+                {
+                    weatherName = "Rain",
+                    prefabName = "TrophyLeech",
+                    lightColorPreset = LightColorPresetType.Blue,
+                    order = 7,
+                };
+                weatherZoneRain.GenerateConfig(optionsRain);
+                weatherConfigList.Add(weatherZoneRain);
+
+                WeatherZoneConfigOptions optionsSwampRain = new WeatherZoneConfigOptions(SectorNameWeatherNormal)
+                {
+                    weatherName = "SwampRain",
+                    prefabName = "TrophyAbomination",
+                    lightColorPreset = LightColorPresetType.Green,
+                    order = 6,
+                };
+                weatherZoneSwampRain.GenerateConfig(optionsSwampRain);
+                weatherConfigList.Add(weatherZoneSwampRain);
+
+                WeatherZoneConfigOptions optionsThunderStorm = new WeatherZoneConfigOptions(SectorNameWeatherNormal)
+                {
+                    weatherName = "ThunderStorm",
+                    prefabName = ModularMagic_Utilities.Instance.prefabs.Spellbook2.name,
+                    lightColorPreset = LightColorPresetType.Blue,
+                    order = 5,
+                };
+                weatherZoneThunderStorm.GenerateConfig(optionsThunderStorm);
+                weatherConfigList.Add(weatherZoneThunderStorm);
+
+                WeatherZoneConfigOptions optionsNoFogThunderStorm = new WeatherZoneConfigOptions(SectorNameWeatherNormal)
+                {
+                    weatherName = "nofogts",
+                    prefabName = "Thunderstone",
+                    lightColorPreset = LightColorPresetType.Blue,
+                    order = 4,
+                };
+                weatherZoneNoFogThunderStorm.GenerateConfig(optionsNoFogThunderStorm);
+                weatherConfigList.Add(weatherZoneNoFogThunderStorm);
+
+                WeatherZoneConfigOptions optionsMisty = new WeatherZoneConfigOptions(SectorNameWeatherNormal)
+                {
+                    weatherName = "Misty",
+                    prefabName = "Crystal",
+                    lightColorPreset = LightColorPresetType.LightBlue,
+                    order = 3,
+                };
+                weatherZoneMisty.GenerateConfig(optionsMisty);
+                weatherConfigList.Add(weatherZoneMisty);
+
+                WeatherZoneConfigOptions optionsSnow = new WeatherZoneConfigOptions(SectorNameWeatherNormal)
+                {
+                    weatherName = "Snow",
+                    prefabName = "FreezeGland",
+                    lightColorPreset = LightColorPresetType.LightBlue,
+                    order = 2,
+                };
+                weatherZoneSnow.GenerateConfig(optionsSnow);
+                weatherConfigList.Add(weatherZoneSnow);
+
+                WeatherZoneConfigOptions optionsSnowStorm = new WeatherZoneConfigOptions(SectorNameWeatherNormal)
+                {
+                    weatherName = "SnowStorm",
+                    prefabName = ModularMagic_Utilities.Instance.prefabs.Lantern2.name,
+                    lightColorPreset = LightColorPresetType.LightBlue,
+                    order = 1,
+                };
+                weatherZoneSnowStorm.GenerateConfig(optionsSnowStorm);
+                weatherConfigList.Add(weatherZoneSnowStorm);
+
+
+
+                WeatherZoneConfigOptions optionsMistlandsClear = new WeatherZoneConfigOptions(SectorNameWeatherMistlands)
+                {
+                    weatherName = "Mistlands_clear",
+                    prefabName = "BlackCore",
+                    lightColorPreset = LightColorPresetType.Pink,
+                    order = 4,
+                };
+                weatherZoneMistlandsClear.GenerateConfig(optionsMistlandsClear);
+                weatherConfigList.Add(weatherZoneMistlandsClear);
+
+                WeatherZoneConfigOptions optionsMistlandsRain = new WeatherZoneConfigOptions(SectorNameWeatherMistlands)
+                {
+                    weatherName = "Mistlands_rain",
+                    prefabName = "TrophySeekerBrute",
+                    lightColorPreset = LightColorPresetType.Pink,
+                    order = 3,
+                };
+                weatherZoneMistlandsRain.GenerateConfig(optionsMistlandsRain);
+                weatherConfigList.Add(weatherZoneMistlandsRain);
+
+                WeatherZoneConfigOptions optionsMistlandsStorm = new WeatherZoneConfigOptions(SectorNameWeatherMistlands)
+                {
+                    weatherName = "Mistlands_thunder",
+                    prefabName = ModularMagic_Utilities.Instance.prefabs.Lantern3.name,
+                    lightColorPreset = LightColorPresetType.Pink,
+                    order = 2,
+                };
+                weatherZoneMistlandsThunder.GenerateConfig(optionsMistlandsStorm);
+                weatherConfigList.Add(weatherZoneMistlandsThunder);
+
+                WeatherZoneConfigOptions optionsDarklandsDark = new WeatherZoneConfigOptions(SectorNameWeatherMistlands)
+                {
+                    weatherName = "Darklands_Dark",
+                    prefabName = "TrophyGrowth",
+                    lightColorPreset = LightColorPresetType.Purple,
+                    order = 1,
+                };
+                weatherZoneDarklandsDark.GenerateConfig(optionsDarklandsDark);
+                weatherConfigList.Add(weatherZoneDarklandsDark);
+
+
+
+
+                WeatherZoneConfigOptions optionsAshlandsAshRain = new WeatherZoneConfigOptions(SectorNameWeatherAshlands)
+                {
+                    weatherName = "Ashlands_ashrain_clear",
+                    prefabName = "TrophyCharredMelee",
+                    lightColorPreset = LightColorPresetType.Red,
+                    order = 6,
+                };
+                weatherZoneAshlandsAshRain.GenerateConfig(optionsAshlandsAshRain);
+                weatherConfigList.Add(weatherZoneAshlandsAshRain);
+
+                WeatherZoneConfigOptions optionsAshlandsMisty = new WeatherZoneConfigOptions(SectorNameWeatherAshlands)
+                {
+                    weatherName = "Ashlands_misty",
+                    prefabName = "TrophyMorgen",
+                    lightColorPreset = LightColorPresetType.Red,
+                    order = 5,
+                };
+                weatherZoneAshlandsMisty.GenerateConfig(optionsAshlandsMisty);
+                weatherConfigList.Add(weatherZoneAshlandsMisty);
+
+                WeatherZoneConfigOptions optionsAshlandsCinderRain = new WeatherZoneConfigOptions(SectorNameWeatherAshlands)
+                {
+                    weatherName = "Ashlands_CinderRain",
+                    prefabName = "TrophyCharredArcher",
+                    lightColorPreset = LightColorPresetType.Red,
+                    order = 4,
+                };
+                weatherZoneAshlandsCinderRain.GenerateConfig(optionsAshlandsCinderRain);
+                weatherConfigList.Add(weatherZoneAshlandsCinderRain);
+
+                WeatherZoneConfigOptions optionsAshlandsMeteorShower= new WeatherZoneConfigOptions(SectorNameWeatherAshlands)
+                {
+                    weatherName = "Ashlands_meteorshower",
+                    prefabName = "TrophyCharredMage",
+                    lightColorPreset = LightColorPresetType.Red,
+                    order = 3,
+                };
+                weatherZoneAshlandsMeteorShower.GenerateConfig(optionsAshlandsMeteorShower);
+                weatherConfigList.Add(weatherZoneAshlandsMeteorShower);
+
+                WeatherZoneConfigOptions optionsAshlandsSeaStorm = new WeatherZoneConfigOptions(SectorNameWeatherAshlands)
+                {
+                    weatherName = "Ashlands_SeaStorm",
+                    prefabName = "TrophyBonemawSerpent",
+                    lightColorPreset = LightColorPresetType.Red,
+                    order = 2,
+                };
+                weatherZoneAshlandsSeastorm.GenerateConfig(optionsAshlandsSeaStorm);
+                weatherConfigList.Add(weatherZoneAshlandsSeastorm);
+
+                WeatherZoneConfigOptions optionsAshlandsStorm = new WeatherZoneConfigOptions(SectorNameWeatherAshlands)
+                {
+                    weatherName = "Ashlands_storm",
+                    prefabName = "TrophyFallenValkyrie",
+                    lightColorPreset = LightColorPresetType.Red,
+                    order = 1,
+                };
+                weatherZoneAshlandsStorm.GenerateConfig(optionsAshlandsStorm);
+                weatherConfigList.Add(weatherZoneAshlandsStorm);
+
+
+
+                WeatherZoneConfigOptions optionsTwilightClear = new WeatherZoneConfigOptions(SectorNameWeatherTwilight)
+                {
+                    weatherName = "Twilight_Clear",
+                    prefabName = "DragonEgg",
+                    lightColorPreset = LightColorPresetType.Yellow,
+                    order = 3,
+                };
+                weatherZoneTwilightClear.GenerateConfig(optionsTwilightClear);
+                weatherConfigList.Add(weatherZoneTwilightClear);
+
+                WeatherZoneConfigOptions optionsTwilightSnow = new WeatherZoneConfigOptions(SectorNameWeatherTwilight)
+                {
+                    weatherName = "Twilight_Snow",
+                    prefabName = "TrophyHatchling",
+                    lightColorPreset = LightColorPresetType.LightBlue,
+                    order = 2,
+                };
+                weatherZoneTwilightSnow.GenerateConfig(optionsTwilightSnow);
+                weatherConfigList.Add(weatherZoneTwilightSnow);
+
+                WeatherZoneConfigOptions optionsTwilightSnowStorm = new WeatherZoneConfigOptions(SectorNameWeatherTwilight)
+                {
+                    weatherName = "Twilight_SnowStorm",
+                    prefabName = "TrophySGolem",
+                    lightColorPreset = LightColorPresetType.LightBlue,
+                    order = 1,
+                };
+                weatherZoneTwilightSnowStorm.GenerateConfig(optionsTwilightSnowStorm);
+                weatherConfigList.Add(weatherZoneTwilightSnowStorm);
+
+
+
+
+                WeatherZoneConfigOptions optionsEikthyr = new WeatherZoneConfigOptions(SectorNameWeatherBosses)
+                {
+                    weatherName = "Eikthyr",
+                    prefabName = "TrophyEikthyr",
+                    lightColorPreset = LightColorPresetType.Orange,
+                    order = 7,
+                };
+                weatherZoneEikthyr.GenerateConfig(optionsEikthyr);
+                weatherConfigList.Add(weatherZoneEikthyr);
+
+                WeatherZoneConfigOptions optionsElder = new WeatherZoneConfigOptions(SectorNameWeatherBosses)
+                {
+                    weatherName = "GDKing",
+                    prefabName = "TrophyTheElder",
+                    lightColorPreset = LightColorPresetType.LemonGreen,
+                    order = 6,
+                };
+                weatherZoneElder.GenerateConfig(optionsElder);
+                weatherConfigList.Add(weatherZoneElder);
+
+                WeatherZoneConfigOptions optionsBonemass = new WeatherZoneConfigOptions(SectorNameWeatherBosses)
+                {
+                    weatherName = "Bonemass",
+                    prefabName = "TrophyBonemass",
+                    lightColorPreset = LightColorPresetType.Green,
+                    order = 5,
+                };
+                weatherZoneBonemass.GenerateConfig(optionsBonemass);
+                weatherConfigList.Add(weatherZoneBonemass);
+
+                WeatherZoneConfigOptions optionsModer = new WeatherZoneConfigOptions(SectorNameWeatherBosses)
+                {
+                    weatherName = "Moder",
+                    prefabName = "TrophyDragonQueen",
+                    lightColorPreset = LightColorPresetType.LightBlue,
+                    order = 4,
+                };
+                weatherZoneModer.GenerateConfig(optionsModer);
+                weatherConfigList.Add(weatherZoneModer);
+
+                WeatherZoneConfigOptions optionsYagluth = new WeatherZoneConfigOptions(SectorNameWeatherBosses)
+                {
+                    weatherName = "GoblinKing",
+                    prefabName = "TrophyGoblinKing",
+                    lightColorPreset = LightColorPresetType.Orange,
+                    order = 3,
+                };
+                weatherZoneYagluth.GenerateConfig(optionsYagluth);
+                weatherConfigList.Add(weatherZoneYagluth);
+
+                WeatherZoneConfigOptions optionsQueen = new WeatherZoneConfigOptions(SectorNameWeatherBosses)
+                {
+                    weatherName = "Queen",
+                    prefabName = "TrophySeekerQueen",
+                    lightColorPreset = LightColorPresetType.Pink,
+                    order = 2,
+                };
+                weatherZoneQueen.GenerateConfig(optionsQueen);
+                weatherConfigList.Add(weatherZoneQueen);
+
+                WeatherZoneConfigOptions optionsFader = new WeatherZoneConfigOptions(SectorNameWeatherBosses)
+                {
+                    weatherName = "Fader",
+                    prefabName = "TrophyFader",
+                    lightColorPreset = LightColorPresetType.Pink,
+                    order = 1,
+                };
+                weatherZoneFader.GenerateConfig(optionsFader);
+                weatherConfigList.Add(weatherZoneFader);
+
+
+
+                WeatherZoneConfigOptions optionsCrypt = new WeatherZoneConfigOptions(SectorNameWeatherDungeons)
+                {
+                    weatherName = "Crypt",
+                    prefabName = "TrophySkeleton",
+                    lightColorPreset = LightColorPresetType.Green,
+                    order = 6,
+                };
+                weatherZoneCrypt.GenerateConfig(optionsCrypt);
+                weatherConfigList.Add(weatherZoneCrypt);
+
+                WeatherZoneConfigOptions optionsSunkenCrypt = new WeatherZoneConfigOptions(SectorNameWeatherDungeons)
+                {
+                    weatherName = "SunkenCrypt",
+                    prefabName = "TrophyDraugr",
+                    lightColorPreset = LightColorPresetType.Green,
+                    order = 5,
+                };
+                weatherZoneSunkenCrypt.GenerateConfig(optionsSunkenCrypt);
+                weatherConfigList.Add(weatherZoneSunkenCrypt);
+
+                WeatherZoneConfigOptions optionsCavesHildir = new WeatherZoneConfigOptions(SectorNameWeatherDungeons)
+                {
+                    weatherName = "CavesHildir",
+                    prefabName = "TrophyCultist_Hildir",
+                    lightColorPreset = LightColorPresetType.Blue,
+                    order = 4,
+                };
+                weatherZoneCavesHildir.GenerateConfig(optionsCavesHildir);
+                weatherConfigList.Add(weatherZoneCavesHildir);
+
+                WeatherZoneConfigOptions optionsCryptHildir = new WeatherZoneConfigOptions(SectorNameWeatherDungeons)
+                {
+                    weatherName = "CryptHildir",
+                    prefabName = "TrophySkeletonHildir",
+                    lightColorPreset = LightColorPresetType.Orange,
+                    order = 3,
+                };
+                weatherZoneCryptHildir.GenerateConfig(optionsCryptHildir);
+                weatherConfigList.Add(weatherZoneCryptHildir);
+
+                WeatherZoneConfigOptions optionsGhosts = new WeatherZoneConfigOptions(SectorNameWeatherDungeons)
+                {
+                    weatherName = "Ghosts",
+                    prefabName = "TrophyWraith",
+                    lightColorPreset = LightColorPresetType.Blue,
+                    order = 2,
+                };
+                weatherZoneGhosts.GenerateConfig(optionsGhosts);
+                weatherConfigList.Add(weatherZoneGhosts);
+
+                WeatherZoneConfigOptions optionsInfectedMine = new WeatherZoneConfigOptions(SectorNameWeatherDungeons)
+                {
+                    weatherName = "InfectedMine",
+                    prefabName = "TrophyDvergr",
+                    lightColorPreset = LightColorPresetType.LemonGreen,
+                    order = 1,
+                };
+                weatherZoneInfectedMine.GenerateConfig(optionsInfectedMine);
+                weatherConfigList.Add(weatherZoneInfectedMine);
+
+
+
+
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not initialise weather config: " + e);
             }
         }
     }

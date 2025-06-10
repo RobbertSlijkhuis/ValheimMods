@@ -12,11 +12,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using static EffectList;
+using static ItemDrop;
 using static UnityEngine.ParticleSystem;
 
 namespace ModularMagic_Utilities.Components
 {
-    internal class WeatherZone : MonoBehaviour, Hoverable, Interactable
+    internal class WeatherZoneMMU : MonoBehaviour, Hoverable, Interactable
     {
         public ZNetView netView;
         public EnvZone envZone;
@@ -33,6 +34,7 @@ namespace ModularMagic_Utilities.Components
         public long creator;
         public bool isInitialised = false;
         public bool isMoving = false;
+        public bool isEnabled;
         public bool isLocked;
         public bool projectorEnabled;
         public bool domeEnabled;
@@ -40,6 +42,7 @@ namespace ModularMagic_Utilities.Components
         public float particleAmount;
         public float projectorSegmentMultiplier = 4f;
         public string lightColorPreset;
+        public string lightColorPresetOverride;
 
         public Color emissionOffColor = new Color(0f, 0f, 0f, 1f);
         public Color emissionRuneOffColor = new Color(0.2f, 0.2f, 0.2f, 1f);
@@ -59,6 +62,7 @@ namespace ModularMagic_Utilities.Components
                 {
                     creator = Game.instance.GetPlayerProfile().GetPlayerID();
 
+                    // Transforms
                     emissionTrans = transform.parent.Find("New/emission");
                     emissionRunesTrans = transform.parent.Find("New/runes emission");
                     domeTrans = transform.parent.Find("New/dome");
@@ -66,31 +70,40 @@ namespace ModularMagic_Utilities.Components
                     controlsTrans = transform.parent.Find("controls");
                     startEffectTrans = transform.parent.Find("drop_spawn");
 
+                    // Components
                     envZone = gameObject.GetComponent<EnvZone>();
                     envZone.m_force = false;
                     sphereCollider = gameObject.GetComponent<SphereCollider>();
                     itemStand = transform.parent.Find("itemstand").gameObject.GetComponent<ItemStand>();
                     circleProjector = projectorTrans.gameObject.GetComponent<CircleProjector>();
 
+                    // States
                     isLocked = netView.GetZDO().GetBool(ModularMagic_Utilities.weatherZoneLockedHash, false);
                     projectorEnabled = false;
                     domeEnabled = netView.GetZDO().GetBool(ModularMagic_Utilities.weatherZoneDomeHash, false);
                     radius = netView.GetZDO().GetFloat(ModularMagic_Utilities.weatherZoneRadiusHash, 30f);
                     particleAmount = netView.GetZDO().GetFloat(ModularMagic_Utilities.weatherZoneParticlesHash, 100);
-                    lightColorPreset = netView.GetZDO().GetString(ModularMagic_Utilities.weatherZoneLightPresetHash, LightColorPresetType.Blue);
+                    lightColorPreset = LightColorPresetType.None;
+                    lightColorPresetOverride = netView.GetZDO().GetString(ModularMagic_Utilities.weatherZoneLightColorPresetHash, LightColorPresetType.None);
 
-                    SetDome(domeEnabled, false);
+                    // RPC's
+                    netView.Register("ToggleIsLocked", RPC_ToggleIsLocked);
+                    netView.Register<string>("EnableWeather", RPC_EnableWeather);
+                    netView.Register("DisableWeather", RPC_DisableWeather);
+                    netView.Register<ZPackage>("OnAcceptSettings", RPC_OnAcceptSettings);
+
+                    // Update radius
                     SetRadius(radius, false);
-                    SetParticles(particleAmount, false);
 
+                    // GUI
                     weatherZoneSettingsGUI = new WeatherZoneSettingsGUI(new UpdateWeatherZoneOptions()
                     {
                         radius = radius,
                         domeEnabled = domeEnabled,
                         particleAmount = particleAmount,
-                        lightColorPreset = lightColorPreset,
+                        lightColorPresetOverride = lightColorPresetOverride,
                     });
-                    weatherZoneSettingsGUI.onAccept.AddListener(OnAcceptSettings);
+                    weatherZoneSettingsGUI.onAccept.AddListener(InvokeOnAcceptSettings);
                 }
             }
             catch (Exception e)
@@ -111,7 +124,7 @@ namespace ModularMagic_Utilities.Components
             string projector = "\nRadius projector: <color=yellow>" + (projectorEnabled ? "On" : "Off") + "</color>";
             string lockControls = "\n\n[<color=yellow>E</color>] "+ (isLocked ? "Unlock" : "Lock") + " controls";
 
-            return name + radiusString + dome + particleAmount + projector + lockControls;
+            return name + radiusString + dome + amount + projector + lockControls;
         }
 
         public string GetHoverName()
@@ -129,9 +142,15 @@ namespace ModularMagic_Utilities.Components
             if (hold)
                 return false;
 
-            if (Game.instance.GetPlayerProfile().GetPlayerID() != creator)
+            if (envZone.m_environment == "" || Game.instance.GetPlayerProfile().GetPlayerID() != creator)
                 return false;
 
+            InvokeToggleIsLocked();
+            return true;
+        }
+
+        public void ToggleIsLocked()
+        {
             isLocked = !isLocked;
             netView.GetZDO().Set(ModularMagic_Utilities.weatherZoneLockedHash, isLocked);
 
@@ -139,74 +158,84 @@ namespace ModularMagic_Utilities.Components
                 MoveControls(shownPos, hiddenPos, 1f);
             else
                 MoveControls(hiddenPos, shownPos, 1f);
-
-            return true;
         }
 
-        public void InitWeather(string itemName)
+        public void InvokeToggleIsLocked()
+        {
+            netView.InvokeRPC(ZNetView.Everybody, "ToggleIsLocked");
+        }
+
+        public void RPC_ToggleIsLocked(long sender)
+        {
+            ToggleIsLocked();
+        }
+
+        public void InitWeather(string prefabName)
         {
             if (envZone == null || sphereCollider == null)
                 return;
 
+            GameObject prefab = PrefabManager.Instance.GetPrefab(prefabName);
+
+            if (prefab == null)
+            {
+                isInitialised = true;
+                return;
+            }
+
+            WeatherZoneConfig config = PluginConfig.weatherConfigList.Find(item => item.prefabName.Value == prefab.name);
             string newEnv = "";
 
-            if (itemName == PluginConfig.spellbook1.name.Value)
-                newEnv = "Clear";
-
-            if (itemName == PluginConfig.spellbook2.name.Value)
-                newEnv = "ThunderStorm";
-
-            if (itemName == PluginConfig.lantern2.name.Value)
-                newEnv = "SnowStorm";
+            if (config != null)
+            {
+                newEnv = config.weatherName;
+                lightColorPreset = config.lightColorPreset.Value;
+            }
 
             envZone.m_environment = newEnv;
             sphereCollider.enabled = true;
             isInitialised = true;
-            UpdateEffects(newEnv != "", true, true, true, false, true);
+            UpdateEffects(newEnv != "", true, true, true, true, true);
         }
 
-        public void EnableWeather(ItemDrop.ItemData item)
+        public void EnableWeather(string prefabName)
         {
             try
             {
                 if (envZone == null || sphereCollider == null)
                     return;
 
-                List<string> nameList = new List<string>()
-                {
-                    PluginConfig.spellbook1.name.Value,
-                    PluginConfig.spellbook2.name.Value,
-                    PluginConfig.spellbook3.name.Value,
-                    PluginConfig.lantern1.name.Value,
-                    PluginConfig.lantern2.name.Value,
-                    PluginConfig.lantern3.name.Value,
-                };
-
-                if (!nameList.Contains(item.m_shared.m_name))
-                    return;
-
+                GameObject prefab = PrefabManager.Instance.GetPrefab(prefabName);
+                WeatherZoneConfig config = PluginConfig.weatherConfigList.Find(item => item.prefabName.Value == prefab.name);
                 string newEnv = "";
 
-                if (item.m_shared.m_name == PluginConfig.spellbook1.name.Value)
-                    newEnv = "Clear";
-
-                if (item.m_shared.m_name == PluginConfig.spellbook2.name.Value)
-                    newEnv = "ThunderStorm";
-
-                if (item.m_shared.m_name == PluginConfig.lantern2.name.Value)
-                    newEnv = "SnowStorm";
+                if (config != null)
+                {
+                    newEnv = config.weatherName;
+                    lightColorPreset = config.lightColorPreset.Value;
+                }
 
                 if (newEnv == "")
                     return;
 
                 envZone.m_environment = newEnv;
                 sphereCollider.enabled = true;
-                UpdateEffects(true, true, true, false, true, true);
+                UpdateEffects(true, true, true, true, true, true);
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError(e);
             }
+        }
+
+        public void InvokeEnableWeather(string prefabName)
+        {
+            netView.InvokeRPC(ZNetView.Everybody, "EnableWeather", prefabName);
+        }
+
+        public void RPC_EnableWeather(long sender, string prefabName)
+        {
+            EnableWeather(prefabName);
         }
 
         public void DisableWeather()
@@ -219,6 +248,47 @@ namespace ModularMagic_Utilities.Components
             UpdateEffects(false, true, true, false, true, true);
         }
 
+        public void InvokeDisableWeather()
+        {
+            netView.InvokeRPC(ZNetView.Everybody, "DisableWeather");
+        }
+
+        public void RPC_DisableWeather(long sender)
+        {
+            DisableWeather();
+        }
+
+        public void OnAcceptSettings(UpdateWeatherZoneOptions values)
+        {            
+            SetRadius(values.radius);
+            SetDome(values.domeEnabled);
+            SetParticles(values.particleAmount);
+            SetLightColorePresetOverride(values.lightColorPresetOverride);
+            UpdateEffects(envZone.m_environment != "", true, true, true, false, false);
+        }
+
+        public void InvokeOnAcceptSettings(UpdateWeatherZoneOptions values)
+        {
+            ZPackage package = new ZPackage();
+            package.Write(values.radius.ToString());
+            package.Write(values.domeEnabled);
+            package.Write(values.particleAmount.ToString());
+            package.Write(values.lightColorPresetOverride);
+
+            netView.InvokeRPC(ZNetView.Everybody, "OnAcceptSettings", package);
+        }
+
+        public void RPC_OnAcceptSettings(long sender, ZPackage package)
+        {
+            UpdateWeatherZoneOptions values = new UpdateWeatherZoneOptions();
+            values.radius = float.Parse(package.ReadString());
+            values.domeEnabled = package.ReadBool();
+            values.particleAmount = float.Parse(package.ReadString());
+            values.lightColorPresetOverride = package.ReadString();
+
+            OnAcceptSettings(values);
+        }
+
         public void OnPieceDestroyed()
         {
             if (itemStand == null)
@@ -226,20 +296,6 @@ namespace ModularMagic_Utilities.Components
 
             itemStand.DropItem();
             SetDome(false, false);
-        }
-
-        public void OnAcceptSettings(UpdateWeatherZoneOptions values)
-        {
-            radius = values.radius;
-            domeEnabled = values.domeEnabled;
-            particleAmount = values.particleAmount;
-            lightColorPreset = values.lightColorPreset;
-            netView.GetZDO().Set(ModularMagic_Utilities.weatherZoneLightPresetHash, lightColorPreset);
-
-            SetDome(domeEnabled);
-            SetRadius(radius);
-            SetParticles(particleAmount);
-            UpdateEffects(envZone.m_environment != "", true, true, true, false, false);
         }
 
         public void SetProjector(bool value)
@@ -298,11 +354,19 @@ namespace ModularMagic_Utilities.Components
             particleAmount = value;
         }
 
+        public void SetLightColorePresetOverride(string value, bool updateZDO = true)
+        {
+            if (updateZDO)
+                netView.GetZDO().Set(ModularMagic_Utilities.weatherZoneParticlesHash, value);
+
+            lightColorPresetOverride = value;
+        }
+
         private void UpdateEffects(bool enabled, bool updateEmission, bool updateDome, bool updateActionFX, bool playEffects, bool moveControls)
         {
             try
             {
-                LightPresetColors presetColors = LightColorPresetHelper.GetColors(lightColorPreset);
+                LightPresetColors presetColors = LightColorPresetHelper.GetColors(lightColorPresetOverride != LightColorPresetType.None ? lightColorPresetOverride : lightColorPreset);
                 presetColors.emissionColor = LightColorPresetHelper.ApplyMultiplierToColor(presetColors.emissionColor, 0.8f);
 
                 if (updateEmission)
@@ -314,14 +378,12 @@ namespace ModularMagic_Utilities.Components
                 if (updateActionFX)
                     UpdateActivationFX(presetColors);
 
-                if (enabled)
+                if (playEffects && enabled)
                     startEffects.Create(startEffectTrans.position, startEffectTrans.rotation);
-                else
+                else if (playEffects)
                     stopEffects.Create(startEffectTrans.position, startEffectTrans.rotation);
 
-
-
-                if (!isLocked)
+                if (moveControls && !isLocked)
                     MoveControls(enabled ? hiddenPos : shownPos, enabled ? shownPos : hiddenPos, 1f);
             }
             catch (Exception e)

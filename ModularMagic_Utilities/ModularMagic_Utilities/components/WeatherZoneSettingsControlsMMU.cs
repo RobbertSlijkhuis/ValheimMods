@@ -11,15 +11,15 @@ using static UnityEngine.GraphicsBuffer;
 
 namespace ModularMagic_Utilities.components
 {
-    internal class WeatherZoneSettingsControls : MonoBehaviour, Hoverable, Interactable
+    internal class WeatherZoneSettingsControlsMMU : MonoBehaviour, Hoverable, Interactable
     {
-        public WeatherZone weatherZone;
+        public WeatherZoneMMU weatherZone;
         public Transform cogTransform;
         public bool isRotating;
 
         private void Awake ()
         {
-            weatherZone = transform.parent.parent.Find("weatherzone").gameObject.GetComponent<WeatherZone>();
+            weatherZone = transform.parent.parent.Find("weatherzone").gameObject.GetComponent<WeatherZoneMMU>();
             cogTransform = transform.Find("cog");
         }
 
@@ -65,7 +65,7 @@ namespace ModularMagic_Utilities.components
             {
                 timestep = timestep + Time.deltaTime;
                 float step = Mathf.Clamp01(timestep / duration);
-                trans.RotateAround(trans.position, Vector3.forward, step);
+                trans.RotateAround(trans.position, trans.up, step);
                 yield return null;
             }
         }

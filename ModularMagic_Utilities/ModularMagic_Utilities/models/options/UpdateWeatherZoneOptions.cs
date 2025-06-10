@@ -5,6 +5,6 @@
         public float radius;
         public bool domeEnabled;
         public float particleAmount;
-        public string lightColorPreset;
+        public string lightColorPresetOverride;
     }
 }

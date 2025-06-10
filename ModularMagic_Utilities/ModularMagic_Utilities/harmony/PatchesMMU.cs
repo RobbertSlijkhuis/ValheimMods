@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Jotunn.Managers;
 using ModularMagic_Utilities.Components;
 using ModularMagic_Utilities.Configs;
 using ModularMagic_Utilities.Helpers;
@@ -47,11 +48,11 @@ namespace ModularMagic_Utilities.Harmony
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(ItemStand), "SetVisualItem")]
-        public static void SetVisualItem_Postfix(ref ItemStand __instance)
+        public static void SetVisualItem_Postfix(ref ItemStand __instance, string itemName)
         {
             try
             {
-                if (__instance == null && __instance.m_currentItemName == "")
+                if (__instance == null || itemName == null)
                     return;
 
                 Transform weatherZoneTrans = __instance.transform?.parent?.Find("weatherzone");
@@ -59,12 +60,12 @@ namespace ModularMagic_Utilities.Harmony
                 if (weatherZoneTrans == null)
                     return;
 
-                WeatherZone weatherZone = weatherZoneTrans.gameObject.GetComponent<WeatherZone>();
+                WeatherZoneMMU weatherZone = weatherZoneTrans.gameObject.GetComponent<WeatherZoneMMU>();
 
                 if (weatherZone == null || weatherZone.isInitialised)
                     return;
 
-                weatherZone.InitWeather(__instance.m_currentItemName);
+                weatherZone.InitWeather(itemName);
 
             }
             catch (Exception e)
@@ -91,7 +92,7 @@ namespace ModularMagic_Utilities.Harmony
                 if (__instance.m_currentItemName != "")
                     return;
 
-                weatherZoneTrans.gameObject.GetComponent<WeatherZone>().EnableWeather(item);
+                weatherZoneTrans.gameObject.GetComponent<WeatherZoneMMU>().InvokeEnableWeather(item.m_dropPrefab.name);
             }
             catch (Exception e)
             {
@@ -113,7 +114,7 @@ namespace ModularMagic_Utilities.Harmony
                 if (weatherZoneTrans == null)
                     return;
 
-                weatherZoneTrans.gameObject.GetComponent<WeatherZone>().DisableWeather();
+                weatherZoneTrans.gameObject.GetComponent<WeatherZoneMMU>().InvokeDisableWeather();
             }
             catch (Exception e)
             {
@@ -135,7 +136,7 @@ namespace ModularMagic_Utilities.Harmony
                 if (weatherZoneTrans == null)
                     return;
 
-                weatherZoneTrans.gameObject.GetComponent<WeatherZone>().OnPieceDestroyed();
+                weatherZoneTrans.gameObject.GetComponent<WeatherZoneMMU>().OnPieceDestroyed();
             }
             catch (Exception e)
             {

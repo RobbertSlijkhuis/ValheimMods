@@ -19,7 +19,7 @@ namespace ModularMagic_Utilities.Helpers
                 if (player == null)
                     throw new Exception("Could not find Player object");
 
-                ItemData itemData = Player.m_localPlayer.m_utilityItem;
+                ItemData itemData = player.m_utilityItem;
 
                 if (itemData == null || itemData.m_shared == null)
                     return;
@@ -36,7 +36,6 @@ namespace ModularMagic_Utilities.Helpers
                 Light lightComp = lightObj.GetComponent<Light>();
                 LightLod lightLodComp = lightObj.GetComponent<LightLod>();
                 ParticleSystem flareComp = flareObj.GetComponent<ParticleSystem>();
-
                 LanternConfig config = LanternHelper.GetLanternConfig(type);
 
                 lightComp.color = config.presetColors.lightColor;

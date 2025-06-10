@@ -95,24 +95,26 @@ namespace ModularMagic_Utilities.Helpers
             switch (value)
             {
                 case 0:
-                    return LightColorPresetType.Red;
+                    return LightColorPresetType.None;
                 case 1:
-                    return LightColorPresetType.Orange;
+                    return LightColorPresetType.Red;
                 case 2:
-                    return LightColorPresetType.Yellow;
+                    return LightColorPresetType.Orange;
                 case 3:
-                    return LightColorPresetType.LemonGreen;
+                    return LightColorPresetType.Yellow;
                 case 4:
-                    return LightColorPresetType.Green;
+                    return LightColorPresetType.LemonGreen;
                 case 5:
-                    return LightColorPresetType.LightBlue;
+                    return LightColorPresetType.Green;
                 case 6:
-                    return LightColorPresetType.Blue;
+                    return LightColorPresetType.LightBlue;
                 case 7:
-                    return LightColorPresetType.Pink;
+                    return LightColorPresetType.Blue;
                 case 8:
-                    return LightColorPresetType.Purple;
+                    return LightColorPresetType.Pink;
                 case 9:
+                    return LightColorPresetType.Purple;
+                case 10:
                     return LightColorPresetType.White;
                 default:
                     return LightColorPresetType.Blue;
@@ -123,28 +125,30 @@ namespace ModularMagic_Utilities.Helpers
         {
             switch (value)
             {
-                case nameof(LightColorPresetType.Red):
+                case nameof(LightColorPresetType.None):
                     return 0;
-                case nameof(LightColorPresetType.Orange):
+                case nameof(LightColorPresetType.Red):
                     return 1;
-                case nameof(LightColorPresetType.Yellow):
+                case nameof(LightColorPresetType.Orange):
                     return 2;
-                case nameof(LightColorPresetType.LemonGreen):
+                case nameof(LightColorPresetType.Yellow):
                     return 3;
-                case nameof(LightColorPresetType.Green):
+                case nameof(LightColorPresetType.LemonGreen):
                     return 4;
-                case nameof(LightColorPresetType.LightBlue):
+                case nameof(LightColorPresetType.Green):
                     return 5;
+                case nameof(LightColorPresetType.LightBlue):
+                    return 6;
                 case nameof(LightColorPresetType.Blue):
-                    return 6;
-                case nameof(LightColorPresetType.Pink):
                     return 7;
-                case nameof(LightColorPresetType.Purple):
+                case nameof(LightColorPresetType.Pink):
                     return 8;
-                case nameof(LightColorPresetType.White):
+                case nameof(LightColorPresetType.Purple):
                     return 9;
+                case nameof(LightColorPresetType.White):
+                    return 10;
                 default:
-                    return 6;
+                    return 0;
             }
         }
     }
