@@ -24,6 +24,11 @@ namespace ModularMagic_Utilities.GUI
             this.currentValues = currentValues;
         }
 
+        public void SetCurrentValues(UpdateWeatherZoneOptions currentValues)
+        {
+            this.currentValues = currentValues;
+        }
+
         public void OnRadiusChanged(string value)
         {
             if (value == null || value == "") return;

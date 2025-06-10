@@ -20,6 +20,7 @@ namespace ModularMagic_Utilities.Components
     internal class WeatherZoneMMU : MonoBehaviour, Hoverable, Interactable
     {
         public ZNetView netView;
+        public Piece piece;
         public EnvZone envZone;
         public SphereCollider sphereCollider;
         public CircleProjector circleProjector;
@@ -31,7 +32,6 @@ namespace ModularMagic_Utilities.Components
         public Transform controlsTrans;
         public Transform startEffectTrans;
 
-        public long creator;
         public bool isInitialised = false;
         public bool isMoving = false;
         public bool isEnabled;
@@ -60,17 +60,16 @@ namespace ModularMagic_Utilities.Components
                 netView = transform.parent.gameObject.GetComponent<ZNetView>();
                 if (netView != null && netView.GetZDO() != null)
                 {
-                    creator = Game.instance.GetPlayerProfile().GetPlayerID();
-
                     // Transforms
                     emissionTrans = transform.parent.Find("New/emission");
                     emissionRunesTrans = transform.parent.Find("New/runes emission");
                     domeTrans = transform.parent.Find("New/dome");
                     projectorTrans = transform.parent.Find("New/projector");
                     controlsTrans = transform.parent.Find("controls");
-                    startEffectTrans = transform.parent.Find("drop_spawn");
+                    startEffectTrans = transform.parent.Find("itemstand/drop_spawn");
 
                     // Components
+                    piece = transform.parent.gameObject.GetComponent<Piece>();
                     envZone = gameObject.GetComponent<EnvZone>();
                     envZone.m_force = false;
                     sphereCollider = gameObject.GetComponent<SphereCollider>();
@@ -88,6 +87,7 @@ namespace ModularMagic_Utilities.Components
 
                     // RPC's
                     netView.Register("ToggleIsLocked", RPC_ToggleIsLocked);
+                    netView.Register<string>("InitWeather", RPC_InitWeather);
                     netView.Register<string>("EnableWeather", RPC_EnableWeather);
                     netView.Register("DisableWeather", RPC_DisableWeather);
                     netView.Register<ZPackage>("OnAcceptSettings", RPC_OnAcceptSettings);
@@ -122,7 +122,7 @@ namespace ModularMagic_Utilities.Components
             string dome = "\nShow Dome: <color=yellow>" + (domeEnabled ? "On" : "Off") + "</color>";
             string amount = "\nParticle amount: <color=yellow>" + particleAmount + "</color>";
             string projector = "\nRadius projector: <color=yellow>" + (projectorEnabled ? "On" : "Off") + "</color>";
-            string lockControls = "\n\n[<color=yellow>E</color>] "+ (isLocked ? "Unlock" : "Lock") + " controls";
+            string lockControls = IsOwner() ? ("\n\n[<color=yellow>E</color>] "+ (isLocked ? "Unlock" : "Lock") + " controls") : "";
 
             return name + radiusString + dome + amount + projector + lockControls;
         }
@@ -142,7 +142,10 @@ namespace ModularMagic_Utilities.Components
             if (hold)
                 return false;
 
-            if (envZone.m_environment == "" || Game.instance.GetPlayerProfile().GetPlayerID() != creator)
+            Jotunn.Logger.LogWarning(Game.instance.GetPlayerProfile().GetPlayerID());
+            Jotunn.Logger.LogWarning(piece.GetCreator());
+
+            if (envZone.m_environment == "" || !IsOwner())
                 return false;
 
             InvokeToggleIsLocked();
@@ -195,7 +198,17 @@ namespace ModularMagic_Utilities.Components
             envZone.m_environment = newEnv;
             sphereCollider.enabled = true;
             isInitialised = true;
-            UpdateEffects(newEnv != "", true, true, true, true, true);
+            UpdateEffects(newEnv != "", true, true, true, false, true);
+        }
+
+        public void InvokeInitWeather(string prefabName)
+        {
+            netView.InvokeRPC(ZNetView.Everybody, "InitWeather", prefabName);
+        }
+
+        public void RPC_InitWeather(long sender, string prefabName)
+        {
+            InitWeather(prefabName);
         }
 
         public void EnableWeather(string prefabName)
@@ -259,7 +272,8 @@ namespace ModularMagic_Utilities.Components
         }
 
         public void OnAcceptSettings(UpdateWeatherZoneOptions values)
-        {            
+        {
+            weatherZoneSettingsGUI.SetCurrentValues(values);
             SetRadius(values.radius);
             SetDome(values.domeEnabled);
             SetParticles(values.particleAmount);
@@ -357,7 +371,7 @@ namespace ModularMagic_Utilities.Components
         public void SetLightColorePresetOverride(string value, bool updateZDO = true)
         {
             if (updateZDO)
-                netView.GetZDO().Set(ModularMagic_Utilities.weatherZoneParticlesHash, value);
+                netView.GetZDO().Set(ModularMagic_Utilities.weatherZoneLightColorPresetHash, value);
 
             lightColorPresetOverride = value;
         }
@@ -523,6 +537,16 @@ namespace ModularMagic_Utilities.Components
             {
                 Jotunn.Logger.LogError("Could not update colors on ActivationFX: " + e);
             }
+        }
+
+        public bool IsOwner()
+        {
+            return Game.instance.GetPlayerProfile().GetPlayerID() == piece.GetCreator();
+        }
+
+        public bool IsLocked()
+        {
+            return isLocked;
         }
 
         public void MoveControls(Vector3 fromPos, Vector3 toPos, float duration)

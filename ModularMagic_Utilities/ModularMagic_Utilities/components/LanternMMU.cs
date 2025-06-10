@@ -16,14 +16,14 @@ namespace ModularMagic_Utilities.Components
             netView = base.gameObject.GetComponent<ZNetView>();
             status = "";
 
-            InvokeRepeating(nameof(UpdateStatus), 0f, 0.3f);
+            InvokeRepeating(nameof(UpdateStatus), 0f, 10.3f);
         }
 
         private void UpdateStatus()
         {
             try
             {
-                if (!netView || !netView.IsValid() || (!PluginConfig.lantern1.enable.Value && !PluginConfig.lantern2.enable.Value && !PluginConfig.lantern3.enable.Value))
+                if (!netView || !netView.IsValid())
                 {
                     CancelInvoke(nameof(UpdateStatus));
                     return;
@@ -36,6 +36,8 @@ namespace ModularMagic_Utilities.Components
 
                 if (status == "")
                     return;
+
+                Jotunn.Logger.LogWarning(status);
 
                 LanternStatus current = StatusStringToObject(status);
                 LanternHelper.UpdateLanternMode(current.playerId, current.status);

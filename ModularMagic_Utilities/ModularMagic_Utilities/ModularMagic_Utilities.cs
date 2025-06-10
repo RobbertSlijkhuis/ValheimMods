@@ -50,19 +50,19 @@ namespace ModularMagic_Utilities
 
             PrefabManager.OnVanillaPrefabsAvailable += AddPieces;
             PrefabManager.OnVanillaPrefabsAvailable += AddUtilities;
-            ItemManager.OnItemsRegistered += LogRecipes;
+            // ItemManager.OnItemsRegistered += LogRecipes;
         }
 
-        private void LogRecipes()
-        {
-            ObjectDB.instance.m_recipes.ForEach(r =>
-            {
-                if (r.name.Contains("MMU_"))
-                    Jotunn.Logger.LogInfo(r.name);
-            });
+        //private void LogRecipes()
+        //{
+        //    ObjectDB.instance.m_recipes.ForEach(r =>
+        //    {
+        //        if (r.name.Contains("MMU_"))
+        //            Jotunn.Logger.LogInfo(r.name);
+        //    });
 
-            ItemManager.OnItemsRegistered -= LogRecipes;
-        }
+        //    ItemManager.OnItemsRegistered -= LogRecipes;
+        //}
         
         /**
          * Called on every update
@@ -133,7 +133,6 @@ namespace ModularMagic_Utilities
 
                 ZNetView netView = prefabs.MarbleItemstand.GetComponent<ZNetView>();
                 ItemStand marbleItemStandcomp = prefabs.MarbleItemstand.transform.Find("itemstand").gameObject.GetComponent<ItemStand>();
-                marbleItemStandcomp.m_netViewOverride = netView;
                 marbleItemStandcomp.m_supportedItems.Add(prefabs.Spellbook1.GetComponent<ItemDrop>());
                 marbleItemStandcomp.m_supportedItems.Add(prefabs.Spellbook2.GetComponent<ItemDrop>());
                 marbleItemStandcomp.m_supportedItems.Add(prefabs.Spellbook3.GetComponent<ItemDrop>());

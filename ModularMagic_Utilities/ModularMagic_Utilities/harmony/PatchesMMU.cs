@@ -65,7 +65,7 @@ namespace ModularMagic_Utilities.Harmony
                 if (weatherZone == null || weatherZone.isInitialised)
                     return;
 
-                weatherZone.InitWeather(itemName);
+                weatherZone.InvokeInitWeather(itemName);
 
             }
             catch (Exception e)
@@ -74,6 +74,28 @@ namespace ModularMagic_Utilities.Harmony
             }
         }
 
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(ItemStand), "UseItem")]
+        public static bool UseItem_Prefix(ref ItemStand __instance, Humanoid user, ItemDrop.ItemData item)
+        {
+            try
+            {
+                if (__instance == null)
+                    return true;
+
+                Transform weatherZoneTrans = __instance.transform?.parent?.Find("weatherzone");
+
+                if (weatherZoneTrans == null)
+                    return true;
+
+                return !weatherZoneTrans.gameObject.GetComponent<WeatherZoneMMU>().IsLocked();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not check for IsLocked in UseItem_Prefix: " + e);
+                return true;
+            }
+        }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(ItemStand), "UseItem")]
@@ -81,7 +103,7 @@ namespace ModularMagic_Utilities.Harmony
         {
             try
             {
-                if (__instance == null)
+                if (__instance == null && __instance.m_currentItemName != "")
                     return;
 
                 Transform weatherZoneTrans = __instance.transform?.parent?.Find("weatherzone");
@@ -89,14 +111,39 @@ namespace ModularMagic_Utilities.Harmony
                 if (weatherZoneTrans == null)
                     return;
 
-                if (__instance.m_currentItemName != "")
+                WeatherZoneMMU weatherZone = weatherZoneTrans.gameObject.GetComponent<WeatherZoneMMU>();
+
+                if (weatherZone.IsLocked())
                     return;
 
-                weatherZoneTrans.gameObject.GetComponent<WeatherZoneMMU>().InvokeEnableWeather(item.m_dropPrefab.name);
+                weatherZone.InvokeEnableWeather(item.m_dropPrefab.name);
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not enable weather in UseItem_Postfix: " + e);
+            }
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(ItemStand), "Interact")]
+        public static bool Interact_Prefix(ref ItemStand __instance, Humanoid user, bool hold, bool alt)
+        {
+            try
+            {
+                if (__instance == null)
+                    return true;
+
+                Transform weatherZoneTrans = __instance.transform?.parent?.Find("weatherzone");
+
+                if (weatherZoneTrans == null)
+                    return true;
+
+                return !weatherZoneTrans.gameObject.GetComponent<WeatherZoneMMU>().IsLocked();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not check for IsLocked in Interact_Prefix: " + e);
+                return true;
             }
         }
 
@@ -114,11 +161,41 @@ namespace ModularMagic_Utilities.Harmony
                 if (weatherZoneTrans == null)
                     return;
 
-                weatherZoneTrans.gameObject.GetComponent<WeatherZoneMMU>().InvokeDisableWeather();
+                WeatherZoneMMU weatherZone = weatherZoneTrans.gameObject.GetComponent<WeatherZoneMMU>();
+
+                if (weatherZone.IsLocked())
+                    return;
+
+                weatherZone.InvokeDisableWeather();
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not disable weather in Interact_Postfix: " + e);
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(ItemStand), "GetHoverText")]
+        public static void GetHoverText_PostFix(ref ItemStand __instance, ref string __result)
+        {
+            try
+            {
+                if (__instance == null)
+                    return;
+
+                Transform weatherZoneTrans = __instance.transform?.parent?.Find("weatherzone");
+
+                if (weatherZoneTrans == null)
+                    return;
+
+                WeatherZoneMMU weatherZone = weatherZoneTrans.gameObject.GetComponent<WeatherZoneMMU>();
+
+                if (weatherZone.IsLocked())
+                    __result = "Locked";
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not change hover text in GetHoverText_PostFix: " + e);
             }
         }
 

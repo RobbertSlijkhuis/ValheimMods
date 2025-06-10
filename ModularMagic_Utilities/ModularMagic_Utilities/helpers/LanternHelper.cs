@@ -14,21 +14,29 @@ namespace ModularMagic_Utilities.Helpers
         {
             try
             {
+                // Jotunn.Logger.LogWarning("Status: " + playerId + ", " + status);
                 Player player = Player.GetPlayer(playerId);
 
                 if (player == null)
                     throw new Exception("Could not find Player object");
 
-                ItemData itemData = player.m_utilityItem;
+                // Jotunn.Logger.LogWarning("Found Player: " + playerId);
+                Inventory inv = player.GetInventory();
+                ItemData itemData = inv.GetEquippedItems().Find(item => 
+                    item.m_shared.m_name == PluginConfig.lantern1.name.Value || 
+                    item.m_shared.m_name == PluginConfig.lantern2.name.Value || 
+                    item.m_shared.m_name == PluginConfig.lantern3.name.Value);
 
                 if (itemData == null || itemData.m_shared == null)
                     return;
 
+                // Jotunn.Logger.LogWarning("Found Utility: " + itemData.m_shared.m_name);
                 int type = LanternHelper.GetLanternType(itemData);
 
                 if (type == 0)
                     return;
 
+                // Jotunn.Logger.LogWarning("Found type: " + type);
                 GameObject lightObj = player.transform.Find("Visual/attach_skin(Clone)/equiped/MMU_Lantern Point Light").gameObject;
                 GameObject flareObj = player.transform.Find("Visual/attach_skin(Clone)/Lantern/MMU_Lantern flare").gameObject;
                 GameObject demisterObj = player.transform.Find("Visual/attach_skin(Clone)/equiped/MMU_Lantern Demister").gameObject;
