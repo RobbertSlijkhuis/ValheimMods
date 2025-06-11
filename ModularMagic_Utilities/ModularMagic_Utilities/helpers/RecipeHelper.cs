@@ -177,7 +177,7 @@ namespace ModularMagic_Utilities.Helpers
         {
             try
             {
-                CustomRecipe recipe = ItemManager.Instance.GetRecipe(options.name); ;
+                CustomRecipe recipe = ItemManager.Instance.GetRecipe(options.name);
 
                 if (recipe == null)
                     throw new Exception("Could not find recipe: "+ options.name);

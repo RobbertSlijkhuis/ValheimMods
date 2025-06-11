@@ -37,7 +37,7 @@ namespace ModularMagic_Utilities.Components
                 if (status == "")
                     return;
 
-                Jotunn.Logger.LogWarning(status);
+                // Jotunn.Logger.LogWarning(status);
 
                 LanternStatus current = StatusStringToObject(status);
                 LanternHelper.UpdateLanternMode(current.playerId, current.status);

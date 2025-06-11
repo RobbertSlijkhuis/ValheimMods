@@ -53,17 +53,17 @@ namespace ModularMagic_Utilities
             // ItemManager.OnItemsRegistered += LogRecipes;
         }
 
-        //private void LogRecipes()
-        //{
-        //    ObjectDB.instance.m_recipes.ForEach(r =>
-        //    {
-        //        if (r.name.Contains("MMU_"))
-        //            Jotunn.Logger.LogInfo(r.name);
-        //    });
+        private void LogRecipes()
+        {
+            ObjectDB.instance.m_recipes.ForEach(r =>
+            {
+                if (r.name.Contains("MMU_"))
+                    Jotunn.Logger.LogInfo(r.name);
+            });
 
-        //    ItemManager.OnItemsRegistered -= LogRecipes;
-        //}
-        
+            ItemManager.OnItemsRegistered -= LogRecipes;
+        }
+
         /**
          * Called on every update
          */
@@ -168,6 +168,10 @@ namespace ModularMagic_Utilities
                 weatherZone.stopEffects.m_effectPrefabs = stopList.ToArray();
 
                 PieceHelper.Create(prefabs.MarbleItemstand, PluginConfig.piece1);
+
+                //CustomPiece piece = PieceManager.Instance.GetPiece("MMU_MarbleItemstand");
+                //Jotunn.Logger.LogWarning("Piece name: " + piece?.PiecePrefab?.name);
+                //piece.Piece.m_resources
                 
                 PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
             }

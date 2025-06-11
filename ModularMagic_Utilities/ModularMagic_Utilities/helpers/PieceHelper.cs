@@ -22,12 +22,16 @@ namespace ModularMagic_Utilities.Helpers
                 pieceConfig.CraftingStation = config.craftingStation.Value;
                 pieceConfig.PieceTable = PieceTables.Hammer;
                 pieceConfig.Category = PieceCategories.Furniture;
-                RequirementConfig[] requirements = RecipeHelper.GetAsRequirementConfigArray(config.recipe.Value, null, null);
+                pieceConfig.AddRequirement("BlackMarble", 10);
+                pieceConfig.AddRequirement("BlackCore", 3);
+                pieceConfig.AddRequirement("MoltenCore", 3);
+                pieceConfig.AddRequirement("CharredCogwheel", 1);
+                //RequirementConfig[] requirements = RecipeHelper.GetAsRequirementConfigArray(config.recipe.Value, null, null);
 
-                if (requirements == null || requirements.Length == 0)
-                    Jotunn.Logger.LogWarning($"Could not resolve recipe for: {prefab.name}");
-                else
-                    pieceConfig.Requirements = requirements;
+                //if (requirements == null || requirements.Length == 0)
+                //    Jotunn.Logger.LogWarning($"Could not resolve recipe for: {prefab.name}");
+                //else
+                //    pieceConfig.Requirements = requirements;
 
                 PieceManager.Instance.AddPiece(new CustomPiece(prefab, true, pieceConfig));
             }

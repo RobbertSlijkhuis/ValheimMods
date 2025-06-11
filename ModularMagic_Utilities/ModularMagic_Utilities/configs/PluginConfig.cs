@@ -35,7 +35,7 @@ namespace ModularMagic_Utilities.Configs
         public static UtilitiesConfig lantern3 = new UtilitiesConfig();
 
         private static string piece1Name = "Marble Item Stand";
-        private static string piece1Recipe = "BlackMarble:10";
+        private static string piece1Recipe = "BlackMarble:10, BlackCore:3, MoltenCore:3, CharredCogwheel:1";
         public static BuildPieceConfig piece1 = new BuildPieceConfig();
 
         public static List<WeatherZoneConfig> weatherConfigList = new List<WeatherZoneConfig>();
