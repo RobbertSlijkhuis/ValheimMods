@@ -44,7 +44,7 @@ namespace ModularMagic_Food.Configs
         public static string mushroom5SoupRecipe = $"Cloudberry:3, {ModularMagic_Food.Instance.prefabs.mushroom5Prefab.name}:2";
         public static FoodConfig mushroom5Soup = new FoodConfig();
 
-        public static string jerky1Name = "Seeker T-bone";
+        public static string jerky1Name = "Seeker Jerky";
         public static string jerky1Recipe = $"BugMeat:1, Honey:2";
         public static FoodConfig jerky1 = new FoodConfig();
 
@@ -356,7 +356,7 @@ namespace ModularMagic_Food.Configs
             {
                 FoodConfigOptions options = new FoodConfigOptions(ModularMagic_Food.Instance.prefabs.jerky1Prefab, jerky1Name, jerky1Recipe)
                 {
-                    description = "Lean and salty... hmmmmmm",
+                    description = "Lean and salty... its not bug I swear!",
                     craftingStation = "Cauldron",
                     minStationLevel = 5,
                     maxStackSize = 20,

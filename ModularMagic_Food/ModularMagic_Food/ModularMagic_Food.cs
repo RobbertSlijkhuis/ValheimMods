@@ -295,7 +295,7 @@ namespace ModularMagic_Food
             prefabs.mushroom3SoupPrefab = assetBundle.LoadAsset<GameObject>("MMF_BogMushroomSoup");
             prefabs.mushroom4SoupPrefab = assetBundle.LoadAsset<GameObject>("MMF_PircedMushroomSoup");
             prefabs.mushroom5SoupPrefab = assetBundle.LoadAsset<GameObject>("MMF_VioletCloudMushroomSoup");
-            prefabs.jerky1Prefab = assetBundle.LoadAsset<GameObject>("MMF_SeekerTBone");
+            prefabs.jerky1Prefab = assetBundle.LoadAsset<GameObject>("MMF_SeekerJerky");
 
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(assetBundle.LoadAsset<StatusEffect>("Puke_MMF"), true));
         }
