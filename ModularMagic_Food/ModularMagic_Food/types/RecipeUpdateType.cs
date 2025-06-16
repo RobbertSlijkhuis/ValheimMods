@@ -3,9 +3,10 @@
     enum RecipeUpdateType
     {
         ENABLE = 0,
-        RECIPE = 1,
-        CRAFTINGSTATION = 2,
-        MINREQUIREDSTATIONLEVEL = 3,
-        MINREQUIREDREPAIRLEVEL = 4,
+        AMOUNT = 1,
+        RECIPE = 2,
+        CRAFTINGSTATION = 3,
+        MINREQUIREDSTATIONLEVEL = 4,
+        MINREQUIREDREPAIRLEVEL = 5,
     }
 }

@@ -17,6 +17,9 @@ namespace ModularMagic_Food.Helpers
             itemConfig.Description = config.description.Value;
             itemConfig.Weight = config.weight.Value;
 
+            if (pickablePrefab == null && config.amount != null)
+                itemConfig.Amount = config.amount.Value;
+
             if (config.recipe != null)
             {
                 itemConfig.CraftingStation = config.craftingStation.Value;
@@ -27,7 +30,6 @@ namespace ModularMagic_Food.Helpers
                     Jotunn.Logger.LogWarning($"Could not resolve recipe for: {prefab.name}");
                 else
                     itemConfig.Requirements = simpleRequirements;
-
             }
 
             UpdateHelper.UpdateItemDrop(prefab, new UpdateItemDropOptions()

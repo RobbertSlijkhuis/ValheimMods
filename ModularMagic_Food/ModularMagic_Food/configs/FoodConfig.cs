@@ -240,15 +240,27 @@ namespace ModularMagic_Food.Configs
 
             if (options.amount != null)
             {
-                amount = Config.Bind(new ConfigDefinition(options.sectionName, "(Pickable) Amount"), (int)options.amount,
-                    new ConfigDescription("The amount of items this pickable mushroom will drop when picked", null,
+                amount = Config.Bind(new ConfigDefinition(options.sectionName, (options.pickablePrefab != null ? "(Pickable) " : "") + "Amount"), (int)options.amount,
+                    new ConfigDescription("The amount of items" + (options.pickablePrefab != null ? " this pickable mushroom will drop when picked" : " that will be crafted"), null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 amount.SettingChanged += (obj, attr) =>
                 {
-                    UpdateHelper.UpdatePickable(options.pickablePrefab, new UpdatePickableOptions()
+                    if (options.pickablePrefab != null)
                     {
-                        amount = amount.Value,
-                    });
+                        UpdateHelper.UpdatePickable(options.pickablePrefab, new UpdatePickableOptions()
+                        {
+                            amount = amount.Value,
+                        });
+                    }
+                    else
+                    {
+                        RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
+                        {
+                            name = options.recipeName,
+                            updateType = RecipeUpdateType.AMOUNT,
+                            amount = amount.Value,
+                        });
+                    }
                 };
             }
 

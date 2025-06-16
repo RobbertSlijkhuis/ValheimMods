@@ -189,6 +189,12 @@ namespace ModularMagic_Food.Helpers
 
                         recipe.Recipe.m_enabled = (bool)options.enable;
                         break;
+                    case RecipeUpdateType.AMOUNT:
+                        if (options.amount == null)
+                            throw new Exception("Amount is null");
+
+                        recipe.Recipe.m_amount = (int)options.amount;
+                        break;
                     case RecipeUpdateType.RECIPE:
                         if (options.requirements == null)
                             throw new Exception("Requirements is null");

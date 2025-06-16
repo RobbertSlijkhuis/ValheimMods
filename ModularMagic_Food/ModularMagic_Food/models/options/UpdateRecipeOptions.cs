@@ -6,6 +6,7 @@ namespace ModularMagic_Food.Models
     {
         public string? name = null;
         public bool? enable = null;
+        public int? amount = null;
         public string? craftingStation = null;
         public string? requirements = null;
         public int? requiredStationLevel = null;

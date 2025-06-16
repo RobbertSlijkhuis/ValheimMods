@@ -360,6 +360,7 @@ namespace ModularMagic_Food.Configs
                     craftingStation = "Cauldron",
                     minStationLevel = 5,
                     maxStackSize = 20,
+                    amount = 2,
                     health = 53f,
                     stamina = 53f,
                     eitr = 0f,
