@@ -20,7 +20,8 @@ namespace ModularMagic_Armors.Harmony
         {
             try
             {
-                __instance.gameObject.AddComponent<ArmorMMA>();
+                if (__instance.GetComponent<ArmorMMA>() == null)
+                    __instance.gameObject.AddComponent<ArmorMMA>();
             }
             catch (Exception e)
             {

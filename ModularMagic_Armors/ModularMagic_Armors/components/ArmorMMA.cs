@@ -14,12 +14,14 @@ namespace ModularMagic_Armors.Components
     internal class ArmorMMA : MonoBehaviour
     {
         private ZNetView _netView;
-        public string status;
+        private string status;
+        private string prevStatus;
 
         private void Awake()
         {
             _netView = base.gameObject.GetComponent<ZNetView>();
             status = "";
+            prevStatus = "";
 
             InvokeRepeating(nameof(UpdateStatus), 0f, 0.3f);
         }
@@ -39,12 +41,13 @@ namespace ModularMagic_Armors.Components
 
                 status = _netView.m_zdo.GetString(ModularMagic_Armors.armorStatusHashCode, "");
 
-                if (status == "")
+                if (status == "" || prevStatus == status)
                     return;
 
                 ArmorStatus current = StatusStringToObject(status);
                 UpdateHelper.UpdateItemEffects(current.playerId, current.items);
                 UpdateHelper.UpdateSetEffects(current.playerId, current.set);
+                prevStatus = status;
             }
             catch (Exception e)
             {
@@ -67,6 +70,7 @@ namespace ModularMagic_Armors.Components
 
             string newStatus = StatusObjectToString(status);
 
+            prevStatus = this.status;
             _netView.m_zdo.Set(ModularMagic_Armors.armorStatusHashCode, newStatus);
             return true;
         }

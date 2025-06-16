@@ -91,8 +91,8 @@ namespace ModularMagic_Armors.Helpers
                     eyeRight.GetComponent<MeshRenderer>().material = ModularMagic_Armors.Instance.materials.DarkWizardArmorEye;
                 }
 
-                eyeLeft.SetActive((wraithHelmet || darkWizardHelmet) ? true : false);
-                eyeRight.SetActive((wraithHelmet || darkWizardHelmet) ? true : false);
+                eyeLeft.SetActive((wraithHelmet || darkWizardHelmet));
+                eyeRight.SetActive((wraithHelmet || darkWizardHelmet));
 
                 if (PluginConfig.adjustEmbla.Value)
                 {
