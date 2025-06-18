@@ -1,4 +1,6 @@
 ﻿#nullable enable
+using ModularMagic_EarthStaffs.Configs;
+using ModularMagic_EarthStaffs.Types;
 using UnityEngine;
 
 namespace ModularMagic_EarthStaffs.Models
@@ -8,43 +10,46 @@ namespace ModularMagic_EarthStaffs.Models
         public GameObject prefab;
         public string sectionName;
         public string recipeName;
-        public string? cooldownStatusEffectName;
 
         public bool enable = true;
         public string name;
         public string? description;
         public string? craftingStation;
-        public int? minStationLevel = 1;
+        public int minStationLevel = 1;
         public string? recipe;
         public string? recipeUpgrade;
-        public int? recipeMultiplier;
-        public int? maxQuality;
-        public float? movementSpeed;
-        public float? damageBlunt;
+        public int recipeMultiplier = 1;
+        public string? selectedSecondaryAttack;
+        public float damageBlunt = 0f;
         public float? damageChop;
-        public float? damageFire;
-        public float? damageFrost;
-        public float? damageLightning;
         public float? damagePickaxe;
-        public float? damagePierce;
-        public float? damageSlash;
-        public float? damageSpirit;
-        public int? blockArmor;
-        public int? deflectionForce;
-        public int? attackForce;
-        public int? useEitr;
-        public int? useEitrSecondary;
-        public float? secondaryCooldown;
+        public float? damagePoison;
+        public float damageSpirit = 0f;
+        public float damageBluntPerLevel = 0f;
+        public float? damageChopPerLevel;
+        public float? damagePickaxePerLevel;
+        public float? damagePoisonPerLevel;
+        public float damageSpiritPerLevel = 0f;
+        public int useEitr = 10;
+        public float projectileVelocity = 15f;
+        public float projectileAccuracy = 1f;
+        public float? projectileBurst;
+        public float weight = 0.3f;
+        public float maxDurability = 200f;
+        public int maxQuality = 4;
+        public float movementSpeed = -0.05f;
+        public int blockArmor = 0;
+        public int deflectionForce = 20;
+        public int attackForce = 20;
 
-        public StaffConfigOptions(GameObject prefab, string name, string recipe, string upgradeRecipe, int sectionIndex)
+        public StaffConfigOptions(GameObject prefab, string name, string recipe, string upgradeRecipe)
         {
             this.prefab = prefab;
             this.name = name;
-            this.sectionName = $"{sectionIndex}. {name.Replace("'", "")}";
+            this.sectionName = $"{name.Replace("'", "")}";
             this.recipe = recipe;
             this.recipeName = $"Recipe_{prefab.name}";
             this.recipeUpgrade = upgradeRecipe;
-            this.cooldownStatusEffectName = $"{prefab.name}CooldownStatusEffect";
         }
     }
 }

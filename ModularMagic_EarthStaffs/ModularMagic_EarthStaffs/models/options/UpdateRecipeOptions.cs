@@ -1,5 +1,7 @@
 ﻿#nullable enable
 
+using ModularMagic_EarthStaffs.Types;
+
 namespace ModularMagic_EarthStaffs.Models
 {
     internal class UpdateRecipeOptions

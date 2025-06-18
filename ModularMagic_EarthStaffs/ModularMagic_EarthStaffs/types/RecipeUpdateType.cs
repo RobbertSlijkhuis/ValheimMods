@@ -1,4 +1,4 @@
-﻿namespace ModularMagic_EarthStaffs
+﻿namespace ModularMagic_EarthStaffs.Types
 {
     enum RecipeUpdateType
     {

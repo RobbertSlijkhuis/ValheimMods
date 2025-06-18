@@ -5,6 +5,7 @@ using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using ModularMagic_EarthStaffs.Models;
+using ModularMagic_EarthStaffs.Types;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
