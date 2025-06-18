@@ -18,6 +18,8 @@ ModularMagic_FireStaffs/ModularMagic_FireStaffs_Unity/
 !ModularMagic_FireStaffs/ModularMagic_FireStaffs_Unity/Assets
 ModularMagic_LightningStaffs/ModularMagic_LightningStaffs_Unity/
 !ModularMagic_LightningStaffs/ModularMagic_LightningStaffs_Unity/Assets
+Testing/Testing_Unity/
+!Testing/Testing_Unity/Assets
 
 # User-specific files
 *.rsuser
