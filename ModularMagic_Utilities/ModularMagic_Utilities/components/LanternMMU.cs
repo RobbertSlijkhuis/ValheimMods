@@ -16,7 +16,7 @@ namespace ModularMagic_Utilities.Components
             netView = base.gameObject.GetComponent<ZNetView>();
             status = "";
 
-            InvokeRepeating(nameof(UpdateStatus), 0f, 10.3f);
+            InvokeRepeating(nameof(UpdateStatus), 0f, 0.3f);
         }
 
         private void UpdateStatus()

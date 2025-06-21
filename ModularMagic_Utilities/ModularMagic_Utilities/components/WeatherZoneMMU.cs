@@ -486,9 +486,13 @@ namespace ModularMagic_Utilities.Components
                     particleSystem.Stop();
 
                 MeshRenderer meshRenderer = domeTrans.gameObject.GetComponent<MeshRenderer>();
+                MeshRenderer meshInnerRenderer = domeTrans.Find("inner").gameObject.GetComponent<MeshRenderer>();
 
                 if (meshRenderer != null)
                     meshRenderer.enabled = enabled ? domeEnabled : false;
+
+                if (meshInnerRenderer != null)
+                    meshInnerRenderer.enabled = enabled ? domeEnabled : false;
             }
         }
 
