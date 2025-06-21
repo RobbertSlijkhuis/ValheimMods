@@ -27,7 +27,10 @@ namespace Testing
         public CustomPrefabs prefabs = new CustomPrefabs();
         public CustomStatusEffects effects = new CustomStatusEffects();
 
-        public static int barlyWineSplashHash;
+        public static readonly int barleyWineHash = 1458612846;
+        public static readonly int frostResistHash = -1768438774;
+        public static readonly int poisonResistHash = -568360536;
+        public static int barleyWineSplashHash;
         public static int frostResistSplashHash;
         public static int poisonResistSplashHash;
 
@@ -61,7 +64,7 @@ namespace Testing
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.FrostResistSplash, true));
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.PoisonResistSplash, true));
 
-            barlyWineSplashHash = effects.BarlyWineSplash.name.GetStableHashCode();
+            barleyWineSplashHash = effects.BarlyWineSplash.name.GetStableHashCode();
             frostResistSplashHash = effects.FrostResistSplash.name.GetStableHashCode();
             poisonResistSplashHash = effects.PoisonResistSplash.name.GetStableHashCode();
         }

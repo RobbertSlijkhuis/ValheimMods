@@ -8,23 +8,22 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: slime_green 1
-  m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
+  m_Shader: {fileID: 4800000, guid: 2ea68959f7ced28409f28b98ff0cf117, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords:
-  - _ALPHABLEND_ON
-  - _EMISSION
+  m_ValidKeywords: []
   m_InvalidKeywords:
   - GEOM_TYPE_BRANCH
   - GEOM_TYPE_BRANCH_DETAIL
   - GEOM_TYPE_FROND
+  - _ALPHABLEND_ON
+  - _EMISSION
   - _FADING_ON
   m_LightmapFlags: 2
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 3000
-  stringTagMap:
-    RenderType: Transparent
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
   m_SavedProperties:
@@ -51,11 +50,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
-        m_Texture: {fileID: 2800000, guid: c1c5f1e38af0012458718b812d1501f3, type: 3}
+        m_Texture: {fileID: 2800000, guid: c1f3a8a7d31a97d4d89ef3a1b62d666d, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: c1c5f1e38af0012458718b812d1501f3, type: 3}
+        m_Texture: {fileID: 2800000, guid: c1f3a8a7d31a97d4d89ef3a1b62d666d, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
