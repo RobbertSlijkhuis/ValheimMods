@@ -4,6 +4,8 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 ## Valheim specific files
+ModularMagic_Core/ModularMagic_Core_Unity/
+!ModularMagic_Cpre/ModularMagic_Core_Unity/Assets
 ModularMagic_Armors/ModularMagic_Armors_Unity/
 !ModularMagic_Armors/ModularMagic_Armors_Unity/Assets
 ModularMagic_Food/ModularMagic_Food_Unity/
