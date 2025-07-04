@@ -5,5 +5,6 @@
         public StatusEffect BarlyWineSplash;
         public StatusEffect FrostResistSplash;
         public StatusEffect PoisonResistSplash;
+        public StatusEffect RatatoskSplash;
     }
 }

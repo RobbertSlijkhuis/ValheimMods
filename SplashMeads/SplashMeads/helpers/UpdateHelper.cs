@@ -56,6 +56,10 @@ namespace SplashMeads.Helpers
                         fxPrefab = SplashMeads.Instance.prefabs.PoisonResistSplashFX;
                         statusEffect = SplashMeads.Instance.effects.PoisonResistSplash;
                         break;
+                    case var value when value == SplashMeads.Instance.prefabs.RatatoskSplash.name:
+                        fxPrefab = SplashMeads.Instance.prefabs.RatatoskSplashFX;
+                        statusEffect = SplashMeads.Instance.effects.RatatoskSplash;
+                        break;
                 }
 
                 if (fxPrefab == null || statusEffect == null)
@@ -91,6 +95,9 @@ namespace SplashMeads.Helpers
                         break;
                     case var value when value == SplashMeads.Instance.prefabs.PoisonResistSplash.name:
                         explPrefab = SplashMeads.Instance.prefabs.PoisonResistSplashExplosion;
+                        break;
+                    case var value when value == SplashMeads.Instance.prefabs.RatatoskSplash.name:
+                        explPrefab = SplashMeads.Instance.prefabs.RatatoskSplashExplosion;
                         break;
                 }
 

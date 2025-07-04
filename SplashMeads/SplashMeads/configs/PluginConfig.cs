@@ -22,6 +22,10 @@ namespace SplashMeads.Configs
         private static string mead3Recipe = "MeadPoisonResist:6, LeatherScraps:3, Resin:2";
         public static SplashMeadConfig mead3 = new SplashMeadConfig();
 
+        private static string mead4Name = "Splash Ratatosk Mead";
+        private static string mead4Recipe = "MeadHasty:6, LeatherScraps:3, Resin:2";
+        public static SplashMeadConfig mead4 = new SplashMeadConfig();
+
         public static void Init()
         {
             InitMeadsConfig();
@@ -57,6 +61,15 @@ namespace SplashMeads.Configs
                     recipeAmount = 2,
                 };
                 mead3.GenerateConfig(options3);
+
+                SplashMeadConfigOptions options4 = new SplashMeadConfigOptions(SplashMeads.Instance.prefabs.RatatoskSplash, mead4Name, mead4Recipe)
+                {
+                    description = "Applies " + mead4Name.Replace("Splash ", "") + " to friendlies hit or in the splash radius",
+                    craftingStation = CraftingStationType.Workbench,
+                    minStationLevel = 3,
+                    recipeAmount = 2,
+                };
+                mead4.GenerateConfig(options4);
             }
             catch (Exception e)
             {
