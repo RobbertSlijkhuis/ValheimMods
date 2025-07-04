@@ -1,10 +1,8 @@
 ﻿using HarmonyLib;
 using ModularMagic_EarthStaffs.Configs;
 using System;
-
-
-// using ModularMagic_EarthStaffs.Configs;
 using UnityEngine;
+using static ItemDrop;
 
 namespace ModularMagic_EarthStaffs.Harmony
 {
@@ -31,10 +29,11 @@ namespace ModularMagic_EarthStaffs.Harmony
                     return true;
                 }
 
-                if (__instance.m_drawStaminaDrain != 8901)
-                    return true;
+                //if (__instance.m_drawStaminaDrain != 8901)
+                //    return true;
 
-                return CheckForCooldown(character, weapon.m_dropPrefab.name);
+                return true;
+                // return CheckForCooldown(character, weapon.m_dropPrefab.name);
             }
             catch (Exception e)
             {

@@ -75,7 +75,7 @@ namespace ModularMagic_EarthStaffs.Configs
                     craftingStation = "Workbench",
                     minStationLevel = 2,
                     damageBlunt = 10f,
-                    damageBluntPerLevel = 2f,
+                    damageBluntPerLevel = 1f,
                     damageChop = 3f,
                     damageChopPerLevel = 1f,
                     damagePickaxe = 2f,
@@ -114,8 +114,8 @@ namespace ModularMagic_EarthStaffs.Configs
                     description = "This staff flings boulders with all the subtlety of an avalanche. Not great for diplomacy. Excellent for everything else!",
                     craftingStation = "Workbench",
                     minStationLevel = 2,
-                    damageBlunt = 17f,
-                    damageBluntPerLevel = 2f,
+                    damageBlunt = 14f,
+                    damageBluntPerLevel = 1f,
                     damageChop = 8f,
                     damageChopPerLevel = 1f,
                     damagePickaxe = 5f,
@@ -131,7 +131,7 @@ namespace ModularMagic_EarthStaffs.Configs
                     useEitr = 5,
                 };
                 staffEarth2.GenerateConfig(options);
-                staffEarth2.secondaryAttackConfig = InitSecondaryAttackBoulderConfig(ModularMagic_EarthStaffs.Instance.prefabs.staffEarth2, staff2Name);
+                //staffEarth2.secondaryAttackConfig = InitSecondaryAttackBoulderConfig(ModularMagic_EarthStaffs.Instance.prefabs.staffEarth2, staff2Name);
 
                 //if (staffEarth2.selectedSecondaryAttack.Value == SelectSecondaryAttackType.Boulder)
                 //    staffEarth2.secondaryAttackConfig = InitSecondaryAttackBoulderConfig(ModularMagic_EarthStaffs.Instance.prefabs.staffEarth2, staff2Name);
@@ -154,8 +154,8 @@ namespace ModularMagic_EarthStaffs.Configs
                     description = "Side effects may include dizziness, confusion, and being buried under several metric tons of stone. Nature just doesn’t negotiate. It bends, breaks, and buries!",
                     craftingStation = "GaldrTable",
                     minStationLevel = 1,
-                    damageBlunt = 24f,
-                    damageBluntPerLevel = 2f,
+                    damageBlunt = 21f,
+                    damageBluntPerLevel = 1f,
                     damageChop = 12f,
                     damageChopPerLevel = 1f,
                     damagePickaxe = 8f,
@@ -171,7 +171,7 @@ namespace ModularMagic_EarthStaffs.Configs
                     useEitr = 7,
                 };
                 staffEarth3.GenerateConfig(options);
-                staffEarth3.secondaryAttackConfig = InitSecondaryAttackRootsConfig(ModularMagic_EarthStaffs.Instance.prefabs.staffEarth3, staff3Name);
+                //staffEarth3.secondaryAttackConfig = InitSecondaryAttackRootsConfig(ModularMagic_EarthStaffs.Instance.prefabs.staffEarth3, staff3Name);
 
                 //if (staffEarth3.selectedSecondaryAttack.Value == SelectSecondaryAttackType.Boulder)
                 //    staffEarth3.secondaryAttackConfig = InitSecondaryAttackBoulderConfig(ModularMagic_EarthStaffs.Instance.prefabs.staffEarth3, staff3Name);
