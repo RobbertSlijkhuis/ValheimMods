@@ -19,7 +19,7 @@ namespace ModularMagic_Core
         public const string PluginName = "ModularMagic_Core";
         public const string PluginVersion = "0.0.1";
         public static ModularMagic_Core Instance;
-        // private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
+        private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
 
         private AssetBundle assetBundle;
         public CustomPrefabs prefabs = new CustomPrefabs();
@@ -33,7 +33,7 @@ namespace ModularMagic_Core
             Instance = this;
             InitAssetBundle();
             PluginConfig.Init();
-            // harmony.PatchAll(Assembly.GetExecutingAssembly());
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             PrefabManager.OnVanillaPrefabsAvailable += AddMaterials;
             ItemManager.OnItemsRegistered += LogRecipes;
