@@ -39,12 +39,13 @@ MonoBehaviour:
       m_inheritParentScale: 0
       m_multiplyParentVisualScale: 0
       m_randomRotation: 0
-      m_scale: 0
+      m_scale: 1
       m_childTransform: 
   m_stopEffects:
     m_effectPrefabs: []
   m_cooldown: 0
   m_activationAnimation: gpower
+  m_character: {fileID: 0}
   m_tickInterval: 0
   m_healthPerTickMinHealthPercentage: 0
   m_healthPerTick: 0
@@ -100,3 +101,10 @@ MonoBehaviour:
   m_maxMaxFallSpeed: 0
   m_fallDamageModifier: 0
   m_windMovementModifier: 0
+  m_windRunStaminaModifier: 0
+  m_pheromoneTarget: {fileID: 0}
+  m_pheromoneSpawnChanceOverride: 0
+  m_pheromoneSpawnMinLevel: 0
+  m_pheromoneLevelUpMultiplier: 1
+  m_pheromoneMaxInstanceOverride: 0
+  m_pheromoneFlee: 0

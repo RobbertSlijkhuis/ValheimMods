@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace SplashMeads.Models
 {
-    internal class IconPositionResult
+    internal class IconPosition
     {
         public float x;
         public float y;
 
-        public IconPositionResult(float x, float y)
+        public IconPosition(float x, float y)
         {
             this.x = x;
             this.y = y;

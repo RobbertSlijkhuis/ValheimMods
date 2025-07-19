@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SplashMeads.Models
 {
-    internal class UpdateItemDropOptions
+    internal class UpdateItemDataOptions
     {
         public string? name = null;
         public string? description = null;

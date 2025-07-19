@@ -6,5 +6,6 @@
         public StatusEffect FrostResistSplash;
         public StatusEffect PoisonResistSplash;
         public StatusEffect RatatoskSplash;
+        public StatusEffect VananidirSplash;
     }
 }

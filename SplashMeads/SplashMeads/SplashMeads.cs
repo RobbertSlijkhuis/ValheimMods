@@ -29,10 +29,12 @@ namespace SplashMeads
         public static readonly int frostResistHash = -1768438774;
         public static readonly int poisonResistHash = -568360536;
         public static readonly int ratatoskHash = 1965486703;
+        public static readonly int vananidirHash = -1907265002;
         public static int barleyWineSplashHash;
         public static int frostResistSplashHash;
         public static int poisonResistSplashHash;
         public static int ratatoskSplashHash;
+        public static int vananidirSplashHash;
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -55,6 +57,7 @@ namespace SplashMeads
             ItemHelper.Create(prefabs.FrostResistSplash, PluginConfig.mead2);
             ItemHelper.Create(prefabs.PoisonResistSplash, PluginConfig.mead3);
             ItemHelper.Create(prefabs.RatatoskSplash, PluginConfig.mead4);
+            ItemHelper.Create(prefabs.VananidirSplash, PluginConfig.mead5);
 
             PrefabManager.OnVanillaPrefabsAvailable -= AddStuff;
         }
@@ -66,11 +69,13 @@ namespace SplashMeads
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.FrostResistSplash, true));
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.PoisonResistSplash, true));
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.RatatoskSplash, true));
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.VananidirSplash, true));
 
             barleyWineSplashHash = effects.BarlyWineSplash.name.GetStableHashCode();
             frostResistSplashHash = effects.FrostResistSplash.name.GetStableHashCode();
             poisonResistSplashHash = effects.PoisonResistSplash.name.GetStableHashCode();
             ratatoskSplashHash = effects.RatatoskSplash.name.GetStableHashCode();
+            vananidirSplashHash = effects.VananidirSplash.name.GetStableHashCode();
         }
 
         private void InitAssetBundle()
@@ -111,12 +116,22 @@ namespace SplashMeads
             prefabs.RatatoskSplash = assetBundle.LoadAsset<GameObject>("SM_SplashRatatosk");
             prefabs.RatatoskSplashProjectile = assetBundle.LoadAsset<GameObject>("ratatosk_projectile_SM");
             prefabs.RatatoskSplashExplosion = assetBundle.LoadAsset<GameObject>("ratatosk_explosion_SM");
-            prefabs.RatatoskSplashFX = assetBundle.LoadAsset<GameObject>("fx_Potion_Ratatosk_SM");
+            prefabs.RatatoskSplashFX = assetBundle.LoadAsset<GameObject>("fx_Potion_ratatosk_SM");
             prefabs.RatatoskSplashHudIcon = enemyHud.transform.Find("HudRoot/HudBase/SplashRatatosk").gameObject;
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RatatoskSplashProjectile, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RatatoskSplashExplosion, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RatatoskSplashFX, true));
             effects.RatatoskSplash = assetBundle.LoadAsset<StatusEffect>("Potion_hasty_splash_SM");
+
+            prefabs.VananidirSplash = assetBundle.LoadAsset<GameObject>("SM_SplashVananidir");
+            prefabs.VananidirSplashProjectile = assetBundle.LoadAsset<GameObject>("vananidir_projectile_SM");
+            prefabs.VananidirSplashExplosion = assetBundle.LoadAsset<GameObject>("vananidir_explosion_SM");
+            prefabs.VananidirSplashFX = assetBundle.LoadAsset<GameObject>("fx_Potion_vananidir_SM");
+            prefabs.VananidirSplashHudIcon = enemyHud.transform.Find("HudRoot/HudBase/SplashVananidir").gameObject;
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.VananidirSplashProjectile, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.VananidirSplashExplosion, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.VananidirSplashFX, true));
+            effects.VananidirSplash = assetBundle.LoadAsset<StatusEffect>("Potion_swimmer_splash_SM");
         }
     }
 }

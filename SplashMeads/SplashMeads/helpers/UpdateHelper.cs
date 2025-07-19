@@ -6,33 +6,68 @@ using System.Linq;
 using System.Runtime.Remoting;
 using SplashMeads.Models;
 using UnityEngine;
+using static ItemDrop;
+using SplashMeads.Configs;
 
 namespace SplashMeads.Helpers
 {
     internal class UpdateHelper
     {
-
-        public static void UpdateItemDrop(GameObject prefab, UpdateItemDropOptions options)
+        public static void UpdateItemData(GameObject prefab, UpdateItemDataOptions options)
         {
-            try
+            if (prefab == null)
+                throw new Exception("Prefab is null");
+
+            ItemData itemData = prefab.GetComponent<ItemDrop>().m_itemData;
+            UpdateItemData(itemData, options);
+            UpdateItemDataInInventory(itemData, options);
+        }
+
+        public static void UpdateItemData(ItemData itemData, UpdateItemDataOptions options)
+        {
+            if (itemData == null)
+                throw new Exception("ItemData is null");
+
+            if (options.name != null) { itemData.m_shared.m_name = options.name; }
+            if (options.description != null) { itemData.m_shared.m_description = options.description; }
+            if (options.weight != null) { itemData.m_shared.m_weight = (float)options.weight; }
+            if (options.maxStackSize != null) { itemData.m_shared.m_maxStackSize = (int)options.maxStackSize; }
+        }
+
+        public static void UpdateItemDataInInventory(ItemData itemData, UpdateItemDataOptions options)
+        {
+            if (Player.m_localPlayer == null)
+                return;
+
+            Inventory inventory = Player.m_localPlayer.GetInventory();
+
+            if (inventory == null)
+                return;
+
+            List<ItemData> items = inventory.GetAllItems().FindAll(item => item.m_shared.m_name == itemData.m_shared.m_name);
+
+            if (items == null)
+                throw new Exception("Could not find items from Inventory");
+
+            Jotunn.Logger.LogWarning("Items to update: "+ items.Count);
+
+            foreach (ItemData item in items)
             {
-                if (prefab == null)
-                    throw new Exception("Prefab is null");
-
-                ItemDrop itemDrop = prefab.GetComponent<ItemDrop>();
-
-                if (itemDrop == null)
-                    throw new Exception("ItemDrop is null");
-
-                if (options.name != null) { itemDrop.m_itemData.m_shared.m_name = options.name; }
-                if (options.description != null) { itemDrop.m_itemData.m_shared.m_description = options.description; }
-                if (options.weight != null) { itemDrop.m_itemData.m_shared.m_weight = (float)options.weight; }
-                if (options.maxStackSize != null) { itemDrop.m_itemData.m_shared.m_maxStackSize = (int)options.maxStackSize; }
+                UpdateItemData(item, options);
             }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Could not update ItemDrop: " + e);
-            }
+        }
+
+        public static void UpdateFXEnabled(GameObject prefab, bool value)
+        {
+            if (prefab == null)
+                throw new Exception("Prefab is null");
+
+            Transform lingeringEffects = prefab.transform.Find("lingering_effects/particles");
+
+            if (lingeringEffects == null)
+                return;
+
+            lingeringEffects.gameObject.SetActive(value);
         }
 
         public static void UpdateDuration(GameObject prefab, int duration)
@@ -60,18 +95,27 @@ namespace SplashMeads.Helpers
                         fxPrefab = SplashMeads.Instance.prefabs.RatatoskSplashFX;
                         statusEffect = SplashMeads.Instance.effects.RatatoskSplash;
                         break;
+                    case var value when value == SplashMeads.Instance.prefabs.VananidirSplash.name:
+                        fxPrefab = SplashMeads.Instance.prefabs.VananidirSplashFX;
+                        statusEffect = SplashMeads.Instance.effects.VananidirSplash;
+                        break;
                 }
 
                 if (fxPrefab == null || statusEffect == null)
                     throw new Exception("Could not find corresponding fx prefab or statuseffect");
 
-                ParticleSystem.MainModule flareMain = fxPrefab.transform.Find("lingering_effects/flare").gameObject.GetComponent<ParticleSystem>().main;
-                ParticleSystem.MainModule flakesMain = fxPrefab.transform.Find("lingering_effects/flakes_up").gameObject.GetComponent<ParticleSystem>().main;
                 fxPrefab.GetComponent<TimedDestruction>().m_timeout = duration;
-                flareMain.duration = duration;
-                flareMain.startLifetime = duration;
-                flakesMain.duration = duration - 3;
                 statusEffect.m_ttl = duration;
+
+                //ParticleSystem.MainModule flareMain = fxPrefab.transform.Find("lingering_effects/flare").gameObject.GetComponent<ParticleSystem>().main;
+                //ParticleSystem.MainModule flakesMain = fxPrefab.transform.Find("lingering_effects/flakes_up").gameObject.GetComponent<ParticleSystem>().main;
+                ParticleSystem.MainModule particlesMain = fxPrefab.transform.Find("lingering_effects/particles").gameObject.GetComponent<ParticleSystem>().main;
+
+                //flareMain.duration = duration;
+                //flareMain.startLifetime = duration;
+                //flakesMain.duration = duration - 3;
+                particlesMain.duration = duration - 3;
+                
             }
             catch (Exception e)
             {
@@ -98,6 +142,9 @@ namespace SplashMeads.Helpers
                         break;
                     case var value when value == SplashMeads.Instance.prefabs.RatatoskSplash.name:
                         explPrefab = SplashMeads.Instance.prefabs.RatatoskSplashExplosion;
+                        break;
+                    case var value when value == SplashMeads.Instance.prefabs.VananidirSplash.name:
+                        explPrefab = SplashMeads.Instance.prefabs.VananidirSplashExplosion;
                         break;
                 }
 

@@ -27,5 +27,11 @@ namespace SplashMeads.Models
         public GameObject RatatoskSplashExplosion;
         public GameObject RatatoskSplashFX;
         public GameObject RatatoskSplashHudIcon;
+
+        public GameObject VananidirSplash;
+        public GameObject VananidirSplashProjectile;
+        public GameObject VananidirSplashExplosion;
+        public GameObject VananidirSplashFX;
+        public GameObject VananidirSplashHudIcon;
     }
 }

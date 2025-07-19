@@ -1,4 +1,5 @@
 ﻿using BepInEx.Configuration;
+using SplashMeads.Helpers;
 using SplashMeads.Models;
 using SplashMeads.Types;
 using System;
@@ -22,13 +23,47 @@ namespace SplashMeads.Configs
         private static string mead3Recipe = "MeadPoisonResist:6, LeatherScraps:3, Resin:2";
         public static SplashMeadConfig mead3 = new SplashMeadConfig();
 
-        private static string mead4Name = "Splash Ratatosk Mead";
+        private static string mead4Name = "Splash Ratatosk Tonic";
         private static string mead4Recipe = "MeadHasty:6, LeatherScraps:3, Resin:2";
         public static SplashMeadConfig mead4 = new SplashMeadConfig();
 
+        private static string mead5Name = "Splash Vananidir Mead";
+        private static string mead5Recipe = "MeadHasty:6, LeatherScraps:3, Resin:2";
+        public static SplashMeadConfig mead5 = new SplashMeadConfig();
+
+        // Other
+        public static string generalSectionname = "General";
+        public static ConfigEntry<bool> showParticles;
+        public static ConfigEntry<bool> showParticlesOnPlayers;
+        public static ConfigEntry<bool> showHudIcons;
+
         public static void Init()
         {
+            InitGeneralConfig();
             InitMeadsConfig();
+        }
+
+        public static void InitGeneralConfig()
+        {
+            showParticles = SplashMeads.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Show particles"), true,
+               new ConfigDescription("Show particles when tames/players are affected by a splash mead", null,
+               new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 3 }));
+            showParticles.SettingChanged += (obj, attr) =>
+            {
+                UpdateHelper.UpdateFXEnabled(SplashMeads.Instance.prefabs.BarlyWineSplashFX, showParticles.Value);
+                UpdateHelper.UpdateFXEnabled(SplashMeads.Instance.prefabs.FrostResistSplashFX, showParticles.Value);
+                UpdateHelper.UpdateFXEnabled(SplashMeads.Instance.prefabs.PoisonResistSplashFX, showParticles.Value);
+                UpdateHelper.UpdateFXEnabled(SplashMeads.Instance.prefabs.RatatoskSplashFX, showParticles.Value);
+                UpdateHelper.UpdateFXEnabled(SplashMeads.Instance.prefabs.VananidirSplashFX, showParticles.Value);
+            };
+
+            showParticlesOnPlayers = SplashMeads.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Show particles on players"), true,
+               new ConfigDescription("Show particles on players affected by a splash mead", null,
+               new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 2 }));
+
+            showHudIcons = SplashMeads.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Show hud icons"), true,
+               new ConfigDescription("Show splash mead icons underneath healthbar of tames", null,
+               new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 1 }));
         }
 
         public static void InitMeadsConfig()
@@ -70,6 +105,15 @@ namespace SplashMeads.Configs
                     recipeAmount = 2,
                 };
                 mead4.GenerateConfig(options4);
+
+                SplashMeadConfigOptions options5 = new SplashMeadConfigOptions(SplashMeads.Instance.prefabs.VananidirSplash, mead5Name, mead5Recipe)
+                {
+                    description = "Applies " + mead4Name.Replace("Splash ", "") + " to friendlies hit or in the splash radius",
+                    craftingStation = CraftingStationType.Workbench,
+                    minStationLevel = 3,
+                    recipeAmount = 2,
+                };
+                mead5.GenerateConfig(options5);
             }
             catch (Exception e)
             {

@@ -13,6 +13,50 @@ namespace SplashMeads.Harmony
     public class PatchesSM
     {
         [HarmonyPostfix]
+        [HarmonyPatch(typeof(Character), "ApplyDamage")]
+        public static void ApplyDamage_Postfix(ref Character __instance, HitData hit)
+        {
+            try
+            {
+                if (__instance == null || hit == null)
+                    return;
+
+                RefreshSplash(__instance, hit.m_statusEffectHash);
+            }
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in ApplyDamage_Postfix: " + e);
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Player), "ConsumeItem")]
+        public static void ConsumeItem_Postfix(ref Player __instance, ItemDrop.ItemData item)
+        {
+            try
+            {
+                if (__instance == null || item == null)
+                    return;
+
+                string itemName = item.m_shared.m_consumeStatusEffect?.name;
+
+                if (itemName == null)
+                    return;
+
+                int effectHash = itemName.GetStableHashCode();
+
+                if (effectHash == 0)
+                    return;
+
+                RemoveSplashWhenConsumeNormal(__instance, effectHash);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in ConsumeItem_Postfix: " + e);
+            }
+        }
+
+        [HarmonyPostfix]
         [HarmonyPatch(typeof(EnemyHud), "Awake")]
         public static void AwakeEnemyHud_Postfix(ref EnemyHud __instance)
         {
@@ -25,6 +69,7 @@ namespace SplashMeads.Harmony
                 SplashMeads.Instance.prefabs.FrostResistSplashHudIcon.transform.SetParent(__instance.m_baseHud.transform, false);
                 SplashMeads.Instance.prefabs.PoisonResistSplashHudIcon.transform.SetParent(__instance.m_baseHud.transform, false);
                 SplashMeads.Instance.prefabs.RatatoskSplashHudIcon.transform.SetParent(__instance.m_baseHud.transform, false);
+                SplashMeads.Instance.prefabs.VananidirSplashHudIcon.transform.SetParent(__instance.m_baseHud.transform, false);
             }
             catch (System.Exception e)
             {
@@ -96,78 +141,14 @@ namespace SplashMeads.Harmony
                                 RectTransform iconFrost = (RectTransform)value.m_gui.transform.Find("SplashFrostResist");
                                 RectTransform iconPoison = (RectTransform)value.m_gui.transform.Find("SplashPoisonResist");
                                 RectTransform iconRatatosk = (RectTransform)value.m_gui.transform.Find("SplashRatatosk");
-                                // RectTransform iconRatatosk = (RectTransform)value.m_gui.transform.Find("SplashVananidir");
-                                float x = -35;
-                                float y = level == 1 ? -13 : -30;
+                                RectTransform iconVananidir = (RectTransform)value.m_gui.transform.Find("SplashVananidir");
+                                IconPosition iconPos = new IconPosition(-35, level == 1 ? -15 : -30);
 
-                                if (value.m_character.GetSEMan().HaveStatusEffect(SplashMeads.barleyWineSplashHash))
-                                {
-                                    if (iconBarley != null)
-                                    {
-                                        iconBarley.gameObject.SetActive(true);
-                                        iconBarley.anchoredPosition = new Vector2(x, y);
-                                        IconPositionResult newPos = CalculatePosition(x, y);
-                                        x = newPos.x;
-                                        y = newPos.y;
-
-                                    }
-                                }
-                                else
-                                {
-                                    if (iconBarley != null)
-                                        iconBarley.gameObject.SetActive(false);
-                                }
-
-                                if (value.m_character.GetSEMan().HaveStatusEffect(SplashMeads.frostResistSplashHash))
-                                {
-                                    if (iconFrost != null)
-                                    {
-                                        iconFrost.gameObject.SetActive(true);
-                                        iconFrost.anchoredPosition = new Vector2(x, y);
-                                        IconPositionResult newPos = CalculatePosition(x, y);
-                                        x = newPos.x;
-                                        y = newPos.y;
-                                    }
-                                }
-                                else
-                                {
-                                    if (iconFrost != null)
-                                        iconFrost.gameObject.SetActive(false);
-                                }
-
-                                if (value.m_character.GetSEMan().HaveStatusEffect(SplashMeads.poisonResistSplashHash))
-                                {
-                                    if (iconPoison != null) 
-                                    {
-                                        iconPoison.gameObject.SetActive(true);
-                                        iconPoison.anchoredPosition = new Vector2(x, y);
-                                        IconPositionResult newPos = CalculatePosition(x, y);
-                                        x = newPos.x;
-                                        y = newPos.y;
-                                    }
-                                }
-                                else
-                                {
-                                    if (iconPoison != null)
-                                        iconPoison.gameObject.SetActive(false);
-                                }
-
-                                if (value.m_character.GetSEMan().HaveStatusEffect(SplashMeads.ratatoskSplashHash))
-                                {
-                                    if (iconRatatosk != null)
-                                    {
-                                        iconRatatosk.gameObject.SetActive(true);
-                                        iconRatatosk.anchoredPosition = new Vector2(x, y);
-                                        IconPositionResult newPos = CalculatePosition(x, y);
-                                        x = newPos.x;
-                                        y = newPos.y;
-                                    }
-                                }
-                                else
-                                {
-                                    if (iconRatatosk != null)
-                                        iconRatatosk.gameObject.SetActive(false);
-                                }
+                                iconPos = UpdateHudIcon(value.m_character, iconBarley, SplashMeads.barleyWineSplashHash, iconPos);
+                                iconPos = UpdateHudIcon(value.m_character, iconFrost, SplashMeads.frostResistSplashHash, iconPos);
+                                iconPos = UpdateHudIcon(value.m_character, iconPoison, SplashMeads.poisonResistSplashHash, iconPos);
+                                iconPos = UpdateHudIcon(value.m_character, iconRatatosk, SplashMeads.ratatoskSplashHash, iconPos);
+                                iconPos = UpdateHudIcon(value.m_character, iconVananidir, SplashMeads.vananidirSplashHash, iconPos);
                             }
                         }
                     }
@@ -230,50 +211,6 @@ namespace SplashMeads.Harmony
             }
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Character), "ApplyDamage")]
-        public static void ApplyDamage_Postfix(ref Character __instance, HitData hit)
-        {
-            try
-            {
-                if (__instance == null || hit == null)
-                    return;
-
-                RefreshSplash(__instance, hit.m_statusEffectHash);
-            }
-            catch (System.Exception e)
-            {
-                Jotunn.Logger.LogError("Something went wrong in ApplyDamage_Postfix: " + e);
-            }
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Player), "ConsumeItem")]
-        public static void ConsumeItem_Postfix(ref Player __instance, ItemDrop.ItemData item)
-        {
-            try
-            {
-                if (__instance == null || item == null)
-                    return;
-
-                string itemName = item.m_shared.m_consumeStatusEffect?.name;
-
-                if (itemName == null)
-                    return;
-
-                int effectHash = itemName.GetStableHashCode();
-
-                if (effectHash == 0)
-                    return;
-
-                RemoveSplashWhenConsumeNormal(__instance, effectHash);
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Something went wrong in ConsumeItem_Postfix: " + e);
-            }
-        }
-
         private static void RefreshSplash(Character character, int effectHash)
         {
             if (effectHash == SplashMeads.barleyWineSplashHash && character.GetSEMan().HaveStatusEffect(SplashMeads.barleyWineSplashHash))
@@ -281,7 +218,10 @@ namespace SplashMeads.Harmony
                 character.GetSEMan().RemoveStatusEffect(SplashMeads.barleyWineSplashHash);
 
                 if (ShouldSplashRefresh(character, SplashMeads.barleyWineHash, PluginConfig.mead1.duration.Value, true))
+                {
+                    ApplySkinnedMeshToFX(SplashMeads.Instance.prefabs.BarlyWineSplashFX, character);
                     character.GetSEMan().AddStatusEffect(SplashMeads.barleyWineSplashHash);
+                }
             }
 
             else if (effectHash == SplashMeads.frostResistSplashHash && character.GetSEMan().HaveStatusEffect(SplashMeads.frostResistSplashHash))
@@ -289,7 +229,10 @@ namespace SplashMeads.Harmony
                 character.GetSEMan().RemoveStatusEffect(SplashMeads.frostResistSplashHash);
 
                 if (ShouldSplashRefresh(character, SplashMeads.frostResistHash, PluginConfig.mead2.duration.Value, true))
+                {
+                    ApplySkinnedMeshToFX(SplashMeads.Instance.prefabs.FrostResistSplashFX, character);
                     character.GetSEMan().AddStatusEffect(SplashMeads.frostResistSplashHash);
+                }
             }
 
             else if (effectHash == SplashMeads.poisonResistSplashHash && character.GetSEMan().HaveStatusEffect(SplashMeads.poisonResistSplashHash))
@@ -297,7 +240,10 @@ namespace SplashMeads.Harmony
                 character.GetSEMan().RemoveStatusEffect(SplashMeads.poisonResistSplashHash);
 
                 if (ShouldSplashRefresh(character, SplashMeads.poisonResistHash, PluginConfig.mead3.duration.Value, true))
+                {
+                    ApplySkinnedMeshToFX(SplashMeads.Instance.prefabs.PoisonResistSplashFX, character);
                     character.GetSEMan().AddStatusEffect(SplashMeads.poisonResistSplashHash);
+                }
             }
 
             else if (effectHash == SplashMeads.ratatoskSplashHash && character.GetSEMan().HaveStatusEffect(SplashMeads.ratatoskSplashHash))
@@ -305,24 +251,22 @@ namespace SplashMeads.Harmony
                 character.GetSEMan().RemoveStatusEffect(SplashMeads.ratatoskSplashHash);
 
                 if (ShouldSplashRefresh(character, SplashMeads.ratatoskHash, PluginConfig.mead4.duration.Value, true))
+                {
+                    ApplySkinnedMeshToFX(SplashMeads.Instance.prefabs.RatatoskSplashFX, character);
                     character.GetSEMan().AddStatusEffect(SplashMeads.ratatoskSplashHash);
+                }
             }
-        }
 
-        private static void RemoveSplashWhenConsumeNormal(Player player, int effectHash)
-        {
-            Jotunn.Logger.LogWarning("effectHash: " + effectHash);
-            if (effectHash == SplashMeads.barleyWineHash && player.GetSEMan().HaveStatusEffect(SplashMeads.barleyWineSplashHash))
-                player.GetSEMan().RemoveStatusEffect(SplashMeads.barleyWineSplashHash);
+            else if (effectHash == SplashMeads.vananidirSplashHash && character.GetSEMan().HaveStatusEffect(SplashMeads.vananidirSplashHash))
+            {
+                character.GetSEMan().RemoveStatusEffect(SplashMeads.vananidirSplashHash);
 
-            else if (effectHash == SplashMeads.frostResistHash && player.GetSEMan().HaveStatusEffect(SplashMeads.frostResistSplashHash))
-                player.GetSEMan().RemoveStatusEffect(SplashMeads.frostResistSplashHash);
-
-            else if (effectHash == SplashMeads.poisonResistHash && player.GetSEMan().HaveStatusEffect(SplashMeads.poisonResistSplashHash))
-                player.GetSEMan().RemoveStatusEffect(SplashMeads.poisonResistSplashHash);
-
-            else if (effectHash == SplashMeads.ratatoskHash && player.GetSEMan().HaveStatusEffect(SplashMeads.ratatoskSplashHash))
-                player.GetSEMan().RemoveStatusEffect(SplashMeads.ratatoskSplashHash);
+                if (ShouldSplashRefresh(character, SplashMeads.vananidirHash, PluginConfig.mead5.duration.Value, true))
+                {
+                    ApplySkinnedMeshToFX(SplashMeads.Instance.prefabs.VananidirSplashFX, character);
+                    character.GetSEMan().AddStatusEffect(SplashMeads.vananidirSplashHash);
+                }
+            }
         }
 
         private static bool ShouldSplashRefresh(Character character, int originalEffectHash, int splashDuration, bool removeOriginal = false)
@@ -343,17 +287,107 @@ namespace SplashMeads.Harmony
             return false;
         }
 
-        private static IconPositionResult CalculatePosition(float valueX, float valueY)
+        private static void ApplySkinnedMeshToFX(GameObject prefab, Character character)
         {
-            float x = valueX + 35;
-            float y = valueY;
+            if (!PluginConfig.showParticles.Value)
+                return;
+
+            SkinnedMeshRenderer[] renderers = character.gameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
+            SkinnedMeshRenderer skinnedMesh = GetBodyRenderer(renderers);
+
+            if (skinnedMesh == null)
+                return;
+
+            Transform particlesTrans = prefab.transform.Find("lingering_effects/particles");
+
+            if (particlesTrans == null)
+                throw new Exception("particlesTrans is null");
+
+            if (character.IsPlayer() && !PluginConfig.showParticlesOnPlayers.Value)
+            {
+                particlesTrans.gameObject.SetActive(false);
+                return;
+            }
+
+            particlesTrans.gameObject.SetActive(true);
+            ParticleSystem particleSystem = particlesTrans.GetComponent<ParticleSystem>();
+            ParticleSystem.ShapeModule shape = particleSystem.shape;
+            shape.skinnedMeshRenderer = skinnedMesh;
+        }
+
+        private static SkinnedMeshRenderer GetBodyRenderer(SkinnedMeshRenderer[] renderers)
+        {
+            // Make this list configurable
+            List<string> allowedNames = new List<string>()
+            {
+                "poly art boar",
+                "body",
+                "m",
+                "lavaneck.001",
+            };
+
+            if (renderers.Length == 1)
+                return renderers[0];
+
+            foreach (SkinnedMeshRenderer renderer in renderers)
+            {
+                if (allowedNames.Contains(renderer.name.ToLower()))
+                    return renderer;
+            }
+
+            return null;
+        }
+
+        private static void RemoveSplashWhenConsumeNormal(Player player, int effectHash)
+        {
+            if (effectHash == SplashMeads.barleyWineHash && player.GetSEMan().HaveStatusEffect(SplashMeads.barleyWineSplashHash))
+                player.GetSEMan().RemoveStatusEffect(SplashMeads.barleyWineSplashHash);
+
+            else if (effectHash == SplashMeads.frostResistHash && player.GetSEMan().HaveStatusEffect(SplashMeads.frostResistSplashHash))
+                player.GetSEMan().RemoveStatusEffect(SplashMeads.frostResistSplashHash);
+
+            else if (effectHash == SplashMeads.poisonResistHash && player.GetSEMan().HaveStatusEffect(SplashMeads.poisonResistSplashHash))
+                player.GetSEMan().RemoveStatusEffect(SplashMeads.poisonResistSplashHash);
+
+            else if (effectHash == SplashMeads.ratatoskHash && player.GetSEMan().HaveStatusEffect(SplashMeads.ratatoskSplashHash))
+                player.GetSEMan().RemoveStatusEffect(SplashMeads.ratatoskSplashHash);
+
+            else if (effectHash == SplashMeads.vananidirHash && player.GetSEMan().HaveStatusEffect(SplashMeads.vananidirSplashHash))
+                player.GetSEMan().RemoveStatusEffect(SplashMeads.vananidirSplashHash);
+        }
+
+        private static IconPosition UpdateHudIcon(Character character, RectTransform icon, int splashHash, IconPosition iconPos)
+        {
+            if (!PluginConfig.showHudIcons.Value)
+            {
+                icon.gameObject.SetActive(false);
+                return iconPos;
+            }
+
+            if (character.GetSEMan().HaveStatusEffect(splashHash))
+            {
+                icon.gameObject.SetActive(true);
+                icon.anchoredPosition = new Vector2(iconPos.x, iconPos.y);
+                return CalcIconPos(iconPos);
+            }
+            else
+            {
+                icon.gameObject.SetActive(false);
+                return iconPos;
+            }
+        }
+
+        private static IconPosition CalcIconPos(IconPosition value)
+        {
+            float x = value.x + 35;
+            float y = value.y;
 
             if (x > 35) {
                 x = -35;
-                y = valueY + -30;
+                y = value.y + -30;
             }
 
-            return new IconPositionResult(x, y);
+            return new IconPosition(x, y);
         }
     }
 }

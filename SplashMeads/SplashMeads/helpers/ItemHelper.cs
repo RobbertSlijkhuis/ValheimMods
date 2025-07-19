@@ -29,7 +29,7 @@ namespace SplashMeads.Helpers
                     itemConfig.Requirements = requirements;
 
                 
-                UpdateHelper.UpdateItemDrop(prefab, new UpdateItemDropOptions()
+                UpdateHelper.UpdateItemData(prefab, new UpdateItemDataOptions()
                 {
                     weight = config.weight.Value,
                     maxStackSize = config.maxStackSize.Value,

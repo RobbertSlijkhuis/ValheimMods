@@ -50,7 +50,7 @@ namespace SplashMeads.Configs
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             name.SettingChanged += (obj, attr) =>
             {
-                UpdateHelper.UpdateItemDrop(options.prefab, new UpdateItemDropOptions()
+                UpdateHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
                 {
                     name = name.Value,
                 });
@@ -61,7 +61,7 @@ namespace SplashMeads.Configs
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             description.SettingChanged += (obj, attr) =>
             {
-                UpdateHelper.UpdateItemDrop(options.prefab, new UpdateItemDropOptions()
+                UpdateHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
                 {
                     description = description.Value,
                 });
@@ -125,7 +125,7 @@ namespace SplashMeads.Configs
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             weight.SettingChanged += (obj, attr) =>
             {
-                UpdateHelper.UpdateItemDrop(options.prefab, new UpdateItemDropOptions()
+                UpdateHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
                 {
                     weight = weight.Value,
                 });
@@ -137,7 +137,7 @@ namespace SplashMeads.Configs
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             maxStackSize.SettingChanged += (obj, attr) =>
             {
-                UpdateHelper.UpdateItemDrop(options.prefab, new UpdateItemDropOptions()
+                UpdateHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
                 {
                     maxStackSize = maxStackSize.Value,
                 });

@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 4203493274
+CRC: 941387735
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 3020b20f9a687d3210f402d68bfd7b38
+    Hash: a836e5fd79b2cea885d19eb954f1fa1c
   TypeTreeHash:
     serializedVersion: 2
     Hash: 401ca3b2fc2c40c9830b992a4b18a826
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 3020b20f9a687d3210f402d68bfd7b38
+    Hash: a836e5fd79b2cea885d19eb954f1fa1c
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -100,20 +100,25 @@ Assets:
 - Assets/Custom/PrefabInstance/BarlyWhine/barlywine_projectile_SM.prefab
 - Assets/Custom/PrefabInstance/BarlyWhine/SM_SplashBarleyWine.prefab
 - Assets/Custom/PrefabInstance/FrostResist/frostresist_explosion_SM.prefab
+- Assets/Custom/PrefabInstance/Vananidir/vananidir_explosion_SM.prefab
 - Assets/Custom/PrefabInstance/FrostResist/fx_Potion_frostresist_SM.prefab
 - Assets/Custom/PrefabInstance/PoisonResist/poisonresist_explosion_SM.prefab
 - Assets/Custom/Monobehaviour/Potion_frostresist_splash_SM.asset
 - Assets/Custom/PrefabInstance/PoisonResist/poisonresist_projectile_SM.prefab
 - Assets/Custom/PrefabInstance/BarlyWhine/barlywine_explosion_SM.prefab
+- Assets/Custom/PrefabInstance/Vananidir/fx_Potion_vananidir_SM.prefab
+- Assets/Custom/PrefabInstance/Vananidir/vananidir_projectile_SM.prefab
 - Assets/Custom/PrefabInstance/BarlyWhine/fx_Potion_fireresist_SM.prefab
 - Assets/Custom/PrefabInstance/Ratatosk/ratatosk_explosion_SM.prefab
 - Assets/Custom/PrefabInstance/Ratatosk/SM_SplashRatatosk.prefab
 - Assets/Custom/PrefabInstance/PoisonResist/SM_SplashPoisonResist.prefab
 - Assets/Custom/PrefabInstance/FrostResist/SM_SplashFrostResist.prefab
+- Assets/Custom/Monobehaviour/Potion_swimmer_splash_SM.asset
+- Assets/Custom/PrefabInstance/Vananidir/SM_SplashVananidir.prefab
 - Assets/Custom/PrefabInstance/EnemyHud_SM.prefab
 - Assets/Custom/PrefabInstance/FrostResist/frostresist_projectile_SM.prefab
 - Assets/Custom/PrefabInstance/Ratatosk/ratatosk_projectile_SM.prefab
-- Assets/Custom/PrefabInstance/Ratatosk/fx_Potion_Ratatosk_SM.prefab
+- Assets/Custom/PrefabInstance/Ratatosk/fx_Potion_ratatosk_SM.prefab
 - Assets/Custom/Monobehaviour/Potion_barleywine_splash_SM.asset
 - Assets/Custom/PrefabInstance/PoisonResist/fx_Potion_poisonresist_SM.prefab
 - Assets/Custom/Monobehaviour/Potion_hasty_splash_SM.asset
