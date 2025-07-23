@@ -1,0 +1,50 @@
+ManifestFileVersion: 0
+CRC: 2871312712
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 3d1d5d1b1e184f06c73fe281fc707eaf
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 6baca1a9e6031ca0c1d7727bd23f5782
+  IncrementalBuildHash:
+    serializedVersion: 2
+    Hash: 3d1d5d1b1e184f06c73fe281fc707eaf
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 90
+  Script: {instanceID: 0}
+- Class: 95
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 1137906148, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 54271039, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 137
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers:
+- AssemblyName: assembly_valheim
+  ClassName: CharacterAnimEvent/Foot
+Assets:
+- Assets/Custom/Material/Skeleton_LoyalBones_PAS.mat
+- Assets/Custom/PrefabInstance/skeleton_base_PAS.prefab
+- Assets/Custom/Mesh/Skeleton_PAS.asset
+Dependencies: []
