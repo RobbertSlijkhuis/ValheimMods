@@ -107,15 +107,28 @@ namespace SplashMeads.Helpers
                 fxPrefab.GetComponent<TimedDestruction>().m_timeout = duration;
                 statusEffect.m_ttl = duration;
 
-                //ParticleSystem.MainModule flareMain = fxPrefab.transform.Find("lingering_effects/flare").gameObject.GetComponent<ParticleSystem>().main;
-                //ParticleSystem.MainModule flakesMain = fxPrefab.transform.Find("lingering_effects/flakes_up").gameObject.GetComponent<ParticleSystem>().main;
-                ParticleSystem.MainModule particlesMain = fxPrefab.transform.Find("lingering_effects/particles").gameObject.GetComponent<ParticleSystem>().main;
+                Transform flareTrans = fxPrefab.transform.Find("lingering_effects/flare");
+                Transform flakeTrans = fxPrefab.transform.Find("lingering_effects/flakes_up");
+                Transform particlesTrans = fxPrefab.transform.Find("lingering_effects/particles");
 
-                //flareMain.duration = duration;
-                //flareMain.startLifetime = duration;
-                //flakesMain.duration = duration - 3;
-                particlesMain.duration = duration - 3;
-                
+                if (flareTrans != null)
+                {
+                    ParticleSystem.MainModule flareMain = flareTrans.gameObject.GetComponent<ParticleSystem>().main;
+                    flareMain.duration = duration;
+                    flareMain.startLifetime = duration;
+                }
+
+                if (flakeTrans != null)
+                {
+                    ParticleSystem.MainModule flakesMain = flakeTrans.gameObject.GetComponent<ParticleSystem>().main;
+                    flakesMain.duration = duration - 3;
+                }
+
+                if (particlesTrans != null)
+                {
+                    ParticleSystem.MainModule particlesMain = particlesTrans.gameObject.GetComponent<ParticleSystem>().main;
+                    particlesMain.duration = duration - 3;
+                }
             }
             catch (Exception e)
             {

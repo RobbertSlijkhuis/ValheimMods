@@ -253,6 +253,21 @@ namespace SplashMeads.Harmony
                 if (ShouldSplashRefresh(character, SplashMeads.ratatoskHash, PluginConfig.mead4.duration.Value, true))
                 {
                     ApplySkinnedMeshToFX(SplashMeads.Instance.prefabs.RatatoskSplashFX, character);
+
+                    if (character.gameObject.name == "Lox(Clone)")
+                    {
+                        GameObject particles = SplashMeads.Instance.prefabs.RatatoskSplashFX.transform.Find("lingering_effects/particles").gameObject;
+                        GameObject particlesLox = SplashMeads.Instance.prefabs.RatatoskSplashFX.transform.Find("lingering_effects/particles_lox").gameObject;
+                        particles.SetActive(false);
+                        particlesLox.SetActive(true);
+
+                        character.GetSEMan().AddStatusEffect(SplashMeads.ratatoskSplashHash);
+
+                        particles.SetActive(true);
+                        particlesLox.SetActive(false);
+                        return;
+                    }
+
                     character.GetSEMan().AddStatusEffect(SplashMeads.ratatoskSplashHash);
                 }
             }
@@ -298,18 +313,25 @@ namespace SplashMeads.Harmony
             if (skinnedMesh == null)
                 return;
 
+            Transform flareTrans = prefab.transform.Find("lingering_effects/flare");
+            Transform flakesTrans = prefab.transform.Find("lingering_effects/flakes_up");
             Transform particlesTrans = prefab.transform.Find("lingering_effects/particles");
-
-            if (particlesTrans == null)
-                throw new Exception("particlesTrans is null");
 
             if (character.IsPlayer() && !PluginConfig.showParticlesOnPlayers.Value)
             {
-                particlesTrans.gameObject.SetActive(false);
+                flareTrans?.gameObject.SetActive(false);
+                flakesTrans?.gameObject.SetActive(false);
+                particlesTrans?.gameObject.SetActive(false);
                 return;
             }
 
-            particlesTrans.gameObject.SetActive(true);
+            flareTrans?.gameObject.SetActive(true);
+            flakesTrans?.gameObject.SetActive(true);
+            particlesTrans?.gameObject.SetActive(true);
+
+            if (particlesTrans == null)
+                return;
+
             ParticleSystem particleSystem = particlesTrans.GetComponent<ParticleSystem>();
             ParticleSystem.ShapeModule shape = particleSystem.shape;
             shape.skinnedMeshRenderer = skinnedMesh;

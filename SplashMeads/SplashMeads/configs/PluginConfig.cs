@@ -47,7 +47,7 @@ namespace SplashMeads.Configs
         {
             showParticles = SplashMeads.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Show particles"), true,
                new ConfigDescription("Show particles when tames/players are affected by a splash mead", null,
-               new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 3 }));
+               new ConfigurationManagerAttributes { IsAdminOnly = false, Order = 3 }));
             showParticles.SettingChanged += (obj, attr) =>
             {
                 UpdateHelper.UpdateFXEnabled(SplashMeads.Instance.prefabs.BarlyWineSplashFX, showParticles.Value);
@@ -59,11 +59,11 @@ namespace SplashMeads.Configs
 
             showParticlesOnPlayers = SplashMeads.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Show particles on players"), true,
                new ConfigDescription("Show particles on players affected by a splash mead", null,
-               new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 2 }));
+               new ConfigurationManagerAttributes { IsAdminOnly = false, Order = 2 }));
 
             showHudIcons = SplashMeads.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Show hud icons"), true,
                new ConfigDescription("Show splash mead icons underneath healthbar of tames", null,
-               new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 1 }));
+               new ConfigurationManagerAttributes { IsAdminOnly = false, Order = 1 }));
         }
 
         public static void InitMeadsConfig()
