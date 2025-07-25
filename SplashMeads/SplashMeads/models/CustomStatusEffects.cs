@@ -7,5 +7,6 @@
         public StatusEffect PoisonResistSplash;
         public StatusEffect RatatoskSplash;
         public StatusEffect VananidirSplash;
+        public StatusEffect AntiStingSplash;
     }
 }

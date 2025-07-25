@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 4278612002
+CRC: 3208845995
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 28d0710c95b624600cecc714557d1eed
+    Hash: 995aa162aafda3ec2a1e714670ce475d
   TypeTreeHash:
     serializedVersion: 2
     Hash: b60f8c6e82899f48adbb14e13846de63
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 28d0710c95b624600cecc714557d1eed
+    Hash: 995aa162aafda3ec2a1e714670ce475d
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -102,10 +102,12 @@ Assets:
 - Assets/Custom/PrefabInstance/FrostResist/frostresist_explosion_SM.prefab
 - Assets/Custom/PrefabInstance/Vananidir/vananidir_explosion_SM.prefab
 - Assets/Custom/PrefabInstance/FrostResist/fx_Potion_frostresist_SM.prefab
+- Assets/Custom/PrefabInstance/AntiSting/antisting_explosion_SM.prefab
 - Assets/Custom/PrefabInstance/PoisonResist/poisonresist_explosion_SM.prefab
 - Assets/Custom/Monobehaviour/Potion_frostresist_splash_SM.asset
 - Assets/Custom/PrefabInstance/PoisonResist/poisonresist_projectile_SM.prefab
 - Assets/Custom/PrefabInstance/BarlyWhine/barlywine_explosion_SM.prefab
+- Assets/Custom/Monobehaviour/Potion_antisting_SM.asset
 - Assets/Custom/PrefabInstance/Vananidir/fx_Potion_vananidir_SM.prefab
 - Assets/Custom/PrefabInstance/Vananidir/vananidir_projectile_SM.prefab
 - Assets/Custom/PrefabInstance/BarlyWhine/fx_Potion_fireresist_SM.prefab
@@ -117,9 +119,12 @@ Assets:
 - Assets/Custom/PrefabInstance/Vananidir/SM_SplashVananidir.prefab
 - Assets/Custom/PrefabInstance/EnemyHud_SM.prefab
 - Assets/Custom/PrefabInstance/FrostResist/frostresist_projectile_SM.prefab
+- Assets/Custom/PrefabInstance/AntiSting/fx_Potion_antisting_SM.prefab
 - Assets/Custom/PrefabInstance/Ratatosk/ratatosk_projectile_SM.prefab
 - Assets/Custom/PrefabInstance/Ratatosk/fx_Potion_ratatosk_SM.prefab
 - Assets/Custom/Monobehaviour/Potion_barleywine_splash_SM.asset
+- Assets/Custom/PrefabInstance/AntiSting/antisting_projectile_SM.prefab
+- Assets/Custom/PrefabInstance/AntiSting/SM_SplashAntiSting.prefab
 - Assets/Custom/PrefabInstance/PoisonResist/fx_Potion_poisonresist_SM.prefab
 - Assets/Custom/Monobehaviour/Potion_hasty_splash_SM.asset
 Dependencies: []

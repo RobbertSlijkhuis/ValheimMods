@@ -23,7 +23,7 @@ namespace SplashMeads.Harmony
 
                 RefreshSplash(__instance, hit.m_statusEffectHash);
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 Jotunn.Logger.LogError("Something went wrong in ApplyDamage_Postfix: " + e);
             }
@@ -70,10 +70,41 @@ namespace SplashMeads.Harmony
                 SplashMeads.Instance.prefabs.PoisonResistSplashHudIcon.transform.SetParent(__instance.m_baseHud.transform, false);
                 SplashMeads.Instance.prefabs.RatatoskSplashHudIcon.transform.SetParent(__instance.m_baseHud.transform, false);
                 SplashMeads.Instance.prefabs.VananidirSplashHudIcon.transform.SetParent(__instance.m_baseHud.transform, false);
+                SplashMeads.Instance.prefabs.AntiStingSplashHudIcon.transform.SetParent(__instance.m_baseHud.transform, false);
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 Jotunn.Logger.LogError("Something went wrong in AwakeEnemyHud_Postfix: " + e);
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(MonsterAI), "PheromoneFleeCheck")]
+        public static void PheromoneFleeCheck_Postfix(ref MonsterAI __instance, ref bool __result,  Character target)
+        {
+            try
+            {
+                if (__instance == null)
+                    return;
+
+                foreach (StatusEffect statusEffect in target.GetSEMan().GetStatusEffects())
+                {
+                    if (statusEffect is SE_Stats sE_Stats && sE_Stats.m_pheromoneFlee)
+                    {
+                        Character component = sE_Stats.m_pheromoneTarget.GetComponent<Character>();
+                        if ((object)component != null && component.m_name == __instance.m_character.m_name)
+                        {
+                            __result = true;
+                            return;
+                        }
+                    }
+                }
+
+                __result = false;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in PheromoneFleeCheck_Postfix: " + e);
             }
         }
 
@@ -142,6 +173,7 @@ namespace SplashMeads.Harmony
                                 RectTransform iconPoison = (RectTransform)value.m_gui.transform.Find("SplashPoisonResist");
                                 RectTransform iconRatatosk = (RectTransform)value.m_gui.transform.Find("SplashRatatosk");
                                 RectTransform iconVananidir = (RectTransform)value.m_gui.transform.Find("SplashVananidir");
+                                RectTransform iconAntiSting = (RectTransform)value.m_gui.transform.Find("SplashAntiSting");
                                 IconPosition iconPos = new IconPosition(-35, level == 1 ? -15 : -30);
 
                                 iconPos = UpdateHudIcon(value.m_character, iconBarley, SplashMeads.barleyWineSplashHash, iconPos);
@@ -149,6 +181,7 @@ namespace SplashMeads.Harmony
                                 iconPos = UpdateHudIcon(value.m_character, iconPoison, SplashMeads.poisonResistSplashHash, iconPos);
                                 iconPos = UpdateHudIcon(value.m_character, iconRatatosk, SplashMeads.ratatoskSplashHash, iconPos);
                                 iconPos = UpdateHudIcon(value.m_character, iconVananidir, SplashMeads.vananidirSplashHash, iconPos);
+                                iconPos = UpdateHudIcon(value.m_character, iconAntiSting, SplashMeads.antiStingSplashHash, iconPos);
                             }
                         }
                     }
@@ -282,6 +315,32 @@ namespace SplashMeads.Harmony
                     character.GetSEMan().AddStatusEffect(SplashMeads.vananidirSplashHash);
                 }
             }
+
+            else if (effectHash == SplashMeads.antiStingSplashHash && character.GetSEMan().HaveStatusEffect(SplashMeads.antiStingSplashHash))
+            {
+                character.GetSEMan().RemoveStatusEffect(SplashMeads.antiStingSplashHash);
+
+                if (ShouldSplashRefresh(character, SplashMeads.antiStingHash, PluginConfig.mead6.duration.Value, true))
+                {
+                    ApplySkinnedMeshToFX(SplashMeads.Instance.prefabs.AntiStingSplashFX, character);
+
+                    if (character.gameObject.name == "Lox(Clone)")
+                    {
+                        GameObject particles = SplashMeads.Instance.prefabs.RatatoskSplashFX.transform.Find("lingering_effects/particles").gameObject;
+                        GameObject particlesLox = SplashMeads.Instance.prefabs.RatatoskSplashFX.transform.Find("lingering_effects/particles_lox").gameObject;
+                        particles.SetActive(false);
+                        particlesLox.SetActive(true);
+
+                        character.GetSEMan().AddStatusEffect(SplashMeads.antiStingSplashHash);
+
+                        particles.SetActive(true);
+                        particlesLox.SetActive(false);
+                        return;
+                    }
+
+                    character.GetSEMan().AddStatusEffect(SplashMeads.antiStingSplashHash);
+                }
+            }
         }
 
         private static bool ShouldSplashRefresh(Character character, int originalEffectHash, int splashDuration, bool removeOriginal = false)
@@ -376,6 +435,9 @@ namespace SplashMeads.Harmony
 
             else if (effectHash == SplashMeads.vananidirHash && player.GetSEMan().HaveStatusEffect(SplashMeads.vananidirSplashHash))
                 player.GetSEMan().RemoveStatusEffect(SplashMeads.vananidirSplashHash);
+
+            else if (effectHash == SplashMeads.antiStingHash && player.GetSEMan().HaveStatusEffect(SplashMeads.antiStingSplashHash))
+                player.GetSEMan().RemoveStatusEffect(SplashMeads.antiStingSplashHash);
         }
 
         private static IconPosition UpdateHudIcon(Character character, RectTransform icon, int splashHash, IconPosition iconPos)

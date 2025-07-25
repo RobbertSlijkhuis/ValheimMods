@@ -33,5 +33,11 @@ namespace SplashMeads.Models
         public GameObject VananidirSplashExplosion;
         public GameObject VananidirSplashFX;
         public GameObject VananidirSplashHudIcon;
+
+        public GameObject AntiStingSplash;
+        public GameObject AntiStingSplashProjectile;
+        public GameObject AntiStingSplashExplosion;
+        public GameObject AntiStingSplashFX;
+        public GameObject AntiStingSplashHudIcon;
     }
 }

@@ -97,6 +97,10 @@ namespace SplashMeads.Helpers
                         fxPrefab = SplashMeads.Instance.prefabs.VananidirSplashFX;
                         statusEffect = SplashMeads.Instance.effects.VananidirSplash;
                         break;
+                    case var value when value == SplashMeads.Instance.prefabs.AntiStingSplash.name:
+                        fxPrefab = SplashMeads.Instance.prefabs.AntiStingSplashFX;
+                        statusEffect = SplashMeads.Instance.effects.AntiStingSplash;
+                        break;
                 }
 
                 if (fxPrefab == null || statusEffect == null)
@@ -156,6 +160,9 @@ namespace SplashMeads.Helpers
                         break;
                     case var value when value == SplashMeads.Instance.prefabs.VananidirSplash.name:
                         explPrefab = SplashMeads.Instance.prefabs.VananidirSplashExplosion;
+                        break;
+                    case var value when value == SplashMeads.Instance.prefabs.AntiStingSplash.name:
+                        explPrefab = SplashMeads.Instance.prefabs.AntiStingSplashExplosion;
                         break;
                 }
 

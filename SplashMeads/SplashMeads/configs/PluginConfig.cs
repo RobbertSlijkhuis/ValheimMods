@@ -31,6 +31,10 @@ namespace SplashMeads.Configs
         private static string mead5Recipe = "MeadSwimmer:6, LeatherScraps:3, Resin:2";
         public static SplashMeadConfig mead5 = new SplashMeadConfig();
 
+        private static string mead6Name = "Splash Anti-Sting Mead";
+        private static string mead6Recipe = "MeadBugRepellent:6, LeatherScraps:3, Resin:2";
+        public static SplashMeadConfig mead6 = new SplashMeadConfig();
+
         // Other
         public static string generalSectionname = "General";
         public static ConfigEntry<bool> showParticles;
@@ -55,6 +59,7 @@ namespace SplashMeads.Configs
                 UpdateHelper.UpdateFXEnabled(SplashMeads.Instance.prefabs.PoisonResistSplashFX, showParticles.Value);
                 UpdateHelper.UpdateFXEnabled(SplashMeads.Instance.prefabs.RatatoskSplashFX, showParticles.Value);
                 UpdateHelper.UpdateFXEnabled(SplashMeads.Instance.prefabs.VananidirSplashFX, showParticles.Value);
+                UpdateHelper.UpdateFXEnabled(SplashMeads.Instance.prefabs.AntiStingSplashFX, showParticles.Value);
             };
 
             showParticlesOnPlayers = SplashMeads.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Show particles on players"), true,
@@ -108,12 +113,21 @@ namespace SplashMeads.Configs
 
                 SplashMeadConfigOptions options5 = new SplashMeadConfigOptions(SplashMeads.Instance.prefabs.VananidirSplash, mead5Name, mead5Recipe)
                 {
-                    description = "Applies " + mead4Name.Replace("Splash ", "") + " to friendlies hit or in the splash radius",
+                    description = "Applies " + mead5Name.Replace("Splash ", "") + " to friendlies hit or in the splash radius",
                     craftingStation = CraftingStationType.Workbench,
                     minStationLevel = 3,
                     recipeAmount = 2,
                 };
                 mead5.GenerateConfig(options5);
+
+                SplashMeadConfigOptions options6 = new SplashMeadConfigOptions(SplashMeads.Instance.prefabs.AntiStingSplash, mead6Name, mead6Recipe)
+                {
+                    description = "Applies " + mead6Name.Replace("Splash ", "") + " to friendlies hit or in the splash radius",
+                    craftingStation = CraftingStationType.Workbench,
+                    minStationLevel = 3,
+                    recipeAmount = 2,
+                };
+                mead6.GenerateConfig(options6);
             }
             catch (Exception e)
             {
