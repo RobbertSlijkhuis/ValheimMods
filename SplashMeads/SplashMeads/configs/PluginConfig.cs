@@ -28,7 +28,7 @@ namespace SplashMeads.Configs
         public static SplashMeadConfig mead4 = new SplashMeadConfig();
 
         private static string mead5Name = "Splash Vananidir Mead";
-        private static string mead5Recipe = "MeadHasty:6, LeatherScraps:3, Resin:2";
+        private static string mead5Recipe = "MeadSwimmer:6, LeatherScraps:3, Resin:2";
         public static SplashMeadConfig mead5 = new SplashMeadConfig();
 
         // Other

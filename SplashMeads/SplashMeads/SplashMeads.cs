@@ -12,12 +12,12 @@ namespace SplashMeads
 {
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
-    //[NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
+    [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     internal class SplashMeads : BaseUnityPlugin
     {
         public const string PluginGUID = "DeathWizsh.SplashMeads";
         public const string PluginName = "SplashMeads";
-        public const string PluginVersion = "1.0.0";
+        public const string PluginVersion = "1.0.3";
         public static SplashMeads Instance;
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
 
@@ -61,7 +61,6 @@ namespace SplashMeads
 
             PrefabManager.OnVanillaPrefabsAvailable -= AddStuff;
         }
-
 
         private void InitStatusEffects()
         {

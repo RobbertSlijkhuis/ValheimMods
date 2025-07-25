@@ -49,8 +49,6 @@ namespace SplashMeads.Helpers
             if (items == null)
                 throw new Exception("Could not find items from Inventory");
 
-            Jotunn.Logger.LogWarning("Items to update: "+ items.Count);
-
             foreach (ItemData item in items)
             {
                 UpdateItemData(item, options);

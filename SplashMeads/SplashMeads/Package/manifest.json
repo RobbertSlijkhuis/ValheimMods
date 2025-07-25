@@ -1,7 +1,7 @@
 {
     "name": "SplashMeads",
-    "description": "A small mod that adds splash variants of the fire, frost and poison resistance meads",
-    "version_number": "1.0.1",
+    "description": "A mod that adds (throwable) splash variants of the resistance (fire, frost, poison), Ratatosk and Vananidir mead",
+    "version_number": "1.0.3",
     "dependencies": [
         "ValheimModding-Jotunn-2.24.3"
     ],
