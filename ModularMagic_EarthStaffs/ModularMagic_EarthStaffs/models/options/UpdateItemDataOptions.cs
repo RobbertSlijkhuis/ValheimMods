@@ -29,8 +29,10 @@ namespace ModularMagic_EarthStaffs.Models
         public int? maxQuality = null;
         public float? movementModifier = null;
         public float? blockPower = null;
+        public float? timedBlockBonus = null;
         public float? deflectionForce = null;
         public float? attackForce = null;
         public float? backstabBonus = null;
+        public Skills.SkillType? specialSkill = null;
     }
 }

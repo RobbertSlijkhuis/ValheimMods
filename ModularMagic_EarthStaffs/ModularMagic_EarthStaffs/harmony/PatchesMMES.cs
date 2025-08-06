@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using ModularMagic_EarthStaffs.Configs;
+using ModularMagic_EarthStaffs.Helpers;
 using System;
 using UnityEngine;
 using static ItemDrop;
@@ -9,6 +10,55 @@ namespace ModularMagic_EarthStaffs.Harmony
     [HarmonyPatch]
     public class PatchesMMES
     {
+        [HarmonyPatch(typeof(Player), "RaiseSkill")]
+        [HarmonyPrefix]
+        public static void RaiseSkill_Postfix(Player __instance, Skills.SkillType skill, float value = 1f)
+        {
+            try
+            {
+                if (__instance == null || skill != Skills.SkillType.ElementalMagic)
+                    return;
+
+                ItemData itemData = __instance.GetCurrentWeapon();
+
+                if (itemData == null || (
+                    itemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.staffEarth0.name && 
+                    itemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.staffEarth1.name && 
+                    itemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.staffEarth2.name &&
+                    itemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.staffEarth3.name
+                ))
+                    return;
+
+                __instance.RaiseSkill(ModularMagic_EarthStaffs.customSkill, itemData.m_shared.m_attack.m_raiseSkillAmount);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in RaiseSkill_Postfix: " + e);
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Humanoid), "EquipItem")]
+        public static void EquipItem_Postfix(ref Humanoid __instance, ItemData item)
+        {
+            try
+            {
+                if (__instance == null || !__instance.IsPlayer() || item == null)
+                    return;
+
+                string imbuementsString = item.m_customData.GetValueSafe(ModularMagic_EarthStaffs.imbuementDataKey);
+
+                if (imbuementsString == null)
+                    return;
+
+                ImbuementHelper.ApplyImbuements(item, imbuementsString);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not update item/set effects in EquipItem_Postfix: " + e);
+            }
+        }
+
         [HarmonyPatch(typeof(Attack), "Start")]
         [HarmonyPrefix]
         public static bool AttackStart_Prefix(Attack __instance, Humanoid character)
@@ -18,7 +68,7 @@ namespace ModularMagic_EarthStaffs.Harmony
                 if (__instance == null || character == null)
                     return true;
 
-                ItemDrop.ItemData weapon = character.GetCurrentWeapon();
+                ItemData weapon = character.GetCurrentWeapon();
 
                 if (weapon == null || weapon.m_dropPrefab == null)
                     return true;
