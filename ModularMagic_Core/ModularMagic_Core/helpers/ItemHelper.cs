@@ -2,9 +2,6 @@
 using Jotunn.Entities;
 using Jotunn.Managers;
 using ModularMagic_Core.Configs;
-using ModularMagic_Core.Helpers;
-using ModularMagic_Core.Models;
-using ModularMagic_Core.Types;
 using UnityEngine;
 
 namespace ModularMagic_Core.Helpers

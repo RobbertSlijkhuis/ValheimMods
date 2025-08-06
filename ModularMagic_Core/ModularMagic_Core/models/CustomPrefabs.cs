@@ -6,5 +6,6 @@ namespace ModularMagic_Core.Models
     {
         public GameObject EitrCrude;
         public GameObject EitrFine;
+        public GameObject ImbuementTable;
     }
 }

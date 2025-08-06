@@ -1,5 +1,6 @@
 ﻿using ModularMagic_Core.Configs;
 using ModularMagic_Core.Models;
+using ModularMagic_Core.Types;
 using System;
 
 namespace ModularMagic_Core.Configs
@@ -16,10 +17,15 @@ namespace ModularMagic_Core.Configs
         public static string material2Recipe = "Crystal:3, Coal:3";
         public static MaterialConfig fineEitr = new MaterialConfig();
 
+        private static string piece1Name = "Imbuement Table";
+        private static string piece1Recipe = "Stone:20";
+        public static BuildPieceConfig piece1 = new BuildPieceConfig();
+
         public static void Init()
         {
             InitCrudeEitrConfig();
             InitFineEitrConfig();
+            InitPiece1Config();
         }
 
         private static void InitCrudeEitrConfig()
@@ -54,6 +60,24 @@ namespace ModularMagic_Core.Configs
             catch (Exception error)
             {
                 Jotunn.Logger.LogError("Could not initialise Fine Eitr config: " + error);
+            }
+        }
+
+        public static void InitPiece1Config()
+        {
+            try
+            {
+                BuildPieceConfigOptions options = new BuildPieceConfigOptions(ModularMagic_Core.Instance.prefabs.ImbuementTable, piece1Name, piece1Recipe)
+                {
+                    description = "$piece_horizontal",
+                    craftingStation = CraftingStationType.Stonecutter,
+                    lightColorPreset = LightColorPresetType.Blue,
+                };
+                piece1.GenerateConfig(options);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + piece1Name + " config: " + e);
             }
         }
     }
