@@ -132,7 +132,7 @@ namespace PlayAsSkeleton.Components
         {
             Player player = Player.GetPlayer(PlayAsSkeleton.playerID);
             string data = PlayAsSkeleton.playerID + "," + isSkeleton + "," + skin + "," + canSwim;
-            player.m_customData[PlayAsSkeleton.playerDataKey] =  data;
+            player.m_customData[PlayAsSkeleton.playerDataKey] = data;
             Game.instance.GetPlayerProfile().SavePlayerData(player);
             Jotunn.Logger.LogWarning("CustomData is now: " + player.m_customData[PlayAsSkeleton.playerDataKey]);
         }
