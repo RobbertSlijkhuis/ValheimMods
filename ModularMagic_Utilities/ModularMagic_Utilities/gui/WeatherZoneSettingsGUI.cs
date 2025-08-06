@@ -21,7 +21,7 @@ namespace ModularMagic_Utilities.GUI
 
         public WeatherZoneSettingsGUI(UpdateWeatherZoneOptions currentValues)
         {
-            this.currentValues = currentValues;
+            SetCurrentValues(currentValues);
         }
 
         public void SetCurrentValues(UpdateWeatherZoneOptions currentValues)

@@ -58,6 +58,7 @@ namespace ModularMagic_Utilities.Components
             try
             {
                 netView = transform.parent.gameObject.GetComponent<ZNetView>();
+
                 if (netView != null && netView.GetZDO() != null)
                 {
                     // Transforms
