@@ -85,11 +85,11 @@ namespace ModularMagic_Armors.Harmony
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Humanoid), "EquipItem")]
-        public static void EquipItem_Postfix(ItemDrop.ItemData item)
+        public static void EquipItem_Postfix(ref Humanoid __instance, ItemDrop.ItemData item)
         {
             try
             {
-                if (!ModularMagic_Armors.Instance.gameIsReady || item == null)
+                if (!ModularMagic_Armors.Instance.gameIsReady || __instance == null || !__instance.IsPlayer() || item == null)
                     return;
 
                 CheckEquipment();
@@ -102,11 +102,11 @@ namespace ModularMagic_Armors.Harmony
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Humanoid), "UnequipItem")]
-        public static void UnequipItem_Postfix(ItemDrop.ItemData item)
+        public static void UnequipItem_Postfix(ref Humanoid __instance, ItemDrop.ItemData item)
         {
             try
             {
-                if (!ModularMagic_Armors.Instance.gameIsReady || item == null)
+                if (!ModularMagic_Armors.Instance.gameIsReady || __instance == null || !__instance.IsPlayer() || item == null)
                     return;
 
                 CheckEquipment();
