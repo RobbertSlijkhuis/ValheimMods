@@ -19,10 +19,14 @@ namespace ModularMagic_Core.Components
             m_imbuementTable.m_onItemAttach.AddListener(InitEmission);
             m_imbuementTable.m_onItemRemove.AddListener(ResetEmission);
             m_imbuementTable.m_onRuneActivation.AddListener(UpdateEmission);
+            m_imbuementTable.m_onSave.AddListener(UpdateEmission);
         }
 
         public string GetHoverText()
         {
+            if (m_imbuementTable.m_imbuements == null)
+                return "Need magical item to imbue";
+
             string canImbue = m_imbuementTable.CanImbue();
             string inputString = canImbue == CanImbueType.Yes ? "[<color=yellow>E</color>] " : "";
             string message = "";

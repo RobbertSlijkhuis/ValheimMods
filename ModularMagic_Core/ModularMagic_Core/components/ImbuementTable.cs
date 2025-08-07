@@ -22,6 +22,7 @@ namespace ModularMagic_Core.Components
         public UnityEvent m_onItemAttach = new UnityEvent();
         public UnityEvent m_onItemRemove = new UnityEvent();
         public UnityEvent m_onRuneActivation = new UnityEvent();
+        public UnityEvent m_onSave = new UnityEvent();
 
         private void Awake ()
         {
@@ -97,25 +98,18 @@ namespace ModularMagic_Core.Components
 
         public string CanImbue()
         {
-            if (Player.m_localPlayer == null)
-                return CanImbueType.Yes;
+            if (Player.m_localPlayer == null || m_imbuements == null)
+                return CanImbueType.No;
 
             Inventory inventory = Player.m_localPlayer.GetInventory();
             int materialInInventory = inventory.CountItems(m_imbuementMaterial);
             int totalMaterialRequired = CountMaterialRequired();
 
-            //Jotunn.Logger.LogWarning("=== CanImbue ===================================");
-            //Jotunn.Logger.LogWarning("materialInInventory: " + materialInInventory);
-
             if (materialInInventory == 0)
                 return CanImbueType.No;
 
-            Jotunn.Logger.LogWarning("Change?: " + m_imbued.All(item => item.enabled));
-
             if (totalMaterialRequired == 0 && m_imbued.All(item => item.enabled))
                 return CanImbueType.NoChange;
-
-            Jotunn.Logger.LogWarning("CanImbue: " + (materialInInventory >= totalMaterialRequired));
 
             if (materialInInventory >= totalMaterialRequired)
                 return CanImbueType.Yes;
@@ -125,6 +119,9 @@ namespace ModularMagic_Core.Components
 
         public int CountMaterialRequired()
         {
+            if (m_imbuements == null)
+                return 0;
+
             int totalMaterialRequired = 0;
 
             foreach (Imbuement imbuement in m_imbuements.FindAll(item => !item.isImbued))
@@ -152,6 +149,14 @@ namespace ModularMagic_Core.Components
                 m_itemData.m_customData[ModularMagic_Core.imbuementMMESDataKey] = imbuementsString;
                 SaveToZDO(m_itemData, netView.GetZDO());
                 Game.instance.GetPlayerProfile().SavePlayerData(Player.m_localPlayer);
+
+                foreach (Imbuement imbuement in m_imbuements.FindAll(item => item.enabled))
+                {
+                    imbuement.isImbued = true;
+                }
+
+                m_imbued = m_imbuements.FindAll(item => item.isImbued);
+                m_onSave.Invoke();
                 return true;
             }
             catch (Exception e)

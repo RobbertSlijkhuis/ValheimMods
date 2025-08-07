@@ -29,14 +29,16 @@ namespace ModularMagic_Core.components
         public void Init()
         {
             m_imbuementTable = transform.parent.parent.gameObject.GetComponent<ImbuementTable>();
+            m_imbuementTable.m_onSave.AddListener(UpdateEmission);
+
             m_origin = transform.localPosition;
             transform.localRotation = TransformHelper.generateRotation(new Vector3(Random.Range(265, 275), Random.Range(-5f, 5), Random.Range(265, 275)));
             transform.localScale = new Vector3(0.008f, 0.008f, 0.008f);
             m_canActivate = CanActivate();
+
             InitRequiredImbuements();
             UpdateEmission();
 
-            //m_idleOriginalStart = position;
             Invoke(nameof(StartMoveIn), m_durationMoveIn);
             InvokeRepeating(nameof(StartIdle), m_durationMoveIn + 0.5f, m_durationIdle + 1f);
         }
