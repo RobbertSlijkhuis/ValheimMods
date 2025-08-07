@@ -1,8 +1,8 @@
 #nullable enable
 
 using BepInEx;
-using DeathWizshAPI.Models;
-using DeathWizshAPI.Types;
+using DeathWizshAPI.Helpers.Models;
+using DeathWizshAPI.Helpers.Types;
 using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;

@@ -1,10 +1,9 @@
 ﻿#nullable enable
 
 using UnityEngine;
-using DeathWizshAPI.Models;
-using DeathWizshAPI.Types;
+using DeathWizshAPI.Helpers.Types;
 
-namespace DeathWizshAPI.Models
+namespace DeathWizshAPI.Helpers.Models
 {
     public class UpdateRecipeOptions
     {

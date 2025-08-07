@@ -1,4 +1,4 @@
-﻿namespace DeathWizshAPI.Models
+﻿namespace DeathWizshAPI.Helpers.Models
 {
     public class RecipeSnapShot
     {

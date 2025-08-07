@@ -1,4 +1,4 @@
-﻿namespace DeathWizshAPI.Types
+﻿namespace DeathWizshAPI.Helpers.Types
 {
     public enum RecipeUpdateType
     {
