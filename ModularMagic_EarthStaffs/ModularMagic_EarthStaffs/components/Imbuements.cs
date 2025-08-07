@@ -22,14 +22,14 @@ namespace ModularMagic_EarthStaffs.Components
             m_imbuements.Add(new Imbuement("Accuracy 2", ImbuementType.ProjectileAccuracy, "Desc", "0.2", 20, 10, new ImbuementPath(1, 2)));
             m_imbuements.Add(new Imbuement("Accuracy 3", ImbuementType.ProjectileAccuracy, "Desc", "0.2", 40, 20, new ImbuementPath(1, 4)));
 
-            m_imbuements.Add(new Imbuement("Secondary Attack", ImbuementType.SecondaryAttack, "Desc", "Nova", 30, 15, new ImbuementPath(2, 3, true)));
+            m_imbuements.Add(new Imbuement("Giant boulder attack", ImbuementType.SecondaryAttack, "Rain down a giant boulder from the sky!", "Rain", 30, 15, new ImbuementPath(2, 3, true)));
             m_imbuements.Add(new Imbuement("Max Quality", ImbuementType.MaxQuality, "Desc", "1", 50, 25, new ImbuementPath(2, 5, true)));
 
             m_imbuements.Add(new Imbuement("Burst 1", ImbuementType.ProjectileBurst, "Desc", "0.02", 10, 5, new ImbuementPath(3, 1)));
             m_imbuements.Add(new Imbuement("Burst 2", ImbuementType.ProjectileBurst, "Desc", "0.02", 20, 10, new ImbuementPath(3, 2)));
             m_imbuements.Add(new Imbuement("Burst 3", ImbuementType.ProjectileBurst, "Desc", "0.02", 40, 20, new ImbuementPath(3, 4)));
 
-            m_imbuements.Add(new Imbuement("Parry Master", ImbuementType.ParryBonus, "Desc", "1", 10, 5, new ImbuementPath(4, 1)));
+            m_imbuements.Add(new Imbuement("Summon Roots", ImbuementType.SecondaryAttack, "Summon roots to attack your enemies!", "Summon", 30, 15, new ImbuementPath(4, 1, true)));
             m_imbuements.Add(new Imbuement("Damage Ratio 1", ImbuementType.DamageRatio, "Desc", "80", 20, 10, new ImbuementPath(4, 2)));
             m_imbuements.Add(new Imbuement("Damage Ratio 2", ImbuementType.DamageRatio, "Desc", "90", 30, 15, new ImbuementPath(4, 3)));
             m_imbuements.Add(new Imbuement("Damage Ratio 3", ImbuementType.DamageRatio, "Desc", "100", 40, 20, new ImbuementPath(4, 4)));

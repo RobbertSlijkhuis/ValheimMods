@@ -3,7 +3,10 @@ using ModularMagic_EarthStaffs.Types;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using UnityEngine;
 using static ItemDrop;
+using static UnityEngine.ParticleSystem;
 
 namespace ModularMagic_EarthStaffs.Helpers
 {
@@ -51,6 +54,12 @@ namespace ModularMagic_EarthStaffs.Helpers
                     case nameof(ImbuementType.ProjectileVelocity):
                         options.projectileVelocity += float.Parse(imbuement.value, CultureInfo.InvariantCulture);
                         break;
+                    case nameof(ImbuementType.SecondaryAttack):
+                        if (imbuement.value == "Rain")
+                            options.secondaryAttack = ModularMagic_EarthStaffs.Instance.prefabs.BigStoneSecondaryAttack.GetComponent<ItemDrop>().m_itemData;
+                        else if (imbuement.value == "Summon")
+                            options.secondaryAttack = ModularMagic_EarthStaffs.Instance.prefabs.RootSecondaryAttack.GetComponent<ItemDrop>().m_itemData;
+                        break;
                 }
             }
 
@@ -59,6 +68,18 @@ namespace ModularMagic_EarthStaffs.Helpers
             Jotunn.Logger.LogWarning(options.projectileAccuracy);
             Jotunn.Logger.LogWarning(options.projectileBurst);
             Jotunn.Logger.LogWarning(options.projectileVelocity);
+
+            StatusEffect ImbuementEffect = ScriptableObject.CreateInstance<StatusEffect>();
+
+            Imbuement last = imbuements.Last();
+            foreach (Imbuement imbuement in imbuements.FindAll(item => item.enabled))
+            {
+                ImbuementEffect.m_tooltip += "<color=green>" + imbuement.name + "</color>" + (imbuement.Equals(last) ? "" : "\n");
+            }
+
+            ImbuementEffect.name = "Imbuements_MMES";
+            ImbuementEffect.m_name = "Imbuements";
+            options.equipStatusEffect = ImbuementEffect;
 
             UpdateHelper.UpdateItemData(itemData, options);
         }

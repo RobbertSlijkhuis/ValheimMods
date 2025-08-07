@@ -1,5 +1,8 @@
 ﻿#nullable enable
 
+using UnityEngine;
+using static ItemDrop;
+
 namespace ModularMagic_EarthStaffs.Models
 {
     internal class UpdateItemDataOptions
@@ -18,6 +21,7 @@ namespace ModularMagic_EarthStaffs.Models
         public float? damageSpiritPerLevel = null;
         public float? attackEitr = null;
         public float? secondaryAttackEitr = null;
+        public StatusEffect? equipStatusEffect = ScriptableObject.CreateInstance<StatusEffect>();
         public float? projectileVelocity = null;
         public float? projectileAccuracy = null;
         public float? projectileBurst = null;
@@ -33,6 +37,12 @@ namespace ModularMagic_EarthStaffs.Models
         public float? deflectionForce = null;
         public float? attackForce = null;
         public float? backstabBonus = null;
+        public ItemData? secondaryAttack = null;
         public Skills.SkillType? specialSkill = null;
+
+        public UpdateItemDataOptions()
+        {
+            equipStatusEffect.name = "empty_MMES";
+        }
     }
 }

@@ -10,6 +10,10 @@ namespace ModularMagic_EarthStaffs.Models
         public GameObject staffEarth2;
         public GameObject staffEarth3;
 
+        // Secondary attacks
+        public GameObject BigStoneSecondaryAttack;
+        public GameObject RootSecondaryAttack;
+
         // Projectiles
         public GameObject projectileMushroom;
         public GameObject projectileBoulder;

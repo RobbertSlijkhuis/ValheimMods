@@ -35,6 +35,7 @@ namespace ModularMagic_EarthStaffs.Helpers
             if (options.damagePickaxePerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_pickaxe = (float)options.damagePickaxePerLevel; }
             if (options.damagePoisonPerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_poison = (float)options.damagePoisonPerLevel; }
             if (options.damageSpiritPerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_spirit = (float)options.damageSpiritPerLevel; }
+            if (options.equipStatusEffect == null || options.equipStatusEffect.name != "empty_MMES") { itemData.m_shared.m_equipStatusEffect = options.equipStatusEffect; }
             if (options.attackEitr != null) { itemData.m_shared.m_attack.m_attackEitr = (float)options.attackEitr; }
             if (options.secondaryAttackEitr != null) { itemData.m_shared.m_secondaryAttack.m_attackEitr = (float)options.secondaryAttackEitr; }
             if (options.projectileVelocity != null) { itemData.m_shared.m_attack.m_projectileVel = (float)options.projectileVelocity; }
@@ -52,6 +53,7 @@ namespace ModularMagic_EarthStaffs.Helpers
             if (options.deflectionForce != null) { itemData.m_shared.m_deflectionForce = (float)options.deflectionForce; }
             if (options.attackForce != null) { itemData.m_shared.m_attackForce = (float)options.attackForce; }
             if (options.backstabBonus != null) { itemData.m_shared.m_backstabBonus = (float)options.backstabBonus; }
+            if (options.secondaryAttack != null) { itemData.m_shared.m_secondaryAttack = options.secondaryAttack.m_shared.m_attack; }
         }
 
         public static void UpdateItemDataInHand(ItemData itemData, UpdateItemDataOptions options)

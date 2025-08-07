@@ -72,8 +72,8 @@ namespace ModularMagic_EarthStaffs
         private void AddSkill()
         {
             SkillConfig skillConfig = new SkillConfig();
-            skillConfig.Identifier = PluginGUID;
-            skillConfig.Name = "Earth magic proficiency";
+            skillConfig.Identifier = "Skill_MMES";
+            skillConfig.Name = "Earth magig";
             skillConfig.Description = "This skill shows how proficient you are with Earth magic and unlocks imbuements";
             skillConfig.IncreaseStep = 1;
             skillConfig.Icon = sprites.RootsCooldown;
@@ -150,23 +150,29 @@ namespace ModularMagic_EarthStaffs
             prefabs.staffEarth1 = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth1");
             prefabs.staffEarth2 = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth2");
             prefabs.staffEarth3 = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth3");
-            prefabs.projectileMushroom = assetBundle.LoadAsset<GameObject>("projectile_mushroom_MMES");
-            //prefabs.projectileBoulder = assetBundle.LoadAsset<GameObject>("projectile_boulder_MMES");
-            //prefabs.Root = assetBundle.LoadAsset<GameObject>("Root_MMES");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.projectileMushroom, true));
-            //PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.projectileBoulder, true));
-            //PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.Root, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("projectile_MMES"), true));
-            //PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("projectile_spawn_boulder_MMES"), true));
-            //PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("script_boulder_MMES"), true));
-            //PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("script_roots_MMES"), true));
-            //PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("root_attack_MMES"), true));
+
+            prefabs.projectileMushroom = assetBundle.LoadAsset<GameObject>("projectile_mushroom_MMES");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.projectileMushroom, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_mushroom_projectile_hit_MMES"), true));
+
+            prefabs.BigStoneSecondaryAttack = assetBundle.LoadAsset<GameObject>("secondary_big_stone_MMES");
+            prefabs.projectileBoulder = assetBundle.LoadAsset<GameObject>("projectile_boulder_MMES");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.projectileBoulder, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("projectile_spawn_boulder_MMES"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("script_boulder_MMES"), true));
+
+            prefabs.RootSecondaryAttack = assetBundle.LoadAsset<GameObject>("secondary_root_MMES");
+            prefabs.Root = assetBundle.LoadAsset<GameObject>("Root_MMES");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.Root, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("root_attack_MMES"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("script_roots_MMES"), true));
+
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_sledge_demolisher_hit_small_MMES"), true));
-            //PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_sledge_demolisher_hit_large_MMES"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_sledge_demolisher_hit_large_MMES"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_earth_spores_MMES"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_earth_spikes_MMES"), true));
-            //PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_earth_windup_MMES"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_earth_windup_MMES"), true));
 
             //sprites.BoulderCooldown = assetBundle.LoadAsset<Sprite>("StaffEarth2Sprite_MMES");
             sprites.RootsCooldown = assetBundle.LoadAsset<Sprite>("StaffEarth3Sprite_MMES");
