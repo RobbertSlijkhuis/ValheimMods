@@ -3,8 +3,8 @@ using SplashMeads.Helpers;
 using SplashMeads.Models;
 using SplashMeads.Types;
 using DeathWizshAPI.Helpers;
-using DeathWizshAPI.Models;
-using DeathWizshAPI.Types;
+using DeathWizshAPI.Helpers.Models;
+using DeathWizshAPI.Helpers.Types;
 
 namespace SplashMeads.Configs
 {

@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 3208845995
+CRC: 1353153892
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 995aa162aafda3ec2a1e714670ce475d
+    Hash: 5531214d419d0947fcd99aeffec17564
   TypeTreeHash:
     serializedVersion: 2
     Hash: b60f8c6e82899f48adbb14e13846de63
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 995aa162aafda3ec2a1e714670ce475d
+    Hash: 5531214d419d0947fcd99aeffec17564
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -98,19 +98,24 @@ SerializeReferenceClassIdentifiers:
 Assets:
 - Assets/Custom/Monobehaviour/Potion_poisonresist_splash_SM.asset
 - Assets/Custom/PrefabInstance/BarlyWhine/barlywine_projectile_SM.prefab
+- Assets/Custom/Monobehaviour/Potion_health_major_SM.asset
 - Assets/Custom/PrefabInstance/BarlyWhine/SM_SplashBarleyWine.prefab
 - Assets/Custom/PrefabInstance/FrostResist/frostresist_explosion_SM.prefab
 - Assets/Custom/PrefabInstance/Vananidir/vananidir_explosion_SM.prefab
 - Assets/Custom/PrefabInstance/FrostResist/fx_Potion_frostresist_SM.prefab
+- Assets/Custom/PrefabInstance/MajorHealth/majorhealth_explosion_SM.prefab
 - Assets/Custom/PrefabInstance/AntiSting/antisting_explosion_SM.prefab
+- Assets/Custom/PrefabInstance/MajorHealth/fx_Potion_majorhealth_SM.prefab
 - Assets/Custom/PrefabInstance/PoisonResist/poisonresist_explosion_SM.prefab
 - Assets/Custom/Monobehaviour/Potion_frostresist_splash_SM.asset
 - Assets/Custom/PrefabInstance/PoisonResist/poisonresist_projectile_SM.prefab
 - Assets/Custom/PrefabInstance/BarlyWhine/barlywine_explosion_SM.prefab
+- Assets/Custom/PrefabInstance/MajorHealth/SM_SplashMajorHealth.prefab
 - Assets/Custom/Monobehaviour/Potion_antisting_SM.asset
-- Assets/Custom/PrefabInstance/Vananidir/fx_Potion_vananidir_SM.prefab
+- Assets/Custom/PrefabInstance/MajorHealth/majorhealth_projectile_SM.prefab
 - Assets/Custom/PrefabInstance/Vananidir/vananidir_projectile_SM.prefab
 - Assets/Custom/PrefabInstance/BarlyWhine/fx_Potion_fireresist_SM.prefab
+- Assets/Custom/PrefabInstance/Vananidir/fx_Potion_vananidir_SM.prefab
 - Assets/Custom/PrefabInstance/Ratatosk/ratatosk_explosion_SM.prefab
 - Assets/Custom/PrefabInstance/Ratatosk/SM_SplashRatatosk.prefab
 - Assets/Custom/PrefabInstance/PoisonResist/SM_SplashPoisonResist.prefab

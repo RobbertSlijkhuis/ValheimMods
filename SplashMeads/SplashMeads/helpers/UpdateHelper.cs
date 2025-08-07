@@ -1,13 +1,8 @@
-﻿using Jotunn.Managers;
-using PlayFab.ClientModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting;
 using SplashMeads.Models;
 using UnityEngine;
 using static ItemDrop;
-using SplashMeads.Configs;
 
 namespace SplashMeads.Helpers
 {
@@ -101,6 +96,10 @@ namespace SplashMeads.Helpers
                         fxPrefab = SplashMeads.Instance.prefabs.AntiStingSplashFX;
                         statusEffect = SplashMeads.Instance.effects.AntiStingSplash;
                         break;
+                    case var value when value == SplashMeads.Instance.prefabs.MajorHealthSplash.name:
+                        fxPrefab = SplashMeads.Instance.prefabs.MajorHealthSplashFX;
+                        statusEffect = SplashMeads.Instance.effects.MajorHealthSplash;
+                        break;
                 }
 
                 if (fxPrefab == null || statusEffect == null)
@@ -163,6 +162,9 @@ namespace SplashMeads.Helpers
                         break;
                     case var value when value == SplashMeads.Instance.prefabs.AntiStingSplash.name:
                         explPrefab = SplashMeads.Instance.prefabs.AntiStingSplashExplosion;
+                        break;
+                    case var value when value == SplashMeads.Instance.prefabs.MajorHealthSplash.name:
+                        explPrefab = SplashMeads.Instance.prefabs.MajorHealthSplashExplosion;
                         break;
                 }
 

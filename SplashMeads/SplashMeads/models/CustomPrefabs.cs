@@ -39,5 +39,11 @@ namespace SplashMeads.Models
         public GameObject AntiStingSplashExplosion;
         public GameObject AntiStingSplashFX;
         public GameObject AntiStingSplashHudIcon;
+
+        public GameObject MajorHealthSplash;
+        public GameObject MajorHealthSplashProjectile;
+        public GameObject MajorHealthSplashExplosion;
+        public GameObject MajorHealthSplashFX;
+        public GameObject MajorHealthSplashHudIcon;
     }
 }

@@ -35,6 +35,10 @@ namespace SplashMeads.Configs
         private static string mead6Recipe = "MeadBugRepellent:6, LeatherScraps:3, Resin:2";
         public static SplashMeadConfig mead6 = new SplashMeadConfig();
 
+        private static string mead7Name = "Splash Major Health Mead";
+        private static string mead7Recipe = "MeadHealthMajor:6, LeatherScraps:3, Resin:2";
+        public static SplashMeadConfig mead7 = new SplashMeadConfig();
+
         // Other
         public static string generalSectionname = "General";
         public static ConfigEntry<bool> showParticles;
@@ -128,6 +132,16 @@ namespace SplashMeads.Configs
                     recipeAmount = 2,
                 };
                 mead6.GenerateConfig(options6);
+
+                SplashMeadConfigOptions options7 = new SplashMeadConfigOptions(SplashMeads.Instance.prefabs.MajorHealthSplash, mead7Name, mead7Recipe)
+                {
+                    description = "Applies " + mead7Name.Replace("Splash ", "") + " to friendlies hit or in the splash radius",
+                    craftingStation = CraftingStationType.Workbench,
+                    minStationLevel = 3,
+                    recipeAmount = 2,
+                    duration = 120,
+                };
+                mead7.GenerateConfig(options7);
             }
             catch (Exception e)
             {

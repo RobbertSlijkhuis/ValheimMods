@@ -31,12 +31,14 @@ namespace SplashMeads
         public static readonly int ratatoskHash = 1965486703;
         public static readonly int vananidirHash = -1907265002;
         public static readonly int antiStingHash = -1157133715;
+        public static readonly int majorHealthHash = 1251702474;
         public static int barleyWineSplashHash;
         public static int frostResistSplashHash;
         public static int poisonResistSplashHash;
         public static int ratatoskSplashHash;
         public static int vananidirSplashHash;
         public static int antiStingSplashHash;
+        public static int majorHealthSplashHash;
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -61,6 +63,7 @@ namespace SplashMeads
             ItemHelper.Create(prefabs.RatatoskSplash, PluginConfig.mead4);
             ItemHelper.Create(prefabs.VananidirSplash, PluginConfig.mead5);
             ItemHelper.Create(prefabs.AntiStingSplash, PluginConfig.mead6);
+            ItemHelper.Create(prefabs.MajorHealthSplash, PluginConfig.mead7);
 
             PrefabManager.OnVanillaPrefabsAvailable -= AddStuff;
         }
@@ -73,6 +76,7 @@ namespace SplashMeads
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.RatatoskSplash, true));
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.VananidirSplash, true));
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.AntiStingSplash, true));
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.MajorHealthSplash, true));
 
             barleyWineSplashHash = effects.BarlyWineSplash.name.GetStableHashCode();
             frostResistSplashHash = effects.FrostResistSplash.name.GetStableHashCode();
@@ -80,6 +84,7 @@ namespace SplashMeads
             ratatoskSplashHash = effects.RatatoskSplash.name.GetStableHashCode();
             vananidirSplashHash = effects.VananidirSplash.name.GetStableHashCode();
             antiStingSplashHash = effects.AntiStingSplash.name.GetStableHashCode();
+            majorHealthSplashHash = effects.MajorHealthSplash.name.GetStableHashCode();
         }
 
         private void InitAssetBundle()
@@ -146,6 +151,16 @@ namespace SplashMeads
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.AntiStingSplashExplosion, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.AntiStingSplashFX, true));
             effects.AntiStingSplash = assetBundle.LoadAsset<StatusEffect>("Potion_antisting_SM");
+
+            prefabs.MajorHealthSplash = assetBundle.LoadAsset<GameObject>("SM_SplashMajorHealth");
+            prefabs.MajorHealthSplashProjectile = assetBundle.LoadAsset<GameObject>("majorhealth_projectile_SM");
+            prefabs.MajorHealthSplashExplosion = assetBundle.LoadAsset<GameObject>("majorhealth_explosion_SM");
+            prefabs.MajorHealthSplashFX = assetBundle.LoadAsset<GameObject>("fx_Potion_majorhealth_SM");
+            prefabs.MajorHealthSplashHudIcon = enemyHud.transform.Find("HudRoot/HudBase/SplashMajorHealth").gameObject;
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.MajorHealthSplashProjectile, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.MajorHealthSplashExplosion, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.MajorHealthSplashFX, true));
+            effects.MajorHealthSplash = assetBundle.LoadAsset<StatusEffect>("Potion_health_major_SM");
         }
     }
 }

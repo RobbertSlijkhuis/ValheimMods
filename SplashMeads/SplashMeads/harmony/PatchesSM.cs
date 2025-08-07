@@ -48,6 +48,7 @@ namespace SplashMeads.Harmony
                 if (effectHash == 0)
                     return;
 
+                //Jotunn.Logger.LogWarning("effectHash:" + effectHash);
                 RemoveSplashWhenConsumeNormal(__instance, effectHash);
             }
             catch (Exception e)
@@ -71,6 +72,7 @@ namespace SplashMeads.Harmony
                 SplashMeads.Instance.prefabs.RatatoskSplashHudIcon.transform.SetParent(__instance.m_baseHud.transform, false);
                 SplashMeads.Instance.prefabs.VananidirSplashHudIcon.transform.SetParent(__instance.m_baseHud.transform, false);
                 SplashMeads.Instance.prefabs.AntiStingSplashHudIcon.transform.SetParent(__instance.m_baseHud.transform, false);
+                SplashMeads.Instance.prefabs.MajorHealthSplashHudIcon.transform.SetParent(__instance.m_baseHud.transform, false);
             }
             catch (Exception e)
             {
@@ -174,6 +176,7 @@ namespace SplashMeads.Harmony
                                 RectTransform iconRatatosk = (RectTransform)value.m_gui.transform.Find("SplashRatatosk");
                                 RectTransform iconVananidir = (RectTransform)value.m_gui.transform.Find("SplashVananidir");
                                 RectTransform iconAntiSting = (RectTransform)value.m_gui.transform.Find("SplashAntiSting");
+                                RectTransform iconMajorHealth = (RectTransform)value.m_gui.transform.Find("SplashMajorHealth");
                                 IconPosition iconPos = new IconPosition(-35, level == 1 ? -15 : -30);
 
                                 iconPos = UpdateHudIcon(value.m_character, iconBarley, SplashMeads.barleyWineSplashHash, iconPos);
@@ -182,6 +185,7 @@ namespace SplashMeads.Harmony
                                 iconPos = UpdateHudIcon(value.m_character, iconRatatosk, SplashMeads.ratatoskSplashHash, iconPos);
                                 iconPos = UpdateHudIcon(value.m_character, iconVananidir, SplashMeads.vananidirSplashHash, iconPos);
                                 iconPos = UpdateHudIcon(value.m_character, iconAntiSting, SplashMeads.antiStingSplashHash, iconPos);
+                                iconPos = UpdateHudIcon(value.m_character, iconMajorHealth, SplashMeads.majorHealthSplashHash, iconPos);
                             }
                         }
                     }
@@ -341,6 +345,17 @@ namespace SplashMeads.Harmony
                     character.GetSEMan().AddStatusEffect(SplashMeads.antiStingSplashHash);
                 }
             }
+
+            else if (effectHash == SplashMeads.majorHealthSplashHash && character.GetSEMan().HaveStatusEffect(SplashMeads.majorHealthSplashHash))
+            {
+                character.GetSEMan().RemoveStatusEffect(SplashMeads.majorHealthSplashHash);
+
+                if (ShouldSplashRefresh(character, SplashMeads.majorHealthHash, PluginConfig.mead7.duration.Value, true))
+                {
+                    ApplySkinnedMeshToFX(SplashMeads.Instance.prefabs.MajorHealthSplashFX, character);
+                    character.GetSEMan().AddStatusEffect(SplashMeads.majorHealthSplashHash);
+                }
+            }
         }
 
         private static bool ShouldSplashRefresh(Character character, int originalEffectHash, int splashDuration, bool removeOriginal = false)
@@ -438,6 +453,9 @@ namespace SplashMeads.Harmony
 
             else if (effectHash == SplashMeads.antiStingHash && player.GetSEMan().HaveStatusEffect(SplashMeads.antiStingSplashHash))
                 player.GetSEMan().RemoveStatusEffect(SplashMeads.antiStingSplashHash);
+
+            else if (effectHash == SplashMeads.majorHealthHash && player.GetSEMan().HaveStatusEffect(SplashMeads.majorHealthSplashHash))
+                player.GetSEMan().RemoveStatusEffect(SplashMeads.majorHealthSplashHash);
         }
 
         private static IconPosition UpdateHudIcon(Character character, RectTransform icon, int splashHash, IconPosition iconPos)
