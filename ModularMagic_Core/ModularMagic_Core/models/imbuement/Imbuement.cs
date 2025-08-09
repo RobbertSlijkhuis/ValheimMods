@@ -1,4 +1,6 @@
-﻿namespace ModularMagic_Core.Models
+﻿using System.Collections.Generic;
+
+namespace ModularMagic_Core.Models
 {
     internal class Imbuement
     {
@@ -8,6 +10,8 @@
         public int materialRequired;
         public string name;
         public ImbuementPath path;
+        public List<Imbuement> requiredFor = new List<Imbuement>();
+        public List<Imbuement> requires = new List<Imbuement>();
         public int skillRequired;
         public string type;
         public string value;

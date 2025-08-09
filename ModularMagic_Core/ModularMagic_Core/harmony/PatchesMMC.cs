@@ -26,6 +26,16 @@ namespace ModularMagic_Core.Harmony
 
                 ImbuementTable comp = __instance.transform.parent.gameObject.GetComponent<ImbuementTable>();
                 comp.StaffAttach(imbuementsStringEarth, item);
+
+                var skills = Player.m_localPlayer.GetSkills();
+                var skillList = skills.GetSkillList();
+
+                foreach (Skills.Skill skill in skillList)
+                {
+                    Jotunn.Logger.LogWarning(skill.m_info.m_skill);
+                    Jotunn.Logger.LogWarning(skill.m_level);
+                    Jotunn.Logger.LogWarning(skill.m_accumulator);
+                }
             }
             catch (Exception e)
             {

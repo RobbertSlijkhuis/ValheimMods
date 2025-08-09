@@ -1,5 +1,4 @@
-﻿using ModularMagic_Core.Components;
-using ModularMagic_Core.Configs;
+﻿using ModularMagic_Core.Configs;
 using ModularMagic_Core.Helpers;
 using ModularMagic_Core.Models;
 using ModularMagic_Core.Types;

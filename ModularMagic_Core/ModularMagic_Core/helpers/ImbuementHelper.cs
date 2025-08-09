@@ -69,11 +69,11 @@ namespace ModularMagic_Core.Helpers
         public static List<Imbuement> StringToList(string value)
         {
             List<Imbuement> imbuements = new List<Imbuement>();
-            string[] data = value.Split(',');
+            string[] data = value.Split(';');
 
             foreach (string item in data)
             {
-                string[] properties = item.Split(':');
+                string[] properties = item.Split('|');
                 Imbuement imbuement = new Imbuement(
                     properties[0],
                     properties[1],
@@ -97,7 +97,7 @@ namespace ModularMagic_Core.Helpers
 
             foreach (Imbuement i in imbuements)
             {
-                items += $"{i.name}:{i.type}:{i.description}:{i.value}:{i.skillRequired}:{i.materialRequired}:{i.path.column}:{i.path.row}:{i.path.allowIntersect}:{i.enabled},";
+                items += $"{i.name}|{i.type}|{i.description}|{i.value}|{i.skillRequired}|{i.materialRequired}|{i.path.column}|{i.path.row}|{i.path.allowIntersect}|{i.enabled};";
             }
 
             if (items != "")
