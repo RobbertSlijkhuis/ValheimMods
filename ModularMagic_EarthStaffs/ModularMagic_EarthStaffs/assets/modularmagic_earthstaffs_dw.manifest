@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 2278728884
+CRC: 3010933138
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 318b3644c7eeacb8c8c7e134a771c006
+    Hash: 6bc7b8b0e9c53ad2a94e917564a2336d
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 48a3270e5cd3bab72a3ce3638731d440
+    Hash: 4e2472941055301a97053e8621eba768
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 318b3644c7eeacb8c8c7e134a771c006
+    Hash: 6bc7b8b0e9c53ad2a94e917564a2336d
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -51,6 +51,8 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: -1044604064, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
@@ -60,8 +62,6 @@ ClassTypes:
   Script: {fileID: -959589234, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: -1421768954, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -130,7 +130,7 @@ Assets:
 - Assets/Custom/PrefabInstance/Earth/projectiles/projectile_spawn_boulder_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/fx/fx_sledge_demolisher_hit_large_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/Root_MMES.prefab
-- Assets/Custom/PrefabInstance/Earth/attacks/secondary_big_stone_MMES.prefab
+- Assets/Custom/PrefabInstance/Earth/attacks/secondary_boulder_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/projectiles/projectile_mushroom_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/MMES_TheForestFlinger.prefab
 - Assets/Custom/PrefabInstance/Earth/fx/fx_sledge_demolisher_hit_small_MMES.prefab

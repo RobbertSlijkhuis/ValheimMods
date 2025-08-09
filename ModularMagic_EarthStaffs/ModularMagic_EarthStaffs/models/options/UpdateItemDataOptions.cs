@@ -12,12 +12,16 @@ namespace ModularMagic_EarthStaffs.Models
         public float? damageBlunt = null;
         public float? damageChop = null;
         public float? damagePickaxe = null;
+        public float? damagePierce = null;
         public float? damagePoison = null;
         public float? damageSpirit = null;
+        public float? damageSlash = null;
         public float? damageBluntPerLevel = null;
         public float? damageChopPerLevel = null;
         public float? damagePickaxePerLevel = null;
+        public float? damagePiercePerLevel = null;
         public float? damagePoisonPerLevel = null;
+        public float? damageSlashPerLevel = null;
         public float? damageSpiritPerLevel = null;
         public float? attackEitr = null;
         public float? secondaryAttackEitr = null;

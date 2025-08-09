@@ -38,7 +38,6 @@ namespace ModularMagic_EarthStaffs
         public CustomSprites sprites = new CustomSprites();
         public ItemDataSnaphot snapshots = new ItemDataSnaphot();
         public static Skills.SkillType customSkill;
-
         public static readonly string imbuementDataKey = "Imbuements_MMES";
 
         // Use this class to add your own localization to the game
@@ -50,7 +49,7 @@ namespace ModularMagic_EarthStaffs
             Instance = this;
             InitAssetBundle();
             PluginConfig.Init();
-            // InitStatusEffects();
+            InitStatusEffects();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             PrefabManager.OnVanillaPrefabsAvailable += AddSkill;
@@ -102,29 +101,29 @@ namespace ModularMagic_EarthStaffs
 
         private void InitStatusEffects()
         {
-            //effects.Staff2Cooldown = ScriptableObject.CreateInstance<StatusEffect>();
-            //effects.Staff2Cooldown.name = PluginConfig.staffEarth2.secondaryAttackConfig.cooldownStatusEffectName;
-            //effects.Staff2Cooldown.m_name = "Summon boulder cooldown";
-            //effects.Staff2Cooldown.m_icon = assetBundle.LoadAsset<Sprite>("StaffEarth2Sprite_MMES");
-            //effects.Staff2Cooldown.m_startMessageType = MessageHud.MessageType.Center;
-            //effects.Staff2Cooldown.m_startMessage = "";
-            //effects.Staff2Cooldown.m_stopMessageType = MessageHud.MessageType.Center;
-            //effects.Staff2Cooldown.m_stopMessage = "";
-            //effects.Staff2Cooldown.m_tooltip = "Be patient!";
-            //effects.Staff2Cooldown.m_ttl = PluginConfig.staffEarth2.secondaryAttackConfig.cooldown.Value;
-            //ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.Staff2Cooldown, fixReference: false));
+            effects.Staff2Cooldown = ScriptableObject.CreateInstance<StatusEffect>();
+            effects.Staff2Cooldown.name = "SummonBoulder_MMES";
+            effects.Staff2Cooldown.m_name = "Summon boulder cooldown";
+            effects.Staff2Cooldown.m_icon = sprites.BoulderCooldown;
+            effects.Staff2Cooldown.m_startMessageType = MessageHud.MessageType.Center;
+            effects.Staff2Cooldown.m_startMessage = "";
+            effects.Staff2Cooldown.m_stopMessageType = MessageHud.MessageType.Center;
+            effects.Staff2Cooldown.m_stopMessage = "";
+            effects.Staff2Cooldown.m_tooltip = "Be patient!";
+            effects.Staff2Cooldown.m_ttl = 30;
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.Staff2Cooldown, fixReference: false));
 
-            //effects.Staff3Cooldown = ScriptableObject.CreateInstance<StatusEffect>();
-            //effects.Staff3Cooldown.name = PluginConfig.staffEarth3.secondaryAttackConfig.cooldownStatusEffectName;
-            //effects.Staff3Cooldown.m_name = "Summon roots cooldown";
-            //effects.Staff3Cooldown.m_icon = assetBundle.LoadAsset<Sprite>("StaffEarth3Sprite_MMES");
-            //effects.Staff3Cooldown.m_startMessageType = MessageHud.MessageType.Center;
-            //effects.Staff3Cooldown.m_startMessage = "";
-            //effects.Staff3Cooldown.m_stopMessageType = MessageHud.MessageType.Center;
-            //effects.Staff3Cooldown.m_stopMessage = "";
-            //effects.Staff3Cooldown.m_tooltip = "Be patient!";
-            //effects.Staff3Cooldown.m_ttl = PluginConfig.staffEarth3.secondaryAttackConfig.cooldown.Value;
-            //ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.Staff3Cooldown, fixReference: false));
+            effects.Staff3Cooldown = ScriptableObject.CreateInstance<StatusEffect>();
+            effects.Staff3Cooldown.name = "SummonRoots_MMES";
+            effects.Staff3Cooldown.m_name = "Summon roots cooldown";
+            effects.Staff3Cooldown.m_icon = sprites.RootsCooldown;
+            effects.Staff3Cooldown.m_startMessageType = MessageHud.MessageType.Center;
+            effects.Staff3Cooldown.m_startMessage = "";
+            effects.Staff3Cooldown.m_stopMessageType = MessageHud.MessageType.Center;
+            effects.Staff3Cooldown.m_stopMessage = "";
+            effects.Staff3Cooldown.m_tooltip = "Be patient!";
+            effects.Staff3Cooldown.m_ttl = 30;
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.Staff3Cooldown, fixReference: false));
 
             //    StatusEffect exhaustAndFhoulMagicEffect = ScriptableObject.CreateInstance<StatusEffect>();
             //    exhaustAndFhoulMagicEffect.name = "ExhaustAndFoulMagicEffect_DW";
@@ -150,19 +149,20 @@ namespace ModularMagic_EarthStaffs
             prefabs.staffEarth1 = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth1");
             prefabs.staffEarth2 = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth2");
             prefabs.staffEarth3 = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth3");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("projectile_MMES"), true));
+            prefabs.projectileDefault = assetBundle.LoadAsset<GameObject>("projectile_MMES");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.projectileDefault, true));
 
             prefabs.projectileMushroom = assetBundle.LoadAsset<GameObject>("projectile_mushroom_MMES");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.projectileMushroom, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_mushroom_projectile_hit_MMES"), true));
 
-            prefabs.BigStoneSecondaryAttack = assetBundle.LoadAsset<GameObject>("secondary_big_stone_MMES");
+            prefabs.SecondaryAttackBoulder = assetBundle.LoadAsset<GameObject>("secondary_boulder_MMES");
             prefabs.projectileBoulder = assetBundle.LoadAsset<GameObject>("projectile_boulder_MMES");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.projectileBoulder, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("projectile_spawn_boulder_MMES"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("script_boulder_MMES"), true));
 
-            prefabs.RootSecondaryAttack = assetBundle.LoadAsset<GameObject>("secondary_root_MMES");
+            prefabs.SecondaryAttackRoots = assetBundle.LoadAsset<GameObject>("secondary_root_MMES");
             prefabs.Root = assetBundle.LoadAsset<GameObject>("Root_MMES");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.Root, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("root_attack_MMES"), true));
@@ -174,7 +174,7 @@ namespace ModularMagic_EarthStaffs
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_earth_spikes_MMES"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_earth_windup_MMES"), true));
 
-            //sprites.BoulderCooldown = assetBundle.LoadAsset<Sprite>("StaffEarth2Sprite_MMES");
+            sprites.BoulderCooldown = assetBundle.LoadAsset<Sprite>("StaffEarth2Sprite_MMES");
             sprites.RootsCooldown = assetBundle.LoadAsset<Sprite>("StaffEarth3Sprite_MMES");
         }
     }

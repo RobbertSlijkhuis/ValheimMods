@@ -79,11 +79,10 @@ namespace ModularMagic_EarthStaffs.Harmony
                     return true;
                 }
 
-                //if (__instance.m_drawStaminaDrain != 8901)
-                //    return true;
+                if (__instance.m_drawStaminaDrain != 8901)
+                    return true;
 
-                return true;
-                // return CheckForCooldown(character, weapon.m_dropPrefab.name);
+                return CheckForCooldown(character, weapon.m_dropPrefab.name);
             }
             catch (Exception e)
             {

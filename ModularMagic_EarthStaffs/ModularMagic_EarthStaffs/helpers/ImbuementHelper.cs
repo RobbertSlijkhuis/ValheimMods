@@ -26,11 +26,30 @@ namespace ModularMagic_EarthStaffs.Helpers
             if (snapShotData == null)
                 throw new Exception("Snapshot ItemData is null");
 
+            options.damageBlunt = snapShotData.m_shared.m_damages.m_blunt;
+            options.damageSlash = 0;
+            options.damagePierce = 0;
+            options.damageBluntPerLevel = snapShotData.m_shared.m_damagesPerLevel.m_blunt;
+            options.damageSlashPerLevel = 0;
+            options.damagePiercePerLevel = 0;
+            options.attackEitr = snapShotData.m_shared.m_attack.m_attackEitr;
             options.maxQuality = snapShotData.m_shared.m_maxQuality;
             options.timedBlockBonus = snapShotData.m_shared.m_timedBlockBonus;
             options.projectileAccuracy = snapShotData.m_shared.m_attack.m_projectileAccuracy;
             options.projectileBurst = snapShotData.m_shared.m_attack.m_burstInterval;
             options.projectileVelocity = snapShotData.m_shared.m_attack.m_projectileVel;
+
+            GameObject projectileBlunt = ModularMagic_EarthStaffs.Instance.prefabs.projectileDefault.transform.Find("visual/blunt").gameObject;
+            GameObject projectileSlash = ModularMagic_EarthStaffs.Instance.prefabs.projectileDefault.transform.Find("visual/slash").gameObject;
+            GameObject projectilePierce = ModularMagic_EarthStaffs.Instance.prefabs.projectileDefault.transform.Find("visual/pierce").gameObject;
+            Projectile projectile = ModularMagic_EarthStaffs.Instance.prefabs.projectileDefault.GetComponent<Projectile>();
+            projectileBlunt.SetActive(true);
+            projectileSlash.SetActive(false);
+            projectilePierce.SetActive(false);
+            projectile.m_rotateVisual = 300f;
+            projectile.m_rotateVisualY = 0f;
+            projectile.m_rotateVisualZ = 0f;
+            projectile.m_visual = projectileBlunt;
 
             foreach (Imbuement imbuement in imbuements)
             {
@@ -39,6 +58,35 @@ namespace ModularMagic_EarthStaffs.Helpers
 
                 switch (imbuement.type)
                 {
+                    case nameof(ImbuementType.DamageType):
+                        if (imbuement.value == "Slash")
+                        {
+                            options.damageSlash = snapShotData.m_shared.m_damages.m_blunt;
+                            options.damageSlashPerLevel = snapShotData.m_shared.m_damagesPerLevel.m_blunt;
+                            projectileSlash.SetActive(true);
+                            projectile.m_rotateVisual = 500f;
+                            projectile.m_rotateVisualY = 0f;
+                            projectile.m_rotateVisualZ = 10f;
+                            projectile.m_visual = projectileSlash;
+                        }
+                        else if (imbuement.value == "Pierce")
+                        {
+                            options.damagePierce = snapShotData.m_shared.m_damages.m_blunt;
+                            options.damagePiercePerLevel = snapShotData.m_shared.m_damagesPerLevel.m_blunt;
+                            projectilePierce.SetActive(true);
+                            projectile.m_rotateVisual = 0f;
+                            projectile.m_rotateVisualY = 0f;
+                            projectile.m_rotateVisualZ = 500f;
+                            projectile.m_visual = projectilePierce;
+                        }
+
+                        options.damageBlunt = 0;
+                        options.damageBluntPerLevel = 0;
+                        projectileBlunt.SetActive(false);
+                        break;
+                    case nameof(ImbuementType.EitrCost):
+                        options.attackEitr -= float.Parse(imbuement.value, CultureInfo.InvariantCulture);
+                        break;
                     case nameof(ImbuementType.MaxQuality):
                         options.maxQuality += int.Parse(imbuement.value, CultureInfo.InvariantCulture);
                         break;
@@ -56,18 +104,20 @@ namespace ModularMagic_EarthStaffs.Helpers
                         break;
                     case nameof(ImbuementType.SecondaryAttack):
                         if (imbuement.value == "Rain")
-                            options.secondaryAttack = ModularMagic_EarthStaffs.Instance.prefabs.BigStoneSecondaryAttack.GetComponent<ItemDrop>().m_itemData;
+                            options.secondaryAttack = ModularMagic_EarthStaffs.Instance.prefabs.SecondaryAttackBoulder.GetComponent<ItemDrop>().m_itemData;
                         else if (imbuement.value == "Summon")
-                            options.secondaryAttack = ModularMagic_EarthStaffs.Instance.prefabs.RootSecondaryAttack.GetComponent<ItemDrop>().m_itemData;
+                            options.secondaryAttack = ModularMagic_EarthStaffs.Instance.prefabs.SecondaryAttackBoulder.GetComponent<ItemDrop>().m_itemData;
                         break;
                 }
             }
 
-            Jotunn.Logger.LogWarning(options.maxQuality);
-            Jotunn.Logger.LogWarning(options.timedBlockBonus);
-            Jotunn.Logger.LogWarning(options.projectileAccuracy);
-            Jotunn.Logger.LogWarning(options.projectileBurst);
-            Jotunn.Logger.LogWarning(options.projectileVelocity);
+            Jotunn.Logger.LogWarning("Damage (B, P, S): " + options.damageBlunt + ", " + options.damagePierce + ", " + options.damageSlash);
+            Jotunn.Logger.LogWarning("Eitr cost: " + options.attackEitr);
+            Jotunn.Logger.LogWarning("ParryBonus: " + options.timedBlockBonus);
+            Jotunn.Logger.LogWarning("Accuracy: " + options.projectileAccuracy);
+            Jotunn.Logger.LogWarning("Burst: " + options.projectileBurst);
+            Jotunn.Logger.LogWarning("Speed: " + options.projectileVelocity);
+            Jotunn.Logger.LogWarning("Secondary: " + options.secondaryAttack == null ? "null" : options.secondaryAttack?.m_shared?.m_attack?.m_attackProjectile?.name);
 
             StatusEffect ImbuementEffect = ScriptableObject.CreateInstance<StatusEffect>();
 
@@ -102,13 +152,13 @@ namespace ModularMagic_EarthStaffs.Helpers
         public static List<Imbuement> StringToList(string value)
         {
             List<Imbuement> imbuements = new List<Imbuement>();
-            string[] data = value.Split(',');
+            string[] data = value.Split(';');
 
             Jotunn.Logger.LogWarning(data[0]);
 
             foreach (string item in data)
             {
-                string[] properties = item.Split(':');
+                string[] properties = item.Split('|');
                 imbuements.Add(new Imbuement(
                     properties[0],
                     properties[1],
@@ -130,7 +180,7 @@ namespace ModularMagic_EarthStaffs.Helpers
 
             foreach (Imbuement i in imbuements)
             {
-                items += $"{i.name}:{i.type}:{i.description}:{i.value}:{i.skillRequired}:{i.materialRequired}:{i.path.column}:{i.path.row}:{i.path.allowIntersect}:{i.enabled},";
+                items += $"{i.name}|{i.type}|{i.description}|{i.value}|{i.skillRequired}|{i.materialRequired}|{i.path.column}|{i.path.row}|{i.path.allowIntersect}|{i.enabled};";
             }
 
             if (items != "")
