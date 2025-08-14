@@ -107,12 +107,12 @@ namespace SplashMeads.Configs
                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = 5 }));
 
             timersFormat = SplashMeads.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Timer format"), HudTimerFormat.Minutes,
-               new ConfigDescription("The format in which the timers are displayed (Minutes:Seconds or the entire duration in seconds)",
+               new ConfigDescription("The format in which the timers are displayed (minutes:seconds or the entire duration in seconds)",
                new AcceptableValueList<string>(hudTimerFormatOptions),
                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = 4 }));
 
             timersAlignment = SplashMeads.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Timer alignment"), HudAlignmentType.Bottom,
-                new ConfigDescription("The vertical alignment of the hud timers",
+                new ConfigDescription("The alignment of the hud timers (topLeft, top, center etc.",
                 new AcceptableValueList<string>(hudAlignmentOptions),
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = 3 }));
         }

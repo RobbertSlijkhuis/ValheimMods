@@ -1,5 +1,10 @@
 ### 1.0.3
 - Fixed splash Vananidir recipe using Ratatosk instead
+- Added Anti-sting splash mead
+- Added health splash meads (minor, medium and major)
+- Added timers to hud icons, can be disabled
+- Added config options to change timer font-size, time format and alignment
+- Added config option to change hud icon size
 
 ### 1.0.2
 - Added hud icons to tames to show which splash meads are active
