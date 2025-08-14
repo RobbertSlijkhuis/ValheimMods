@@ -9,5 +9,7 @@
         public StatusEffect VananidirSplash;
         public StatusEffect AntiStingSplash;
         public StatusEffect MajorHealthSplash;
+        public StatusEffect MediumHealthSplash;
+        public StatusEffect MinorHealthSplash;
     }
 }

@@ -398,3 +398,6 @@ Environment.props
 # not the generated dll for thunderstore
 */Package/plugins/*
 
+/com.unity.textmeshpro-3.2.0-pre.5
+/SplashMeads/SplashMeads/assets/assets
+/SplashMeads/SplashMeads/assets/assets.manifest

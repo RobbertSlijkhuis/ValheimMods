@@ -1,9 +1,10 @@
 ﻿using HarmonyLib;
-using Jotunn.Managers;
 using SplashMeads.Configs;
 using SplashMeads.Models;
+using SplashMeads.Types;
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using static EnemyHud;
 
@@ -12,6 +13,42 @@ namespace SplashMeads.Harmony
     [HarmonyPatch]
     public class PatchesSM
     {
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(StatusEffect), "ResetTime")]
+        public static bool ResetTime_Prefix(ref StatusEffect __instance)
+        {
+            try
+            {
+                if (__instance == null || (__instance.m_nameHash != SplashMeads.majorHealthSplashHash && __instance.m_nameHash != SplashMeads.mediumHealthSplashHash && __instance.m_nameHash != SplashMeads.minorHealthSplashHash))
+                    return true;
+
+                return false;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in ResetTime_Prefix: " + e);
+                return true;
+            }
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(SEMan), "Internal_AddStatusEffect")]
+        public static bool Internal_AddStatusEffect_Prefix(ref SEMan __instance, int nameHash, bool resetTime, int itemLevel, float skillLevel)
+        {
+            try
+            {
+                if (__instance == null || nameHash == 0 || (nameHash != SplashMeads.majorHealthSplashHash && nameHash != SplashMeads.mediumHealthSplashHash && nameHash != SplashMeads.minorHealthSplashHash))
+                    return true;
+
+                return ShouldHealthSplashRefresh(__instance, nameHash);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in Internal_AddStatusEffect_Prefix: " + e);
+                return true;
+            }
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Character), "ApplyDamage")]
         public static void ApplyDamage_Postfix(ref Character __instance, HitData hit)
@@ -21,7 +58,7 @@ namespace SplashMeads.Harmony
                 if (__instance == null || hit == null)
                     return;
 
-                RefreshSplash(__instance, hit.m_statusEffectHash);
+                RefreshSplash(__instance, hit);
             }
             catch (Exception e)
             {
@@ -48,7 +85,7 @@ namespace SplashMeads.Harmony
                 if (effectHash == 0)
                     return;
 
-                //Jotunn.Logger.LogWarning("effectHash:" + effectHash);
+                // Jotunn.Logger.LogWarning("effectHash ("+ itemName + "):" + effectHash);
                 RemoveSplashWhenConsumeNormal(__instance, effectHash);
             }
             catch (Exception e)
@@ -73,6 +110,8 @@ namespace SplashMeads.Harmony
                 SplashMeads.Instance.prefabs.VananidirSplashHudIcon.transform.SetParent(__instance.m_baseHud.transform, false);
                 SplashMeads.Instance.prefabs.AntiStingSplashHudIcon.transform.SetParent(__instance.m_baseHud.transform, false);
                 SplashMeads.Instance.prefabs.MajorHealthSplashHudIcon.transform.SetParent(__instance.m_baseHud.transform, false);
+                SplashMeads.Instance.prefabs.MediumHealthSplashHudIcon.transform.SetParent(__instance.m_baseHud.transform, false);
+                SplashMeads.Instance.prefabs.MinorHealthSplashHudIcon.transform.SetParent(__instance.m_baseHud.transform, false);
             }
             catch (Exception e)
             {
@@ -177,7 +216,9 @@ namespace SplashMeads.Harmony
                                 RectTransform iconVananidir = (RectTransform)value.m_gui.transform.Find("SplashVananidir");
                                 RectTransform iconAntiSting = (RectTransform)value.m_gui.transform.Find("SplashAntiSting");
                                 RectTransform iconMajorHealth = (RectTransform)value.m_gui.transform.Find("SplashMajorHealth");
-                                IconPosition iconPos = new IconPosition(-35, level == 1 ? -15 : -30);
+                                RectTransform iconMediumHealth = (RectTransform)value.m_gui.transform.Find("SplashMediumHealth");
+                                RectTransform iconMinorHealth = (RectTransform)value.m_gui.transform.Find("SplashMinorHealth");
+                                IconPosition iconPos = new IconPosition(-(PluginConfig.HudIconSize.Value + 5), level == 1 ? -(PluginConfig.HudIconSize.Value / 2) : -PluginConfig.HudIconSize.Value);
 
                                 iconPos = UpdateHudIcon(value.m_character, iconBarley, SplashMeads.barleyWineSplashHash, iconPos);
                                 iconPos = UpdateHudIcon(value.m_character, iconFrost, SplashMeads.frostResistSplashHash, iconPos);
@@ -186,6 +227,8 @@ namespace SplashMeads.Harmony
                                 iconPos = UpdateHudIcon(value.m_character, iconVananidir, SplashMeads.vananidirSplashHash, iconPos);
                                 iconPos = UpdateHudIcon(value.m_character, iconAntiSting, SplashMeads.antiStingSplashHash, iconPos);
                                 iconPos = UpdateHudIcon(value.m_character, iconMajorHealth, SplashMeads.majorHealthSplashHash, iconPos);
+                                iconPos = UpdateHudIcon(value.m_character, iconMediumHealth, SplashMeads.mediumHealthSplashHash, iconPos);
+                                iconPos = UpdateHudIcon(value.m_character, iconMinorHealth, SplashMeads.minorHealthSplashHash, iconPos);
                             }
                         }
                     }
@@ -248,8 +291,10 @@ namespace SplashMeads.Harmony
             }
         }
 
-        private static void RefreshSplash(Character character, int effectHash)
+        private static void RefreshSplash(Character character, HitData hit)
         {
+            int effectHash = hit.m_statusEffectHash;
+
             if (effectHash == SplashMeads.barleyWineSplashHash && character.GetSEMan().HaveStatusEffect(SplashMeads.barleyWineSplashHash))
             {
                 character.GetSEMan().RemoveStatusEffect(SplashMeads.barleyWineSplashHash);
@@ -330,8 +375,8 @@ namespace SplashMeads.Harmony
 
                     if (character.gameObject.name == "Lox(Clone)")
                     {
-                        GameObject particles = SplashMeads.Instance.prefabs.RatatoskSplashFX.transform.Find("lingering_effects/particles").gameObject;
-                        GameObject particlesLox = SplashMeads.Instance.prefabs.RatatoskSplashFX.transform.Find("lingering_effects/particles_lox").gameObject;
+                        GameObject particles = SplashMeads.Instance.prefabs.AntiStingSplashFX.transform.Find("lingering_effects/particles").gameObject;
+                        GameObject particlesLox = SplashMeads.Instance.prefabs.AntiStingSplashFX.transform.Find("lingering_effects/particles_lox").gameObject;
                         particles.SetActive(false);
                         particlesLox.SetActive(true);
 
@@ -343,17 +388,6 @@ namespace SplashMeads.Harmony
                     }
 
                     character.GetSEMan().AddStatusEffect(SplashMeads.antiStingSplashHash);
-                }
-            }
-
-            else if (effectHash == SplashMeads.majorHealthSplashHash && character.GetSEMan().HaveStatusEffect(SplashMeads.majorHealthSplashHash))
-            {
-                character.GetSEMan().RemoveStatusEffect(SplashMeads.majorHealthSplashHash);
-
-                if (ShouldSplashRefresh(character, SplashMeads.majorHealthHash, PluginConfig.mead7.duration.Value, true))
-                {
-                    ApplySkinnedMeshToFX(SplashMeads.Instance.prefabs.MajorHealthSplashFX, character);
-                    character.GetSEMan().AddStatusEffect(SplashMeads.majorHealthSplashHash);
                 }
             }
         }
@@ -372,6 +406,14 @@ namespace SplashMeads.Harmony
 
                 return true;
             }
+
+            return false;
+        }
+
+        private static bool ShouldHealthSplashRefresh(SEMan __instance, int effectHash)
+        {
+            if (!__instance.HaveStatusEffectCategory("healthpotion"))
+                return true;
 
             return false;
         }
@@ -453,9 +495,6 @@ namespace SplashMeads.Harmony
 
             else if (effectHash == SplashMeads.antiStingHash && player.GetSEMan().HaveStatusEffect(SplashMeads.antiStingSplashHash))
                 player.GetSEMan().RemoveStatusEffect(SplashMeads.antiStingSplashHash);
-
-            else if (effectHash == SplashMeads.majorHealthHash && player.GetSEMan().HaveStatusEffect(SplashMeads.majorHealthSplashHash))
-                player.GetSEMan().RemoveStatusEffect(SplashMeads.majorHealthSplashHash);
         }
 
         private static IconPosition UpdateHudIcon(Character character, RectTransform icon, int splashHash, IconPosition iconPos)
@@ -469,7 +508,61 @@ namespace SplashMeads.Harmony
             if (character.GetSEMan().HaveStatusEffect(splashHash))
             {
                 icon.gameObject.SetActive(true);
+                icon.sizeDelta = new Vector2(PluginConfig.HudIconSize.Value, PluginConfig.HudIconSize.Value);
                 icon.anchoredPosition = new Vector2(iconPos.x, iconPos.y);
+
+                RectTransform text = (RectTransform)icon.Find("Text");
+
+                if (text == null)
+                    throw new Exception("Could not find text component");
+
+                TextMeshProUGUI textComp = text.gameObject.GetComponent<TextMeshProUGUI>();
+
+                if (PluginConfig.showHudTimers.Value)
+                {
+                    StatusEffect effect = character.GetSEMan().GetStatusEffect(splashHash);
+                    string time = FormatTime(effect.GetRemaningTime());
+                    textComp.SetText(time);
+                    textComp.fontSize = PluginConfig.timersFontSize.Value;
+                    text.sizeDelta = new Vector2(PluginConfig.HudIconSize.Value, PluginConfig.HudIconSize.Value);
+
+                    switch (PluginConfig.timersAlignment.Value)
+                    {
+                        case nameof(HudAlignmentType.TopLeft):
+                            textComp.alignment = TextAlignmentOptions.TopLeft;
+                            break;
+                        case nameof(HudAlignmentType.Top):
+                            textComp.alignment = TextAlignmentOptions.Top;
+                            break;
+                        case nameof(HudAlignmentType.TopRight):
+                            textComp.alignment = TextAlignmentOptions.TopRight;
+                            break;
+                        case nameof(HudAlignmentType.Left):
+                            textComp.alignment = TextAlignmentOptions.Left;
+                            break;
+                        case nameof(HudAlignmentType.Center):
+                            textComp.alignment = TextAlignmentOptions.Center;
+                            break;
+                        case nameof(HudAlignmentType.Right):
+                            textComp.alignment = TextAlignmentOptions.Right;
+                            break;
+                        case nameof(HudAlignmentType.BottomLeft):
+                            textComp.alignment = TextAlignmentOptions.BottomLeft;
+                            break;
+                        case nameof(HudAlignmentType.Bottom):
+                            textComp.alignment = TextAlignmentOptions.Bottom;
+                            break;
+                        case nameof(HudAlignmentType.BottomRight):
+                            textComp.alignment = TextAlignmentOptions.BottomRight;
+                            break;
+                        default:
+                            textComp.alignment = TextAlignmentOptions.Center;
+                            break;
+                    }
+                }
+                else
+                    textComp.SetText("");
+
                 return CalcIconPos(iconPos);
             }
             else
@@ -479,14 +572,30 @@ namespace SplashMeads.Harmony
             }
         }
 
+        private static string FormatTime(float time)
+        {
+            if (PluginConfig.timersFormat.Value == HudTimerFormat.Seconds)
+                return time.ToString("F0");
+            else
+            {
+                int totalTime = int.Parse(time.ToString("F0"));
+                int minutes = totalTime / 60;
+                int seconds = totalTime % 60;
+
+                string min = minutes > 0 ? $"{minutes}:" : "";
+                string sec = (minutes > 0 && seconds < 10) ? $"0{seconds}" : $"{seconds}";
+                return min + sec;
+            }
+        }
+
         private static IconPosition CalcIconPos(IconPosition value)
         {
-            float x = value.x + 35;
+            float x = value.x + PluginConfig.HudIconSize.Value + 5;
             float y = value.y;
 
-            if (x > 35) {
-                x = -35;
-                y = value.y + -30;
+            if (x > PluginConfig.HudIconSize.Value + 5) {
+                x = -(PluginConfig.HudIconSize.Value + 5);
+                y = value.y + -PluginConfig.HudIconSize.Value;
             }
 
             return new IconPosition(x, y);

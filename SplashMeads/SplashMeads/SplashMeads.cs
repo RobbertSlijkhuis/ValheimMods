@@ -32,6 +32,8 @@ namespace SplashMeads
         public static readonly int vananidirHash = -1907265002;
         public static readonly int antiStingHash = -1157133715;
         public static readonly int majorHealthHash = 1251702474;
+        public static readonly int mediumHealthHash = -67041294;
+        public static readonly int minorHealthHash = -590058386;
         public static int barleyWineSplashHash;
         public static int frostResistSplashHash;
         public static int poisonResistSplashHash;
@@ -39,6 +41,8 @@ namespace SplashMeads
         public static int vananidirSplashHash;
         public static int antiStingSplashHash;
         public static int majorHealthSplashHash;
+        public static int mediumHealthSplashHash;
+        public static int minorHealthSplashHash;
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -64,6 +68,8 @@ namespace SplashMeads
             ItemHelper.Create(prefabs.VananidirSplash, PluginConfig.mead5);
             ItemHelper.Create(prefabs.AntiStingSplash, PluginConfig.mead6);
             ItemHelper.Create(prefabs.MajorHealthSplash, PluginConfig.mead7);
+            ItemHelper.Create(prefabs.MediumHealthSplash, PluginConfig.mead8);
+            ItemHelper.Create(prefabs.MinorHealthSplash, PluginConfig.mead9);
 
             PrefabManager.OnVanillaPrefabsAvailable -= AddStuff;
         }
@@ -77,6 +83,8 @@ namespace SplashMeads
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.VananidirSplash, true));
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.AntiStingSplash, true));
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.MajorHealthSplash, true));
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.MediumHealthSplash, true));
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.MinorHealthSplash, true));
 
             barleyWineSplashHash = effects.BarlyWineSplash.name.GetStableHashCode();
             frostResistSplashHash = effects.FrostResistSplash.name.GetStableHashCode();
@@ -85,6 +93,8 @@ namespace SplashMeads
             vananidirSplashHash = effects.VananidirSplash.name.GetStableHashCode();
             antiStingSplashHash = effects.AntiStingSplash.name.GetStableHashCode();
             majorHealthSplashHash = effects.MajorHealthSplash.name.GetStableHashCode();
+            mediumHealthSplashHash = effects.MediumHealthSplash.name.GetStableHashCode();
+            minorHealthSplashHash = effects.MinorHealthSplash.name.GetStableHashCode();
         }
 
         private void InitAssetBundle()
@@ -161,6 +171,26 @@ namespace SplashMeads
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.MajorHealthSplashExplosion, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.MajorHealthSplashFX, true));
             effects.MajorHealthSplash = assetBundle.LoadAsset<StatusEffect>("Potion_health_major_SM");
+
+            prefabs.MediumHealthSplash = assetBundle.LoadAsset<GameObject>("SM_SplashMediumHealth");
+            prefabs.MediumHealthSplashProjectile = assetBundle.LoadAsset<GameObject>("mediumhealth_projectile_SM");
+            prefabs.MediumHealthSplashExplosion = assetBundle.LoadAsset<GameObject>("mediumhealth_explosion_SM");
+            prefabs.MediumHealthSplashFX = assetBundle.LoadAsset<GameObject>("fx_Potion_mediumhealth_SM");
+            prefabs.MediumHealthSplashHudIcon = enemyHud.transform.Find("HudRoot/HudBase/SplashMediumHealth").gameObject;
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.MediumHealthSplashProjectile, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.MediumHealthSplashExplosion, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.MediumHealthSplashFX, true));
+            effects.MediumHealthSplash = assetBundle.LoadAsset<StatusEffect>("Potion_health_medium_SM");
+
+            prefabs.MinorHealthSplash = assetBundle.LoadAsset<GameObject>("SM_SplashMinorHealth");
+            prefabs.MinorHealthSplashProjectile = assetBundle.LoadAsset<GameObject>("minorhealth_projectile_SM");
+            prefabs.MinorHealthSplashExplosion = assetBundle.LoadAsset<GameObject>("minorhealth_explosion_SM");
+            prefabs.MinorHealthSplashFX = assetBundle.LoadAsset<GameObject>("fx_Potion_minorhealth_SM");
+            prefabs.MinorHealthSplashHudIcon = enemyHud.transform.Find("HudRoot/HudBase/SplashMinorHealth").gameObject;
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.MinorHealthSplashProjectile, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.MinorHealthSplashExplosion, true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.MinorHealthSplashFX, true));
+            effects.MinorHealthSplash = assetBundle.LoadAsset<StatusEffect>("Potion_health_minor_SM");
         }
     }
 }

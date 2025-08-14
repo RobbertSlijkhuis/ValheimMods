@@ -100,6 +100,14 @@ namespace SplashMeads.Helpers
                         fxPrefab = SplashMeads.Instance.prefabs.MajorHealthSplashFX;
                         statusEffect = SplashMeads.Instance.effects.MajorHealthSplash;
                         break;
+                    case var value when value == SplashMeads.Instance.prefabs.MediumHealthSplash.name:
+                        fxPrefab = SplashMeads.Instance.prefabs.MediumHealthSplashFX;
+                        statusEffect = SplashMeads.Instance.effects.MediumHealthSplash;
+                        break;
+                    case var value when value == SplashMeads.Instance.prefabs.MinorHealthSplash.name:
+                        fxPrefab = SplashMeads.Instance.prefabs.MinorHealthSplashFX;
+                        statusEffect = SplashMeads.Instance.effects.MinorHealthSplash;
+                        break;
                 }
 
                 if (fxPrefab == null || statusEffect == null)
@@ -165,6 +173,12 @@ namespace SplashMeads.Helpers
                         break;
                     case var value when value == SplashMeads.Instance.prefabs.MajorHealthSplash.name:
                         explPrefab = SplashMeads.Instance.prefabs.MajorHealthSplashExplosion;
+                        break;
+                    case var value when value == SplashMeads.Instance.prefabs.MediumHealthSplash.name:
+                        explPrefab = SplashMeads.Instance.prefabs.MediumHealthSplashExplosion;
+                        break;
+                    case var value when value == SplashMeads.Instance.prefabs.MinorHealthSplash.name:
+                        explPrefab = SplashMeads.Instance.prefabs.MinorHealthSplashExplosion;
                         break;
                 }
 

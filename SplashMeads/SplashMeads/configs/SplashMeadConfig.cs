@@ -146,8 +146,8 @@ namespace SplashMeads.Configs
                 });
             };
 
-            duration = Config.Bind(new ConfigDefinition(options.sectionName, "Duration"), options.duration,
-                new ConfigDescription("The duration applied to the status effect (seconds)",
+            duration = Config.Bind(new ConfigDefinition(options.sectionName, options.isCooldown ? "Cooldown" : "Duration"), options.duration,
+                new ConfigDescription("The " + (options.isCooldown ? "cooldown" : "duration") + " applied to the status effect (seconds)",
                 new AcceptableValueRange<int>(60, 600),
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             duration.SettingChanged += (obj, attr) =>

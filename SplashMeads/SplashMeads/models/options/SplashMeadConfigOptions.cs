@@ -21,14 +21,16 @@ namespace SplashMeads.Models
         public float weight = 1f;
         public int duration = 300;
         public float radius = 4f;
+        public bool isCooldown;
 
-        public SplashMeadConfigOptions(GameObject prefab, string name, string recipe)
+        public SplashMeadConfigOptions(GameObject prefab, string name, string recipe, bool isCooldown = false)
         {
             this.prefab = prefab;
             this.name = name;
             sectionName = $"{name.Replace("'", "")}";
             this.recipe = recipe;
             recipeName = $"Recipe_{prefab.name}";
+            this.isCooldown = isCooldown;
         }
     }
 }
