@@ -3,6 +3,7 @@ using ModularMagic_Core.Configs;
 using ModularMagic_Core.Helpers;
 using ModularMagic_Core.Models;
 using ModularMagic_Core.Types;
+using ModularMagic_EarthStaffs.Types;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -29,13 +30,13 @@ namespace ModularMagic_Core.components
         {
             m_imbuementTable = transform.parent.parent.gameObject.GetComponent<ImbuementTable>();
             m_imbuementTable.m_onSave.AddListener(UpdateEmission);
+            m_imbuementTable.m_onRuneActivation.AddListener(UpdateEmission);
 
             m_origin = transform.localPosition;
             transform.localRotation = TransformHelper.generateRotation(new Vector3(Random.Range(265, 275), Random.Range(-5f, 5), Random.Range(265, 275)));
             transform.localScale = new Vector3(0.008f, 0.008f, 0.008f);
             m_canActivate = CanActivate();
 
-            InitRequiredImbuements();
             UpdateEmission();
 
             Invoke(nameof(StartMoveIn), m_durationMoveIn);
@@ -49,14 +50,14 @@ namespace ModularMagic_Core.components
 
             m_canActivate = CanActivate();
 
-            string inputString = m_canActivate == CanRuneActivateType.Yes ? "\n[<color=yellow>E</color>] " : "\n" + StatusMessage(m_canActivate);
-            string nameColor = m_canActivate == CanRuneActivateType.Yes || m_canActivate == CanRuneActivateType.RequiredForOtherImbuement ? (m_imbuement.enabled ? "green" : "yellow") : "red";
-            string name = "<color=" + nameColor + ">" + m_imbuement.name + "</color>";
-            string description = "\n" + m_imbuement.description;
-            string cost = "\n" + m_imbuement.materialRequired + " Magic powder, " + m_imbuement.skillRequired + " skill";
-            string enableMessage = m_canActivate == CanRuneActivateType.Yes ? (m_imbuement.enabled ? "Disable" : "Enable") : "";
+            string inputString = m_canActivate == CanRuneActivateType.Yes ? Localization.instance.Localize("\n[<color=yellow>$KEY_Use</color>] Upgrade\n[<color=yellow>$KEY_AltPlace + $KEY_Use</color>] Downgrade") : "\n" + StatusMessage(m_canActivate);
+            string nameColor = m_canActivate == CanRuneActivateType.Yes ? (m_imbuement.enabled ? "green" : "yellow") : "red";
+            string name = $"<color={nameColor}>{m_imbuement.name} {(m_imbuement.level > 0 ? m_imbuement.level : "")}</color>";
+            string description = $"\n {m_imbuement.description}";
+            string divider = "\n <color=#808080ff>--------------------------------------</color>";
+            // string cost = "\n" + m_imbuement.materialRequired + " Magic powder, " + m_imbuement.skillRequired + " skill";
 
-            return name + description + cost + inputString + enableMessage;
+            return name + description + inputString;
         }
 
         public string GetHoverName()
@@ -74,12 +75,87 @@ namespace ModularMagic_Core.components
             if (hold)
                 return false;
 
-            if (m_canActivate == CanRuneActivateType.Yes)
+            if (m_canActivate != CanRuneActivateType.Yes)
+                return false;
+
+            if (m_imbuement.category == ImbuementCategoryType.Normal)
             {
-                Jotunn.Logger.LogWarning("=== Activate =====================");
-                m_imbuement.enabled = !m_imbuement.enabled;
-                m_imbuementTable.m_onRuneActivation.Invoke();
+                Jotunn.Logger.LogWarning("=== Activate Normal =====================");
+
+                if (alt)
+                {
+                    m_imbuement.level--;
+
+                    if (m_imbuement.level < 0)
+                        m_imbuement.level = 0;
+
+                    if (m_imbuement.level == 0)
+                        m_imbuement.enabled = false;
+
+                    UpdateEmission();
+                    m_imbuementTable.m_onRuneActivation.Invoke();
+                    return true;
+                }
+
+                m_imbuement.level++;
+
+                if (m_imbuement.level > m_imbuement.maxLevel)
+                    m_imbuement.level = m_imbuement.maxLevel;
+
+                if (m_imbuement.level > 0)
+                    m_imbuement.enabled = true;
+
                 UpdateEmission();
+                m_imbuementTable.m_onRuneActivation.Invoke();
+                return true;
+            }
+
+            if (m_imbuement.category == ImbuementCategoryType.Attack)
+            {
+                Jotunn.Logger.LogWarning("=== Activate Attack =====================");
+
+                if (alt)
+                {
+                    m_imbuement.enabled = false;
+                    UpdateEmission();
+                    return true;
+                }
+
+                Imbuement exists = m_imbuementTable.m_imbuements.Find(item => item.category == ImbuementCategoryType.Attack && item.enabled);
+
+                if (exists != null)
+                {
+                    exists.enabled = false;
+                }
+
+                m_imbuement.enabled = true;
+                UpdateEmission();
+                m_imbuementTable.m_onRuneActivation.Invoke();
+                return true;
+            }
+
+            if (m_imbuement.category == ImbuementCategoryType.SecondaryAttack)
+            {
+                Jotunn.Logger.LogWarning("=== Activate Secondary Attack =====================");
+
+                if (alt)
+                {
+                    m_imbuement.enabled = false;
+                    UpdateEmission();
+                    m_imbuementTable.m_onRuneActivation.Invoke();
+                    return true;
+                }
+
+                Imbuement exists = m_imbuementTable.m_imbuements.Find(item => item.category == ImbuementCategoryType.SecondaryAttack && item.enabled);
+
+                if (exists != null)
+                {
+                    exists.enabled = false;
+                }
+
+                m_imbuement.enabled = true;
+                UpdateEmission();
+                m_imbuementTable.m_onRuneActivation.Invoke();
                 return true;
             }
 
@@ -92,36 +168,33 @@ namespace ModularMagic_Core.components
             Invoke(nameof(StartMoveOut), m_durationMoveIn);
         }
 
-        private void InitRequiredImbuements()
-        {
-            SetupRequirementList(m_imbuement.requires, -1);
-            SetupRequirementList(m_imbuement.requiredFor, 1);
-        }
-
         private string CanActivate()
         {
-            if (m_imbuement.enabled)
-            {
-                Imbuement requiredFor = m_imbuement.requiredFor.Find(item => item.enabled);
-
-                if (requiredFor == null)
-                    return CanRuneActivateType.Yes;
-                else
-                    return CanRuneActivateType.RequiredForOtherImbuement;
-            }
-
             if (Player.m_localPlayer == null)
                 throw new Exception("Player is null");
 
-            if (m_imbuement.requires.Count != 0 && m_imbuement.requires.Find(item => item.enabled) == null)
-                return CanRuneActivateType.RequiresOtherImbuement;
-            
-            if (Player.m_localPlayer.GetSkillLevel(Skills.SkillType.ElementalMagic) < m_imbuement.skillRequired)
-                return CanRuneActivateType.NotEnoughSkill;
+            //if (m_imbuement.category == ImbuementCategoryType.Attack)
+            //{
+            //    Imbuement imbuement = m_imbuementTable.m_imbuements.Find(item => item.category == ImbuementCategoryType.Attack && item.enabled);
 
-            Inventory inventory = Player.m_localPlayer.GetInventory();
-            if ((inventory.CountItems(m_imbuementTable.m_imbuementMaterial) - m_imbuementTable.CountMaterialRequired()) < m_imbuement.materialRequired)
-                return CanRuneActivateType.NotEnoughMaterial;
+            //    if (imbuement != null)
+            //        return CanRuneActivateType.HasAttackUpgrade;
+            //}
+
+            //if (m_imbuement.category == ImbuementCategoryType.SecondaryAttack)
+            //{
+            //    Imbuement imbuement = m_imbuementTable.m_imbuements.Find(item => item.category == ImbuementCategoryType.SecondaryAttack && item.enabled);
+
+            //    if (imbuement != null)
+            //        return CanRuneActivateType.HasSecondaryAttack;
+            //}
+
+            //if (Player.m_localPlayer.GetSkillLevel(Skills.SkillType.ElementalMagic) < m_imbuement.skillRequired)
+            //    return CanRuneActivateType.NotEnoughSkill;
+
+            //Inventory inventory = Player.m_localPlayer.GetInventory();
+            //if ((inventory.CountItems(m_imbuementTable.m_imbuementMaterial) - m_imbuementTable.CountMaterialRequired()) < m_imbuement.materialRequired)
+            //    return CanRuneActivateType.NotEnoughMaterial;
 
             return CanRuneActivateType.Yes;
         }
@@ -130,14 +203,14 @@ namespace ModularMagic_Core.components
         {
             switch (status)
             {
-                case nameof(CanRuneActivateType.RequiresOtherImbuement):
-                    return "Requires" + FormatNamesMessage(m_imbuement.requires);
-                case nameof(CanRuneActivateType.RequiredForOtherImbuement):
-                    return "Required for" + FormatNamesMessage(m_imbuement.requiredFor);
                 case nameof(CanRuneActivateType.NotEnoughSkill):
                     return "Not enough skill";
                 case nameof(CanRuneActivateType.NotEnoughMaterial):
                     return "Not enough materials";
+                case nameof(CanRuneActivateType.HasAttackUpgrade):
+                    return "There is already another attack upgrade active!";
+                case nameof(CanRuneActivateType.HasSecondaryAttack):
+                    return "There is already another secondary attack active!";
                 default:
                     return "Something went wrong, contact author pls";
             }
@@ -150,85 +223,65 @@ namespace ModularMagic_Core.components
             if (m_imbuement.enabled)
             {
                 LightPresetColors colors = LightColorPresetHelper.GetColors(m_imbuement.isImbued ? LightColorPresetType.Green : LightColorPresetType.Yellow);
-                meshComp.materials = new Material[1] { m_runeMaterials.emissive };
+                Material runeMat = m_runeMaterials.wood;
+
+                switch (m_imbuement.level)
+                {
+                    case 1:
+                        runeMat = m_runeMaterials.wood;
+                        break;
+                    case 2:
+                        runeMat = m_runeMaterials.stone;
+                        break;
+                    case 3:
+                        runeMat = m_runeMaterials.marble;
+                        break;
+                    case 4:
+                        runeMat = m_runeMaterials.grausten;
+                        break;
+                    default:
+                        runeMat = m_runeMaterials.wood;
+                        break;
+                }
+
+                meshComp.materials = new Material[1] { runeMat };
 
                 Material mat = meshComp.materials[0];
                 mat.SetColor("_EmissionColor", colors.emissionColor);
             }
             else
-                meshComp.materials = new Material[1] { m_runeMaterials.material };
+                meshComp.materials = new Material[1] { m_runeMaterials.woodOff };
         }
 
         public void StartMoveIn()
         {
             Vector3 start = transform.localPosition;
-            Vector3 end = ImbuementHelper.CalculatePosition(m_imbuement.path);
+            Vector3 end = ImbuementHelper.CalculatePosition(m_imbuement.category, m_imbuement.column);
             m_startIdle = end;
-            StartCoroutine(LerpTransform(start, end, m_durationMoveIn));
+            StartCoroutine(LerpHelper.LerpTransform(transform, start, end, m_durationMoveIn));
         }
 
         public void StartMoveOut()
         {
             Vector3 start = transform.localPosition;
             Vector3 end = m_origin;
-            StartCoroutine(LerpTransform(start, end, m_durationMoveIn, true));
+            StartCoroutine(LerpHelper.LerpTransform(transform, start, end, m_durationMoveIn, gameObject, true));
         }
 
         public void StartIdle()
         {
             Vector3 start = transform.localPosition;
-            Vector3 end = RandomPosition(m_startIdle, m_minIdle, m_maxIdle);
-            StartCoroutine(LerpTransform(start, end, m_durationIdle));
+            Vector3 end = LerpHelper.RandomPosition(m_startIdle, m_minIdle, m_maxIdle);
+            StartCoroutine(LerpHelper.LerpTransform(transform, start, end, m_durationIdle));
         }
 
-        private Vector3 RandomPosition(Vector3 start, float min, float max)
-        {
-            Vector3 end = new Vector3(start.x, start.y, start.z);
-            end.x = start.x + Random.Range(min, max);
-            end.y = start.y + Random.Range(min, max);
-
-            return end;
-        }
-
-        private IEnumerator LerpTransform(Vector3 start, Vector3 end, float duration, bool destroy = false)
-        {
-            float timeElapsed = 0f;
-
-            while (timeElapsed < duration)
-            {
-                float t = timeElapsed / duration;
-                transform.localPosition = Vector3.Lerp(start, end, t);
-                timeElapsed += Time.deltaTime;
-
-                yield return null;
-            }
-
-            transform.localPosition = end;
-
-            if (destroy)
-                GameObject.Destroy(gameObject);
-        }
-
-        private void SetupRequirementList(List<Imbuement> requirementList, int row)
-        {
-            Imbuement columnSame = m_imbuementTable.m_imbuements.Find(item => item.path.row == m_imbuement.path.row + row && item.path.column == m_imbuement.path.column);
-            Imbuement columnLeft = m_imbuementTable.m_imbuements.Find(item => item.path.row == m_imbuement.path.row + row && item.path.column == m_imbuement.path.column - 1);
-            Imbuement columnRight = m_imbuementTable.m_imbuements.Find(item => item.path.row == m_imbuement.path.row + row && item.path.column == m_imbuement.path.column + 1);
-
-            if (columnSame != null)
-                requirementList.Add(columnSame);
-
-            if (columnLeft != null && (columnLeft.path.allowIntersect || m_imbuement.path.allowIntersect))
-                requirementList.Add(columnLeft);
-
-            if (columnRight != null && (columnRight.path.allowIntersect || m_imbuement.path.allowIntersect))
-                requirementList.Add(columnRight);
-        }
-
-        private string FormatNamesMessage(List<Imbuement> imbuements)
+        private string FormatNamesMessage(List<Imbuement> imbuements, bool filterEnabled = false)
         {
             string names = "";
             string multipleString = imbuements.Count > 1 ? " any of: " : ": ";
+
+            if (filterEnabled)
+                imbuements = imbuements.FindAll(item => item.enabled);
 
             foreach (Imbuement imbuement in imbuements)
             {

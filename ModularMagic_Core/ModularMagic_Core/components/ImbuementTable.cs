@@ -4,7 +4,6 @@ using ModularMagic_Core.Models;
 using ModularMagic_Core.Types;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using static ItemDrop;
@@ -17,6 +16,7 @@ namespace ModularMagic_Core.Components
         public List<Imbuement> m_imbuements = new List<Imbuement>();
         public List<Imbuement> m_imbued = new List<Imbuement>();
         public ItemData m_itemData;
+        public string m_imbuementsString;
         public string m_imbuementMaterial = "$item_resin";
 
         public UnityEvent m_onItemAttach = new UnityEvent();
@@ -24,25 +24,53 @@ namespace ModularMagic_Core.Components
         public UnityEvent m_onRuneActivation = new UnityEvent();
         public UnityEvent m_onSave = new UnityEvent();
 
-        private void Awake ()
+        private Transform m_spellbookTransform;
+        private Vector3 m_spellbookStartIdle;
+        private Vector3 m_spellbookEndIdle;
+        private float m_spellbookDurationIdle = 10f;
+        private bool m_spellbookReverseIdle = false;
+
+        private Transform m_staffTransform;
+        private Vector3 m_staffStartIdle;
+        private Vector3 m_staffEndIdle;
+        private float m_staffDurationIdle = 10f;
+        private bool m_staffReverseIdle = false;
+
+        private void Awake()
         {
             netView = transform.Find("itemstand").gameObject.GetComponent<ItemStand>().m_netViewOverride;
+
+            m_spellbookTransform = transform.Find("controls/accept_book");
+            m_spellbookStartIdle = new Vector3(m_spellbookTransform.localPosition.x, m_spellbookTransform.localPosition.y, m_spellbookTransform.localPosition.z);
+            m_spellbookEndIdle = new Vector3(m_spellbookTransform.localPosition.x, m_spellbookTransform.localPosition.y + 0.06f, m_spellbookTransform.localPosition.z);
+
+            m_staffTransform = transform.Find("itemstand/attach_other");
+            m_staffStartIdle = new Vector3(m_staffTransform.localPosition.x, m_staffTransform.localPosition.y, m_staffTransform.localPosition.z);
+            m_staffEndIdle = new Vector3(m_staffTransform.localPosition.x, m_staffTransform.localPosition.y + 0.06f, m_staffTransform.localPosition.z);
+
+            InvokeRepeating(nameof(StartSpellbookIdle), 0f, m_spellbookDurationIdle + 0.1f);
         }
 
         public void StaffAttach(string imbuementsString, ItemData itemData)
         {
+            
             m_imbuements = ImbuementHelper.StringToList(imbuementsString);
-            m_itemData = itemData;
             m_imbued = m_imbuements.FindAll(item => item.isImbued);
+            m_itemData = itemData;
+            m_imbuementsString = imbuementsString;
             m_onItemAttach.Invoke();
             CreateRunes();
+            InvokeRepeating(nameof(StartStaffIdle), 0f, m_staffDurationIdle + 0.1f);
         }
 
         public void StaffRemove()
         {
-            m_imbuements = null;
+            CancelInvoke(nameof(StartStaffIdle));
+
+            m_imbuements = new List<Imbuement>();
+            m_imbued = new List<Imbuement>();
             m_itemData = null;
-            m_imbued = null;
+            m_imbuementsString = null;
             m_onItemRemove.Invoke();
             RemoveRunes();
         }
@@ -101,39 +129,45 @@ namespace ModularMagic_Core.Components
             if (Player.m_localPlayer == null || m_imbuements == null)
                 return CanImbueType.No;
 
-            Inventory inventory = Player.m_localPlayer.GetInventory();
-            int materialInInventory = inventory.CountItems(m_imbuementMaterial);
-            int totalMaterialRequired = CountMaterialRequired();
+            //Inventory inventory = Player.m_localPlayer.GetInventory();
+            //int materialInInventory = inventory.CountItems(m_imbuementMaterial);
+            //int totalMaterialRequired = CountMaterialRequired();
 
-            if (materialInInventory == 0)
-                return CanImbueType.No;
+            //if (materialInInventory == 0)
+            //    return CanImbueType.No;
 
-            if (totalMaterialRequired == 0 && m_imbued.All(item => item.enabled))
+            //if (totalMaterialRequired == 0 && m_imbued.All(item => item.enabled))
+            //    return CanImbueType.NoChange;
+
+            //if (materialInInventory >= totalMaterialRequired)
+            //    return CanImbueType.Yes;
+
+            string currentImbuementsString = ImbuementHelper.ListToString(m_imbuements);
+
+            Jotunn.Logger.LogWarning("CanImbue: " + m_imbuementsString == currentImbuementsString);
+            if (m_imbuementsString == currentImbuementsString)
                 return CanImbueType.NoChange;
-
-            if (materialInInventory >= totalMaterialRequired)
-                return CanImbueType.Yes;
 
             return CanImbueType.Yes;
         }
 
-        public int CountMaterialRequired()
-        {
-            if (m_imbuements == null)
-                return 0;
+        //public int CountMaterialRequired()
+        //{
+        //    if (m_imbuements == null)
+        //        return 0;
 
-            int totalMaterialRequired = 0;
+        //    int totalMaterialRequired = 0;
 
-            foreach (Imbuement imbuement in m_imbuements.FindAll(item => !item.isImbued))
-            {
-                if (!imbuement.enabled)
-                    continue;
+        //    foreach (Imbuement imbuement in m_imbuements.FindAll(item => !item.isImbued))
+        //    {
+        //        if (!imbuement.enabled)
+        //            continue;
 
-                totalMaterialRequired += imbuement.materialRequired;
-            }
+        //        totalMaterialRequired += imbuement.materialRequired;
+        //    }
 
-            return totalMaterialRequired;
-        }
+        //    return totalMaterialRequired;
+        //}
 
         public bool Save()
         {
@@ -155,6 +189,7 @@ namespace ModularMagic_Core.Components
                     imbuement.isImbued = true;
                 }
 
+                m_imbuementsString = imbuementsString;
                 m_imbued = m_imbuements.FindAll(item => item.isImbued);
                 m_onSave.Invoke();
                 return true;
@@ -164,6 +199,22 @@ namespace ModularMagic_Core.Components
                 Jotunn.Logger.LogError("Could not save imbuements to item: " + e);
                 return false;
             }
+        }
+
+        public void StartSpellbookIdle()
+        {
+            m_spellbookReverseIdle = !m_spellbookReverseIdle;
+            Vector3 start = m_spellbookReverseIdle ? m_spellbookEndIdle : m_spellbookStartIdle;
+            Vector3 end = m_spellbookReverseIdle ? m_spellbookStartIdle : m_spellbookEndIdle;
+            StartCoroutine(LerpHelper.LerpTransform(m_spellbookTransform, start, end, m_spellbookDurationIdle));
+        }
+
+        public void StartStaffIdle()
+        {
+            m_staffReverseIdle = !m_staffReverseIdle;
+            Vector3 start = m_staffReverseIdle ? m_staffEndIdle : m_staffStartIdle;
+            Vector3 end = m_staffReverseIdle ? m_staffStartIdle : m_staffEndIdle;
+            StartCoroutine(LerpHelper.LerpTransform(m_staffTransform, start, end, m_staffDurationIdle));
         }
     }
 }

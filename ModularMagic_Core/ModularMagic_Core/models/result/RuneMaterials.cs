@@ -4,13 +4,19 @@ namespace ModularMagic_Core.Models
 {
     internal class RuneMaterials
     {
-        public Material material;
-        public Material emissive;
+        public Material grausten;
+        public Material marble;
+        public Material stone;
+        public Material woodOff;
+        public Material wood;
 
-        public RuneMaterials(Material material, Material emissive)
+        public RuneMaterials(Material woodOff, Material wood, Material stone, Material marble, Material grausten)
         {
-            this.material = material;
-            this.emissive = emissive;
+            this.grausten = grausten;
+            this.marble = marble;
+            this.stone = stone;
+            this.wood = wood;
+            this.woodOff = woodOff;
         }
     }
 }

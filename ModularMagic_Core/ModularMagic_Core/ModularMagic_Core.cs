@@ -54,13 +54,20 @@ namespace ModularMagic_Core
         private void AddPieces()
         {
             ItemStand itemStandComp = prefabs.ImbuementTable.transform.Find("itemstand").gameObject.GetComponent<ItemStand>();
-            Transform acceptTrans = prefabs.ImbuementTable.transform.Find("controls/accept");
+            Transform acceptTrans = prefabs.ImbuementTable.transform.Find("controls/accept_book");
             itemStandComp.m_unsupportedItems.Add(PrefabManager.Instance.GetPrefab("Hammer").GetComponent<ItemDrop>());
             acceptTrans.gameObject.AddComponent<ImbuementTableAccept>();
             prefabs.ImbuementTable.AddComponent<ImbuementTable>();
 
             PieceHelper.Create(prefabs.ImbuementTable, PluginConfig.piece1);
             PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
+
+            foreach (var button in ZInput.instance.m_buttons)
+            {
+                Jotunn.Logger.LogWarning("============================================");
+                Jotunn.Logger.LogWarning("Key: " + button.Key);
+                Jotunn.Logger.LogWarning("Name: " + button.Value.Name);
+            }
         }
 
         /**
@@ -74,19 +81,43 @@ namespace ModularMagic_Core
             prefabs.EitrFine = assetBundle.LoadAsset<GameObject>("MMC_EitrFine");
             prefabs.ImbuementTable = assetBundle.LoadAsset<GameObject>("MMC_ImbuementTable");
 
-            materials.RuneA = assetBundle.LoadAsset<Material>("Rune_A_MMC");
-            materials.RuneB = assetBundle.LoadAsset<Material>("Rune_B_MMC");
-            materials.RuneC = assetBundle.LoadAsset<Material>("Rune_C_MMC");
-            materials.RuneD = assetBundle.LoadAsset<Material>("Rune_D_MMC");
-            materials.RuneE = assetBundle.LoadAsset<Material>("Rune_E_MMC");
-            materials.RuneF = assetBundle.LoadAsset<Material>("Rune_F_MMC");
+            materials.SpellBook = assetBundle.LoadAsset<Material>("Spellbook2_1_1_MMC");
+            materials.SpellBookOff = assetBundle.LoadAsset<Material>("Spellbook2_1_1_off_MMC");
 
-            materials.RuneEmissiveA = assetBundle.LoadAsset<Material>("RuneEmissive_A_MMC");
-            materials.RuneEmissiveB = assetBundle.LoadAsset<Material>("RuneEmissive_B_MMC");
-            materials.RuneEmissiveC = assetBundle.LoadAsset<Material>("RuneEmissive_C_MMC");
-            materials.RuneEmissiveD = assetBundle.LoadAsset<Material>("RuneEmissive_D_MMC");
-            materials.RuneEmissiveE = assetBundle.LoadAsset<Material>("RuneEmissive_E_MMC");
-            materials.RuneEmissiveF = assetBundle.LoadAsset<Material>("RuneEmissive_F_MMC");
+            materials.RuneWoodOffA = assetBundle.LoadAsset<Material>("Rune_WoodOff_A_MMC");
+            materials.RuneWoodOffB = assetBundle.LoadAsset<Material>("Rune_WoodOff_B_MMC");
+            materials.RuneWoodOffC = assetBundle.LoadAsset<Material>("Rune_WoodOff_C_MMC");
+            materials.RuneWoodOffD = assetBundle.LoadAsset<Material>("Rune_WoodOff_D_MMC");
+            materials.RuneWoodOffE = assetBundle.LoadAsset<Material>("Rune_WoodOff_E_MMC");
+            materials.RuneWoodOffF = assetBundle.LoadAsset<Material>("Rune_WoodOff_F_MMC");
+
+            materials.RuneWoodA = assetBundle.LoadAsset<Material>("Rune_Wood_A_MMC");
+            materials.RuneWoodB = assetBundle.LoadAsset<Material>("Rune_Wood_B_MMC");
+            materials.RuneWoodC = assetBundle.LoadAsset<Material>("Rune_Wood_C_MMC");
+            materials.RuneWoodD = assetBundle.LoadAsset<Material>("Rune_Wood_D_MMC");
+            materials.RuneWoodE = assetBundle.LoadAsset<Material>("Rune_Wood_E_MMC");
+            materials.RuneWoodF = assetBundle.LoadAsset<Material>("Rune_Wood_F_MMC");
+
+            materials.RuneStoneA = assetBundle.LoadAsset<Material>("Rune_Stone_A_MMC");
+            materials.RuneStoneB = assetBundle.LoadAsset<Material>("Rune_Stone_B_MMC");
+            materials.RuneStoneC = assetBundle.LoadAsset<Material>("Rune_Stone_C_MMC");
+            materials.RuneStoneD = assetBundle.LoadAsset<Material>("Rune_Stone_D_MMC");
+            materials.RuneStoneE = assetBundle.LoadAsset<Material>("Rune_Stone_E_MMC");
+            materials.RuneStoneF = assetBundle.LoadAsset<Material>("Rune_Stone_F_MMC");
+
+            materials.RuneMarbleA = assetBundle.LoadAsset<Material>("Rune_Marble_A_MMC");
+            materials.RuneMarbleB = assetBundle.LoadAsset<Material>("Rune_Marble_B_MMC");
+            materials.RuneMarbleC = assetBundle.LoadAsset<Material>("Rune_Marble_C_MMC");
+            materials.RuneMarbleD = assetBundle.LoadAsset<Material>("Rune_Marble_D_MMC");
+            materials.RuneMarbleE = assetBundle.LoadAsset<Material>("Rune_Marble_E_MMC");
+            materials.RuneMarbleF = assetBundle.LoadAsset<Material>("Rune_Marble_F_MMC");
+
+            materials.RuneGraustenA = assetBundle.LoadAsset<Material>("Rune_Grausten_A_MMC");
+            materials.RuneGraustenB = assetBundle.LoadAsset<Material>("Rune_Grausten_B_MMC");
+            materials.RuneGraustenC = assetBundle.LoadAsset<Material>("Rune_Grausten_C_MMC");
+            materials.RuneGraustenD = assetBundle.LoadAsset<Material>("Rune_Grausten_D_MMC");
+            materials.RuneGraustenE = assetBundle.LoadAsset<Material>("Rune_Grausten_E_MMC");
+            materials.RuneGraustenF = assetBundle.LoadAsset<Material>("Rune_Grausten_F_MMC");
         }
     }
 }
