@@ -177,7 +177,7 @@ MonoBehaviour:
       m_timedBlockBonus: 2
       m_animationState: 12
       m_skillType: 9
-      m_toolTier: 5
+      m_toolTier: 0
       m_damages:
         m_damage: 0
         m_blunt: 14

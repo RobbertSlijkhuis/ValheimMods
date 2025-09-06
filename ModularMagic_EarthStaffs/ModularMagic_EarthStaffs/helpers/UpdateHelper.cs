@@ -13,7 +13,10 @@ namespace ModularMagic_EarthStaffs.Helpers
             if (prefab == null)
                 throw new Exception("Prefab is null");
 
+            Jotunn.Logger.LogWarning("UpdateItemData prefab: " + prefab.name);
+
             ItemData itemData = prefab.GetComponent<ItemDrop>().m_itemData;
+            Jotunn.Logger.LogWarning("UpdateItemData itemData: " + itemData.m_shared.m_name);
             UpdateItemData(itemData, options);
             UpdateItemDataInHand(itemData, options);
         }
@@ -41,13 +44,9 @@ namespace ModularMagic_EarthStaffs.Helpers
             if (options.damageSpiritPerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_spirit = (float)options.damageSpiritPerLevel; }
             if (options.equipStatusEffect == null || options.equipStatusEffect.name != "empty_MMES") { itemData.m_shared.m_equipStatusEffect = options.equipStatusEffect; }
             if (options.attackEitr != null) { itemData.m_shared.m_attack.m_attackEitr = (float)options.attackEitr; }
-            if (options.secondaryAttackEitr != null) { itemData.m_shared.m_secondaryAttack.m_attackEitr = (float)options.secondaryAttackEitr; }
             if (options.projectileVelocity != null) { itemData.m_shared.m_attack.m_projectileVel = (float)options.projectileVelocity; }
             if (options.projectileAccuracy != null) { itemData.m_shared.m_attack.m_projectileAccuracy = (float)options.projectileAccuracy; }
             if (options.projectileBurst != null) { itemData.m_shared.m_attack.m_burstInterval = (float)options.projectileBurst; }
-            if (options.secondaryLaunchAngle != null) { itemData.m_shared.m_secondaryAttack.m_launchAngle = (float)options.secondaryLaunchAngle; }
-            if (options.secondaryProjectileVelocity != null) { itemData.m_shared.m_secondaryAttack.m_projectileVel = (float)options.secondaryProjectileVelocity; }
-            if (options.secondaryProjectileAccuracy != null) { itemData.m_shared.m_secondaryAttack.m_projectileAccuracy = (float)options.secondaryProjectileAccuracy; }
             if (options.weight != null) { itemData.m_shared.m_weight = (float)options.weight; }
             if (options.maxDurability != null) { itemData.m_shared.m_maxDurability = (float)options.maxDurability; }
             if (options.maxQuality > 0) { itemData.m_shared.m_maxQuality = (int)options.maxQuality; }
@@ -57,6 +56,11 @@ namespace ModularMagic_EarthStaffs.Helpers
             if (options.deflectionForce != null) { itemData.m_shared.m_deflectionForce = (float)options.deflectionForce; }
             if (options.attackForce != null) { itemData.m_shared.m_attackForce = (float)options.attackForce; }
             if (options.backstabBonus != null) { itemData.m_shared.m_backstabBonus = (float)options.backstabBonus; }
+
+            if (options.secondaryAttackEitr != null) { itemData.m_shared.m_secondaryAttack.m_attackEitr = (float)options.secondaryAttackEitr; }
+            if (options.secondaryLaunchAngle != null) { itemData.m_shared.m_secondaryAttack.m_launchAngle = (float)options.secondaryLaunchAngle; }
+            if (options.secondaryProjectileVelocity != null) { itemData.m_shared.m_secondaryAttack.m_projectileVel = (float)options.secondaryProjectileVelocity; }
+            if (options.secondaryProjectileAccuracy != null) { itemData.m_shared.m_secondaryAttack.m_projectileAccuracy = (float)options.secondaryProjectileAccuracy; }
             if (options.secondaryAttack != null) { itemData.m_shared.m_secondaryAttack = options.secondaryAttack.m_shared.m_attack; }
         }
 
@@ -67,9 +71,18 @@ namespace ModularMagic_EarthStaffs.Helpers
 
             ItemData weaponItemData = Player.m_localPlayer.GetCurrentWeapon();
 
-            if (weaponItemData == null || weaponItemData.m_shared.m_name != itemData.m_shared.m_name)
+            Jotunn.Logger.LogWarning("weaponItemData: " + weaponItemData?.m_shared?.m_name);
+            Jotunn.Logger.LogWarning("itemData: " + itemData?.m_shared?.m_name);
+
+            if (weaponItemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth1.name && 
+                weaponItemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth2.name &&
+                weaponItemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth3.name
+            )
                 return;
 
+            Jotunn.Logger.LogWarning("Velocity: " + options.secondaryProjectileVelocity);
+            Jotunn.Logger.LogWarning("Accuracy: " + options.secondaryProjectileAccuracy);
+            Jotunn.Logger.LogWarning("Angle: " + options.secondaryLaunchAngle);
             UpdateItemData(weaponItemData, options);
         }
 
@@ -137,7 +150,7 @@ namespace ModularMagic_EarthStaffs.Helpers
             if (itemDrop == null)
                 throw new Exception("ItemDrop is null");
 
-            GameObject attackPrefab = itemDrop.m_itemData.m_shared.m_secondaryAttack.m_attackProjectile;
+            GameObject attackPrefab = itemDrop.m_itemData.m_shared.m_attack.m_attackProjectile;
 
             if (attackPrefab == null)
                 throw new Exception("Attack prefab is null");

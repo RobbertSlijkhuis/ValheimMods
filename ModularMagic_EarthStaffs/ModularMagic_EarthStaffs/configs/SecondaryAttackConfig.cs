@@ -1,10 +1,7 @@
 ﻿using BepInEx.Configuration;
-using Jotunn.Entities;
-using Jotunn.Managers;
 using ModularMagic_EarthStaffs.Helpers;
 using ModularMagic_EarthStaffs.Models;
 using ModularMagic_EarthStaffs.Types;
-using UnityEngine;
 
 namespace ModularMagic_EarthStaffs.Configs
 {
@@ -30,32 +27,26 @@ namespace ModularMagic_EarthStaffs.Configs
         public ConfigEntry<float> projectileAccuracy;
 
         // Other
-        public GameObject prefab;
-        public GameObject staffPrefab;
-        // public StatusEffect cooldownStatusEffect;
         public string cooldownStatusEffectName;
-        public SecondaryAttackType type;
+        public string type;
         private int entryCount = 100;
 
-        public void GenerateConfig(GameObject staffPrefab, SecondaryAttackConfigOptions options)
+        public void GenerateConfig(SecondaryAttackConfigOptions options)
         {
             ConfigFile Config = ModularMagic_EarthStaffs.Instance.Config;
-            this.prefab = options.prefab;
-            this.staffPrefab = staffPrefab;
-            // this.cooldownStatusEffect = InitStatusEffect(options);
             this.cooldownStatusEffectName = options.cooldownStatusEffectName;
             this.type = options.type;
 
             string entityDesc = "projectile / summoned creatures(s)";
-            if (options.type == SecondaryAttackType.PROJECTILE) entityDesc = "projectile";
-            if (options.type == SecondaryAttackType.HUMANOID) entityDesc = "summoned creatures(s)";
+            if (options.type == SecondaryAttackType.Projectile) entityDesc = "projectile";
+            if (options.type == SecondaryAttackType.Humanoid) entityDesc = "summoned creatures(s)";
 
             useEitr = Config.Bind(new ConfigDefinition(options.sectionName, "Secondary attack eitr cost"), options.useEitr,
                 new ConfigDescription("The secondary attack eitr cost", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             useEitr.SettingChanged += (obj, attr) =>
             {
-                UpdateHelper.UpdateItemData(staffPrefab, new UpdateItemDataOptions()
+                UpdateHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
                 {
                     secondaryAttackEitr = useEitr.Value,
                 });
@@ -66,10 +57,15 @@ namespace ModularMagic_EarthStaffs.Configs
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             cooldown.SettingChanged += (obj, attr) =>
             {
+                Jotunn.Logger.LogWarning("Effect name: " + options.cooldownStatusEffectName);
+                Jotunn.Logger.LogWarning("Effect hash: " + options.cooldownStatusEffectName.GetStableHashCode());
                 StatusEffect statusEffect = ObjectDB.instance.GetStatusEffect(options.cooldownStatusEffectName.GetStableHashCode());
 
                 if (statusEffect != null)
                 {
+                    Jotunn.Logger.LogWarning("Name: " + statusEffect.m_name);
+                    Jotunn.Logger.LogWarning("TTL: " + statusEffect.m_ttl);
+                    Jotunn.Logger.LogWarning("New value: " + cooldown.Value);
                     statusEffect.m_ttl = cooldown.Value;
                 }
             };
@@ -81,7 +77,7 @@ namespace ModularMagic_EarthStaffs.Configs
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 health.SettingChanged += (obj, attr) =>
                 {
-                    UpdateHelper.UpdateHumanoid(options.prefab, new UpdateHumanoidOptions()
+                    UpdateHelper.UpdateHumanoid(options.secondPrefab, new UpdateHumanoidOptions()
                     {
                         health = health.Value,
                     });
@@ -95,7 +91,7 @@ namespace ModularMagic_EarthStaffs.Configs
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 aoe.SettingChanged += (obj, attr) =>
                 {
-                    UpdateHelper.UpdateProjectile(options.prefab, new UpdateProjectileOptions()
+                    UpdateHelper.UpdateProjectile(options.secondPrefab, new UpdateProjectileOptions()
                     {
                         aoe = aoe.Value,
                     });
@@ -109,16 +105,16 @@ namespace ModularMagic_EarthStaffs.Configs
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 damageBlunt.SettingChanged += (obj, attr) =>
                 {
-                    if (options.type == SecondaryAttackType.PROJECTILE)
+                    if (options.type == SecondaryAttackType.Projectile)
                     {
-                        UpdateHelper.UpdateProjectile(options.prefab, new UpdateProjectileOptions()
+                        UpdateHelper.UpdateProjectile(options.secondPrefab, new UpdateProjectileOptions()
                         {
                             damageBlunt = damageBlunt.Value,
                         });
                     }
-                    else if (options.type == SecondaryAttackType.HUMANOID)
+                    else if (options.type == SecondaryAttackType.Humanoid)
                     {
-                        UpdateHelper.UpdateHumanoidAttackItemData(options.prefab, new UpdateItemDataOptions()
+                        UpdateHelper.UpdateHumanoidAttackItemData(options.secondPrefab, new UpdateItemDataOptions()
                         {
                             damageBlunt = damageBlunt.Value,
                         });
@@ -133,16 +129,16 @@ namespace ModularMagic_EarthStaffs.Configs
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 damageChop.SettingChanged += (obj, attr) =>
                 {
-                    if (options.type == SecondaryAttackType.PROJECTILE)
+                    if (options.type == SecondaryAttackType.Projectile)
                     {
-                        UpdateHelper.UpdateProjectile(options.prefab, new UpdateProjectileOptions()
+                        UpdateHelper.UpdateProjectile(options.secondPrefab, new UpdateProjectileOptions()
                         {
                             damageChop = damageChop.Value,
                         });
                     }
-                    else if (options.type == SecondaryAttackType.HUMANOID)
+                    else if (options.type == SecondaryAttackType.Humanoid)
                     {
-                        UpdateHelper.UpdateHumanoidAttackItemData(options.prefab, new UpdateItemDataOptions()
+                        UpdateHelper.UpdateHumanoidAttackItemData(options.secondPrefab, new UpdateItemDataOptions()
                         {
                             damageChop = damageChop.Value,
                         });
@@ -157,16 +153,16 @@ namespace ModularMagic_EarthStaffs.Configs
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 damagePickaxe.SettingChanged += (obj, attr) =>
                 {
-                    if (options.type == SecondaryAttackType.PROJECTILE)
+                    if (options.type == SecondaryAttackType.Projectile)
                     {
-                        UpdateHelper.UpdateProjectile(options.prefab, new UpdateProjectileOptions()
+                        UpdateHelper.UpdateProjectile(options.secondPrefab, new UpdateProjectileOptions()
                         {
                             damagePickaxe = damagePickaxe.Value,
                         });
                     }
-                    else if (options.type == SecondaryAttackType.HUMANOID)
+                    else if (options.type == SecondaryAttackType.Humanoid)
                     {
-                        UpdateHelper.UpdateHumanoidAttackItemData(options.prefab, new UpdateItemDataOptions()
+                        UpdateHelper.UpdateHumanoidAttackItemData(options.secondPrefab, new UpdateItemDataOptions()
                         {
                             damagePickaxe = damagePickaxe.Value,
                         });
@@ -181,16 +177,16 @@ namespace ModularMagic_EarthStaffs.Configs
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 damagePoison.SettingChanged += (obj, attr) =>
                 {
-                    if (options.type == SecondaryAttackType.PROJECTILE)
+                    if (options.type == SecondaryAttackType.Projectile)
                     {
-                        UpdateHelper.UpdateProjectile(options.prefab, new UpdateProjectileOptions()
+                        UpdateHelper.UpdateProjectile(options.secondPrefab, new UpdateProjectileOptions()
                         {
                             damagePoison = damagePoison.Value,
                         });
                     }
-                    else if (options.type == SecondaryAttackType.HUMANOID)
+                    else if (options.type == SecondaryAttackType.Humanoid)
                     {
-                        UpdateHelper.UpdateHumanoidAttackItemData(options.prefab, new UpdateItemDataOptions()
+                        UpdateHelper.UpdateHumanoidAttackItemData(options.secondPrefab, new UpdateItemDataOptions()
                         {
                             damagePoison = damagePoison.Value,
                         });
@@ -205,16 +201,16 @@ namespace ModularMagic_EarthStaffs.Configs
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 damageSpirit.SettingChanged += (obj, attr) =>
                 {
-                    if (options.type == SecondaryAttackType.PROJECTILE)
+                    if (options.type == SecondaryAttackType.Projectile)
                     {
-                        UpdateHelper.UpdateProjectile(options.prefab, new UpdateProjectileOptions()
+                        UpdateHelper.UpdateProjectile(options.secondPrefab, new UpdateProjectileOptions()
                         {
                             damageSpirit = damageSpirit.Value,
                         });
                     }
-                    else if (options.type == SecondaryAttackType.HUMANOID)
+                    else if (options.type == SecondaryAttackType.Humanoid)
                     {
-                        UpdateHelper.UpdateHumanoidAttackItemData(options.prefab, new UpdateItemDataOptions()
+                        UpdateHelper.UpdateHumanoidAttackItemData(options.secondPrefab, new UpdateItemDataOptions()
                         {
                             damageSpirit = damageSpirit.Value,
                         });
@@ -229,16 +225,16 @@ namespace ModularMagic_EarthStaffs.Configs
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 attackForce.SettingChanged += (obj, attr) =>
                 {
-                    if (options.type == SecondaryAttackType.PROJECTILE)
+                    if (options.type == SecondaryAttackType.Projectile)
                     {
-                        UpdateHelper.UpdateProjectile(options.prefab, new UpdateProjectileOptions()
+                        UpdateHelper.UpdateProjectile(options.secondPrefab, new UpdateProjectileOptions()
                         {
                             attackForce = attackForce.Value,
                         });
                     }
-                    else if (options.type == SecondaryAttackType.HUMANOID)
+                    else if (options.type == SecondaryAttackType.Humanoid)
                     {
-                        UpdateHelper.UpdateHumanoidAttackItemData(options.prefab, new UpdateItemDataOptions()
+                        UpdateHelper.UpdateHumanoidAttackItemData(options.secondPrefab, new UpdateItemDataOptions()
                         {
                             attackForce = attackForce.Value,
                         });
@@ -253,7 +249,7 @@ namespace ModularMagic_EarthStaffs.Configs
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 minToSpawn.SettingChanged += (obj, attr) =>
                 {
-                    UpdateHelper.UpdateSpawnAbility(staffPrefab, new UpdateSpawnAbilityOptions()
+                    UpdateHelper.UpdateSpawnAbility(options.prefab, new UpdateSpawnAbilityOptions()
                     {
                         minToSpawn = minToSpawn.Value,
                     });
@@ -267,7 +263,7 @@ namespace ModularMagic_EarthStaffs.Configs
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 maxToSpawn.SettingChanged += (obj, attr) =>
                 {
-                    UpdateHelper.UpdateSpawnAbility(staffPrefab, new UpdateSpawnAbilityOptions()
+                    UpdateHelper.UpdateSpawnAbility(options.prefab, new UpdateSpawnAbilityOptions()
                     {
                         maxToSpawn = maxToSpawn.Value,
                     });
@@ -281,7 +277,7 @@ namespace ModularMagic_EarthStaffs.Configs
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 maxSpawns.SettingChanged += (obj, attr) =>
                 {
-                    UpdateHelper.UpdateSpawnAbility(staffPrefab, new UpdateSpawnAbilityOptions()
+                    UpdateHelper.UpdateSpawnAbility(options.prefab, new UpdateSpawnAbilityOptions()
                     {
                         maxSpawns = maxSpawns.Value,
                     });
@@ -295,7 +291,7 @@ namespace ModularMagic_EarthStaffs.Configs
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 spawnRadius.SettingChanged += (obj, attr) =>
                 {
-                    UpdateHelper.UpdateSpawnAbility(staffPrefab, new UpdateSpawnAbilityOptions()
+                    UpdateHelper.UpdateSpawnAbility(options.prefab, new UpdateSpawnAbilityOptions()
                     {
                         spawnRadius = spawnRadius.Value,
                     });
@@ -309,7 +305,7 @@ namespace ModularMagic_EarthStaffs.Configs
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 launchAngle.SettingChanged += (obj, attr) =>
                 {
-                    UpdateHelper.UpdateItemData(staffPrefab, new UpdateItemDataOptions()
+                    UpdateHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
                     {
                         secondaryLaunchAngle = launchAngle.Value,
                     });
@@ -323,7 +319,7 @@ namespace ModularMagic_EarthStaffs.Configs
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 projectileVelocity.SettingChanged += (obj, attr) =>
                 {
-                    UpdateHelper.UpdateItemData(staffPrefab, new UpdateItemDataOptions()
+                    UpdateHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
                     {
                         secondaryProjectileVelocity = projectileVelocity.Value,
                     });
@@ -337,43 +333,13 @@ namespace ModularMagic_EarthStaffs.Configs
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 projectileAccuracy.SettingChanged += (obj, attr) =>
                 {
-                    UpdateHelper.UpdateItemData(staffPrefab, new UpdateItemDataOptions()
+                    UpdateHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
                     {
                         secondaryProjectileAccuracy = projectileAccuracy.Value,
                     });
                 };
             }
         }
-
-        //private StatusEffect InitStatusEffect(SecondaryAttackConfigOptions options)
-        //{
-        //    string name = "";
-        //    Sprite sprite = null;
-
-        //    if (options.type == SecondaryAttackType.PROJECTILE)
-        //    {
-        //        name = "Summon boulder cooldown";
-        //        sprite = ModularMagic_EarthStaffs.Instance.sprites.BoulderCooldown;
-        //    }
-        //    else if (options.type == SecondaryAttackType.PROJECTILE)
-        //    {
-        //        name = "Summon roots cooldown";
-        //        sprite = ModularMagic_EarthStaffs.Instance.sprites.RootsCooldown;
-        //    }
-
-        //    StatusEffect cooldownStatusEffect = ScriptableObject.CreateInstance<StatusEffect>();
-        //    cooldownStatusEffect.name = options.cooldownStatusEffectName;
-        //    cooldownStatusEffect.m_name = name;
-        //    cooldownStatusEffect.m_icon = sprite;
-        //    cooldownStatusEffect.m_startMessageType = MessageHud.MessageType.Center;
-        //    cooldownStatusEffect.m_startMessage = "";
-        //    cooldownStatusEffect.m_stopMessageType = MessageHud.MessageType.Center;
-        //    cooldownStatusEffect.m_stopMessage = "";
-        //    cooldownStatusEffect.m_tooltip = "Be patient!";
-        //    cooldownStatusEffect.m_ttl = options.cooldown;
-        //    ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(cooldownStatusEffect, fixReference: false));
-        //    return cooldownStatusEffect;
-        //}
 
         private int HandleOrder()
         {

@@ -2,23 +2,26 @@
 {
     internal class Imbuement
     {
-        public bool enabled;
+
+        public string category;
+        public int column;
         public string description;
-        public int materialRequired;
+        public bool enabled;
+        public int level;
+        public int maxLevel;
         public string name;
-        public ImbuementPath path;
-        public int skillRequired;
         public string type;
         public string value;
 
-        public Imbuement(string name, string type, string description, string value, int skillRequired, int materialRequired, ImbuementPath path, bool enabled = false)
+        public Imbuement(string name, string description, string type, string category, int column, string value, int level, int maxLevel, bool enabled = false)
         {
-            this.enabled = enabled;
+            this.category = category;
+            this.column = column;
             this.description = description;
-            this.materialRequired = materialRequired;
+            this.enabled = enabled;
+            this.level = level;
+            this.maxLevel = maxLevel;
             this.name = name;
-            this.path = path;
-            this.skillRequired = skillRequired;
             this.type = type;
             this.value = value;
         }

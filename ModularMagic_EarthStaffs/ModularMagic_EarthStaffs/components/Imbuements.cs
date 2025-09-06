@@ -1,14 +1,8 @@
-﻿using HarmonyLib;
-using ModularMagic_EarthStaffs.Helpers;
+﻿using ModularMagic_EarthStaffs.Helpers;
 using ModularMagic_EarthStaffs.Models;
 using ModularMagic_EarthStaffs.Types;
-using PlayFab.EconomyModels;
-using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Globalization;
 using UnityEngine;
-using static ItemDrop;
 
 namespace ModularMagic_EarthStaffs.Components
 {
@@ -18,26 +12,16 @@ namespace ModularMagic_EarthStaffs.Components
 
         private void Awake()
         {
-            m_imbuements.Add(new Imbuement("Damage Slash", ImbuementType.DamageType, "Changes the projectile to resemble a circular blade, changing the main damage type to slash and increasing chopping capabilities", "Slash", 20, 10, new ImbuementPath(1, 2, true)));
-            m_imbuements.Add(new Imbuement("Damage Pierce", ImbuementType.DamageType, "Cone shaped projectiles to increase armor piercing, changes the main damage type to pierce and increases mining capabilities", "Pierce", 20, 10, new ImbuementPath(2, 2, true)));
+            m_imbuements.Add(new Imbuement("Accuracy", "Increase staff accuracy", ImbuementType.ProjectileAccuracy, ImbuementCategoryType.Normal, 1, "0.125", 0, 4));
+            m_imbuements.Add(new Imbuement("Attack speed", "Increase staff attack speed", ImbuementType.ProjectileBurst, ImbuementCategoryType.Normal, 2, "0.0125", 0, 4));
+            m_imbuements.Add(new Imbuement("Projectile Speed", "Increase projectile speed", ImbuementType.ProjectileVelocity, ImbuementCategoryType.Normal, 3, "1", 0, 4));
+            m_imbuements.Add(new Imbuement("Eitr cost", "Decrease Eitr usage of the main attack", ImbuementType.EitrCost, ImbuementCategoryType.Normal, 4, "0.25", 0, 4));
 
-            m_imbuements.Add(new Imbuement("Accuracy 1", ImbuementType.ProjectileAccuracy, "Increase accuracy", "0.2", 10, 5, new ImbuementPath(1, 1)));
-            m_imbuements.Add(new Imbuement("Accuracy 2", ImbuementType.ProjectileAccuracy, "Increase accuracy further", "0.2", 30, 15, new ImbuementPath(1, 3)));
-            m_imbuements.Add(new Imbuement("Accuracy 3", ImbuementType.ProjectileAccuracy, "Increase accuracy even further", "0.2", 40, 20, new ImbuementPath(1, 4)));
+            m_imbuements.Add(new Imbuement("Damage Slash", "Changes the projectile to resemble a circular blade, changing the main damage type to slash and increasing chopping capabilities", ImbuementType.DamageType, ImbuementCategoryType.Attack, 1, "Slash", 0, 1));
+            m_imbuements.Add(new Imbuement("Damage Pierce", "Cone shaped projectiles to increase armor piercing, changes the main damage type to pierce and increases mining capabilities", ImbuementType.DamageType, ImbuementCategoryType.Attack, 2, "Pierce", 0, 1));
 
-            m_imbuements.Add(new Imbuement("Burst 1", ImbuementType.ProjectileBurst, "Increase attack speed", "0.02", 10, 5, new ImbuementPath(2, 1)));
-            m_imbuements.Add(new Imbuement("Burst 2", ImbuementType.ProjectileBurst, "Increase attack speed further", "0.02", 30, 15, new ImbuementPath(2, 3)));
-            m_imbuements.Add(new Imbuement("Burst 3", ImbuementType.ProjectileBurst, "Increase attack speed even further", "0.02", 40, 20, new ImbuementPath(2, 4)));
-
-            m_imbuements.Add(new Imbuement("Parry master", ImbuementType.ParryBonus, "The staff has been strengthend with magic, increasing parry bonus by 1", "1", 10, 5, new ImbuementPath(3, 1)));
-            m_imbuements.Add(new Imbuement("Giant boulder attack", ImbuementType.SecondaryAttack, "Rain down a giant boulder from the sky!", "Rain", 30, 15, new ImbuementPath(3, 3, true)));
-            m_imbuements.Add(new Imbuement("Summon Roots", ImbuementType.SecondaryAttack, "Summon roots to attack your enemies!", "Summon", 50, 25, new ImbuementPath(3, 5, true)));
-
-            m_imbuements.Add(new Imbuement("Eitr cost", ImbuementType.EitrCost, "Decrease Eitr cost by 1", "1", 20, 10, new ImbuementPath(4, 2)));
-
-            m_imbuements.Add(new Imbuement("Speed 1", ImbuementType.ProjectileVelocity, "Increase projectile speed", "2", 10, 5, new ImbuementPath(4, 1)));
-            m_imbuements.Add(new Imbuement("Speed 2", ImbuementType.ProjectileVelocity, "Increase projectile speed further", "2", 30, 15, new ImbuementPath(4, 3)));
-            m_imbuements.Add(new Imbuement("Speed 3", ImbuementType.ProjectileVelocity, "Increase projectile speed even further", "2", 40, 20, new ImbuementPath(4, 4)));
+            m_imbuements.Add(new Imbuement("Giant boulder attack", "Rain down a giant boulder from the sky!", ImbuementType.SecondaryAttack, ImbuementCategoryType.SecondaryAttack, 1, "Rain", 0, 1));
+            m_imbuements.Add(new Imbuement("Summon Roots", "Summon roots to attack your enemies!", ImbuementType.SecondaryAttack, ImbuementCategoryType.SecondaryAttack, 2, "Summon", 0, 1));
 
             string imbuementsString = ImbuementHelper.ListToString(m_imbuements);
             GetComponent<ItemDrop>().m_itemData.m_customData[ModularMagic_EarthStaffs.imbuementDataKey] = imbuementsString;

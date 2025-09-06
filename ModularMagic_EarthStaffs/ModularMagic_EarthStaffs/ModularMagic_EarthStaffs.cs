@@ -1,7 +1,6 @@
 using BepInEx;
 using Jotunn.Configs;
 
-// using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
@@ -9,14 +8,8 @@ using ModularMagic_EarthStaffs.Components;
 using ModularMagic_EarthStaffs.Configs;
 using ModularMagic_EarthStaffs.Helpers;
 using ModularMagic_EarthStaffs.Models;
-using System.Collections.Generic;
-
-// using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
-using static AudioMan;
-using static EffectList;
-// using static EffectList;
 
 namespace ModularMagic_EarthStaffs
 {
@@ -83,47 +76,50 @@ namespace ModularMagic_EarthStaffs
 
         private void AddEarthStaffs()
         {
-            snapshots.staffEarth1 = prefabs.staffEarth1.GetComponent<ItemDrop>().m_itemData.Clone();
-            snapshots.staffEarth2 = prefabs.staffEarth2.GetComponent<ItemDrop>().m_itemData.Clone();
-            snapshots.staffEarth3 = prefabs.staffEarth3.GetComponent<ItemDrop>().m_itemData.Clone();
+            snapshots.staffEarth1 = prefabs.StaffEarth1.GetComponent<ItemDrop>().m_itemData.Clone();
+            snapshots.staffEarth2 = prefabs.StaffEarth2.GetComponent<ItemDrop>().m_itemData.Clone();
+            snapshots.staffEarth3 = prefabs.StaffEarth3.GetComponent<ItemDrop>().m_itemData.Clone();
 
-            prefabs.staffEarth1.AddComponent<Imbuements>();
-            prefabs.staffEarth2.AddComponent<Imbuements>();
-            prefabs.staffEarth3.AddComponent<Imbuements>();
+            prefabs.StaffEarth1.AddComponent<Imbuements>();
+            prefabs.StaffEarth2.AddComponent<Imbuements>();
+            prefabs.StaffEarth3.AddComponent<Imbuements>();
 
-            ItemHelper.CreateStaff(prefabs.staffEarth0, PluginConfig.staffEarth0);
-            ItemHelper.CreateStaff(prefabs.staffEarth1, PluginConfig.staffEarth1);
-            ItemHelper.CreateStaff(prefabs.staffEarth2, PluginConfig.staffEarth2);
-            ItemHelper.CreateStaff(prefabs.staffEarth3, PluginConfig.staffEarth3);
+            ItemHelper.CreateStaff(prefabs.StaffEarth0, PluginConfig.staffEarth0);
+            ItemHelper.CreateStaff(prefabs.StaffEarth1, PluginConfig.staffEarth1);
+            ItemHelper.CreateStaff(prefabs.StaffEarth2, PluginConfig.staffEarth2);
+            ItemHelper.CreateStaff(prefabs.StaffEarth3, PluginConfig.staffEarth3);
+
+            AttackHelper.UpdateBoulder(prefabs.SecondaryAttackBoulder, prefabs.ProjectileBoulder, PluginConfig.secondaryAttackBoulder);
+            AttackHelper.UpdateRoots(prefabs.SecondaryAttackRoots, prefabs.Root, PluginConfig.secondaryAttackRoots);
 
             PrefabManager.OnVanillaPrefabsAvailable -= AddEarthStaffs;
         }
 
         private void InitStatusEffects()
         {
-            effects.Staff2Cooldown = ScriptableObject.CreateInstance<StatusEffect>();
-            effects.Staff2Cooldown.name = "SummonBoulder_MMES";
-            effects.Staff2Cooldown.m_name = "Summon boulder cooldown";
-            effects.Staff2Cooldown.m_icon = sprites.BoulderCooldown;
-            effects.Staff2Cooldown.m_startMessageType = MessageHud.MessageType.Center;
-            effects.Staff2Cooldown.m_startMessage = "";
-            effects.Staff2Cooldown.m_stopMessageType = MessageHud.MessageType.Center;
-            effects.Staff2Cooldown.m_stopMessage = "";
-            effects.Staff2Cooldown.m_tooltip = "Be patient!";
-            effects.Staff2Cooldown.m_ttl = 30;
-            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.Staff2Cooldown, fixReference: false));
+            effects.BoulderCooldown = ScriptableObject.CreateInstance<StatusEffect>();
+            effects.BoulderCooldown.name = PluginConfig.secondaryAttackBoulder.cooldownStatusEffectName;
+            effects.BoulderCooldown.m_name = "Boulder cooldown";
+            effects.BoulderCooldown.m_icon = sprites.BoulderCooldown;
+            effects.BoulderCooldown.m_startMessageType = MessageHud.MessageType.Center;
+            effects.BoulderCooldown.m_startMessage = "";
+            effects.BoulderCooldown.m_stopMessageType = MessageHud.MessageType.Center;
+            effects.BoulderCooldown.m_stopMessage = "";
+            effects.BoulderCooldown.m_tooltip = "Be patient!";
+            effects.BoulderCooldown.m_ttl = PluginConfig.secondaryAttackBoulder.cooldown.Value;
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.BoulderCooldown, fixReference: false));
 
-            effects.Staff3Cooldown = ScriptableObject.CreateInstance<StatusEffect>();
-            effects.Staff3Cooldown.name = "SummonRoots_MMES";
-            effects.Staff3Cooldown.m_name = "Summon roots cooldown";
-            effects.Staff3Cooldown.m_icon = sprites.RootsCooldown;
-            effects.Staff3Cooldown.m_startMessageType = MessageHud.MessageType.Center;
-            effects.Staff3Cooldown.m_startMessage = "";
-            effects.Staff3Cooldown.m_stopMessageType = MessageHud.MessageType.Center;
-            effects.Staff3Cooldown.m_stopMessage = "";
-            effects.Staff3Cooldown.m_tooltip = "Be patient!";
-            effects.Staff3Cooldown.m_ttl = 30;
-            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.Staff3Cooldown, fixReference: false));
+            effects.RootsCooldown = ScriptableObject.CreateInstance<StatusEffect>();
+            effects.RootsCooldown.name = PluginConfig.secondaryAttackRoots.cooldownStatusEffectName;
+            effects.RootsCooldown.m_name = "Summon roots cooldown";
+            effects.RootsCooldown.m_icon = sprites.RootsCooldown;
+            effects.RootsCooldown.m_startMessageType = MessageHud.MessageType.Center;
+            effects.RootsCooldown.m_startMessage = "";
+            effects.RootsCooldown.m_stopMessageType = MessageHud.MessageType.Center;
+            effects.RootsCooldown.m_stopMessage = "";
+            effects.RootsCooldown.m_tooltip = "Be patient!";
+            effects.RootsCooldown.m_ttl = PluginConfig.secondaryAttackRoots.cooldown.Value;
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.RootsCooldown, fixReference: false));
 
             //    StatusEffect exhaustAndFhoulMagicEffect = ScriptableObject.CreateInstance<StatusEffect>();
             //    exhaustAndFhoulMagicEffect.name = "ExhaustAndFoulMagicEffect_DW";
@@ -145,20 +141,20 @@ namespace ModularMagic_EarthStaffs
         {
             assetBundle = AssetUtils.LoadAssetBundleFromResources("modularmagic_earthstaffs_dw");
 
-            prefabs.staffEarth0 = assetBundle.LoadAsset<GameObject>("MMES_TheForestFlinger");
-            prefabs.staffEarth1 = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth1");
-            prefabs.staffEarth2 = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth2");
-            prefabs.staffEarth3 = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth3");
-            prefabs.projectileDefault = assetBundle.LoadAsset<GameObject>("projectile_MMES");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.projectileDefault, true));
+            prefabs.StaffEarth0 = assetBundle.LoadAsset<GameObject>("MMES_TheForestFlinger");
+            prefabs.StaffEarth1 = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth1");
+            prefabs.StaffEarth2 = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth2");
+            prefabs.StaffEarth3 = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth3");
+            prefabs.ProjectileDefault = assetBundle.LoadAsset<GameObject>("projectile_MMES");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ProjectileDefault, true));
 
-            prefabs.projectileMushroom = assetBundle.LoadAsset<GameObject>("projectile_mushroom_MMES");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.projectileMushroom, true));
+            prefabs.ProjectileMushroom = assetBundle.LoadAsset<GameObject>("projectile_mushroom_MMES");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ProjectileMushroom, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_mushroom_projectile_hit_MMES"), true));
 
             prefabs.SecondaryAttackBoulder = assetBundle.LoadAsset<GameObject>("secondary_boulder_MMES");
-            prefabs.projectileBoulder = assetBundle.LoadAsset<GameObject>("projectile_boulder_MMES");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.projectileBoulder, true));
+            prefabs.ProjectileBoulder = assetBundle.LoadAsset<GameObject>("projectile_boulder_MMES");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ProjectileBoulder, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("projectile_spawn_boulder_MMES"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("script_boulder_MMES"), true));
 

@@ -1,10 +1,10 @@
 ﻿namespace ModularMagic_EarthStaffs.Types
 {
-    enum SecondaryAttackType
+    internal class SecondaryAttackType
     {
-        PROJECTILE = 0,
-        AOE = 1,
-        SCRIPT = 2,
-        HUMANOID = 3,
+        public static string Projectile => "Projectile";
+        public static string AOE => "AOE";
+        public static string Script => "Script";
+        public static string Humanoid => "Humanoid";
     }
 }

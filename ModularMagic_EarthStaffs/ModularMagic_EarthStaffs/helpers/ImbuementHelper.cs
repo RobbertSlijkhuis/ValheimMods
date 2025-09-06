@@ -6,7 +6,6 @@ using System.Globalization;
 using System.Linq;
 using UnityEngine;
 using static ItemDrop;
-using static UnityEngine.ParticleSystem;
 
 namespace ModularMagic_EarthStaffs.Helpers
 {
@@ -39,10 +38,10 @@ namespace ModularMagic_EarthStaffs.Helpers
             options.projectileBurst = snapShotData.m_shared.m_attack.m_burstInterval;
             options.projectileVelocity = snapShotData.m_shared.m_attack.m_projectileVel;
 
-            GameObject projectileBlunt = ModularMagic_EarthStaffs.Instance.prefabs.projectileDefault.transform.Find("visual/blunt").gameObject;
-            GameObject projectileSlash = ModularMagic_EarthStaffs.Instance.prefabs.projectileDefault.transform.Find("visual/slash").gameObject;
-            GameObject projectilePierce = ModularMagic_EarthStaffs.Instance.prefabs.projectileDefault.transform.Find("visual/pierce").gameObject;
-            Projectile projectile = ModularMagic_EarthStaffs.Instance.prefabs.projectileDefault.GetComponent<Projectile>();
+            GameObject projectileBlunt = ModularMagic_EarthStaffs.Instance.prefabs.ProjectileDefault.transform.Find("visual/blunt").gameObject;
+            GameObject projectileSlash = ModularMagic_EarthStaffs.Instance.prefabs.ProjectileDefault.transform.Find("visual/slash").gameObject;
+            GameObject projectilePierce = ModularMagic_EarthStaffs.Instance.prefabs.ProjectileDefault.transform.Find("visual/pierce").gameObject;
+            Projectile projectile = ModularMagic_EarthStaffs.Instance.prefabs.ProjectileDefault.GetComponent<Projectile>();
             projectileBlunt.SetActive(true);
             projectileSlash.SetActive(false);
             projectilePierce.SetActive(false);
@@ -85,7 +84,7 @@ namespace ModularMagic_EarthStaffs.Helpers
                         projectileBlunt.SetActive(false);
                         break;
                     case nameof(ImbuementType.EitrCost):
-                        options.attackEitr -= float.Parse(imbuement.value, CultureInfo.InvariantCulture);
+                        options.attackEitr -= float.Parse(imbuement.value, CultureInfo.InvariantCulture) * imbuement.level;
                         break;
                     case nameof(ImbuementType.MaxQuality):
                         options.maxQuality += int.Parse(imbuement.value, CultureInfo.InvariantCulture);
@@ -94,19 +93,19 @@ namespace ModularMagic_EarthStaffs.Helpers
                         options.timedBlockBonus += float.Parse(imbuement.value, CultureInfo.InvariantCulture);
                         break;
                     case nameof(ImbuementType.ProjectileAccuracy):
-                        options.projectileAccuracy -= float.Parse(imbuement.value, CultureInfo.InvariantCulture);
+                        options.projectileAccuracy -= float.Parse(imbuement.value, CultureInfo.InvariantCulture) * imbuement.level;
                         break;
                     case nameof(ImbuementType.ProjectileBurst):
-                        options.projectileBurst -= float.Parse(imbuement.value, CultureInfo.InvariantCulture);
+                        options.projectileBurst -= float.Parse(imbuement.value, CultureInfo.InvariantCulture) * imbuement.level;
                         break;
                     case nameof(ImbuementType.ProjectileVelocity):
-                        options.projectileVelocity += float.Parse(imbuement.value, CultureInfo.InvariantCulture);
+                        options.projectileVelocity += float.Parse(imbuement.value, CultureInfo.InvariantCulture) * imbuement.level;
                         break;
                     case nameof(ImbuementType.SecondaryAttack):
                         if (imbuement.value == "Rain")
                             options.secondaryAttack = ModularMagic_EarthStaffs.Instance.prefabs.SecondaryAttackBoulder.GetComponent<ItemDrop>().m_itemData;
                         else if (imbuement.value == "Summon")
-                            options.secondaryAttack = ModularMagic_EarthStaffs.Instance.prefabs.SecondaryAttackBoulder.GetComponent<ItemDrop>().m_itemData;
+                            options.secondaryAttack = ModularMagic_EarthStaffs.Instance.prefabs.SecondaryAttackRoots.GetComponent<ItemDrop>().m_itemData;
                         break;
                 }
             }
@@ -124,7 +123,7 @@ namespace ModularMagic_EarthStaffs.Helpers
             Imbuement last = imbuements.Last();
             foreach (Imbuement imbuement in imbuements.FindAll(item => item.enabled))
             {
-                ImbuementEffect.m_tooltip += "<color=green>" + imbuement.name + "</color>" + (imbuement.Equals(last) ? "" : "\n");
+                ImbuementEffect.m_tooltip += $"<color=green>{imbuement.name} {(imbuement.level > 0 ? imbuement.level : "")} </color>{(imbuement.Equals(last) ? "" : "\n")}";
             }
 
             ImbuementEffect.name = "Imbuements_MMES";
@@ -138,11 +137,11 @@ namespace ModularMagic_EarthStaffs.Helpers
         {
             switch (name)
             {
-                case var value when value == ModularMagic_EarthStaffs.Instance.prefabs.staffEarth1.name:
+                case var value when value == ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth1.name:
                     return ModularMagic_EarthStaffs.Instance.snapshots.staffEarth1;
-                case var value when value == ModularMagic_EarthStaffs.Instance.prefabs.staffEarth2.name:
+                case var value when value == ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth2.name:
                     return ModularMagic_EarthStaffs.Instance.snapshots.staffEarth2;
-                case var value when value == ModularMagic_EarthStaffs.Instance.prefabs.staffEarth3.name:
+                case var value when value == ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth3.name:
                     return ModularMagic_EarthStaffs.Instance.snapshots.staffEarth3;
                 default:
                     return null;
@@ -165,10 +164,11 @@ namespace ModularMagic_EarthStaffs.Helpers
                     properties[2],
                     properties[3],
                     int.Parse(properties[4]),
-                    int.Parse(properties[5]),
-                    new ImbuementPath(int.Parse(properties[6]), int.Parse(properties[7]), bool.Parse(properties[8])),
-                    bool.Parse(properties[9]
-                )));
+                    properties[5],
+                    int.Parse(properties[6]),
+                    int.Parse(properties[7]),
+                    bool.Parse(properties[8])
+                ));
             }
 
             return imbuements;
@@ -180,11 +180,14 @@ namespace ModularMagic_EarthStaffs.Helpers
 
             foreach (Imbuement i in imbuements)
             {
-                items += $"{i.name}|{i.type}|{i.description}|{i.value}|{i.skillRequired}|{i.materialRequired}|{i.path.column}|{i.path.row}|{i.path.allowIntersect}|{i.enabled};";
+                items += $"{i.name}|{i.description}|{i.type}|{i.category}|{i.column}|{i.value}|{i.level}|{i.maxLevel}|{i.enabled};";
             }
 
             if (items != "")
                 items = items.Remove(items.Length - 1);
+
+            Jotunn.Logger.LogWarning("=== Earth To String ==============================");
+            Jotunn.Logger.LogWarning(items);
 
             return items;
         }

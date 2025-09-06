@@ -1,6 +1,4 @@
 ﻿#nullable enable
-using ModularMagic_EarthStaffs.Configs;
-using ModularMagic_EarthStaffs.Types;
 using UnityEngine;
 
 namespace ModularMagic_EarthStaffs.Models

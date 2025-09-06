@@ -22,10 +22,10 @@ namespace ModularMagic_EarthStaffs.Harmony
                 ItemData itemData = __instance.GetCurrentWeapon();
 
                 if (itemData == null || (
-                    itemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.staffEarth0.name && 
-                    itemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.staffEarth1.name && 
-                    itemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.staffEarth2.name &&
-                    itemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.staffEarth3.name
+                    itemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth0.name && 
+                    itemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth1.name && 
+                    itemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth2.name &&
+                    itemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth3.name
                 ))
                     return;
 
@@ -73,7 +73,7 @@ namespace ModularMagic_EarthStaffs.Harmony
                 if (weapon == null || weapon.m_dropPrefab == null)
                     return true;
 
-                if (weapon.m_dropPrefab.name == ModularMagic_EarthStaffs.Instance.prefabs.staffEarth0.name)
+                if (weapon.m_dropPrefab.name == ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth0.name)
                 {
                     RandomizeMushroom();
                     return true;
@@ -82,7 +82,7 @@ namespace ModularMagic_EarthStaffs.Harmony
                 if (__instance.m_drawStaminaDrain != 8901)
                     return true;
 
-                return CheckForCooldown(character, weapon.m_dropPrefab.name);
+                return CheckForCooldown(character, __instance);
             }
             catch (Exception e)
             {
@@ -91,26 +91,26 @@ namespace ModularMagic_EarthStaffs.Harmony
             }
         }
 
-        private static bool CheckForCooldown(Character character, string name)
+        private static bool CheckForCooldown(Character character, Attack attack)
         {
             float cooldownValue = 0f;
             float eitrValue = 0f;
             bool hasEffect = false;
             StatusEffect statusEffect = null;
 
-            switch (name)
+            switch (attack.m_attackProjectile.name)
             {
-                case var value when value == ModularMagic_EarthStaffs.Instance.prefabs.staffEarth2.name:
-                    cooldownValue = PluginConfig.staffEarth2.secondaryAttackConfig.cooldown.Value;
-                    eitrValue = PluginConfig.staffEarth2.secondaryAttackConfig.useEitr.Value;
-                    hasEffect = character.GetSEMan().HaveStatusEffect(PluginConfig.staffEarth2.secondaryAttackConfig.cooldownStatusEffectName.GetStableHashCode());
-                    statusEffect = ModularMagic_EarthStaffs.Instance.effects.Staff2Cooldown;
+                case "projectile_spawn_boulder_MMES":
+                    cooldownValue = PluginConfig.secondaryAttackBoulder.cooldown.Value;
+                    eitrValue = PluginConfig.secondaryAttackBoulder.useEitr.Value;
+                    statusEffect = ModularMagic_EarthStaffs.Instance.effects.BoulderCooldown;
+                    hasEffect = character.GetSEMan().HaveStatusEffect(statusEffect.name.GetHashCode());
                     break;
-                case var value when value == ModularMagic_EarthStaffs.Instance.prefabs.staffEarth3.name:
-                    cooldownValue = PluginConfig.staffEarth3.secondaryAttackConfig.cooldown.Value;
-                    eitrValue = PluginConfig.staffEarth3.secondaryAttackConfig.useEitr.Value;
-                    hasEffect = character.GetSEMan().HaveStatusEffect(PluginConfig.staffEarth3.secondaryAttackConfig.cooldownStatusEffectName.GetStableHashCode());
-                    statusEffect = ModularMagic_EarthStaffs.Instance.effects.Staff3Cooldown;
+                case "script_roots_MMES":
+                    cooldownValue = PluginConfig.secondaryAttackRoots.cooldown.Value;
+                    eitrValue = PluginConfig.secondaryAttackRoots.useEitr.Value;
+                    statusEffect = ModularMagic_EarthStaffs.Instance.effects.RootsCooldown;
+                    hasEffect = character.GetSEMan().HaveStatusEffect(statusEffect.name.GetHashCode());
                     break;
             }
 
@@ -135,14 +135,14 @@ namespace ModularMagic_EarthStaffs.Harmony
 
         private static void RandomizeMushroom()
         {
-            Transform mushroom = ModularMagic_EarthStaffs.Instance.prefabs.projectileMushroom.transform.Find("visual/Mushroom");
-            Transform mushroomBlue = ModularMagic_EarthStaffs.Instance.prefabs.projectileMushroom.transform.Find("visual/MushroomBlue");
-            Transform mushroomYellow = ModularMagic_EarthStaffs.Instance.prefabs.projectileMushroom.transform.Find("visual/MushroomYellow");
-            Transform branch = ModularMagic_EarthStaffs.Instance.prefabs.projectileMushroom.transform.Find("visual/Branch");
-            Transform dandelion = ModularMagic_EarthStaffs.Instance.prefabs.projectileMushroom.transform.Find("visual/Dandelion");
-            Transform stone = ModularMagic_EarthStaffs.Instance.prefabs.projectileMushroom.transform.Find("visual/Stone");
-            Transform flint = ModularMagic_EarthStaffs.Instance.prefabs.projectileMushroom.transform.Find("visual/Flint");
-            Transform bush = ModularMagic_EarthStaffs.Instance.prefabs.projectileMushroom.transform.Find("visual/RaspberryBush");
+            Transform mushroom = ModularMagic_EarthStaffs.Instance.prefabs.ProjectileMushroom.transform.Find("visual/Mushroom");
+            Transform mushroomBlue = ModularMagic_EarthStaffs.Instance.prefabs.ProjectileMushroom.transform.Find("visual/MushroomBlue");
+            Transform mushroomYellow = ModularMagic_EarthStaffs.Instance.prefabs.ProjectileMushroom.transform.Find("visual/MushroomYellow");
+            Transform branch = ModularMagic_EarthStaffs.Instance.prefabs.ProjectileMushroom.transform.Find("visual/Branch");
+            Transform dandelion = ModularMagic_EarthStaffs.Instance.prefabs.ProjectileMushroom.transform.Find("visual/Dandelion");
+            Transform stone = ModularMagic_EarthStaffs.Instance.prefabs.ProjectileMushroom.transform.Find("visual/Stone");
+            Transform flint = ModularMagic_EarthStaffs.Instance.prefabs.ProjectileMushroom.transform.Find("visual/Flint");
+            Transform bush = ModularMagic_EarthStaffs.Instance.prefabs.ProjectileMushroom.transform.Find("visual/RaspberryBush");
 
             mushroom.gameObject.SetActive(false);
             mushroomBlue.gameObject.SetActive(false);

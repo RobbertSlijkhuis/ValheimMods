@@ -1,10 +1,8 @@
-﻿using UnityEngine;
-
-namespace ModularMagic_EarthStaffs.Models
+﻿namespace ModularMagic_EarthStaffs.Models
 {
     class CustomStatusEffects
     {
-        public StatusEffect Staff2Cooldown;
-        public StatusEffect Staff3Cooldown;
+        public StatusEffect BoulderCooldown;
+        public StatusEffect RootsCooldown;
     }
 }

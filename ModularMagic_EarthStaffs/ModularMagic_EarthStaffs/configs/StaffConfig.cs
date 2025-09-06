@@ -2,7 +2,6 @@
 using ModularMagic_EarthStaffs.Helpers;
 using ModularMagic_EarthStaffs.Models;
 using ModularMagic_EarthStaffs.Types;
-using UnityEngine;
 
 namespace ModularMagic_EarthStaffs.Configs
 {
@@ -10,7 +9,6 @@ namespace ModularMagic_EarthStaffs.Configs
     {
         // General options
         public static string[] craftingStationOptions = new string[] { "None", "Disabled", "Workbench", "Forge", "Stonecutter", "Cauldron", "ArtisanTable", "BlackForge", "GaldrTable" };
-        public static string[] selectSecondaryAttackOptions = new string[] { SelectSecondaryAttackType.None, SelectSecondaryAttackType.Boulder, SelectSecondaryAttackType.Roots };
 
         // The  fields to generate
         public ConfigEntry<bool> enable;
@@ -21,7 +19,6 @@ namespace ModularMagic_EarthStaffs.Configs
         public ConfigEntry<string> recipe;
         public ConfigEntry<string> recipeUpgrade;
         public ConfigEntry<int> recipeMultiplier;
-        public ConfigEntry<string> selectedSecondaryAttack;
         public ConfigEntry<float> damageBlunt;
         public ConfigEntry<float> damageBluntPerLevel;
         public ConfigEntry<float> damageChop;
@@ -45,7 +42,6 @@ namespace ModularMagic_EarthStaffs.Configs
         public ConfigEntry<int> attackForce;
 
         // Other
-        public SecondaryAttackConfig secondaryAttackConfig;
         private int entryCount = 100;
 
         public void GenerateConfig(StaffConfigOptions options)
@@ -158,17 +154,6 @@ namespace ModularMagic_EarthStaffs.Configs
                     upgradeMultiplier = recipeMultiplier.Value,
                 });
             };
-
-            if (options.selectedSecondaryAttack != null)
-            {
-                selectedSecondaryAttack = Config.Bind(new ConfigDefinition(options.sectionName, "Secondary attack"), options.selectedSecondaryAttack,
-                    new ConfigDescription("The secondary attack attached to the item",
-                    new AcceptableValueList<string>(selectSecondaryAttackOptions),
-                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
-                selectedSecondaryAttack.SettingChanged += (obj, attr) =>
-                {
-                };
-            }
 
             damageBlunt = Config.Bind(new ConfigDefinition(options.sectionName, "Blunt damage"), options.damageBlunt,
                 new ConfigDescription("Blunt damage on the item", null,

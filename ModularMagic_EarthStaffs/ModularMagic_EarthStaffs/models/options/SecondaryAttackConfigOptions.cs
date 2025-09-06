@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using ModularMagic_EarthStaffs.Types;
 using UnityEngine;
 
 namespace ModularMagic_EarthStaffs.Models
@@ -7,7 +6,8 @@ namespace ModularMagic_EarthStaffs.Models
     internal class SecondaryAttackConfigOptions
     {
         public GameObject prefab;
-        public SecondaryAttackType type;
+        public GameObject secondPrefab;
+        public string type;
         public string sectionName;
         public string cooldownStatusEffectName;
 
@@ -30,9 +30,10 @@ namespace ModularMagic_EarthStaffs.Models
         public float? projectileVelocity;
         public float? projectileAccuracy;
 
-        public SecondaryAttackConfigOptions(GameObject prefab, SecondaryAttackType type, string name)
+        public SecondaryAttackConfigOptions(GameObject prefab, GameObject secondPrefab, string type, string name)
         {
             this.prefab = prefab;
+            this.secondPrefab = secondPrefab;
             this.type = type;
             this.sectionName = $"{name.Replace("'", "")}";
             this.cooldownStatusEffectName = $"{prefab.name}CooldownStatusEffect";
