@@ -24,11 +24,13 @@ namespace ModularMagic_Core.Components
         public UnityEvent m_onRuneActivation = new UnityEvent();
         public UnityEvent m_onSave = new UnityEvent();
 
-        private Transform m_spellbookTransform;
-        private Vector3 m_spellbookStartIdle;
-        private Vector3 m_spellbookEndIdle;
-        private float m_spellbookDurationIdle = 10f;
-        private bool m_spellbookReverseIdle = false;
+        private Material m_tableMat;
+        private Color m_emissionHigh;
+        private Color m_emissionLow;
+        private float m_emissionMultiplier = 0.3f;
+        private float m_emissionDurationIdle = 3f;
+        private bool m_emissionReverseIdle = false;
+        private bool m_emissiveIdleIsStarting = true;
 
         private Transform m_staffTransform;
         private Vector3 m_staffStartIdle;
@@ -40,15 +42,14 @@ namespace ModularMagic_Core.Components
         {
             netView = transform.Find("itemstand").gameObject.GetComponent<ItemStand>().m_netViewOverride;
 
-            m_spellbookTransform = transform.Find("controls/accept_book");
-            m_spellbookStartIdle = new Vector3(m_spellbookTransform.localPosition.x, m_spellbookTransform.localPosition.y, m_spellbookTransform.localPosition.z);
-            m_spellbookEndIdle = new Vector3(m_spellbookTransform.localPosition.x, m_spellbookTransform.localPosition.y + 0.06f, m_spellbookTransform.localPosition.z);
+            MeshRenderer meshComp = transform.Find("new/altar").gameObject.GetComponent<MeshRenderer>();
+            m_tableMat = meshComp.materials[0];
+            m_emissionHigh = LightColorPresetHelper.GetColors(LightColorPresetType.Green).emissionColor;
+            m_emissionLow = new Color(m_emissionHigh.r * m_emissionMultiplier, m_emissionHigh.g * m_emissionMultiplier, m_emissionHigh.b * m_emissionMultiplier, m_emissionHigh.a);
 
             m_staffTransform = transform.Find("itemstand/attach_other");
             m_staffStartIdle = new Vector3(m_staffTransform.localPosition.x, m_staffTransform.localPosition.y, m_staffTransform.localPosition.z);
             m_staffEndIdle = new Vector3(m_staffTransform.localPosition.x, m_staffTransform.localPosition.y + 0.06f, m_staffTransform.localPosition.z);
-
-            InvokeRepeating(nameof(StartSpellbookIdle), 0f, m_spellbookDurationIdle + 0.1f);
         }
 
         public void StaffAttach(string imbuementsString, ItemData itemData)
@@ -60,12 +61,18 @@ namespace ModularMagic_Core.Components
             m_imbuementsString = imbuementsString;
             m_onItemAttach.Invoke();
             CreateRunes();
-            InvokeRepeating(nameof(StartStaffIdle), 0f, m_staffDurationIdle + 0.1f);
+
+            Invoke(nameof(EmissionStart), 0f);
+            InvokeRepeating(nameof(EmissionIdle), m_emissionDurationIdle + 0.1f, m_emissionDurationIdle + 0.1f);
+            InvokeRepeating(nameof(StaffIdle), 0f, m_staffDurationIdle + 0.1f);
         }
 
         public void StaffRemove()
         {
-            CancelInvoke(nameof(StartStaffIdle));
+            CancelInvoke(nameof(EmissionStart));
+            CancelInvoke(nameof(EmissionIdle));
+            CancelInvoke(nameof(StaffIdle));
+            Invoke(nameof(EmissionStop), 0f);
 
             m_imbuements = new List<Imbuement>();
             m_imbued = new List<Imbuement>();
@@ -144,7 +151,7 @@ namespace ModularMagic_Core.Components
 
             string currentImbuementsString = ImbuementHelper.ListToString(m_imbuements);
 
-            Jotunn.Logger.LogWarning("CanImbue: " + m_imbuementsString == currentImbuementsString);
+            // Jotunn.Logger.LogWarning("CanImbue: " + m_imbuementsString == currentImbuementsString);
             if (m_imbuementsString == currentImbuementsString)
                 return CanImbueType.NoChange;
 
@@ -201,20 +208,64 @@ namespace ModularMagic_Core.Components
             }
         }
 
-        public void StartSpellbookIdle()
+        public void EmissionStart()
         {
-            m_spellbookReverseIdle = !m_spellbookReverseIdle;
-            Vector3 start = m_spellbookReverseIdle ? m_spellbookEndIdle : m_spellbookStartIdle;
-            Vector3 end = m_spellbookReverseIdle ? m_spellbookStartIdle : m_spellbookEndIdle;
-            StartCoroutine(LerpHelper.LerpTransform(m_spellbookTransform, start, end, m_spellbookDurationIdle));
+            m_emissiveIdleIsStarting = true;
+            Color fromColor = m_tableMat.GetColor("_EmissionColor");
+            Color toColor = m_emissionHigh;
+            StartCoroutine(LerpHelper.LerpColor(m_tableMat, fromColor, toColor, m_emissionDurationIdle));
         }
 
-        public void StartStaffIdle()
+        public void EmissionStop()
+        {
+            Color fromColor = m_tableMat.GetColor("_EmissionColor");
+            Color toColor = new Color(0f, 0f, 0f, 1f);
+            StartCoroutine(LerpHelper.LerpColor(m_tableMat, fromColor, toColor, m_emissionDurationIdle));
+        }
+
+        public void EmissionIdle()
+        {
+            if (m_emissiveIdleIsStarting)
+            {
+                m_emissionReverseIdle = false;
+                m_emissiveIdleIsStarting = false;
+            }
+            else
+                m_emissionReverseIdle = !m_emissionReverseIdle;
+                
+            Color fromColor = m_emissionReverseIdle ? m_emissionLow : m_emissionHigh;
+            Color toColor = m_emissionReverseIdle ? m_emissionHigh : m_emissionLow;
+            StartCoroutine(LerpHelper.LerpColor(m_tableMat, fromColor, toColor, m_emissionDurationIdle));
+        }
+
+        public void StaffIdle()
         {
             m_staffReverseIdle = !m_staffReverseIdle;
             Vector3 start = m_staffReverseIdle ? m_staffEndIdle : m_staffStartIdle;
             Vector3 end = m_staffReverseIdle ? m_staffStartIdle : m_staffEndIdle;
             StartCoroutine(LerpHelper.LerpTransform(m_staffTransform, start, end, m_staffDurationIdle));
         }
+
+        //private float GetPercentage(float total, float part)
+        //{
+        //    Jotunn.Logger.LogWarning("Total: " + total);
+        //    Jotunn.Logger.LogWarning("Part: " + part);
+
+        //    if (total == 0f)
+        //        return 0f;
+
+        //    if (part == 0f)
+        //        return 1;
+
+        //    float result = part / total;
+
+        //    if (result < 0) result = 0;
+        //    if (result > 1) result = 1;
+
+        //    Jotunn.Logger.LogWarning("Calc: " + part / total);
+        //    Jotunn.Logger.LogWarning("Result: " + result);
+
+        //    return result;
+        //}
     }
 }

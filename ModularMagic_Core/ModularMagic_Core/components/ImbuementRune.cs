@@ -33,7 +33,7 @@ namespace ModularMagic_Core.components
             m_imbuementTable.m_onRuneActivation.AddListener(UpdateEmission);
 
             m_origin = transform.localPosition;
-            transform.localRotation = TransformHelper.generateRotation(new Vector3(Random.Range(265, 275), Random.Range(-5f, 5), Random.Range(265, 275)));
+            transform.localRotation = TransformHelper.GenerateRotation(new Vector3(Random.Range(265, 275), Random.Range(-5f, 5), Random.Range(265, 275)));
             transform.localScale = new Vector3(0.008f, 0.008f, 0.008f);
             m_canActivate = CanActivate();
 
@@ -80,8 +80,6 @@ namespace ModularMagic_Core.components
 
             if (m_imbuement.category == ImbuementCategoryType.Normal)
             {
-                Jotunn.Logger.LogWarning("=== Activate Normal =====================");
-
                 if (alt)
                 {
                     m_imbuement.level--;
@@ -112,8 +110,6 @@ namespace ModularMagic_Core.components
 
             if (m_imbuement.category == ImbuementCategoryType.Attack)
             {
-                Jotunn.Logger.LogWarning("=== Activate Attack =====================");
-
                 if (alt)
                 {
                     m_imbuement.enabled = false;
@@ -136,8 +132,6 @@ namespace ModularMagic_Core.components
 
             if (m_imbuement.category == ImbuementCategoryType.SecondaryAttack)
             {
-                Jotunn.Logger.LogWarning("=== Activate Secondary Attack =====================");
-
                 if (alt)
                 {
                     m_imbuement.enabled = false;

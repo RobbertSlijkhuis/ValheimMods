@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 2657160681
+CRC: 775045808
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 0985e4fc28f29c7fc050669031e64054
+    Hash: 86a562587085156eb81bd9cf94176d81
   TypeTreeHash:
     serializedVersion: 2
     Hash: f18f96d1ffde07e283faae8903a1ff99
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 0985e4fc28f29c7fc050669031e64054
+    Hash: 86a562587085156eb81bd9cf94176d81
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -87,6 +87,7 @@ Assets:
 - Assets/Custom/Material/Table/Stone/Rune_Stone_E_MMC.mat
 - Assets/Custom/Material/Table/Wood/Rune_Wood_A_MMC.mat
 - Assets/Custom/Material/Table/Grausten/Rune_Grausten_A_MMC.mat
+- Assets/Custom/Material/Table/Altar_MMC.mat
 - Assets/Custom/Material/Table/Grausten/Rune_Grausten_MMC.mat
 - Assets/Custom/PrefabInstance/Eitr/MMC_EitrFine.prefab
 - Assets/Custom/Material/Table/Wood/Rune_Wood_C_MMC.mat

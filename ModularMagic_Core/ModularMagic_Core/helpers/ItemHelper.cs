@@ -19,7 +19,7 @@ namespace ModularMagic_Core.Helpers
             RequirementConfig[] requirements = RecipeHelper.GetAsRequirementConfigArray(config.recipe.Value, null, null);
 
             if (requirements == null || requirements.Length == 0)
-                Jotunn.Logger.LogWarning($"Could not resolve recipe for: {prefab.name}");
+                Jotunn.Logger.LogError($"Could not resolve recipe for: {prefab.name}");
             else
                 itemConfig.Requirements = requirements;
 

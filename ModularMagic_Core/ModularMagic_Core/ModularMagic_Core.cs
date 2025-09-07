@@ -62,12 +62,12 @@ namespace ModularMagic_Core
             PieceHelper.Create(prefabs.ImbuementTable, PluginConfig.piece1);
             PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
 
-            foreach (var button in ZInput.instance.m_buttons)
-            {
-                Jotunn.Logger.LogWarning("============================================");
-                Jotunn.Logger.LogWarning("Key: " + button.Key);
-                Jotunn.Logger.LogWarning("Name: " + button.Value.Name);
-            }
+            //foreach (var button in ZInput.instance.m_buttons)
+            //{
+            //    Jotunn.Logger.LogWarning("============================================");
+            //    Jotunn.Logger.LogWarning("Key: " + button.Key);
+            //    Jotunn.Logger.LogWarning("Name: " + button.Value.Name);
+            //}
         }
 
         /**
@@ -81,6 +81,7 @@ namespace ModularMagic_Core
             prefabs.EitrFine = assetBundle.LoadAsset<GameObject>("MMC_EitrFine");
             prefabs.ImbuementTable = assetBundle.LoadAsset<GameObject>("MMC_ImbuementTable");
 
+            materials.ImbuementTable = assetBundle.LoadAsset<Material>("Altar_MMC");
             materials.SpellBook = assetBundle.LoadAsset<Material>("Spellbook2_1_1_MMC");
             materials.SpellBookOff = assetBundle.LoadAsset<Material>("Spellbook2_1_1_off_MMC");
 
