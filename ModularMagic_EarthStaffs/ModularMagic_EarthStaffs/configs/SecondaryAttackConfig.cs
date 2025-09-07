@@ -57,17 +57,10 @@ namespace ModularMagic_EarthStaffs.Configs
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
             cooldown.SettingChanged += (obj, attr) =>
             {
-                Jotunn.Logger.LogWarning("Effect name: " + options.cooldownStatusEffectName);
-                Jotunn.Logger.LogWarning("Effect hash: " + options.cooldownStatusEffectName.GetStableHashCode());
                 StatusEffect statusEffect = ObjectDB.instance.GetStatusEffect(options.cooldownStatusEffectName.GetStableHashCode());
 
                 if (statusEffect != null)
-                {
-                    Jotunn.Logger.LogWarning("Name: " + statusEffect.m_name);
-                    Jotunn.Logger.LogWarning("TTL: " + statusEffect.m_ttl);
-                    Jotunn.Logger.LogWarning("New value: " + cooldown.Value);
                     statusEffect.m_ttl = cooldown.Value;
-                }
             };
 
             if (options.health != null)

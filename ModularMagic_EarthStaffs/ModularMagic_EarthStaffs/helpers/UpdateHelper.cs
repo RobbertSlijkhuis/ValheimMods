@@ -13,10 +13,8 @@ namespace ModularMagic_EarthStaffs.Helpers
             if (prefab == null)
                 throw new Exception("Prefab is null");
 
-            Jotunn.Logger.LogWarning("UpdateItemData prefab: " + prefab.name);
 
             ItemData itemData = prefab.GetComponent<ItemDrop>().m_itemData;
-            Jotunn.Logger.LogWarning("UpdateItemData itemData: " + itemData.m_shared.m_name);
             UpdateItemData(itemData, options);
             UpdateItemDataInHand(itemData, options);
         }
@@ -71,18 +69,12 @@ namespace ModularMagic_EarthStaffs.Helpers
 
             ItemData weaponItemData = Player.m_localPlayer.GetCurrentWeapon();
 
-            Jotunn.Logger.LogWarning("weaponItemData: " + weaponItemData?.m_shared?.m_name);
-            Jotunn.Logger.LogWarning("itemData: " + itemData?.m_shared?.m_name);
-
             if (weaponItemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth1.name && 
                 weaponItemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth2.name &&
                 weaponItemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth3.name
             )
                 return;
 
-            Jotunn.Logger.LogWarning("Velocity: " + options.secondaryProjectileVelocity);
-            Jotunn.Logger.LogWarning("Accuracy: " + options.secondaryProjectileAccuracy);
-            Jotunn.Logger.LogWarning("Angle: " + options.secondaryLaunchAngle);
             UpdateItemData(weaponItemData, options);
         }
 

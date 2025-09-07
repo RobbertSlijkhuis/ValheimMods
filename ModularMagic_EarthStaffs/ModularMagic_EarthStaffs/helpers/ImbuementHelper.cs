@@ -153,8 +153,6 @@ namespace ModularMagic_EarthStaffs.Helpers
             List<Imbuement> imbuements = new List<Imbuement>();
             string[] data = value.Split(';');
 
-            Jotunn.Logger.LogWarning(data[0]);
-
             foreach (string item in data)
             {
                 string[] properties = item.Split('|');
@@ -185,9 +183,6 @@ namespace ModularMagic_EarthStaffs.Helpers
 
             if (items != "")
                 items = items.Remove(items.Length - 1);
-
-            Jotunn.Logger.LogWarning("=== Earth To String ==============================");
-            Jotunn.Logger.LogWarning(items);
 
             return items;
         }

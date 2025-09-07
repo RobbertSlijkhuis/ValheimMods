@@ -20,7 +20,7 @@ namespace ModularMagic_EarthStaffs.Helpers
             RequirementConfig[] simpleRequirements = RecipeHelper.GetAsRequirementConfigArray(config.recipe.Value, config.recipeUpgrade.Value, config.recipeMultiplier.Value);
 
             if (simpleRequirements == null || simpleRequirements.Length == 0)
-                Jotunn.Logger.LogWarning($"Could not resolve recipe for: {prefab.name}");
+                Jotunn.Logger.LogError($"Could not resolve recipe for: {prefab.name}");
             else
                 itemConfig.Requirements = simpleRequirements;
 
