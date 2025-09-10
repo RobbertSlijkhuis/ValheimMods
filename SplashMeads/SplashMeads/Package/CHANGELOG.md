@@ -1,3 +1,6 @@
+### 1.0.4
+- Fixed an error that broke hud icons in Call To Arms update
+
 ### 1.0.3
 - Fixed splash Vananidir recipe using Ratatosk instead
 - Added Anti-sting splash mead

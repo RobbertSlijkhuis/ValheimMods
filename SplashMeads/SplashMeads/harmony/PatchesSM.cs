@@ -423,11 +423,11 @@ namespace SplashMeads.Harmony
             if (!PluginConfig.showParticles.Value)
                 return;
 
-            SkinnedMeshRenderer[] renderers = character.gameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
-            SkinnedMeshRenderer skinnedMesh = GetBodyRenderer(renderers);
+            //SkinnedMeshRenderer[] renderers = character.gameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
+            //SkinnedMeshRenderer skinnedMesh = GetBodyRenderer(renderers);
 
-            if (skinnedMesh == null)
-                return;
+            //if (skinnedMesh == null)
+            //    return;
 
             Transform flareTrans = prefab.transform.Find("lingering_effects/flare");
             Transform flakesTrans = prefab.transform.Find("lingering_effects/flakes_up");
@@ -450,7 +450,7 @@ namespace SplashMeads.Harmony
 
             ParticleSystem particleSystem = particlesTrans.GetComponent<ParticleSystem>();
             ParticleSystem.ShapeModule shape = particleSystem.shape;
-            shape.skinnedMeshRenderer = skinnedMesh;
+            // shape.skinnedMeshRenderer = skinnedMesh;
         }
 
         private static SkinnedMeshRenderer GetBodyRenderer(SkinnedMeshRenderer[] renderers)

@@ -17,7 +17,7 @@ namespace SplashMeads
     {
         public const string PluginGUID = "DeathWizsh.SplashMeads";
         public const string PluginName = "SplashMeads";
-        public const string PluginVersion = "1.0.3";
+        public const string PluginVersion = "1.0.4";
         public static SplashMeads Instance;
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
 
