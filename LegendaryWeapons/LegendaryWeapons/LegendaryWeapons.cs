@@ -19,7 +19,7 @@ namespace LegendaryWeapons
     {
         public const string PluginGUID = "DeathWizsh.LegendaryWeapons";
         public const string PluginName = "Legendary Weapons";
-        public const string PluginVersion = "1.0.4";
+        public const string PluginVersion = "1.0.5";
         private static string configFileName = PluginGUID + ".cfg";
         private static string configFileFullPath = BepInEx.Paths.ConfigPath + Path.DirectorySeparatorChar.ToString() + configFileName;
 
