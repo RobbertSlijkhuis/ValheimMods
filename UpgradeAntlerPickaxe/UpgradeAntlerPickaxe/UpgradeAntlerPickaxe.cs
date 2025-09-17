@@ -17,7 +17,7 @@ namespace UpgradeAntlerPickaxe
     {
         public const string PluginGUID = "DeathWizsh.UpgradeAntlerPickaxe";
         public const string PluginName = "Upgrade Antler Pickaxe";
-        public const string PluginVersion = "1.1.3";
+        public const string PluginVersion = "1.1.4";
         private static string configFileName = PluginGUID + ".cfg";
         private static string configFileFullPath = BepInEx.Paths.ConfigPath + Path.DirectorySeparatorChar.ToString() + configFileName;
 
