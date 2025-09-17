@@ -15,7 +15,7 @@ namespace PavedRoadNoLevel
     {
         public const string PluginGUID = "DeathWizsh.PavedRoadNoLevel";
         public const string PluginName = "Paved Road No Level";
-        public const string PluginVersion = "1.0.6";
+        public const string PluginVersion = "1.0.7";
         private static string configFileName = PluginGUID + ".cfg";
         private static string configFileFullPath = BepInEx.Paths.ConfigPath + Path.DirectorySeparatorChar.ToString() + configFileName;
 

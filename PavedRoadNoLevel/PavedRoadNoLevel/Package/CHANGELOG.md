@@ -1,3 +1,6 @@
+### 1.0.7
+- Updated to Call to Arms update, increased Jotunn dependency to 2.26.1
+
 ### 1.0.6
 - Updated to Bog Witch update
 
