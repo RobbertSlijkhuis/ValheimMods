@@ -153,7 +153,7 @@ namespace ModularMagic_Utilities.Harmony
         {
             try
             {
-                if (__instance == null)
+                if (__instance == null || !hold)
                     return;
 
                 Transform weatherZoneTrans = __instance.transform?.parent?.Find("weatherzone");
