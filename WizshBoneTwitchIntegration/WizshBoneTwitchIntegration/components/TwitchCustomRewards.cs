@@ -14,9 +14,15 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 {
     internal class TwitchCustomRewards : MonoBehaviour
     {
+        private TwitchChat m_chat;
         GameTask<EventStream<CustomRewardEvent>> m_customRewardEvents;
         public Redeems m_redeems = new Redeems();
         public bool isPlayerInSafeZone = false;
+
+        private void Awake()
+        {
+            m_chat = gameObject.GetComponent<TwitchChat>();
+        }
 
         public void SubscribeToRedeemEvents()
         {
@@ -52,14 +58,18 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (isPlayerInSafeZone)
                 {
                     Jotunn.Logger.LogWarning("Player is in safe zone, canceling redeem...");
+                    m_chat.Send($"@{currentRewardEvent.RedeemerName} Player is inside a Twitch safe zone, your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} point has been refunded!");
                     Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Canceled);
                     return;
                 }
 
                 if (redeem.type == RedeemType.SpawnCreature)
                 {
-                    foreach (SpawnCreatureData creature in redeem.spawnCreatureData)
+                    foreach (SpawnCreatureData creature in redeem.creatureData)
                     {
+                        if (redeem.IsUserInputRequired)
+                            creature.talkMessage = m_chat.GetLatestMessageByAuthor(currentRewardEvent.RedeemerName)?.message;
+
                         if (creature.count > 1)
                             RedeemHelper.SpawnCreatures(new SpawnOptions(creature.prefabName, Player.m_localPlayer.transform, creature, currentRewardEvent));
                         else
@@ -78,14 +88,21 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
                 }
 
-                if (redeem.type == RedeemType.ShrinkPlayer)
+                if (redeem.type == RedeemType.PlayerGrow)
                 {
-                    ShrinkPlayer();
-                    Invoke(nameof(UnshrinkPlayer), PluginConfig.configMiniMeDuration.Value);
+                    GrowPlayer();
+                    Invoke(nameof(ResetPlayer), PluginConfig.configMiniMeDuration.Value);
                     Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
                 }
 
-                if (redeem.type == RedeemType.RandomStatusEffect)
+                if (redeem.type == RedeemType.PlayerShrink)
+                {
+                    ShrinkPlayer();
+                    Invoke(nameof(ResetPlayer), PluginConfig.configMiniMeDuration.Value);
+                    Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
+                }
+
+                if (redeem.type == RedeemType.StatusEffectRandom)
                 {
                     int hash = RedeemHelper.GetRandomStatusEffect();
                     Player.m_localPlayer.GetSEMan().AddStatusEffect(hash);
@@ -98,6 +115,13 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
         }
 
+        private void GrowPlayer()
+        {
+            Player.m_localPlayer.GetSEMan().AddStatusEffect(WizshBoneTwitchIntegration.Instance.effects.MiniMe);
+            RedeemHelper.SetPlayerSpeed(1.25f);
+            StartCoroutine(LerpHelper.LerpScale(Player.m_localPlayer.transform, Player.m_localPlayer.transform.localScale, new Vector3(1.45f, 1.45f, 1.45f), 1.5f));
+        }
+
         private void ShrinkPlayer()
         {
             Player.m_localPlayer.GetSEMan().AddStatusEffect(WizshBoneTwitchIntegration.Instance.effects.MiniMe);
@@ -105,7 +129,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             StartCoroutine(LerpHelper.LerpScale(Player.m_localPlayer.transform, Player.m_localPlayer.transform.localScale, new Vector3(0.45f, 0.45f, 0.45f), 1.5f));
         }
 
-        private void UnshrinkPlayer()
+        private void ResetPlayer()
         {
             RedeemHelper.ResetPlayerSpeed(Player.m_localPlayer);
             StartCoroutine(LerpHelper.LerpScale(Player.m_localPlayer.transform, Player.m_localPlayer.transform.localScale, new Vector3(1f, 1f, 1f), 1.5f));
@@ -123,8 +147,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 {
                     BackgroundColor = redeem.backgroundColor,
                     Cost = redeem.cost,
-                    // IsUserInputRequired = redeem.talks,
-                    IsUserInputRequired = false,
+                    IsUserInputRequired = redeem.IsUserInputRequired,
                     Title = redeem.title,
                 });
             }

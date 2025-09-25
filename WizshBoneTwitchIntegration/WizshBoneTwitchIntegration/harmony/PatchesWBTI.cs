@@ -14,8 +14,8 @@ namespace WizshBoneTwitchIntegration.Harmony
             try
             {
                 Jotunn.Logger.LogWarning("Adding twitch components to player");
-                __instance.gameObject.AddComponent<TwitchCustomRewards>();
                 __instance.gameObject.AddComponent<TwitchChat>();
+                __instance.gameObject.AddComponent<TwitchCustomRewards>();
                 __instance.gameObject.AddComponent<TwitchAuth>();
             }
             catch (Exception e)

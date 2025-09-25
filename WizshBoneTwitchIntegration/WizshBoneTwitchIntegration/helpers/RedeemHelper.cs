@@ -8,7 +8,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 {
     internal class RedeemHelper
     {
-        public static PlayerSpeedSnapshot playerSpeedSnapshot;
+        public static PlayerSnapshot playerSnapshot;
 
         public static Vector3 GenerateSpawnLocation(Transform transform, string type)
         {
@@ -38,6 +38,12 @@ namespace WizshBoneTwitchIntegration.Helpers
             humanComp.m_faction = Character.Faction.Boss;
             humanComp.m_level = options.creatureData.level;
 
+            if (!options.creatureData.allowDrops)
+            {
+                CharacterDrop dropComp = creature.GetComponent<CharacterDrop>();
+                dropComp.m_drops = new List<CharacterDrop.Drop>();
+            }
+
             if (options.creatureData.talks)
             {
                 NpcTalk talkComp = creature.AddComponent<NpcTalk>();
@@ -51,13 +57,11 @@ namespace WizshBoneTwitchIntegration.Helpers
                     $"Troll on duty, cuty Betu... AAAARRRRGGGH something!",
                     $"Its smashing time! Hehe-eh",
                 };
-                talkComp.OnBecameAggravated(BaseAI.AggravatedReason.Damage);
-            }
 
-            if (!options.creatureData.allowDrops)
-            {
-                CharacterDrop dropComp = creature.GetComponent<CharacterDrop>();
-                dropComp.m_drops = new List<CharacterDrop.Drop>();
+                if (options.creatureData.talkMessage != null && options.creatureData.talkMessage.Trim() != "" && options.creatureData.talkMessage.Trim().Length > 2)
+                    talkComp.m_aggravated = new List<string>() { options.creatureData.talkMessage };
+
+                talkComp.OnBecameAggravated(BaseAI.AggravatedReason.Damage);
             }
         }
 
@@ -97,21 +101,26 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static void SetPlayerSpeed(float multiplier)
         {
-            if (playerSpeedSnapshot == null)
-                playerSpeedSnapshot = new PlayerSpeedSnapshot(Player.m_localPlayer);
+            if (playerSnapshot == null)
+                playerSnapshot = new PlayerSnapshot(Player.m_localPlayer);
 
-            Player.m_localPlayer.m_crouchSpeed = playerSpeedSnapshot.crouchSpeed * multiplier;
-            Player.m_localPlayer.m_jumpForce = playerSpeedSnapshot.jumpForce * multiplier;
-            Player.m_localPlayer.m_jumpForceForward = playerSpeedSnapshot.jumpForceForward * multiplier;
-            Player.m_localPlayer.m_runSpeed = playerSpeedSnapshot.runSpeed * multiplier;
-            Player.m_localPlayer.m_speed = playerSpeedSnapshot.speed * multiplier;
-            Player.m_localPlayer.m_swimSpeed = playerSpeedSnapshot.swimSpeed * multiplier;
-            Player.m_localPlayer.m_walkSpeed = playerSpeedSnapshot.walkSpeed * multiplier;
+            Player.m_localPlayer.m_jumpForce = playerSnapshot.jumpForce * multiplier;
+            Player.m_localPlayer.m_jumpForceForward = playerSnapshot.jumpForceForward * multiplier;
+
+            Player.m_localPlayer.m_crouchSpeed = playerSnapshot.crouchSpeed * multiplier;
+            Player.m_localPlayer.m_runSpeed = playerSnapshot.runSpeed * multiplier;
+            Player.m_localPlayer.m_speed = playerSnapshot.speed * multiplier;
+            Player.m_localPlayer.m_walkSpeed = playerSnapshot.walkSpeed * multiplier;
+
+            Player.m_localPlayer.m_swimDepth = playerSnapshot.swimDepth * multiplier;
+            Player.m_localPlayer.m_swimSpeed = playerSnapshot.swimSpeed * multiplier;
+
+            // Player.m_localPlayer.m_maxCarryWeight = playerSnapshot.maxCarryWeight * multiplier;
         }
 
         public static void ResetPlayerSpeed(Player player)
         {
-            playerSpeedSnapshot.Apply(player);
+            playerSnapshot.Apply(player);
         }
     }
 }

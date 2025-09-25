@@ -6,15 +6,17 @@ namespace WizshBoneTwitchIntegration.Models
     {
         public string backgroundColor;
         public int cost;
-        public List<SpawnCreatureData> spawnCreatureData;
+        public bool IsUserInputRequired;
+        public List<SpawnCreatureData> creatureData;
         public string title;
         public string type;
 
-        public RedeemData(string type, string title, int cost, string backgroundColor, List<SpawnCreatureData> spawnCreatureData = null)
+        public RedeemData(string type, string title, int cost, string backgroundColor, bool IsUserInputRequired = false, List<SpawnCreatureData> creatureData = null)
         {
             this.backgroundColor = backgroundColor;
             this.cost = cost;
-            this.spawnCreatureData = spawnCreatureData;
+            this.IsUserInputRequired = IsUserInputRequired;
+            this.creatureData = creatureData;
             this.title = title;
             this.type = type;
         }

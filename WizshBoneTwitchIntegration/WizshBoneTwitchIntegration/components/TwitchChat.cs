@@ -1,25 +1,29 @@
-﻿using System.IO;
-using System.Net.Http;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Net.Sockets;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Models;
 
 namespace WizshBoneTwitchIntegration.TwitchIntegration
 {
     internal class TwitchChat : MonoBehaviour
     {
-        private string username = "WizshBoneBot";
-        private string password;
-        private string channel;
-
         private TcpClient twitchClient;
         private StreamReader reader;
         private StreamWriter writer;
-        public string chatText;
+        private bool isLoggedIn;
+        public List<TwitchChatMessage> chatHistory = new List<TwitchChatMessage>();
+        private int historyLength = 30;
 
         private string twitchClientSecret = "kqfpjddbg5945on7ip7wuj08faps5m";
         private string twitchClientId = "8i260qk16tmvumfssr2h4klu99frjb";
         private string _sOAuth;
 
+        private string username = "WizshBoneBot";
+        private string password;
+        private string channel;
+
+        private string loginMessage = "Welcome, GLHF!";
 
         void Update()
         {
@@ -55,7 +59,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             writer.WriteLine("USER " + username.ToLower() + " 8 * :" + username.ToLower());
             writer.WriteLine("JOIN #" + channel.ToLower());
             writer.Flush();
-            Invoke(nameof(SendMessage), 10f);
         }
 
         public void GetOAuth(params string[] scopes)
@@ -69,9 +72,24 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             LogIn();
         }
 
-        private void SendMessage()
+        public TwitchChatMessage GetFirstMessageByAuthor(string author)
         {
-            writer.WriteLine($"PRIVMSG #{channel} :This message was send from the WizshBone Twitch integration. Hello {channel}!");
+            return chatHistory.Find(item => item.author == author.ToLower());
+        }
+
+        public List<TwitchChatMessage> GetAllMessagesByAuthor(string author)
+        {
+            return chatHistory.FindAll(item => item.author == author.ToLower());
+        }
+
+        public TwitchChatMessage GetLatestMessageByAuthor(string author)
+        {
+            return chatHistory.FindLast(item => item.author == author.ToLower());
+        }
+
+        public void Send(string message)
+        {
+            writer.WriteLine($"PRIVMSG #{channel} :WTBI: {message}");
             writer.Flush();
         }
 
@@ -80,7 +98,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             if (twitchClient != null && twitchClient.Available > 0)
             {
                 string message = reader.ReadLine();
-                Jotunn.Logger.LogWarning("Message: " + message);
+                Jotunn.Logger.LogWarning(message);
 
                 if (message.Contains("PING"))
                 {
@@ -89,18 +107,29 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     return;
                 }
 
-                //if (!message.Contains("PRIVMSG"))
-                //    return;
+                if (message.Contains(loginMessage))
+                {
+                    Jotunn.Logger.LogWarning("Twitch chat login successfull!");
+                    isLoggedIn = true;
+                    return;
+                }
 
-                //int splitPoint = message.IndexOf("!");
-                //string author = message.Substring(0, splitPoint);
-                //author = author.Substring(1);
+                if (!message.Contains("PRIVMSG"))
+                    return;
 
-                //splitPoint = message.IndexOf("!", 1);
-                //string chat = message.Substring(splitPoint + 1);
+                // Message: :deathwizsh!deathwizsh@deathwizsh.tmi.twitch.tv PRIVMSG #azeriath :Another test :P
+                int splitPoint = message.IndexOf("!");
+                string author = message.Substring(0, splitPoint);
+                author = author.Substring(1);
 
-                //chatText += $"{author}: {chat}\n";
-                // Jotunn.Logger.LogWarning($"{author}: {chat}");
+                splitPoint = message.IndexOf(":", 1);
+                string chatMessage = message.Substring(splitPoint + 1);
+
+                chatHistory.Add(new TwitchChatMessage(author, chatMessage));
+                // Jotunn.Logger.LogWarning($"{author}|{chatMessage}");
+
+                if (chatHistory.Count > historyLength)
+                    chatHistory.RemoveAt(0);
             }
         }
     }

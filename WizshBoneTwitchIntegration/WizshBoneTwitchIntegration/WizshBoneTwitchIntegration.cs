@@ -146,7 +146,6 @@ namespace WizshBoneTwitchIntegration
             // Chat loves this: Spawn chest with small healing meads in there and call it "cheese mead".
             // Fish Detonate: Detonate fish in radius
             // Remove redeems on game quit
-            // Make greydwarf spawn 2 star
             // ====================================
             // Ideas:
             // MORE POSITIVE EFFECTS
@@ -155,6 +154,7 @@ namespace WizshBoneTwitchIntegration
             // Flashbang?
             // Add halucinations to player?
             // Suggestion: "Spawn Deathsquitto" and "Spawn just the sound of a Deathsquitto"
+            // Disable all twitchy wards via bits (specific amount like 1000)
         }
     }
 }
