@@ -17,6 +17,9 @@ namespace ModularMagic_Core.Components
         private float m_emissionDuration = 1.5f;
         private float m_rotationDuration = 0.75f;
         private bool m_spellbookReverseIdle = true;
+        private IEnumerator m_emission;
+        private IEnumerator m_spellbookStart;
+        private IEnumerator m_spellbookStop;
         private IEnumerator m_spellbookIdle;
 
         private void Awake()
@@ -24,8 +27,8 @@ namespace ModularMagic_Core.Components
             m_imbuementTable = transform.parent.parent.gameObject.GetComponent<ImbuementTable>();
             m_imbuementTable.m_onItemAttach.AddListener(EmissionStart);
             m_imbuementTable.m_onItemRemove.AddListener(EmissionStop);
-            m_imbuementTable.m_onRuneActivation.AddListener(EmissionStart);
-            m_imbuementTable.m_onSave.AddListener(EmissionStart);
+            m_imbuementTable.m_onRuneActivation.AddListener(EmissionUpdate);
+            m_imbuementTable.m_onSave.AddListener(OnSave);
             m_tableMat = gameObject.GetComponent<MeshRenderer>().materials[0];
 
             //m_spellbookStartIdle = new Vector3(transform.localPosition.x, transform.localPosition.y, transform.localPosition.z);
@@ -114,8 +117,62 @@ namespace ModularMagic_Core.Components
         //    meshComp.materials = new Material[1] { ModularMagic_Core.Instance.materials.SpellBookOff };
         //}
 
+        public void OnSave()
+        {
+            EmissionUpdate();
+            ParticleSystem partComp = gameObject.GetComponent<ParticleSystem>();
+            partComp.Play();
+        }
+
         public void EmissionStart()
         {
+            if (m_spellbookStop != null)
+                StopCoroutine(m_spellbookStop);
+
+            if (m_emission != null)
+                StopCoroutine(m_emission);
+
+            EmissionUpdate();
+
+            Vector3 fromPos = transform.localPosition;
+            Vector3 toPos = m_spellbookStartIdle;
+            Vector3 fromRot = new Vector3(28.607f, -196.08f, -90.506f);
+            Vector3 toRot = new Vector3(0f, -145f, -35f);
+            m_spellbookStart = LerpHelper.SlerpPositionAndRotation(transform, fromPos, toPos, fromRot, toRot, m_rotationDuration);
+            StartCoroutine(m_spellbookStart);
+            InvokeRepeating(nameof(SpellbookIdle), m_rotationDuration + 0.1f, m_spellbookDurationIdle + 0.1f);
+        }
+
+        public void EmissionStop()
+        {
+            CancelInvoke(nameof(SpellbookIdle));
+
+            if (m_spellbookIdle != null)
+                StopCoroutine(m_spellbookIdle);
+            else if (m_spellbookStart != null)
+                StopCoroutine(m_spellbookStart);
+
+            if (m_emission != null)
+                StopCoroutine(m_emission);
+
+            Color fromColor = m_tableMat.GetColor("_EmissionColor");
+            Color toColor = new Color(0f, 0f, 0f, 1f);
+            m_emission = LerpHelper.LerpColor(m_tableMat, fromColor, toColor, m_emissionDuration);
+            StartCoroutine(m_emission);
+
+            Vector3 toPos = new Vector3(0.354f, 1.054f, 0.897f);
+            Vector3 fromPos = transform.localPosition;
+            Vector3 toRot = new Vector3(28.607f, -196.08f, -90.506f);
+            Vector3 fromRot = new Vector3(0f, -145f, -35f);
+            m_spellbookStop = LerpHelper.SlerpPositionAndRotation(transform, fromPos, toPos, fromRot, toRot, m_rotationDuration);
+            StartCoroutine(m_spellbookStop);
+        }
+
+        public void EmissionUpdate()
+        {
+            if (m_emission != null)
+                StopCoroutine(m_emission);
+
             LightPresetColors colors;
             string canImbue = m_imbuementTable.CanImbue();
 
@@ -128,42 +185,16 @@ namespace ModularMagic_Core.Components
 
             Color fromColor = m_tableMat.GetColor("_EmissionColor");
             Color toColor = colors.emissionColor;
-            StartCoroutine(LerpHelper.LerpColor(m_tableMat, fromColor, toColor, m_emissionDuration));
-
-            // Vector3 fromPos = new Vector3(0.354f, 1.054f, 0.897f);
-            Vector3 fromPos = transform.localPosition;
-            Vector3 toPos = new Vector3(0.402f, 1.223f, 0.893f);
-            Vector3 fromRot = new Vector3(28.607f, -196.08f, -90.506f);
-            //Vector3 fromRot = transform.localRotation.eulerAngles;
-            Vector3 toRot = new Vector3(0f, -145f, -35f);
-            StartCoroutine(LerpHelper.LerpPositionAndRotation(transform, fromPos, toPos, fromRot, toRot, m_rotationDuration));
-            InvokeRepeating(nameof(SpellbookIdle), m_emissionDuration + 0.1f, m_spellbookDurationIdle + 0.1f);
+            m_emission = LerpHelper.LerpColor(m_tableMat, fromColor, toColor, m_emissionDuration);
+            StartCoroutine(m_emission);
         }
 
-        public void EmissionStop()
-        {
-            CancelInvoke(nameof(SpellbookIdle));
-            StopCoroutine(m_spellbookIdle);
-
-            Color fromColor = m_tableMat.GetColor("_EmissionColor");
-            Color toColor = new Color(0f, 0f, 0f, 1f);
-            StartCoroutine(LerpHelper.LerpColor(m_tableMat, fromColor, toColor, m_emissionDuration));
-
-            Vector3 toPos = new Vector3(0.354f, 1.054f, 0.897f);
-            //Vector3 fromPos = new Vector3(0.402f, 1.223f, 0.893f);
-            Vector3 fromPos = transform.localPosition;
-            Vector3 toRot = new Vector3(28.607f, -196.08f, -90.506f);
-            Vector3 fromRot = new Vector3(0f, -145f, -35f);
-            //Vector3 fromRot = transform.localRotation.eulerAngles;
-            StartCoroutine(LerpHelper.LerpPositionAndRotation(transform, fromPos, toPos, fromRot, toRot, m_rotationDuration));
-        }
-
-        public void SpellbookIdle()
+        public void SpellbookIdle(Vector3? customStart)
         {
             m_spellbookReverseIdle = !m_spellbookReverseIdle;
             Vector3 start = m_spellbookReverseIdle ? m_spellbookEndIdle : m_spellbookStartIdle;
             Vector3 end = m_spellbookReverseIdle ? m_spellbookStartIdle : m_spellbookEndIdle;
-            m_spellbookIdle = LerpHelper.LerpTransform(transform, start, end, m_spellbookDurationIdle);
+            m_spellbookIdle = LerpHelper.SlerpPosition(transform, start, end, m_spellbookDurationIdle);
             StartCoroutine(m_spellbookIdle);
         }
     }

@@ -3,6 +3,7 @@ using ModularMagic_Core.Helpers;
 using ModularMagic_Core.Models;
 using ModularMagic_Core.Types;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -31,12 +32,17 @@ namespace ModularMagic_Core.Components
         private float m_emissionDurationIdle = 3f;
         private bool m_emissionReverseIdle = false;
         private bool m_emissiveIdleIsStarting = true;
+        private IEnumerator m_emission;
 
         private Transform m_staffTransform;
-        private Vector3 m_staffStartIdle;
-        private Vector3 m_staffEndIdle;
+        private Vector3 m_staffPositionStartIdle;
+        private Vector3 m_staffPositionEndIdle;
+        private Vector3 m_staffRotateStartIdle;
+        private Vector3 m_staffRotateEndIdle;
         private float m_staffDurationIdle = 10f;
         private bool m_staffReverseIdle = false;
+        private bool m_staffFirstRotate = true;
+        private IEnumerator m_staffIdle;
 
         private void Awake()
         {
@@ -48,13 +54,14 @@ namespace ModularMagic_Core.Components
             m_emissionLow = new Color(m_emissionHigh.r * m_emissionMultiplier, m_emissionHigh.g * m_emissionMultiplier, m_emissionHigh.b * m_emissionMultiplier, m_emissionHigh.a);
 
             m_staffTransform = transform.Find("itemstand/attach_other");
-            m_staffStartIdle = new Vector3(m_staffTransform.localPosition.x, m_staffTransform.localPosition.y, m_staffTransform.localPosition.z);
-            m_staffEndIdle = new Vector3(m_staffTransform.localPosition.x, m_staffTransform.localPosition.y + 0.06f, m_staffTransform.localPosition.z);
+            m_staffPositionStartIdle = new Vector3(m_staffTransform.localPosition.x, m_staffTransform.localPosition.y, m_staffTransform.localPosition.z);
+            m_staffPositionEndIdle = new Vector3(m_staffTransform.localPosition.x, m_staffTransform.localPosition.y + 0.1f, m_staffTransform.localPosition.z);
+            m_staffRotateStartIdle = new Vector3(0f, 0f, 45f);
+            m_staffRotateEndIdle = new Vector3(0f, 0f, -45f);
         }
 
         public void StaffAttach(string imbuementsString, ItemData itemData)
         {
-            
             m_imbuements = ImbuementHelper.StringToList(imbuementsString);
             m_imbued = m_imbuements.FindAll(item => item.isImbued);
             m_itemData = itemData;
@@ -69,6 +76,9 @@ namespace ModularMagic_Core.Components
 
         public void StaffRemove()
         {
+            if (m_emission != null)
+                StopCoroutine(m_emission);
+
             CancelInvoke(nameof(EmissionStart));
             CancelInvoke(nameof(EmissionIdle));
             CancelInvoke(nameof(StaffIdle));
@@ -78,6 +88,7 @@ namespace ModularMagic_Core.Components
             m_imbued = new List<Imbuement>();
             m_itemData = null;
             m_imbuementsString = null;
+            m_staffFirstRotate = true;
             m_onItemRemove.Invoke();
             RemoveRunes();
         }
@@ -213,14 +224,16 @@ namespace ModularMagic_Core.Components
             m_emissiveIdleIsStarting = true;
             Color fromColor = m_tableMat.GetColor("_EmissionColor");
             Color toColor = m_emissionHigh;
-            StartCoroutine(LerpHelper.LerpColor(m_tableMat, fromColor, toColor, m_emissionDurationIdle));
+            m_emission = LerpHelper.LerpColor(m_tableMat, fromColor, toColor, m_emissionDurationIdle);
+            StartCoroutine(m_emission);
         }
 
         public void EmissionStop()
         {
             Color fromColor = m_tableMat.GetColor("_EmissionColor");
             Color toColor = new Color(0f, 0f, 0f, 1f);
-            StartCoroutine(LerpHelper.LerpColor(m_tableMat, fromColor, toColor, m_emissionDurationIdle));
+            m_emission = LerpHelper.LerpColor(m_tableMat, fromColor, toColor, m_emissionDurationIdle);
+            StartCoroutine(m_emission);
         }
 
         public void EmissionIdle()
@@ -235,15 +248,21 @@ namespace ModularMagic_Core.Components
                 
             Color fromColor = m_emissionReverseIdle ? m_emissionLow : m_emissionHigh;
             Color toColor = m_emissionReverseIdle ? m_emissionHigh : m_emissionLow;
-            StartCoroutine(LerpHelper.LerpColor(m_tableMat, fromColor, toColor, m_emissionDurationIdle));
+            m_emission = LerpHelper.LerpColor(m_tableMat, fromColor, toColor, m_emissionDurationIdle);
+            StartCoroutine(m_emission);
         }
 
         public void StaffIdle()
         {
             m_staffReverseIdle = !m_staffReverseIdle;
-            Vector3 start = m_staffReverseIdle ? m_staffEndIdle : m_staffStartIdle;
-            Vector3 end = m_staffReverseIdle ? m_staffStartIdle : m_staffEndIdle;
-            StartCoroutine(LerpHelper.LerpTransform(m_staffTransform, start, end, m_staffDurationIdle));
+            Vector3 startPos = m_staffReverseIdle ? m_staffPositionEndIdle : m_staffPositionStartIdle;
+            Vector3 endPos = m_staffReverseIdle ? m_staffPositionStartIdle : m_staffPositionEndIdle;
+            Vector3 startRot = m_staffFirstRotate ? new Vector3(0f, 0f, 0f) : m_staffReverseIdle ? m_staffRotateEndIdle : m_staffRotateStartIdle;
+            Vector3 endRot = m_staffReverseIdle ? m_staffRotateStartIdle : m_staffRotateEndIdle;
+            m_staffFirstRotate = false;
+            // m_staffIdle = LerpHelper.SlerpPosition(m_staffTransform, start, end, m_staffDurationIdle);
+            m_staffIdle = LerpHelper.LerpPositionAndRotation(m_staffTransform, startPos, endPos, startRot, endRot, m_staffDurationIdle);
+            StartCoroutine(m_staffIdle);
         }
 
         //private float GetPercentage(float total, float part)

@@ -5,7 +5,7 @@ namespace ModularMagic_Core.Helpers
 {
     internal class LerpHelper
     {
-        public static IEnumerator LerpTransform(Transform transform, Vector3 start, Vector3 end, float duration, GameObject gameObject = null, bool destroy = false)
+        public static IEnumerator LerpPosition(Transform transform, Vector3 start, Vector3 end, float duration, GameObject gameObject = null, bool destroy = false)
         {
             float timeElapsed = 0f;
 
@@ -13,6 +13,25 @@ namespace ModularMagic_Core.Helpers
             {
                 float t = timeElapsed / duration;
                 transform.localPosition = Vector3.Lerp(start, end, t);
+                timeElapsed += Time.deltaTime;
+
+                yield return null;
+            }
+
+            transform.localPosition = end;
+
+            if (gameObject && destroy)
+                GameObject.Destroy(gameObject);
+        }
+
+        public static IEnumerator SlerpPosition(Transform transform, Vector3 start, Vector3 end, float duration, GameObject gameObject = null, bool destroy = false)
+        {
+            float timeElapsed = 0f;
+
+            while (timeElapsed < duration)
+            {
+                float t = timeElapsed / duration;
+                transform.localPosition = Vector3.Slerp(start, end, t);
                 timeElapsed += Time.deltaTime;
 
                 yield return null;
@@ -33,6 +52,24 @@ namespace ModularMagic_Core.Helpers
                 float t = timeElapsed / duration;
                 transform.localPosition = Vector3.Lerp(startPos, endPos, t);
                 transform.localRotation = TransformHelper.GenerateRotation(Vector3.Lerp(startRot, endRot, t));
+                timeElapsed += Time.deltaTime;
+
+                yield return null;
+            }
+
+            transform.localPosition = endPos;
+            transform.localRotation = TransformHelper.GenerateRotation(endRot);
+        }
+
+        public static IEnumerator SlerpPositionAndRotation(Transform transform, Vector3 startPos, Vector3 endPos, Vector3 startRot, Vector3 endRot, float duration)
+        {
+            float timeElapsed = 0f;
+
+            while (timeElapsed < duration)
+            {
+                float t = timeElapsed / duration;
+                transform.localPosition = Vector3.Slerp(startPos, endPos, t);
+                transform.localRotation = TransformHelper.GenerateRotation(Vector3.Slerp(startRot, endRot, t));
                 timeElapsed += Time.deltaTime;
 
                 yield return null;

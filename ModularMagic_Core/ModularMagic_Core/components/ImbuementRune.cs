@@ -252,21 +252,21 @@ namespace ModularMagic_Core.components
             Vector3 start = transform.localPosition;
             Vector3 end = ImbuementHelper.CalculatePosition(m_imbuement.category, m_imbuement.column);
             m_startIdle = end;
-            StartCoroutine(LerpHelper.LerpTransform(transform, start, end, m_durationMoveIn));
+            StartCoroutine(LerpHelper.SlerpPosition(transform, start, end, m_durationMoveIn));
         }
 
         public void StartMoveOut()
         {
             Vector3 start = transform.localPosition;
             Vector3 end = m_origin;
-            StartCoroutine(LerpHelper.LerpTransform(transform, start, end, m_durationMoveIn, gameObject, true));
+            StartCoroutine(LerpHelper.SlerpPosition(transform, start, end, m_durationMoveIn, gameObject, true));
         }
 
         public void StartIdle()
         {
             Vector3 start = transform.localPosition;
             Vector3 end = LerpHelper.RandomPosition(m_startIdle, m_minIdle, m_maxIdle);
-            StartCoroutine(LerpHelper.LerpTransform(transform, start, end, m_durationIdle));
+            StartCoroutine(LerpHelper.SlerpPosition(transform, start, end, m_durationIdle));
         }
 
         private string FormatNamesMessage(List<Imbuement> imbuements, bool filterEnabled = false)

@@ -49,7 +49,7 @@ namespace ModularMagic_Core.Harmony
         {
             try
             {
-                if (__instance == null)
+                if (!hold || __instance == null)
                     return;
 
                 ImbuementTable comp = __instance.transform.parent.gameObject.GetComponent<ImbuementTable>();
@@ -62,7 +62,7 @@ namespace ModularMagic_Core.Harmony
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not disable weather in Interact_Postfix: " + e);
+                Jotunn.Logger.LogError("Something went wrong in Interact_Postfix: " + e);
             }
         }
     }
