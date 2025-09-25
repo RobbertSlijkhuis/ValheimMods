@@ -1,0 +1,77 @@
+ManifestFileVersion: 0
+CRC: 987979277
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: c046085c8e7f1b6c3831959346cc01a7
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: fab8c867ffa0e6173bfea38040821900
+  IncrementalBuildHash:
+    serializedVersion: 2
+    Hash: c046085c8e7f1b6c3831959346cc01a7
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 64
+  Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
+- Class: 108
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: -870746866, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 2094620348, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1345532120, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: -179248876, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 136
+  Script: {instanceID: 0}
+- Class: 198
+  Script: {instanceID: 0}
+- Class: 199
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers:
+- AssemblyName: assembly_valheim
+  ClassName: EffectList
+- AssemblyName: assembly_valheim
+  ClassName: EffectList/EffectData
+- AssemblyName: assembly_valheim
+  ClassName: HitData/DamageModPair
+- AssemblyName: assembly_valheim
+  ClassName: HitData/DamageTypes
+Assets:
+- Assets/Custom/PrefabInstance/spawn_fish_WBTI.prefab
+- Assets/Custom/Monobehaviour/Freezing_WBTI.asset
+- Assets/Custom/Monobehaviour/Burning_WBTI.asset
+- Assets/Custom/Monobehaviour/Poison_WBTI.asset
+- Assets/Custom/Sprite/MiniMeSprite_WBTI.png
+- Assets/Custom/PrefabInstance/WBTI_guard_stone.prefab
+Dependencies: []

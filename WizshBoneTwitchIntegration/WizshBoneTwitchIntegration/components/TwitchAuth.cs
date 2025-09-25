@@ -1,116 +1,143 @@
-﻿using TwitchSDK;
+﻿using System;
+using TwitchSDK;
 using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Gui;
-using WizshBoneTwitchIntegration.GUI;
-using WizshBoneTwitchIntegration.Models;
+using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.TwitchIntegration
 {
     internal class TwitchAuth : MonoBehaviour
     {
-        GameTask<AuthenticationInfo> AuthInfoTask;
-        GameTask<AuthState> curAuthState;
-        bool isLoginShown = false;
-        bool isRewardsSetup = false;
+        private TwitchChat m_chat;
+        private TwitchCustomRewards m_customRewards;
+        private GameTask<AuthenticationInfo> AuthInfoTask;
+        private GameTask<AuthState> currentAuthState;
+        private string twitchStatus;
+        private bool isLoginShown = false;
         public bool isLoggedIn = false;
+        public bool isEnabled = false;
 
-        public LoginGUI loginGUI;
+        public TwitchStateGUI loginGUI;
 
         void Awake()
         {
-            GetAuthInformation();
-            // GUI
-            loginGUI = new LoginGUI();
-            loginGUI.onAccept.AddListener(OnAcceptSettings);
+            m_chat = gameObject.GetComponent<TwitchChat>();
+            m_customRewards = gameObject.GetComponent<TwitchCustomRewards>();
+            loginGUI = new TwitchStateGUI();
+            loginGUI.onLogin.AddListener(InvokeAuth);
+            loginGUI.onEnable.AddListener(InvokeEnabled);
         }
 
-        void Update()
+        public void InvokeAuth()
         {
-            UpdateAuthState();
+            InvokeRepeating(nameof(InitComponents), 0f, 0.3f);
         }
 
-        public void InvokeLogin()
+        public void InvokeEnabled()
         {
-            if (isLoggedIn)
+            SetEnabled(!isEnabled);
+        }
+
+        public void InitComponents()
+        {
+            Jotunn.Logger.LogWarning("LOGIN");
+
+            if (AuthInfoTask == null)
+            {
+                GetAuthInformation();
                 return;
+            }
 
-            InvokeRepeating(nameof(UpdateAuthState), 0f, 0.3f);
+            if (!isLoggedIn)
+            {
+                UpdateAuthState();
+                return;
+            }
+
+            m_customRewards.SubscribeToRedeemEvents();
+            CancelInvoke(nameof(InitComponents));
+        }
+
+        public void SetEnabled(bool value)
+        {
+            isEnabled = value;
+
+            if (m_customRewards == null)
+                throw new Exception("Could not find custom rewards component!");
+            if (value)
+                m_customRewards.SetRewards();
+            else
+                m_customRewards.ClearRewards();
         }
 
         public void UpdateAuthState()
         {
-            if (isLoggedIn)
-                return;
-
-            curAuthState = Twitch.API.GetAuthState();
-
-            if (curAuthState == null)
+            try
             {
-                Jotunn.Logger.LogWarning("curAuthState is null");
-                return;
-            }
+                currentAuthState = Twitch.API.GetAuthState();
 
-            if (curAuthState.MaybeResult.Status == AuthStatus.LoggedIn)
-            {
-                isLoggedIn = true;
-                Jotunn.Logger.LogWarning("User logged in");
-
-                if (!isRewardsSetup)
+                if (currentAuthState == null)
+                {
+                    Jotunn.Logger.LogError("curAuthState is null");
                     return;
+                }
 
-                TwitchCustomRewards rewardsComp = gameObject.GetComponent<TwitchCustomRewards>();
-                if (rewardsComp)
+                if (currentAuthState.MaybeResult.Status == AuthStatus.LoggedIn)
                 {
-                    rewards.SetSampleRewards();
-                    //Jotunn.Logger.LogWarning("Rewards setup");
-                    isRewardsSetup = true;
+                    //AuthInfoTask.
+                    //currentAuthState.Task.
+                    Jotunn.Logger.LogWarning(AuthInfoTask.Exception);
+                    Jotunn.Logger.LogWarning(currentAuthState.Exception);
+
+                    SetEnabled(true);
+                    isLoggedIn = true;
+                    twitchStatus = TwitchStatusType.LoggedIn;
+                    loginGUI.UpdateGUI();
+                    Jotunn.Logger.LogWarning("User logged in");
+
+                    m_chat.Connect();
+                }
+
+                if (currentAuthState.MaybeResult.Status == AuthStatus.LoggedOut)
+                {
+                    SetEnabled(false);
+                    isLoggedIn = false;
+                    isLoginShown = false;
+                    twitchStatus = TwitchStatusType.LoggedOut;
+                    loginGUI.UpdateGUI();
+                    Jotunn.Logger.LogWarning("User logged out");
+                }
+
+                if (currentAuthState.MaybeResult.Status == AuthStatus.WaitingForCode)
+                {
+                    var UserAuthInfo = Twitch.API.GetAuthenticationInfo(TwitchOAuthScope.Bits.Read).MaybeResult;
+
+                    if (UserAuthInfo == null)
+                    {
+                        // User is still loading
+                        //Jotunn.Logger.LogWarning("Loading...");
+                    }
+
+                    Jotunn.Logger.LogWarning("Asking for login: ");
+                    twitchStatus = TwitchStatusType.WaitingForCode;
+
+                    if (!isLoginShown)
+                    {
+                        Application.OpenURL($"{UserAuthInfo.Uri}");
+                        isLoginShown = true;
+                    }
                 }
             }
-            if (curAuthState.MaybeResult.Status == AuthStatus.LoggedOut)
+            catch (Exception e)
             {
-                // user is logged out, do something
-                // In this example you could also call GetAuthInformation() to retrigger login
-                isLoggedIn = false;
-                Jotunn.Logger.LogWarning("User logged out");
-                TwitchCustomRewards rewards = gameObject.GetComponent<TwitchCustomRewards>();
-                if (rewards != null && isRewardsSetup)
-                {
-                    rewards.ClearRewards();
-                    //Jotunn.Logger.LogWarning("Rewards removed!");
-                    isRewardsSetup = false;
-                }
-            }
-            if (curAuthState.MaybeResult.Status == AuthStatus.WaitingForCode)
-            {
-                isLoggedIn = false;
-
-                // Waiting for code
-                var UserAuthInfo = Twitch.API.GetAuthenticationInfo(TwitchOAuthScope.Bits.Read).MaybeResult;
-
-                if (UserAuthInfo == null)
-                {
-                    // User is still loading
-                    //Jotunn.Logger.LogWarning("Loading...");
-                }
-
-                //Jotunn.Logger.LogWarning("Uri: " + UserAuthInfo.Uri);
-                //Jotunn.Logger.LogWarning("Code: " + UserAuthInfo.UserCode);
-                Jotunn.Logger.LogWarning("Asking for login: ");
-
-                if (!isLoginShown)
-                {
-                    // We have reached the state where we can ask the user to login
-                    Application.OpenURL($"{UserAuthInfo.Uri}");
-                    isLoginShown = true;
-                }
+                Jotunn.Logger.LogError(e);
+                CancelInvoke(nameof(InitComponents));
             }
         }
 
-        // Triggered by something external, like a login button on a options menu screen
         public void GetAuthInformation()
         {
-            // Check to see if the user is currently logged in or not.
             if (AuthInfoTask == null)
             {
                 // This example uses all scopes, we suggest you only request the scopes you actively need.
