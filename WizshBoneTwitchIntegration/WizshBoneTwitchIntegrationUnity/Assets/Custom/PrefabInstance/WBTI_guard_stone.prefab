@@ -5277,7 +5277,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_primaryTarget: 0
-  m_randomTarget: 1
+  m_randomTarget: 0
   m_targetNonPlayerBuilt: 1
   m_icon: {fileID: 21300000, guid: 76ea7ac17850e4a48b410a6e7bdcf1da, type: 3}
   m_name: Twitchy Ward

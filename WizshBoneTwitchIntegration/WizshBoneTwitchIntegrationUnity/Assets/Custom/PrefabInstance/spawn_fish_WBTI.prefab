@@ -80,7 +80,7 @@ MonoBehaviour:
   m_copySkillToRandomFactor: 0
   m_setMaxInstancesFromWeaponLevel: 0
   m_levelUpSettings: []
-  m_targetType: 3
+  m_targetType: 2
   m_targetWhenPathfindingType: 1
   m_maxTargetRange: 40
   m_spawnEffects:

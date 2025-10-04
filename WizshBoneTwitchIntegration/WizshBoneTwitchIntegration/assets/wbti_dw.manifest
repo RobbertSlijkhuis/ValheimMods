@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 987979277
+CRC: 3348096969
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: c046085c8e7f1b6c3831959346cc01a7
+    Hash: ba7c07f0243de8ac731d598bf9a5158a
   TypeTreeHash:
     serializedVersion: 2
-    Hash: fab8c867ffa0e6173bfea38040821900
+    Hash: c1f312ad6e224e4a9f536f2e88607546
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: c046085c8e7f1b6c3831959346cc01a7
+    Hash: ba7c07f0243de8ac731d598bf9a5158a
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -37,6 +37,8 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: -870746866, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
@@ -47,7 +49,7 @@ ClassTypes:
 - Class: 114
   Script: {fileID: -179248876, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+  Script: {fileID: 788646874, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 115
   Script: {instanceID: 0}
 - Class: 136
@@ -67,11 +69,16 @@ SerializeReferenceClassIdentifiers:
   ClassName: HitData/DamageModPair
 - AssemblyName: assembly_valheim
   ClassName: HitData/DamageTypes
+- AssemblyName: assembly_valheim
+  ClassName: TerrainOp/Settings
 Assets:
 - Assets/Custom/PrefabInstance/spawn_fish_WBTI.prefab
+- Assets/Custom/Monobehaviour/NoFallDamage_WBTI.asset
 - Assets/Custom/Monobehaviour/Freezing_WBTI.asset
+- Assets/Custom/PrefabInstance/RemoveTheCountry_WBTI.prefab
 - Assets/Custom/Monobehaviour/Burning_WBTI.asset
 - Assets/Custom/Monobehaviour/Poison_WBTI.asset
 - Assets/Custom/Sprite/MiniMeSprite_WBTI.png
+- Assets/Custom/Sprite/BigMeSprite_WBTI.png
 - Assets/Custom/PrefabInstance/WBTI_guard_stone.prefab
 Dependencies: []

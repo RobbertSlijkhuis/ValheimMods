@@ -7,15 +7,13 @@ namespace WizshBoneTwitchIntegration.Models
     {
         public SpawnCreatureData creatureData;
         public CustomRewardEvent customReward;
-        public string prefabName;
         public bool IsUserInputRequired;
         public Transform transform;
 
-        public SpawnOptions(string prefabName, Transform transform, SpawnCreatureData creatureData, CustomRewardEvent customReward)
+        public SpawnOptions(SpawnCreatureData creatureData, Transform transform, CustomRewardEvent customReward = null)
         {
             this.creatureData = creatureData;
             this.customReward = customReward;
-            this.prefabName = prefabName;
             this.transform = transform;
         }
     }

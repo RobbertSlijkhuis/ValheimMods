@@ -26,6 +26,8 @@ SplashMeads/SplashMeads_Unity/
 !SplashMeads/SplashMeads_Unity/Assets
 Testing/Testing_Unity/
 !Testing/Testing_Unity/Assets
+WizshBoneTwitchIntegration/WizshBoneTwitchIntegrationUnity/
+!WizshBoneTwitchIntegration/WizshBoneTwitchIntegrationUnity/Assets
 
 # User-specific files
 *.rsuser

@@ -6,6 +6,7 @@ namespace WizshBoneTwitchIntegration.Models
     {
         public bool allowDrops;
         public int count;
+        public bool isHallucination;
         public int level;
         public string prefabName;
         public string position;

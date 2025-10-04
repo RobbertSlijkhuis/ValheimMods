@@ -29,7 +29,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 return;
             }
 
-            authComp = Player.m_localPlayer.gameObject.GetComponent<TwitchAuth>();
+            authComp = Game.instance.gameObject.GetComponent<TwitchAuth>();
 
             panel = GUIManager.Instance.CreateWoodpanel(
                 parent: GUIManager.CustomGUIFront.transform,

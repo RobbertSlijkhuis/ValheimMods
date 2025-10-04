@@ -3,8 +3,12 @@
     internal class CustomStatusEffects
     {
         public StatusEffect MiniMe;
-        public StatusEffect Burning;
+        public StatusEffect BigMe;
+
+        public SE_Stats Burning;
         public StatusEffect Freezing;
         public StatusEffect Poison;
+
+        public StatusEffect NoFallDamage;
     }
 }

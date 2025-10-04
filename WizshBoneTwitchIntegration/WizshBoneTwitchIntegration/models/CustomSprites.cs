@@ -5,5 +5,6 @@ namespace WizshBoneTwitchIntegration.Models
     class CustomSprites
     {
         public Sprite MiniMeSprite;
+        public Sprite BigMeSprite;
     }
 }

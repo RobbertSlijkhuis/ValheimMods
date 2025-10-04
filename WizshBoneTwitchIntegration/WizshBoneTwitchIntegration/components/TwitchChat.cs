@@ -109,6 +109,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (message.Contains(loginMessage))
                 {
+                    // Send($"This message was send from the WizshBone Twitch integration mod and we have hacked ourself into your channel. We wish you a great day {channel}!");
                     Jotunn.Logger.LogWarning("Twitch chat login successfull!");
                     isLoggedIn = true;
                     return;

@@ -4,6 +4,7 @@
     {
         public static string Brown => "#734624";
         public static string Green => "#395c32";
+        public static string LightGreen => "#74bd66";
         public static string Grey => "#8c8c8c";
         public static string Pink => "#bb33ff";
         public static string Red => "#eb3434";
