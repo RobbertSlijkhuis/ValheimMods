@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 using WizshBoneTwitchIntegration.Types;
@@ -12,7 +13,7 @@ namespace WizshBoneTwitchIntegration.Harmony
     {
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Game), "Awake")]
-        public static void Awake_Postfix(ref PlayerController __instance)
+        public static void GameAwake_Postfix()
         {
             try
             {
@@ -23,7 +24,28 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not add Twitch components in Awake_Postfix: " + e);
+                Jotunn.Logger.LogError("Could not add Twitch components in GameAwake_Postfix: " + e);
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Player), "OnSpawned")]
+        public static void PlayerOnSpawned_Postfix(ref Player __instance)
+        {
+            try
+            {
+                if (__instance == null)
+                {
+                    Jotunn.Logger.LogError("Player does not exist!");
+                    return;
+                }
+
+                Jotunn.Logger.LogWarning("Adding twitch components to the player");
+                __instance.gameObject.AddComponent<TwitchChatting>();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not add Twitch components in PlayerOnSpawned_Postfix: " + e);
             }
         }
 

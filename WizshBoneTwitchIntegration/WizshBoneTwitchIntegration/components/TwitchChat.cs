@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Sockets;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Models;
@@ -70,6 +71,16 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             _sOAuth = response.access_token;
             LogIn();
+        }
+
+        public List<string> GetAuthorsInChat()
+        {
+            List<string> authors = new List<string>();
+            foreach (TwitchChatMessage message in chatHistory)
+            {
+                authors.Add(message.author);
+            }
+            return authors.Distinct().ToList();
         }
 
         public TwitchChatMessage GetFirstMessageByAuthor(string author)

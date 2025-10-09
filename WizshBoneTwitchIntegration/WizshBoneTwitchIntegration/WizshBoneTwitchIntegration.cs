@@ -19,7 +19,7 @@ namespace WizshBoneTwitchIntegration
     [NetworkCompatibility(CompatibilityLevel.NotEnforced, VersionStrictness.Minor)]
     internal class WizshBoneTwitchIntegration : BaseUnityPlugin
     {
-        public const string PluginGUID = "com.jotunn.WizshBoneTwitchIntegration";
+        public const string PluginGUID = "DeathWizsh.WizshBoneTwitchIntegration";
         public const string PluginName = "WizshBoneTwitchIntegration";
         public const string PluginVersion = "0.0.1";
         public static WizshBoneTwitchIntegration Instance;
@@ -158,6 +158,7 @@ namespace WizshBoneTwitchIntegration
             // Chat loves this: Spawn chest with small healing meads in there and call it "cheese mead".
             // IN PROGRESS: Remove redeems on game quit
             // IN PROGRESS: Add halucinations
+            // Refund redeems when player dead
             // ====================================
             // Ideas:
             // MORE POSITIVE EFFECTS

@@ -63,6 +63,28 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     return;
                 }
 
+                if (Player.m_localPlayer.transform.localPosition.y >= 4000)
+                {
+                    List<string> listOfTitles = new List<string>();
+                    listOfTitles.Add("troll");
+                    listOfTitles.Add("golem");
+                    listOfTitles.Add("lox");
+                    listOfTitles.Add("bat");
+                    listOfTitles.Add("abomination");
+                    listOfTitles.Add("country");
+
+                    foreach (string title in listOfTitles)
+                    {
+                        if (currentRewardEvent.CustomRewardTitle.ToLower().Contains(title))
+                        {
+                            Jotunn.Logger.LogWarning("Player is in dungeon, canceling redeem...");
+                            m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} point has been refunded!");
+                            Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Canceled);
+                            return;
+                        }
+                    }
+                }
+
                 if (redeem.type == RedeemType.SpawnCreature)
                 {
                     foreach (SpawnCreatureData creature in redeem.creatureData)
@@ -116,7 +138,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (redeem.type == RedeemType.TerrainRemove)
                 {
                     Player.m_localPlayer.GetSEMan().AddStatusEffect(WizshBoneTwitchIntegration.Instance.effects.NoFallDamage);
-                    GameObject dig = UnityEngine.Object.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.RemoveTheCountry, transform.position, transform.rotation);
+                    GameObject dig = UnityEngine.Object.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.RemoveTheCountry, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
                     Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
                 }
 
