@@ -3,6 +3,7 @@ using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
+using SeedCart.Components;
 using SeedCart.Models;
 using UnityEngine;
 
