@@ -21,11 +21,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private TwitchAuth m_twitchAuth;
         private TwitchChat m_twitchChat;
         private Dictionary<string, GameObject> m_assigned = new Dictionary<string, GameObject>();
+        private float m_scanRadius = 30f;
+
 
         private void Awake()
         {
             m_twitchAuth = Game.instance.gameObject.GetComponent<TwitchAuth>();
             m_twitchChat = Game.instance.gameObject.GetComponent<TwitchChat>();
+
             InvokeRepeating(nameof(DetectCreaturesAndAssignUsers), 0f, 3f);
         }
 
@@ -40,19 +43,17 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 return;
 
             List<GameObject> creatures = new List<GameObject>();
-            Collider[] objects = Physics.OverlapSphere(transform.position, 30f);
+            Collider[] objects = Physics.OverlapSphere(transform.position, m_scanRadius);
 
             foreach (Collider obj in objects)
             {
+                Humanoid humanComp = obj.gameObject.GetComponent<Humanoid>();
                 MonsterAI monsterComp = obj.gameObject.GetComponent<MonsterAI>();
-                AnimalAI animalComp = obj.gameObject.GetComponent<AnimalAI>();
-                Fish fishComp = obj.gameObject.GetComponent<Fish>();
                 bool hasTwitchUser = obj.gameObject.GetComponent<TwitchCheckForMessage>() != null;
+                bool isTwitchSpawn = humanComp != null ? humanComp.m_faction == Character.Faction.Boss : false;
 
-                if (hasTwitchUser || (monsterComp == null && animalComp == null && fishComp == null))
-                {
+                if (hasTwitchUser || isTwitchSpawn || monsterComp == null)
                     continue;
-                }
 
                 List<string> authors = m_twitchChat.GetAuthorsInChat();
                 authors.RemoveAll(item => m_assigned.ContainsKey(item));

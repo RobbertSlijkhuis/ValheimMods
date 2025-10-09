@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Models;
+using WizshBoneTwitchIntegration.TwitchIntegration;
 using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.Helpers
@@ -49,7 +50,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (!options.creatureData.isHallucination) {
                 humanComp.m_name = options.customReward.RedeemerName;
                 humanComp.m_faction = Character.Faction.Boss;
-                humanComp.m_level = options.creatureData.level; 
+                humanComp.m_level = options.creatureData.level;
             }
             else
             {
@@ -102,7 +103,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             {
                 NpcTalk talkComp = creature.AddComponent<NpcTalk>();
                 talkComp.m_name = options.customReward.RedeemerName;
-                talkComp.m_maxRange = 20f;
+                talkComp.m_maxRange = 30f;
                 talkComp.m_offset = 3f;
                 talkComp.m_hideDialogDelay = 10f;
                 talkComp.m_aggravated = new List<string>() {

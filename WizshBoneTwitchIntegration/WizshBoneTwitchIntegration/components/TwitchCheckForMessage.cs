@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Models;
 
@@ -13,9 +12,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         Humanoid m_humanoid;
 
         string m_author;
-        string m_lastMessage;
         string m_originalName;
         DateTime m_lastMessageTime;
+        private int m_resetTimer = 60;
 
         private void Awake()
         {
@@ -38,8 +37,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
             m_humanoid.m_name = author;
             m_npcTalk.m_name = author;
-            m_npcTalk.m_maxRange = 20f;
-            m_npcTalk.m_offset = 3f;
+            m_npcTalk.m_maxRange = 30f;
+            m_npcTalk.m_offset = 1f;
             m_npcTalk.m_hideDialogDelay = 10f;
 
             InvokeRepeating(nameof(CheckChatForMessage), 0f, 3f);
@@ -60,34 +59,34 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 TimeSpan timeSpan = DateTime.Now.Subtract(m_lastMessageTime);
                 Jotunn.Logger.LogWarning("Time span seconds: " + timeSpan.TotalSeconds);
 
-                if (timeSpan.TotalSeconds > 60)
+                if (timeSpan.TotalSeconds > m_resetTimer)
                 {
                     Jotunn.Logger.LogWarning("Unassign");
                     UnassignUser();
                 }
             }
 
-            if (message == null || message.message == null || message.message == m_lastMessage)
+            if (message == null || message.hasBeenBroadcasted || message.message == null)
                 return;
 
-            m_lastMessage = message.message;
+            message.hasBeenBroadcasted = true;
             m_lastMessageTime = DateTime.Now;
-            m_npcTalk.m_aggravated = new List<string>() { message.message };
-            m_npcTalk.OnBecameAggravated(BaseAI.AggravatedReason.Damage);
+            m_npcTalk.Say(message.message, "Aggravated");
         }
 
         private void UnassignUser(bool isDestroy = false)
         {
             CancelInvoke(nameof(CheckChatForMessage));
-            m_twitchChatting.RemoveAssignedUser(m_author);
+
+            if (m_author != null)
+                m_twitchChatting.RemoveAssignedUser(m_author);
 
             if (!isDestroy)
             {
+                m_humanoid.m_name = m_originalName;
+                m_author = null;
+                m_lastMessageTime = DateTime.MinValue;
                 Destroy(this);
-                //m_author = null;
-                //m_lastMessage = null;
-                //m_lastMessageTime = DateTime.MinValue;
-                //m_humanoid.m_name = m_originalName;
             }
         }
     }
