@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using Jotunn.Managers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -7,9 +8,9 @@ using UnityEngine;
 namespace SeedCart.Components {
     public class MovementChecker : MonoBehaviour
     {
-        public Transform playerTransform; // Assign your player's transform here
+        public Transform cartTransform;
         private Vector3 lastPosition;
-        public float distanceThreshold = 0.85f;
+        public float distanceThreshold = 0.9f;
 
         private List<string> m_allowedList = new List<string>();
         private Dictionary<string, string> m_plantDict = new Dictionary<string, string>();
@@ -17,8 +18,8 @@ namespace SeedCart.Components {
         private void Awake()
         {
             // Store the initial position
-            playerTransform = transform;
-            lastPosition = playerTransform.position;
+            cartTransform = transform;
+            lastPosition = cartTransform.position;
 
             m_allowedList.Add("barley");
             m_allowedList.Add("carrot");
@@ -39,7 +40,7 @@ namespace SeedCart.Components {
         private void Update()
         {
             // Calculate the distance from the last frame
-            float distance = Vector3.Distance(lastPosition, playerTransform.position);
+            float distance = Vector3.Distance(lastPosition, cartTransform.position);
 
             // Check if the player has moved more than the threshold
             if (distance >= distanceThreshold)
@@ -47,14 +48,14 @@ namespace SeedCart.Components {
 
                 Jotunn.Logger.LogWarning("Player has moved " + distance + " meters!");
                 // Reset last position or do something else here
-                lastPosition = playerTransform.position;
+                lastPosition = cartTransform.position;
 
                 List<Transform> plantPoints = new List<Transform>();
                 plantPoints.Add(transform.Find("PlantPointLeft"));
                 plantPoints.Add(transform.Find("PlantPointCenter"));
                 plantPoints.Add(transform.Find("PlantPointRight"));
 
-                Jotunn.Logger.LogWarning("plantPoints: " + plantPoints.Count);
+                // Jotunn.Logger.LogWarning("plantPoints: " + plantPoints.Count);
 
                 foreach (Transform plantTransform in plantPoints)
                 {
@@ -68,9 +69,9 @@ namespace SeedCart.Components {
 
                     Jotunn.Logger.LogWarning(hitInfo.collider?.gameObject?.name);
 
-                    if (hitInfo.collider == null || hitInfo.collider.gameObject == null)
+                    if (hitInfo.collider == null || hitInfo.collider.gameObject == null || !hitInfo.collider.gameObject.name.Equals("terrain", StringComparison.OrdinalIgnoreCase))
                     {
-                        Jotunn.Logger.LogWarning("No gameObject found! " + plantTransform.name);
+                        // Jotunn.Logger.LogWarning("No gameObject found! " + plantTransform.name);
                         continue;
                     }
 
@@ -78,7 +79,7 @@ namespace SeedCart.Components {
 
                     if (heightmapComp != null && !heightmapComp.IsCultivated(hitInfo.point))
                     {
-                        Jotunn.Logger.LogWarning("Nope... " + plantTransform.name);
+                        // Jotunn.Logger.LogWarning("Nope... " + plantTransform.name);
                         continue;
                     }
                     else
@@ -128,6 +129,8 @@ namespace SeedCart.Components {
                     }
 
                     GameObject onion = Instantiate(PrefabManager.Instance.GetPrefab(prefabName), plantPosition, plantTransform.rotation);
+                    Piece pieceComp = onion.GetComponent<Piece>();
+                    pieceComp.m_placeEffect.Create(plantPosition, plantTransform.rotation);
 
                     inv.RemoveOneItem(firstItem);
                 }
