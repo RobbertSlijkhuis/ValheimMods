@@ -51,7 +51,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 Jotunn.Logger.LogWarning($"Time: {currentRewardEvent.RedeemedAt}");
                 Jotunn.Logger.LogWarning($"Status: {currentRewardEvent.Status}");
 
-                RedeemData redeem = m_redeems.list.Find(item => item.title == currentRewardEvent.CustomRewardTitle);
+                RedeemEntry redeem = m_redeems.list.Find(item => item.title == currentRewardEvent.CustomRewardTitle);
                 if (redeem == null)
                     return;
 
@@ -87,12 +87,12 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (redeem.type == RedeemType.SpawnCreature)
                 {
-                    foreach (SpawnCreatureData creature in redeem.creatureData)
+                    foreach (SpawnCreatureData creature in redeem.creatures)
                     {
-                        if (redeem.isUserInputRequired)
+                        if (redeem.userInput)
                             creature.talkMessage = m_chat.GetLatestMessageByAuthor(currentRewardEvent.RedeemerName)?.message;
 
-                        if (creature.count > 1)
+                        if (creature.amount > 1)
                             RedeemHelper.SpawnCreatures(new SpawnOptions(creature, Player.m_localPlayer.transform, currentRewardEvent));
                         else
                             RedeemHelper.SpawnCreature(new SpawnOptions(creature, Player.m_localPlayer.transform, currentRewardEvent));
@@ -102,6 +102,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (redeem.type == RedeemType.SpawnHallucination)
                 {
+                    RedeemHelper.hallucinationCount = 0;
+                    InvokeRepeating(nameof(StartHallucinations), 0f, 20f);
                 }
 
                 if (redeem.type == RedeemType.SpawnShower)
@@ -154,6 +156,19 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
         }
 
+        private void StartHallucinations()
+        {
+            if (RedeemHelper.hallucinationCount > 6)
+                StopHallucinations();
+            else
+                RedeemHelper.SpawnHallucination();
+        }
+
+        private void StopHallucinations()
+        {
+            CancelInvoke(nameof(StartHallucinations));
+        }
+
         private void DestroyFish()
         {
             foreach (GameObject fish in RedeemHelper.fishList)
@@ -184,7 +199,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             StartCoroutine(LerpHelper.LerpScale(Player.m_localPlayer.transform, Player.m_localPlayer.transform.localScale, new Vector3(1f, 1f, 1f), 1.5f));
         }
 
-        public void SetRewards(List<RedeemData> listData = null)
+        public void SetRewards(List<RedeemEntry> listData = null)
         {
             Jotunn.Logger.LogWarning("SetRewards()");
             List<CustomRewardDefinition> listRewards = new List<CustomRewardDefinition>();
@@ -192,17 +207,19 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             if (listData == null)
                 listData = m_redeems.list;
 
-            foreach (RedeemData redeem in m_redeems.list)
+            listData.RemoveAll(item => item.type == RedeemType.Undefined);
+
+            foreach (RedeemEntry redeem in m_redeems.list)
             {
                 if (redeem.globalKey == null || ZoneSystem.instance.GetGlobalKey(redeem.globalKey))
                 {
                     listRewards.Add(new CustomRewardDefinition()
                     {
                         BackgroundColor = redeem.backgroundColor,
-                        Cost = redeem.cost,
                         GlobalCooldownSeconds = redeem.cooldown,
                         IsGlobalCooldownEnabled = redeem.cooldown > 0,
-                        IsUserInputRequired = redeem.isUserInputRequired,
+                        IsUserInputRequired = redeem.userInput,
+                        Cost = redeem.points,
                         Title = redeem.title,
                     });
                 }
@@ -219,6 +236,13 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
             if (applicationQuit)
                 Invoke(nameof(Quit), 10f);
+        }
+
+        public bool ReloadRewards()
+        {
+            bool result = m_redeems.Reload();
+            SetRewards();
+            return result;
         }
 
         private void Quit()

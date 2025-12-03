@@ -26,16 +26,16 @@ namespace WizshBoneTwitchIntegration.Components
         {
             if (other.gameObject.name != "Player(Clone)")
             {
-                Humanoid humanComp = other.gameObject.GetComponent<Humanoid>();
-                MonsterAI monterComp = other.gameObject.GetComponent<MonsterAI>();
+                Humanoid humanoid = other.gameObject.GetComponent<Humanoid>();
+                MonsterAI monsterAI = other.gameObject.GetComponent<MonsterAI>();
 
-                if (humanComp != null && monterComp != null && !humanComp.GetSEMan().HaveStatusEffect(WizshBoneTwitchIntegration.Instance.effects.Burning.m_nameHash))
+                if (humanoid != null && monsterAI != null && !humanoid.GetSEMan().HaveStatusEffect(WizshBoneTwitchIntegration.Instance.effects.Burning.m_nameHash))
                 {
                     float duration = 10f;
                     SE_Stats burning = Instantiate(WizshBoneTwitchIntegration.Instance.effects.Burning);
-                    burning.m_healthPerTick = (humanComp.m_health / duration) * -1;
+                    burning.m_healthPerTick = Mathf.RoundToInt(humanoid.m_health / duration) * -1;
                     burning.m_ttl = duration;
-                    humanComp.GetSEMan().AddStatusEffect(burning);
+                    humanoid.GetSEMan().AddStatusEffect(burning);
                 }
 
                 return;

@@ -9,10 +9,12 @@ namespace WizshBoneTwitchIntegration.Gui
     internal class TwitchStateGUI
     {
         private GameObject panel;
-        private TwitchAuth authComp;
+        private TwitchAuth twitchAuth;
+        private TwitchChatting twitchChatting;
 
         public UnityEvent onLogin = new UnityEvent();
-        public UnityEvent onEnable = new UnityEvent();
+        public UnityEvent onEnableRedeems = new UnityEvent();
+        public UnityEvent onEnableChatting = new UnityEvent();
         public UnityEvent onClose = new UnityEvent();
 
         public void ShowGUI()
@@ -29,7 +31,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 return;
             }
 
-            authComp = Game.instance.gameObject.GetComponent<TwitchAuth>();
+            twitchAuth = Game.instance.gameObject.GetComponent<TwitchAuth>();
+            twitchChatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
 
             panel = GUIManager.Instance.CreateWoodpanel(
                 parent: GUIManager.CustomGUIFront.transform,
@@ -37,7 +40,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMax: new Vector2(0.5f, 0.5f),
                 position: new Vector2(0, 0),
                 width: 480,
-                height: 380,
+                //height: 380,
+                height: 450,
                 draggable: false
             );
             panel.SetActive(false);
@@ -83,14 +87,14 @@ namespace WizshBoneTwitchIntegration.Gui
             );
 
             GameObject loginTextObj = GUIManager.Instance.CreateText(
-                text: authComp.isLoggedIn ? "Status: Logged in!" : "Status: Not logged in",
+                text: twitchAuth.retrievedUserInfo ? $"Welcome {twitchAuth.displayName}" : "Please login into Twitch",
                 parent: panel.transform,
                 anchorMin: new Vector2(.5f, 1f),
                 anchorMax: new Vector2(.5f, 1f),
                 position: new Vector2(-105f, -105f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 16,
-                color: authComp.isLoggedIn ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
+                color: twitchAuth.retrievedUserInfo ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
                 width: 225,
@@ -111,15 +115,19 @@ namespace WizshBoneTwitchIntegration.Gui
             Button loginButton = loginButtonObj.GetComponent<Button>();
             loginButton.onClick.AddListener(Login);
 
-            if (authComp.isLoggedIn)
-                CreateEnableButton();
+            if (twitchAuth.retrievedUserInfo)
+            {
+                CreateEnableRedeemsButton();
+                CreateEnableChattingButton();
+            }
 
             GUIManager.Instance.CreateText(
-                text: "Please report any issues on my Discord, the link is on the mod page!",
+                // text: "Please report any issues on my Discord, the link is on the mod page! Suggestions are also welcome!",
+                text: $"Redeems can be configured in \"{WizshBoneTwitchIntegration.redeemsConfigPath.Substring(0, 24)} {WizshBoneTwitchIntegration.redeemsConfigPath.Substring(24)}\". They can be reloaded during gameplay with the \"ReloadTwitchRedeems\" command.",
                 parent: panel.transform,
                 anchorMin: new Vector2(0.5f, 0f),
                 anchorMax: new Vector2(0.5f, 0f),
-                position: new Vector2(10f, 130f),
+                position: new Vector2(10f, 140f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 14,
                 color: GUIManager.Instance.ValheimBeige,
@@ -144,7 +152,8 @@ namespace WizshBoneTwitchIntegration.Gui
             cancelButton.onClick.AddListener(CloseGUI);
 
             GUIManager.Instance.CreateText(
-                text: "Redeem settings are configured in the config. We recommend using a config manager for in-game adjustments.",
+                // text: $"Redeems can be configured in \"{WizshBoneTwitchIntegration.redeemsConfigPath}\". They can be reloaded during gameplay with the \"ReloadTwitchRedeems\" command.",
+                text: "Please report any issues on my Discord, the link can be found on my mod page or Twitch channel! Suggestions are also welcome!",
                 parent: panel.transform,
                 anchorMin: new Vector2(0.5f, 0f),
                 anchorMax: new Vector2(0.5f, 0f),
@@ -181,32 +190,70 @@ namespace WizshBoneTwitchIntegration.Gui
             onLogin.Invoke();
         }
 
-        private void Enable()
+        private void EnableRedeems()
         {
-            onEnable.Invoke();
+            onEnableRedeems.Invoke();
             UpdateGUI();
         }
 
-        public void CreateEnableButton()
+        private void EnableChatting()
+        {
+            onEnableChatting.Invoke();
+            UpdateGUI();
+        }
+
+        public void CreateEnableRedeemsButton()
         {
             GUIManager.Instance.CreateText(
-                text: authComp.isEnabled ? "Status: Enabled!" : "Status: Disabled!",
+                text: twitchAuth.isEnabledRedeems ? "Redeems are currently enabled" : "Redeems are currently disabled",
+                parent: panel.transform,
+                anchorMin: new Vector2(.5f, 1f),
+                anchorMax: new Vector2(.5f, 1f),
+                position: new Vector2(-105f, -245f),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: 16,
+                color: twitchAuth.isEnabledRedeems ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
+                outline: true,
+                outlineColor: Color.black,
+                width: 225,
+                height: 60f,
+                addContentSizeFitter: false
+            );
+
+            GameObject enableButtonObj = GUIManager.Instance.CreateButton(
+                text: twitchAuth.isEnabledRedeems ? "Disable Redeems" : "Enable Redeems",
+                parent: panel.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(110f, -240f),
+                width: 225f,
+                height: 60f
+            );
+            enableButtonObj.SetActive(true);
+            Button enableButton = enableButtonObj.GetComponent<Button>();
+            enableButton.onClick.AddListener(EnableRedeems);
+        }
+
+        public void CreateEnableChattingButton()
+        {
+            GUIManager.Instance.CreateText(
+                text: "Random creatures can show chat messages from viewers",
                 parent: panel.transform,
                 anchorMin: new Vector2(.5f, 1f),
                 anchorMax: new Vector2(.5f, 1f),
                 position: new Vector2(-105f, -175f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 16,
-                color: authComp.isEnabled ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
+                color: twitchChatting.isEnabled ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
                 width: 225,
-                height: 30f,
+                height: 60f,
                 addContentSizeFitter: false
             );
 
             GameObject enableButtonObj = GUIManager.Instance.CreateButton(
-                text: authComp.isEnabled ? "Disable Redeems" : "Enable Redeems",
+                text: twitchChatting.isEnabled ? "Disable in-game chat messages" : "Enable in-game chat messages",
                 parent: panel.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
@@ -216,7 +263,7 @@ namespace WizshBoneTwitchIntegration.Gui
             );
             enableButtonObj.SetActive(true);
             Button enableButton = enableButtonObj.GetComponent<Button>();
-            enableButton.onClick.AddListener(Enable);
+            enableButton.onClick.AddListener(EnableChatting);
         }
     }
 }

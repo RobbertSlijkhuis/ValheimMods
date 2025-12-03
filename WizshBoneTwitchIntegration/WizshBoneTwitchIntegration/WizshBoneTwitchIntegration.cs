@@ -6,8 +6,10 @@ using Jotunn.Utils;
 using System;
 using System.Reflection;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Commands;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Configs;
+using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
@@ -15,7 +17,7 @@ namespace WizshBoneTwitchIntegration
 {
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
-    [BepInDependency(Jotunn.Main.ModGuid)]
+    [BepInDependency("com.ValheimModding.YamlDotNetDetector")]
     [NetworkCompatibility(CompatibilityLevel.NotEnforced, VersionStrictness.Minor)]
     internal class WizshBoneTwitchIntegration : BaseUnityPlugin
     {
@@ -29,7 +31,9 @@ namespace WizshBoneTwitchIntegration
         public CustomPrefabs prefabs = new CustomPrefabs();
         public CustomStatusEffects effects = new CustomStatusEffects();
         public CustomSprites sprites = new CustomSprites();
-        private ButtonConfig loginButton;
+        private ButtonConfig wizshBoneWindowButton;
+        public static string customConfigPath = "BepInEx/config/WizshBoneTwitchIntegration";
+        public static string redeemsConfigPath = customConfigPath + "/redeems.yaml";
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -40,8 +44,10 @@ namespace WizshBoneTwitchIntegration
             Instance = this;
             InitAssetBundle();
             PluginConfig.Init();
+            InitRedeemsFile();
             InitStatusEffects();
             InitInputs();
+            InitCommands();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             PrefabManager.OnVanillaPrefabsAvailable += AddPieces;
@@ -52,7 +58,7 @@ namespace WizshBoneTwitchIntegration
         {
             try
             {
-                if (ZInput.instance == null || loginButton == null || !ZInput.GetButtonDown(loginButton.Name) || !Player.m_localPlayer)
+                if (ZInput.instance == null || wizshBoneWindowButton == null || !ZInput.GetButtonDown(wizshBoneWindowButton.Name) || !Player.m_localPlayer)
                     return;
 
                 TwitchAuth authComp = Game.instance.gameObject.GetComponent<TwitchAuth>();
@@ -60,7 +66,7 @@ namespace WizshBoneTwitchIntegration
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not show settings GUI: " + e);
+                Jotunn.Logger.LogError("Could not show WizshBone settings GUI: " + e);
             }
         }
 
@@ -93,6 +99,12 @@ namespace WizshBoneTwitchIntegration
             PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
         }
 
+        private void InitRedeemsFile()
+        {
+            YAMLHelper.InitRedeemsConfig();
+            YAMLHelper.ReadRedeemsConfig(true);
+        }
+
         private void InitStatusEffects()
         {
             effects.MiniMe = ScriptableObject.CreateInstance<StatusEffect>();
@@ -119,18 +131,24 @@ namespace WizshBoneTwitchIntegration
         {
             try
             {
-                loginButton = new ButtonConfig
+                wizshBoneWindowButton = new ButtonConfig
                 {
-                    Name = "Twitch login",
-                    ShortcutConfig = PluginConfig.configLoginButton,
+                    Name = "WizshBone Window",
+                    ShortcutConfig = PluginConfig.configWizshBoneWindow,
                 };
 
-                InputManager.Instance.AddButton(PluginGUID, loginButton);
+                InputManager.Instance.AddButton(PluginGUID, wizshBoneWindowButton);
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not initialise inputs: " + e);
             }
+        }
+
+        private void InitCommands()
+        {
+            CommandManager.Instance.AddConsoleCommand(new ReloadRedeemsCommand());
+            CommandManager.Instance.AddConsoleCommand(new ClearMonsterClaimsCommand());
         }
 
         private void InitAssetBundle()
@@ -157,8 +175,8 @@ namespace WizshBoneTwitchIntegration
             // LoyalBones: A red skeleton with normal damage but insane health pool
             // Chat loves this: Spawn chest with small healing meads in there and call it "cheese mead".
             // IN PROGRESS: Remove redeems on game quit
-            // IN PROGRESS: Add halucinations
-            // Refund redeems when player dead
+            // IN PROGRESS: Add halucinations, make player stunned/dazed when getting hit by Hallucinations? Or half damage?
+            // IN PROGRESS: Load redeems from YAML file
             // ====================================
             // Ideas:
             // MORE POSITIVE EFFECTS
@@ -166,6 +184,7 @@ namespace WizshBoneTwitchIntegration
             // Drunk blur effect?
             // Flashbang?
             // Disable all twitchy wards via bits (specific amount like 1000)
+            // White/black list to block users from using the mod
         }
     }
 }

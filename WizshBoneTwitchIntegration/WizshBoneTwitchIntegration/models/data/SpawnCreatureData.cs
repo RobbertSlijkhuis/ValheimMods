@@ -5,7 +5,7 @@ namespace WizshBoneTwitchIntegration.Models
     internal class SpawnCreatureData
     {
         public bool allowDrops;
-        public int count;
+        public int amount;
         public bool isHallucination;
         public int level;
         public string prefabName;
@@ -13,11 +13,19 @@ namespace WizshBoneTwitchIntegration.Models
         public string talkMessage;
         public bool talks;
 
-
-        public SpawnCreatureData(string prefabName, int level = 1, int count = 1, bool allowDrops = false, bool talks = false, string position = nameof(SpawnPositionType.OnPlayer))
+        public SpawnCreatureData()
+        {
+            allowDrops = false;
+            amount = 1;
+            level = 1;
+            prefabName = "";
+            position = SpawnPositionType.OnPlayer;
+            talks = false;
+        }
+        public SpawnCreatureData(string prefabName, int level = 1, int amount = 1, bool allowDrops = false, bool talks = false, string position = nameof(SpawnPositionType.OnPlayer))
         {
             this.allowDrops = allowDrops;
-            this.count = count;
+            this.amount = amount;
             this.level = level;
             this.prefabName = prefabName;
             this.position = position;

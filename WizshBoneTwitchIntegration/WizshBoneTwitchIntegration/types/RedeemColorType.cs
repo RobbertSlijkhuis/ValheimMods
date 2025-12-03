@@ -11,5 +11,7 @@
         public static string TrollBlue => "#4e8ebf";
         public static string Silver => "#b8d3e6";
         public static string Yellow => "#ebc034";
+
+        public static string Purple = "#451663";
     }
 }

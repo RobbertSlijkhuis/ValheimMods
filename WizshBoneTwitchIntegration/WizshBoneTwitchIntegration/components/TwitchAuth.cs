@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using TwitchSDK;
 using TwitchSDK.Interop;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Gui;
-using WizshBoneTwitchIntegration.Helpers;
-using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.TwitchIntegration
@@ -16,10 +14,13 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private TwitchCustomRewards m_customRewards;
         private GameTask<AuthenticationInfo> AuthInfoTask;
         private GameTask<AuthState> currentAuthState;
+        public GameTask<TwitchSDK.Interop.UserInfo> userInfo;
         private string twitchStatus;
         private bool isLoginShown = false;
         public bool isLoggedIn = false;
-        public bool isEnabled = false;
+        public bool retrievedUserInfo = false;
+        public bool isEnabledRedeems = false;
+        public string displayName;
 
         public TwitchStateGUI loginGUI;
 
@@ -29,90 +30,25 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             m_customRewards = gameObject.GetComponent<TwitchCustomRewards>();
             loginGUI = new TwitchStateGUI();
             loginGUI.onLogin.AddListener(InvokeAuth);
-            loginGUI.onEnable.AddListener(InvokeEnabled);
+            loginGUI.onEnableRedeems.AddListener(InvokeEnableRedeems);
+            loginGUI.onEnableChatting.AddListener(InvokeEnableChatting);
         }
 
         public void InvokeAuth()
         {
-            //Jotunn.Logger.LogWarning("Activated hallucinations");
-            //var biome = Player.m_localPlayer.GetCurrentBiome();
-            //Jotunn.Logger.LogWarning("Current biome: " + biome);
-
-            //List<string> monsterList = new List<string>();
-
-            //switch (biome)
-            //{
-            //    case Heightmap.Biome.Meadows:
-            //        monsterList.Add("Neck");
-            //        monsterList.Add("Greyling");
-            //        monsterList.Add("Boar");
-            //        break;
-            //    case Heightmap.Biome.BlackForest:
-            //        monsterList.Add("Greydwarf");
-            //        monsterList.Add("Bjorn");
-            //        monsterList.Add("Greydwarf_Shaman");
-            //        monsterList.Add("Troll");
-            //        monsterList.Add("Greydwarf_Elite");
-            //        monsterList.Add("Bjorn");
-            //        monsterList.Add("Skeleton");
-            //        break;
-            //    case Heightmap.Biome.Swamp:
-            //        monsterList.Add("Draugr");
-            //        monsterList.Add("BlobElite");
-            //        monsterList.Add("Abomination");
-            //        monsterList.Add("Blob");
-            //        monsterList.Add("Draugr_Elite");
-            //        monsterList.Add("Wraith");
-            //        break;
-            //    case Heightmap.Biome.Mountain:
-            //        monsterList.Add("Wolf");
-            //        monsterList.Add("Hatchling");
-            //        monsterList.Add("StoneGolem");
-            //        monsterList.Add("Wolf");
-            //        monsterList.Add("Fenring");
-            //        break;
-            //    case Heightmap.Biome.Plains:
-            //        monsterList.Add("Deathsquito");
-            //        monsterList.Add("Goblin");
-            //        monsterList.Add("Lox");
-            //        monsterList.Add("Deathsquito");
-            //        monsterList.Add("GoblinBrute");
-            //        monsterList.Add("Unbjorn");
-            //        break;
-            //    case Heightmap.Biome.Mistlands:
-            //        monsterList.Add("Seeker");
-            //        monsterList.Add("Tick");
-            //        monsterList.Add("SeekerBrute");
-            //        monsterList.Add("Gjall");
-            //        break;
-            //    case Heightmap.Biome.AshLands:
-            //        monsterList.Add("Charred_Melee");
-            //        monsterList.Add("FallenValkyrie");
-            //        monsterList.Add("Asksvin");
-            //        monsterList.Add("Charred_Archer");
-            //        monsterList.Add("BlobLava");
-            //        monsterList.Add("Morgen");
-            //        monsterList.Add("Charred_Twitcher");
-            //        monsterList.Add("Volture");
-            //        break;
-            //}
-
-            //int index = UnityEngine.Random.Range(0, monsterList.Count);
-            //string monster = monsterList[index];
-
-            //CustomRewardEvent customReward = new CustomRewardEvent();
-            //SpawnCreatureData creature = new SpawnCreatureData(monster);
-            //customReward.BroadcasterName = "DeadFizsh";
-            //creature.isHallucination = true;
-            //creature.position = SpawnPositionType.Random;
-            //RedeemHelper.SpawnCreature(new SpawnOptions(creature, Player.m_localPlayer.transform, customReward));
-
             InvokeRepeating(nameof(InitComponents), 0f, 0.3f);
         }
 
-        public void InvokeEnabled()
+        public void InvokeEnableRedeems()
         {
-            SetEnabled(!isEnabled);
+            SetEnableRedeems(!isEnabledRedeems);
+        }
+
+        public void InvokeEnableChatting()
+        {
+            TwitchChatting twitchChatting = gameObject.GetComponent<TwitchChatting>();
+            twitchChatting.isEnabled = !twitchChatting.isEnabled;
+            PluginConfig.configChattingEnabled.Value = twitchChatting.isEnabled;
         }
 
         public void InitComponents()
@@ -130,14 +66,23 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 UpdateAuthState();
                 return;
             }
+            else
+            {
+                GetMyUserInfo();
+            }
 
+            if (!retrievedUserInfo)
+                return;
+
+            m_chat.Connect();
             m_customRewards.SubscribeToRedeemEvents();
             CancelInvoke(nameof(InitComponents));
+            loginGUI.UpdateGUI();
         }
 
-        public void SetEnabled(bool value)
+        public void SetEnableRedeems(bool value)
         {
-            isEnabled = value;
+            isEnabledRedeems = value;
 
             if (m_customRewards == null)
                 throw new Exception("Could not find custom rewards component!");
@@ -161,18 +106,16 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (currentAuthState.MaybeResult.Status == AuthStatus.LoggedIn)
                 {
-                    SetEnabled(true);
+                    SetEnableRedeems(true);
                     isLoggedIn = true;
                     twitchStatus = TwitchStatusType.LoggedIn;
                     loginGUI.UpdateGUI();
                     Jotunn.Logger.LogWarning("User logged in");
-
-                    m_chat.Connect();
                 }
 
                 if (currentAuthState.MaybeResult.Status == AuthStatus.LoggedOut)
                 {
-                    SetEnabled(false);
+                    SetEnableRedeems(false);
                     isLoggedIn = false;
                     isLoginShown = false;
                     twitchStatus = TwitchStatusType.LoggedOut;
@@ -198,6 +141,32 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         Application.OpenURL($"{UserAuthInfo.Uri}");
                         isLoginShown = true;
                     }
+                }
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError(e);
+                CancelInvoke(nameof(InitComponents));
+            }
+        }
+
+        public void GetMyUserInfo()
+        {
+            try
+            {
+                userInfo = Twitch.API.GetMyUserInfo();
+
+                if (userInfo == null)
+                {
+                    Jotunn.Logger.LogError("userInfo is null");
+                    return;
+                }
+
+                if (userInfo.MaybeResult != null)
+                {
+                    displayName = userInfo.MaybeResult.DisplayName;
+                    Jotunn.Logger.LogWarning(displayName);
+                    retrievedUserInfo = true;
                 }
             }
             catch (Exception e)

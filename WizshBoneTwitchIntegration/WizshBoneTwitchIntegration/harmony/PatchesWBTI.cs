@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 using WizshBoneTwitchIntegration.Types;
@@ -21,55 +20,13 @@ namespace WizshBoneTwitchIntegration.Harmony
                 Game.instance.gameObject.AddComponent<TwitchChat>();
                 Game.instance.gameObject.AddComponent<TwitchCustomRewards>();
                 Game.instance.gameObject.AddComponent<TwitchAuth>();
+                Game.instance.gameObject.AddComponent<TwitchChatting>();
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not add Twitch components in GameAwake_Postfix: " + e);
             }
         }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Player), "OnSpawned")]
-        public static void PlayerOnSpawned_Postfix(ref Player __instance)
-        {
-            try
-            {
-                if (__instance == null)
-                {
-                    Jotunn.Logger.LogError("Player does not exist!");
-                    return;
-                }
-
-                Jotunn.Logger.LogWarning("Adding twitch components to the player");
-                __instance.gameObject.AddComponent<TwitchChatting>();
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Could not add Twitch components in PlayerOnSpawned_Postfix: " + e);
-            }
-        }
-
-        //[HarmonyPrefix]
-        //[HarmonyPatch(typeof(Game), "OnApplicationQuit")]
-        //public static bool OnApplicationQuit_Prefix()
-        //{
-        //    try
-        //    {
-        //        TwitchCustomRewards rewardComp = Player.m_localPlayer.gameObject.GetComponent<TwitchCustomRewards>();
-
-        //        if (rewardComp == null)
-        //            return true;
-
-        //        Jotunn.Logger.LogWarning("Player still exists in OnApplicationQuit");
-        //        rewardComp.ClearRewards(true);
-        //        return false;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Jotunn.Logger.LogError("Could not clear rewards on OnApplicationQuit_Prefix: " + e);
-        //        return true;
-        //    }
-        //}
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Game), "Shutdown")]
@@ -107,7 +64,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                 if (rewardComp == null)
                     return;
 
-                List<RedeemData> redeemList = new List<RedeemData>();
+                List<RedeemEntry> redeemList = new List<RedeemEntry>();
 
                 switch (keyStr)
                 {
