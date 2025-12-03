@@ -1,17 +1,19 @@
 using BepInEx;
-using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
 using SeedCart.Components;
+using SeedCart.Configs;
+using SeedCart.Helpers;
 using SeedCart.Models;
+using SeedCart.Types;
 using UnityEngine;
 
 namespace SeedCart
 {
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
-    //[NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
+    [NetworkCompatibility(CompatibilityLevel.NotEnforced, VersionStrictness.Minor)]
     internal class SeedCart : BaseUnityPlugin
     {
         public const string PluginGUID = "DeathWizsh.SeedCart";
@@ -21,6 +23,7 @@ namespace SeedCart
 
         private AssetBundle assetBundle;
         public CustomPrefabs prefabs = new CustomPrefabs();
+        public static string currentTrader;
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -30,23 +33,23 @@ namespace SeedCart
         {
             Instance = this;
             InitAssetBundle();
+            PluginConfig.Init();
 
             PrefabManager.OnVanillaPrefabsAvailable += AddPieces;
         }
 
         private void AddPieces()
         {
-            PieceConfig pieceConfig = new PieceConfig();
-            pieceConfig.Enabled = true;
-            pieceConfig.Name = "Seed Cart";
-            pieceConfig.Description = "A card that plants your seeds!";
-            pieceConfig.PieceTable = PieceTables.Hammer;
-            pieceConfig.Category = PieceCategories.Misc;
-            pieceConfig.AddRequirement("Wood", 20);
+            ItemHelper.CreateMaterial(prefabs.Plow, PluginConfig.rustedPlow);
 
             prefabs.SeedCart.AddComponent<MovementChecker>();
+            PieceHelper.Create(prefabs.SeedCart, PluginConfig.piece1);
 
-            PieceManager.Instance.AddPiece(new CustomPiece(prefabs.SeedCart, true, pieceConfig));
+            currentTrader = PluginConfig.rustedPlow.trader.Value;
+            GameObject prefab = PrefabManager.Instance.GetPrefab(currentTrader);
+            Trader comp = prefab.GetComponent<Trader>();
+            comp.m_items.Add(UpdateHelper.CreateNewTradeItem());
+
             PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
         }
 
@@ -55,6 +58,7 @@ namespace SeedCart
             assetBundle = AssetUtils.LoadAssetBundleFromResources("seedcart_dw");
 
             prefabs.SeedCart = assetBundle.LoadAsset<GameObject>("SeedCart_SC");
+            prefabs.Plow = assetBundle.LoadAsset<GameObject>("Plow_SC");
         }
     }
 }

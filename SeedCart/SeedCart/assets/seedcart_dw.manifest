@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 3174955893
+CRC: 3177894694
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 4231d786523ca7396607c2d9d9a66a63
+    Hash: a500d697cac39f88c2d0961a088965f5
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 7f1a7b841fb653f03ed409867900c3e0
+    Hash: 4cdd905be61e4d974118d4ff5090ceb3
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 4231d786523ca7396607c2d9d9a66a63
+    Hash: a500d697cac39f88c2d0961a088965f5
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -41,17 +41,15 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 1790797106, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: -347224168, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
   Script: {fileID: 274441210, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 1541706127, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 1290261775, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 2094620348, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+  Script: {fileID: 2094620348, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: -1735741815, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -86,6 +84,8 @@ ClassTypes:
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
+  ClassName: Attack
+- AssemblyName: assembly_valheim
   ClassName: DropTable
 - AssemblyName: assembly_valheim
   ClassName: EffectList
@@ -96,7 +96,12 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: HitData/DamageTypes
 - AssemblyName: assembly_valheim
+  ClassName: ItemDrop/ItemData
+- AssemblyName: assembly_valheim
+  ClassName: ItemDrop/ItemData/SharedData
+- AssemblyName: assembly_valheim
   ClassName: Vagon/LoadData
 Assets:
 - Assets/Custom/PrefabInstance/SeedCart_SC.prefab
+- Assets/Custom/PrefabInstance/Plow_SC.prefab
 Dependencies: []

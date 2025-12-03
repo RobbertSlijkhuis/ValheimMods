@@ -8,6 +8,7 @@ using UnityEngine;
 namespace SeedCart.Components {
     public class MovementChecker : MonoBehaviour
     {
+        private ZNetView netView;
         public Transform cartTransform;
         private Vector3 lastPosition;
         public float distanceThreshold = 0.9f;
@@ -17,7 +18,7 @@ namespace SeedCart.Components {
 
         private void Awake()
         {
-            // Store the initial position
+            netView = gameObject.GetComponent<ZNetView>();
             cartTransform = transform;
             lastPosition = cartTransform.position;
 
@@ -39,101 +40,109 @@ namespace SeedCart.Components {
 
         private void Update()
         {
-            // Calculate the distance from the last frame
-            float distance = Vector3.Distance(lastPosition, cartTransform.position);
+            try {
+                if (netView.m_ghost)
+                    return;
 
-            // Check if the player has moved more than the threshold
-            if (distance >= distanceThreshold)
-            {
+                // Calculate the distance from the last frame
+                float distance = Vector3.Distance(lastPosition, cartTransform.position);
 
-                Jotunn.Logger.LogWarning("Player has moved " + distance + " meters!");
-                // Reset last position or do something else here
-                lastPosition = cartTransform.position;
-
-                List<Transform> plantPoints = new List<Transform>();
-                plantPoints.Add(transform.Find("PlantPointLeft"));
-                plantPoints.Add(transform.Find("PlantPointCenter"));
-                plantPoints.Add(transform.Find("PlantPointRight"));
-
-                // Jotunn.Logger.LogWarning("plantPoints: " + plantPoints.Count);
-
-                foreach (Transform plantTransform in plantPoints)
+                // Check if the player has moved more than the threshold
+                if (distance >= distanceThreshold)
                 {
-                    RaycastHit hitInfo;
-                    Vector3 adjustedPos = plantTransform.position + Vector3.up * 0.5f;
-                    Physics.Raycast(adjustedPos, Vector3.down, out hitInfo, 1f);
+                    Jotunn.Logger.LogWarning("Player has moved " + distance + " meters!");
+                    // Reset last position or do something else here
+                    lastPosition = cartTransform.position;
 
-                    LineRenderer lineRenderer = plantTransform.gameObject.GetComponent<LineRenderer>();
-                    lineRenderer.SetPosition(0, adjustedPos);
-                    lineRenderer.SetPosition(1, adjustedPos + Vector3.down * 1f);
+                    List<Transform> plantPoints = new List<Transform>();
+                    plantPoints.Add(transform.Find("PlantPointLeft"));
+                    plantPoints.Add(transform.Find("PlantPointCenter"));
+                    plantPoints.Add(transform.Find("PlantPointRight"));
 
-                    Jotunn.Logger.LogWarning(hitInfo.collider?.gameObject?.name);
+                    // Jotunn.Logger.LogWarning("plantPoints: " + plantPoints.Count);
 
-                    if (hitInfo.collider == null || hitInfo.collider.gameObject == null || !hitInfo.collider.gameObject.name.Equals("terrain", StringComparison.OrdinalIgnoreCase))
+                    foreach (Transform plantTransform in plantPoints)
                     {
-                        // Jotunn.Logger.LogWarning("No gameObject found! " + plantTransform.name);
-                        continue;
+                        RaycastHit hitInfo;
+                        Vector3 adjustedPos = plantTransform.position + Vector3.up * 0.5f;
+                        Physics.Raycast(adjustedPos, Vector3.down, out hitInfo, 1f);
+
+                        LineRenderer lineRenderer = plantTransform.gameObject.GetComponent<LineRenderer>();
+                        lineRenderer.SetPosition(0, adjustedPos);
+                        lineRenderer.SetPosition(1, adjustedPos + Vector3.down * 1f);
+
+                        Jotunn.Logger.LogWarning(hitInfo.collider?.gameObject?.name);
+
+                        if (hitInfo.collider == null || hitInfo.collider.gameObject == null || !hitInfo.collider.gameObject.name.Equals("terrain", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Jotunn.Logger.LogWarning("No gameObject found! " + plantTransform.name);
+                            continue;
+                        }
+
+                        Heightmap heightmapComp = hitInfo.collider.gameObject.GetComponent<Heightmap>();
+
+                        if (heightmapComp != null && !heightmapComp.IsCultivated(hitInfo.point))
+                        {
+                            // Jotunn.Logger.LogWarning("Nope... " + plantTransform.name);
+                            continue;
+                        }
+                        else
+                        {
+                            Jotunn.Logger.LogWarning("CULTIVATED! " + plantTransform.name);
+                        }
+
+                        Container containerComp = transform.Find("Container").GetComponent<Container>();
+                        Inventory inv = containerComp.GetInventory();
+                        List<ItemDrop.ItemData> items = inv.GetAllItemsInGridOrder();
+                        items.Reverse();
+
+                        List<ItemDrop.ItemData> plantableList = items.Where(item => m_allowedList.Any(other => item.m_shared.m_name.Contains(other))).ToList();
+
+                        if (plantableList.Count == 0)
+                        {
+                            Jotunn.Logger.LogWarning("No applicable item found!");
+                            continue;
+                        }
+
+                        foreach (ItemDrop.ItemData item in plantableList)
+                        {
+                            Jotunn.Logger.LogWarning(item.m_shared.m_name);
+                        }
+
+                        ItemDrop.ItemData firstItem = plantableList.First();
+
+                        if (firstItem == null)
+                        {
+                            Jotunn.Logger.LogError("Could not find first item in cart container!");
+                            continue;
+                        }
+
+                        string prefabName = m_plantDict.GetValueSafe(firstItem.m_shared.m_name);
+
+                        if (prefabName == null || prefabName == "")
+                        {
+                            Jotunn.Logger.LogError("Could not find corresponding prefab to plant!");
+                            continue;
+                        }
+
+                        Vector3 plantPosition = new Vector3(plantTransform.position.x, plantTransform.position.y, plantTransform.position.z);
+
+                        if (ZoneSystem.instance.FindFloor(plantPosition, out var height))
+                        {
+                            plantPosition.y = height;
+                        }
+
+                        GameObject onion = Instantiate(PrefabManager.Instance.GetPrefab(prefabName), plantPosition, plantTransform.rotation);
+                        Piece pieceComp = onion.GetComponent<Piece>();
+                        pieceComp.m_placeEffect.Create(plantPosition, plantTransform.rotation);
+
+                        inv.RemoveOneItem(firstItem);
                     }
-
-                    Heightmap heightmapComp = hitInfo.collider.gameObject.GetComponent<Heightmap>();
-
-                    if (heightmapComp != null && !heightmapComp.IsCultivated(hitInfo.point))
-                    {
-                        // Jotunn.Logger.LogWarning("Nope... " + plantTransform.name);
-                        continue;
-                    }
-                    else
-                    {
-                        Jotunn.Logger.LogWarning("CULTIVATED! " + plantTransform.name);
-                    }
-
-                    Container containerComp = transform.Find("Container").GetComponent<Container>();
-                    Inventory inv = containerComp.GetInventory();
-                    List<ItemDrop.ItemData> items = inv.GetAllItemsInGridOrder();
-                    items.Reverse();
-
-                    List<ItemDrop.ItemData> plantableList = items.Where(item => m_allowedList.Any(other => item.m_shared.m_name.Contains(other))).ToList();
-
-                    if (plantableList.Count == 0)
-                    {
-                        Jotunn.Logger.LogWarning("No applicable item found!");
-                        continue;
-                    }
-
-                    foreach (ItemDrop.ItemData item in plantableList)
-                    {
-                        Jotunn.Logger.LogWarning(item.m_shared.m_name);
-                    }
-
-                    ItemDrop.ItemData firstItem = plantableList.First();
-
-                    if (firstItem == null)
-                    {
-                        Jotunn.Logger.LogError("Could not find first item in cart container!");
-                        continue;
-                    }
-
-                    string prefabName = m_plantDict.GetValueSafe(firstItem.m_shared.m_name);
-
-                    if (prefabName == null || prefabName == "")
-                    {
-                        Jotunn.Logger.LogError("Could not find corresponding prefab to plant!");
-                        continue;
-                    }
-
-                    Vector3 plantPosition = new Vector3(plantTransform.position.x, plantTransform.position.y, plantTransform.position.z);
-
-                    if (ZoneSystem.instance.FindFloor(plantPosition, out var height))
-                    {
-                        plantPosition.y = height;
-                    }
-
-                    GameObject onion = Instantiate(PrefabManager.Instance.GetPrefab(prefabName), plantPosition, plantTransform.rotation);
-                    Piece pieceComp = onion.GetComponent<Piece>();
-                    pieceComp.m_placeEffect.Create(plantPosition, plantTransform.rotation);
-
-                    inv.RemoveOneItem(firstItem);
                 }
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in Update: " + e);
             }
         }
     }
