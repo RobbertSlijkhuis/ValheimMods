@@ -10,6 +10,7 @@ namespace WizshBoneTwitchIntegration.Gui
     {
         private GameObject panel;
         private TwitchAuth twitchAuth;
+        private TwitchCustomRewards twitchCustomRewards;
         private TwitchChatting twitchChatting;
 
         public UnityEvent onLogin = new UnityEvent();
@@ -32,6 +33,7 @@ namespace WizshBoneTwitchIntegration.Gui
             }
 
             twitchAuth = Game.instance.gameObject.GetComponent<TwitchAuth>();
+            twitchCustomRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
             twitchChatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
 
             panel = GUIManager.Instance.CreateWoodpanel(
@@ -205,14 +207,14 @@ namespace WizshBoneTwitchIntegration.Gui
         public void CreateEnableRedeemsButton()
         {
             GUIManager.Instance.CreateText(
-                text: twitchAuth.isEnabledRedeems ? "Redeems are currently enabled" : "Redeems are currently disabled",
+                text: twitchCustomRewards.isEnabled ? "Redeems are currently enabled" : "Redeems are currently disabled",
                 parent: panel.transform,
                 anchorMin: new Vector2(.5f, 1f),
                 anchorMax: new Vector2(.5f, 1f),
                 position: new Vector2(-105f, -245f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 16,
-                color: twitchAuth.isEnabledRedeems ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
+                color: twitchCustomRewards.isEnabled ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
                 width: 225,
@@ -221,7 +223,7 @@ namespace WizshBoneTwitchIntegration.Gui
             );
 
             GameObject enableButtonObj = GUIManager.Instance.CreateButton(
-                text: twitchAuth.isEnabledRedeems ? "Disable Redeems" : "Enable Redeems",
+                text: twitchCustomRewards.isEnabled ? "Disable Redeems" : "Enable Redeems",
                 parent: panel.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),

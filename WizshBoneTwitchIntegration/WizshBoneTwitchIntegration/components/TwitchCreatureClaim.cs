@@ -2,7 +2,6 @@
 using UnityEngine;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
-using YamlDotNet.Core.Tokens;
 
 namespace WizshBoneTwitchIntegration.components
 {
@@ -30,7 +29,7 @@ namespace WizshBoneTwitchIntegration.components
 
         private void Awake()
         {
-            m_netView.gameObject.GetComponent<ZNetView>();
+            m_netView = gameObject.GetComponent<ZNetView>();
 
             if (m_netView != null && m_netView.GetZDO() != null)
             {
@@ -46,7 +45,7 @@ namespace WizshBoneTwitchIntegration.components
         {
             if (author == null || author == "")
             {
-                Jotunn.Logger.LogWarning("MonsterClaim does not have a user assigned!");
+                Jotunn.Logger.LogWarning("Cannot assign a user to this creature claim, user is null");
                 return;
             }
 
@@ -61,14 +60,13 @@ namespace WizshBoneTwitchIntegration.components
             m_npcTalk.m_offset = 1f;
             m_npcTalk.m_hideDialogDelay = 10f;
 
-            m_twitchChatting.AddAssignedUser(author);
+            m_twitchChatting.AddAssignedUser(author, gameObject);
 
             InvokeRepeating(nameof(CheckChatForMessage), 0f, 3f);
         }
 
         private void OnDestroy()
         {
-            Jotunn.Logger.LogWarning("OnDestroy");
             UnassignUser(true);
         }
 
@@ -81,10 +79,7 @@ namespace WizshBoneTwitchIntegration.components
                 TimeSpan timeSpan = DateTime.Now.Subtract(m_lastMessageTime);
 
                 if (!m_isSpawn && timeSpan.TotalSeconds > m_unclaimTimer)
-                {
-                    Jotunn.Logger.LogWarning("Unassign");
                     UnassignUser();
-                }
             }
 
             if (message == null || message.hasBeenBroadcasted)
@@ -95,20 +90,29 @@ namespace WizshBoneTwitchIntegration.components
             m_npcTalk.Say(message.message, "Aggravated");
         }
 
-        private void UnassignUser(bool isDestroy = false)
+        public void UnassignUser(bool isAlreadyDestroyed = false)
         {
-            CancelInvoke(nameof(CheckChatForMessage));
-
             if (m_author != null)
                 m_twitchChatting.RemoveAssignedUser(m_author);
 
-            if (!isDestroy)
-            {
-                m_humanoid.m_name = m_originalName;
-                m_author = null;
-                m_lastMessageTime = DateTime.MinValue;
-                Destroy(this);
-            }
+            // Prevent multiple destructions when creature is killed
+            if (!isAlreadyDestroyed)
+                PrepareForDestruction();
+        }
+
+        public void UnassignClaim()
+        {
+            if (m_author != null)
+                PrepareForDestruction();
+        }
+
+        private void PrepareForDestruction()
+        {
+            m_humanoid.m_name = m_originalName;
+            m_author = null;
+            m_lastMessageTime = DateTime.MinValue;
+            Destroy(m_npcTalk);
+            Destroy(this);
         }
     }
 }

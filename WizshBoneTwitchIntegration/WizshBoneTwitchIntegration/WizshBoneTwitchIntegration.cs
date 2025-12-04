@@ -174,9 +174,11 @@ namespace WizshBoneTwitchIntegration
             // TODO:
             // LoyalBones: A red skeleton with normal damage but insane health pool
             // Chat loves this: Spawn chest with small healing meads in there and call it "cheese mead".
+            // Ask user in chat if he wants to be a creature before assigning the creature
             // IN PROGRESS: Remove redeems on game quit
             // IN PROGRESS: Add halucinations, make player stunned/dazed when getting hit by Hallucinations? Or half damage?
-            // IN PROGRESS: Load redeems from YAML file
+            // White/black list to block users from using the mod
+            // IN PROGRESS: Black list bots from chatting in-game
             // ====================================
             // Ideas:
             // MORE POSITIVE EFFECTS
@@ -184,7 +186,7 @@ namespace WizshBoneTwitchIntegration
             // Drunk blur effect?
             // Flashbang?
             // Disable all twitchy wards via bits (specific amount like 1000)
-            // White/black list to block users from using the mod
+
         }
     }
 }

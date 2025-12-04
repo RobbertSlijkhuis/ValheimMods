@@ -17,28 +17,28 @@ namespace WizshBoneTwitchIntegration.Commands
             }
             
             TwitchAuth authComp = Game.instance.gameObject.GetComponent<TwitchAuth>();
+            TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
 
 
             if (!authComp.isLoggedIn)
             {
-                Jotunn.Logger.LogInfo("You are currently not logged in to Twitch!");
+                Jotunn.Logger.LogWarning("You are currently not logged in to Twitch!");
                 return;
             }
 
-            if (!authComp.isEnabledRedeems)
+            if (!customRewards.isEnabled)
             {
-                Jotunn.Logger.LogInfo("The Twitch redeems are currently not enabled!");
+                Jotunn.Logger.LogWarning("The Twitch redeems are currently not enabled!");
                 return;
             }
 
-            TwitchCustomRewards rewardsComp = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
-            if (rewardsComp.ReloadRewards())
+            if (customRewards.ReloadRewards())
             {
                 Jotunn.Logger.LogInfo("Twitch redeems reloaded!");
             }
             else
             {
-                Jotunn.Logger.LogInfo("Something went wrong while trying to reload Twitch redeems!");
+                Jotunn.Logger.LogError("Something went wrong while trying to reload Twitch redeems!");
             }
         }
     }

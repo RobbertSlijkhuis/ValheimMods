@@ -11,6 +11,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
     internal class TwitchChat : MonoBehaviour
     {
         private TwitchAuth twitchAuth;
+        private TwitchChatting twitchChatting;
         private TcpClient twitchClient;
         private StreamReader reader;
         private StreamWriter writer;
@@ -151,6 +152,12 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 int splitPoint = message.IndexOf("!");
                 string author = message.Substring(0, splitPoint);
                 author = author.Substring(1);
+
+                if (twitchChatting == null)
+                    twitchChatting = Game.instance.GetComponent<TwitchChatting>();
+
+                if (twitchChatting.GetBlacklist().Contains(author))
+                    return;
 
                 splitPoint = message.IndexOf(":", 1);
                 string chatMessage = message.Substring(splitPoint + 1);

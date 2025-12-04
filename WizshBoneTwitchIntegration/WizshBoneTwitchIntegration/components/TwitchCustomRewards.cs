@@ -18,6 +18,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         GameTask<EventStream<CustomRewardEvent>> m_customRewardEvents;
         public Redeems m_redeems = new Redeems();
         public bool isPlayerInSafeZone = false;
+        public bool isEnabled = false;
 
         private void Awake()
         {
@@ -30,6 +31,16 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 return;
 
             m_customRewardEvents = Twitch.API.SubscribeToCustomRewardEvents();
+        }
+
+        public void SetEnableRedeems(bool value)
+        {
+            isEnabled = value;
+
+            if (value)
+                SetRewards();
+            else
+                ClearRewards();
         }
 
         // Update is called once per frame
@@ -173,6 +184,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             foreach (GameObject fish in RedeemHelper.fishList)
             {
+                ZNetView netView = fish.GetComponent<ZNetView>();
+                netView.Destroy();
                 GameObject.Destroy(fish);
             }
 

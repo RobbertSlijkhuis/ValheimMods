@@ -19,7 +19,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private bool isLoginShown = false;
         public bool isLoggedIn = false;
         public bool retrievedUserInfo = false;
-        public bool isEnabledRedeems = false;
         public string displayName;
 
         public TwitchStateGUI loginGUI;
@@ -41,7 +40,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void InvokeEnableRedeems()
         {
-            SetEnableRedeems(!isEnabledRedeems);
+            m_customRewards.SetEnableRedeems(!m_customRewards.isEnabled);
         }
 
         public void InvokeEnableChatting()
@@ -80,18 +79,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             loginGUI.UpdateGUI();
         }
 
-        public void SetEnableRedeems(bool value)
-        {
-            isEnabledRedeems = value;
-
-            if (m_customRewards == null)
-                throw new Exception("Could not find custom rewards component!");
-            if (value)
-                m_customRewards.SetRewards();
-            else
-                m_customRewards.ClearRewards();
-        }
-
         public void UpdateAuthState()
         {
             try
@@ -106,7 +93,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (currentAuthState.MaybeResult.Status == AuthStatus.LoggedIn)
                 {
-                    SetEnableRedeems(true);
+                    m_customRewards.SetEnableRedeems(true);
                     isLoggedIn = true;
                     twitchStatus = TwitchStatusType.LoggedIn;
                     loginGUI.UpdateGUI();
@@ -115,7 +102,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (currentAuthState.MaybeResult.Status == AuthStatus.LoggedOut)
                 {
-                    SetEnableRedeems(false);
+                    m_customRewards.SetEnableRedeems(false);
                     isLoggedIn = false;
                     isLoginShown = false;
                     twitchStatus = TwitchStatusType.LoggedOut;
