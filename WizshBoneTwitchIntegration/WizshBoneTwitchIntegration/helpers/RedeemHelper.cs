@@ -50,7 +50,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             if (!options.creatureData.isHallucination) {
                 TwitchCreatureClaim monsterClaim = creature.AddComponent<TwitchCreatureClaim>();
-                monsterClaim.Init(options.customReward.RedeemerName.ToLower(), true);
+                monsterClaim.Init(options);
                 humanoid.m_name = options.customReward.RedeemerName;
                 humanoid.m_faction = Character.Faction.Boss;
                 humanoid.SetLevel(options.creatureData.level);

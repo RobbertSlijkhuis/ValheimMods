@@ -51,6 +51,7 @@ namespace WizshBoneTwitchIntegration
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             PrefabManager.OnVanillaPrefabsAvailable += AddPieces;
+            PrefabManager.OnPrefabsRegistered += AddPersistentDataToCreatures;
             ItemManager.OnItemsRegistered += LogStatusEffects;
         }
 
@@ -97,6 +98,26 @@ namespace WizshBoneTwitchIntegration
             prefabs.GuardStone.transform.Find("controls").gameObject.AddComponent<TwitchSafeZoneControls>();
             PieceManager.Instance.AddPiece(new CustomPiece(prefabs.GuardStone, true, pieceConfig));
             PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
+        }
+
+        private void AddPersistentDataToCreatures()
+        {
+            Jotunn.Logger.LogWarning("AddPersistentDataToCreatures()");
+
+            foreach (string name in ZNetScene.instance.GetPrefabNames())
+            {
+                GameObject prefab = PrefabManager.Instance.GetPrefab(name);
+                Humanoid humanoid = prefab.GetComponent<Humanoid>();
+                MonsterAI monsterAI = prefab.GetComponent<MonsterAI>();
+
+                if (humanoid != null && monsterAI != null)
+                {
+                    Jotunn.Logger.LogWarning($"Adding persistent data to {name}");
+                    prefab.AddComponent<TwitchPersistentData>();
+                }
+            }
+
+            PrefabManager.OnPrefabsRegistered -= AddPersistentDataToCreatures;
         }
 
         private void InitRedeemsFile()

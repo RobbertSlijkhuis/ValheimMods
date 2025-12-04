@@ -19,14 +19,6 @@ namespace WizshBoneTwitchIntegration.components
         public DateTime m_lastMessageTime;
         private int m_unclaimTimer = 120;
 
-        private bool m_allowDrops;
-        private Character.Faction faction;
-        private string m_name;
-
-        public readonly int allowDropsHash = "WBTI_CreatureAllowDrops".GetStableHashCode();
-        public readonly int factionHash = "WBTI_CreatureAllowDrops".GetStableHashCode();
-        public readonly int nameHash = "WBTI_CreatureFaction".GetStableHashCode();
-
         private void Awake()
         {
             m_netView = gameObject.GetComponent<ZNetView>();
@@ -36,12 +28,34 @@ namespace WizshBoneTwitchIntegration.components
                 m_twitchChatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
                 m_twitchChat = Game.instance.gameObject.GetComponent<TwitchChat>();
                 m_humanoid = gameObject.GetComponent<Humanoid>();
-
-                // m_name = m_netView.GetZDO().GetString(nameHash, m_humanoid.m_name);
             }
         }
 
-        public void Init(string author, bool isSpawn = false)
+        public void Init(SpawnOptions options)
+        {
+            if (options == null)
+            {
+                Jotunn.Logger.LogWarning("Cannot assign a user to this creature claim, options is null");
+                return;
+            }
+
+            m_author = options.customReward.RedeemerName;
+
+            TwitchPersistentData persistentData = gameObject.GetComponent<TwitchPersistentData>();
+            persistentData.SetData(m_author, options.creatureData.allowDrops);
+
+            m_npcTalk = gameObject.AddComponent<NpcTalk>();
+            m_npcTalk.m_name = m_author;
+            m_npcTalk.m_maxRange = 30f;
+            m_npcTalk.m_offset = 1f;
+            m_npcTalk.m_hideDialogDelay = 10f;
+
+            m_twitchChatting.AddAssignedUser(m_author, gameObject);
+
+            InvokeRepeating(nameof(CheckChatForMessage), 0f, 3f);
+        }
+
+        public void Init(string author)
         {
             if (author == null || author == "")
             {
@@ -51,7 +65,6 @@ namespace WizshBoneTwitchIntegration.components
 
             m_author = author;
             m_originalName = m_humanoid.m_name;
-            m_isSpawn = isSpawn;
             m_humanoid.m_name = author;
 
             m_npcTalk = gameObject.AddComponent<NpcTalk>();
@@ -65,7 +78,7 @@ namespace WizshBoneTwitchIntegration.components
             InvokeRepeating(nameof(CheckChatForMessage), 0f, 3f);
         }
 
-        private void OnDestroy()
+        public void OnDestroy()
         {
             UnassignUser(true);
         }
