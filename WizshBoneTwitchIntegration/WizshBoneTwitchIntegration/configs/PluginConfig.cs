@@ -39,8 +39,8 @@ namespace WizshBoneTwitchIntegration.Configs
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
             configChattingEnabled.SettingChanged += (obj, attr) =>
             {
-                TwitchChatting twitchChatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
-                twitchChatting.isEnabled = configChattingEnabled.Value;
+                TwitchChatting chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
+                chatting.m_enabled = configChattingEnabled.Value;
             };
 
             configChattingBlackList = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionGeneral, "Chatting black list", "Nightbot, StreamElements",
@@ -48,8 +48,8 @@ namespace WizshBoneTwitchIntegration.Configs
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
             configChattingBlackList.SettingChanged += (obj, attr) =>
             {
-                TwitchChatting twitchChatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
-                twitchChatting.DeserializeBlackList(configChattingBlackList.Value);
+                TwitchChatting chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
+                chatting.DeserializeUserBlackList(configChattingBlackList.Value);
             };
 
             configMiniMeDuration = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionBuffsAndDebuffs, "MiniMe duration", 180f,

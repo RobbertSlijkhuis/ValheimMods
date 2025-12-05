@@ -45,9 +45,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void InvokeEnableChatting()
         {
-            TwitchChatting twitchChatting = gameObject.GetComponent<TwitchChatting>();
-            twitchChatting.isEnabled = !twitchChatting.isEnabled;
-            PluginConfig.configChattingEnabled.Value = twitchChatting.isEnabled;
+            TwitchChatting chatting = gameObject.GetComponent<TwitchChatting>();
+            chatting.m_enabled = !chatting.m_enabled;
+            PluginConfig.configChattingEnabled.Value = chatting.m_enabled;
         }
 
         public void InitComponents()

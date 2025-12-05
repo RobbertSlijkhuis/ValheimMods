@@ -14,31 +14,31 @@ namespace WizshBoneTwitchIntegration.Commands
         public override List<string> CommandOptionList()
         {
             TwitchChatting twitchChatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
-            List<string> result = twitchChatting.GetAllAssignedUsers().Select(item => item.author).ToList();
+            List<string> result = twitchChatting.GetAllCreatureAssignments().Select(item => item.userName).ToList();
             return result;
         }
 
         public override void Run(string[] args)
         {
-            TwitchAuth authComp = Game.instance.gameObject.GetComponent<TwitchAuth>();
+            TwitchAuth auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
 
-            if (!authComp.isLoggedIn)
+            if (!auth.isLoggedIn)
             {
                 Jotunn.Logger.LogWarning("You are currently not logged in to Twitch!");
                 return;
             }
 
-            TwitchChatting twitchChatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
+            TwitchChatting chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
 
             if (args.Length == 1)
             {
-                if (!twitchChatting.ContainsAssignedUser(args[0]))
+                if (!chatting.ContainsCreatureAssignment(args[0]))
                 {
                     Jotunn.Logger.LogWarning("Could not find any creature assignment of user: " + args[0]);
                     return;
                 }
 
-                twitchChatting.RemoveAssignedUser(args[0]);
+                chatting.RemoveCreatureAssignment(args[0]);
                 return;
             }
         }

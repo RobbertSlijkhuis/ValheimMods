@@ -10,25 +10,22 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 {
     internal class TwitchChat : MonoBehaviour
     {
-        private TwitchAuth twitchAuth;
-        private TwitchChatting twitchChatting;
-        private TcpClient twitchClient;
+        private TwitchAuth m_auth;
+        private TwitchChatting m_chatting;
+        private TcpClient tcpClient;
         private StreamReader reader;
         private StreamWriter writer;
-        private bool isLoggedIn;
-        public List<TwitchChatMessage> chatHistory = new List<TwitchChatMessage>();
-        private int historyLength = 30;
-        private int messageRelevanceTimer = 120;
 
-        private string twitchClientSecret = "kqfpjddbg5945on7ip7wuj08faps5m";
-        private string twitchClientId = "8i260qk16tmvumfssr2h4klu99frjb";
-        private string _sOAuth;
+        private List<TwitchChatMessage> m_chatHistory = new List<TwitchChatMessage>();
+        private int m_historyLength = 30;
+        private int m_messageRelevanceTimer = 120;
 
-        private string username = "WizshBoneBot";
-        private string password;
-        private string channel;
-
-        private string loginMessage = "Welcome, GLHF!";
+        private string tcpClientSecret = "kqfpjddbg5945on7ip7wuj08faps5m";
+        private string tcpClientId = "8i260qk16tmvumfssr2h4klu99frjb";
+        private string m_sOAuth;
+        private string m_channel;
+        private string m_loginMessage = "Welcome, GLHF!";
+        public bool m_loggedIn = false;
 
         public void Update()
         {
@@ -42,132 +39,127 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void LogIn()
         {
-            twitchAuth = Game.instance.gameObject.GetComponent<TwitchAuth>();
+            m_auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
 
-            if (_sOAuth == null || _sOAuth == "")
+            if (m_sOAuth == null || m_sOAuth == "")
                 return;
 
-            password = "oauth:" + _sOAuth;
-            // channel = "DeathWizsh";
-            channel = twitchAuth.displayName;
+            string userName = "WizshBoneBot".ToLower();
+            string password = "oauth:" + m_sOAuth;
+            m_channel = m_auth.displayName.ToLower();
 
-            twitchClient = new TcpClient("irc.chat.twitch.tv", 6667);
-            reader = new StreamReader(twitchClient.GetStream());
-            writer = new StreamWriter(twitchClient.GetStream());
-
-            Jotunn.Logger.LogWarning("Password: " + password);
-            Jotunn.Logger.LogWarning("Nick: " + username);
-            Jotunn.Logger.LogWarning("User name: " + username + " 8 * :" + username);
-            Jotunn.Logger.LogWarning("Channel: " + channel);
-
-            Jotunn.Logger.LogWarning("Loggin into chat");
+            tcpClient = new TcpClient("irc.chat.twitch.tv", 6667);
+            reader = new StreamReader(tcpClient.GetStream());
+            writer = new StreamWriter(tcpClient.GetStream());
 
             writer.WriteLine("PASS " + password);
-            writer.WriteLine("NICK " + username.ToLower());
-            writer.WriteLine("USER " + username.ToLower() + " 8 * :" + username.ToLower());
-            writer.WriteLine("JOIN #" + channel.ToLower());
+            writer.WriteLine("NICK " + userName);
+            writer.WriteLine("USER " + userName + " 8 * :" + userName);
+            writer.WriteLine("JOIN #" + m_channel);
             writer.Flush();
-
-            Jotunn.Logger.LogWarning("DONE!");
         }
 
         public void GetOAuth(params string[] scopes)
         {
-            new TwitchOAuthGetter(twitchClientId, twitchClientSecret, OnOAuthTokenRecieved, scopes);
+            new TwitchOAuthGetter(tcpClientId, tcpClientSecret, OnOAuthTokenRecieved, scopes);
         }
 
         private void OnOAuthTokenRecieved(ApiCodeTokenResponse response)
         {
-            _sOAuth = response.access_token;
+            m_sOAuth = response.access_token;
             LogIn();
         }
 
-        public List<string> GetAuthorsInChat()
+        public List<string> GetUsersInChatHistory()
         {
-            List<string> authors = new List<string>();
-            foreach (TwitchChatMessage message in chatHistory)
+            List<string> users = new List<string>();
+
+            foreach (TwitchChatMessage message in m_chatHistory)
             {
                 TimeSpan timeSpan = DateTime.Now.Subtract(message.timestamp);
 
-                if (message.hasBeenBroadcasted || timeSpan.TotalSeconds > messageRelevanceTimer)
+                if (message.hasBeenBroadcasted || timeSpan.TotalSeconds > m_messageRelevanceTimer)
                     continue;
 
-                authors.Add(message.author);
+                users.Add(message.userName);
             }
-
-            foreach (string author in authors.Distinct().ToList())
-            {
-                Jotunn.Logger.LogWarning(author);
-            };
            
-            return authors.Distinct().ToList();
+            return users.Distinct().ToList();
         }
 
-        public TwitchChatMessage GetFirstMessageByAuthor(string author)
+        public TwitchChatMessage GetFirstMessageOfUser(string userName)
         {
-            return chatHistory.Find(item => item.author == author.ToLower());
+            return m_chatHistory.Find(item => item.userName == userName.ToLower());
         }
 
-        public List<TwitchChatMessage> GetAllMessagesByAuthor(string author)
+        public List<TwitchChatMessage> GetAllMessagesOfUser(string userName)
         {
-            return chatHistory.FindAll(item => item.author == author.ToLower());
+            return m_chatHistory.FindAll(item => item.userName == userName.ToLower());
         }
 
-        public TwitchChatMessage GetLatestMessageByAuthor(string author)
+        public TwitchChatMessage GetLastMessageOfUser(string userName)
         {
-            return chatHistory.FindLast(item => item.author == author.ToLower());
+            return m_chatHistory.FindLast(item => item.userName == userName.ToLower());
         }
 
         public void Send(string message)
         {
-            writer.WriteLine($"PRIVMSG #{channel} :WTBI: {message}");
+            writer.WriteLine($"PRIVMSG #{m_channel} :WTBI: {message}");
             writer.Flush();
         }
 
         private void Read()
         {
-            if (twitchClient != null && twitchClient.Available > 0)
+            if (tcpClient == null || tcpClient.Available == 0)
+                return;
+
+            string message = reader.ReadLine();
+
+            if (message.Contains("PING"))
             {
-                string message = reader.ReadLine();
-                Jotunn.Logger.LogWarning(message);
-
-                if (message.Contains("PING"))
-                {
-                    writer.WriteLine("PONG :tmi.twitch.tv\r\n");
-                    writer.Flush();
-                    return;
-                }
-
-                if (message.Contains(loginMessage))
-                {
-                    Jotunn.Logger.LogWarning("Twitch chat login successfull!");
-                    isLoggedIn = true;
-                    return;
-                }
-
-                if (!message.Contains("PRIVMSG"))
-                    return;
-
-                // Message: :deathwizsh!deathwizsh@deathwizsh.tmi.twitch.tv PRIVMSG #azeriath :Another test :P
-                int splitPoint = message.IndexOf("!");
-                string author = message.Substring(0, splitPoint);
-                author = author.Substring(1);
-
-                if (twitchChatting == null)
-                    twitchChatting = Game.instance.GetComponent<TwitchChatting>();
-
-                if (twitchChatting.GetBlacklist().Contains(author))
-                    return;
-
-                splitPoint = message.IndexOf(":", 1);
-                string chatMessage = message.Substring(splitPoint + 1);
-
-                chatHistory.Add(new TwitchChatMessage(author, chatMessage));
-                // Jotunn.Logger.LogWarning($"{author}|{chatMessage}");
-
-                if (chatHistory.Count > historyLength)
-                    chatHistory.RemoveAt(0);
+                writer.WriteLine("PONG :tmi.twitch.tv\r\n");
+                writer.Flush();
+                return;
             }
+
+            if (message.Contains(m_loginMessage))
+            {
+                m_loggedIn = true;
+                return;
+            }
+
+            if (!message.Contains("PRIVMSG"))
+                return;
+
+            if (message.Contains("WTBI:"))
+                return;
+
+            // Example message: :deathwizsh!deathwizsh@deathwizsh.tmi.twitch.tv PRIVMSG #azeriath :Another test :P
+            int splitPoint = message.IndexOf("!");
+            string userName = message.Substring(0, splitPoint);
+            userName = userName.Substring(1);
+
+            if (m_chatting == null)
+                m_chatting = Game.instance.GetComponent<TwitchChatting>();
+
+            if (m_chatting.GetUserBlacklist().Contains(userName))
+                return;
+
+            splitPoint = message.IndexOf(":", 1);
+            string chatMessage = message.Substring(splitPoint + 1);
+
+            Jotunn.Logger.LogWarning($"{userName}: {chatMessage}");
+
+            if (m_chatting.GetChosenUser() == userName && chatMessage.Equals("!claim", StringComparison.OrdinalIgnoreCase))
+            {
+                m_chatting.AcceptClaim();
+                return;
+            }
+
+            m_chatHistory.Add(new TwitchChatMessage(userName, chatMessage));
+
+            if (m_chatHistory.Count > m_historyLength)
+                m_chatHistory.RemoveAt(0);
         }
     }
 }

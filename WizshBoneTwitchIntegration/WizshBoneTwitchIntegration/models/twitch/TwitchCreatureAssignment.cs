@@ -4,12 +4,12 @@ namespace WizshBoneTwitchIntegration.Models
 {
     internal class TwitchCreatureAssignment
     {
-        public string author;
+        public string userName;
         public GameObject creature;
 
-        public TwitchCreatureAssignment(string author, GameObject creature)
+        public TwitchCreatureAssignment(string userName, GameObject creature)
         {
-            this.author = author;
+            this.userName = userName;
             this.creature = creature;
         }
     }

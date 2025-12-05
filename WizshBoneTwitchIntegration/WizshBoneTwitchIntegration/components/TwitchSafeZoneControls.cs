@@ -5,25 +5,26 @@ namespace WizshBoneTwitchIntegration.Components
 {
     internal class TwitchSafeZoneControls : MonoBehaviour, Hoverable, Interactable, TextReceiver
     {
-        public readonly int radiusHash = "SafezoneRadius_WBTI".GetStableHashCode();
-        public ZNetView netView;
+        
+        private ZNetView m_netView;
         private Transform projectorTransform;
         private Transform colliderTrans;
-        public bool isProjectorOn;
-        public float radius;
+        private bool isProjectorOn;
+        private float radius;
+        private readonly int radiusHash = "SafezoneRadius_WBTI".GetStableHashCode();
 
-        private void Awake()
+        public void Awake()
         {
             try
             {
-                netView = transform.parent.gameObject.GetComponent<ZNetView>();
+                m_netView = transform.parent.gameObject.GetComponent<ZNetView>();
 
-                if (netView != null && netView.GetZDO() != null)
+                if (m_netView != null && m_netView.GetZDO() != null)
                 {
                     projectorTransform = transform.Find("projector");
                     colliderTrans = transform.parent.Find("AreaMarker");
                     isProjectorOn = false;
-                    radius = netView.GetZDO().GetFloat(radiusHash, 30f);
+                    radius = m_netView.GetZDO().GetFloat(radiusHash, 30f);
 
                     SetRadius(radius);
                 }
@@ -82,7 +83,7 @@ namespace WizshBoneTwitchIntegration.Components
 
         public string GetText()
         {
-            return $"{netView.GetZDO().GetFloat(radiusHash)}";
+            return $"{m_netView.GetZDO().GetFloat(radiusHash)}";
         }
 
         public void SetText(string value)
@@ -104,7 +105,7 @@ namespace WizshBoneTwitchIntegration.Components
             projectorComp.m_radius = value;
             colliderComp.radius = value;
 
-            netView.GetZDO().Set(radiusHash, value);
+            m_netView.GetZDO().Set(radiusHash, value);
         }
 
         private bool IsDigitsOnly(string value)

@@ -102,18 +102,16 @@ namespace WizshBoneTwitchIntegration
 
         private void AddPersistentDataToCreatures()
         {
-            Jotunn.Logger.LogWarning("AddPersistentDataToCreatures()");
-
             foreach (string name in ZNetScene.instance.GetPrefabNames())
             {
                 GameObject prefab = PrefabManager.Instance.GetPrefab(name);
                 Humanoid humanoid = prefab.GetComponent<Humanoid>();
                 MonsterAI monsterAI = prefab.GetComponent<MonsterAI>();
 
-                if (humanoid != null && monsterAI != null)
+                if (humanoid != null && humanoid.m_faction != Character.Faction.Boss && monsterAI != null)
                 {
                     Jotunn.Logger.LogWarning($"Adding persistent data to {name}");
-                    prefab.AddComponent<TwitchPersistentData>();
+                    prefab.AddComponent<TwitchCreaturePersistentData>();
                 }
             }
 
@@ -194,12 +192,11 @@ namespace WizshBoneTwitchIntegration
             // ====================================
             // TODO:
             // LoyalBones: A red skeleton with normal damage but insane health pool
-            // Chat loves this: Spawn chest with small healing meads in there and call it "cheese mead".
+            // Chat loves this: Spawn chest with cheese (random food?) Make cheese wheel that gives random food?".
             // Ask user in chat if he wants to be a creature before assigning the creature
             // IN PROGRESS: Remove redeems on game quit
             // IN PROGRESS: Add halucinations, make player stunned/dazed when getting hit by Hallucinations? Or half damage?
             // White/black list to block users from using the mod
-            // IN PROGRESS: Black list bots from chatting in-game
             // ====================================
             // Ideas:
             // MORE POSITIVE EFFECTS

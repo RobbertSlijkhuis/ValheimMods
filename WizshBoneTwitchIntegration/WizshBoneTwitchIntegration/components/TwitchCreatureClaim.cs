@@ -1,32 +1,34 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
-namespace WizshBoneTwitchIntegration.components
+namespace WizshBoneTwitchIntegration.Components
 {
     internal class TwitchCreatureClaim : MonoBehaviour
     {
-        public TwitchChatting m_twitchChatting;
-        public TwitchChat m_twitchChat;
+        public TwitchChatting m_chatting;
+        public TwitchChat m_chat;
+        public TwitchCreatureAssignment m_assignment;
         public ZNetView m_netView;
         public NpcTalk m_npcTalk;
         public Humanoid m_humanoid;
 
-        public string m_author;
         public string m_originalName;
         public bool m_isSpawn = false;
         public DateTime m_lastMessageTime;
         private int m_unclaimTimer = 120;
+        private bool m_isUnclaimDestroy = false;
 
-        private void Awake()
+        public void Awake()
         {
             m_netView = gameObject.GetComponent<ZNetView>();
 
             if (m_netView != null && m_netView.GetZDO() != null)
             {
-                m_twitchChatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
-                m_twitchChat = Game.instance.gameObject.GetComponent<TwitchChat>();
+                m_chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
+                m_chat = Game.instance.gameObject.GetComponent<TwitchChat>();
                 m_humanoid = gameObject.GetComponent<Humanoid>();
             }
         }
@@ -39,60 +41,104 @@ namespace WizshBoneTwitchIntegration.components
                 return;
             }
 
-            m_author = options.customReward.RedeemerName;
+            m_isSpawn = true;
+            m_assignment = new TwitchCreatureAssignment(options.customReward.RedeemerName, gameObject);
+            m_originalName = m_humanoid.m_name;
 
-            TwitchPersistentData persistentData = gameObject.GetComponent<TwitchPersistentData>();
-            persistentData.SetData(m_author, options.creatureData.allowDrops);
+            TwitchCreaturePersistentData persistentData = gameObject.GetComponent<TwitchCreaturePersistentData>();
+            persistentData.SetData(m_assignment.userName, options.creatureData);
 
-            m_npcTalk = gameObject.AddComponent<NpcTalk>();
-            m_npcTalk.m_name = m_author;
-            m_npcTalk.m_maxRange = 30f;
-            m_npcTalk.m_offset = 1f;
-            m_npcTalk.m_hideDialogDelay = 10f;
-
-            m_twitchChatting.AddAssignedUser(m_author, gameObject);
-
+            m_chatting.AddCreatureAssignment(m_assignment);
+            SetupNpcTalk(options.creatureData);
             InvokeRepeating(nameof(CheckChatForMessage), 0f, 3f);
         }
 
-        public void Init(string author)
+        public void Init(string userName)
         {
-            if (author == null || author == "")
+            if (userName == null || userName == "")
             {
-                Jotunn.Logger.LogWarning("Cannot assign a user to this creature claim, user is null");
+                Jotunn.Logger.LogWarning("Cannot assign a user to this creature claim, user name is null");
                 return;
             }
 
-            m_author = author;
+            m_assignment = new TwitchCreatureAssignment(userName, gameObject);
             m_originalName = m_humanoid.m_name;
-            m_humanoid.m_name = author;
+            m_humanoid.m_name = userName;
 
-            m_npcTalk = gameObject.AddComponent<NpcTalk>();
-            m_npcTalk.m_name = author;
-            m_npcTalk.m_maxRange = 30f;
-            m_npcTalk.m_offset = 1f;
-            m_npcTalk.m_hideDialogDelay = 10f;
+            m_chatting.AddCreatureAssignment(m_assignment);
+            SetupNpcTalk();
+            InvokeRepeating(nameof(CheckChatForMessage), 0f, 3f);
+        }
 
-            m_twitchChatting.AddAssignedUser(author, gameObject);
+        public void ReInit(string userName, SpawnCreatureData creatureData)
+        {
+            if (userName == null || creatureData == null)
+            {
+                Jotunn.Logger.LogWarning("Cannot assign a user to this creature claim, either user name or options is null");
+                return;
+            }
 
+            m_isSpawn = true;
+            m_assignment = new TwitchCreatureAssignment(userName, gameObject);
+            m_originalName = m_humanoid.m_name;
+
+            m_chatting.AddCreatureAssignment(m_assignment);
+            SetupNpcTalk(creatureData);
             InvokeRepeating(nameof(CheckChatForMessage), 0f, 3f);
         }
 
         public void OnDestroy()
         {
-            UnassignUser(true);
+            CancelInvoke(nameof(CheckChatForMessage));
+            Destroy(m_npcTalk);
+
+            m_assignment.creature = null;
+            m_humanoid.m_name = m_originalName;
+            m_lastMessageTime = DateTime.MinValue;
+
+            if (!m_isUnclaimDestroy)
+                Unassign();
+        }
+
+        private void SetupNpcTalk(SpawnCreatureData creatureData = null)
+        {
+            m_npcTalk = gameObject.AddComponent<NpcTalk>();
+            m_npcTalk.m_name = m_assignment.userName;
+            m_npcTalk.m_maxRange = 30f;
+            m_npcTalk.m_offset = 1f;
+            m_npcTalk.m_hideDialogDelay = 10f;
+
+            if (creatureData == null || !creatureData.talks)
+                return;
+
+            if (creatureData.prefabName.Equals("troll", StringComparison.OrdinalIgnoreCase))
+                m_npcTalk.m_aggravated = new List<string>() {
+                    $"{m_assignment.userName} told me you bad! You DIE now!",
+                    $"{m_assignment.userName} send me here for food... AH food!",
+                    $"Troll on duty, cuty Betu... AAAARRRRGGGH something!",
+                    $"Its smashing time! Hehe-eh",
+                };
+
+            if (creatureData.talkMessage != null && creatureData.talkMessage.Trim() != "" && creatureData.talkMessage.Trim().Length > 2)
+                m_npcTalk.m_aggravated = new List<string>() { creatureData.talkMessage };
+
+            m_npcTalk.OnBecameAggravated(BaseAI.AggravatedReason.Damage);
         }
 
         private void CheckChatForMessage()
         {
-            TwitchChatMessage message = m_twitchChat.GetLatestMessageByAuthor(m_author);
+            TwitchChatMessage message = m_chat.GetLastMessageOfUser(m_assignment.userName);
 
             if (m_lastMessageTime != DateTime.MinValue)
             {
                 TimeSpan timeSpan = DateTime.Now.Subtract(m_lastMessageTime);
 
                 if (!m_isSpawn && timeSpan.TotalSeconds > m_unclaimTimer)
-                    UnassignUser();
+                {
+                    m_isUnclaimDestroy = true;
+                    Unassign();
+                    return;
+                }
             }
 
             if (message == null || message.hasBeenBroadcasted)
@@ -103,29 +149,15 @@ namespace WizshBoneTwitchIntegration.components
             m_npcTalk.Say(message.message, "Aggravated");
         }
 
-        public void UnassignUser(bool isAlreadyDestroyed = false)
+        private void Unassign()
         {
-            if (m_author != null)
-                m_twitchChatting.RemoveAssignedUser(m_author);
-
-            // Prevent multiple destructions when creature is killed
-            if (!isAlreadyDestroyed)
-                PrepareForDestruction();
-        }
-
-        public void UnassignClaim()
-        {
-            if (m_author != null)
-                PrepareForDestruction();
-        }
-
-        private void PrepareForDestruction()
-        {
-            m_humanoid.m_name = m_originalName;
-            m_author = null;
-            m_lastMessageTime = DateTime.MinValue;
-            Destroy(m_npcTalk);
-            Destroy(this);
+            if (m_assignment == null || m_assignment.userName == null)
+            {
+                Jotunn.Logger.LogError("Can not remove creature assignment, either the assignment or userName is null");
+                return;
+            }
+            
+            m_chatting.RemoveCreatureAssignment(m_assignment);
         }
     }
 }

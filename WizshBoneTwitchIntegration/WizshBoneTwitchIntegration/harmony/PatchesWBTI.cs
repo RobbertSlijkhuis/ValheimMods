@@ -16,7 +16,6 @@ namespace WizshBoneTwitchIntegration.Harmony
         {
             try
             {
-                Jotunn.Logger.LogWarning("Adding twitch components to Game");
                 Game.instance.gameObject.AddComponent<TwitchChat>();
                 Game.instance.gameObject.AddComponent<TwitchCustomRewards>();
                 Game.instance.gameObject.AddComponent<TwitchAuth>();
@@ -34,13 +33,12 @@ namespace WizshBoneTwitchIntegration.Harmony
         {
             try
             {
-                TwitchCustomRewards rewardComp = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+                TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
 
-                if (rewardComp == null)
+                if (customRewards == null)
                     return;
 
-                Jotunn.Logger.LogWarning("Disabling redeems");
-                rewardComp.ClearRewards();
+                customRewards.ClearRewards();
             }
             catch (Exception e)
             {
@@ -54,14 +52,14 @@ namespace WizshBoneTwitchIntegration.Harmony
         {
             try
             {
-                TwitchAuth authComp = Game.instance.gameObject.GetComponent<TwitchAuth>();
+                TwitchAuth auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
 
-                if (!authComp || !authComp.isLoggedIn || !keyStr.Contains("defeated_"))
+                if (!auth || !auth.isLoggedIn || !keyStr.Contains("defeated_"))
                     return;
 
-                TwitchCustomRewards rewardComp = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+                TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
 
-                if (rewardComp == null)
+                if (customRewards == null)
                     return;
 
                 List<RedeemEntry> redeemList = new List<RedeemEntry>();
@@ -69,20 +67,20 @@ namespace WizshBoneTwitchIntegration.Harmony
                 switch (keyStr)
                 {
                     case nameof(GlobalKeyType.DefeatedEikthyr):
-                        redeemList.AddRange(rewardComp.m_redeems.list.FindAll(item => item.globalKey == GlobalKeyType.DefeatedEikthyr));
+                        redeemList.AddRange(customRewards.m_redeems.list.FindAll(item => item.globalKey == GlobalKeyType.DefeatedEikthyr));
                         break;
                     case nameof(GlobalKeyType.DefeatedElder):
-                        redeemList.AddRange(rewardComp.m_redeems.list.FindAll(item => item.globalKey == GlobalKeyType.DefeatedElder));
+                        redeemList.AddRange(customRewards.m_redeems.list.FindAll(item => item.globalKey == GlobalKeyType.DefeatedElder));
                         break;
                     case nameof(GlobalKeyType.DefeatedBonemass):
-                        redeemList.AddRange(rewardComp.m_redeems.list.FindAll(item => item.globalKey == GlobalKeyType.DefeatedBonemass));
+                        redeemList.AddRange(customRewards.m_redeems.list.FindAll(item => item.globalKey == GlobalKeyType.DefeatedBonemass));
                         break;
                     case nameof(GlobalKeyType.DefeatedModer):
-                        redeemList.AddRange(rewardComp.m_redeems.list.FindAll(item => item.globalKey == GlobalKeyType.DefeatedModer));
+                        redeemList.AddRange(customRewards.m_redeems.list.FindAll(item => item.globalKey == GlobalKeyType.DefeatedModer));
                         break;
                 }
 
-                rewardComp.SetRewards(redeemList);
+                customRewards.SetRewards(redeemList);
             }
             catch (Exception e)
             {

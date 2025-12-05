@@ -4,14 +4,14 @@ namespace WizshBoneTwitchIntegration.Models
 {
     internal class TwitchChatMessage
     {
-        public string author;
+        public string userName;
         public bool hasBeenBroadcasted = false;
         public string message;
         public DateTime timestamp;
 
-        public TwitchChatMessage(string author, string message)
+        public TwitchChatMessage(string userName, string message)
         {
-            this.author = author;
+            this.userName = userName;
             this.message = message;
             this.timestamp = DateTime.Now;
         }

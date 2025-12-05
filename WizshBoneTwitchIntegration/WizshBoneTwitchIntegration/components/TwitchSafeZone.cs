@@ -1,66 +1,92 @@
 ﻿using UnityEngine;
 using WizshBoneTwitchIntegration.TwitchIntegration;
+using YamlDotNet.Core.Tokens;
 
 namespace WizshBoneTwitchIntegration.Components
 {
     internal class TwitchSafeZone : MonoBehaviour
     {
-        private GameObject playerInZone;
+        private TwitchCustomRewards m_customRewards;
+        private GameObject m_playerInZone;
+        private readonly string playerIdentifier = "Player(Clone)";
 
-        private void OnTriggerEnter(Collider other)
+        public void Awake()
         {
-            HandlePlayerInSafeZone(other, true, "Player entered");
+            m_customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
         }
 
-        private void OnTriggerStay(Collider other)
+        public void OnTriggerEnter(Collider collider)
         {
-            HandlePlayerInSafeZone(other, true);
+            HandlePlayer(collider, true, "Player entered");
         }
 
-        private void OnTriggerExit(Collider other)
+        public void OnTriggerStay(Collider collider)
         {
-            HandlePlayerInSafeZone(other, false, "Player left");
+            HandlePlayer(collider, true);
+            HandleSpawns(collider);
         }
 
-        private void HandlePlayerInSafeZone(Collider other, bool value, string message = null)
+        public void OnTriggerExit(Collider collider)
         {
-            if (other.gameObject.name != "Player(Clone)")
+            HandlePlayer(collider, false, "Player left");
+        }
+
+        private void HandlePlayer(Collider collider, bool value, string message = null)
+        {
+            if (collider.gameObject.name != playerIdentifier)
+                return;
+
+            Player player = collider.gameObject.GetComponent<Player>();
+
+            if (player.GetPlayerID() == Player.m_localPlayer.GetPlayerID())
+                m_customRewards.m_playerIsInSafeZone = value;
+
+            if (value)
+                m_playerInZone = collider.gameObject;
+            else
+                m_playerInZone = null;
+        }
+
+        public void HandleSpawns(Collider collider)
+        {
+            if (collider.gameObject.name != playerIdentifier)
             {
-                Humanoid humanoid = other.gameObject.GetComponent<Humanoid>();
-                MonsterAI monsterAI = other.gameObject.GetComponent<MonsterAI>();
+                TwitchCreatureClaim creatureClaim = collider.gameObject.GetComponent<TwitchCreatureClaim>();
 
-                if (humanoid != null && monsterAI != null && !humanoid.GetSEMan().HaveStatusEffect(WizshBoneTwitchIntegration.Instance.effects.Burning.m_nameHash))
+                if (creatureClaim == null)
+                    return;
+
+                Tameable tameable = collider.gameObject.GetComponent<Tameable>();
+
+                if (tameable != null)
+                    if (tameable.IsTamed())
+                        return;
+
+                if (!creatureClaim.m_isSpawn)
+                    return;
+
+                Humanoid humanoid = collider.gameObject.GetComponent<Humanoid>();
+
+                if (humanoid != null && !humanoid.GetSEMan().HaveStatusEffect(WizshBoneTwitchIntegration.Instance.effects.Burning.m_nameHash))
                 {
                     float duration = 10f;
                     SE_Stats burning = Instantiate(WizshBoneTwitchIntegration.Instance.effects.Burning);
-                    burning.m_healthPerTick = Mathf.RoundToInt(humanoid.m_health / duration) * -1;
+                    burning.m_healthPerTick = Mathf.RoundToInt(humanoid.GetMaxHealth() / (duration - 1f) * -1f);
                     burning.m_ttl = duration;
                     humanoid.GetSEMan().AddStatusEffect(burning);
                 }
-
-                return;
             }
-
-            TwitchCustomRewards comp = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
-            comp.isPlayerInSafeZone = value;
-
-            if (value)
-                playerInZone = other.gameObject;
-            else
-                playerInZone = null;
-
-            //if (message != null)
-            //    Jotunn.Logger.LogWarning(message + (playerInZone ? $" {playerInZone.name}" : " NULL"));
         }
 
-        private void OnDestroy()
+        public void OnDestroy()
         {
-            if (playerInZone == null)
+            if (m_playerInZone == null)
                 return;
 
-            // Jotunn.Logger.LogWarning("Ward destroyed, removing player from zone");
-            TwitchCustomRewards comp = playerInZone.GetComponent<TwitchCustomRewards>();
-            comp.isPlayerInSafeZone = false;
+            Player player = m_playerInZone.GetComponent<Player>();
+
+            if (player.GetPlayerID() == Player.m_localPlayer.GetPlayerID())
+                m_customRewards.m_playerIsInSafeZone = false;
         }
     }
 }

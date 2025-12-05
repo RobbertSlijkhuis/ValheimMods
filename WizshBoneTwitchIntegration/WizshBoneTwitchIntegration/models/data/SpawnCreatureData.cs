@@ -22,7 +22,7 @@ namespace WizshBoneTwitchIntegration.Models
             position = SpawnPositionType.OnPlayer;
             talks = false;
         }
-        public SpawnCreatureData(string prefabName, int level = 1, int amount = 1, bool allowDrops = false, bool talks = false, string position = nameof(SpawnPositionType.OnPlayer))
+        public SpawnCreatureData(string prefabName, int level = 1, int amount = 1, string position = nameof(SpawnPositionType.OnPlayer), bool allowDrops = false, bool talks = false)
         {
             this.allowDrops = allowDrops;
             this.amount = amount;

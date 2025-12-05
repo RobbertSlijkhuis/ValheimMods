@@ -9,9 +9,9 @@ namespace WizshBoneTwitchIntegration.Gui
     internal class TwitchStateGUI
     {
         private GameObject panel;
-        private TwitchAuth twitchAuth;
-        private TwitchCustomRewards twitchCustomRewards;
-        private TwitchChatting twitchChatting;
+        private TwitchAuth auth;
+        private TwitchCustomRewards customRewards;
+        private TwitchChatting chatting;
 
         public UnityEvent onLogin = new UnityEvent();
         public UnityEvent onEnableRedeems = new UnityEvent();
@@ -32,9 +32,9 @@ namespace WizshBoneTwitchIntegration.Gui
                 return;
             }
 
-            twitchAuth = Game.instance.gameObject.GetComponent<TwitchAuth>();
-            twitchCustomRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
-            twitchChatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
+            auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
+            customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+            chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
 
             panel = GUIManager.Instance.CreateWoodpanel(
                 parent: GUIManager.CustomGUIFront.transform,
@@ -89,14 +89,14 @@ namespace WizshBoneTwitchIntegration.Gui
             );
 
             GameObject loginTextObj = GUIManager.Instance.CreateText(
-                text: twitchAuth.retrievedUserInfo ? $"Welcome {twitchAuth.displayName}" : "Please login into Twitch",
+                text: auth.retrievedUserInfo ? $"Welcome {auth.displayName}" : "Please login into Twitch",
                 parent: panel.transform,
                 anchorMin: new Vector2(.5f, 1f),
                 anchorMax: new Vector2(.5f, 1f),
                 position: new Vector2(-105f, -105f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 16,
-                color: twitchAuth.retrievedUserInfo ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
+                color: auth.retrievedUserInfo ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
                 width: 225,
@@ -117,7 +117,7 @@ namespace WizshBoneTwitchIntegration.Gui
             Button loginButton = loginButtonObj.GetComponent<Button>();
             loginButton.onClick.AddListener(Login);
 
-            if (twitchAuth.retrievedUserInfo)
+            if (auth.retrievedUserInfo)
             {
                 CreateEnableRedeemsButton();
                 CreateEnableChattingButton();
@@ -207,14 +207,14 @@ namespace WizshBoneTwitchIntegration.Gui
         public void CreateEnableRedeemsButton()
         {
             GUIManager.Instance.CreateText(
-                text: twitchCustomRewards.isEnabled ? "Redeems are currently enabled" : "Redeems are currently disabled",
+                text: customRewards.isEnabled ? "Redeems are currently enabled" : "Redeems are currently disabled",
                 parent: panel.transform,
                 anchorMin: new Vector2(.5f, 1f),
                 anchorMax: new Vector2(.5f, 1f),
                 position: new Vector2(-105f, -245f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 16,
-                color: twitchCustomRewards.isEnabled ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
+                color: customRewards.isEnabled ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
                 width: 225,
@@ -223,7 +223,7 @@ namespace WizshBoneTwitchIntegration.Gui
             );
 
             GameObject enableButtonObj = GUIManager.Instance.CreateButton(
-                text: twitchCustomRewards.isEnabled ? "Disable Redeems" : "Enable Redeems",
+                text: customRewards.isEnabled ? "Disable Redeems" : "Enable Redeems",
                 parent: panel.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
@@ -246,7 +246,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 position: new Vector2(-105f, -175f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 16,
-                color: twitchChatting.isEnabled ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
+                color: chatting.m_enabled ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
                 width: 225,
@@ -255,7 +255,7 @@ namespace WizshBoneTwitchIntegration.Gui
             );
 
             GameObject enableButtonObj = GUIManager.Instance.CreateButton(
-                text: twitchChatting.isEnabled ? "Disable in-game chat messages" : "Enable in-game chat messages",
+                text: chatting.m_enabled ? "Disable in-game chat messages" : "Enable in-game chat messages",
                 parent: panel.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),

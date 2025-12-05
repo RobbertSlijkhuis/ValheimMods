@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using TwitchSDK.Interop;
 using UnityEngine;
-using WizshBoneTwitchIntegration.components;
+using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.Types;
 
@@ -45,16 +45,11 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
 
             GameObject creature = UnityEngine.Object.Instantiate(prefab, GenerateSpawnLocation(transform, options.creatureData.position), transform.rotation);
-            ZNetView netView = creature.GetComponent<ZNetView>();
             Humanoid humanoid = creature.GetComponent<Humanoid>();
 
             if (!options.creatureData.isHallucination) {
-                TwitchCreatureClaim monsterClaim = creature.AddComponent<TwitchCreatureClaim>();
-                monsterClaim.Init(options);
-                humanoid.m_name = options.customReward.RedeemerName;
-                humanoid.m_faction = Character.Faction.Boss;
-                humanoid.SetLevel(options.creatureData.level);
-                humanoid.m_level = options.creatureData.level;
+                TwitchCreatureClaim creatureClaim = creature.AddComponent<TwitchCreatureClaim>();
+                creatureClaim.Init(options);
             }
             else
             {
@@ -97,32 +92,6 @@ namespace WizshBoneTwitchIntegration.Helpers
                     listOfItemSets.Add(itemSet);
                 }
                 humanoid.m_randomSets = listOfItemSets.ToArray();
-            }
-
-            if (!options.creatureData.allowDrops)
-            {
-                CharacterDrop characterDrop = creature.GetComponent<CharacterDrop>();
-                characterDrop.m_drops = new List<CharacterDrop.Drop>();
-            }
-
-            if (options.creatureData.talks)
-            {
-                NpcTalk npcTalk = creature.AddComponent<NpcTalk>();
-                npcTalk.m_name = options.customReward.RedeemerName;
-                npcTalk.m_maxRange = 30f;
-                npcTalk.m_offset = 3f;
-                npcTalk.m_hideDialogDelay = 10f;
-                npcTalk.m_aggravated = new List<string>() {
-                    $"{options.customReward.RedeemerName} told me you bad! You DIE now!",
-                    $"{options.customReward.RedeemerName} send me here for food... AH food!",
-                    $"Troll on duty, cuty Betu... AAAARRRRGGGH something!",
-                    $"Its smashing time! Hehe-eh",
-                };
-
-                if (options.creatureData.talkMessage != null && options.creatureData.talkMessage.Trim() != "" && options.creatureData.talkMessage.Trim().Length > 2)
-                    npcTalk.m_aggravated = new List<string>() { options.creatureData.talkMessage };
-
-                npcTalk.OnBecameAggravated(BaseAI.AggravatedReason.Damage);
             }
         }
 
