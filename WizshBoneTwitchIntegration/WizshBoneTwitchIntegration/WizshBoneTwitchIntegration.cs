@@ -204,6 +204,8 @@ namespace WizshBoneTwitchIntegration
             // Drunk blur effect?
             // Flashbang?
             // Disable all twitchy wards via bits (specific amount like 1000)
+            // Add commands for claimed creatures to do things (flee, stop, attack player/base, activate specific attack, emote?)
+            // Add options to super charge a spawned creature, more hp, damage, equip gear?
 
         }
     }

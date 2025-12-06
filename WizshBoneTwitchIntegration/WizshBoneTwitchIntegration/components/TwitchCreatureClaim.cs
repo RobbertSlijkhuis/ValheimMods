@@ -108,19 +108,24 @@ namespace WizshBoneTwitchIntegration.Components
             m_npcTalk.m_offset = 1f;
             m_npcTalk.m_hideDialogDelay = 10f;
 
-            if (creatureData == null || !creatureData.talks)
+            if (creatureData == null || !creatureData.talks || creatureData.talkMessage == null)
                 return;
 
-            if (creatureData.prefabName.Equals("troll", StringComparison.OrdinalIgnoreCase))
-                m_npcTalk.m_aggravated = new List<string>() {
-                    $"{m_assignment.userName} told me you bad! You DIE now!",
-                    $"{m_assignment.userName} send me here for food... AH food!",
-                    $"Troll on duty, cuty Betu... AAAARRRRGGGH something!",
-                    $"Its smashing time! Hehe-eh",
-                };
+            if (creatureData.talkMessage.Contains(";"))
+            {
+                string[] messages = creatureData.talkMessage.Split(';');
+                m_npcTalk.m_aggravated = new List<string>();
 
-            if (creatureData.talkMessage != null && creatureData.talkMessage.Trim() != "" && creatureData.talkMessage.Trim().Length > 2)
+                foreach (string message in messages)
+                {
+                    string fixedMessage = message.Replace("{{userName}}", m_assignment.userName);
+                    m_npcTalk.m_aggravated.Add(fixedMessage);
+                }
+            }
+            else
+            {
                 m_npcTalk.m_aggravated = new List<string>() { creatureData.talkMessage };
+            }              
 
             m_npcTalk.OnBecameAggravated(BaseAI.AggravatedReason.Damage);
         }

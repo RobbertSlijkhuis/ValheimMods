@@ -44,6 +44,7 @@ namespace WizshBoneTwitchIntegration.Components
 
             ApplyData(m_name, creatureData.level);
             ApplyAllowDrops(creatureData.allowDrops);
+            ApplyTameable(creatureData.isFriendly);
         }
 
         public void SetData(string name, SpawnCreatureData creatureData)
@@ -56,6 +57,7 @@ namespace WizshBoneTwitchIntegration.Components
 
             ApplyData(name, creatureData.level);
             ApplyAllowDrops(creatureData.allowDrops);
+            ApplyTameable(creatureData.isFriendly);
         }
 
         public void ApplyData(string name, int level)
@@ -77,17 +79,28 @@ namespace WizshBoneTwitchIntegration.Components
                 characterDrop.m_drops = new List<CharacterDrop.Drop>();
         }
 
+        public void ApplyTameable(bool isFriendly)
+        {
+            if (!isFriendly)
+                return;
+
+            Tameable tameable = gameObject.AddComponent<Tameable>();
+            tameable.m_monsterAI.MakeTame();
+            tameable.m_commandable = true;
+        }
+
         public string CreatureDataToString(SpawnCreatureData creatureData)
         {
-            return $"{creatureData.prefabName}|{creatureData.level}|{creatureData.amount}|{creatureData.position}|{creatureData.allowDrops}|{creatureData.talks}|{creatureData.talkMessage}|{creatureData.isHallucination}";
+            return $"{creatureData.prefabName}|{creatureData.level}|{creatureData.amount}|{creatureData.position}|{creatureData.allowDrops}|{creatureData.isFriendly}|{creatureData.talks}|{creatureData.talkMessage}|{creatureData.isHallucination}";
         }
 
         public SpawnCreatureData StringToCreatureData(string value)
         {
             string[] data = value.Split('|');
             SpawnCreatureData creatureData = new SpawnCreatureData(data[0], int.Parse(data[1]), int.Parse(data[2]), data[3], bool.Parse(data[4]), bool.Parse(data[5]));
-            creatureData.talkMessage = data[6];
-            creatureData.isHallucination = bool.Parse(data[7]);
+            creatureData.talks = bool.Parse(data[6]);
+            creatureData.talkMessage = data[7];
+            creatureData.isHallucination = bool.Parse(data[8]);
 
             return creatureData;
         }
