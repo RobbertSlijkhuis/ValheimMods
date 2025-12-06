@@ -1,9 +1,7 @@
 ﻿using HarmonyLib;
 using System;
-using System.Collections.Generic;
-using WizshBoneTwitchIntegration.Models;
+using UnityEngine;
 using WizshBoneTwitchIntegration.TwitchIntegration;
-using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.Harmony
 {
@@ -53,8 +51,9 @@ namespace WizshBoneTwitchIntegration.Harmony
             try
             {
                 TwitchAuth auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
+                string loweredKey = keyStr.ToLower();
 
-                if (!auth || !auth.isLoggedIn || !keyStr.Contains("defeated_"))
+                if (!auth || !auth.isLoggedIn || (!loweredKey.Contains("defeated_") && !loweredKey.Contains("killed")))
                     return;
 
                 TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
@@ -62,25 +61,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                 if (customRewards == null)
                     return;
 
-                List<RedeemEntry> redeemList = new List<RedeemEntry>();
-
-                switch (keyStr)
-                {
-                    case nameof(GlobalKeyType.DefeatedEikthyr):
-                        redeemList.AddRange(customRewards.m_redeems.list.FindAll(item => item.globalKey == GlobalKeyType.DefeatedEikthyr));
-                        break;
-                    case nameof(GlobalKeyType.DefeatedElder):
-                        redeemList.AddRange(customRewards.m_redeems.list.FindAll(item => item.globalKey == GlobalKeyType.DefeatedElder));
-                        break;
-                    case nameof(GlobalKeyType.DefeatedBonemass):
-                        redeemList.AddRange(customRewards.m_redeems.list.FindAll(item => item.globalKey == GlobalKeyType.DefeatedBonemass));
-                        break;
-                    case nameof(GlobalKeyType.DefeatedModer):
-                        redeemList.AddRange(customRewards.m_redeems.list.FindAll(item => item.globalKey == GlobalKeyType.DefeatedModer));
-                        break;
-                }
-
-                customRewards.SetRewards(redeemList);
+                customRewards.SetRewards();
             }
             catch (Exception e)
             {

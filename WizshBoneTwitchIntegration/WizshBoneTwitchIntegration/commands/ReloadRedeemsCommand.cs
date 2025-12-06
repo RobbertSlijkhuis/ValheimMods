@@ -26,7 +26,7 @@ namespace WizshBoneTwitchIntegration.Commands
                 return;
             }
 
-            if (!customRewards.isEnabled)
+            if (!customRewards.m_enabled)
             {
                 Jotunn.Logger.LogWarning("The Twitch redeems are currently not enabled!");
                 return;

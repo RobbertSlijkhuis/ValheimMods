@@ -15,10 +15,10 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
     internal class TwitchCustomRewards : MonoBehaviour
     {
         private TwitchChat m_chat;
-        GameTask<EventStream<CustomRewardEvent>> m_customRewardEvents;
-        public Redeems m_redeems = new Redeems();
+        private GameTask<EventStream<CustomRewardEvent>> m_customRewardEvents;
+        private Redeems m_redeems = new Redeems();
         public bool m_playerIsInSafeZone = false;
-        public bool isEnabled = false;
+        public bool m_enabled = false;
 
         private void Awake()
         {
@@ -33,9 +33,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             m_customRewardEvents = Twitch.API.SubscribeToCustomRewardEvents();
         }
 
+        public List<RedeemEntry> GetRedeemList()
+        {
+            return m_redeems.list;
+        }
+
         public void SetEnableRedeems(bool value)
         {
-            isEnabled = value;
+            m_enabled = value;
 
             if (value)
                 SetRewards();
@@ -212,17 +217,17 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             StartCoroutine(LerpHelper.LerpScale(Player.m_localPlayer.transform, Player.m_localPlayer.transform.localScale, new Vector3(1f, 1f, 1f), 1.5f));
         }
 
-        public void SetRewards(List<RedeemEntry> listData = null)
+        public void SetRewards(List<RedeemEntry> redeems = null)
         {
             Jotunn.Logger.LogWarning("SetRewards()");
             List<CustomRewardDefinition> listRewards = new List<CustomRewardDefinition>();
 
-            if (listData == null)
-                listData = m_redeems.list;
+            if (redeems == null)
+                redeems = m_redeems.list;
 
-            listData.RemoveAll(item => item.type == RedeemType.Undefined);
+            redeems.RemoveAll(item => item.type == RedeemType.Undefined);
 
-            foreach (RedeemEntry redeem in m_redeems.list)
+            foreach (RedeemEntry redeem in redeems)
             {
                 if (redeem.globalKey == null || ZoneSystem.instance.GetGlobalKey(redeem.globalKey))
                 {

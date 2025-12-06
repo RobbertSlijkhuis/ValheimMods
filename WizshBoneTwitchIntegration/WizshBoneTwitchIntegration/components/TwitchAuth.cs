@@ -40,7 +40,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void InvokeEnableRedeems()
         {
-            m_customRewards.SetEnableRedeems(!m_customRewards.isEnabled);
+            m_customRewards.SetEnableRedeems(!m_customRewards.m_enabled);
         }
 
         public void InvokeEnableChatting()

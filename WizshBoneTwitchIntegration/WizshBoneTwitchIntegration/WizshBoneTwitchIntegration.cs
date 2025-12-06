@@ -97,6 +97,24 @@ namespace WizshBoneTwitchIntegration
             prefabs.GuardStone.transform.Find("AreaMarker").gameObject.AddComponent<TwitchSafeZone>();
             prefabs.GuardStone.transform.Find("controls").gameObject.AddComponent<TwitchSafeZoneControls>();
             PieceManager.Instance.AddPiece(new CustomPiece(prefabs.GuardStone, true, pieceConfig));
+
+            prefabs.NeckBeard = PrefabManager.Instance.CreateClonedPrefab("NeckBeard", "Neck");
+            Transform beardTransform = prefabs.NeckBeard.transform.Find("Visual/Armature/Hips/Spine/Spine1/Neck/Head/Jaw/Jaw_end");
+            Humanoid humanoid = prefabs.NeckBeard.GetComponent<Humanoid>();
+            GameObject beardPrefab = PrefabManager.Instance.GetPrefab("Beard_06");
+            GameObject beardCopy = Instantiate(beardPrefab, beardTransform);
+            SkinnedMeshRenderer skinnedMeshRenderer = beardCopy.transform.Find("beard6").gameObject.GetComponent<SkinnedMeshRenderer>();
+            skinnedMeshRenderer.materials[0].SetColor("_SkinColor", new Color(0.4392157f, 0.3803921f, 0.3647059f));
+
+            beardCopy.transform.localPosition = new Vector3(0f, -0.0119f, -0.0594f);
+            beardCopy.transform.localRotation = TransformHelper.GenerateRotation(new Vector3(-90, 180f, 0f));
+            beardCopy.transform.localScale = new Vector3(0.08f, 0.0333333f, 0.08f);
+            humanoid.m_name = "Feo, the Historian";
+
+            Transform lillies = prefabs.NeckBeard.transform.Find("Visual/Lillies");
+            lillies.gameObject.SetActive(false);
+
+            PrefabManager.Instance.AddPrefab(prefabs.NeckBeard);
             PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
         }
 
@@ -121,7 +139,7 @@ namespace WizshBoneTwitchIntegration
         private void InitRedeemsFile()
         {
             YAMLHelper.InitRedeemsConfig();
-            YAMLHelper.ReadRedeemsConfig(true);
+            YAMLHelper.ReadRedeemsConfig();
         }
 
         private void InitStatusEffects()
@@ -193,7 +211,6 @@ namespace WizshBoneTwitchIntegration
             // TODO:
             // LoyalBones: A red skeleton with normal damage but insane health pool
             // Chat loves this: Spawn chest with cheese (random food?) Make cheese wheel that gives random food?".
-            // Ask user in chat if he wants to be a creature before assigning the creature
             // IN PROGRESS: Remove redeems on game quit
             // IN PROGRESS: Add halucinations, make player stunned/dazed when getting hit by Hallucinations? Or half damage?
             // White/black list to block users from using the mod
@@ -206,7 +223,17 @@ namespace WizshBoneTwitchIntegration
             // Disable all twitchy wards via bits (specific amount like 1000)
             // Add commands for claimed creatures to do things (flee, stop, attack player/base, activate specific attack, emote?)
             // Add options to super charge a spawned creature, more hp, damage, equip gear?
-
+            // Add references to friends, streamers in the mod. Like I did with troll Betuti line
+            // - DeathWizsh the Raven landing on streamers shoulder saying "There is a mod for that" every time someone says that in chat
+            // - Feo the neckbeard (A neck with a beard) that randomly gives you history facts (Or spanwed by redeem aswell?)
+            // - Sjoeky an actuall goat that gives you random combat/survial tips when you die to much in the most dry and sarcastic manner (spawn at your respawn location and redeem aswell?)
+            // - Make DurdyJay exactly like Odin, and spawns randomly in like Odin. But instead of dissappearing straight away he gets Googly Eyes and a stick out Tongue and says something nice/somewhat durdy. And his name changes to DurdyJay at that moment ofc
+            // - itsnanobug?
+            // - Azeriath?
+            // - jaqkEquips
+            // - PithyPeaches?
+            // - LoyalBones and KrzyMoogle?
+            // References are kinda like gods? Allow them to give you blessings when encountered? Feo relaxing you, rested. Sjoeky "encouraging you", damage reduction
         }
     }
 }

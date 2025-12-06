@@ -8,5 +8,6 @@ namespace WizshBoneTwitchIntegration.Models
         public GameObject FishRainScript;
         public GameObject GuardStone;
         public GameObject RemoveTheCountry;
+        public GameObject NeckBeard;
     }
 }

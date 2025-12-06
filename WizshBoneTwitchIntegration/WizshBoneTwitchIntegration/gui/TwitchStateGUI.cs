@@ -207,14 +207,14 @@ namespace WizshBoneTwitchIntegration.Gui
         public void CreateEnableRedeemsButton()
         {
             GUIManager.Instance.CreateText(
-                text: customRewards.isEnabled ? "Redeems are currently enabled" : "Redeems are currently disabled",
+                text: customRewards.m_enabled ? "Redeems are currently enabled" : "Redeems are currently disabled",
                 parent: panel.transform,
                 anchorMin: new Vector2(.5f, 1f),
                 anchorMax: new Vector2(.5f, 1f),
                 position: new Vector2(-105f, -245f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 16,
-                color: customRewards.isEnabled ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
+                color: customRewards.m_enabled ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
                 width: 225,
@@ -223,7 +223,7 @@ namespace WizshBoneTwitchIntegration.Gui
             );
 
             GameObject enableButtonObj = GUIManager.Instance.CreateButton(
-                text: customRewards.isEnabled ? "Disable Redeems" : "Enable Redeems",
+                text: customRewards.m_enabled ? "Disable Redeems" : "Enable Redeems",
                 parent: panel.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
