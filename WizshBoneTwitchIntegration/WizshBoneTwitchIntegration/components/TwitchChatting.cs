@@ -136,6 +136,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
             TwitchCreatureClaim newCreatureClaimn = m_chosenPrefab.AddComponent<TwitchCreatureClaim>();
             newCreatureClaimn.Init(m_chosenUser);
+
+            m_chosenUser = null;
+            m_chosenPrefab = null;
         }
 
         public string GetChosenUser()

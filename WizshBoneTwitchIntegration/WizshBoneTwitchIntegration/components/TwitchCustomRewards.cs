@@ -113,6 +113,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         else
                             RedeemHelper.SpawnCreature(new SpawnOptions(creature, Player.m_localPlayer.transform, currentRewardEvent));
                     }
+
                     Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
                 }
 

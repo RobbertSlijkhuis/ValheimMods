@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 1822261179
+CRC: 3368147447
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: c2e06013ded9a23dd17efbe6de7ae3e7
+    Hash: 5aa243ad4ed6447ba41fae208cc9ffe6
   TypeTreeHash:
     serializedVersion: 2
-    Hash: c1f312ad6e224e4a9f536f2e88607546
+    Hash: dcf9edec2237cad2e2f3792ed2687e1f
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: c2e06013ded9a23dd17efbe6de7ae3e7
+    Hash: 5aa243ad4ed6447ba41fae208cc9ffe6
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -28,9 +28,19 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 48
   Script: {instanceID: 0}
+- Class: 54
+  Script: {instanceID: 0}
 - Class: 64
   Script: {instanceID: 0}
 - Class: 65
+  Script: {instanceID: 0}
+- Class: 74
+  Script: {instanceID: 0}
+- Class: 90
+  Script: {instanceID: 0}
+- Class: 91
+  Script: {instanceID: 0}
+- Class: 95
   Script: {instanceID: 0}
 - Class: 108
   Script: {instanceID: 0}
@@ -39,9 +49,21 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: 1137906148, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: -1383431051, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: -870746866, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: -1421768954, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: -1094038755, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 829610738, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: -843416108, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 2094620348, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -49,18 +71,32 @@ ClassTypes:
 - Class: 114
   Script: {fileID: -179248876, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: -2012497638, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: 788646874, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: -917656959, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 115
   Script: {instanceID: 0}
+- Class: 134
+  Script: {instanceID: 0}
 - Class: 136
+  Script: {instanceID: 0}
+- Class: 137
   Script: {instanceID: 0}
 - Class: 198
   Script: {instanceID: 0}
 - Class: 199
   Script: {instanceID: 0}
+- Class: 205
+  Script: {instanceID: 0}
 - Class: 213
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers:
+- AssemblyName: assembly_valheim
+  ClassName: CharacterDrop/Drop
 - AssemblyName: assembly_valheim
   ClassName: EffectList
 - AssemblyName: assembly_valheim
@@ -68,7 +104,11 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: HitData/DamageModPair
 - AssemblyName: assembly_valheim
+  ClassName: HitData/DamageModifiers
+- AssemblyName: assembly_valheim
   ClassName: HitData/DamageTypes
+- AssemblyName: assembly_valheim
+  ClassName: LevelEffects/LevelSetup
 - AssemblyName: assembly_valheim
   ClassName: TerrainOp/Settings
 Assets:
@@ -77,6 +117,7 @@ Assets:
 - Assets/Custom/Monobehaviour/Freezing_WBTI.asset
 - Assets/Custom/PrefabInstance/RemoveTheCountry_WBTI.prefab
 - Assets/Custom/Monobehaviour/Burning_WBTI.asset
+- Assets/Custom/PrefabInstance/FeoTheHistorian_WBTI.prefab
 - Assets/Custom/Monobehaviour/Poison_WBTI.asset
 - Assets/Custom/Sprite/MiniMeSprite_WBTI.png
 - Assets/Custom/Sprite/BigMeSprite_WBTI.png

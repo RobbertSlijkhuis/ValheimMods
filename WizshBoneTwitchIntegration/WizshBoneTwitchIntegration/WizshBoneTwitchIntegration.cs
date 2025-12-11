@@ -98,23 +98,23 @@ namespace WizshBoneTwitchIntegration
             prefabs.GuardStone.transform.Find("controls").gameObject.AddComponent<TwitchSafeZoneControls>();
             PieceManager.Instance.AddPiece(new CustomPiece(prefabs.GuardStone, true, pieceConfig));
 
-            prefabs.NeckBeard = PrefabManager.Instance.CreateClonedPrefab("NeckBeard", "Neck");
-            Transform beardTransform = prefabs.NeckBeard.transform.Find("Visual/Armature/Hips/Spine/Spine1/Neck/Head/Jaw/Jaw_end");
-            Humanoid humanoid = prefabs.NeckBeard.GetComponent<Humanoid>();
-            GameObject beardPrefab = PrefabManager.Instance.GetPrefab("Beard_06");
-            GameObject beardCopy = Instantiate(beardPrefab, beardTransform);
-            SkinnedMeshRenderer skinnedMeshRenderer = beardCopy.transform.Find("beard6").gameObject.GetComponent<SkinnedMeshRenderer>();
-            skinnedMeshRenderer.materials[0].SetColor("_SkinColor", new Color(0.4392157f, 0.3803921f, 0.3647059f));
+            //prefabs.NeckBeard = PrefabManager.Instance.CreateClonedPrefab("NeckBeard", "Neck");
+            //Transform beardTransform = prefabs.NeckBeard.transform.Find("Visual/Armature/Hips/Spine/Spine1/Neck/Head/Jaw/Jaw_end");
+            //Humanoid humanoid = prefabs.NeckBeard.GetComponent<Humanoid>();
+            //GameObject beardPrefab = PrefabManager.Instance.GetPrefab("Beard_06");
+            //GameObject beardCopy = Instantiate(beardPrefab, beardTransform);
+            //SkinnedMeshRenderer skinnedMeshRenderer = beardCopy.transform.Find("beard6").gameObject.GetComponent<SkinnedMeshRenderer>();
+            //skinnedMeshRenderer.materials[0].SetColor("_SkinColor", new Color(0.4392157f, 0.3803921f, 0.3647059f));
 
-            beardCopy.transform.localPosition = new Vector3(0f, -0.0119f, -0.0594f);
-            beardCopy.transform.localRotation = TransformHelper.GenerateRotation(new Vector3(-90, 180f, 0f));
-            beardCopy.transform.localScale = new Vector3(0.08f, 0.0333333f, 0.08f);
-            humanoid.m_name = "Feo, the Historian";
+            //beardCopy.transform.localPosition = new Vector3(0f, -0.0119f, -0.0594f);
+            //beardCopy.transform.localRotation = TransformHelper.GenerateRotation(new Vector3(-90, 180f, 0f));
+            //beardCopy.transform.localScale = new Vector3(0.08f, 0.0333333f, 0.08f);
+            //humanoid.m_name = "Feo, the Historian";
 
-            Transform lillies = prefabs.NeckBeard.transform.Find("Visual/Lillies");
-            lillies.gameObject.SetActive(false);
+            //Transform lillies = prefabs.NeckBeard.transform.Find("Visual/Lillies");
+            //lillies.gameObject.SetActive(false);
 
-            PrefabManager.Instance.AddPrefab(prefabs.NeckBeard);
+            //PrefabManager.Instance.AddPrefab(prefabs.NeckBeard);
             PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
         }
 
@@ -198,6 +198,8 @@ namespace WizshBoneTwitchIntegration
             prefabs.GuardStone = assetBundle.LoadAsset<GameObject>("WBTI_guard_stone");
             prefabs.RemoveTheCountry = assetBundle.LoadAsset<GameObject>("RemoveTheCountry_WBTI");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RemoveTheCountry, true));
+            prefabs.NeckBeard = assetBundle.LoadAsset<GameObject>("FeoTheHistorian_WBTI");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.NeckBeard, true));
 
             effects.Burning = assetBundle.LoadAsset<SE_Stats>("Burning_WBTI");
             effects.Freezing = assetBundle.LoadAsset<StatusEffect>("Freezing_WBTI");

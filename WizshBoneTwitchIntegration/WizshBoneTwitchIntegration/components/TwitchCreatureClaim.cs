@@ -149,9 +149,42 @@ namespace WizshBoneTwitchIntegration.Components
             if (message == null || message.hasBeenBroadcasted)
                 return;
 
+            if (message.message.Equals("!unclaim", StringComparison.OrdinalIgnoreCase))
+            {
+                SetMessageAsBroadcasted(message);
+                m_isUnclaimDestroy = true;
+                Unassign();
+                return;
+            }
+
+            if (message.message.Equals("!heal", StringComparison.OrdinalIgnoreCase) && m_originalName.Contains("shaman"))
+            {
+                if (m_humanoid.InAttack())
+                    return;
+
+                MonsterAI monsterAI = gameObject.GetComponent<MonsterAI>();
+
+                if (monsterAI == null)
+                {
+                    Jotunn.Logger.LogError("Could not find monster AI to start healing");
+                    return;
+                }
+
+                SetMessageAsBroadcasted(message);
+                m_npcTalk.Say("Alright... healing!", "Aggravated");
+                m_humanoid.EquipBestWeapon(m_humanoid, null, m_humanoid, null);
+                monsterAI.DoAttack(m_humanoid, true);
+                return;
+            }
+
+            SetMessageAsBroadcasted(message);
+            m_npcTalk.Say(message.message, "Aggravated");
+        }
+
+        private void SetMessageAsBroadcasted(TwitchChatMessage message)
+        {
             message.hasBeenBroadcasted = true;
             m_lastMessageTime = DateTime.Now;
-            m_npcTalk.Say(message.message, "Aggravated");
         }
 
         private void Unassign()

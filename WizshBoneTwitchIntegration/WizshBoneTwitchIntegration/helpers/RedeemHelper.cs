@@ -368,6 +368,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 if (itemDrop.m_itemData.m_shared.m_triggerEffect.m_effectPrefabs.Length > 0)
                 {
                     List<EffectList.EffectData> effectList = new List<EffectList.EffectData>();
+
                     foreach (var effect in itemDrop.m_itemData.m_shared.m_triggerEffect.m_effectPrefabs)
                     {
                         EffectList.EffectData effectData = new EffectList.EffectData();
@@ -378,6 +379,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                         effectData.m_variant = -1;
                         effectList.Add(effectData);
                     }
+
                     itemDrop.m_itemData.m_shared.m_triggerEffect.m_effectPrefabs = effectList.ToArray();
                 }
             }

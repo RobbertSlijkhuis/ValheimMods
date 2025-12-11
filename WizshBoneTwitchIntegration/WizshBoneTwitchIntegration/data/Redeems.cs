@@ -25,7 +25,7 @@ namespace WizshBoneTwitchIntegration.Data
         {
             if (!FileExists())
             {
-                Jotunn.Logger.LogError("Could not find redeems configuration");
+                Jotunn.Logger.LogError("Could not find redeems configuration for reload!");
                 return false;
             }
 
