@@ -14,20 +14,24 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 {
     internal class TwitchCustomRewards : MonoBehaviour
     {
+        private TwitchAuth m_auth;
         private TwitchChat m_chat;
         private GameTask<EventStream<CustomRewardEvent>> m_customRewardEvents;
         private Redeems m_redeems = new Redeems();
+        private List<string> m_bannedUsers = new List<string>();
         public bool m_playerIsInSafeZone = false;
         public bool m_enabled = false;
 
-        private void Awake()
+        public void Awake()
         {
             m_chat = gameObject.GetComponent<TwitchChat>();
         }
 
         public void SubscribeToRedeemEvents()
         {
-            if (m_customRewardEvents != null)
+            m_auth = gameObject.GetComponent<TwitchAuth>();
+
+            if (m_customRewardEvents != null || !m_auth.m_loggedIn)
                 return;
 
             m_customRewardEvents = Twitch.API.SubscribeToCustomRewardEvents();
@@ -48,56 +52,91 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 ClearRewards();
         }
 
-        // Update is called once per frame
         public void Update()
         {
             try
             {
-                if (m_customRewardEvents == null)
+                if (m_customRewardEvents == null || !m_auth.m_loggedIn)
                     return;
 
                 CustomRewardEvent currentRewardEvent;
                 m_customRewardEvents.MaybeResult.TryGetNextEvent(out currentRewardEvent);
+                HandleRedeem(currentRewardEvent);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in custom rewards update: " + e);
+            }
+        }
+
+        public void HandleRedeem(CustomRewardEvent currentRewardEvent)
+        {
+            try
+            {
+                if (currentRewardEvent == null)
+                    return;
+
+                //Jotunn.Logger.LogWarning(currentRewardEvent.RedeemerName);
+                //Jotunn.Logger.LogWarning(currentRewardEvent.RedeemedAt);
+                //Jotunn.Logger.LogWarning(currentRewardEvent.CustomRewardTitle);
+                //Jotunn.Logger.LogWarning(currentRewardEvent.CustomRewardCost);
+                //Jotunn.Logger.LogWarning(currentRewardEvent.Status.ToString());
 
                 if (currentRewardEvent == null || currentRewardEvent.Status == CustomRewardRedemptionState.Fulfilled || currentRewardEvent.Status == CustomRewardRedemptionState.Canceled)
                     return;
 
-                // Do something
                 Jotunn.Logger.LogWarning($"{currentRewardEvent.RedeemerName} has bought {currentRewardEvent.CustomRewardTitle} for {currentRewardEvent.CustomRewardCost}!");
                 Jotunn.Logger.LogWarning($"Time: {currentRewardEvent.RedeemedAt}");
                 Jotunn.Logger.LogWarning($"Status: {currentRewardEvent.Status}");
 
                 RedeemEntry redeem = m_redeems.list.Find(item => item.title == currentRewardEvent.CustomRewardTitle);
                 if (redeem == null)
+                {
+                    Jotunn.Logger.LogError($"Could not find redeem: {currentRewardEvent.CustomRewardTitle}");
                     return;
+                }
 
                 if (m_playerIsInSafeZone)
                 {
                     Jotunn.Logger.LogWarning("Player is in safe zone, canceling redeem...");
-                    m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is inside a Twitch safe zone! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} point has been refunded!");
+                    m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is inside a Twitch safe zone! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
                     Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Canceled);
                     return;
                 }
 
                 if (Player.m_localPlayer.transform.localPosition.y >= 4000)
                 {
-                    List<string> listOfTitles = new List<string>();
-                    listOfTitles.Add("troll");
-                    listOfTitles.Add("golem");
-                    listOfTitles.Add("lox");
-                    listOfTitles.Add("bat");
-                    listOfTitles.Add("abomination");
-                    listOfTitles.Add("country");
+                    bool cancelRedeem = false;
+                    List<string> notAllowedList = new List<string>();
+                    notAllowedList.Add("troll");
+                    notAllowedList.Add("abomination");
+                    notAllowedList.Add("bat");
+                    notAllowedList.Add("hatchling");
+                    notAllowedList.Add("golem");
+                    notAllowedList.Add("lox");
+                    notAllowedList.Add("deathsquito");
 
-                    foreach (string title in listOfTitles)
+                    if (redeem.type == RedeemType.TerrainRemove || redeem.type == RedeemType.SpawnHallucination || redeem.type == RedeemType.SpawnShower)
+                        cancelRedeem = true;
+
+                    if (redeem.creatures != null)
                     {
-                        if (currentRewardEvent.CustomRewardTitle.ToLower().Contains(title))
+                        foreach (SpawnCreatureData creature in redeem.creatures)
                         {
-                            Jotunn.Logger.LogWarning("Player is in dungeon, canceling redeem...");
-                            m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} point has been refunded!");
-                            Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Canceled);
-                            return;
+                            if (notAllowedList.Contains(creature.prefabName.ToLower()))
+                            {
+                                cancelRedeem = true;
+                                break;
+                            }
                         }
+                    }
+
+                    if (cancelRedeem)
+                    {
+                        Jotunn.Logger.LogWarning("Player is in dungeon, canceling redeem...");
+                        m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
+                        Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Canceled);
+                        return;
                     }
                 }
 
@@ -169,7 +208,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Something went wrong in custom rewards: "+ e);
+                Jotunn.Logger.LogError("Something went wrong while handling a redeem: " + e);
             }
         }
 

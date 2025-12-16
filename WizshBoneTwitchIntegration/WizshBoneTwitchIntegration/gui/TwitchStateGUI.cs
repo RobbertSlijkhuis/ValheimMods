@@ -14,8 +14,8 @@ namespace WizshBoneTwitchIntegration.Gui
         private TwitchChatting chatting;
 
         public UnityEvent onLogin = new UnityEvent();
-        public UnityEvent onEnableRedeems = new UnityEvent();
-        public UnityEvent onEnableChatting = new UnityEvent();
+        public UnityEvent onToggleRedeems = new UnityEvent();
+        public UnityEvent onToggleChatting = new UnityEvent();
         public UnityEvent onClose = new UnityEvent();
 
         public void ShowGUI()
@@ -89,14 +89,14 @@ namespace WizshBoneTwitchIntegration.Gui
             );
 
             GameObject loginTextObj = GUIManager.Instance.CreateText(
-                text: auth.retrievedUserInfo ? $"Welcome {auth.displayName}" : "Please login into Twitch",
+                text: GetLoginStatusMessage(),
                 parent: panel.transform,
                 anchorMin: new Vector2(.5f, 1f),
                 anchorMax: new Vector2(.5f, 1f),
                 position: new Vector2(-105f, -105f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 16,
-                color: auth.retrievedUserInfo ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
+                color: auth.m_userInfo != null ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
                 width: 225,
@@ -117,7 +117,7 @@ namespace WizshBoneTwitchIntegration.Gui
             Button loginButton = loginButtonObj.GetComponent<Button>();
             loginButton.onClick.AddListener(Login);
 
-            if (auth.retrievedUserInfo)
+            if (auth.m_userInfo != null)
             {
                 CreateEnableRedeemsButton();
                 CreateEnableChattingButton();
@@ -192,15 +192,15 @@ namespace WizshBoneTwitchIntegration.Gui
             onLogin.Invoke();
         }
 
-        private void EnableRedeems()
+        private void ToggleRedeems()
         {
-            onEnableRedeems.Invoke();
+            onToggleRedeems.Invoke();
             UpdateGUI();
         }
 
-        private void EnableChatting()
+        private void ToggleChatting()
         {
-            onEnableChatting.Invoke();
+            onToggleChatting.Invoke();
             UpdateGUI();
         }
 
@@ -233,7 +233,7 @@ namespace WizshBoneTwitchIntegration.Gui
             );
             enableButtonObj.SetActive(true);
             Button enableButton = enableButtonObj.GetComponent<Button>();
-            enableButton.onClick.AddListener(EnableRedeems);
+            enableButton.onClick.AddListener(ToggleRedeems);
         }
 
         public void CreateEnableChattingButton()
@@ -265,7 +265,24 @@ namespace WizshBoneTwitchIntegration.Gui
             );
             enableButtonObj.SetActive(true);
             Button enableButton = enableButtonObj.GetComponent<Button>();
-            enableButton.onClick.AddListener(EnableChatting);
+            enableButton.onClick.AddListener(ToggleChatting);
+        }
+
+        private string GetLoginStatusMessage()
+        {
+            if (!auth || !auth.m_loggedIn)
+                return "Welcome! Please login into Twitch";
+
+            if (auth.m_waitingForCode)
+                return "Waiting for authorization, check your browser!";
+
+            if (auth.m_loggedIn && auth.m_userInfo == null)
+                return "Fetching user info...";
+
+            if (auth.m_userInfo != null)
+                return $"Welcome {auth.m_userInfo.displayName}";
+
+            return "Something went wrong...";
         }
     }
 }

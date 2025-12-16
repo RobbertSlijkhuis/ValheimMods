@@ -186,6 +186,7 @@ namespace WizshBoneTwitchIntegration
         {
             CommandManager.Instance.AddConsoleCommand(new ReloadRedeemsCommand());
             CommandManager.Instance.AddConsoleCommand(new ClearMonsterClaimsCommand());
+            CommandManager.Instance.AddConsoleCommand(new UseRedeemCommand());
         }
 
         private void InitAssetBundle()
@@ -225,17 +226,26 @@ namespace WizshBoneTwitchIntegration
             // Disable all twitchy wards via bits (specific amount like 1000)
             // Add commands for claimed creatures to do things (flee, stop, attack player/base, activate specific attack, emote?)
             // Add options to super charge a spawned creature, more hp, damage, equip gear?
-            // Add references to friends, streamers in the mod. Like I did with troll Betuti line
+            // Add references to friends, streamers, viewers in a seperate mod. Like I did with troll Betuti line
             // - DeathWizsh the Raven landing on streamers shoulder saying "There is a mod for that" every time someone says that in chat
-            // - Feo the neckbeard (A neck with a beard) that randomly gives you history facts (Or spanwed by redeem aswell?)
+            // - Feo the neckbeard (A neck with a beard) that randomly gives you history facts (spawned by redeem?)
             // - Sjoeky an actuall goat that gives you random combat/survial tips when you die to much in the most dry and sarcastic manner (spawn at your respawn location and redeem aswell?)
-            // - Make DurdyJay exactly like Odin, and spawns randomly in like Odin. But instead of dissappearing straight away he gets Googly Eyes and a stick out Tongue and says something nice/somewhat durdy. And his name changes to DurdyJay at that moment ofc
+            // - Kimetsu a Dvergr mage, blessing?
+            // - Soma_af a bear (reskinned as a white/pink teddybear with antlers as soma as a bear with antlers emote) Spawns when cooking? Drops random food when sneezing? Adds a 4th food slot?
+            // - Make DurdyJay exactly like Odin, and spawns randomly in like Odin. But instead of dissappearing straight away he gets Googly Eyes and a stick out Tongue and says something nice/somewhat durdy. And his name changes to DurdyJay at that moment ofc (blessing?)
             // - itsnanobug?
-            // - Azeriath?
+            // - Azeriath? Blessing: Less fall damage he said
             // - jaqkEquips
             // - PithyPeaches?
             // - LoyalBones and KrzyMoogle?
             // References are kinda like gods? Allow them to give you blessings when encountered? Feo relaxing you, rested. Sjoeky "encouraging you", damage reduction
+            // Some gods can be summoned via a ritual (new piece spawned in the world? and/or buildable one) Some gods can be angered and do something negative
+            // - Feo summon alter spawns in meadows here and there, you can then make a food to summon him (includes neck tail as joke, he does not know)
+            //   He can also get angry if you don't sit down to listen to his history fact or if you try to summon him when the summon is on cooldown
+            //   3 summons to anger him, 3 summons while angered and then you get smiten by Obliterator lightning
+            // - Soma_af can also be summoned and gives food to the player (back-up emergency food) according to highest boss kill (Global or player key)
+            //   Will summon big teddybear version when angered that hunts you down! She has a temper
+            // - When dieing to much Sjoeky will give tips and damage reduction blessing, during blessing timer he can also randomly help and fight.
         }
     }
 }

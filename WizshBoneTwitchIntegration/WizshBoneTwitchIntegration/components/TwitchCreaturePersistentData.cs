@@ -42,7 +42,7 @@ namespace WizshBoneTwitchIntegration.Components
             TwitchCreatureClaim creatureClaim = gameObject.AddComponent<TwitchCreatureClaim>();
             creatureClaim.ReInit(m_name, creatureData);
 
-            ApplyData(m_name, creatureData.level);
+            ApplyData(m_name, creatureData.level, creatureData.rename);
             ApplyAllowDrops(creatureData.allowDrops);
             ApplyTameable(creatureData.isFriendly);
         }
@@ -55,17 +55,19 @@ namespace WizshBoneTwitchIntegration.Components
             m_name = name;
             m_creatureDataString = creatureDataString;
 
-            ApplyData(name, creatureData.level);
+            ApplyData(name, creatureData.level, creatureData.rename);
             ApplyAllowDrops(creatureData.allowDrops);
             ApplyTameable(creatureData.isFriendly);
         }
 
-        public void ApplyData(string name, int level)
+        public void ApplyData(string name, int level, bool rename = true)
         {
             Humanoid humanoid = gameObject.GetComponent<Humanoid>();
-            humanoid.m_name = name;
             humanoid.SetLevel(level);
             humanoid.m_faction = Character.Faction.Boss;
+
+            if (rename)
+                humanoid.m_name = name;
         }
 
         public void ApplyAllowDrops(bool allowDrops)
@@ -91,16 +93,18 @@ namespace WizshBoneTwitchIntegration.Components
 
         public string CreatureDataToString(SpawnCreatureData creatureData)
         {
-            return $"{creatureData.prefabName}|{creatureData.level}|{creatureData.amount}|{creatureData.position}|{creatureData.allowDrops}|{creatureData.isFriendly}|{creatureData.talks}|{creatureData.talkMessage}|{creatureData.isHallucination}";
+            return $"{creatureData.prefabName}|{creatureData.level}|{creatureData.amount}|{creatureData.position}|{creatureData.allowDrops}|{creatureData.isFriendly}|{creatureData.rename}|{creatureData.talks}|{creatureData.talkMessage}|{creatureData.talkInterval}|{creatureData.isHallucination}";
         }
 
         public SpawnCreatureData StringToCreatureData(string value)
         {
             string[] data = value.Split('|');
             SpawnCreatureData creatureData = new SpawnCreatureData(data[0], int.Parse(data[1]), int.Parse(data[2]), data[3], bool.Parse(data[4]), bool.Parse(data[5]));
-            creatureData.talks = bool.Parse(data[6]);
-            creatureData.talkMessage = data[7];
-            creatureData.isHallucination = bool.Parse(data[8]);
+            creatureData.rename = bool.Parse(data[6]);
+            creatureData.talks = bool.Parse(data[7]);
+            creatureData.talkMessage = data[8];
+            creatureData.talkInterval = int.Parse(data[9]);
+            creatureData.isHallucination = bool.Parse(data[10]);
 
             return creatureData;
         }

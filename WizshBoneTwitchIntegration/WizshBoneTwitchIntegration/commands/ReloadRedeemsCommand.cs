@@ -20,7 +20,7 @@ namespace WizshBoneTwitchIntegration.Commands
             TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
 
 
-            if (!authComp.isLoggedIn)
+            if (!authComp.m_loggedIn)
             {
                 Jotunn.Logger.LogWarning("You are currently not logged in to Twitch!");
                 return;

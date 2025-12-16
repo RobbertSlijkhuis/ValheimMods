@@ -15,7 +15,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private List<string> m_userBlacklist = new List<string>();
         public bool m_enabled;
 
-        private float m_scanRadius = 30f;
+        private float m_scanRadius = 20f;
         private float m_scanInterval = 15f;
         private string m_chosenUser;
         private GameObject m_chosenPrefab;
@@ -82,7 +82,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         private void DetectCreaturesAndAssignUsers()
         {
-            if (!m_auth.isLoggedIn || !m_enabled)
+            if (!m_auth.m_loggedIn || !m_enabled)
                 return;
 
             Jotunn.Logger.LogWarning("DetectCreaturesAndAssignUsers()");

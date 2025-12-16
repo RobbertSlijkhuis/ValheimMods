@@ -53,7 +53,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                 TwitchAuth auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
                 string loweredKey = keyStr.ToLower();
 
-                if (!auth || !auth.isLoggedIn || (!loweredKey.Contains("defeated_") && !loweredKey.Contains("killed")))
+                if (!auth || !auth.m_loggedIn || (!loweredKey.Contains("defeated_") && !loweredKey.Contains("killed")))
                     return;
 
                 TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();

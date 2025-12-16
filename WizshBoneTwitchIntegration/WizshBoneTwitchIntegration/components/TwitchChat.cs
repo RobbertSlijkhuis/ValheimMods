@@ -46,7 +46,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
             string userName = "WizshBoneBot".ToLower();
             string password = "oauth:" + m_sOAuth;
-            m_channel = m_auth.displayName.ToLower();
+            m_channel = m_auth.m_userInfo.displayName.ToLower();
 
             tcpClient = new TcpClient("irc.chat.twitch.tv", 6667);
             reader = new StreamReader(tcpClient.GetStream());

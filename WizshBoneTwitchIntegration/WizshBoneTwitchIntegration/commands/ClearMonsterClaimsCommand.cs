@@ -22,7 +22,7 @@ namespace WizshBoneTwitchIntegration.Commands
         {
             TwitchAuth auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
 
-            if (!auth.isLoggedIn)
+            if (!auth.m_loggedIn)
             {
                 Jotunn.Logger.LogWarning("You are currently not logged in to Twitch!");
                 return;

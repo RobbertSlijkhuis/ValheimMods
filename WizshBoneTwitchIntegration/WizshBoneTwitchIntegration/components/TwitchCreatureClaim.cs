@@ -125,9 +125,12 @@ namespace WizshBoneTwitchIntegration.Components
             else
             {
                 m_npcTalk.m_aggravated = new List<string>() { creatureData.talkMessage };
-            }              
+            }
 
-            m_npcTalk.OnBecameAggravated(BaseAI.AggravatedReason.Damage);
+            if (creatureData.talkInterval >= 3f)
+                InvokeRepeating(nameof(InvokeTalkInterval), 0f, creatureData.talkInterval);
+            else
+                m_npcTalk.OnBecameAggravated(BaseAI.AggravatedReason.Damage);
         }
 
         private void CheckChatForMessage()
@@ -179,6 +182,11 @@ namespace WizshBoneTwitchIntegration.Components
 
             SetMessageAsBroadcasted(message);
             m_npcTalk.Say(message.message, "Aggravated");
+        }
+
+        private void InvokeTalkInterval()
+        {
+            m_npcTalk.OnBecameAggravated(BaseAI.AggravatedReason.Damage);
         }
 
         private void SetMessageAsBroadcasted(TwitchChatMessage message)
