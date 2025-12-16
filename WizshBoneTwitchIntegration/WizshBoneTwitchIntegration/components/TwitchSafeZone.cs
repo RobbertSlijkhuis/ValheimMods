@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using WizshBoneTwitchIntegration.TwitchIntegration;
-using YamlDotNet.Core.Tokens;
 
 namespace WizshBoneTwitchIntegration.Components
 {
@@ -51,21 +50,23 @@ namespace WizshBoneTwitchIntegration.Components
         {
             if (collider.gameObject.name != playerIdentifier)
             {
+                TwitchCreaturePersistentData persistentData = collider.gameObject.GetComponent<TwitchCreaturePersistentData>();
+
+                if (persistentData == null || persistentData.m_ignoreWard)
+                    return;
+
                 TwitchCreatureClaim creatureClaim = collider.gameObject.GetComponent<TwitchCreatureClaim>();
 
                 if (creatureClaim == null)
                     return;
 
-                Tameable tameable = collider.gameObject.GetComponent<Tameable>();
+                Humanoid humanoid = collider.gameObject.GetComponent<Humanoid>();
 
-                if (tameable != null)
-                    if (tameable.IsTamed())
-                        return;
+                if (humanoid != null && humanoid.m_tamed)
+                    return;
 
                 if (!creatureClaim.m_isSpawn)
                     return;
-
-                Humanoid humanoid = collider.gameObject.GetComponent<Humanoid>();
 
                 if (humanoid != null && !humanoid.GetSEMan().HaveStatusEffect(WizshBoneTwitchIntegration.Instance.effects.Burning.m_nameHash))
                 {

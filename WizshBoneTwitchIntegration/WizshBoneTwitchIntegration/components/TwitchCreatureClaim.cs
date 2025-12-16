@@ -8,16 +8,17 @@ namespace WizshBoneTwitchIntegration.Components
 {
     internal class TwitchCreatureClaim : MonoBehaviour
     {
-        public TwitchChatting m_chatting;
-        public TwitchChat m_chat;
-        public TwitchCreatureAssignment m_assignment;
-        public ZNetView m_netView;
-        public NpcTalk m_npcTalk;
-        public Humanoid m_humanoid;
+        private TwitchChatting m_chatting;
+        private TwitchChat m_chat;
+        private TwitchCreatureInteract m_creatureInteract;
+        private TwitchCreatureAssignment m_assignment;
+        private ZNetView m_netView;
+        private NpcTalk m_npcTalk;
+        private Humanoid m_humanoid;
 
-        public string m_originalName;
         public bool m_isSpawn = false;
-        public DateTime m_lastMessageTime;
+        private string m_originalName;
+        private DateTime m_lastMessageTime;
         private int m_unclaimTimer = 120;
         private bool m_isUnclaimDestroy = false;
 
@@ -46,7 +47,7 @@ namespace WizshBoneTwitchIntegration.Components
             m_originalName = m_humanoid.m_name;
 
             TwitchCreaturePersistentData persistentData = gameObject.GetComponent<TwitchCreaturePersistentData>();
-            persistentData.SetData(m_assignment.userName, options.creatureData);
+            persistentData.SetData(m_assignment.userName, options.creatureData, options.ignoreWard);
 
             m_chatting.AddCreatureAssignment(m_assignment);
             SetupNpcTalk(options.creatureData);
@@ -92,6 +93,9 @@ namespace WizshBoneTwitchIntegration.Components
             CancelInvoke(nameof(CheckChatForMessage));
             Destroy(m_npcTalk);
 
+            if (m_creatureInteract != null)
+                Destroy(m_creatureInteract);
+
             m_assignment.creature = null;
             m_humanoid.m_name = m_originalName;
             m_lastMessageTime = DateTime.MinValue;
@@ -118,6 +122,9 @@ namespace WizshBoneTwitchIntegration.Components
             if (creatureData == null || !creatureData.talks || creatureData.talkMessage == null)
                 return;
 
+            if (creatureData.talkInteract)
+                m_creatureInteract = gameObject.AddComponent<TwitchCreatureInteract>();
+
             if (creatureData.talkMessage.Contains(";"))
             {
                 string[] messages = creatureData.talkMessage.Split(';');
@@ -135,9 +142,9 @@ namespace WizshBoneTwitchIntegration.Components
             }
 
             if (creatureData.talkInterval >= 3f)
-                InvokeRepeating(nameof(InvokeTalkInterval), 0f, creatureData.talkInterval);
-            else
-                m_npcTalk.OnBecameAggravated(BaseAI.AggravatedReason.Damage);
+                InvokeRepeating(nameof(SayAMessage), 0f, creatureData.talkInterval);
+            else if (!creatureData.talkInteract)
+                SayAMessage();
         }
 
         private void CheckChatForMessage()
@@ -169,6 +176,12 @@ namespace WizshBoneTwitchIntegration.Components
 
             if (message.message.Equals("!heal", StringComparison.OrdinalIgnoreCase) && m_originalName.Contains("shaman"))
             {
+                if (m_humanoid == null)
+                {
+                    Jotunn.Logger.LogError("Cannot finish command !heal, humanoid is null");
+                    return;
+                }
+
                 if (m_humanoid.InAttack())
                     return;
 
@@ -191,7 +204,7 @@ namespace WizshBoneTwitchIntegration.Components
             m_npcTalk.Say(message.message, "Aggravated");
         }
 
-        private void InvokeTalkInterval()
+        public void SayAMessage()
         {
             m_npcTalk.OnBecameAggravated(BaseAI.AggravatedReason.Damage);
         }

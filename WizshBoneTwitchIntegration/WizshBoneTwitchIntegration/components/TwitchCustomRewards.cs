@@ -96,7 +96,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     return;
                 }
 
-                if (m_playerIsInSafeZone)
+                if (m_playerIsInSafeZone && !redeem.ignoreWard)
                 {
                     Jotunn.Logger.LogWarning("Player is in safe zone, canceling redeem...");
                     m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is inside a Twitch safe zone! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
@@ -148,9 +148,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                             creature.talkMessage = m_chat.GetLastMessageOfUser(currentRewardEvent.RedeemerName)?.message;
 
                         if (creature.amount > 1)
-                            RedeemHelper.SpawnCreatures(new SpawnOptions(creature, Player.m_localPlayer.transform, currentRewardEvent));
+                            RedeemHelper.SpawnCreatures(new SpawnOptions(creature, Player.m_localPlayer.transform, currentRewardEvent, redeem.ignoreWard));
                         else
-                            RedeemHelper.SpawnCreature(new SpawnOptions(creature, Player.m_localPlayer.transform, currentRewardEvent));
+                            RedeemHelper.SpawnCreature(new SpawnOptions(creature, Player.m_localPlayer.transform, currentRewardEvent, redeem.ignoreWard));
                     }
 
                     Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);

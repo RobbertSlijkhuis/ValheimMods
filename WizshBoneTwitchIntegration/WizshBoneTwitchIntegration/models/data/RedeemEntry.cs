@@ -5,26 +5,17 @@ namespace WizshBoneTwitchIntegration.Models
 {
     internal class RedeemEntry
     {
-        public string backgroundColor;
-        public int cooldown;
+        public string backgroundColor = "#a970ff";
+        public int cooldown = 0;
         public List<SpawnCreatureData> creatures;
         public string globalKey;
-        public int points;
-        public string title;
-        public string type;
-        public bool userInput;
+        public bool ignoreWard = false;
+        public int points = 0;
+        public string title = "";
+        public string type = RedeemType.Undefined;
+        public bool userInput = false;
 
-        public RedeemEntry()
-        {
-            backgroundColor = "#a970ff";
-            cooldown = 0;
-            creatures = null;
-            globalKey = null;
-            points = 0;
-            title = "";
-            type = RedeemType.Undefined;
-            userInput = false;
-        }
+        public RedeemEntry() {}
 
         public RedeemEntry(string type, string title, int points, string backgroundColor, int cooldown = 0, bool userInput = false, string globalKey = null, List<SpawnCreatureData> creatures = null)
         {

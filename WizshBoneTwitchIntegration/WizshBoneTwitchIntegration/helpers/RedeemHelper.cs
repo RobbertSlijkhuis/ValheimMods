@@ -71,6 +71,16 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
             else
             {
+                if (monsterAI == null)
+                {
+                    throw new System.Exception("No monster AI available for creature spawn!");
+                }
+
+                if (humanoid == null)
+                {
+                    throw new System.Exception("No humanoid available for creature spawn!");
+                }
+
                 monsterAI.m_huntPlayer = true;
                 monsterAI.m_enableHuntPlayer = true;
                 monsterAI.SetHuntPlayer(true);

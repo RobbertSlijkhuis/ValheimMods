@@ -53,9 +53,13 @@ namespace WizshBoneTwitchIntegration.Helpers
                             Jotunn.Logger.LogWarning(creature.amount);
                             Jotunn.Logger.LogWarning(creature.position);
                             Jotunn.Logger.LogWarning(creature.allowDrops);
-                            Jotunn.Logger.LogWarning(creature.isFriendly);
+                            Jotunn.Logger.LogWarning(creature.friendly);
+                            Jotunn.Logger.LogWarning(creature.commandable);
                             Jotunn.Logger.LogWarning(creature.talks);
+                            Jotunn.Logger.LogWarning(creature.talkInteract);
+                            Jotunn.Logger.LogWarning(creature.talkInterval);
                             Jotunn.Logger.LogWarning(creature.talkMessage);
+                            Jotunn.Logger.LogWarning(creature.isHallucination);
                         }
                     }
                 }

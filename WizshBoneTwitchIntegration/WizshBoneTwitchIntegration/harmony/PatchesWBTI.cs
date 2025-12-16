@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Harmony
@@ -65,7 +66,26 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not clear rewards on GlobalKeyAdd_Postfix: " + e);
+                Jotunn.Logger.LogError("Could not update rewards on GlobalKeyAdd_Postfix: " + e);
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Character), "GetHoverText")]
+        public static void GetHoverText_Postfix(ref Character __instance, ref string __result)
+        {
+            try
+            {
+                TwitchCreatureInteract creatureInteract = __instance.gameObject.GetComponent<TwitchCreatureInteract>();
+
+                if (creatureInteract != null)
+                {
+                    __result = creatureInteract.GetHoverText();
+                }
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in GetHoverText_Postfix: " + e);
             }
         }
     }
