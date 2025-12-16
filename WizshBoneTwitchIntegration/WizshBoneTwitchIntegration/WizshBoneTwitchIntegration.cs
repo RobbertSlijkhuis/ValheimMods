@@ -126,7 +126,7 @@ namespace WizshBoneTwitchIntegration
                 Humanoid humanoid = prefab.GetComponent<Humanoid>();
                 MonsterAI monsterAI = prefab.GetComponent<MonsterAI>();
 
-                if (humanoid != null && humanoid.m_faction != Character.Faction.Boss && monsterAI != null)
+                if (humanoid != null && monsterAI != null)
                 {
                     Jotunn.Logger.LogWarning($"Adding persistent data to {name}");
                     prefab.AddComponent<TwitchCreaturePersistentData>();

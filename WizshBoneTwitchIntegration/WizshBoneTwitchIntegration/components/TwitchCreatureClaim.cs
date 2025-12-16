@@ -102,11 +102,18 @@ namespace WizshBoneTwitchIntegration.Components
 
         private void SetupNpcTalk(SpawnCreatureData creatureData = null)
         {
-            m_npcTalk = gameObject.AddComponent<NpcTalk>();
-            m_npcTalk.m_name = m_assignment.userName;
-            m_npcTalk.m_maxRange = 30f;
-            m_npcTalk.m_offset = 1f;
-            m_npcTalk.m_hideDialogDelay = 10f;
+            NpcTalk npcTalk = gameObject.GetComponent<NpcTalk>();
+
+            if (npcTalk == null)
+            {
+                m_npcTalk = gameObject.AddComponent<NpcTalk>();
+                m_npcTalk.m_name = m_assignment.userName;
+                m_npcTalk.m_maxRange = 30f;
+                m_npcTalk.m_offset = 1f;
+                m_npcTalk.m_hideDialogDelay = 10f;
+            }
+            else
+                m_npcTalk = npcTalk;
 
             if (creatureData == null || !creatureData.talks || creatureData.talkMessage == null)
                 return;

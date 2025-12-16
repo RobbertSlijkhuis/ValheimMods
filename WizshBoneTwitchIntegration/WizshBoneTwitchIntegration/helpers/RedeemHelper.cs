@@ -17,8 +17,12 @@ namespace WizshBoneTwitchIntegration.Helpers
         public static Vector3 GenerateSpawnLocation(Transform transform, string type)
         {
             Vector3 position;
+
             switch (type)
             {
+                case nameof(SpawnPositionType.InFrontOfPlayer):
+                    position = (transform.forward * 3f) + transform.position;
+                    return position;
                 case nameof(SpawnPositionType.Flying):
                     position = (transform.forward * 10f) + (transform.up * 7f) + transform.position;
                     return position;
@@ -34,6 +38,19 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
         }
 
+        public static Quaternion GenerateSpawnRotation(Transform transform, string type)
+        {
+            switch (type)
+            {
+                case nameof(SpawnPositionType.InFrontOfPlayer):
+                case nameof(SpawnPositionType.Flying):
+                    transform.Rotate(Vector3.up, 180f);
+                    return transform.rotation;
+                default:
+                    return transform.rotation;
+            }
+        }
+
         public static void SpawnCreature(SpawnOptions options)
         {
             Transform transform = options.transform;
@@ -44,8 +61,9 @@ namespace WizshBoneTwitchIntegration.Helpers
                 Jotunn.Logger.LogError("Could not find prefab to spawn");
             }
 
-            GameObject creature = UnityEngine.Object.Instantiate(prefab, GenerateSpawnLocation(transform, options.creatureData.position), transform.rotation);
+            GameObject creature = UnityEngine.Object.Instantiate(prefab, GenerateSpawnLocation(transform, options.creatureData.position), GenerateSpawnRotation(transform, options.creatureData.position));
             Humanoid humanoid = creature.GetComponent<Humanoid>();
+            MonsterAI monsterAI = creature.GetComponent<MonsterAI>();
 
             if (!options.creatureData.isHallucination) {
                 TwitchCreatureClaim creatureClaim = creature.AddComponent<TwitchCreatureClaim>();
@@ -53,7 +71,6 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
             else
             {
-                MonsterAI monsterAI = creature.GetComponent<MonsterAI>();
                 monsterAI.m_huntPlayer = true;
                 monsterAI.m_enableHuntPlayer = true;
                 monsterAI.SetHuntPlayer(true);
@@ -93,6 +110,8 @@ namespace WizshBoneTwitchIntegration.Helpers
                 }
                 humanoid.m_randomSets = listOfItemSets.ToArray();
             }
+
+            monsterAI.LookAt(transform.position);
         }
 
         public static void SpawnCreatures(SpawnOptions options)
