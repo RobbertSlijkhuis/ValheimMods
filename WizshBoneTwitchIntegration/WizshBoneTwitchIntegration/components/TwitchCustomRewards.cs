@@ -4,6 +4,7 @@ using System.Globalization;
 using TwitchSDK;
 using TwitchSDK.Interop;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Data;
 using WizshBoneTwitchIntegration.Helpers;
@@ -172,17 +173,26 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
                 }
 
-                if (redeem.type == RedeemType.PlayerGrow)
+                if (redeem.type == RedeemType.PlayerShrink)
                 {
-                    GrowPlayer();
-                    Invoke(nameof(ResetPlayer), PluginConfig.configMiniMeDuration.Value);
+
+                    TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
+                    TwitchStatusEffect statusEffect = new TwitchStatusEffect("MiniMe", PluginConfig.configMiniMeDuration.Value);
+                    statusEffect.onStart = customStatusEffect.ShrinkPlayer;
+                    statusEffect.onEnd = customStatusEffect.ResetPlayer;
+
+                    customStatusEffect.AddStatusEffect(statusEffect);
                     Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
                 }
 
-                if (redeem.type == RedeemType.PlayerShrink)
+                if (redeem.type == RedeemType.PlayerGrow)
                 {
-                    ShrinkPlayer();
-                    Invoke(nameof(ResetPlayer), PluginConfig.configMiniMeDuration.Value);
+                    TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
+                    TwitchStatusEffect statusEffect = new TwitchStatusEffect("BigMe", PluginConfig.configMiniMeDuration.Value);
+                    statusEffect.onStart = customStatusEffect.GrowPlayer;
+                    statusEffect.onEnd = customStatusEffect.ResetPlayer;
+
+                    customStatusEffect.AddStatusEffect(statusEffect);
                     Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
                 }
 
@@ -235,26 +245,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
 
             RedeemHelper.fishList.Clear();
-        }
-
-        private void GrowPlayer()
-        {
-            Player.m_localPlayer.GetSEMan().AddStatusEffect(WizshBoneTwitchIntegration.Instance.effects.BigMe);
-            RedeemHelper.SetPlayerSpeed(1.25f);
-            StartCoroutine(LerpHelper.LerpScale(Player.m_localPlayer.transform, Player.m_localPlayer.transform.localScale, new Vector3(1.45f, 1.45f, 1.45f), 1.5f));
-        }
-
-        private void ShrinkPlayer()
-        {
-            Player.m_localPlayer.GetSEMan().AddStatusEffect(WizshBoneTwitchIntegration.Instance.effects.MiniMe);
-            RedeemHelper.SetPlayerSpeed(0.75f);
-            StartCoroutine(LerpHelper.LerpScale(Player.m_localPlayer.transform, Player.m_localPlayer.transform.localScale, new Vector3(0.45f, 0.45f, 0.45f), 1.5f));
-        }
-
-        private void ResetPlayer()
-        {
-            RedeemHelper.ResetPlayerSpeed(Player.m_localPlayer);
-            StartCoroutine(LerpHelper.LerpScale(Player.m_localPlayer.transform, Player.m_localPlayer.transform.localScale, new Vector3(1f, 1f, 1f), 1.5f));
         }
 
         public void SetRewards(List<RedeemEntry> redeems = null)

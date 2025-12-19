@@ -270,19 +270,16 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private string GetLoginStatusMessage()
         {
-            if (!auth || !auth.m_loggedIn)
-                return "Welcome! Please login into Twitch";
-
-            if (auth.m_waitingForCode)
-                return "Waiting for authorization, check your browser!";
+            if (auth.m_userInfo != null)
+                return $"Welcome {auth.m_userInfo.displayName}";
 
             if (auth.m_loggedIn && auth.m_userInfo == null)
                 return "Fetching user info...";
 
-            if (auth.m_userInfo != null)
-                return $"Welcome {auth.m_userInfo.displayName}";
+            if (auth.m_waitingForCode)
+                return "Waiting for authorization, check your browser!";
 
-            return "Something went wrong...";
+            return "Welcome! Please login into Twitch";
         }
     }
 }

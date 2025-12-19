@@ -2,6 +2,7 @@
 using System;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
+using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Harmony
@@ -19,6 +20,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                 Game.instance.gameObject.AddComponent<TwitchCustomRewards>();
                 Game.instance.gameObject.AddComponent<TwitchAuth>();
                 Game.instance.gameObject.AddComponent<TwitchChatting>();
+                Game.instance.gameObject.AddComponent<TwitchCustomStatusEffect>();
             }
             catch (Exception e)
             {
@@ -86,6 +88,60 @@ namespace WizshBoneTwitchIntegration.Harmony
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Something went wrong in GetHoverText_Postfix: " + e);
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Player), "OnSpawned")]
+        public static void OnSpawned_Postfix(ref Player __instance)
+        {
+            try
+            {
+                if (Player.m_localPlayer.GetPlayerID() != __instance.GetPlayerID())
+                {
+                    Jotunn.Logger.LogWarning($"Not local player! {Player.m_localPlayer.GetPlayerID()} - {__instance.GetPlayerID()}");
+                    return;
+                }
+
+                TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
+                customStatusEffect.ReApplyStatusEffects();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in OnSpawned_Postfix: " + e);
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(StatusEffect), "Stop")]
+        public static void Stop_Postfix(StatusEffect __instance)
+        {
+            try
+            {
+                int nameHash = __instance.NameHash();
+                TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
+                TwitchStatusEffect statusEffect = customStatusEffect.GetStatusEffects().Find(item => item.nameHash == nameHash);
+                Jotunn.Logger.LogWarning($"STOP: {nameHash} in Stop_Postfix");
+
+                if (statusEffect == null)
+                    return;
+
+                Jotunn.Logger.LogWarning($"{nameHash} is custom StatusEffect!");
+
+                if (__instance.IsDone())
+                {
+                    Jotunn.Logger.LogWarning("Is done, calling onEnd!");
+                    customStatusEffect.RemoveStatusEffect(statusEffect, false);
+                }
+                else
+                {
+                    Jotunn.Logger.LogWarning("Updating remaining time!");
+                    statusEffect.duration = __instance.GetRemaningTime();
+                }
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in Stop_Postfix: " + e);
             }
         }
     }

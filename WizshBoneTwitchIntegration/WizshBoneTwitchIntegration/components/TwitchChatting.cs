@@ -87,6 +87,11 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
             Jotunn.Logger.LogWarning("DetectCreaturesAndAssignUsers()");
             List<GameObject> creatures = new List<GameObject>();
+
+            // Player is likely dead
+            if (Player.m_localPlayer == null)
+                return;
+
             Collider[] objects = Physics.OverlapSphere(Player.m_localPlayer.transform.position, m_scanRadius);
 
             foreach (Collider obj in objects)

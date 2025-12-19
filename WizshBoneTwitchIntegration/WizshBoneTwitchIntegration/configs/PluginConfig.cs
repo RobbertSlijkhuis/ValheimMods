@@ -55,10 +55,6 @@ namespace WizshBoneTwitchIntegration.Configs
             configMiniMeDuration = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionBuffsAndDebuffs, "MiniMe duration", 180f,
                 new ConfigDescription("The duration applied to the MiniMe redeem", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
-            configMiniMeDuration.SettingChanged += (obj, attr) =>
-            {
-                WizshBoneTwitchIntegration.Instance.effects.MiniMe.m_ttl = configMiniMeDuration.Value;
-            };
 
             configRaiseRadius = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionRemoveTheCountry, "Remove The Country Rdeem: raise radius", 8f,
                 new ConfigDescription("How big the radius is of the Remove The Country Rdeem", null,

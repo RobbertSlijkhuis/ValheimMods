@@ -97,24 +97,6 @@ namespace WizshBoneTwitchIntegration
             prefabs.GuardStone.transform.Find("AreaMarker").gameObject.AddComponent<TwitchSafeZone>();
             prefabs.GuardStone.transform.Find("controls").gameObject.AddComponent<TwitchSafeZoneControls>();
             PieceManager.Instance.AddPiece(new CustomPiece(prefabs.GuardStone, true, pieceConfig));
-
-            //prefabs.NeckBeard = PrefabManager.Instance.CreateClonedPrefab("NeckBeard", "Neck");
-            //Transform beardTransform = prefabs.NeckBeard.transform.Find("Visual/Armature/Hips/Spine/Spine1/Neck/Head/Jaw/Jaw_end");
-            //Humanoid humanoid = prefabs.NeckBeard.GetComponent<Humanoid>();
-            //GameObject beardPrefab = PrefabManager.Instance.GetPrefab("Beard_06");
-            //GameObject beardCopy = Instantiate(beardPrefab, beardTransform);
-            //SkinnedMeshRenderer skinnedMeshRenderer = beardCopy.transform.Find("beard6").gameObject.GetComponent<SkinnedMeshRenderer>();
-            //skinnedMeshRenderer.materials[0].SetColor("_SkinColor", new Color(0.4392157f, 0.3803921f, 0.3647059f));
-
-            //beardCopy.transform.localPosition = new Vector3(0f, -0.0119f, -0.0594f);
-            //beardCopy.transform.localRotation = TransformHelper.GenerateRotation(new Vector3(-90, 180f, 0f));
-            //beardCopy.transform.localScale = new Vector3(0.08f, 0.0333333f, 0.08f);
-            //humanoid.m_name = "Feo, the Historian";
-
-            //Transform lillies = prefabs.NeckBeard.transform.Find("Visual/Lillies");
-            //lillies.gameObject.SetActive(false);
-
-            //PrefabManager.Instance.AddPrefab(prefabs.NeckBeard);
             PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
         }
 
@@ -144,20 +126,6 @@ namespace WizshBoneTwitchIntegration
 
         private void InitStatusEffects()
         {
-            effects.MiniMe = ScriptableObject.CreateInstance<StatusEffect>();
-            effects.MiniMe.name = "MiniMe";
-            effects.MiniMe.m_name = "MiniMe";
-            effects.MiniMe.m_icon = sprites.MiniMeSprite;
-            effects.MiniMe.m_ttl = PluginConfig.configMiniMeDuration.Value;
-            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.MiniMe, fixReference: false));
-
-            effects.BigMe = ScriptableObject.CreateInstance<StatusEffect>();
-            effects.BigMe.name = "BigMe";
-            effects.BigMe.m_name = "BigMe";
-            effects.BigMe.m_icon = sprites.BigMeSprite;
-            effects.BigMe.m_ttl = PluginConfig.configMiniMeDuration.Value;
-            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.BigMe, fixReference: false));
-
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.Burning, fixReference: true));
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.Freezing, fixReference: true));
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.Poison, fixReference: true));

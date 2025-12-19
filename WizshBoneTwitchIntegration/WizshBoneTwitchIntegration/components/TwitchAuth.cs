@@ -121,6 +121,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     {
                         Application.OpenURL($"{authInfo.Uri}");
                         m_waitingForCode = true;
+                        loginGUI.UpdateGUI();
                     }
 
                     return;
