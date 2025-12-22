@@ -1,10 +1,13 @@
-﻿namespace WizshBoneTwitchIntegration.Models
+﻿using System.Collections.Generic;
+
+namespace WizshBoneTwitchIntegration.Models
 {
     internal class TwitchStatusEffect
     {
         public float duration;
         public string name;
         public int nameHash;
+        public List<string> blockedByStatusEffects = new List<string>();
 
         public delegate void onEndDelegate();
         public delegate void onStartDelegate(TwitchStatusEffect statusEffect);

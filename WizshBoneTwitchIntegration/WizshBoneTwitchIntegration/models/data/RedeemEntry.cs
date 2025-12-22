@@ -7,15 +7,17 @@ namespace WizshBoneTwitchIntegration.Models
     {
         public string backgroundColor = "#a970ff";
         public int cooldown = 0;
-        public List<SpawnCreatureData> creatures;
+        public ChestData chest = new ChestData();
+        public List<SpawnCreatureData> creatures = new List<SpawnCreatureData>();
         public string globalKey;
         public bool ignoreWard = false;
         public int points = 0;
+        public List<string> statusEffects = new List<string>();
         public string title = "";
         public string type = RedeemType.Undefined;
         public bool userInput = false;
 
-        public RedeemEntry() {}
+        public RedeemEntry() { }
 
         public RedeemEntry(string type, string title, int points, string backgroundColor, int cooldown = 0, bool userInput = false, string globalKey = null, List<SpawnCreatureData> creatures = null)
         {

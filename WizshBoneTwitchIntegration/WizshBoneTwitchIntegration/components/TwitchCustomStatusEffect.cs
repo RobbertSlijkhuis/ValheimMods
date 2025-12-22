@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
@@ -23,20 +24,39 @@ namespace WizshBoneTwitchIntegration.Components
         /// Adds a custom status effect that either executes custom code on start/end and/or persists through death
         /// </summary>
         /// <param name="entry"></param>
-        public void AddStatusEffect(TwitchStatusEffect entry)
+        /// <returns></returns>
+        public bool AddStatusEffect(TwitchStatusEffect entry)
         {
-            if (m_statusEffects.Find(item => item.nameHash == entry.nameHash) != null)
+            try
             {
-                Jotunn.Logger.LogWarning($"StatusEffect {entry.nameHash} already exists!");
-                return;
+                if (m_statusEffects.Find(item => item.nameHash == entry.nameHash) != null)
+                {
+                    Jotunn.Logger.LogWarning($"StatusEffect {entry.name} is already active!");
+                    return false;
+                }
+
+                TwitchStatusEffect blockedBy = m_statusEffects.Find(item => entry.blockedByStatusEffects.Contains(item.name));
+
+                if (blockedBy != null)
+                {
+                    Jotunn.Logger.LogWarning($"StatusEffect {entry.name} is blocked by {blockedBy.name}");
+                    return false;
+                }
+
+                m_statusEffects.Add(entry);
+
+                if (entry.onStart == null)
+                    Player.m_localPlayer.GetSEMan().AddStatusEffect(entry.nameHash);
+                else
+                    entry.onStart(entry);
+
+                return true;
             }
-
-            m_statusEffects.Add(entry);
-
-            if (entry.onStart == null)
-                Player.m_localPlayer.GetSEMan().AddStatusEffect(entry.nameHash);
-            else
-                entry.onStart(entry);
+            catch(Exception e)
+            {
+                Jotunn.Logger.LogWarning("Somethign went wrong while adding the StatusEffect: "+ e);
+                return false;
+            }
         }
 
         /// <summary>
@@ -44,19 +64,30 @@ namespace WizshBoneTwitchIntegration.Components
         /// </summary>
         /// <param name="entry"></param>
         /// <param name="removeFromPlayer"></param>
-        public void RemoveStatusEffect(TwitchStatusEffect entry, bool removeFromPlayer = true)
+        /// <returns></returns>
+        public bool RemoveStatusEffect(TwitchStatusEffect entry, bool removeFromPlayer = true)
         {
-            if (m_statusEffects.Find(item => item.nameHash == entry.nameHash) == null)
-            {
-                Jotunn.Logger.LogWarning($"Could not find StatusEffect {entry.nameHash}!");
-                return;
+            try
+            { 
+                if (m_statusEffects.Find(item => item.nameHash == entry.nameHash) == null)
+                {
+                    Jotunn.Logger.LogWarning($"Could not find StatusEffect with name {entry.name}!");
+                    return false;
+                }
+
+                entry.onEnd?.Invoke();
+                m_statusEffects.Remove(entry);
+
+                if (removeFromPlayer)
+                    Player.m_localPlayer.GetSEMan().RemoveStatusEffect(entry.nameHash);
+
+                return true;
             }
-
-            entry.onEnd?.Invoke();
-            m_statusEffects.Remove(entry);
-
-            if (removeFromPlayer)
-                Player.m_localPlayer.GetSEMan().RemoveStatusEffect(entry.nameHash);
+            catch(Exception e)
+            {
+                Jotunn.Logger.LogWarning("Somethign went wrong while removing the StatusEffect: " + e);
+                return false;
+            }
         }
 
         /// <summary>

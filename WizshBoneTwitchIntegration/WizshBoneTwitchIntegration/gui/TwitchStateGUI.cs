@@ -42,7 +42,6 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMax: new Vector2(0.5f, 0.5f),
                 position: new Vector2(0, 0),
                 width: 480,
-                //height: 380,
                 height: 450,
                 draggable: false
             );
@@ -277,7 +276,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 return "Fetching user info...";
 
             if (auth.m_waitingForCode)
-                return "Waiting for authorization, check your browser!";
+                return "Waiting for authorization,\ncheck your browser!";
 
             return "Welcome! Please login into Twitch";
         }

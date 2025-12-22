@@ -9,5 +9,8 @@ namespace WizshBoneTwitchIntegration.Models
         public GameObject GuardStone;
         public GameObject RemoveTheCountry;
         public GameObject NeckBeard;
+
+        public GameObject ChestIron;
+        public GameObject ChestGold;
     }
 }

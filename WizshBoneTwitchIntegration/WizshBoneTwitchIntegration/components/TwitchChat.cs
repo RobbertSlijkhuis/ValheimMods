@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Sockets;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Models;
+using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.TwitchIntegration
 {
@@ -102,9 +103,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             return m_chatHistory.FindLast(item => item.userName == userName.ToLower());
         }
 
-        public void Send(string message)
+        public void Send(string message, string announce = "")
         {
-            writer.WriteLine($"PRIVMSG #{m_channel} :WTBI: {message}");
+            writer.WriteLine($"PRIVMSG #{m_channel} :{announce} WTBI: {message}");
             writer.Flush();
         }
 

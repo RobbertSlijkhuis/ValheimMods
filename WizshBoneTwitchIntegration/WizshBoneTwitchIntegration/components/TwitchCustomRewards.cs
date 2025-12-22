@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using TwitchSDK;
@@ -77,12 +78,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (currentRewardEvent == null)
                     return;
 
-                //Jotunn.Logger.LogWarning(currentRewardEvent.RedeemerName);
-                //Jotunn.Logger.LogWarning(currentRewardEvent.RedeemedAt);
-                //Jotunn.Logger.LogWarning(currentRewardEvent.CustomRewardTitle);
-                //Jotunn.Logger.LogWarning(currentRewardEvent.CustomRewardCost);
-                //Jotunn.Logger.LogWarning(currentRewardEvent.Status.ToString());
-
                 if (currentRewardEvent == null || currentRewardEvent.Status == CustomRewardRedemptionState.Fulfilled || currentRewardEvent.Status == CustomRewardRedemptionState.Canceled)
                     return;
 
@@ -93,7 +88,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 RedeemEntry redeem = m_redeems.list.Find(item => item.title == currentRewardEvent.CustomRewardTitle);
                 if (redeem == null)
                 {
-                    Jotunn.Logger.LogError($"Could not find redeem: {currentRewardEvent.CustomRewardTitle}");
+                    Jotunn.Logger.LogError($"Could not find redeem! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
+                    Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Canceled);
                     return;
                 }
 
@@ -108,20 +104,26 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (Player.m_localPlayer.transform.localPosition.y >= 4000)
                 {
                     bool cancelRedeem = false;
-                    List<string> notAllowedList = new List<string>();
-                    notAllowedList.Add("troll");
-                    notAllowedList.Add("abomination");
-                    notAllowedList.Add("bat");
-                    notAllowedList.Add("hatchling");
-                    notAllowedList.Add("golem");
-                    notAllowedList.Add("lox");
-                    notAllowedList.Add("deathsquito");
 
                     if (redeem.type == RedeemType.TerrainRemove || redeem.type == RedeemType.SpawnHallucination || redeem.type == RedeemType.SpawnShower)
                         cancelRedeem = true;
 
                     if (redeem.creatures != null)
                     {
+                        List<string> notAllowedList = new List<string>();
+                        notAllowedList.Add("abomination");
+                        notAllowedList.Add("bat");
+                        notAllowedList.Add("bjorn");
+                        notAllowedList.Add("deathsquito");
+                        notAllowedList.Add("gjall");
+                        notAllowedList.Add("goblinbrute");
+                        notAllowedList.Add("golem");
+                        notAllowedList.Add("hatchling");
+                        notAllowedList.Add("lox");
+                        notAllowedList.Add("seekerbrute");
+                        notAllowedList.Add("troll");
+                        notAllowedList.Add("unbjorn");
+
                         foreach (SpawnCreatureData creature in redeem.creatures)
                         {
                             if (notAllowedList.Contains(creature.prefabName.ToLower()))
@@ -155,84 +157,151 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     }
 
                     Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
+                    return;
                 }
 
                 if (redeem.type == RedeemType.SpawnHallucination)
                 {
                     RedeemHelper.hallucinationCount = 0;
                     InvokeRepeating(nameof(StartHallucinations), 0f, 20f);
+                    return;
                 }
 
                 if (redeem.type == RedeemType.SpawnShower)
                 {
-                    GameObject shower = UnityEngine.Object.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.FishRainScript, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
+                    GameObject shower = Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.FishRainScript, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
                     SpawnAbility spawnComp = shower.GetComponent<SpawnAbility>();
                     spawnComp.m_owner = Player.m_localPlayer;
                     shower.transform.SetParent(Player.m_localPlayer.transform);
                     shower.SetActive(true);
                     Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
+                    return;
                 }
 
                 if (redeem.type == RedeemType.PlayerShrink)
                 {
-
                     TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
                     TwitchStatusEffect statusEffect = new TwitchStatusEffect("MiniMe", PluginConfig.configMiniMeDuration.Value);
+                    statusEffect.blockedByStatusEffects.Add("BigMe");
                     statusEffect.onStart = customStatusEffect.ShrinkPlayer;
                     statusEffect.onEnd = customStatusEffect.ResetPlayer;
+                    bool success = customStatusEffect.AddStatusEffect(statusEffect);
 
-                    customStatusEffect.AddStatusEffect(statusEffect);
-                    Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
+                    if (success)
+                        Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
+                    else
+                    {
+                        m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer already has the selected StatusEffect or it is blocked by a different one! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
+                        Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Canceled);
+                    }
+                    return;
                 }
 
                 if (redeem.type == RedeemType.PlayerGrow)
                 {
                     TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
                     TwitchStatusEffect statusEffect = new TwitchStatusEffect("BigMe", PluginConfig.configMiniMeDuration.Value);
+                    statusEffect.blockedByStatusEffects.Add("MiniMe");
                     statusEffect.onStart = customStatusEffect.GrowPlayer;
                     statusEffect.onEnd = customStatusEffect.ResetPlayer;
+                    bool success = customStatusEffect.AddStatusEffect(statusEffect);
 
-                    customStatusEffect.AddStatusEffect(statusEffect);
+                    if (success)
+                        Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
+                    else
+                    {
+                        m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer already has the selected StatusEffect or it is blocked by a different one! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
+                        Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Canceled);
+                    }
+                    return;
+                }
+
+                if (redeem.type == RedeemType.StatusEffect)
+                {
+                    Jotunn.Logger.LogWarning("STATUS EFFECT");
+                    if (redeem.statusEffects == null || redeem.statusEffects.Count == 0)
+                    {
+                        Jotunn.Logger.LogWarning("Could not find a status effect to apply, canceling redeem!");
+                        Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Canceled);
+                        return;
+                    }
+
+                    foreach (string statusEffect in redeem.statusEffects)
+                    {
+                        Jotunn.Logger.LogWarning("name: " + statusEffect);
+                        int hash = StatusEffectType.GetByString(statusEffect);
+                        Jotunn.Logger.LogWarning("Hash: " + hash);
+
+                        if (hash == -1)
+                        {
+                            Jotunn.Logger.LogWarning("Not a valid status effect to apply, skipping...");
+                            continue;
+                        }
+
+                        Player.m_localPlayer.GetSEMan().AddStatusEffect(hash);
+                    }
+
                     Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
+                    return;
                 }
 
                 if (redeem.type == RedeemType.StatusEffectRandom)
                 {
-                    int hash = RedeemHelper.GetRandomStatusEffect();
+                    int hash = StatusEffectHelper.GetRandomStatusEffect();
                     Player.m_localPlayer.GetSEMan().AddStatusEffect(hash);
                     Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
+                    return;
+                }
+
+                if (redeem.type == RedeemType.SurpriseChest)
+                {
+                    if (redeem.chest == null)
+                    {
+                        Jotunn.Logger.LogWarning("Could not find a chest options to apply, canceling redeem!");
+                        Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Canceled);
+                        return;
+                    }
+
+                    GameObject chestPrefab = WizshBoneTwitchIntegration.Instance.prefabs.ChestIron;
+
+                    if (redeem.chest.type == ChestType.Gold)
+                        chestPrefab = WizshBoneTwitchIntegration.Instance.prefabs.ChestGold;
+
+                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Surprise Chest inbound!");
+                    StartCoroutine(InitSurpriseChestWithDelay(chestPrefab, redeem.chest));
+                    Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
+                    return;
                 }
 
                 if (redeem.type == RedeemType.TerrainRemove)
                 {
                     Player.m_localPlayer.GetSEMan().AddStatusEffect(WizshBoneTwitchIntegration.Instance.effects.NoFallDamage);
-                    GameObject dig = UnityEngine.Object.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.RemoveTheCountry, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
+                    GameObject dig = Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.RemoveTheCountry, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
                     Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
+                    return;
                 }
 
                 if (redeem.type == RedeemType.ExplodeFish)
                 {
                     RedeemHelper.DetonateFish();
                     Invoke(nameof(DestroyFish), 0.5f);
+                    Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
+                    return;
                 }
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Something went wrong while handling a redeem: " + e);
+                Jotunn.Logger.LogError("Something went wrong while handling the redeem, refunding... and the error: " + e);
+                Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Canceled);
             }
         }
 
         private void StartHallucinations()
         {
             if (RedeemHelper.hallucinationCount > 6)
-                StopHallucinations();
+                CancelInvoke(nameof(StartHallucinations));
             else
                 RedeemHelper.SpawnHallucination();
-        }
-
-        private void StopHallucinations()
-        {
-            CancelInvoke(nameof(StartHallucinations));
         }
 
         private void DestroyFish()
@@ -241,10 +310,18 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             {
                 ZNetView netView = fish.GetComponent<ZNetView>();
                 netView.Destroy();
-                GameObject.Destroy(fish);
+                Destroy(fish);
             }
 
             RedeemHelper.fishList.Clear();
+        }
+
+        public IEnumerator InitSurpriseChestWithDelay(GameObject prefab, ChestData chestData)
+        {
+            yield return new WaitForSeconds(3f);
+
+            RedeemHelper.SpawnSupriseChest(prefab, chestData);
+
         }
 
         public void SetRewards(List<RedeemEntry> redeems = null)

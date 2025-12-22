@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 3802426255
+CRC: 764633372
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 82879727bebe8b91d9f474c7591a8589
+    Hash: 7bba195e65437f06ec1d3c27c38425f4
   TypeTreeHash:
     serializedVersion: 2
-    Hash: b937b5ae11ad60e239d3e01fcaa5c03c
+    Hash: ca1b096db4b1855a6e90715546ec1e1f
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 82879727bebe8b91d9f474c7591a8589
+    Hash: 7bba195e65437f06ec1d3c27c38425f4
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -54,6 +54,8 @@ ClassTypes:
   Script: {fileID: 1137906148, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: -1383431051, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: -959589234, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: -870746866, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -110,6 +112,7 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: TerrainOp/Settings
 Assets:
+- Assets/Custom/PrefabInstance/ChestIron_WBTI.prefab
 - Assets/Custom/PrefabInstance/spawn_fish_WBTI.prefab
 - Assets/Custom/Monobehaviour/NoFallDamage_WBTI.asset
 - Assets/Custom/Monobehaviour/Freezing_WBTI.asset
@@ -119,5 +122,6 @@ Assets:
 - Assets/Custom/Monobehaviour/Poison_WBTI.asset
 - Assets/Custom/Sprite/MiniMeSprite_WBTI.png
 - Assets/Custom/Sprite/BigMeSprite_WBTI.png
+- Assets/Custom/PrefabInstance/ChestGold_WBTI.prefab
 - Assets/Custom/PrefabInstance/WBTI_guard_stone.prefab
 Dependencies: []

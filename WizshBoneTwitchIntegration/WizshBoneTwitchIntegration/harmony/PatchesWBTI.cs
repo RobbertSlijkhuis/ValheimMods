@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using System;
-using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
@@ -83,6 +82,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                 if (creatureInteract != null)
                 {
                     __result = creatureInteract.GetHoverText();
+                    return;
                 }
             }
             catch (Exception e)

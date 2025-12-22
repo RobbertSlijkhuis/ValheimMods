@@ -14,7 +14,7 @@ namespace WizshBoneTwitchIntegration.Helpers
         public static List<GameObject> fishList = new List<GameObject>();
         public static int hallucinationCount = 0;
 
-        public static Vector3 GenerateSpawnLocation(Transform transform, string type)
+        public static Vector3 UpdateSpawnLocation(Transform transform, string type)
         {
             Vector3 position;
 
@@ -22,6 +22,9 @@ namespace WizshBoneTwitchIntegration.Helpers
             {
                 case nameof(SpawnPositionType.InFrontOfPlayer):
                     position = (transform.forward * 3f) + transform.position;
+                    return position;
+                case nameof(SpawnPositionType.InFrontOfPlayerHigh):
+                    position = (transform.forward * 3f) + (transform.up * 3f) + transform.position;
                     return position;
                 case nameof(SpawnPositionType.Flying):
                     position = (transform.forward * 10f) + (transform.up * 7f) + transform.position;
@@ -38,11 +41,12 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
         }
 
-        public static Quaternion GenerateSpawnRotation(Transform transform, string type)
+        public static Quaternion UpdateSpawnRotation(Transform transform, string type)
         {
             switch (type)
             {
                 case nameof(SpawnPositionType.InFrontOfPlayer):
+                case nameof(SpawnPositionType.InFrontOfPlayerHigh):
                 case nameof(SpawnPositionType.Flying):
                     transform.Rotate(Vector3.up, 180f);
                     return transform.rotation;
@@ -53,7 +57,6 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static void SpawnCreature(SpawnOptions options)
         {
-            Transform transform = options.transform;
             GameObject prefab = PrefabManager.Instance.GetPrefab(options.creatureData.prefabName);
 
             if (prefab == null)
@@ -61,67 +64,42 @@ namespace WizshBoneTwitchIntegration.Helpers
                 Jotunn.Logger.LogError("Could not find prefab to spawn");
             }
 
-            GameObject creature = UnityEngine.Object.Instantiate(prefab, GenerateSpawnLocation(transform, options.creatureData.position), GenerateSpawnRotation(transform, options.creatureData.position));
-            Humanoid humanoid = creature.GetComponent<Humanoid>();
+            GameObject creature = UnityEngine.Object.Instantiate(prefab, options.transform.position, options.transform.rotation);
+            creature.transform.localPosition = UpdateSpawnLocation(creature.transform, options.creatureData.position);
+            creature.transform.localRotation = UpdateSpawnRotation(creature.transform, options.creatureData.position);
+
             MonsterAI monsterAI = creature.GetComponent<MonsterAI>();
 
-            if (!options.creatureData.isHallucination) {
+            if (monsterAI == null)
+            {
+                throw new System.Exception("No monster AI available for creature spawn!");
+            }
+
+            if (!options.creatureData.isHallucination)
+            {
                 TwitchCreatureClaim creatureClaim = creature.AddComponent<TwitchCreatureClaim>();
                 creatureClaim.Init(options);
             }
-            else
-            {
-                if (monsterAI == null)
-                {
-                    throw new System.Exception("No monster AI available for creature spawn!");
-                }
+            else 
+            { 
+                Humanoid humanoid = creature.GetComponent<Humanoid>();
 
                 if (humanoid == null)
                 {
                     throw new System.Exception("No humanoid available for creature spawn!");
                 }
 
+                TwitchCreaturePersistentData persistentData = creature.GetComponent<TwitchCreaturePersistentData>();
+                persistentData.SetData(humanoid.m_name, options.creatureData, options.ignoreWard);
+
                 monsterAI.m_huntPlayer = true;
                 monsterAI.m_enableHuntPlayer = true;
                 monsterAI.SetHuntPlayer(true);
                 humanoid.SetHealth(10f);
                 humanoid.SetMaxHealth(10f);
-
-                List<GameObject> defaultItemsList = new List<GameObject>();
-                foreach (GameObject item in humanoid.m_defaultItems)
-                {
-                    GameObject attack = UnityEngine.Object.Instantiate(item);
-                    DeepSearchForAttacks(attack);
-                    defaultItemsList.Add(attack);
-                }
-                humanoid.m_defaultItems = defaultItemsList.ToArray();
-
-                List<GameObject> randomWeaponList = new List<GameObject>();
-                foreach (GameObject item in humanoid.m_randomWeapon)
-                {
-                    GameObject attack = UnityEngine.Object.Instantiate(item);
-                    DeepSearchForAttacks(attack);
-                    randomWeaponList.Add(attack);
-                }
-                humanoid.m_randomWeapon = randomWeaponList.ToArray();
-
-                List<Humanoid.ItemSet> listOfItemSets = new List<Humanoid.ItemSet>();
-                foreach (Humanoid.ItemSet itemSet in humanoid.m_randomSets)
-                {
-                    List<GameObject> itemSetList = new List<GameObject>();
-                    foreach (GameObject item in itemSet.m_items)
-                    {
-                        GameObject attack = UnityEngine.Object.Instantiate(item);
-                        DeepSearchForAttacks(attack);
-                        itemSetList.Add(attack);
-                    }
-                    itemSet.m_items = itemSetList.ToArray();
-                    listOfItemSets.Add(itemSet);
-                }
-                humanoid.m_randomSets = listOfItemSets.ToArray();
             }
 
-            monsterAI.LookAt(transform.position);
+            monsterAI.LookAt(options.transform.position);
         }
 
         public static void SpawnCreatures(SpawnOptions options)
@@ -190,23 +168,20 @@ namespace WizshBoneTwitchIntegration.Helpers
                         monsterList.Add("Fenring");
                     break;
                 case Heightmap.Biome.Plains:
-                    // monsterList.Add("Deathsquito");
+                    monsterList.Add("Deathsquito");
 
                     if (isNight)
                         monsterList.Add("Unbjorn");
 
                     monsterList.Add("Goblin");
                     monsterList.Add("Lox");
-                    // monsterList.Add("Deathsquito");
+                    monsterList.Add("Deathsquito");
 
                     if (isNight)
                         monsterList.Add("Unbjorn");
-
-                    monsterList.Add("GoblinBrute");
                     break;
                 case Heightmap.Biome.Mistlands:
                     monsterList.Add("Seeker");
-                    monsterList.Add("Tick");
                     monsterList.Add("SeekerBrute");
                     monsterList.Add("Gjall");
                     break;
@@ -229,7 +204,19 @@ namespace WizshBoneTwitchIntegration.Helpers
             SpawnCreatureData creature = new SpawnCreatureData(monster);
             creature.isHallucination = true;
             creature.position = SpawnPositionType.RandomBehind;
+            creature.rename = false;
             SpawnCreature(new SpawnOptions(creature, Player.m_localPlayer.transform, customReward));
+        }
+
+        public static void SpawnSupriseChest(GameObject prefab, ChestData chestData)
+        {
+            Transform transform = Player.m_localPlayer.transform;
+            GameObject chest = UnityEngine.Object.Instantiate(prefab, transform.position, transform.rotation);
+            chest.transform.localPosition = UpdateSpawnLocation(chest.transform, SpawnPositionType.InFrontOfPlayerHigh);
+            chest.transform.localRotation = UpdateSpawnRotation(chest.transform, SpawnPositionType.InFrontOfPlayerHigh);
+
+            TwitchSurpriseChest surpriseChest = chest.GetComponent<TwitchSurpriseChest>();
+            surpriseChest.Init(chestData);
         }
 
         public static void DetonateFish()
@@ -252,32 +239,6 @@ namespace WizshBoneTwitchIntegration.Helpers
             {
                 UnityEngine.Object.Instantiate(explosion, fish.transform);
             }
-        }
-
-        public static int GetRandomStatusEffect()
-        {
-            List<int> hashList = new List<int>();
-            hashList.Add(1458612846); // BarleyWine
-            hashList.Add(WizshBoneTwitchIntegration.Instance.effects.Burning.NameHash()); // Burning
-            hashList.Add(-1768438774); // FrostResist
-            hashList.Add(WizshBoneTwitchIntegration.Instance.effects.Freezing.NameHash()); // Freezing
-            hashList.Add(-568360536); // PoisonResist
-            hashList.Add(WizshBoneTwitchIntegration.Instance.effects.Poison.NameHash()); // Poison
-            hashList.Add(-404287610); // Ratatosk
-            hashList.Add(-629027225); // Puke
-            hashList.Add(-1325774533); // Bzerker
-            hashList.Add(-1273337594); // Wet
-            hashList.Add(2062111878); // Lightfoot
-            hashList.Add(-1779147092); // Tared
-            // hashList.Add(-291236605); // Tasty
-            hashList.Add(-2079273775); // Rested
-            hashList.Add(-1779147092); // Tared
-
-            int index = Random.Range(0, hashList.Count);
-            int hash = hashList[index];
-            Jotunn.Logger.LogWarning("Random: " + index);
-            Jotunn.Logger.LogWarning("Hash: " + hash);
-            return hash;
         }
 
         public static void SetPlayerSpeed(float multiplier)

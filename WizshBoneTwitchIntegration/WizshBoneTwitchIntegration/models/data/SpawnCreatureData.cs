@@ -18,7 +18,7 @@ namespace WizshBoneTwitchIntegration.Models
         public string talkMessage;
         public bool talks = false;
 
-        public SpawnCreatureData() {}
+        public SpawnCreatureData() { }
 
         public SpawnCreatureData(string prefabName, int level = 1, int amount = 1, string position = nameof(SpawnPositionType.OnPlayer), bool allowDrops = false, bool friendly = false, bool commandable = false)
         {
