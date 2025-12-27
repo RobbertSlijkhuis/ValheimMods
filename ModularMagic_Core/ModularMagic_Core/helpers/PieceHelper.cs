@@ -10,7 +10,7 @@ namespace ModularMagic_Core.Helpers
 {
     internal class PieceHelper
     {
-        public static void Create(GameObject prefab, BuildPieceConfig config, bool isWeatherZone = false)
+        public static void Create(GameObject prefab, BuildPieceConfig config, bool renderIcon = false)
         {
             try
             {
@@ -22,6 +22,17 @@ namespace ModularMagic_Core.Helpers
                 pieceConfig.PieceTable = PieceTables.Hammer;
                 pieceConfig.Category = PieceCategories.Furniture;
                 pieceConfig.AddRequirement("Stone", 20);
+                pieceConfig.AddRequirement("MMC_EitrCrude", 12);
+                pieceConfig.AddRequirement("Copper", 8);
+                pieceConfig.AddRequirement("Tin", 2);
+
+                if (renderIcon)
+                {
+                    RenderManager.RenderRequest request = new RenderManager.RenderRequest(prefab);
+                    request.Rotation = RenderManager.IsometricRotation;
+                    // request.UseCache = true;
+                    pieceConfig.Icon = RenderManager.Instance.Render(request);
+                }
 
                 //RequirementConfig[] requirements = RecipeHelper.GetAsRequirementConfigArray(config.recipe.Value, null, null);
 

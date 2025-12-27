@@ -22,7 +22,7 @@ namespace ModularMagic_Core.Components
         private IEnumerator m_spellbookStop;
         private IEnumerator m_spellbookIdle;
 
-        private void Awake()
+        public void Awake()
         {
             m_imbuementTable = transform.parent.parent.gameObject.GetComponent<ImbuementTable>();
             m_imbuementTable.m_onItemAttach.AddListener(EmissionStart);

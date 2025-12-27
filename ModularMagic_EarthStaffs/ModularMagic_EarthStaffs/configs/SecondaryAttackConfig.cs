@@ -7,7 +7,6 @@ namespace ModularMagic_EarthStaffs.Configs
 {
     internal class SecondaryAttackConfig
     {
-        // The  fields to generate
         public ConfigEntry<float> health;
         public ConfigEntry<int> minToSpawn;
         public ConfigEntry<int> maxToSpawn;
@@ -26,7 +25,6 @@ namespace ModularMagic_EarthStaffs.Configs
         public ConfigEntry<float> projectileVelocity;
         public ConfigEntry<float> projectileAccuracy;
 
-        // Other
         public string cooldownStatusEffectName;
         public string type;
         private int entryCount = 100;
@@ -38,8 +36,12 @@ namespace ModularMagic_EarthStaffs.Configs
             this.type = options.type;
 
             string entityDesc = "projectile / summoned creatures(s)";
-            if (options.type == SecondaryAttackType.Projectile) entityDesc = "projectile";
-            if (options.type == SecondaryAttackType.Humanoid) entityDesc = "summoned creatures(s)";
+
+            if (options.type == SecondaryAttackType.Projectile)
+                entityDesc = "projectile";
+
+            if (options.type == SecondaryAttackType.Humanoid)
+                entityDesc = "summoned creatures(s)";
 
             useEitr = Config.Bind(new ConfigDefinition(options.sectionName, "Secondary attack eitr cost"), options.useEitr,
                 new ConfigDescription("The secondary attack eitr cost", null,

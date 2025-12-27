@@ -1,8 +1,6 @@
 ﻿using HarmonyLib;
 using ModularMagic_Core.Components;
-using ModularMagic_Core.Helpers;
 using System;
-using UnityEngine;
 using static ItemDrop;
 
 namespace ModularMagic_Core.Harmony
@@ -19,23 +17,17 @@ namespace ModularMagic_Core.Harmony
                 if (__instance == null || __instance.m_currentItemName != "" || item == null)
                     return;
 
-                string imbuementsStringEarth = item.m_customData.GetValueSafe(ModularMagic_Core.imbuementMMESDataKey);
+                string imbuementsString = item.m_customData.GetValueSafe(ModularMagic_Core.imbuementDataKey);
 
-                if (imbuementsStringEarth == null)
+                if (imbuementsString == null)
                     return;
 
-                ImbuementTable comp = __instance.transform.parent.gameObject.GetComponent<ImbuementTable>();
-                comp.StaffAttach(imbuementsStringEarth, item);
+                ImbuementTable imbuementTable = __instance.transform.parent.gameObject.GetComponent<ImbuementTable>();
 
-                //var skills = Player.m_localPlayer.GetSkills();
-                //var skillList = skills.GetSkillList();
+                if (imbuementTable == null)
+                    return;
 
-                //foreach (Skills.Skill skill in skillList)
-                //{
-                //    Jotunn.Logger.LogWarning(skill.m_info.m_skill);
-                //    Jotunn.Logger.LogWarning(skill.m_level);
-                //    Jotunn.Logger.LogWarning(skill.m_accumulator);
-                //}
+                imbuementTable.StaffAttach(imbuementsString, item);
             }
             catch (Exception e)
             {
@@ -52,12 +44,12 @@ namespace ModularMagic_Core.Harmony
                 if (!hold || __instance == null)
                     return;
 
-                ImbuementTable comp = __instance.transform.parent.gameObject.GetComponent<ImbuementTable>();
+                ImbuementTable imbuementTable = __instance.transform.parent.gameObject.GetComponent<ImbuementTable>();
 
-                if (comp == null)
+                if (imbuementTable == null)
                     return;
 
-                comp.StaffRemove();
+                imbuementTable.StaffRemove();
 
             }
             catch (Exception e)

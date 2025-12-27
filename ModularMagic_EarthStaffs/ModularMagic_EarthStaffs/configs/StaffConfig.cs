@@ -1,4 +1,5 @@
 ﻿using BepInEx.Configuration;
+using ModularMagic_Core.Types;
 using ModularMagic_EarthStaffs.Helpers;
 using ModularMagic_EarthStaffs.Models;
 using ModularMagic_EarthStaffs.Types;
@@ -7,10 +8,10 @@ namespace ModularMagic_EarthStaffs.Configs
 {
     internal class StaffConfig
     {
-        // General options
-        public static string[] craftingStationOptions = new string[] { "None", "Disabled", "Workbench", "Forge", "Stonecutter", "Cauldron", "ArtisanTable", "BlackForge", "GaldrTable" };
+        public static string[] craftingStationOptions = new string[] {
+            CraftingStationType.None, CraftingStationType.Disabled, CraftingStationType.Workbench, CraftingStationType.Forge, CraftingStationType.Stonecutter,
+            CraftingStationType.Cauldron, CraftingStationType.ArtisanTable, CraftingStationType.BlackForge, CraftingStationType.GaldrTable };
 
-        // The  fields to generate
         public ConfigEntry<bool> enable;
         public ConfigEntry<string> name;
         public ConfigEntry<string> description;
@@ -35,13 +36,11 @@ namespace ModularMagic_EarthStaffs.Configs
         public ConfigEntry<float> projectileBurst;
         public ConfigEntry<float> weight;
         public ConfigEntry<float> maxDurability;
-        public ConfigEntry<int> maxQuality;
         public ConfigEntry<float> movementSpeed;
         public ConfigEntry<int> blockArmor;
         public ConfigEntry<int> deflectionForce;
         public ConfigEntry<int> attackForce;
 
-        // Other
         private int entryCount = 100;
 
         public void GenerateConfig(StaffConfigOptions options)
@@ -340,17 +339,6 @@ namespace ModularMagic_EarthStaffs.Configs
                 UpdateHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
                 {
                     maxDurability = maxDurability.Value,
-                });
-            };
-
-            maxQuality = Config.Bind(new ConfigDefinition(options.sectionName, "Max quality"), (int)options.maxQuality,
-                    new ConfigDescription("The maximum quality the item can become", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
-            maxQuality.SettingChanged += (obj, attr) =>
-            {
-                UpdateHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
-                {
-                    maxQuality = maxQuality.Value,
                 });
             };
 

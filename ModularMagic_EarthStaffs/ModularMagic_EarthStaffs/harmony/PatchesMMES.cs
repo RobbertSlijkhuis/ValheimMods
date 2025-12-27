@@ -10,33 +10,6 @@ namespace ModularMagic_EarthStaffs.Harmony
     [HarmonyPatch]
     public class PatchesMMES
     {
-        [HarmonyPatch(typeof(Player), "RaiseSkill")]
-        [HarmonyPrefix]
-        public static void RaiseSkill_Postfix(Player __instance, Skills.SkillType skill, float value = 1f)
-        {
-            try
-            {
-                if (__instance == null || skill != Skills.SkillType.ElementalMagic)
-                    return;
-
-                ItemData itemData = __instance.GetCurrentWeapon();
-
-                if (itemData == null || (
-                    itemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth0.name && 
-                    itemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth1.name && 
-                    itemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth2.name &&
-                    itemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth3.name
-                ))
-                    return;
-
-                __instance.RaiseSkill(ModularMagic_EarthStaffs.customSkill, itemData.m_shared.m_attack.m_raiseSkillAmount);
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Something went wrong in RaiseSkill_Postfix: " + e);
-            }
-        }
-
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Humanoid), "EquipItem")]
         public static void EquipItem_Postfix(ref Humanoid __instance, ItemData item)

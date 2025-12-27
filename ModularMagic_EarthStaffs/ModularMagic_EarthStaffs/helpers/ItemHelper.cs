@@ -41,7 +41,6 @@ namespace ModularMagic_EarthStaffs.Helpers
                 projectileBurst = config.projectileBurst == null ? 0f : config.projectileBurst == null ? 0f : config.projectileBurst.Value,
                 weight = config.weight.Value,
                 maxDurability = config.maxDurability.Value,
-                maxQuality = config.maxQuality.Value,
                 movementModifier = config.movementSpeed.Value,
                 blockPower = config.blockArmor.Value,
                 deflectionForce = config.deflectionForce.Value,

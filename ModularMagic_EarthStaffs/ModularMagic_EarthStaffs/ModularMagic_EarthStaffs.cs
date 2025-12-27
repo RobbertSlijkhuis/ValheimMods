@@ -1,6 +1,4 @@
 using BepInEx;
-using Jotunn.Configs;
-
 using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
@@ -26,18 +24,14 @@ namespace ModularMagic_EarthStaffs
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
 
         private AssetBundle assetBundle;
+        public static CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();
         public CustomPrefabs prefabs = new CustomPrefabs();
         public CustomStatusEffects effects = new CustomStatusEffects();
         public CustomSprites sprites = new CustomSprites();
         public ItemDataSnaphot snapshots = new ItemDataSnaphot();
-        public static Skills.SkillType customSkill;
-        public static readonly string imbuementDataKey = "Imbuements_MMES";
+        public static readonly string imbuementDataKey = "Imbuements_MMC";
 
-        // Use this class to add your own localization to the game
-        // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
-        public static CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();
-
-        private void Awake()
+        public void Awake()
         {
             Instance = this;
             InitAssetBundle();
@@ -45,44 +39,36 @@ namespace ModularMagic_EarthStaffs
             InitStatusEffects();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            PrefabManager.OnVanillaPrefabsAvailable += AddSkill;
             PrefabManager.OnVanillaPrefabsAvailable += AddEarthStaffs;
-            ItemManager.OnItemsRegistered += LogRecipes;
+            // ItemManager.OnItemsRegistered += LogRecipes;
         }
 
-        private void LogRecipes()
-        {
-            ObjectDB.instance.m_recipes.ForEach(r =>
-            {
-                if (r.name.Contains("MMES"))
-                    Jotunn.Logger.LogInfo(r.name);
-            });
+        //private void LogRecipes()
+        //{
+        //    ObjectDB.instance.m_recipes.ForEach(r =>
+        //    {
+        //        if (r.name.Contains("MMES"))
+        //            Jotunn.Logger.LogInfo(r.name);
+        //    });
 
-            ItemManager.OnItemsRegistered -= LogRecipes;
-        }
-
-        private void AddSkill()
-        {
-            SkillConfig skillConfig = new SkillConfig();
-            skillConfig.Identifier = "Skill_MMES";
-            skillConfig.Name = "Earth magig";
-            skillConfig.Description = "This skill shows how proficient you are with Earth magic and unlocks imbuements";
-            skillConfig.IncreaseStep = 1;
-            skillConfig.Icon = sprites.RootsCooldown;
-
-            customSkill = SkillManager.Instance.AddSkill(skillConfig);
-            PrefabManager.OnVanillaPrefabsAvailable -= AddSkill;
-        }
+        //    ItemManager.OnItemsRegistered -= LogRecipes;
+        //}
 
         private void AddEarthStaffs()
         {
+            snapshots.staffEarth0 = prefabs.StaffEarth0.GetComponent<ItemDrop>().m_itemData.Clone();
             snapshots.staffEarth1 = prefabs.StaffEarth1.GetComponent<ItemDrop>().m_itemData.Clone();
             snapshots.staffEarth2 = prefabs.StaffEarth2.GetComponent<ItemDrop>().m_itemData.Clone();
             snapshots.staffEarth3 = prefabs.StaffEarth3.GetComponent<ItemDrop>().m_itemData.Clone();
 
-            prefabs.StaffEarth1.AddComponent<Imbuements>();
-            prefabs.StaffEarth2.AddComponent<Imbuements>();
-            prefabs.StaffEarth3.AddComponent<Imbuements>();
+            Imbuements imbuements0 = prefabs.StaffEarth0.AddComponent<Imbuements>();
+            Imbuements imbuements1 = prefabs.StaffEarth1.AddComponent<Imbuements>();
+            Imbuements imbuements2 = prefabs.StaffEarth2.AddComponent<Imbuements>();
+            Imbuements imbuements3 = prefabs.StaffEarth3.AddComponent<Imbuements>();
+            imbuements0.m_slots = 1;
+            imbuements1.m_slots = 2;
+            imbuements2.m_slots = 3;
+            imbuements3.m_slots = 4;
 
             ItemHelper.CreateStaff(prefabs.StaffEarth0, PluginConfig.staffEarth0);
             ItemHelper.CreateStaff(prefabs.StaffEarth1, PluginConfig.staffEarth1);

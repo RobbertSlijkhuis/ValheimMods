@@ -9,19 +9,16 @@ namespace ModularMagic_Core.Configs
 {
     internal class BuildPieceConfig
     {
-        // General options
         public static string[] craftingStationOptions = new string[] { 
             CraftingStationType.None, CraftingStationType.Disabled, CraftingStationType.Workbench, CraftingStationType.Forge, CraftingStationType.Stonecutter, 
-            CraftingStationType.Cauldron, CraftingStationType.ArtisanTable, CraftingStationType.BlackForge, CraftingStationType.GaldrTable };
+            CraftingStationType.Cauldron, CraftingStationType.ArtisanTable, CraftingStationType.BlackForge, CraftingStationType.GaldrTable, CraftingStationType.RuneTable };
 
-        // The  fields to generate
         public ConfigEntry<bool> enable;
         public ConfigEntry<string> name;
         public ConfigEntry<string> description;
         public ConfigEntry<string> craftingStation;
         public ConfigEntry<string> recipe;
 
-        // Other
         private int entryCount = 11;
 
         public void GenerateConfig(BuildPieceConfigOptions options)

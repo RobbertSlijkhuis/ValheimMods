@@ -2,10 +2,12 @@ using BepInEx;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
-using ModularMagic_Core.Configs;
-using ModularMagic_Core.Helpers;
-using ModularMagic_Core.Models;
 using ModularMagic_Core.Components;
+using ModularMagic_Core.Configs;
+using ModularMagic_Core.Data;
+using ModularMagic_Core.Helpers;
+using ModularMagic_Core.localization;
+using ModularMagic_Core.Models;
 using System.Reflection;
 using UnityEngine;
 
@@ -23,32 +25,41 @@ namespace ModularMagic_Core
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
 
         private AssetBundle assetBundle;
-        public CustomPrefabs prefabs = new CustomPrefabs();
+        public static CustomPrefabs prefabs = new CustomPrefabs();
         public CustomMaterials materials = new CustomMaterials();
 
-        public static readonly string imbuementMMESDataKey = "Imbuements_MMES";
+        public static readonly string imbuementDataKey = "Imbuements_MMC";
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
         public static CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();
 
-        private void Awake()
+        public void Awake()
         {
             Instance = this;
             InitAssetBundle();
+            LocaleEnglish.Init();
+            RuneData.Init();
             PluginConfig.Init();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            PrefabManager.OnVanillaPrefabsAvailable += AddMaterials;
+            PrefabManager.OnVanillaPrefabsAvailable += AddItems;
             PrefabManager.OnVanillaPrefabsAvailable += AddPieces;
         }
 
-        private void AddMaterials()
+        private void AddItems()
         {
-            ItemHelper.CreateMaterial(prefabs.EitrCrude, PluginConfig.crudeEitr);
-            ItemHelper.CreateMaterial(prefabs.EitrFine, PluginConfig.fineEitr);
+            foreach (RuneEntry entry in RuneData.list)
+            {
+                ImbuementRune imbuementRune = entry.prefab.AddComponent<ImbuementRune>();
+                imbuementRune.Init(entry.type, entry.value, entry.level, entry.charged,  entry.allowedWeapons, entry.nameKey, entry.descriptionKey);
+                ItemHelper.Create(entry.prefab, entry.config, true);
+            }
+
+            ItemHelper.Create(prefabs.EitrCrude, PluginConfig.crudeEitr);
+            ItemHelper.Create(prefabs.EitrFine, PluginConfig.fineEitr);
             
-            PrefabManager.OnVanillaPrefabsAvailable -= AddMaterials;
+            PrefabManager.OnVanillaPrefabsAvailable -= AddItems;
         }
 
         private void AddPieces()
@@ -56,18 +67,17 @@ namespace ModularMagic_Core
             ItemStand itemStandComp = prefabs.ImbuementTable.transform.Find("itemstand").gameObject.GetComponent<ItemStand>();
             Transform acceptTrans = prefabs.ImbuementTable.transform.Find("controls/accept_book");
             itemStandComp.m_unsupportedItems.Add(PrefabManager.Instance.GetPrefab("Hammer").GetComponent<ItemDrop>());
+
+            foreach (RuneEntry entry in RuneData.list)
+            {
+                itemStandComp.m_unsupportedItems.Add(entry.prefab.GetComponent<ItemDrop>());
+            }
+
             acceptTrans.gameObject.AddComponent<ImbuementTableAccept>();
             prefabs.ImbuementTable.AddComponent<ImbuementTable>();
 
-            PieceHelper.Create(prefabs.ImbuementTable, PluginConfig.piece1);
+            PieceHelper.Create(prefabs.ImbuementTable, PluginConfig.piece1, true);
             PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
-
-            //foreach (var button in ZInput.instance.m_buttons)
-            //{
-            //    Jotunn.Logger.LogWarning("============================================");
-            //    Jotunn.Logger.LogWarning("Key: " + button.Key);
-            //    Jotunn.Logger.LogWarning("Name: " + button.Value.Name);
-            //}
         }
 
         /**
@@ -78,47 +88,48 @@ namespace ModularMagic_Core
             assetBundle = AssetUtils.LoadAssetBundleFromResources("modularmagic_core_dw");
 
             prefabs.EitrCrude = assetBundle.LoadAsset<GameObject>("MMC_EitrCrude");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.EitrCrude, true));
             prefabs.EitrFine = assetBundle.LoadAsset<GameObject>("MMC_EitrFine");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.EitrFine, true));
             prefabs.ImbuementTable = assetBundle.LoadAsset<GameObject>("MMC_ImbuementTable");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ImbuementTable, true));
+
+            prefabs.RuneAccuracyWood = assetBundle.LoadAsset<GameObject>("MMC_Rune_Accuracy");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneAccuracyWood, true));
+            prefabs.RuneAccuracyStone = PrefabHelper.CreateClonedVariant("MMC_Rune_Accuracy_Stone", prefabs.RuneAccuracyWood.name, 2);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneAccuracyStone, true));
+            prefabs.RuneAccuracyMarble = PrefabHelper.CreateClonedVariant("MMC_Rune_Accuracy_Marble", prefabs.RuneAccuracyWood.name, 3);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneAccuracyMarble, true));
+            prefabs.RuneAccuracyGrausten = PrefabHelper.CreateClonedVariant("MMC_Rune_Accuracy_Grausten", prefabs.RuneAccuracyWood.name, 4);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneAccuracyGrausten, true));
+
+            prefabs.RuneDamageSlashWood = assetBundle.LoadAsset<GameObject>("MMC_Rune_DamageSlash");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamageSlashWood, true));
+            prefabs.RuneDamageSlashStone = PrefabHelper.CreateClonedVariant("MMC_Rune_DamageSlash_Stone", prefabs.RuneDamageSlashWood.name, 2);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamageSlashStone, true));
+            prefabs.RuneDamageSlashMarble = PrefabHelper.CreateClonedVariant("MMC_Rune_DamageSlash_Marble", prefabs.RuneDamageSlashWood.name, 3);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamageSlashMarble, true));
+            prefabs.RuneDamageSlashGrausten = PrefabHelper.CreateClonedVariant("MMC_Rune_DamageSlash_Grausten", prefabs.RuneDamageSlashWood.name, 4);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamageSlashGrausten, true));
+
+            prefabs.RuneNovaStone = assetBundle.LoadAsset<GameObject>("MMC_Rune_Nova");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneNovaStone, true));
+            prefabs.RuneNovaMarble = PrefabHelper.CreateClonedVariant("MMC_Rune_Nova_Marble", prefabs.RuneNovaStone.name, 2);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneNovaMarble, true));
+            prefabs.RuneNovaGrausten = PrefabHelper.CreateClonedVariant("MMC_Rune_Nova_Grausten", prefabs.RuneNovaStone.name, 3);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneNovaGrausten, true));
+
+            prefabs.RuneRainStone = assetBundle.LoadAsset<GameObject>("MMC_Rune_Rain");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneRainStone, true));
+            prefabs.RuneRainMarble = PrefabHelper.CreateClonedVariant("MMC_Rune_Rain_Marble", prefabs.RuneRainStone.name, 2);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneRainMarble, true));
+            prefabs.RuneRainGrausten = PrefabHelper.CreateClonedVariant("MMC_Rune_Rain_Grausten", prefabs.RuneRainStone.name, 3);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneRainGrausten, true));
 
             materials.ImbuementTable = assetBundle.LoadAsset<Material>("Altar_MMC");
             materials.SpellBook = assetBundle.LoadAsset<Material>("Spellbook2_1_1_MMC");
             materials.SpellBookOff = assetBundle.LoadAsset<Material>("Spellbook2_1_1_off_MMC");
-
-            materials.RuneWoodOffA = assetBundle.LoadAsset<Material>("Rune_WoodOff_A_MMC");
-            materials.RuneWoodOffB = assetBundle.LoadAsset<Material>("Rune_WoodOff_B_MMC");
-            materials.RuneWoodOffC = assetBundle.LoadAsset<Material>("Rune_WoodOff_C_MMC");
-            materials.RuneWoodOffD = assetBundle.LoadAsset<Material>("Rune_WoodOff_D_MMC");
-            materials.RuneWoodOffE = assetBundle.LoadAsset<Material>("Rune_WoodOff_E_MMC");
-            materials.RuneWoodOffF = assetBundle.LoadAsset<Material>("Rune_WoodOff_F_MMC");
-
-            materials.RuneWoodA = assetBundle.LoadAsset<Material>("Rune_Wood_A_MMC");
-            materials.RuneWoodB = assetBundle.LoadAsset<Material>("Rune_Wood_B_MMC");
-            materials.RuneWoodC = assetBundle.LoadAsset<Material>("Rune_Wood_C_MMC");
-            materials.RuneWoodD = assetBundle.LoadAsset<Material>("Rune_Wood_D_MMC");
-            materials.RuneWoodE = assetBundle.LoadAsset<Material>("Rune_Wood_E_MMC");
-            materials.RuneWoodF = assetBundle.LoadAsset<Material>("Rune_Wood_F_MMC");
-
-            materials.RuneStoneA = assetBundle.LoadAsset<Material>("Rune_Stone_A_MMC");
-            materials.RuneStoneB = assetBundle.LoadAsset<Material>("Rune_Stone_B_MMC");
-            materials.RuneStoneC = assetBundle.LoadAsset<Material>("Rune_Stone_C_MMC");
-            materials.RuneStoneD = assetBundle.LoadAsset<Material>("Rune_Stone_D_MMC");
-            materials.RuneStoneE = assetBundle.LoadAsset<Material>("Rune_Stone_E_MMC");
-            materials.RuneStoneF = assetBundle.LoadAsset<Material>("Rune_Stone_F_MMC");
-
-            materials.RuneMarbleA = assetBundle.LoadAsset<Material>("Rune_Marble_A_MMC");
-            materials.RuneMarbleB = assetBundle.LoadAsset<Material>("Rune_Marble_B_MMC");
-            materials.RuneMarbleC = assetBundle.LoadAsset<Material>("Rune_Marble_C_MMC");
-            materials.RuneMarbleD = assetBundle.LoadAsset<Material>("Rune_Marble_D_MMC");
-            materials.RuneMarbleE = assetBundle.LoadAsset<Material>("Rune_Marble_E_MMC");
-            materials.RuneMarbleF = assetBundle.LoadAsset<Material>("Rune_Marble_F_MMC");
-
-            materials.RuneGraustenA = assetBundle.LoadAsset<Material>("Rune_Grausten_A_MMC");
-            materials.RuneGraustenB = assetBundle.LoadAsset<Material>("Rune_Grausten_B_MMC");
-            materials.RuneGraustenC = assetBundle.LoadAsset<Material>("Rune_Grausten_C_MMC");
-            materials.RuneGraustenD = assetBundle.LoadAsset<Material>("Rune_Grausten_D_MMC");
-            materials.RuneGraustenE = assetBundle.LoadAsset<Material>("Rune_Grausten_E_MMC");
-            materials.RuneGraustenF = assetBundle.LoadAsset<Material>("Rune_Grausten_F_MMC");
+            materials.RuneGhost = assetBundle.LoadAsset<Material>("Rune_Ghost_MMC");
         }
     }
 }

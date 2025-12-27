@@ -15,10 +15,8 @@ namespace ModularMagic_Core.Components
     {
         private ZNetView netView;
         public List<Imbuement> m_imbuements = new List<Imbuement>();
-        public List<Imbuement> m_imbued = new List<Imbuement>();
         public ItemData m_itemData;
         public string m_imbuementsString;
-        public string m_imbuementMaterial = "$item_resin";
 
         public UnityEvent m_onItemAttach = new UnityEvent();
         public UnityEvent m_onItemRemove = new UnityEvent();
@@ -63,11 +61,13 @@ namespace ModularMagic_Core.Components
         public void StaffAttach(string imbuementsString, ItemData itemData)
         {
             m_imbuements = ImbuementHelper.StringToList(imbuementsString);
-            m_imbued = m_imbuements.FindAll(item => item.isImbued);
             m_itemData = itemData;
             m_imbuementsString = imbuementsString;
             m_onItemAttach.Invoke();
             CreateRunes();
+
+            //Jotunn.Logger.LogWarning("======================================");
+            //Jotunn.Logger.LogWarning("STAFF ATTACH: " + m_imbuementsString);
 
             Invoke(nameof(EmissionStart), 0f);
             InvokeRepeating(nameof(EmissionIdle), m_emissionDurationIdle + 0.1f, m_emissionDurationIdle + 0.1f);
@@ -76,6 +76,9 @@ namespace ModularMagic_Core.Components
 
         public void StaffRemove()
         {
+            //Jotunn.Logger.LogWarning("======================================");
+            //Jotunn.Logger.LogWarning("STAFF REMOVE: " + m_imbuementsString);
+
             if (m_emission != null)
                 StopCoroutine(m_emission);
 
@@ -85,7 +88,6 @@ namespace ModularMagic_Core.Components
             Invoke(nameof(EmissionStop), 0f);
 
             m_imbuements = new List<Imbuement>();
-            m_imbued = new List<Imbuement>();
             m_itemData = null;
             m_imbuementsString = null;
             m_staffFirstRotate = true;
@@ -109,21 +111,15 @@ namespace ModularMagic_Core.Components
 
             int index = 0;
 
-            foreach (var imbuement in m_imbuements)
+            foreach (Imbuement imbuement in m_imbuements)
             {
-                GameObject rune = UnityEngine.Object.Instantiate(defaultRuneTransform.gameObject, defaultRuneTransform);
-                rune.transform.SetParent(runesTransform);
+                GameObject interactRune = Instantiate(defaultRuneTransform.gameObject, defaultRuneTransform);
+                interactRune.transform.SetParent(runesTransform);
+                interactRune.SetActive(true);
 
-                RuneMaterials runeMats = ImbuementHelper.GetRuneMaterialByInteger(index);
-                ImbuementRune runeComp = rune.AddComponent<ImbuementRune>();
-                runeComp.m_imbuement = imbuement;
-                runeComp.m_runeMaterials = runeMats;
-                runeComp.Init();
-
+                ImbuementTableInteract tableInteract = interactRune.AddComponent<ImbuementTableInteract>();
+                tableInteract.Init(imbuement, index);
                 index++;
-
-                if (index > 5)
-                    index = 0;
             }
         }
 
@@ -136,9 +132,8 @@ namespace ModularMagic_Core.Components
 
             foreach (Transform child in runesTransform)
             {
-                //GameObject.Destroy(child.gameObject);
-                ImbuementRune runeComp = child.gameObject.GetComponent<ImbuementRune>();
-                runeComp.Destroy();
+                ImbuementTableInteract tableInteract = child.gameObject.GetComponent<ImbuementTableInteract>();
+                tableInteract.Destroy();
             }
         }
 
@@ -196,19 +191,23 @@ namespace ModularMagic_Core.Components
                 if (canImbue == CanImbueType.No || canImbue == CanImbueType.NoChange)
                     return false;
 
+                foreach (Imbuement imbuement in m_imbuements)
+                {
+                    if (imbuement.type == ImbuementType.None)
+                        continue;
+
+                    imbuement.saved = true;
+                }
+
                 string imbuementsString = ImbuementHelper.ListToString(m_imbuements);
-                Jotunn.Logger.LogWarning("=== Save ===================================");
-                m_itemData.m_customData[ModularMagic_Core.imbuementMMESDataKey] = imbuementsString;
+                //Jotunn.Logger.LogWarning("=== Save ===================================");
+                //Jotunn.Logger.LogWarning("STAFF SAVE: " + m_imbuementsString);
+
+                m_itemData.m_customData[ModularMagic_Core.imbuementDataKey] = imbuementsString;
                 SaveToZDO(m_itemData, netView.GetZDO());
                 Game.instance.GetPlayerProfile().SavePlayerData(Player.m_localPlayer);
 
-                foreach (Imbuement imbuement in m_imbuements.FindAll(item => item.enabled))
-                {
-                    imbuement.isImbued = true;
-                }
-
                 m_imbuementsString = imbuementsString;
-                m_imbued = m_imbuements.FindAll(item => item.isImbued);
                 m_onSave.Invoke();
                 return true;
             }

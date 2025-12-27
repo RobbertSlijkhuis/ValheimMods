@@ -1,8 +1,6 @@
 ﻿using ModularMagic_EarthStaffs.Models;
 using ModularMagic_EarthStaffs.Types;
-using PlayFab.ClientModels;
 using System;
-using UnityEngine;
 
 namespace ModularMagic_EarthStaffs.Configs
 {

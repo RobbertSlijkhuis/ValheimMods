@@ -32,7 +32,6 @@ namespace ModularMagic_EarthStaffs.Helpers
             options.damageSlashPerLevel = 0;
             options.damagePiercePerLevel = 0;
             options.attackEitr = snapShotData.m_shared.m_attack.m_attackEitr;
-            options.maxQuality = snapShotData.m_shared.m_maxQuality;
             options.timedBlockBonus = snapShotData.m_shared.m_timedBlockBonus;
             options.projectileAccuracy = snapShotData.m_shared.m_attack.m_projectileAccuracy;
             options.projectileBurst = snapShotData.m_shared.m_attack.m_burstInterval;
@@ -52,9 +51,6 @@ namespace ModularMagic_EarthStaffs.Helpers
 
             foreach (Imbuement imbuement in imbuements)
             {
-                if (!imbuement.enabled) 
-                    continue;
-
                 switch (imbuement.type)
                 {
                     case nameof(ImbuementType.DamageType):
@@ -85,9 +81,6 @@ namespace ModularMagic_EarthStaffs.Helpers
                         break;
                     case nameof(ImbuementType.EitrCost):
                         options.attackEitr -= float.Parse(imbuement.value, CultureInfo.InvariantCulture) * imbuement.level;
-                        break;
-                    case nameof(ImbuementType.MaxQuality):
-                        options.maxQuality += int.Parse(imbuement.value, CultureInfo.InvariantCulture);
                         break;
                     case nameof(ImbuementType.ParryBonus):
                         options.timedBlockBonus += float.Parse(imbuement.value, CultureInfo.InvariantCulture);
@@ -121,7 +114,7 @@ namespace ModularMagic_EarthStaffs.Helpers
             StatusEffect ImbuementEffect = ScriptableObject.CreateInstance<StatusEffect>();
 
             Imbuement last = imbuements.Last();
-            foreach (Imbuement imbuement in imbuements.FindAll(item => item.enabled))
+            foreach (Imbuement imbuement in imbuements.FindAll(item => item.type != ImbuementType.None))
             {
                 ImbuementEffect.m_tooltip += $"<color=green>{imbuement.name} {(imbuement.level > 0 ? imbuement.level : "")} </color>{(imbuement.Equals(last) ? "" : "\n")}";
             }
@@ -137,6 +130,8 @@ namespace ModularMagic_EarthStaffs.Helpers
         {
             switch (name)
             {
+                case var value when value == ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth0.name:
+                    return ModularMagic_EarthStaffs.Instance.snapshots.staffEarth0;
                 case var value when value == ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth1.name:
                     return ModularMagic_EarthStaffs.Instance.snapshots.staffEarth1;
                 case var value when value == ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth2.name:
@@ -156,17 +151,20 @@ namespace ModularMagic_EarthStaffs.Helpers
             foreach (string item in data)
             {
                 string[] properties = item.Split('|');
-                imbuements.Add(new Imbuement(
+                Imbuement imbuement = new Imbuement(
                     properties[0],
                     properties[1],
                     properties[2],
                     properties[3],
-                    int.Parse(properties[4]),
-                    properties[5],
-                    int.Parse(properties[6]),
-                    int.Parse(properties[7]),
-                    bool.Parse(properties[8])
-                ));
+                    properties[4],
+                    int.Parse(properties[5]),
+                    bool.Parse(properties[6]),
+                    bool.Parse(properties[7]),
+                    properties[8],
+                    bool.Parse(properties[9])
+                );
+
+                imbuements.Add(imbuement);
             }
 
             return imbuements;
@@ -178,7 +176,7 @@ namespace ModularMagic_EarthStaffs.Helpers
 
             foreach (Imbuement i in imbuements)
             {
-                items += $"{i.name}|{i.description}|{i.type}|{i.category}|{i.column}|{i.value}|{i.level}|{i.maxLevel}|{i.enabled};";
+                items += $"{i.type}|{i.prefab}|{i.name}|{i.description}|{i.value}|{i.level}|{i.charged}|{i.saved}|{i.weaponType}|{i.allowSecondary};";
             }
 
             if (items != "")

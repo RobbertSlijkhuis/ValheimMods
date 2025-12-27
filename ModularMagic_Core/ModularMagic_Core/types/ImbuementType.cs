@@ -9,6 +9,7 @@
         public static string DamageRatio => "DamageRatio";
         public static string EitrCost => "EitrCost";
         public static string MaxQuality => "MaxQuality";
+        public static string None => "None";
         public static string ParryBonus => "ParryBonus";
         public static string ProjectileAccuracy => "ProjectileAccuracy";
         public static string ProjectileBurst => "ProjectileBurst";

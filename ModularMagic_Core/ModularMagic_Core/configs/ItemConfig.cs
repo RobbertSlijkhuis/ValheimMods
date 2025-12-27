@@ -1,17 +1,16 @@
 ﻿using BepInEx.Configuration;
-using ModularMagic_Core.Configs;
 using ModularMagic_Core.Helpers;
 using ModularMagic_Core.Models;
 using ModularMagic_Core.Types;
 
 namespace ModularMagic_Core.Configs
 {
-    internal class MaterialConfig
+    internal class ItemConfig
     {
-        // General options
-        public static string[] craftingStationOptions = new string[] { "None", "Disabled", "Workbench", "Forge", "Stonecutter", "Cauldron", "ArtisanTable", "BlackForge", "GaldrTable" };
+        public static string[] craftingStationOptions = new string[] {
+            CraftingStationType.None, CraftingStationType.Disabled, CraftingStationType.Workbench, CraftingStationType.Forge, CraftingStationType.Stonecutter,
+            CraftingStationType.Cauldron, CraftingStationType.ArtisanTable, CraftingStationType.BlackForge, CraftingStationType.GaldrTable, CraftingStationType.RuneTable };
 
-        // The config fields to generate
         public ConfigEntry<bool> enable;
         public ConfigEntry<string> name;
         public ConfigEntry<string> description;
@@ -19,10 +18,9 @@ namespace ModularMagic_Core.Configs
         public ConfigEntry<int> minStationLevel;
         public ConfigEntry<string> recipe;
 
-        // Other
         private int entryCount = 100;
 
-        public void GenerateConfig(MaterialConfigOptions options)
+        public void GenerateConfig(ItemConfigOptions options)
         {
             ConfigFile Config = ModularMagic_Core.Instance.Config;
 

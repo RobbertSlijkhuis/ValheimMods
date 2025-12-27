@@ -1,5 +1,4 @@
 ﻿#nullable enable
-
 using UnityEngine;
 using static ItemDrop;
 
@@ -34,7 +33,6 @@ namespace ModularMagic_EarthStaffs.Models
         public float? secondaryProjectileAccuracy = null;
         public float? weight = null;
         public float? maxDurability = null;
-        public int? maxQuality = null;
         public float? movementModifier = null;
         public float? blockPower = null;
         public float? timedBlockBonus = null;

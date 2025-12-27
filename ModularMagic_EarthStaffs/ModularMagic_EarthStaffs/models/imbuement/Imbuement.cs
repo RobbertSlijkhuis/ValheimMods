@@ -1,29 +1,34 @@
-﻿namespace ModularMagic_EarthStaffs.Models
+﻿using ModularMagic_EarthStaffs.Types;
+
+namespace ModularMagic_EarthStaffs.Models
 {
     internal class Imbuement
     {
+        public bool allowSecondary = true;
+        public bool charged = true;
+        public string description = "";
+        public int level = 1;
+        public string name = "Empty";
+        public string prefab = "";
+        public bool saved = false;
+        public string type = ImbuementType.None;
+        public string value = "";
+        public string weaponType = WeaponType.MMES;
 
-        public string category;
-        public int column;
-        public string description;
-        public bool enabled;
-        public int level;
-        public int maxLevel;
-        public string name;
-        public string type;
-        public string value;
+        public Imbuement() { }
 
-        public Imbuement(string name, string description, string type, string category, int column, string value, int level, int maxLevel, bool enabled = false)
+        public Imbuement(string type, string prefab, string name, string description, string value, int level, bool charged, bool saved, string weaponType, bool allowSecondary)
         {
-            this.category = category;
-            this.column = column;
+            this.allowSecondary = allowSecondary;
+            this.charged = charged;
             this.description = description;
-            this.enabled = enabled;
             this.level = level;
-            this.maxLevel = maxLevel;
             this.name = name;
+            this.prefab = prefab;
+            this.saved = saved;
             this.type = type;
             this.value = value;
+            this.weaponType = weaponType;
         }
     }
 }
