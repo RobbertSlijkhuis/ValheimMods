@@ -62,13 +62,20 @@ namespace ModularMagic_EarthStaffs
             snapshots.staffEarth3 = prefabs.StaffEarth3.GetComponent<ItemDrop>().m_itemData.Clone();
 
             Imbuements imbuements0 = prefabs.StaffEarth0.AddComponent<Imbuements>();
-            Imbuements imbuements1 = prefabs.StaffEarth1.AddComponent<Imbuements>();
-            Imbuements imbuements2 = prefabs.StaffEarth2.AddComponent<Imbuements>();
-            Imbuements imbuements3 = prefabs.StaffEarth3.AddComponent<Imbuements>();
             imbuements0.m_slots = 1;
+            imbuements0.m_tier = 0;
+
+            Imbuements imbuements1 = prefabs.StaffEarth1.AddComponent<Imbuements>();
             imbuements1.m_slots = 2;
+            imbuements1.m_tier = 1;
+
+            Imbuements imbuements2 = prefabs.StaffEarth2.AddComponent<Imbuements>();
             imbuements2.m_slots = 3;
+            imbuements2.m_tier = 2;
+
+            Imbuements imbuements3 = prefabs.StaffEarth3.AddComponent<Imbuements>();
             imbuements3.m_slots = 4;
+            imbuements3.m_tier = 4;
 
             ItemHelper.CreateStaff(prefabs.StaffEarth0, PluginConfig.staffEarth0);
             ItemHelper.CreateStaff(prefabs.StaffEarth1, PluginConfig.staffEarth1);

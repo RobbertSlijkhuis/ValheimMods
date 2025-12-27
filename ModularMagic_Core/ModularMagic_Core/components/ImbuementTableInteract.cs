@@ -184,7 +184,7 @@ namespace ModularMagic_Core.components
             if (!imbuementRune.m_allowedWeapons.Contains(m_imbuement.weaponType))
                 return false;
 
-            if (!m_imbuement.allowSecondary && imbuementRune.m_type == ImbuementType.SecondaryAttack)
+            if (m_imbuement.tier < imbuementRune.m_tier)
                 return false;
 
             string weaponTypeLower = m_imbuement.weaponType.ToLower();
@@ -267,7 +267,6 @@ namespace ModularMagic_Core.components
 
             //GameObject oldRune = Instantiate(prefab, attachTransform.position, attachTransform.rotation);
             ImbuementRune imbuementRune = oldRune.GetComponent<ImbuementRune>();
-            imbuementRune.m_charged = false;
             // Destroy(attachTransform.gameObject);
             Destroy(oldAttachTransform.gameObject);
             m_dropOldItem = null;

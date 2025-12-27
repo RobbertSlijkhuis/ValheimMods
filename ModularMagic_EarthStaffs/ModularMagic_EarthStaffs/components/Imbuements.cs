@@ -9,6 +9,7 @@ namespace ModularMagic_EarthStaffs.Components
     {
         public List<Imbuement> m_imbuements = new List<Imbuement>();
         public int m_slots = 2;
+        public int m_tier = 1;
 
         public void Awake()
         {
@@ -23,10 +24,7 @@ namespace ModularMagic_EarthStaffs.Components
                 for (int i = 0; i < m_slots; i++)
                 {
                     Imbuement imbuement = new Imbuement();
-
-                    if (gameObject.name == $"{ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth0.name}(Clone)" || gameObject.name == $"{ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth1.name}(Clone)")
-                        imbuement.allowSecondary = false;
-
+                    imbuement.tier = m_tier;
                     m_imbuements.Add(imbuement);
                 }
 

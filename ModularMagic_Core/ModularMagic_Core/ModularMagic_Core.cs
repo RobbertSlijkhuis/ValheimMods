@@ -52,7 +52,7 @@ namespace ModularMagic_Core
             foreach (RuneEntry entry in RuneData.list)
             {
                 ImbuementRune imbuementRune = entry.prefab.AddComponent<ImbuementRune>();
-                imbuementRune.Init(entry.type, entry.value, entry.level, entry.charged,  entry.allowedWeapons, entry.nameKey, entry.descriptionKey);
+                imbuementRune.Init(entry.type, entry.value, entry.tier, entry.level, entry.allowedWeapons, entry.nameKey, entry.descriptionKey);
                 ItemHelper.Create(entry.prefab, entry.config, true);
             }
 
@@ -130,6 +130,13 @@ namespace ModularMagic_Core
             materials.SpellBook = assetBundle.LoadAsset<Material>("Spellbook2_1_1_MMC");
             materials.SpellBookOff = assetBundle.LoadAsset<Material>("Spellbook2_1_1_off_MMC");
             materials.RuneGhost = assetBundle.LoadAsset<Material>("Rune_Ghost_MMC");
+
+            /*
+             * Notes
+             * 
+             * Add global key to staff to prevent smurfing.
+             * Add tier to runes and weapons to prevent high level runes from being put in lower weapons
+             */
         }
     }
 }

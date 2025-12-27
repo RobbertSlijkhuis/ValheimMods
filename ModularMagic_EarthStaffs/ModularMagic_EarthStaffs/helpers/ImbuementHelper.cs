@@ -158,10 +158,9 @@ namespace ModularMagic_EarthStaffs.Helpers
                     properties[3],
                     properties[4],
                     int.Parse(properties[5]),
-                    bool.Parse(properties[6]),
+                    int.Parse(properties[6]),
                     bool.Parse(properties[7]),
-                    properties[8],
-                    bool.Parse(properties[9])
+                    properties[8]
                 );
 
                 imbuements.Add(imbuement);
@@ -176,7 +175,7 @@ namespace ModularMagic_EarthStaffs.Helpers
 
             foreach (Imbuement i in imbuements)
             {
-                items += $"{i.type}|{i.prefab}|{i.name}|{i.description}|{i.value}|{i.level}|{i.charged}|{i.saved}|{i.weaponType}|{i.allowSecondary};";
+                items += $"{i.type}|{i.prefab}|{i.name}|{i.description}|{i.value}|{i.tier}|{i.level}|{i.saved}|{i.weaponType};";
             }
 
             if (items != "")

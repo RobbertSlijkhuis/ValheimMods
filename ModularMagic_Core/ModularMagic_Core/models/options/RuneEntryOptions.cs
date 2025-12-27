@@ -18,6 +18,7 @@ namespace ModularMagic_Core.Models
         public string nameKey;
         public GameObject prefab;
         public string recipe;
+        public int tier = 1;
         public string type;
         public string value;
     }

@@ -7,7 +7,6 @@ namespace ModularMagic_Core.Models
     internal class RuneEntry
     {
         public List<string> allowedWeapons = new List<string>();
-        public bool charged = true;
         public ItemConfig config = new ItemConfig();
         public string craftingStation;
         public string description;
@@ -18,6 +17,7 @@ namespace ModularMagic_Core.Models
         public string nameKey;
         public GameObject prefab;
         public string recipe;
+        public int tier;
         public string type;
         public string value;
 
@@ -33,6 +33,7 @@ namespace ModularMagic_Core.Models
             this.nameKey = options.nameKey;
             this.prefab = options.prefab;
             this.recipe = options.recipe;
+            this.tier = options.tier;
             this.type = options.type;
             this.value = options.value;
 

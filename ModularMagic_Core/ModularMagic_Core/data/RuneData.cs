@@ -23,20 +23,24 @@ namespace ModularMagic_Core.Data
             accuracyOptions.nameKey = LocaleKey.ItemRuneAccuracy;
             accuracyOptions.prefab = ModularMagic_Core.prefabs.RuneAccuracyWood;
             accuracyOptions.recipe = "FineWood:3, LeatherScraps:3";
+            accuracyOptions.tier = 0;
             accuracyOptions.type = ImbuementType.ProjectileAccuracy;
             accuracyOptions.value = "0.125";
             list.Add(new RuneEntry(accuracyOptions));
 
+            accuracyOptions.tier = 2;
             accuracyOptions.level = 2;
             accuracyOptions.prefab = ModularMagic_Core.prefabs.RuneAccuracyStone;
             accuracyOptions.recipe = "Stone:3, LeatherScraps:3";
             list.Add(new RuneEntry(accuracyOptions));
 
+            accuracyOptions.tier = 3;
             accuracyOptions.level = 3;
             accuracyOptions.prefab = ModularMagic_Core.prefabs.RuneAccuracyMarble;
             accuracyOptions.recipe = "BlackMarble:3, LeatherScraps:3";
             list.Add(new RuneEntry(accuracyOptions));
 
+            accuracyOptions.tier = 4;
             accuracyOptions.level = 4;
             accuracyOptions.prefab = ModularMagic_Core.prefabs.RuneAccuracyGrausten;
             accuracyOptions.recipe = "Grausten:3, LeatherScraps:3";
@@ -54,16 +58,19 @@ namespace ModularMagic_Core.Data
             damageSlashOptions.value = "Slash";
             list.Add(new RuneEntry(damageSlashOptions));
 
+            damageSlashOptions.tier = 2;
             damageSlashOptions.level = 2;
             damageSlashOptions.prefab = ModularMagic_Core.prefabs.RuneDamageSlashStone;
             damageSlashOptions.recipe = "Stone:3, SurtlingCore:3";
             list.Add(new RuneEntry(damageSlashOptions));
 
+            damageSlashOptions.tier = 3;
             damageSlashOptions.level = 3;
             damageSlashOptions.prefab = ModularMagic_Core.prefabs.RuneDamageSlashMarble;
             damageSlashOptions.recipe = "BlackMarble:3, SurtlingCore:3";
             list.Add(new RuneEntry(damageSlashOptions));
 
+            damageSlashOptions.tier = 4;
             damageSlashOptions.level = 4;
             damageSlashOptions.prefab = ModularMagic_Core.prefabs.RuneDamageSlashGrausten;
             damageSlashOptions.recipe = "Grausten:3, SurtlingCore:3";
@@ -77,15 +84,18 @@ namespace ModularMagic_Core.Data
             novaOptions.nameKey = LocaleKey.ItemRuneNova;
             novaOptions.prefab = ModularMagic_Core.prefabs.RuneNovaStone;
             novaOptions.recipe = "Stone:3, Coal:3";
+            novaOptions.tier = 2;
             novaOptions.type = ImbuementType.SecondaryAttack;
             novaOptions.value = "Nova";
             list.Add(new RuneEntry(novaOptions));
 
+            novaOptions.tier = 3;
             novaOptions.level = 2;
             novaOptions.prefab = ModularMagic_Core.prefabs.RuneNovaMarble;
             novaOptions.recipe = "BlackMarble:3, Coal:3";
             list.Add(new RuneEntry(novaOptions));
 
+            novaOptions.tier = 4;
             novaOptions.level = 3;
             novaOptions.prefab = ModularMagic_Core.prefabs.RuneNovaGrausten;
             novaOptions.recipe = "Grausten:3, Coal:3";
@@ -99,15 +109,18 @@ namespace ModularMagic_Core.Data
             rainOptions.nameKey = LocaleKey.ItemRuneRain;
             rainOptions.prefab = ModularMagic_Core.prefabs.RuneRainStone;
             rainOptions.recipe = "Stone:3, Blueberries:3";
+            rainOptions.tier = 2;
             rainOptions.type = ImbuementType.SecondaryAttack;
             rainOptions.value = "Rain";
             list.Add(new RuneEntry(rainOptions));
 
+            rainOptions.tier = 3;
             rainOptions.level = 2;
             rainOptions.prefab = ModularMagic_Core.prefabs.RuneRainMarble;
             rainOptions.recipe = "BlackMarble:3, Blueberries:3";
             list.Add(new RuneEntry(rainOptions));
 
+            rainOptions.tier = 4;
             rainOptions.level = 3;
             rainOptions.prefab = ModularMagic_Core.prefabs.RuneRainGrausten;
             rainOptions.recipe = "Grausten:3, Blueberries:3";
