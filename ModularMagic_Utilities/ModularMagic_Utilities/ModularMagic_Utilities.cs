@@ -3,7 +3,6 @@ using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
-using ModularMagic_Utilities.components;
 using ModularMagic_Utilities.Components;
 using ModularMagic_Utilities.Configs;
 using ModularMagic_Utilities.Helpers;

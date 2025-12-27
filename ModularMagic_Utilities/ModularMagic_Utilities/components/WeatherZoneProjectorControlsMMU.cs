@@ -1,15 +1,8 @@
-﻿using ModularMagic_Utilities.Components;
-using ModularMagic_Utilities.Configs;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ModularMagic_Utilities.Configs;
 using UnityEngine;
 using static UnityEngine.ParticleSystem;
 
-namespace ModularMagic_Utilities.components
+namespace ModularMagic_Utilities.Components
 {
     internal class WeatherZoneProjectorControlsMMU : MonoBehaviour, Hoverable, Interactable
     {
@@ -17,7 +10,7 @@ namespace ModularMagic_Utilities.components
         public ParticleSystem particleSystem;
         public bool isRotating;
 
-        private void Awake ()
+        private void Awake()
         {
             weatherZone = transform.parent.parent.Find("weatherzone").gameObject.GetComponent<WeatherZoneMMU>();
             particleSystem = transform.Find("circle").gameObject.GetComponent<ParticleSystem>();

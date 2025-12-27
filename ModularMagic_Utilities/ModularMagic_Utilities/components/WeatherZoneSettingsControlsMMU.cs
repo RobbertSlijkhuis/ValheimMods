@@ -1,15 +1,8 @@
-﻿using ModularMagic_Utilities.Components;
-using ModularMagic_Utilities.Configs;
-using System;
+﻿using ModularMagic_Utilities.Configs;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
-namespace ModularMagic_Utilities.components
+namespace ModularMagic_Utilities.Components
 {
     internal class WeatherZoneSettingsControlsMMU : MonoBehaviour, Hoverable, Interactable
     {
@@ -17,7 +10,7 @@ namespace ModularMagic_Utilities.components
         public Transform cogTransform;
         public bool isRotating;
 
-        private void Awake ()
+        private void Awake()
         {
             weatherZone = transform.parent.parent.Find("weatherzone").gameObject.GetComponent<WeatherZoneMMU>();
             cogTransform = transform.Find("cog");

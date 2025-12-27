@@ -196,8 +196,11 @@ namespace ModularMagic_Armors.Harmony
                 if (HaveStatusEffect(__instance, PluginConfig.armor2Legs.magicStatusEffectName))
                     value += GetValueFromConfig(skillType, PluginConfig.armor2Legs);
 
+                //Jotunn.Logger.LogWarning("from previous result: " + __result);
+                //Jotunn.Logger.LogWarning("Skill From gear: " + value);
+
                 float newLevel = __result + value;
-                __instance.m_player.GetSEMan().ModifySkillLevel(skillType, ref newLevel);
+                // __instance.m_player.GetSEMan().ModifySkillLevel(skillType, ref newLevel);
                 __result = newLevel;
             }
             catch (Exception e)

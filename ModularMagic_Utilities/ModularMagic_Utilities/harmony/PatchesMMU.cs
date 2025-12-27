@@ -268,7 +268,7 @@ namespace ModularMagic_Utilities.Harmony
                     value = GetValueFromConfig(skillType, PluginConfig.lantern3);
 
                 float newLevel = __result + value;
-                __instance.m_player.GetSEMan().ModifySkillLevel(skillType, ref newLevel);
+                // __instance.m_player.GetSEMan().ModifySkillLevel(skillType, ref newLevel);
                 __result = newLevel;
             }
             catch (Exception e)

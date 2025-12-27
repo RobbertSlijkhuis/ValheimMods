@@ -19,6 +19,8 @@ namespace ModularMagic_Armors
     [NetworkCompatibility(CompatibilityLevel.ClientMustHaveMod, VersionStrictness.Minor)]
     internal class ModularMagic_Armors : BaseUnityPlugin
     {
+        // ADD FROST RESITANCE TO DARKWIZARD CLOAK, OR FREEZE TO DEATH IN MOUNTAINS
+
         public const string PluginGUID = "DeathWizsh.ModularMagic_Armors";
         public const string PluginName = "ModularMagic_Armors";
         public const string PluginVersion = "0.0.1";
