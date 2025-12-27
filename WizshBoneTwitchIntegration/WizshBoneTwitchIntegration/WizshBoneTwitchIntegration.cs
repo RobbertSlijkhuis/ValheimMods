@@ -197,6 +197,7 @@ namespace WizshBoneTwitchIntegration
             // ====================================
             // Ideas:
             // MORE POSITIVE EFFECTS
+            // Add a way to be able to find spanwed creature. FOr the kill all spawned ruler!
             // Add temp mist fog to location
             // Drunk blur effect?
             // Flashbang?

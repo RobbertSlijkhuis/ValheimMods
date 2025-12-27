@@ -71,7 +71,6 @@ namespace WizshBoneTwitchIntegration.Components
             m_amount = chestData.amount > 5 ? 5 : chestData.amount < 1 ? 1 : chestData.amount;
             m_force = chestData.force;
             m_interact = chestData.interact;
-
             m_items = chestData.items;
             m_mimic = chestData.mimicChance == 0 ? false : Random.Range(0, 100) <= chestData.mimicChance;
             m_random = chestData.random;
@@ -79,12 +78,6 @@ namespace WizshBoneTwitchIntegration.Components
             m_yeetChance = chestData.yeetChance;
 
             m_supriseChestInteract = transform.Find("chest_top").gameObject.AddComponent<TwitchSurpriseChestInteract>();
-
-            //Jotunn.Logger.LogWarning("Force: " + m_force);
-            //Jotunn.Logger.LogWarning("Interact: " + m_interact);
-            //Jotunn.Logger.LogWarning("Mimic: " + m_mimic);
-            //Jotunn.Logger.LogWarning("Random: " + m_random);
-            //Jotunn.Logger.LogWarning("YeetChance: " + m_yeetChance);
 
             TriggerStartEffects();
 
@@ -127,6 +120,10 @@ namespace WizshBoneTwitchIntegration.Components
                 StartCoroutine(SpawnItem(item, force, angleChange, timeOffset));
                 timeOffset += m_spawnDelay;
             }
+
+            TimedDestruction timedDestruction = gameObject.AddComponent<TimedDestruction>();
+            timedDestruction.m_timeout = 10f;
+            timedDestruction.Trigger();
         }
 
         private IEnumerator SpawnItem(string prefabName, float force, float deviation, float delay)
