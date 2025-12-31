@@ -188,16 +188,26 @@ namespace WizshBoneTwitchIntegration
 
             // ====================================
             // TODO:
+            // ====================================
+            // Add extra stars to hud when level is higher then 3 (max level is 10)
+            // Remove/add redeems when player leaves/enters a dungeon and check what kind of dungeon the player is in
+            // Prevent redeems from being used when the game is paused
+            // White/black list to block users from using the mod
+            //
+            // ====================================
+            // IN PROGRESS:
+            // ====================================
+            // Remove redeems on game quit
+            // Add halucinations, make player stunned/dazed when getting hit by Hallucinations? Or half damage?
+            // Suprise chests, multiple chests to gamble, add a mimic to bite the opener
+            //
+            // ====================================
+            // IDEAS:
+            // ====================================
+            // MORE POSITIVE EFFECTS
             // LoyalBones: A red skeleton with normal damage but insane health pool
             // Chat loves this: Spawn chest with cheese (random food?) Make cheese wheel that gives random food?".
-            // IN PROGRESS: Remove redeems on game quit
-            // IN PROGRESS: Add halucinations, make player stunned/dazed when getting hit by Hallucinations? Or half damage?
-            // In PROGRESS: Suprise chests, add auto opening one that spouts items, closed one to open with interaction. Multiple to gamble, add a mimic to bite the opener
-            // White/black list to block users from using the mod
-            // ====================================
-            // Ideas:
-            // MORE POSITIVE EFFECTS
-            // Add a way to be able to find spanwed creature. FOr the kill all spawned ruler!
+            // Add a way to be able to find spanwed creature. For the kill all spawned rule!
             // Add temp mist fog to location
             // Drunk blur effect?
             // Flashbang?
