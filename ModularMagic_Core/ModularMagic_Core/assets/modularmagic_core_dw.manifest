@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 3871161792
+CRC: 2980714035
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 61075c6455281ae01c00b701097d707d
+    Hash: 283ad3cf08a6384bbb1293b158222278
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 8ea091c098cafabe9cb938946b77b3ae
+    Hash: b3bb64f501d0f1018f634a7c7d443845
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 61075c6455281ae01c00b701097d707d
+    Hash: 283ad3cf08a6384bbb1293b158222278
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -34,12 +34,24 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 65
   Script: {instanceID: 0}
+- Class: 74
+  Script: {instanceID: 0}
+- Class: 82
+  Script: {instanceID: 0}
+- Class: 83
+  Script: {instanceID: 0}
+- Class: 91
+  Script: {instanceID: 0}
+- Class: 95
+  Script: {instanceID: 0}
 - Class: 108
   Script: {instanceID: 0}
 - Class: 114
   Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: -1044604064, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 963225042, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -55,7 +67,11 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 2094620348, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: 895252998, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 313648218, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 115
   Script: {instanceID: 0}
 - Class: 135
@@ -67,6 +83,12 @@ ClassTypes:
 - Class: 205
   Script: {instanceID: 0}
 - Class: 213
+  Script: {instanceID: 0}
+- Class: 241
+  Script: {instanceID: 0}
+- Class: 243
+  Script: {instanceID: 0}
+- Class: 245
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
@@ -84,6 +106,7 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: ItemDrop/ItemData/SharedData
 Assets:
+- Assets/Custom/PrefabInstance/Runes/MMC_Rune_DamagePierce.prefab
 - Assets/Custom/Material/Table/Marble/Rune_Marble_C_MMC.mat
 - Assets/Custom/PrefabInstance/Runes/MMC_Rune_Accuracy.prefab
 - Assets/Custom/Material/Table/Stone/Rune_Stone_E_MMC.mat
@@ -101,8 +124,9 @@ Assets:
 - Assets/Custom/Material/Table/Marble/Rune_Marble_MMC.mat
 - Assets/Custom/Material/Table/Grausten/Rune_Grausten_F_MMC.mat
 - Assets/Custom/Material/Table/Grausten/Rune_Grausten_B_MMC.mat
-- Assets/Custom/Material/Table/Wood/Rune_WoodOff_B_MMC.mat
+- Assets/Custom/PrefabInstance/Runes/MMC_Rune_DamageBlunt.prefab
 - Assets/Custom/Material/Table/Wood/Rune_WoodOff_F_MMC.mat
+- Assets/Custom/Material/Table/Wood/Rune_WoodOff_B_MMC.mat
 - Assets/Custom/Material/Table/Wood/Rune_Wood_F_MMC.mat
 - Assets/Custom/Material/Table/Stone/Rune_Stone_B_MMC.mat
 - Assets/Custom/Material/Table/Wood/Rune_WoodOff_D_MMC.mat
@@ -117,6 +141,7 @@ Assets:
 - Assets/Custom/PrefabInstance/Runes/MMC_Rune_Nova.prefab
 - Assets/Custom/Material/Table/Stone/Rune_Stone_F_MMC.mat
 - Assets/Custom/Material/Table/Grausten/Rune_Grausten_E_MMC.mat
+- Assets/Custom/PrefabInstance/Table/fx_save_MMC.prefab
 - Assets/Custom/Material/Table/Spellbook2_1_1_off_MMC.mat
 - Assets/Custom/Material/Table/Spellbook2_1_1_MMC.mat
 - Assets/Custom/PrefabInstance/Eitr/MMC_EitrCrude.prefab
@@ -125,7 +150,7 @@ Assets:
 - Assets/Custom/Material/Table/Wood/Rune_WoodOff_E_MMC.mat
 - Assets/Custom/Material/Table/Stone/Rune_Stone_D_MMC.mat
 - Assets/Custom/Material/Table/Marble/Rune_Marble_F_MMC.mat
-- Assets/Custom/PrefabInstance/Table/MMC_ImbuementTable.prefab
+- Assets/Custom/PrefabInstance/Table/MMC_RuneTable.prefab
 - Assets/Custom/PrefabInstance/Runes/MMC_Rune_DamageSlash.prefab
 - Assets/Custom/Material/Table/Marble/Rune_Marble_B_MMC.mat
 - Assets/Custom/Material/Table/Marble/Rune_Marble_A_MMC.mat

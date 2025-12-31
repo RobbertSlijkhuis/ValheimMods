@@ -45,6 +45,7 @@ namespace ModularMagic_Core
 
             PrefabManager.OnVanillaPrefabsAvailable += AddItems;
             PrefabManager.OnVanillaPrefabsAvailable += AddPieces;
+            PieceManager.OnPiecesRegistered += CreatePieceIcons;
         }
 
         private void AddItems()
@@ -64,8 +65,8 @@ namespace ModularMagic_Core
 
         private void AddPieces()
         {
-            ItemStand itemStandComp = prefabs.ImbuementTable.transform.Find("itemstand").gameObject.GetComponent<ItemStand>();
-            Transform acceptTrans = prefabs.ImbuementTable.transform.Find("controls/accept_book");
+            ItemStand itemStandComp = prefabs.RuneTable.transform.Find("itemstand").gameObject.GetComponent<ItemStand>();
+            Transform acceptTrans = prefabs.RuneTable.transform.Find("controls/accept_book");
             itemStandComp.m_unsupportedItems.Add(PrefabManager.Instance.GetPrefab("Hammer").GetComponent<ItemDrop>());
 
             foreach (RuneEntry entry in RuneData.list)
@@ -73,11 +74,26 @@ namespace ModularMagic_Core
                 itemStandComp.m_unsupportedItems.Add(entry.prefab.GetComponent<ItemDrop>());
             }
 
-            acceptTrans.gameObject.AddComponent<ImbuementTableAccept>();
-            prefabs.ImbuementTable.AddComponent<ImbuementTable>();
+            acceptTrans.gameObject.AddComponent<RuneTableAccept>();
+            prefabs.RuneTable.AddComponent<RuneTable>();
 
-            PieceHelper.Create(prefabs.ImbuementTable, PluginConfig.piece1, true);
+            PieceHelper.Create(prefabs.RuneTable, PluginConfig.piece1, true);
             PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
+        }
+
+        private void CreatePieceIcons()
+        {
+            CraftingStation craftingStation = prefabs.RuneTable.GetComponent<CraftingStation>();
+            Piece piece = prefabs.RuneTable.GetComponent<Piece>();
+
+            RenderManager.RenderRequest request = new RenderManager.RenderRequest(prefabs.RuneTable);
+            request.Rotation = RenderManager.IsometricRotation;
+
+            Sprite icon = RenderManager.Instance.Render(request);
+            piece.m_icon = icon;
+            craftingStation.m_icon = icon;
+
+            PieceManager.OnPiecesRegistered -= CreatePieceIcons;
         }
 
         /**
@@ -91,8 +107,10 @@ namespace ModularMagic_Core
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.EitrCrude, true));
             prefabs.EitrFine = assetBundle.LoadAsset<GameObject>("MMC_EitrFine");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.EitrFine, true));
-            prefabs.ImbuementTable = assetBundle.LoadAsset<GameObject>("MMC_ImbuementTable");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ImbuementTable, true));
+            prefabs.RuneTable = assetBundle.LoadAsset<GameObject>("MMC_RuneTable");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneTable, true));
+            prefabs.SaveFX = assetBundle.LoadAsset<GameObject>("fx_save_MMC");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.SaveFX, true));
 
             prefabs.RuneAccuracyWood = assetBundle.LoadAsset<GameObject>("MMC_Rune_Accuracy");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneAccuracyWood, true));
@@ -102,6 +120,24 @@ namespace ModularMagic_Core
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneAccuracyMarble, true));
             prefabs.RuneAccuracyGrausten = PrefabHelper.CreateClonedVariant("MMC_Rune_Accuracy_Grausten", prefabs.RuneAccuracyWood.name, 4);
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneAccuracyGrausten, true));
+
+            prefabs.RuneDamageBluntWood = assetBundle.LoadAsset<GameObject>("MMC_Rune_DamageBlunt");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamageBluntWood, true));
+            prefabs.RuneDamageBluntStone = PrefabHelper.CreateClonedVariant("MMC_Rune_DamageBlunt_Stone", prefabs.RuneDamageBluntWood.name, 2);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamageBluntStone, true));
+            prefabs.RuneDamageBluntMarble = PrefabHelper.CreateClonedVariant("MMC_Rune_DamageBlunt_Marble", prefabs.RuneDamageBluntWood.name, 3);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamageBluntMarble, true));
+            prefabs.RuneDamageBluntGrausten = PrefabHelper.CreateClonedVariant("MMC_Rune_DamageBlunt_Grausten", prefabs.RuneDamageBluntWood.name, 4);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamageBluntGrausten, true));
+
+            prefabs.RuneDamagePierceWood = assetBundle.LoadAsset<GameObject>("MMC_Rune_DamagePierce");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamagePierceWood, true));
+            prefabs.RuneDamagePierceStone = PrefabHelper.CreateClonedVariant("MMC_Rune_DamagePierce_Stone", prefabs.RuneDamagePierceWood.name, 2);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamagePierceStone, true));
+            prefabs.RuneDamagePierceMarble = PrefabHelper.CreateClonedVariant("MMC_Rune_DamagePierce_Marble", prefabs.RuneDamagePierceWood.name, 3);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamagePierceMarble, true));
+            prefabs.RuneDamagePierceGrausten = PrefabHelper.CreateClonedVariant("MMC_Rune_DamagePierce_Grausten", prefabs.RuneDamagePierceWood.name, 4);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamagePierceGrausten, true));
 
             prefabs.RuneDamageSlashWood = assetBundle.LoadAsset<GameObject>("MMC_Rune_DamageSlash");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamageSlashWood, true));
@@ -132,10 +168,8 @@ namespace ModularMagic_Core
             materials.RuneGhost = assetBundle.LoadAsset<Material>("Rune_Ghost_MMC");
 
             /*
-             * Notes
-             * 
+             * Notes:
              * Add global key to staff to prevent smurfing.
-             * Add tier to runes and weapons to prevent high level runes from being put in lower weapons
              */
         }
     }

@@ -22,7 +22,7 @@ namespace ModularMagic_Core.Harmony
                 if (imbuementsString == null)
                     return;
 
-                ImbuementTable imbuementTable = __instance.transform.parent.gameObject.GetComponent<ImbuementTable>();
+                RuneTable imbuementTable = __instance.transform.parent.gameObject.GetComponent<RuneTable>();
 
                 if (imbuementTable == null)
                     return;
@@ -44,7 +44,7 @@ namespace ModularMagic_Core.Harmony
                 if (!hold || __instance == null)
                     return;
 
-                ImbuementTable imbuementTable = __instance.transform.parent.gameObject.GetComponent<ImbuementTable>();
+                RuneTable imbuementTable = __instance.transform.parent.gameObject.GetComponent<RuneTable>();
 
                 if (imbuementTable == null)
                     return;

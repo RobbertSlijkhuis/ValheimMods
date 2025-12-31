@@ -14,7 +14,7 @@ namespace ModularMagic_Core.Configs
         public static string material2Recipe = "Crystal:3, Coal:3";
         public static ItemConfig fineEitr = new ItemConfig();
 
-        private static string piece1Name = "Imbuement Table";
+        private static string piece1Name = "Rune Imbuement Table";
         private static string piece1Recipe = "Stone:20";
         public static BuildPieceConfig piece1 = new BuildPieceConfig();
 
@@ -64,7 +64,7 @@ namespace ModularMagic_Core.Configs
         {
             try
             {
-                BuildPieceConfigOptions options = new BuildPieceConfigOptions(ModularMagic_Core.prefabs.ImbuementTable, piece1Name, piece1Recipe)
+                BuildPieceConfigOptions options = new BuildPieceConfigOptions(ModularMagic_Core.prefabs.RuneTable, piece1Name, piece1Recipe)
                 {
                     description = "$piece_horizontal",
                     craftingStation = CraftingStationType.Stonecutter,

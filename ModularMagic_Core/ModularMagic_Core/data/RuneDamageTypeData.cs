@@ -1,0 +1,103 @@
+﻿using ModularMagic_Core.Locale;
+using ModularMagic_Core.Models;
+using ModularMagic_Core.Types;
+using System.Collections.Generic;
+
+namespace ModularMagic_Core.Data
+{
+    internal class RuneDamageTypeData
+    {
+        public RuneDamageTypeData(List<RuneEntry> list)
+        {
+            RuneEntryOptions damageBluntOptions = new RuneEntryOptions();
+            damageBluntOptions.allowedWeapons = RuneData.Ice;
+            damageBluntOptions.description = "Apply this rune to your weapon to change the main damage type! This rune might not work on certain weapons!";
+            damageBluntOptions.descriptionKey = LocaleKey.ItemRuneBleedingEdgeDesc;
+            damageBluntOptions.name = "Rune: Blunt Damage";
+            damageBluntOptions.nameKey = LocaleKey.ItemRuneBleedingEdge;
+            damageBluntOptions.prefab = ModularMagic_Core.prefabs.RuneDamageBluntWood;
+            damageBluntOptions.recipe = "FineWood:3, Stone:3";
+            damageBluntOptions.type = ImbuementType.DamageType;
+            damageBluntOptions.value = "Blunt";
+            list.Add(new RuneEntry(damageBluntOptions));
+
+            damageBluntOptions.tier = 2;
+            damageBluntOptions.level = 2;
+            damageBluntOptions.prefab = ModularMagic_Core.prefabs.RuneDamageBluntStone;
+            damageBluntOptions.recipe = "Stone:3, Stone:3";
+            list.Add(new RuneEntry(damageBluntOptions));
+
+            damageBluntOptions.tier = 3;
+            damageBluntOptions.level = 3;
+            damageBluntOptions.prefab = ModularMagic_Core.prefabs.RuneDamageBluntMarble;
+            damageBluntOptions.recipe = "BlackMarble:3, Stone:3";
+            list.Add(new RuneEntry(damageBluntOptions));
+
+            damageBluntOptions.tier = 4;
+            damageBluntOptions.level = 4;
+            damageBluntOptions.prefab = ModularMagic_Core.prefabs.RuneDamageBluntGrausten;
+            damageBluntOptions.recipe = "Grausten:3, Stone:3";
+            list.Add(new RuneEntry(damageBluntOptions));
+
+            RuneEntryOptions damagePierceOptions = new RuneEntryOptions();
+            damagePierceOptions.allowedWeapons = RuneData.Earth;
+            damagePierceOptions.description = "Apply this rune to your weapon to change the main damage type! This rune might not work on certain weapons!";
+            damagePierceOptions.descriptionKey = LocaleKey.ItemRuneBleedingEdgeDesc;
+            damagePierceOptions.name = "Rune: Pierce Damage";
+            damagePierceOptions.nameKey = LocaleKey.ItemRuneBleedingEdge;
+            damagePierceOptions.prefab = ModularMagic_Core.prefabs.RuneDamagePierceWood;
+            damagePierceOptions.recipe = "FineWood:3, FreezeGland:3";
+            damagePierceOptions.type = ImbuementType.DamageType;
+            damagePierceOptions.value = "Pierce";
+            list.Add(new RuneEntry(damagePierceOptions));
+
+            damagePierceOptions.tier = 2;
+            damagePierceOptions.level = 2;
+            damagePierceOptions.prefab = ModularMagic_Core.prefabs.RuneDamagePierceStone;
+            damagePierceOptions.recipe = "Stone:3, FreezeGland:3";
+            list.Add(new RuneEntry(damagePierceOptions));
+
+            damagePierceOptions.tier = 3;
+            damagePierceOptions.level = 3;
+            damagePierceOptions.prefab = ModularMagic_Core.prefabs.RuneDamagePierceMarble;
+            damagePierceOptions.recipe = "BlackMarble:3, FreezeGland:3";
+            list.Add(new RuneEntry(damagePierceOptions));
+
+            damagePierceOptions.tier = 4;
+            damagePierceOptions.level = 4;
+            damagePierceOptions.prefab = ModularMagic_Core.prefabs.RuneDamagePierceGrausten;
+            damagePierceOptions.recipe = "Grausten:3, FreezeGland:3";
+            list.Add(new RuneEntry(damagePierceOptions));
+
+            RuneEntryOptions damageSlashOptions = new RuneEntryOptions();
+            damageSlashOptions.allowedWeapons = RuneData.EarthIce;
+            damageSlashOptions.description = "Apply this rune to your weapon to change the main damage type! This rune might not work on certain weapons!";
+            damageSlashOptions.descriptionKey = LocaleKey.ItemRuneBleedingEdgeDesc;
+            damageSlashOptions.name = "Rune: Slash Damage";
+            damageSlashOptions.nameKey = LocaleKey.ItemRuneBleedingEdge;
+            damageSlashOptions.prefab = ModularMagic_Core.prefabs.RuneDamageSlashWood;
+            damageSlashOptions.recipe = "FineWood:3, SurtlingCore:3";
+            damageSlashOptions.type = ImbuementType.DamageType;
+            damageSlashOptions.value = "Slash";
+            list.Add(new RuneEntry(damageSlashOptions));
+
+            damageSlashOptions.tier = 2;
+            damageSlashOptions.level = 2;
+            damageSlashOptions.prefab = ModularMagic_Core.prefabs.RuneDamageSlashStone;
+            damageSlashOptions.recipe = "Stone:3, SurtlingCore:3";
+            list.Add(new RuneEntry(damageSlashOptions));
+
+            damageSlashOptions.tier = 3;
+            damageSlashOptions.level = 3;
+            damageSlashOptions.prefab = ModularMagic_Core.prefabs.RuneDamageSlashMarble;
+            damageSlashOptions.recipe = "BlackMarble:3, SurtlingCore:3";
+            list.Add(new RuneEntry(damageSlashOptions));
+
+            damageSlashOptions.tier = 4;
+            damageSlashOptions.level = 4;
+            damageSlashOptions.prefab = ModularMagic_Core.prefabs.RuneDamageSlashGrausten;
+            damageSlashOptions.recipe = "Grausten:3, SurtlingCore:3";
+            list.Add(new RuneEntry(damageSlashOptions));
+        }
+    }
+}

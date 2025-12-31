@@ -1,4 +1,5 @@
-﻿using ModularMagic_Core.components;
+﻿using Jotunn.Managers;
+using ModularMagic_Core.components;
 using ModularMagic_Core.Helpers;
 using ModularMagic_Core.Models;
 using ModularMagic_Core.Types;
@@ -11,7 +12,7 @@ using static ItemDrop;
 
 namespace ModularMagic_Core.Components
 {
-    internal class ImbuementTable : MonoBehaviour
+    internal class RuneTable : MonoBehaviour
     {
         private ZNetView netView;
         public List<Imbuement> m_imbuements = new List<Imbuement>();
@@ -23,6 +24,8 @@ namespace ModularMagic_Core.Components
         public UnityEvent m_onRuneActivation = new UnityEvent();
         public UnityEvent m_onSave = new UnityEvent();
 
+        private Transform m_altarTransform;
+        private Transform m_staffTransform;
         private Material m_tableMat;
         private Color m_emissionHigh;
         private Color m_emissionLow;
@@ -32,30 +35,30 @@ namespace ModularMagic_Core.Components
         private bool m_emissiveIdleIsStarting = true;
         private IEnumerator m_emission;
 
-        private Transform m_staffTransform;
-        private Vector3 m_staffPositionStartIdle;
-        private Vector3 m_staffPositionEndIdle;
-        private Vector3 m_staffRotateStartIdle;
-        private Vector3 m_staffRotateEndIdle;
-        private float m_staffDurationIdle = 10f;
-        private bool m_staffReverseIdle = false;
-        private bool m_staffFirstRotate = true;
-        private IEnumerator m_staffIdle;
+        public EffectList saveEffects = new EffectList();
 
-        private void Awake()
+        public void Awake()
         {
             netView = transform.Find("itemstand").gameObject.GetComponent<ItemStand>().m_netViewOverride;
+            m_staffTransform = transform.Find("itemstand/attach_other");
+            m_altarTransform = transform.Find("new/altar");
 
-            MeshRenderer meshComp = transform.Find("new/altar").gameObject.GetComponent<MeshRenderer>();
+            MeshRenderer meshComp = m_altarTransform.gameObject.GetComponent<MeshRenderer>();
             m_tableMat = meshComp.materials[0];
+
+            // TODO: Move this to staff attach when specific weapon colors are introduced
             m_emissionHigh = LightColorPresetHelper.GetColors(LightColorPresetType.Green).emissionColor;
             m_emissionLow = new Color(m_emissionHigh.r * m_emissionMultiplier, m_emissionHigh.g * m_emissionMultiplier, m_emissionHigh.b * m_emissionMultiplier, m_emissionHigh.a);
 
-            m_staffTransform = transform.Find("itemstand/attach_other");
-            m_staffPositionStartIdle = new Vector3(m_staffTransform.localPosition.x, m_staffTransform.localPosition.y, m_staffTransform.localPosition.z);
-            m_staffPositionEndIdle = new Vector3(m_staffTransform.localPosition.x, m_staffTransform.localPosition.y + 0.1f, m_staffTransform.localPosition.z);
-            m_staffRotateStartIdle = new Vector3(0f, 0f, 45f);
-            m_staffRotateEndIdle = new Vector3(0f, 0f, -45f);
+            EffectList.EffectData saveEffectData = new EffectList.EffectData();
+            saveEffectData.m_enabled = true;
+            saveEffectData.m_prefab = ModularMagic_Core.prefabs.SaveFX;
+            saveEffectData.m_variant = -1;
+
+            List<EffectList.EffectData> saveEffectsList = new List<EffectList.EffectData>();
+            saveEffectsList.Add(saveEffectData);
+
+            saveEffects.m_effectPrefabs = saveEffectsList.ToArray();
         }
 
         public void StaffAttach(string imbuementsString, ItemData itemData)
@@ -63,36 +66,36 @@ namespace ModularMagic_Core.Components
             m_imbuements = ImbuementHelper.StringToList(imbuementsString);
             m_itemData = itemData;
             m_imbuementsString = imbuementsString;
-            m_onItemAttach.Invoke();
             CreateRunes();
 
-            //Jotunn.Logger.LogWarning("======================================");
-            //Jotunn.Logger.LogWarning("STAFF ATTACH: " + m_imbuementsString);
+            m_onItemAttach.Invoke();
 
             Invoke(nameof(EmissionStart), 0f);
             InvokeRepeating(nameof(EmissionIdle), m_emissionDurationIdle + 0.1f, m_emissionDurationIdle + 0.1f);
-            InvokeRepeating(nameof(StaffIdle), 0f, m_staffDurationIdle + 0.1f);
+
+            Animator animatorStaff = m_staffTransform.gameObject.GetComponent<Animator>();
+            animatorStaff.SetTrigger("Idle");
         }
 
         public void StaffRemove()
         {
-            //Jotunn.Logger.LogWarning("======================================");
-            //Jotunn.Logger.LogWarning("STAFF REMOVE: " + m_imbuementsString);
-
             if (m_emission != null)
                 StopCoroutine(m_emission);
 
             CancelInvoke(nameof(EmissionStart));
             CancelInvoke(nameof(EmissionIdle));
-            CancelInvoke(nameof(StaffIdle));
             Invoke(nameof(EmissionStop), 0f);
 
             m_imbuements = new List<Imbuement>();
             m_itemData = null;
             m_imbuementsString = null;
-            m_staffFirstRotate = true;
-            m_onItemRemove.Invoke();
             RemoveRunes();
+
+            m_onItemRemove.Invoke();
+
+            Animator animatorStaff = m_staffTransform.gameObject.GetComponent<Animator>();
+            animatorStaff.Rebind();
+            animatorStaff.Update(0f);
         }
 
         public void CreateRunes()
@@ -117,8 +120,8 @@ namespace ModularMagic_Core.Components
                 interactRune.transform.SetParent(runesTransform);
                 interactRune.SetActive(true);
 
-                ImbuementTableInteract tableInteract = interactRune.AddComponent<ImbuementTableInteract>();
-                tableInteract.Init(imbuement, index);
+                RuneTableRuneInteract tableInteract = interactRune.AddComponent<RuneTableRuneInteract>();
+                tableInteract.Init(imbuement, index, m_emissionHigh);
                 index++;
             }
         }
@@ -132,63 +135,28 @@ namespace ModularMagic_Core.Components
 
             foreach (Transform child in runesTransform)
             {
-                ImbuementTableInteract tableInteract = child.gameObject.GetComponent<ImbuementTableInteract>();
-                tableInteract.Destroy();
+                RuneTableRuneInteract tableInteract = child.gameObject.GetComponent<RuneTableRuneInteract>();
+                tableInteract.StartMoveOut();
             }
         }
 
-        public string CanImbue()
+        public string CanSave()
         {
-            if (Player.m_localPlayer == null || m_imbuements == null)
-                return CanImbueType.No;
-
-            //Inventory inventory = Player.m_localPlayer.GetInventory();
-            //int materialInInventory = inventory.CountItems(m_imbuementMaterial);
-            //int totalMaterialRequired = CountMaterialRequired();
-
-            //if (materialInInventory == 0)
-            //    return CanImbueType.No;
-
-            //if (totalMaterialRequired == 0 && m_imbued.All(item => item.enabled))
-            //    return CanImbueType.NoChange;
-
-            //if (materialInInventory >= totalMaterialRequired)
-            //    return CanImbueType.Yes;
-
             string currentImbuementsString = ImbuementHelper.ListToString(m_imbuements);
 
-            // Jotunn.Logger.LogWarning("CanImbue: " + m_imbuementsString == currentImbuementsString);
             if (m_imbuementsString == currentImbuementsString)
                 return CanImbueType.NoChange;
 
             return CanImbueType.Yes;
         }
 
-        //public int CountMaterialRequired()
-        //{
-        //    if (m_imbuements == null)
-        //        return 0;
-
-        //    int totalMaterialRequired = 0;
-
-        //    foreach (Imbuement imbuement in m_imbuements.FindAll(item => !item.isImbued))
-        //    {
-        //        if (!imbuement.enabled)
-        //            continue;
-
-        //        totalMaterialRequired += imbuement.materialRequired;
-        //    }
-
-        //    return totalMaterialRequired;
-        //}
-
         public bool Save()
         {
             try
             {
-                string canImbue = CanImbue();
+                string canSave = CanSave();
 
-                if (canImbue == CanImbueType.No || canImbue == CanImbueType.NoChange)
+                if (canSave == CanImbueType.No || canSave == CanImbueType.NoChange)
                     return false;
 
                 foreach (Imbuement imbuement in m_imbuements)
@@ -209,6 +177,7 @@ namespace ModularMagic_Core.Components
 
                 m_imbuementsString = imbuementsString;
                 m_onSave.Invoke();
+                // saveEffects.Create(m_staffTransform.position, m_staffTransform.rotation);
                 return true;
             }
             catch (Exception e)
@@ -244,46 +213,11 @@ namespace ModularMagic_Core.Components
             }
             else
                 m_emissionReverseIdle = !m_emissionReverseIdle;
-                
+
             Color fromColor = m_emissionReverseIdle ? m_emissionLow : m_emissionHigh;
             Color toColor = m_emissionReverseIdle ? m_emissionHigh : m_emissionLow;
             m_emission = LerpHelper.LerpColor(m_tableMat, fromColor, toColor, m_emissionDurationIdle);
             StartCoroutine(m_emission);
         }
-
-        public void StaffIdle()
-        {
-            m_staffReverseIdle = !m_staffReverseIdle;
-            Vector3 startPos = m_staffReverseIdle ? m_staffPositionEndIdle : m_staffPositionStartIdle;
-            Vector3 endPos = m_staffReverseIdle ? m_staffPositionStartIdle : m_staffPositionEndIdle;
-            Vector3 startRot = m_staffFirstRotate ? new Vector3(0f, 0f, 0f) : m_staffReverseIdle ? m_staffRotateEndIdle : m_staffRotateStartIdle;
-            Vector3 endRot = m_staffReverseIdle ? m_staffRotateStartIdle : m_staffRotateEndIdle;
-            m_staffFirstRotate = false;
-            // m_staffIdle = LerpHelper.SlerpPosition(m_staffTransform, start, end, m_staffDurationIdle);
-            m_staffIdle = LerpHelper.LerpPositionAndRotation(m_staffTransform, startPos, endPos, startRot, endRot, m_staffDurationIdle);
-            StartCoroutine(m_staffIdle);
-        }
-
-        //private float GetPercentage(float total, float part)
-        //{
-        //    Jotunn.Logger.LogWarning("Total: " + total);
-        //    Jotunn.Logger.LogWarning("Part: " + part);
-
-        //    if (total == 0f)
-        //        return 0f;
-
-        //    if (part == 0f)
-        //        return 1;
-
-        //    float result = part / total;
-
-        //    if (result < 0) result = 0;
-        //    if (result > 1) result = 1;
-
-        //    Jotunn.Logger.LogWarning("Calc: " + part / total);
-        //    Jotunn.Logger.LogWarning("Result: " + result);
-
-        //    return result;
-        //}
     }
 }

@@ -1,8 +1,8 @@
-﻿using Jotunn.Configs;
+﻿using Jotunn;
+using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using ModularMagic_Core.Configs;
-using ModularMagic_Core.Models;
 using System;
 using UnityEngine;
 
@@ -20,7 +20,7 @@ namespace ModularMagic_Core.Helpers
                 pieceConfig.Description = config.description.Value;
                 pieceConfig.CraftingStation = config.craftingStation.Value;
                 pieceConfig.PieceTable = PieceTables.Hammer;
-                pieceConfig.Category = PieceCategories.Furniture;
+                pieceConfig.Category = PieceCategories.Crafting;
                 pieceConfig.AddRequirement("Stone", 20);
                 pieceConfig.AddRequirement("MMC_EitrCrude", 12);
                 pieceConfig.AddRequirement("Copper", 8);
@@ -28,10 +28,13 @@ namespace ModularMagic_Core.Helpers
 
                 if (renderIcon)
                 {
-                    RenderManager.RenderRequest request = new RenderManager.RenderRequest(prefab);
-                    request.Rotation = RenderManager.IsometricRotation;
-                    // request.UseCache = true;
-                    pieceConfig.Icon = RenderManager.Instance.Render(request);
+                    //CraftingStation craftingStation = prefab.GetComponent<CraftingStation>();
+                    //RenderManager.RenderRequest request = new RenderManager.RenderRequest(prefab);
+                    //request.Rotation = RenderManager.IsometricRotation;
+
+                    //Sprite icon = RenderManager.Instance.Render(request);
+                    //pieceConfig.Icon = icon;
+                    //craftingStation.m_icon = icon;
                 }
 
                 //RequirementConfig[] requirements = RecipeHelper.GetAsRequirementConfigArray(config.recipe.Value, null, null);

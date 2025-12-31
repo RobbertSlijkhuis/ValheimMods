@@ -10,7 +10,7 @@
         public static string GaldrTable => "GaldrTable";
         public static string None => "None";
         public static string Stonecutter => "Stonecutter";
-        public static string RuneTable => "MMC_ImbuementTable";
+        public static string RuneTable => "MMC_RuneTable";
         public static string Workbench => "Workbench";
     }
 }

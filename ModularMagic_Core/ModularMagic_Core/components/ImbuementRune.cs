@@ -1,6 +1,4 @@
-﻿using Jotunn.Managers;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace ModularMagic_Core.Components
