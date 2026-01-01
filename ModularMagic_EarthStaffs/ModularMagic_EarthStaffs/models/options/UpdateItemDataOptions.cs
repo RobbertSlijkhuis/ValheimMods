@@ -10,6 +10,7 @@ namespace ModularMagic_EarthStaffs.Models
         public string? description = null;
         public float? damageBlunt = null;
         public float? damageChop = null;
+        public float? damageGeneral = null;
         public float? damagePickaxe = null;
         public float? damagePierce = null;
         public float? damagePoison = null;
@@ -17,6 +18,7 @@ namespace ModularMagic_EarthStaffs.Models
         public float? damageSlash = null;
         public float? damageBluntPerLevel = null;
         public float? damageChopPerLevel = null;
+        public float? damageGeneralPerLevel = null;
         public float? damagePickaxePerLevel = null;
         public float? damagePiercePerLevel = null;
         public float? damagePoisonPerLevel = null;
@@ -25,6 +27,7 @@ namespace ModularMagic_EarthStaffs.Models
         public float? attackEitr = null;
         public float? secondaryAttackEitr = null;
         public StatusEffect? equipStatusEffect = ScriptableObject.CreateInstance<StatusEffect>();
+        public ItemData? mainAttack;
         public float? projectileVelocity = null;
         public float? projectileAccuracy = null;
         public float? projectileBurst = null;

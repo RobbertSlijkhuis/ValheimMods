@@ -1,4 +1,5 @@
-﻿using ModularMagic_EarthStaffs.Models;
+﻿using ModularMagic_EarthStaffs.Configs;
+using ModularMagic_EarthStaffs.Models;
 using ModularMagic_EarthStaffs.Types;
 using System;
 using System.Collections.Generic;
@@ -36,11 +37,12 @@ namespace ModularMagic_EarthStaffs.Helpers
             options.projectileAccuracy = snapShotData.m_shared.m_attack.m_projectileAccuracy;
             options.projectileBurst = snapShotData.m_shared.m_attack.m_burstInterval;
             options.projectileVelocity = snapShotData.m_shared.m_attack.m_projectileVel;
+            options.mainAttack = snapShotData;
 
-            GameObject projectileBlunt = ModularMagic_EarthStaffs.Instance.prefabs.ProjectileDefault.transform.Find("visual/blunt").gameObject;
-            GameObject projectileSlash = ModularMagic_EarthStaffs.Instance.prefabs.ProjectileDefault.transform.Find("visual/slash").gameObject;
-            GameObject projectilePierce = ModularMagic_EarthStaffs.Instance.prefabs.ProjectileDefault.transform.Find("visual/pierce").gameObject;
-            Projectile projectile = ModularMagic_EarthStaffs.Instance.prefabs.ProjectileDefault.GetComponent<Projectile>();
+            GameObject projectileBlunt = ModularMagic_EarthStaffs.prefabs.ProjectileDefault.transform.Find("visual/blunt").gameObject;
+            GameObject projectileSlash = ModularMagic_EarthStaffs.prefabs.ProjectileDefault.transform.Find("visual/slash").gameObject;
+            GameObject projectilePierce = ModularMagic_EarthStaffs.prefabs.ProjectileDefault.transform.Find("visual/pierce").gameObject;
+            Projectile projectile = ModularMagic_EarthStaffs.prefabs.ProjectileDefault.GetComponent<Projectile>();
             projectileBlunt.SetActive(true);
             projectileSlash.SetActive(false);
             projectilePierce.SetActive(false);
@@ -80,25 +82,31 @@ namespace ModularMagic_EarthStaffs.Helpers
                         projectileBlunt.SetActive(false);
                         break;
                     case nameof(ImbuementType.EitrCost):
-                        options.attackEitr -= float.Parse(imbuement.value, CultureInfo.InvariantCulture) * imbuement.level;
+                        options.attackEitr -= PluginConfig.imbuementConfig.EitrCost.Value * imbuement.level;
                         break;
                     case nameof(ImbuementType.ParryBonus):
                         options.timedBlockBonus += float.Parse(imbuement.value, CultureInfo.InvariantCulture);
                         break;
                     case nameof(ImbuementType.ProjectileAccuracy):
-                        options.projectileAccuracy -= float.Parse(imbuement.value, CultureInfo.InvariantCulture) * imbuement.level;
+                        options.projectileAccuracy -= PluginConfig.imbuementConfig.ProjectileAccuracy.Value * imbuement.level;
                         break;
                     case nameof(ImbuementType.ProjectileBurst):
-                        options.projectileBurst -= float.Parse(imbuement.value, CultureInfo.InvariantCulture) * imbuement.level;
+                        options.projectileBurst -= PluginConfig.imbuementConfig.ProjectileBurst.Value * imbuement.level;
                         break;
                     case nameof(ImbuementType.ProjectileVelocity):
-                        options.projectileVelocity += float.Parse(imbuement.value, CultureInfo.InvariantCulture) * imbuement.level;
+                        options.projectileVelocity += PluginConfig.imbuementConfig.ProjectileSpeed.Value * imbuement.level;
+                        break;
+                    case nameof(ImbuementType.MainAttack):
+                        if (imbuement.value == "Cone")
+                            options.mainAttack = ModularMagic_EarthStaffs.prefabs.mainAttackCone.GetComponent<ItemDrop>().m_itemData;
                         break;
                     case nameof(ImbuementType.SecondaryAttack):
-                        if (imbuement.value == "Rain")
-                            options.secondaryAttack = ModularMagic_EarthStaffs.Instance.prefabs.SecondaryAttackBoulder.GetComponent<ItemDrop>().m_itemData;
+                        if (imbuement.value == "Nova")
+                            options.secondaryAttack = ModularMagic_EarthStaffs.prefabs.SecondaryAttackNova.GetComponent<ItemDrop>().m_itemData;
+                        else if (imbuement.value == "Rain")
+                            options.secondaryAttack = ModularMagic_EarthStaffs.prefabs.SecondaryAttackBoulder.GetComponent<ItemDrop>().m_itemData;
                         else if (imbuement.value == "Summon")
-                            options.secondaryAttack = ModularMagic_EarthStaffs.Instance.prefabs.SecondaryAttackRoots.GetComponent<ItemDrop>().m_itemData;
+                            options.secondaryAttack = ModularMagic_EarthStaffs.prefabs.SecondaryAttackRoots.GetComponent<ItemDrop>().m_itemData;
                         break;
                 }
             }
@@ -109,6 +117,7 @@ namespace ModularMagic_EarthStaffs.Helpers
             Jotunn.Logger.LogWarning("Accuracy: " + options.projectileAccuracy);
             Jotunn.Logger.LogWarning("Burst: " + options.projectileBurst);
             Jotunn.Logger.LogWarning("Speed: " + options.projectileVelocity);
+            Jotunn.Logger.LogWarning("Main: " + options.mainAttack == null ? "null" : options.mainAttack?.m_shared?.m_attack?.m_attackProjectile?.name);
             Jotunn.Logger.LogWarning("Secondary: " + options.secondaryAttack == null ? "null" : options.secondaryAttack?.m_shared?.m_attack?.m_attackProjectile?.name);
 
             StatusEffect ImbuementEffect = ScriptableObject.CreateInstance<StatusEffect>();
@@ -130,14 +139,14 @@ namespace ModularMagic_EarthStaffs.Helpers
         {
             switch (name)
             {
-                case var value when value == ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth0.name:
-                    return ModularMagic_EarthStaffs.Instance.snapshots.staffEarth0;
-                case var value when value == ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth1.name:
-                    return ModularMagic_EarthStaffs.Instance.snapshots.staffEarth1;
-                case var value when value == ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth2.name:
-                    return ModularMagic_EarthStaffs.Instance.snapshots.staffEarth2;
-                case var value when value == ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth3.name:
-                    return ModularMagic_EarthStaffs.Instance.snapshots.staffEarth3;
+                case var value when value == ModularMagic_EarthStaffs.prefabs.StaffEarth0.name:
+                    return ModularMagic_EarthStaffs.snapshots.staffEarth0;
+                case var value when value == ModularMagic_EarthStaffs.prefabs.StaffEarth1.name:
+                    return ModularMagic_EarthStaffs.snapshots.staffEarth1;
+                case var value when value == ModularMagic_EarthStaffs.prefabs.StaffEarth2.name:
+                    return ModularMagic_EarthStaffs.snapshots.staffEarth2;
+                case var value when value == ModularMagic_EarthStaffs.prefabs.StaffEarth3.name:
+                    return ModularMagic_EarthStaffs.snapshots.staffEarth3;
                 default:
                     return null;
             }

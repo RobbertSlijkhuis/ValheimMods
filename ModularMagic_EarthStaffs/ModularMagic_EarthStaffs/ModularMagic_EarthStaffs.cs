@@ -6,6 +6,7 @@ using ModularMagic_EarthStaffs.Components;
 using ModularMagic_EarthStaffs.Configs;
 using ModularMagic_EarthStaffs.Helpers;
 using ModularMagic_EarthStaffs.Models;
+using System;
 using System.Reflection;
 using UnityEngine;
 
@@ -25,10 +26,10 @@ namespace ModularMagic_EarthStaffs
 
         private AssetBundle assetBundle;
         public static CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();
-        public CustomPrefabs prefabs = new CustomPrefabs();
-        public CustomStatusEffects effects = new CustomStatusEffects();
-        public CustomSprites sprites = new CustomSprites();
-        public ItemDataSnaphot snapshots = new ItemDataSnaphot();
+        public static CustomPrefabs prefabs = new CustomPrefabs();
+        public static CustomStatusEffects effects = new CustomStatusEffects();
+        public static CustomSprites sprites = new CustomSprites();
+        public static ItemDataSnaphot snapshots = new ItemDataSnaphot();
         public static readonly string imbuementDataKey = "Imbuements_MMC";
 
         public void Awake()
@@ -56,62 +57,66 @@ namespace ModularMagic_EarthStaffs
 
         private void AddEarthStaffs()
         {
-            snapshots.staffEarth0 = prefabs.StaffEarth0.GetComponent<ItemDrop>().m_itemData.Clone();
-            snapshots.staffEarth1 = prefabs.StaffEarth1.GetComponent<ItemDrop>().m_itemData.Clone();
-            snapshots.staffEarth2 = prefabs.StaffEarth2.GetComponent<ItemDrop>().m_itemData.Clone();
-            snapshots.staffEarth3 = prefabs.StaffEarth3.GetComponent<ItemDrop>().m_itemData.Clone();
+            try
+            {
+                snapshots.staffEarth0 = prefabs.StaffEarth0.GetComponent<ItemDrop>().m_itemData.Clone();
+                snapshots.staffEarth1 = prefabs.StaffEarth1.GetComponent<ItemDrop>().m_itemData.Clone();
+                snapshots.staffEarth2 = prefabs.StaffEarth2.GetComponent<ItemDrop>().m_itemData.Clone();
+                snapshots.staffEarth3 = prefabs.StaffEarth3.GetComponent<ItemDrop>().m_itemData.Clone();
 
-            Imbuements imbuements0 = prefabs.StaffEarth0.AddComponent<Imbuements>();
-            imbuements0.m_slots = 1;
-            imbuements0.m_tier = 0;
+                Imbuements imbuements0 = prefabs.StaffEarth0.AddComponent<Imbuements>();
+                imbuements0.m_slots = 1;
+                imbuements0.m_tier = 0;
 
-            Imbuements imbuements1 = prefabs.StaffEarth1.AddComponent<Imbuements>();
-            imbuements1.m_slots = 2;
-            imbuements1.m_tier = 1;
+                Imbuements imbuements1 = prefabs.StaffEarth1.AddComponent<Imbuements>();
+                imbuements1.m_slots = 2;
+                imbuements1.m_tier = 1;
 
-            Imbuements imbuements2 = prefabs.StaffEarth2.AddComponent<Imbuements>();
-            imbuements2.m_slots = 3;
-            imbuements2.m_tier = 2;
+                Imbuements imbuements2 = prefabs.StaffEarth2.AddComponent<Imbuements>();
+                imbuements2.m_slots = 3;
+                imbuements2.m_tier = 2;
 
-            Imbuements imbuements3 = prefabs.StaffEarth3.AddComponent<Imbuements>();
-            imbuements3.m_slots = 4;
-            imbuements3.m_tier = 4;
+                Imbuements imbuements3 = prefabs.StaffEarth3.AddComponent<Imbuements>();
+                imbuements3.m_slots = 4;
+                imbuements3.m_tier = 4;
 
-            ItemHelper.CreateStaff(prefabs.StaffEarth0, PluginConfig.staffEarth0);
-            ItemHelper.CreateStaff(prefabs.StaffEarth1, PluginConfig.staffEarth1);
-            ItemHelper.CreateStaff(prefabs.StaffEarth2, PluginConfig.staffEarth2);
-            ItemHelper.CreateStaff(prefabs.StaffEarth3, PluginConfig.staffEarth3);
+                ItemHelper.CreateStaff(prefabs.StaffEarth0, PluginConfig.staffEarth0);
+                ItemHelper.CreateStaff(prefabs.StaffEarth1, PluginConfig.staffEarth1);
+                ItemHelper.CreateStaff(prefabs.StaffEarth2, PluginConfig.staffEarth2);
+                ItemHelper.CreateStaff(prefabs.StaffEarth3, PluginConfig.staffEarth3);
 
-            AttackHelper.UpdateBoulder(prefabs.SecondaryAttackBoulder, prefabs.ProjectileBoulder, PluginConfig.secondaryAttackBoulder);
-            AttackHelper.UpdateRoots(prefabs.SecondaryAttackRoots, prefabs.Root, PluginConfig.secondaryAttackRoots);
+                AttackHelper.UpdateCone(prefabs.Cone, PluginConfig.mainAttackCone);
+                AttackHelper.UpdateNova(prefabs.Nova, PluginConfig.secondaryAttackNova);
+                AttackHelper.UpdateRain(prefabs.SecondaryAttackBoulder, prefabs.ProjectileBoulder, PluginConfig.secondaryAttackRain);
+                AttackHelper.UpdateSummon(prefabs.SecondaryAttackRoots, prefabs.Root, PluginConfig.secondaryAttackSummon);
 
-            PrefabManager.OnVanillaPrefabsAvailable -= AddEarthStaffs;
+                prefabs.Nova.AddComponent<NovaTerrainEdit>();
+
+                PrefabManager.OnVanillaPrefabsAvailable -= AddEarthStaffs;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in adding the earth staffs: " + e);
+                PrefabManager.OnVanillaPrefabsAvailable -= AddEarthStaffs;
+            }
         }
 
         private void InitStatusEffects()
         {
             effects.BoulderCooldown = ScriptableObject.CreateInstance<StatusEffect>();
-            effects.BoulderCooldown.name = PluginConfig.secondaryAttackBoulder.cooldownStatusEffectName;
+            effects.BoulderCooldown.name = PluginConfig.secondaryAttackRain.cooldownStatusEffectName;
             effects.BoulderCooldown.m_name = "Boulder cooldown";
             effects.BoulderCooldown.m_icon = sprites.BoulderCooldown;
-            effects.BoulderCooldown.m_startMessageType = MessageHud.MessageType.Center;
-            effects.BoulderCooldown.m_startMessage = "";
-            effects.BoulderCooldown.m_stopMessageType = MessageHud.MessageType.Center;
-            effects.BoulderCooldown.m_stopMessage = "";
             effects.BoulderCooldown.m_tooltip = "Be patient!";
-            effects.BoulderCooldown.m_ttl = PluginConfig.secondaryAttackBoulder.cooldown.Value;
+            effects.BoulderCooldown.m_ttl = PluginConfig.secondaryAttackRain.cooldown.Value;
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.BoulderCooldown, fixReference: false));
 
             effects.RootsCooldown = ScriptableObject.CreateInstance<StatusEffect>();
-            effects.RootsCooldown.name = PluginConfig.secondaryAttackRoots.cooldownStatusEffectName;
+            effects.RootsCooldown.name = PluginConfig.secondaryAttackSummon.cooldownStatusEffectName;
             effects.RootsCooldown.m_name = "Summon roots cooldown";
             effects.RootsCooldown.m_icon = sprites.RootsCooldown;
-            effects.RootsCooldown.m_startMessageType = MessageHud.MessageType.Center;
-            effects.RootsCooldown.m_startMessage = "";
-            effects.RootsCooldown.m_stopMessageType = MessageHud.MessageType.Center;
-            effects.RootsCooldown.m_stopMessage = "";
             effects.RootsCooldown.m_tooltip = "Be patient!";
-            effects.RootsCooldown.m_ttl = PluginConfig.secondaryAttackRoots.cooldown.Value;
+            effects.RootsCooldown.m_ttl = PluginConfig.secondaryAttackSummon.cooldown.Value;
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.RootsCooldown, fixReference: false));
 
             //    StatusEffect exhaustAndFhoulMagicEffect = ScriptableObject.CreateInstance<StatusEffect>();
@@ -145,6 +150,16 @@ namespace ModularMagic_EarthStaffs
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ProjectileMushroom, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_mushroom_projectile_hit_MMES"), true));
 
+            prefabs.mainAttackCone = assetBundle.LoadAsset<GameObject>("main_cone_attack_MMES");
+            prefabs.Cone = assetBundle.LoadAsset<GameObject>("attack_cone_MMES");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.Cone, true));
+
+            prefabs.SecondaryAttackNova = assetBundle.LoadAsset<GameObject>("secondary_nova_MMES");
+            prefabs.Nova = assetBundle.LoadAsset<GameObject>("attack_nova_MMES");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.Nova, true));
+            prefabs.LevelTerrain = assetBundle.LoadAsset<GameObject>("script_levelTerrain_MMES");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.LevelTerrain, false));
+
             prefabs.SecondaryAttackBoulder = assetBundle.LoadAsset<GameObject>("secondary_boulder_MMES");
             prefabs.ProjectileBoulder = assetBundle.LoadAsset<GameObject>("projectile_boulder_MMES");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ProjectileBoulder, true));
@@ -154,7 +169,7 @@ namespace ModularMagic_EarthStaffs
             prefabs.SecondaryAttackRoots = assetBundle.LoadAsset<GameObject>("secondary_root_MMES");
             prefabs.Root = assetBundle.LoadAsset<GameObject>("Root_MMES");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.Root, true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("root_attack_MMES"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("attack_root_MMES"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("script_roots_MMES"), true));
 
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_sledge_demolisher_hit_small_MMES"), true));

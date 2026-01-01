@@ -1,4 +1,5 @@
-﻿using ModularMagic_EarthStaffs.Models;
+﻿using ModularMagic_EarthStaffs.configs;
+using ModularMagic_EarthStaffs.Models;
 using ModularMagic_EarthStaffs.Types;
 using System;
 
@@ -12,27 +13,33 @@ namespace ModularMagic_EarthStaffs.Configs
         public static StaffConfig staffEarth0 = new StaffConfig();
 
         public static string staff1Name = "Staff of Rocks";
-        public static string staff1Recipe = $"{ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth0.name}:1, RoundLog:10, Stone:10, Thistle:10";
+        public static string staff1Recipe = $"{ModularMagic_EarthStaffs.prefabs.StaffEarth0.name}:1, RoundLog:10, Stone:10, Thistle:10";
         public static string staff1UpgradeRecipe = "RoundLog:5, Stone:5, Thistle:3";
         public static StaffConfig staffEarth1 = new StaffConfig();
 
         public static string staff2Name = "Staff of the Avalanche";
-        public static string staff2Recipe = $"{ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth1.name}:1, FineWood:10, Root:10, Crystal:10";
+        public static string staff2Recipe = $"{ModularMagic_EarthStaffs.prefabs.StaffEarth1.name}:1, FineWood:10, Root:10, Crystal:10";
         public static string staff2UpgradeRecipe = "FineWood:5, Root:3, Crystal:3";
         public static StaffConfig staffEarth2 = new StaffConfig();
 
         public static string staff3Name = "Oakrend the Earthcaller";
-        public static string staff3Recipe = $"{ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth2.name}:1, YggdrasilWood:20, Sap:10, Eitr:16";
+        public static string staff3Recipe = $"{ModularMagic_EarthStaffs.prefabs.StaffEarth2.name}:1, YggdrasilWood:20, Sap:10, Eitr:16";
         public static string staff3UpgradeRecipe = "YggdrasilWood:5, Sap:2, Eitr:8";
         public static StaffConfig staffEarth3 = new StaffConfig();
 
-        public static string secondaryAttack1Name = "Secondary attack Boulder";
-        public static SecondaryAttackConfig secondaryAttackBoulder = new SecondaryAttackConfig();
+        public static string mainAttackConeName = "Main attack Cone";
+        public static SecondaryAttackConfig mainAttackCone = new SecondaryAttackConfig();
 
-        public static string secondaryAttack2Name = "Secondary attack Roots";
-        public static SecondaryAttackConfig secondaryAttackRoots = new SecondaryAttackConfig();
+        public static string secondaryAttackNovaName = "Secondary attack Nova";
+        public static SecondaryAttackConfig secondaryAttackNova = new SecondaryAttackConfig();
 
-        private static int sectionIndex = 1;
+        public static string secondaryAttackRainName = "Secondary attack Boulder";
+        public static SecondaryAttackConfig secondaryAttackRain = new SecondaryAttackConfig();
+
+        public static string secondaryAttackSummonName = "Secondary attack Roots";
+        public static SecondaryAttackConfig secondaryAttackSummon = new SecondaryAttackConfig();
+
+        public static ImbuementConfig imbuementConfig = new ImbuementConfig();
 
         public static void Init()
         {
@@ -40,15 +47,20 @@ namespace ModularMagic_EarthStaffs.Configs
             InitStaffEarth1Config();
             InitStaffEarth2Config();
             InitStaffEarth3Config();
-            InitSecondaryAttackBoulderConfig();
-            InitSecondaryAttackRootsConfig();
+
+            InitMainAttackConeConfig();
+            InitSecondaryAttackNovaConfig();
+            InitSecondaryAttackRainConfig();
+            InitSecondaryAttackSummonConfig();
+
+            imbuementConfig.GenerateConfig();
         }
 
         private static void InitStaffEarth0Config()
         {
             try
             {
-                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth0, staff0Name, staff0Recipe, staff0UpgradeRecipe)
+                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_EarthStaffs.prefabs.StaffEarth0, staff0Name, staff0Recipe, staff0UpgradeRecipe)
                 {
                     description = "Held together by nothing but wishful thinking, this staff hurls whatever the forest has lying around. Mushrooms? Sure. Berrie bushes? Why not!",
                     craftingStation = "Workbench",
@@ -76,7 +88,7 @@ namespace ModularMagic_EarthStaffs.Configs
         {
             try
             {
-                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth1, staff1Name, staff1Recipe, staff1UpgradeRecipe)
+                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_EarthStaffs.prefabs.StaffEarth1, staff1Name, staff1Recipe, staff1UpgradeRecipe)
                 {
                     description = "The staff equivalent of shouting ‘rock!’ and hoping for the best! Chance for broken limbs: optimal",
                     craftingStation = "Workbench",
@@ -110,7 +122,7 @@ namespace ModularMagic_EarthStaffs.Configs
             try
             {
                 
-                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth2, staff2Name, staff2Recipe, staff2UpgradeRecipe)
+                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_EarthStaffs.prefabs.StaffEarth2, staff2Name, staff2Recipe, staff2UpgradeRecipe)
                 {
                     description = "This staff flings boulders with all the subtlety of an avalanche. Not great for diplomacy. Excellent for everything else!",
                     craftingStation = "Workbench",
@@ -143,7 +155,7 @@ namespace ModularMagic_EarthStaffs.Configs
         {
             try
             {
-                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth3, staff3Name, staff3Recipe, staff3UpgradeRecipe)
+                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_EarthStaffs.prefabs.StaffEarth3, staff3Name, staff3Recipe, staff3UpgradeRecipe)
                 {
                     description = "Side effects may include dizziness, confusion, and being buried under several metric tons of stone. Nature just doesn’t negotiate. It bends, breaks, and buries!",
                     craftingStation = "GaldrTable",
@@ -172,20 +184,77 @@ namespace ModularMagic_EarthStaffs.Configs
             }
         }
 
-        private static void InitSecondaryAttackBoulderConfig()
+        private static void InitMainAttackConeConfig()
         {
             try
             {
                 SecondaryAttackConfigOptions options = new SecondaryAttackConfigOptions(
-                    ModularMagic_EarthStaffs.Instance.prefabs.SecondaryAttackBoulder,
-                    ModularMagic_EarthStaffs.Instance.prefabs.ProjectileBoulder,
+                    ModularMagic_EarthStaffs.prefabs.mainAttackCone,
+                    ModularMagic_EarthStaffs.prefabs.Cone,
+                    SecondaryAttackType.AOE,
+                    mainAttackConeName
+                )
+                {
+                    damageBlunt = 0f,
+                    damageChop = 0f,
+                    damageGeneral = 2f,
+                    damagePickaxe = 0f,
+                    damagePierce = 0f,
+                    damagePoison = 15f,
+                    damageSpirit = 2f,
+                };
+                mainAttackCone.GenerateConfig(options);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + mainAttackConeName + " config: " + e);
+            }
+        }
+
+        private static void InitSecondaryAttackNovaConfig()
+        {
+            try
+            {
+                SecondaryAttackConfigOptions options = new SecondaryAttackConfigOptions(
+                    ModularMagic_EarthStaffs.prefabs.SecondaryAttackNova,
+                    ModularMagic_EarthStaffs.prefabs.Nova,
+                    SecondaryAttackType.AOE,
+                    secondaryAttackNovaName
+                )
+                {
+                    aoe = 5f,
+                    damageBlunt = 0f,
+                    damageChop = 0f,
+                    damageGeneral = 0f,
+                    damagePickaxe = 0f,
+                    damagePierce = 75f,
+                    damagePoison = 15f,
+                    damageSpirit = 15f,
+                    attackForce = 100f,
+                };
+                secondaryAttackNova.GenerateConfig(options);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + secondaryAttackNovaName + " config: " + e);
+            }
+        }
+
+        private static void InitSecondaryAttackRainConfig()
+        {
+            try
+            {
+                SecondaryAttackConfigOptions options = new SecondaryAttackConfigOptions(
+                    ModularMagic_EarthStaffs.prefabs.SecondaryAttackBoulder,
+                    ModularMagic_EarthStaffs.prefabs.ProjectileBoulder,
                     SecondaryAttackType.Projectile,
-                    secondaryAttack1Name
+                    secondaryAttackRainName
                 )
                 {
                     aoe = 4.5f,
                     damageBlunt = 90f,
                     damageChop = 30f,
+                    damageGeneral = 0f,
                     damagePickaxe = 30f,
                     damagePoison = 0f,
                     damageSpirit = 0f,
@@ -194,36 +263,44 @@ namespace ModularMagic_EarthStaffs.Configs
                     projectileVelocity = 20f,
                     projectileAccuracy = 1f,
                 };
-                secondaryAttackBoulder.GenerateConfig(options);
+                secondaryAttackRain.GenerateConfig(options);
             }
-            catch (Exception error)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not initialise " + staff3Name + " config: " + error);
+                Jotunn.Logger.LogError("Could not initialise " + secondaryAttackRainName + " config: " + e);
             }
         }
 
-        private static void InitSecondaryAttackRootsConfig()
+        private static void InitSecondaryAttackSummonConfig()
         {
-            SecondaryAttackConfigOptions options = new SecondaryAttackConfigOptions(
-                ModularMagic_EarthStaffs.Instance.prefabs.SecondaryAttackRoots,
-                ModularMagic_EarthStaffs.Instance.prefabs.Root,
-                SecondaryAttackType.Humanoid,
-                secondaryAttack2Name
-            )
+            try
             {
-                health = 150f,
-                minToSpawn = 7,
-                maxToSpawn = 7,
-                maxSpawns = 7,
-                spawnRadius = 15f,
-                damageBlunt = 70f,
-                damageChop = 20f,
-                damagePickaxe = 20f,
-                damagePoison = 0f,
-                damageSpirit = 20f,
-                attackForce = 40f,
-            };
-            secondaryAttackRoots.GenerateConfig(options);
+                SecondaryAttackConfigOptions options = new SecondaryAttackConfigOptions(
+                    ModularMagic_EarthStaffs.prefabs.SecondaryAttackRoots,
+                    ModularMagic_EarthStaffs.prefabs.Root,
+                    SecondaryAttackType.Humanoid,
+                    secondaryAttackSummonName
+                )
+                {
+                    health = 150f,
+                    minToSpawn = 7,
+                    maxToSpawn = 7,
+                    maxSpawns = 7,
+                    spawnRadius = 15f,
+                    damageBlunt = 70f,
+                    damageChop = 20f,
+                    damageGeneral = 0f,
+                    damagePickaxe = 20f,
+                    damagePoison = 0f,
+                    damageSpirit = 20f,
+                    attackForce = 40f,
+                };
+                secondaryAttackSummon.GenerateConfig(options);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + secondaryAttackSummonName + " config: " + e);
+            }
         }
     }
 }

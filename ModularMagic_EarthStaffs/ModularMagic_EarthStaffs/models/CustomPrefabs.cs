@@ -13,9 +13,15 @@ namespace ModularMagic_EarthStaffs.Models
         public GameObject ProjectileDefault;
         public GameObject ProjectileBoulder;
 
+        public GameObject mainAttackCone;
+
         public GameObject SecondaryAttackBoulder;
+        public GameObject SecondaryAttackNova;
         public GameObject SecondaryAttackRoots;
 
+        public GameObject Cone;
+        public GameObject Nova;
         public GameObject Root;
+        public GameObject LevelTerrain;
     }
 }

@@ -21,7 +21,9 @@ namespace ModularMagic_EarthStaffs.Models
         public float? aoe;
         public float? damageBlunt;
         public float? damageChop;
+        public float? damageGeneral;
         public float? damagePickaxe;
+        public float? damagePierce;
         public float? damagePoison;
         public float? damageSpirit;
         public float? attackForce;

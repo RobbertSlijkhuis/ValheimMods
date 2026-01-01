@@ -23,11 +23,14 @@ namespace ModularMagic_EarthStaffs.Helpers
         {
             if (itemData == null)
                 throw new Exception("ItemData is null");
+            
+            if (options.mainAttack != null) { itemData.m_shared.m_attack = options.mainAttack.m_shared.m_attack; }
 
             if (options.name != null) { itemData.m_shared.m_name = options.name; }
             if (options.description != null) { itemData.m_shared.m_description = options.description; }
             if (options.damageBlunt != null) { itemData.m_shared.m_damages.m_blunt = (float)options.damageBlunt; }
             if (options.damageChop != null) { itemData.m_shared.m_damages.m_chop = (float)options.damageChop; }
+            if (options.damageGeneral != null) { itemData.m_shared.m_damages.m_damage = (float)options.damageGeneral; }
             if (options.damagePickaxe != null) { itemData.m_shared.m_damages.m_pickaxe = (float)options.damagePickaxe; }
             if (options.damagePierce != null) { itemData.m_shared.m_damages.m_pierce = (float)options.damagePierce; }
             if (options.damagePoison != null) { itemData.m_shared.m_damages.m_poison = (float)options.damagePoison; }
@@ -35,6 +38,7 @@ namespace ModularMagic_EarthStaffs.Helpers
             if (options.damageSpirit != null) { itemData.m_shared.m_damages.m_spirit = (float)options.damageSpirit; }
             if (options.damageBluntPerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_blunt = (float)options.damageBluntPerLevel; }
             if (options.damageChopPerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_chop = (float)options.damageChopPerLevel; }
+            if (options.damageGeneralPerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_damage = (float)options.damageGeneralPerLevel; }
             if (options.damagePickaxePerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_pickaxe = (float)options.damagePickaxePerLevel; }
             if (options.damagePiercePerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_pierce = (float)options.damagePiercePerLevel; }
             if (options.damagePoisonPerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_poison = (float)options.damagePoisonPerLevel; }
@@ -68,9 +72,9 @@ namespace ModularMagic_EarthStaffs.Helpers
 
             ItemData weaponItemData = Player.m_localPlayer.GetCurrentWeapon();
 
-            if (weaponItemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth1.name && 
-                weaponItemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth2.name &&
-                weaponItemData.m_dropPrefab.name != ModularMagic_EarthStaffs.Instance.prefabs.StaffEarth3.name
+            if (weaponItemData.m_dropPrefab.name != ModularMagic_EarthStaffs.prefabs.StaffEarth1.name && 
+                weaponItemData.m_dropPrefab.name != ModularMagic_EarthStaffs.prefabs.StaffEarth2.name &&
+                weaponItemData.m_dropPrefab.name != ModularMagic_EarthStaffs.prefabs.StaffEarth3.name
             )
                 return;
 
@@ -156,6 +160,26 @@ namespace ModularMagic_EarthStaffs.Helpers
             if (options.maxSpawns != null) { spawnAbility.m_maxSpawned = (int)options.maxSpawns; }
             if (options.spawnRadius != null) { spawnAbility.m_spawnRadius = (int)options.spawnRadius; }
 
+        }
+
+        public static void UpdateAoe(GameObject prefab, UpdateAoeOptions options)
+        {
+            if (prefab == null)
+                throw new Exception("Prefab is null");
+
+            Aoe aoe = prefab.GetComponent<Aoe>();
+
+            if (aoe == null)
+                throw new Exception("Aoe is null");
+
+            if (options.aoe != null) { aoe.m_radius = (float)options.aoe; }
+            if (options.damageBlunt != null) { aoe.m_damage.m_blunt = (float)options.damageBlunt; }
+            if (options.damageChop != null) { aoe.m_damage.m_chop = (float)options.damageChop; }
+            if (options.damagePickaxe != null) { aoe.m_damage.m_pickaxe = (float)options.damagePickaxe; }
+            if (options.damagePierce != null) { aoe.m_damage.m_pierce = (float)options.damagePierce; }
+            if (options.damagePoison != null) { aoe.m_damage.m_poison = (float)options.damagePoison; }
+            if (options.damageSpirit != null) { aoe.m_damage.m_spirit = (float)options.damageSpirit; }
+            if (options.attackForce != null) { aoe.m_attackForce = (float)options.attackForce; }
         }
     }
 }

@@ -15,7 +15,9 @@ namespace ModularMagic_EarthStaffs.Configs
         public ConfigEntry<float> aoe;
         public ConfigEntry<float> damageBlunt;
         public ConfigEntry<float> damageChop;
+        public ConfigEntry<float> damageGeneral;
         public ConfigEntry<float> damagePickaxe;
+        public ConfigEntry<float> damagePierce;
         public ConfigEntry<float> damagePoison;
         public ConfigEntry<float> damageSpirit;
         public ConfigEntry<float> attackForce;
@@ -86,10 +88,20 @@ namespace ModularMagic_EarthStaffs.Configs
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 aoe.SettingChanged += (obj, attr) =>
                 {
-                    UpdateHelper.UpdateProjectile(options.secondPrefab, new UpdateProjectileOptions()
+                    if (options.type == SecondaryAttackType.AOE)
                     {
-                        aoe = aoe.Value,
-                    });
+                        UpdateHelper.UpdateAoe(options.secondPrefab, new UpdateAoeOptions()
+                        {
+                            aoe = aoe.Value,
+                        });
+                    }
+                    else if (options.type == SecondaryAttackType.Projectile)
+                    { 
+                        UpdateHelper.UpdateProjectile(options.secondPrefab, new UpdateProjectileOptions()
+                        {
+                            aoe = aoe.Value,
+                        });
+                    }
                 };
             }
 
@@ -100,6 +112,13 @@ namespace ModularMagic_EarthStaffs.Configs
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 damageBlunt.SettingChanged += (obj, attr) =>
                 {
+                    if (options.type == SecondaryAttackType.AOE)
+                    {
+                        UpdateHelper.UpdateAoe(options.secondPrefab, new UpdateAoeOptions()
+                        {
+                            damageBlunt = damageBlunt.Value,
+                        });
+                    }
                     if (options.type == SecondaryAttackType.Projectile)
                     {
                         UpdateHelper.UpdateProjectile(options.secondPrefab, new UpdateProjectileOptions()
@@ -124,6 +143,13 @@ namespace ModularMagic_EarthStaffs.Configs
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 damageChop.SettingChanged += (obj, attr) =>
                 {
+                    if (options.type == SecondaryAttackType.AOE)
+                    {
+                        UpdateHelper.UpdateAoe(options.secondPrefab, new UpdateAoeOptions()
+                        {
+                            damageChop = damageChop.Value,
+                        });
+                    }
                     if (options.type == SecondaryAttackType.Projectile)
                     {
                         UpdateHelper.UpdateProjectile(options.secondPrefab, new UpdateProjectileOptions()
@@ -136,6 +162,37 @@ namespace ModularMagic_EarthStaffs.Configs
                         UpdateHelper.UpdateHumanoidAttackItemData(options.secondPrefab, new UpdateItemDataOptions()
                         {
                             damageChop = damageChop.Value,
+                        });
+                    }
+                };
+            }
+
+            if (options.damageGeneral != null)
+            {
+                damageGeneral = Config.Bind(new ConfigDefinition(options.sectionName, "General damage"), (float)options.damageGeneral,
+                    new ConfigDescription("The general damage on the " + entityDesc + " (not visible ingame)", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+                damageGeneral.SettingChanged += (obj, attr) =>
+                {
+                    if (options.type == SecondaryAttackType.AOE)
+                    {
+                        UpdateHelper.UpdateAoe(options.secondPrefab, new UpdateAoeOptions()
+                        {
+                            damageGeneral = damageGeneral.Value,
+                        });
+                    }
+                    else if (options.type == SecondaryAttackType.Projectile)
+                    {
+                        UpdateHelper.UpdateProjectile(options.secondPrefab, new UpdateProjectileOptions()
+                        {
+                            damageGeneral = damageGeneral.Value,
+                        });
+                    }
+                    else if (options.type == SecondaryAttackType.Humanoid)
+                    {
+                        UpdateHelper.UpdateHumanoidAttackItemData(options.secondPrefab, new UpdateItemDataOptions()
+                        {
+                            damageGeneral = damageGeneral.Value,
                         });
                     }
                 };
@@ -148,7 +205,14 @@ namespace ModularMagic_EarthStaffs.Configs
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 damagePickaxe.SettingChanged += (obj, attr) =>
                 {
-                    if (options.type == SecondaryAttackType.Projectile)
+                    if (options.type == SecondaryAttackType.AOE)
+                    {
+                        UpdateHelper.UpdateAoe(options.secondPrefab, new UpdateAoeOptions()
+                        {
+                            damagePickaxe = damagePickaxe.Value,
+                        });
+                    }
+                    else if (options.type == SecondaryAttackType.Projectile)
                     {
                         UpdateHelper.UpdateProjectile(options.secondPrefab, new UpdateProjectileOptions()
                         {
@@ -165,14 +229,52 @@ namespace ModularMagic_EarthStaffs.Configs
                 };
             }
 
+            if (options.damagePierce != null)
+            {
+                damagePierce = Config.Bind(new ConfigDefinition(options.sectionName, "Pierce damage"), (float)options.damagePierce,
+                    new ConfigDescription("The pierce damage on the " + entityDesc + " (not visible ingame)", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+                damagePierce.SettingChanged += (obj, attr) =>
+                {
+                    if (options.type == SecondaryAttackType.AOE)
+                    {
+                        UpdateHelper.UpdateAoe(options.secondPrefab, new UpdateAoeOptions()
+                        {
+                            damagePierce = damagePierce.Value,
+                        });
+                    }
+                    else if (options.type == SecondaryAttackType.Projectile)
+                    {
+                        UpdateHelper.UpdateProjectile(options.secondPrefab, new UpdateProjectileOptions()
+                        {
+                            damagePierce = damagePierce.Value,
+                        });
+                    }
+                    else if (options.type == SecondaryAttackType.Humanoid)
+                    {
+                        UpdateHelper.UpdateHumanoidAttackItemData(options.secondPrefab, new UpdateItemDataOptions()
+                        {
+                            damagePierce = damagePierce.Value,
+                        });
+                    }
+                };
+            }
+
             if (options.damagePoison != null)
             {
                 damagePoison = Config.Bind(new ConfigDefinition(options.sectionName, "Poison damage"), (float)options.damagePoison,
-                    new ConfigDescription("The poison damage on the " + entityDesc + " (not visible ingame, effects mining damage)", null,
+                    new ConfigDescription("The poison damage on the " + entityDesc + " (not visible ingame)", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 damagePoison.SettingChanged += (obj, attr) =>
                 {
-                    if (options.type == SecondaryAttackType.Projectile)
+                    if (options.type == SecondaryAttackType.AOE)
+                    {
+                        UpdateHelper.UpdateAoe(options.secondPrefab, new UpdateAoeOptions()
+                        {
+                            damagePoison = damagePoison.Value,
+                        });
+                    }
+                    else if (options.type == SecondaryAttackType.Projectile)
                     {
                         UpdateHelper.UpdateProjectile(options.secondPrefab, new UpdateProjectileOptions()
                         {
@@ -196,7 +298,14 @@ namespace ModularMagic_EarthStaffs.Configs
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 damageSpirit.SettingChanged += (obj, attr) =>
                 {
-                    if (options.type == SecondaryAttackType.Projectile)
+                    if (options.type == SecondaryAttackType.AOE)
+                    {
+                        UpdateHelper.UpdateAoe(options.secondPrefab, new UpdateAoeOptions()
+                        {
+                            damageSpirit = damageSpirit.Value,
+                        });
+                    }
+                    else if (options.type == SecondaryAttackType.Projectile)
                     {
                         UpdateHelper.UpdateProjectile(options.secondPrefab, new UpdateProjectileOptions()
                         {
@@ -220,7 +329,14 @@ namespace ModularMagic_EarthStaffs.Configs
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
                 attackForce.SettingChanged += (obj, attr) =>
                 {
-                    if (options.type == SecondaryAttackType.Projectile)
+                    if (options.type == SecondaryAttackType.AOE)
+                    {
+                        UpdateHelper.UpdateAoe(options.secondPrefab, new UpdateAoeOptions()
+                        {
+                            attackForce = attackForce.Value,
+                        });
+                    }
+                    else if (options.type == SecondaryAttackType.Projectile)
                     {
                         UpdateHelper.UpdateProjectile(options.secondPrefab, new UpdateProjectileOptions()
                         {

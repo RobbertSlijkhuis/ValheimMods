@@ -2,7 +2,7 @@
 
 namespace ModularMagic_EarthStaffs.Models
 {
-    internal class UpdateProjectileOptions
+    internal class UpdateAoeOptions
     {
         public float? aoe = null;
         public float? damageBlunt = null;
