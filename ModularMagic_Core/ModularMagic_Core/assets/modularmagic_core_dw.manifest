@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 2980714035
+CRC: 3758948239
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 283ad3cf08a6384bbb1293b158222278
+    Hash: 9bc802487b7537fcddb5dff57146aaa1
   TypeTreeHash:
     serializedVersion: 2
     Hash: b3bb64f501d0f1018f634a7c7d443845
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 283ad3cf08a6384bbb1293b158222278
+    Hash: 9bc802487b7537fcddb5dff57146aaa1
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -106,52 +106,56 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: ItemDrop/ItemData/SharedData
 Assets:
-- Assets/Custom/PrefabInstance/Runes/MMC_Rune_DamagePierce.prefab
-- Assets/Custom/Material/Table/Marble/Rune_Marble_C_MMC.mat
-- Assets/Custom/PrefabInstance/Runes/MMC_Rune_Accuracy.prefab
-- Assets/Custom/Material/Table/Stone/Rune_Stone_E_MMC.mat
-- Assets/Custom/Material/Table/Wood/Rune_Wood_A_MMC.mat
+- Assets/Custom/Material/Runes/Marble/Rune_Marble_A_MMC.mat
+- Assets/Custom/Material/Runes/Marble/Rune_Marble_C_MMC.mat
+- Assets/Custom/PrefabInstance/Runes/MMC_Rune_ProjectileAccuracy.prefab
+- Assets/Custom/Material/Runes/Stone/Rune_Stone_E_MMC.mat
+- Assets/Custom/Material/Runes/Wood/Rune_Wood_A_MMC.mat
 - Assets/Custom/Material/Table/Altar_MMC.mat
-- Assets/Custom/Material/Table/Grausten/Rune_Grausten_D_MMC.mat
-- Assets/Custom/Material/Table/Stone/Rune_Stone_C_MMC.mat
-- Assets/Custom/Material/Table/Wood/Rune_Wood_E_MMC.mat
-- Assets/Custom/Material/Table/Marble/Rune_Marble_E_MMC.mat
-- Assets/Custom/Material/Table/Wood/Rune_Wood_MMC.mat
-- Assets/Custom/Material/Table/Wood/Rune_WoodOff_C_MMC.mat
-- Assets/Custom/Material/Table/Grausten/Rune_Grausten_C_MMC.mat
-- Assets/Custom/Material/Table/Rune_Ghost_MMC.mat
-- Assets/Custom/Material/Table/Wood/Rune_Wood_D_MMC.mat
-- Assets/Custom/Material/Table/Marble/Rune_Marble_MMC.mat
-- Assets/Custom/Material/Table/Grausten/Rune_Grausten_F_MMC.mat
-- Assets/Custom/Material/Table/Grausten/Rune_Grausten_B_MMC.mat
+- Assets/Custom/Material/Runes/Grausten/Rune_Grausten_D_MMC.mat
+- Assets/Custom/Material/Runes/Stone/Rune_Stone_C_MMC.mat
+- Assets/Custom/Material/Runes/Wood/Rune_Wood_E_MMC.mat
+- Assets/Custom/Material/Runes/Marble/Rune_Marble_E_MMC.mat
+- Assets/Custom/Material/Runes/Wood/Rune_Wood_MMC.mat
+- Assets/Custom/PrefabInstance/Runes/MMC_Rune_Creatures.prefab
+- Assets/Custom/Material/Runes/Grausten/Rune_Grausten_C_MMC.mat
+- Assets/Custom/Material/Runes/Rune_Ghost_MMC.mat
+- Assets/Custom/Material/Runes/Wood/Rune_Wood_D_MMC.mat
+- Assets/Custom/Material/Runes/Marble/Rune_Marble_MMC.mat
+- Assets/Custom/Material/Runes/Grausten/Rune_Grausten_F_MMC.mat
+- Assets/Custom/Material/Runes/Grausten/Rune_Grausten_B_MMC.mat
 - Assets/Custom/PrefabInstance/Runes/MMC_Rune_DamageBlunt.prefab
-- Assets/Custom/Material/Table/Wood/Rune_WoodOff_F_MMC.mat
-- Assets/Custom/Material/Table/Wood/Rune_WoodOff_B_MMC.mat
-- Assets/Custom/Material/Table/Wood/Rune_Wood_F_MMC.mat
-- Assets/Custom/Material/Table/Stone/Rune_Stone_B_MMC.mat
-- Assets/Custom/Material/Table/Wood/Rune_WoodOff_D_MMC.mat
-- Assets/Custom/Material/Table/Wood/Rune_WoodOff_A_MMC.mat
-- Assets/Custom/Material/Table/Grausten/Rune_Grausten_A_MMC.mat
-- Assets/Custom/Material/Table/Stone/Rune_Stone_MMC.mat
-- Assets/Custom/Material/Table/Grausten/Rune_Grausten_MMC.mat
+- Assets/Custom/Material/Runes/Wood/Rune_WoodOff_F_MMC.mat
+- Assets/Custom/Material/Runes/Wood/Rune_WoodOff_B_MMC.mat
+- Assets/Custom/Material/Runes/Wood/Rune_Wood_F_MMC.mat
+- Assets/Custom/Material/Runes/Stone/Rune_Stone_B_MMC.mat
+- Assets/Custom/Material/Runes/Wood/Rune_WoodOff_D_MMC.mat
+- Assets/Custom/Material/Runes/Wood/Rune_WoodOff_A_MMC.mat
+- Assets/Custom/Material/Runes/Grausten/Rune_Grausten_A_MMC.mat
+- Assets/Custom/PrefabInstance/Runes/MMC_Rune_ProjectileBurst.prefab
+- Assets/Custom/Material/Runes/Grausten/Rune_Grausten_MMC.mat
 - Assets/Custom/PrefabInstance/Eitr/MMC_EitrFine.prefab
-- Assets/Custom/Material/Table/Wood/Rune_Wood_C_MMC.mat
-- Assets/Custom/Material/Table/Wood/Rune_Wood_B_MMC.mat
-- Assets/Custom/Material/Table/Stone/Rune_Stone_A_MMC.mat
+- Assets/Custom/Material/Runes/Wood/Rune_Wood_C_MMC.mat
+- Assets/Custom/Material/Runes/Wood/Rune_Wood_B_MMC.mat
+- Assets/Custom/Material/Runes/Stone/Rune_Stone_A_MMC.mat
+- Assets/Custom/Material/Runes/Stone/Rune_Stone_MMC.mat
 - Assets/Custom/PrefabInstance/Runes/MMC_Rune_Nova.prefab
-- Assets/Custom/Material/Table/Stone/Rune_Stone_F_MMC.mat
-- Assets/Custom/Material/Table/Grausten/Rune_Grausten_E_MMC.mat
+- Assets/Custom/PrefabInstance/Runes/MMC_Rune_EitrCost.prefab
+- Assets/Custom/Material/Runes/Stone/Rune_Stone_F_MMC.mat
+- Assets/Custom/Material/Runes/Grausten/Rune_Grausten_E_MMC.mat
+- Assets/Custom/PrefabInstance/Runes/MMC_Rune_Cone.prefab
 - Assets/Custom/PrefabInstance/Table/fx_save_MMC.prefab
 - Assets/Custom/Material/Table/Spellbook2_1_1_off_MMC.mat
 - Assets/Custom/Material/Table/Spellbook2_1_1_MMC.mat
 - Assets/Custom/PrefabInstance/Eitr/MMC_EitrCrude.prefab
-- Assets/Custom/Material/Table/Marble/Rune_Marble_D_MMC.mat
+- Assets/Custom/Material/Runes/Marble/Rune_Marble_D_MMC.mat
 - Assets/Custom/PrefabInstance/Runes/MMC_Rune_Rain.prefab
-- Assets/Custom/Material/Table/Wood/Rune_WoodOff_E_MMC.mat
-- Assets/Custom/Material/Table/Stone/Rune_Stone_D_MMC.mat
-- Assets/Custom/Material/Table/Marble/Rune_Marble_F_MMC.mat
+- Assets/Custom/Material/Runes/Wood/Rune_WoodOff_E_MMC.mat
+- Assets/Custom/Material/Runes/Stone/Rune_Stone_D_MMC.mat
+- Assets/Custom/PrefabInstance/Runes/MMC_Rune_ProjectileSpeed.prefab
+- Assets/Custom/Material/Runes/Marble/Rune_Marble_F_MMC.mat
 - Assets/Custom/PrefabInstance/Table/MMC_RuneTable.prefab
 - Assets/Custom/PrefabInstance/Runes/MMC_Rune_DamageSlash.prefab
-- Assets/Custom/Material/Table/Marble/Rune_Marble_B_MMC.mat
-- Assets/Custom/Material/Table/Marble/Rune_Marble_A_MMC.mat
+- Assets/Custom/Material/Runes/Marble/Rune_Marble_B_MMC.mat
+- Assets/Custom/PrefabInstance/Runes/MMC_Rune_DamagePierce.prefab
 Dependencies: []

@@ -9,9 +9,34 @@ namespace ModularMagic_Core.Data
     {
         public RuneSecondaryAttackData(List<RuneEntry> list)
         {
+            RuneEntryOptions creaturesOptions = new RuneEntryOptions();
+            creaturesOptions.allowedWeapons = RuneData.EarthFireIceLightning;
+            creaturesOptions.description = "Add a secondary ability to your weapon! This ability is different depending on the type of the weapon!";
+            creaturesOptions.descriptionKey = LocaleKey.NoneDesc;
+            creaturesOptions.name = "Rune: Summon";
+            creaturesOptions.nameKey = LocaleKey.None;
+            creaturesOptions.prefab = ModularMagic_Core.prefabs.RuneCreaturesStone;
+            creaturesOptions.recipe = "Stone:3, Coal:3";
+            creaturesOptions.tier = 2;
+            creaturesOptions.type = ImbuementType.SecondaryAttack;
+            creaturesOptions.value = "Summon";
+            list.Add(new RuneEntry(creaturesOptions));
+
+            creaturesOptions.tier = 3;
+            creaturesOptions.level = 2;
+            creaturesOptions.prefab = ModularMagic_Core.prefabs.RuneCreaturesMarble;
+            creaturesOptions.recipe = "BlackMarble:3, Coal:3";
+            list.Add(new RuneEntry(creaturesOptions));
+
+            creaturesOptions.tier = 4;
+            creaturesOptions.level = 3;
+            creaturesOptions.prefab = ModularMagic_Core.prefabs.RuneCreaturesGrausten;
+            creaturesOptions.recipe = "Grausten:3, Coal:3";
+            list.Add(new RuneEntry(creaturesOptions));
+
             RuneEntryOptions novaOptions = new RuneEntryOptions();
             novaOptions.allowedWeapons = RuneData.EarthFireIceLightning;
-            novaOptions.description = "Apply this rune to your weapon to add a secondary ability! This ability is different depending on the type of the weapon! ";
+            novaOptions.description = "Add a secondary ability to your weapon! This ability is different depending on the type of the weapon!";
             novaOptions.descriptionKey = LocaleKey.ItemRuneNovaDesc;
             novaOptions.name = "Rune: Nova";
             novaOptions.nameKey = LocaleKey.ItemRuneNova;
@@ -36,7 +61,7 @@ namespace ModularMagic_Core.Data
 
             RuneEntryOptions rainOptions = new RuneEntryOptions();
             rainOptions.allowedWeapons = RuneData.EarthFireIce;
-            rainOptions.description = "Apply this rune to your weapon to add a secondary ability! This ability is different depending on the type of the weapon! ";
+            rainOptions.description = "Add a secondary ability to your weapon! This ability is different depending on the type of the weapon!";
             rainOptions.descriptionKey = LocaleKey.ItemRuneRainDesc;
             rainOptions.name = "Rune: Rain";
             rainOptions.nameKey = LocaleKey.ItemRuneRain;

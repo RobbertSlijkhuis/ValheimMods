@@ -16,7 +16,9 @@ namespace ModularMagic_Core.Data
         public static void Init()
         {
             new RuneDamageTypeData(list);
+            new RuneMiscData(list);
             new RuneProjectileData(list);
+            new RuneMainAttackData(list);
             new RuneSecondaryAttackData(list);
         }
     }

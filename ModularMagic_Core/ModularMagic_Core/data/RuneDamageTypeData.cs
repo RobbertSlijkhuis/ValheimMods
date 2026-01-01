@@ -11,10 +11,10 @@ namespace ModularMagic_Core.Data
         {
             RuneEntryOptions damageBluntOptions = new RuneEntryOptions();
             damageBluntOptions.allowedWeapons = RuneData.Ice;
-            damageBluntOptions.description = "Apply this rune to your weapon to change the main damage type! This rune might not work on certain weapons!";
-            damageBluntOptions.descriptionKey = LocaleKey.ItemRuneBleedingEdgeDesc;
-            damageBluntOptions.name = "Rune: Blunt Damage";
-            damageBluntOptions.nameKey = LocaleKey.ItemRuneBleedingEdge;
+            damageBluntOptions.description = "Change the physical damage to Blunt";
+            damageBluntOptions.descriptionKey = LocaleKey.ItemDamageTypeBluntDesc;
+            damageBluntOptions.name = "Rune: Damage Blunt";
+            damageBluntOptions.nameKey = LocaleKey.ItemDamageTypeBlunt;
             damageBluntOptions.prefab = ModularMagic_Core.prefabs.RuneDamageBluntWood;
             damageBluntOptions.recipe = "FineWood:3, Stone:3";
             damageBluntOptions.type = ImbuementType.DamageType;
@@ -41,10 +41,10 @@ namespace ModularMagic_Core.Data
 
             RuneEntryOptions damagePierceOptions = new RuneEntryOptions();
             damagePierceOptions.allowedWeapons = RuneData.Earth;
-            damagePierceOptions.description = "Apply this rune to your weapon to change the main damage type! This rune might not work on certain weapons!";
-            damagePierceOptions.descriptionKey = LocaleKey.ItemRuneBleedingEdgeDesc;
-            damagePierceOptions.name = "Rune: Pierce Damage";
-            damagePierceOptions.nameKey = LocaleKey.ItemRuneBleedingEdge;
+            damagePierceOptions.description = "Change the physical damage to Pierce";
+            damagePierceOptions.descriptionKey = LocaleKey.ItemDamageTypePierceDesc;
+            damagePierceOptions.name = "Rune: Damage Pierce";
+            damagePierceOptions.nameKey = LocaleKey.ItemDamageTypePierce;
             damagePierceOptions.prefab = ModularMagic_Core.prefabs.RuneDamagePierceWood;
             damagePierceOptions.recipe = "FineWood:3, FreezeGland:3";
             damagePierceOptions.type = ImbuementType.DamageType;
@@ -71,10 +71,10 @@ namespace ModularMagic_Core.Data
 
             RuneEntryOptions damageSlashOptions = new RuneEntryOptions();
             damageSlashOptions.allowedWeapons = RuneData.EarthIce;
-            damageSlashOptions.description = "Apply this rune to your weapon to change the main damage type! This rune might not work on certain weapons!";
-            damageSlashOptions.descriptionKey = LocaleKey.ItemRuneBleedingEdgeDesc;
-            damageSlashOptions.name = "Rune: Slash Damage";
-            damageSlashOptions.nameKey = LocaleKey.ItemRuneBleedingEdge;
+            damageSlashOptions.description = "Change the physical damage to Slash";
+            damageSlashOptions.descriptionKey = LocaleKey.ItemDamageTypeSlashDesc;
+            damageSlashOptions.name = "Rune: Damage Slash";
+            damageSlashOptions.nameKey = LocaleKey.ItemDamageTypeSlash;
             damageSlashOptions.prefab = ModularMagic_Core.prefabs.RuneDamageSlashWood;
             damageSlashOptions.recipe = "FineWood:3, SurtlingCore:3";
             damageSlashOptions.type = ImbuementType.DamageType;

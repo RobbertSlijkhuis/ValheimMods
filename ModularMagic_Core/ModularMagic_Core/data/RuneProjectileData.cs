@@ -11,11 +11,11 @@ namespace ModularMagic_Core.Data
         {
             RuneEntryOptions accuracyOptions = new RuneEntryOptions();
             accuracyOptions.allowedWeapons = RuneData.EarthIce;
-            accuracyOptions.description = "Apply this rune to your weapon to increase its accuracy! This rune might not work on certain weapons!";
-            accuracyOptions.descriptionKey = LocaleKey.ItemRuneAccuracyDesc;
+            accuracyOptions.description = "Improve the accuracy of your weapon!";
+            accuracyOptions.descriptionKey = LocaleKey.ItemRuneProjectileAccuracyDesc;
             accuracyOptions.name = "Rune: Accuracy";
-            accuracyOptions.nameKey = LocaleKey.ItemRuneAccuracy;
-            accuracyOptions.prefab = ModularMagic_Core.prefabs.RuneAccuracyWood;
+            accuracyOptions.nameKey = LocaleKey.ItemRuneProjectileAccuracy;
+            accuracyOptions.prefab = ModularMagic_Core.prefabs.RuneProjectileAccuracyWood;
             accuracyOptions.recipe = "FineWood:3, LeatherScraps:3";
             accuracyOptions.tier = 0;
             accuracyOptions.type = ImbuementType.ProjectileAccuracy;
@@ -24,21 +24,83 @@ namespace ModularMagic_Core.Data
 
             accuracyOptions.tier = 2;
             accuracyOptions.level = 2;
-            accuracyOptions.prefab = ModularMagic_Core.prefabs.RuneAccuracyStone;
+            accuracyOptions.prefab = ModularMagic_Core.prefabs.RuneProjectileAccuracyStone;
             accuracyOptions.recipe = "Stone:3, LeatherScraps:3";
             list.Add(new RuneEntry(accuracyOptions));
 
             accuracyOptions.tier = 3;
             accuracyOptions.level = 3;
-            accuracyOptions.prefab = ModularMagic_Core.prefabs.RuneAccuracyMarble;
+            accuracyOptions.prefab = ModularMagic_Core.prefabs.RuneProjectileAccuracyMarble;
             accuracyOptions.recipe = "BlackMarble:3, LeatherScraps:3";
             list.Add(new RuneEntry(accuracyOptions));
 
             accuracyOptions.tier = 4;
             accuracyOptions.level = 4;
-            accuracyOptions.prefab = ModularMagic_Core.prefabs.RuneAccuracyGrausten;
+            accuracyOptions.prefab = ModularMagic_Core.prefabs.RuneProjectileAccuracyGrausten;
             accuracyOptions.recipe = "Grausten:3, LeatherScraps:3";
             list.Add(new RuneEntry(accuracyOptions));
+
+            RuneEntryOptions burstOptions = new RuneEntryOptions();
+            burstOptions.allowedWeapons = RuneData.EarthIce;
+            burstOptions.description = "Improve the attack speed of your weapon!";
+            burstOptions.descriptionKey = LocaleKey.ItemRuneProjectileBurstDesc;
+            burstOptions.name = "Rune: Attack Speed";
+            burstOptions.nameKey = LocaleKey.ItemRuneProjectileBurst;
+            burstOptions.prefab = ModularMagic_Core.prefabs.RuneProjectileBurstWood;
+            burstOptions.recipe = "FineWood:3, LeatherScraps:3";
+            burstOptions.tier = 0;
+            burstOptions.type = ImbuementType.ProjectileBurst;
+            burstOptions.value = "0.0125";
+            list.Add(new RuneEntry(burstOptions));
+
+            burstOptions.tier = 2;
+            burstOptions.level = 2;
+            burstOptions.prefab = ModularMagic_Core.prefabs.RuneProjectileBurstStone;
+            burstOptions.recipe = "Stone:3, LeatherScraps:3";
+            list.Add(new RuneEntry(burstOptions));
+
+            burstOptions.tier = 3;
+            burstOptions.level = 3;
+            burstOptions.prefab = ModularMagic_Core.prefabs.RuneProjectileBurstMarble;
+            burstOptions.recipe = "BlackMarble:3, LeatherScraps:3";
+            list.Add(new RuneEntry(burstOptions));
+
+            burstOptions.tier = 4;
+            burstOptions.level = 4;
+            burstOptions.prefab = ModularMagic_Core.prefabs.RuneProjectileBurstGrausten;
+            burstOptions.recipe = "Grausten:3, LeatherScraps:3";
+            list.Add(new RuneEntry(burstOptions));
+
+            RuneEntryOptions speedOptions = new RuneEntryOptions();
+            speedOptions.allowedWeapons = RuneData.EarthIce;
+            speedOptions.description = "Improve the projectile speed of your weapon!";
+            speedOptions.descriptionKey = LocaleKey.ItemRuneProjectileSpeedDesc;
+            speedOptions.name = "Rune: Projectile Speed";
+            speedOptions.nameKey = LocaleKey.ItemRuneProjectileSpeed;
+            speedOptions.prefab = ModularMagic_Core.prefabs.RuneProjectileSpeedWood;
+            speedOptions.recipe = "FineWood:3, LeatherScraps:3";
+            speedOptions.tier = 0;
+            speedOptions.type = ImbuementType.ProjectileVelocity;
+            speedOptions.value = "1";
+            list.Add(new RuneEntry(speedOptions));
+
+            speedOptions.tier = 2;
+            speedOptions.level = 2;
+            speedOptions.prefab = ModularMagic_Core.prefabs.RuneProjectileSpeedStone;
+            speedOptions.recipe = "Stone:3, LeatherScraps:3";
+            list.Add(new RuneEntry(speedOptions));
+
+            speedOptions.tier = 3;
+            speedOptions.level = 3;
+            speedOptions.prefab = ModularMagic_Core.prefabs.RuneProjectileSpeedMarble;
+            speedOptions.recipe = "BlackMarble:3, LeatherScraps:3";
+            list.Add(new RuneEntry(speedOptions));
+
+            speedOptions.tier = 4;
+            speedOptions.level = 4;
+            speedOptions.prefab = ModularMagic_Core.prefabs.RuneProjectileSpeedGrausten;
+            speedOptions.recipe = "Grausten:3, LeatherScraps:3";
+            list.Add(new RuneEntry(speedOptions));
         }
     }
 }
