@@ -114,7 +114,7 @@ namespace WizshBoneTwitchIntegration
 
                 if (humanoid != null && monsterAI != null)
                 {
-                    Jotunn.Logger.LogWarning($"Adding persistent data to {name}");
+                    // Jotunn.Logger.LogWarning($"Adding persistent data to {name}");
                     prefab.AddComponent<TwitchCreaturePersistentData>();
                 }
             }
@@ -193,6 +193,7 @@ namespace WizshBoneTwitchIntegration
             // Remove/add redeems when player leaves/enters a dungeon and check what kind of dungeon the player is in
             // Prevent redeems from being used when the game is paused
             // White/black list to block users from using the mod
+            // If heal cooldown, user gets point refunded
             //
             // ====================================
             // IN PROGRESS:

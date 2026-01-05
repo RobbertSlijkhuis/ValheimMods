@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jotunn.Managers;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -101,8 +102,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     return;
                 }
 
-                if (Player.m_localPlayer.transform.localPosition.y >= 4000)
+                if (Player.m_localPlayer.InInterior())
                 {
+                    string dungeonType = EnvMan.instance.GetCurrentEnvironment().m_name;
                     bool cancelRedeem = false;
 
                     if (redeem.type == RedeemType.TerrainRemove || redeem.type == RedeemType.SpawnHallucination || redeem.type == RedeemType.SpawnShower)
@@ -123,6 +125,25 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         notAllowedList.Add("seekerbrute");
                         notAllowedList.Add("troll");
                         notAllowedList.Add("unbjorn");
+
+                        switch (dungeonType)
+                        {
+                            case nameof(DungeonType.FrostCave):
+                            case nameof(DungeonType.HowlingCavern):
+                                notAllowedList.Remove("golem");
+                                break;
+                            case nameof(DungeonType.InfestedMine):
+                                notAllowedList.Remove("seekerbrute");
+                                notAllowedList.Remove("golem");
+                                break;
+                            case nameof(DungeonType.Queen):
+                                notAllowedList.Remove("bat");
+                                notAllowedList.Remove("deathsquito");
+                                notAllowedList.Remove("gjall");
+                                notAllowedList.Remove("golem");
+                                notAllowedList.Remove("seekerbrute");
+                                break;
+                        }
 
                         foreach (SpawnCreatureData creature in redeem.creatures)
                         {
@@ -169,11 +190,121 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (redeem.type == RedeemType.SpawnShower)
                 {
-                    GameObject shower = Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.FishRainScript, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
-                    SpawnAbility spawnComp = shower.GetComponent<SpawnAbility>();
-                    spawnComp.m_owner = Player.m_localPlayer;
+                    if (redeem.shower == null)
+                    {
+                        Jotunn.Logger.LogWarning("Could not find a shower data, canceling redeem!");
+                        Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Canceled);
+                        return;
+                    }
+
+                    GameObject showerPrefab;
+
+                    if (redeem.shower.prefabName == null)
+                        showerPrefab = WizshBoneTwitchIntegration.Instance.prefabs.FishRainScript;
+                    else
+                        showerPrefab = PrefabManager.Instance.GetPrefab(redeem.shower.prefabName);
+
+                    GameObject shower = Instantiate(showerPrefab, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
+                    SpawnAbility spawnAbility = shower.GetComponent<SpawnAbility>();
                     shower.transform.SetParent(Player.m_localPlayer.transform);
-                    shower.SetActive(true);
+
+                    if (spawnAbility == null)
+                        throw new Exception("Could not find spawn ability on shower prefab");
+
+                    spawnAbility.m_owner = Player.m_localPlayer;
+                    spawnAbility.m_setMaxInstancesFromWeaponLevel = false;
+                    spawnAbility.m_maxSummonReached = "You have reached the maximum of spawns";
+
+                    if (redeem.shower.accuracy != null)
+                        spawnAbility.m_projectileAccuracy = (float)redeem.shower.accuracy;
+
+                    if (redeem.shower.groundOffset != null)
+                        spawnAbility.m_spawnGroundOffset = (float)redeem.shower.groundOffset;
+
+                    if (redeem.shower.initialSpawnDelay != null)
+                        spawnAbility.m_initialSpawnDelay = (float)redeem.shower.initialSpawnDelay;
+
+                    if (redeem.shower.maxTargetRange != null)
+                        spawnAbility.m_maxTargetRange = (int)redeem.shower.maxTargetRange;
+
+                    if (redeem.shower.maxSpawned != null)
+                        spawnAbility.m_maxSpawned = (int)redeem.shower.maxSpawned;
+
+                    if (redeem.shower.maxToSpawn != null)
+                        spawnAbility.m_maxToSpawn = (int)redeem.shower.maxToSpawn;
+
+                    if (redeem.shower.minToSpawn != null)
+                        spawnAbility.m_minToSpawn = (int)redeem.shower.minToSpawn;
+
+                    if (redeem.shower.randomDirection != null)
+                        spawnAbility.m_randomDirection = (bool)redeem.shower.randomDirection;
+
+                    if (redeem.shower.randomAngleMax != null)
+                        spawnAbility.m_randomAngleMax = (float)redeem.shower.randomAngleMax;
+
+                    if (redeem.shower.randomAngleMin != null)
+                        spawnAbility.m_randomAngleMin = (float)redeem.shower.randomAngleMin;
+
+                    if (redeem.shower.randomYRotation != null)
+                        spawnAbility.m_randomYRotation = (bool)redeem.shower.randomYRotation;
+
+                    if (redeem.shower.spawnDelay != null)
+                        spawnAbility.m_spawnDelay = (float)redeem.shower.spawnDelay;
+
+                    if (redeem.shower.spawnRadius != null)
+                        spawnAbility.m_spawnRadius = (float)redeem.shower.spawnRadius;
+
+                    if (redeem.shower.velocity != null)
+                        spawnAbility.m_projectileVelocity = (float)redeem.shower.velocity;
+
+                    if (redeem.shower.velocityMax != null)
+                        spawnAbility.m_projectileVelocityMax = (float)redeem.shower.velocityMax;
+
+                    if (redeem.shower.spawns != null && redeem.shower.spawns.Count > 0)
+                    {
+                        List<GameObject> spawns = new List<GameObject>();
+
+                        foreach (string spawn in redeem.shower.spawns)
+                        {
+                            GameObject prefab = PrefabManager.Instance.GetPrefab(spawn);
+
+                            if (prefab == null)
+                            {
+                                Jotunn.Logger.LogError($"Could not find prefab {spawn} for SpawnAbility");
+                                continue;
+                            }
+
+                            spawns.Add(prefab);
+                        }
+
+                        spawnAbility.m_spawnPrefab = spawns.ToArray();
+                    }
+
+                    SpawnAbility.TargetType? targetType = SpawnAbilityTargetType.ConvertToTargetType(redeem.shower.targetType);
+
+                    if (targetType != null)
+                        spawnAbility.m_targetType = (SpawnAbility.TargetType)targetType;
+                    else
+                        Jotunn.Logger.LogWarning("SpawnAbility target type is null");
+
+                    if (redeem.shower.maxSpawned != null && redeem.shower.maxSpawned > 0)
+                    {
+                        foreach (GameObject prefab in spawnAbility.m_spawnPrefab)
+                        {
+                            if (SpawnSystem.GetNrOfInstances(prefab) >= redeem.shower.maxSpawned)
+                            {
+                                Jotunn.Logger.LogWarning("Already on max spawned, canceling redeem...");
+                                m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, there is already a maximum number of spawns! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
+                                Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Canceled);
+                                return;
+                            }
+                        }
+                    }
+
+                    if (redeem.shower.announceMessage != null)
+                        Player.m_localPlayer.Message(MessageHud.MessageType.Center, redeem.shower.announceMessage);
+
+                    StartCoroutine(spawnAbility.Spawn());
                     Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
                     return;
                 }
@@ -218,7 +349,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (redeem.type == RedeemType.StatusEffect)
                 {
-                    Jotunn.Logger.LogWarning("STATUS EFFECT");
                     if (redeem.statusEffects == null || redeem.statusEffects.Count == 0)
                     {
                         Jotunn.Logger.LogWarning("Could not find a status effect to apply, canceling redeem!");
@@ -228,9 +358,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                     foreach (string statusEffect in redeem.statusEffects)
                     {
-                        Jotunn.Logger.LogWarning("name: " + statusEffect);
                         int hash = StatusEffectType.GetByString(statusEffect);
-                        Jotunn.Logger.LogWarning("Hash: " + hash);
 
                         if (hash == -1)
                         {

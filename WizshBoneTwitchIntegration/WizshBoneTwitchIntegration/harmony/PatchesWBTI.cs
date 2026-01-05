@@ -121,23 +121,14 @@ namespace WizshBoneTwitchIntegration.Harmony
                 int nameHash = __instance.NameHash();
                 TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
                 TwitchStatusEffect statusEffect = customStatusEffect.GetStatusEffects().Find(item => item.nameHash == nameHash);
-                Jotunn.Logger.LogWarning($"STOP: {nameHash} in Stop_Postfix");
 
                 if (statusEffect == null)
                     return;
 
-                Jotunn.Logger.LogWarning($"{nameHash} is custom StatusEffect!");
-
                 if (__instance.IsDone())
-                {
-                    Jotunn.Logger.LogWarning("Is done, calling onEnd!");
                     customStatusEffect.RemoveStatusEffect(statusEffect, false);
-                }
                 else
-                {
-                    Jotunn.Logger.LogWarning("Updating remaining time!");
                     statusEffect.duration = __instance.GetRemaningTime();
-                }
             }
             catch (Exception e)
             {

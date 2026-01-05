@@ -12,6 +12,7 @@ namespace WizshBoneTwitchIntegration.Models
         public string globalKey;
         public bool ignoreWard = false;
         public int points = 0;
+        public SpawnAbilityData shower = new SpawnAbilityData();
         public List<string> statusEffects = new List<string>();
         public string title = "";
         public string type = RedeemType.Undefined;

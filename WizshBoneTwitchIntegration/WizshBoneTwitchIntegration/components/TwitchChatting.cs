@@ -16,7 +16,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public bool m_enabled;
 
         private float m_scanRadius = 20f;
-        private float m_scanInterval = 15f;
+        private float m_scanInterval = 60f;
         private string m_chosenUser;
         private GameObject m_chosenPrefab;
 

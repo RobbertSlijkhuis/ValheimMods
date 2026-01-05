@@ -68,6 +68,17 @@ namespace WizshBoneTwitchIntegration.Helpers
             creature.transform.localPosition = UpdateSpawnLocation(creature.transform, options.creatureData.position);
             creature.transform.localRotation = UpdateSpawnRotation(creature.transform, options.creatureData.position);
 
+            if (Player.m_localPlayer.InInterior())
+            {
+                string dungeonType = EnvMan.instance.GetCurrentEnvironment().m_name;
+
+                Jotunn.Logger.LogWarning("Dungeon: " + dungeonType);
+                Jotunn.Logger.LogWarning("Name: " + creature.name);
+
+                if (dungeonType == DungeonType.Queen && creature.name == "Gjall(Clone)")
+                    creature.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+            }
+
             MonsterAI monsterAI = creature.GetComponent<MonsterAI>();
 
             if (monsterAI == null)
@@ -117,7 +128,6 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (hallucinationCount > 6)
                 return;
 
-            Jotunn.Logger.LogWarning("Activated hallucinations");
             Heightmap.Biome biome = Player.m_localPlayer.GetCurrentBiome();
             Jotunn.Logger.LogWarning("Current biome: " + biome);
             bool isNight = EnvMan.IsNight();
