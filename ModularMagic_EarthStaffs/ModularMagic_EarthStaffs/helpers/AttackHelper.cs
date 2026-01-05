@@ -8,17 +8,6 @@ namespace ModularMagic_EarthStaffs.Helpers
     {
         public static void UpdateCone(GameObject aoePrefab, SecondaryAttackConfig config)
         {
-            Jotunn.Logger.LogWarning("prefab: " + aoePrefab?.name);
-            Jotunn.Logger.LogWarning("cooldown: " + config?.cooldown?.Value);
-            Jotunn.Logger.LogWarning("damageBlunt: " + config?.damageBlunt?.Value);
-            Jotunn.Logger.LogWarning("damageChop: " + config?.damageChop?.Value);
-            Jotunn.Logger.LogWarning("damageGeneral: " + config?.damageGeneral?.Value);
-            Jotunn.Logger.LogWarning("damagePickaxe: " + config?.damagePickaxe?.Value);
-            Jotunn.Logger.LogWarning("damagePierce: " + config?.damagePierce?.Value);
-            Jotunn.Logger.LogWarning("damagePoison: " + config?.damagePoison?.Value);
-            Jotunn.Logger.LogWarning("damageSpirit: " + config?.damageSpirit?.Value);
-
-
             UpdateHelper.UpdateAoe(aoePrefab, new UpdateAoeOptions()
             {
                 damageBlunt = config.damageBlunt.Value,
@@ -33,16 +22,6 @@ namespace ModularMagic_EarthStaffs.Helpers
 
         public static void UpdateNova(GameObject aoePrefab, SecondaryAttackConfig config)
         {
-            Jotunn.Logger.LogWarning("prefab: " + aoePrefab?.name);
-            Jotunn.Logger.LogWarning("cooldown: " + config?.cooldown?.Value);
-            Jotunn.Logger.LogWarning("damageBlunt: " + config?.damageBlunt?.Value);
-            Jotunn.Logger.LogWarning("damageChop: " + config?.damageChop?.Value);
-            Jotunn.Logger.LogWarning("damageGeneral: " + config?.damageGeneral?.Value);
-            Jotunn.Logger.LogWarning("damagePickaxe: " + config?.damagePickaxe?.Value);
-            Jotunn.Logger.LogWarning("damagePierce: " + config?.damagePierce?.Value);
-            Jotunn.Logger.LogWarning("damagePoison: " + config?.damagePoison?.Value);
-            Jotunn.Logger.LogWarning("damageSpirit: " + config?.damageSpirit?.Value);
-
             UpdateHelper.UpdateAoe(aoePrefab, new UpdateAoeOptions()
             {
                 aoe = config.aoe.Value,

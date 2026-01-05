@@ -29,8 +29,9 @@ namespace ModularMagic_EarthStaffs
         public static CustomPrefabs prefabs = new CustomPrefabs();
         public static CustomStatusEffects effects = new CustomStatusEffects();
         public static CustomSprites sprites = new CustomSprites();
-        public static ItemDataSnaphot snapshots = new ItemDataSnaphot();
+        public static ItemDataSnapshots snapshots = new ItemDataSnapshots();
         public static readonly string imbuementDataKey = "Imbuements_MMC";
+        public static bool gameIsReady = false;
 
         public void Awake()
         {
@@ -59,11 +60,6 @@ namespace ModularMagic_EarthStaffs
         {
             try
             {
-                snapshots.staffEarth0 = prefabs.StaffEarth0.GetComponent<ItemDrop>().m_itemData.Clone();
-                snapshots.staffEarth1 = prefabs.StaffEarth1.GetComponent<ItemDrop>().m_itemData.Clone();
-                snapshots.staffEarth2 = prefabs.StaffEarth2.GetComponent<ItemDrop>().m_itemData.Clone();
-                snapshots.staffEarth3 = prefabs.StaffEarth3.GetComponent<ItemDrop>().m_itemData.Clone();
-
                 Imbuements imbuements0 = prefabs.StaffEarth0.AddComponent<Imbuements>();
                 imbuements0.m_slots = 1;
                 imbuements0.m_tier = 0;
@@ -91,6 +87,11 @@ namespace ModularMagic_EarthStaffs
                 AttackHelper.UpdateSummon(prefabs.SecondaryAttackRoots, prefabs.Root, PluginConfig.secondaryAttackSummon);
 
                 prefabs.Nova.AddComponent<NovaTerrainEdit>();
+
+                snapshots.staffEarth0.Init(prefabs.StaffEarth0.GetComponent<ItemDrop>().m_itemData);
+                snapshots.staffEarth1.Init(prefabs.StaffEarth1.GetComponent<ItemDrop>().m_itemData);
+                snapshots.staffEarth2.Init(prefabs.StaffEarth2.GetComponent<ItemDrop>().m_itemData);
+                snapshots.staffEarth3.Init(prefabs.StaffEarth3.GetComponent<ItemDrop>().m_itemData);
 
                 PrefabManager.OnVanillaPrefabsAvailable -= AddEarthStaffs;
             }

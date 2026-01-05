@@ -1,9 +1,9 @@
-﻿using ModularMagic_EarthStaffs.Configs;
+﻿using HarmonyLib;
+using ModularMagic_EarthStaffs.Configs;
 using ModularMagic_EarthStaffs.Models;
 using ModularMagic_EarthStaffs.Types;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using UnityEngine;
 using static ItemDrop;
@@ -21,23 +21,23 @@ namespace ModularMagic_EarthStaffs.Helpers
         public static void ApplyImbuements(ItemData itemData, List<Imbuement> imbuements)
         {
             UpdateItemDataOptions options = new UpdateItemDataOptions();
-            ItemData snapShotData = GetItemDataSnapshot(itemData.m_dropPrefab.name);
+            ItemDataSnapShot snapshot = GetItemDataSnapshot(itemData.m_dropPrefab.name);
 
-            if (snapShotData == null)
-                throw new Exception("Snapshot ItemData is null");
+            if (snapshot == null)
+                throw new Exception("Snapshot is null");
 
-            options.damageBlunt = snapShotData.m_shared.m_damages.m_blunt;
+            options.damageBlunt = snapshot.damageBlunt;
             options.damageSlash = 0;
             options.damagePierce = 0;
-            options.damageBluntPerLevel = snapShotData.m_shared.m_damagesPerLevel.m_blunt;
+            options.damageBluntPerLevel = snapshot.damageBluntPerlevel;
             options.damageSlashPerLevel = 0;
             options.damagePiercePerLevel = 0;
-            options.attackEitr = snapShotData.m_shared.m_attack.m_attackEitr;
-            options.timedBlockBonus = snapShotData.m_shared.m_timedBlockBonus;
-            options.projectileAccuracy = snapShotData.m_shared.m_attack.m_projectileAccuracy;
-            options.projectileBurst = snapShotData.m_shared.m_attack.m_burstInterval;
-            options.projectileVelocity = snapShotData.m_shared.m_attack.m_projectileVel;
-            options.mainAttack = snapShotData;
+            options.attackEitr = snapshot.attackEitr;
+            // options.timedBlockBonus = snapshot.timedBlockBonus;
+            options.projectileAccuracy = snapshot.projectileAccuracy;
+            options.projectileBurst = snapshot.projectileBurst;
+            options.projectileVelocity = snapshot.projectileVelocity;
+            options.mainAttack = snapshot.mainAttack;
 
             GameObject projectileBlunt = ModularMagic_EarthStaffs.prefabs.ProjectileDefault.transform.Find("visual/blunt").gameObject;
             GameObject projectileSlash = ModularMagic_EarthStaffs.prefabs.ProjectileDefault.transform.Find("visual/slash").gameObject;
@@ -58,8 +58,8 @@ namespace ModularMagic_EarthStaffs.Helpers
                     case nameof(ImbuementType.DamageType):
                         if (imbuement.value == "Slash")
                         {
-                            options.damageSlash = snapShotData.m_shared.m_damages.m_blunt;
-                            options.damageSlashPerLevel = snapShotData.m_shared.m_damagesPerLevel.m_blunt;
+                            options.damageSlash = snapshot.damageBlunt;
+                            options.damageSlashPerLevel = snapshot.damageBluntPerlevel;
                             projectileSlash.SetActive(true);
                             projectile.m_rotateVisual = 500f;
                             projectile.m_rotateVisualY = 0f;
@@ -68,8 +68,8 @@ namespace ModularMagic_EarthStaffs.Helpers
                         }
                         else if (imbuement.value == "Pierce")
                         {
-                            options.damagePierce = snapShotData.m_shared.m_damages.m_blunt;
-                            options.damagePiercePerLevel = snapShotData.m_shared.m_damagesPerLevel.m_blunt;
+                            options.damagePierce = snapshot.damageBlunt;
+                            options.damagePiercePerLevel = snapshot.damageBluntPerlevel;
                             projectilePierce.SetActive(true);
                             projectile.m_rotateVisual = 0f;
                             projectile.m_rotateVisualY = 0f;
@@ -84,9 +84,9 @@ namespace ModularMagic_EarthStaffs.Helpers
                     case nameof(ImbuementType.EitrCost):
                         options.attackEitr -= PluginConfig.imbuementConfig.EitrCost.Value * imbuement.level;
                         break;
-                    case nameof(ImbuementType.ParryBonus):
-                        options.timedBlockBonus += float.Parse(imbuement.value, CultureInfo.InvariantCulture);
-                        break;
+                    //case nameof(ImbuementType.ParryBonus):
+                    //    options.timedBlockBonus += float.Parse(imbuement.value, CultureInfo.InvariantCulture);
+                    //    break;
                     case nameof(ImbuementType.ProjectileAccuracy):
                         options.projectileAccuracy -= PluginConfig.imbuementConfig.ProjectileAccuracy.Value * imbuement.level;
                         break;
@@ -113,7 +113,7 @@ namespace ModularMagic_EarthStaffs.Helpers
 
             Jotunn.Logger.LogWarning("Damage (B, P, S): " + options.damageBlunt + ", " + options.damagePierce + ", " + options.damageSlash);
             Jotunn.Logger.LogWarning("Eitr cost: " + options.attackEitr);
-            Jotunn.Logger.LogWarning("ParryBonus: " + options.timedBlockBonus);
+            //Jotunn.Logger.LogWarning("ParryBonus: " + options.timedBlockBonus);
             Jotunn.Logger.LogWarning("Accuracy: " + options.projectileAccuracy);
             Jotunn.Logger.LogWarning("Burst: " + options.projectileBurst);
             Jotunn.Logger.LogWarning("Speed: " + options.projectileVelocity);
@@ -135,7 +135,7 @@ namespace ModularMagic_EarthStaffs.Helpers
             UpdateHelper.UpdateItemData(itemData, options);
         }
 
-        private static ItemData GetItemDataSnapshot(string name)
+        private static ItemDataSnapShot GetItemDataSnapshot(string name)
         {
             switch (name)
             {

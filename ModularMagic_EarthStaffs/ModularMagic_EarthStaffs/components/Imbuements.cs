@@ -1,4 +1,5 @@
-﻿using ModularMagic_EarthStaffs.Helpers;
+﻿using HarmonyLib;
+using ModularMagic_EarthStaffs.Helpers;
 using ModularMagic_EarthStaffs.Models;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,11 +14,8 @@ namespace ModularMagic_EarthStaffs.Components
 
         public void Awake()
         {
-            ItemDrop itemDrop = GetComponent<ItemDrop>();
-            string imbuementsData;
-            string imbuementsString;
-
-            itemDrop.m_itemData.m_customData.TryGetValue(ModularMagic_EarthStaffs.imbuementDataKey, out imbuementsData);
+            ItemDrop itemDrop = gameObject.GetComponent<ItemDrop>();
+            string imbuementsData = itemDrop.m_itemData.m_customData.GetValueSafe(ModularMagic_EarthStaffs.imbuementDataKey);
 
             if (imbuementsData == null)
             {
@@ -28,17 +26,18 @@ namespace ModularMagic_EarthStaffs.Components
                     m_imbuements.Add(imbuement);
                 }
 
-                imbuementsString = ImbuementHelper.ListToString(m_imbuements);
+                string imbuementsString = ImbuementHelper.ListToString(m_imbuements);
                 itemDrop.m_itemData.m_customData[ModularMagic_EarthStaffs.imbuementDataKey] = imbuementsString;
             }
             else
             {
                 m_imbuements = ImbuementHelper.StringToList(imbuementsData);
-                imbuementsString = imbuementsData;
-            }
 
-            Jotunn.Logger.LogWarning("======================================");
-            Jotunn.Logger.LogWarning("STAFF INIT: " + imbuementsString);
+                foreach (Imbuement imbuement in m_imbuements)
+                {
+                    Jotunn.Logger.LogWarning(imbuement.name);
+                }
+            }
 
             //m_imbuements.Add(new Imbuement("Accuracy", "Increase staff accuracy", ImbuementType.ProjectileAccuracy, ImbuementCategoryType.Normal, 1, "0.125", 0, 4));
             //m_imbuements.Add(new Imbuement("Attack speed", "Increase staff attack speed", ImbuementType.ProjectileBurst, ImbuementCategoryType.Normal, 2, "0.0125", 0, 4));

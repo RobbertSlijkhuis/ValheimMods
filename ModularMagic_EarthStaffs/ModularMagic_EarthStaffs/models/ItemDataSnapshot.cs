@@ -1,12 +1,10 @@
-﻿using static ItemDrop;
-
-namespace ModularMagic_EarthStaffs.Models
+﻿namespace ModularMagic_EarthStaffs.Models
 {
-    internal class ItemDataSnaphot
+    internal class ItemDataSnapshots
     {
-        public ItemData staffEarth0;
-        public ItemData staffEarth1;
-        public ItemData staffEarth2;
-        public ItemData staffEarth3;
+        public ItemDataSnapShot staffEarth0 = new ItemDataSnapShot();
+        public ItemDataSnapShot staffEarth1 = new ItemDataSnapShot();
+        public ItemDataSnapShot staffEarth2 = new ItemDataSnapShot();
+        public ItemDataSnapShot staffEarth3 = new ItemDataSnapShot();
     }
 }

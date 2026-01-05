@@ -11,12 +11,26 @@ namespace ModularMagic_EarthStaffs.Harmony
     public class PatchesMMES
     {
         [HarmonyPostfix]
+        [HarmonyPatch(typeof(Game), "Start")]
+        public static void GameStart_Postfix()
+        {
+            try
+            {
+                ModularMagic_EarthStaffs.gameIsReady = true;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in GameStart_Postfix: " + e);
+            }
+        }
+
+        [HarmonyPostfix]
         [HarmonyPatch(typeof(Humanoid), "EquipItem")]
         public static void EquipItem_Postfix(ref Humanoid __instance, ItemData item)
         {
             try
             {
-                if (__instance == null || !__instance.IsPlayer() || item == null)
+                if (__instance == null || !__instance.IsPlayer() || item == null || !ModularMagic_EarthStaffs.gameIsReady)
                     return;
 
                 string imbuementsString = item.m_customData.GetValueSafe(ModularMagic_EarthStaffs.imbuementDataKey);

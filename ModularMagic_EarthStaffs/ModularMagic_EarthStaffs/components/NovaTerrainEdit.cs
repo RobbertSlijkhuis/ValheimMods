@@ -22,7 +22,9 @@ namespace ModularMagic_EarthStaffs.Components
 
             List<EffectList.EffectData> list = new List<EffectList.EffectData>();
             list.Add(hoeEffect);
-            list.Add(mudRoadEffect);
+
+            if (!Player.m_localPlayer.InInterior())
+                list.Add(mudRoadEffect);
 
             m_terrainEffects.m_effectPrefabs = list.ToArray();
 
