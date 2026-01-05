@@ -63,6 +63,8 @@ namespace ModularMagic_Core.Components
 
         public void StaffAttach(string imbuementsString, ItemData itemData)
         {
+            // Jotunn.Logger.LogWarning("=== Staff Attach ===========================");
+            // Jotunn.Logger.LogWarning(imbuementsString);
             m_imbuements = ImbuementHelper.StringToList(imbuementsString);
             m_itemData = itemData;
             m_imbuementsString = imbuementsString;

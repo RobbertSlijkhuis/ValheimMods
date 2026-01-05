@@ -27,7 +27,6 @@ namespace ModularMagic_Core
         private AssetBundle assetBundle;
         public static CustomPrefabs prefabs = new CustomPrefabs();
         public static CustomMaterials materials = new CustomMaterials();
-
         public static readonly string imbuementDataKey = "Imbuements_MMC";
 
         // Use this class to add your own localization to the game

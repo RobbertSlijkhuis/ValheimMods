@@ -178,7 +178,6 @@ namespace ModularMagic_Core.components
                 return false;
             }
 
-            Jotunn.Logger.LogWarning($"Removing {item.m_shared.m_name} from inventory");
             m_itemNew = item;
 
             m_imbuement.description = Localization.instance.Localize($"${imbuementRune.m_descriptionKey}_{weaponTypeLower}");
@@ -245,7 +244,6 @@ namespace ModularMagic_Core.components
         {
             yield return new WaitForSeconds(0.4f);
 
-            Jotunn.Logger.LogWarning("KICK");
             GameObject kicked = Instantiate(m_itemNew.m_dropPrefab, m_transformNew.position, m_transformNew.rotation);
             Rigidbody rigidbody = kicked.GetComponent<Rigidbody>();
             rigidbody.AddForce(kicked.transform.forward * 300);
@@ -258,7 +256,6 @@ namespace ModularMagic_Core.components
         {
             yield return new WaitForSeconds(0.6f);
 
-            Jotunn.Logger.LogWarning("Complete rest of reset");
             Transform attachTransform = m_transformOld.Find("attach(Clone)");
             MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
 

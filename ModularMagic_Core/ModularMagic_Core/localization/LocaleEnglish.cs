@@ -8,7 +8,6 @@ namespace ModularMagic_Core.localization
     {
         public static void Init()
         {
-            Jotunn.Logger.LogWarning("Adding English locale...");
             ModularMagic_Core.Localization = LocalizationManager.Instance.GetLocalization();
             ModularMagic_Core.Localization.AddTranslation("English", new Dictionary<string, string>
             {

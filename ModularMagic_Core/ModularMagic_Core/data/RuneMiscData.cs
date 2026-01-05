@@ -16,7 +16,7 @@ namespace ModularMagic_Core.Data
             eitrCostOptions.name = "Rune: Eitr cost";
             eitrCostOptions.nameKey = LocaleKey.ItemEitrCost;
             eitrCostOptions.prefab = ModularMagic_Core.prefabs.RuneEitrCostWood;
-            eitrCostOptions.recipe = "FineWood:3, Stone:3";
+            eitrCostOptions.recipe = $"RoundLog:3, {ModularMagic_Core.prefabs.EitrCrude.name}:9";
             eitrCostOptions.type = ImbuementType.EitrCost;
             eitrCostOptions.value = "0.25";
             list.Add(new RuneEntry(eitrCostOptions));
@@ -24,19 +24,19 @@ namespace ModularMagic_Core.Data
             eitrCostOptions.tier = 2;
             eitrCostOptions.level = 2;
             eitrCostOptions.prefab = ModularMagic_Core.prefabs.RuneEitrCostStone;
-            eitrCostOptions.recipe = "Stone:3, Stone:3";
+            eitrCostOptions.recipe = $"Stone:3, {ModularMagic_Core.prefabs.EitrFine.name}:9";
             list.Add(new RuneEntry(eitrCostOptions));
 
             eitrCostOptions.tier = 3;
             eitrCostOptions.level = 3;
             eitrCostOptions.prefab = ModularMagic_Core.prefabs.RuneEitrCostMarble;
-            eitrCostOptions.recipe = "BlackMarble:3, Stone:3";
+            eitrCostOptions.recipe = "BlackMarble:3, Eitr:9";
             list.Add(new RuneEntry(eitrCostOptions));
 
             eitrCostOptions.tier = 4;
             eitrCostOptions.level = 4;
             eitrCostOptions.prefab = ModularMagic_Core.prefabs.RuneEitrCostGrausten;
-            eitrCostOptions.recipe = "Grausten:3, Stone:3";
+            eitrCostOptions.recipe = "Grausten:3, Eitr:9";
             list.Add(new RuneEntry(eitrCostOptions));
         }
     }

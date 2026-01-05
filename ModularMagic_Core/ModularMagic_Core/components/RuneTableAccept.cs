@@ -75,7 +75,6 @@ namespace ModularMagic_Core.Components
 
         public void EmissionStart()
         {
-            Jotunn.Logger.LogWarning("Book start");
             Animator animator = gameObject.GetComponent<Animator>();
             animator.SetTrigger("Start");
             EmissionUpdate();
@@ -83,7 +82,6 @@ namespace ModularMagic_Core.Components
 
         public void EmissionStop()
         {
-            Jotunn.Logger.LogWarning("Book end");
             Animator animator = gameObject.GetComponent<Animator>();
             animator.SetTrigger("End");
 
