@@ -55,7 +55,8 @@ namespace WizshBoneTwitchIntegration.Commands
             currentRewardEvent.CustomRewardTitle = title.TrimEnd();
             currentRewardEvent.CustomRewardCost = 100;
             currentRewardEvent.Status = CustomRewardRedemptionState.Unfulfilled;
-            
+            WizshBoneTwitchIntegration.useRedeemCommand = true;
+
             customRewards.HandleRedeem(currentRewardEvent);
         }
     }

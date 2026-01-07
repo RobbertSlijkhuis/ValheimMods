@@ -46,7 +46,8 @@ namespace WizshBoneTwitchIntegration.Components
             TwitchCreatureClaim creatureClaim = gameObject.AddComponent<TwitchCreatureClaim>();
             creatureClaim.ReInit(m_name, creatureData);
 
-            ApplyData(m_name, creatureData.level, creatureData.rename);
+            ApplyHumanoid(m_name, creatureData.level, creatureData.rename);
+            ApplyMonsterAI(creatureData.aggravatable, creatureData.mistVision);
             ApplyAllowDrops(creatureData.allowDrops);
             ApplyTameable(creatureData.friendly, creatureData.commandable);
         }
@@ -61,12 +62,13 @@ namespace WizshBoneTwitchIntegration.Components
             m_ignoreWard = ignoreWard;
             m_name = name;
 
-            ApplyData(name, creatureData.level, creatureData.rename);
+            ApplyHumanoid(name, creatureData.level, creatureData.rename);
+            ApplyMonsterAI(creatureData.aggravatable, creatureData.mistVision);
             ApplyAllowDrops(creatureData.allowDrops);
             ApplyTameable(creatureData.friendly, creatureData.commandable);
         }
 
-        public void ApplyData(string name, int level, bool rename = true)
+        public void ApplyHumanoid(string name, int level, bool rename = true)
         {
             Humanoid humanoid = gameObject.GetComponent<Humanoid>();
             humanoid.SetLevel(level);
@@ -74,6 +76,13 @@ namespace WizshBoneTwitchIntegration.Components
 
             if (rename)
                 humanoid.m_name = name;
+        }
+
+        public void ApplyMonsterAI(bool aggravatable, bool misVision)
+        {
+            MonsterAI monserAI = gameObject.GetComponent<MonsterAI>();
+            monserAI.m_aggravatable = aggravatable;
+            monserAI.m_mistVision = misVision;
         }
 
         public void ApplyAllowDrops(bool allowDrops)
@@ -101,19 +110,21 @@ namespace WizshBoneTwitchIntegration.Components
 
         public string CreatureDataToString(SpawnCreatureData creatureData)
         {
-            return $"{creatureData.prefabName}|{creatureData.level}|{creatureData.amount}|{creatureData.position}|{creatureData.allowDrops}|{creatureData.friendly}|{creatureData.commandable}|{creatureData.rename}|{creatureData.talks}|{creatureData.talkInteract}|{creatureData.talkInterval}|{creatureData.talkMessage}|{creatureData.isHallucination}";
+            return $"{creatureData.prefabName}|{creatureData.level}|{creatureData.amount}|{creatureData.position}|{creatureData.allowDrops}|{creatureData.friendly}|{creatureData.commandable}|{creatureData.aggravatable}|{creatureData.mistVision}|{creatureData.rename}|{creatureData.talks}|{creatureData.talkInteract}|{creatureData.talkInterval}|{creatureData.talkMessage}|{creatureData.isHallucination}";
         }
 
         public SpawnCreatureData StringToCreatureData(string value)
         {
             string[] data = value.Split('|');
             SpawnCreatureData creatureData = new SpawnCreatureData(data[0], int.Parse(data[1]), int.Parse(data[2]), data[3], bool.Parse(data[4]), bool.Parse(data[5]), bool.Parse(data[6]));
-            creatureData.rename = bool.Parse(data[7]);
-            creatureData.talks = bool.Parse(data[8]);
-            creatureData.talkInteract = bool.Parse(data[9]);
-            creatureData.talkInterval = int.Parse(data[10]);
-            creatureData.talkMessage = data[11];
-            creatureData.isHallucination = bool.Parse(data[12]);
+            creatureData.aggravatable = bool.Parse(data[7]);
+            creatureData.mistVision = bool.Parse(data[8]);
+            creatureData.rename = bool.Parse(data[9]);
+            creatureData.talks = bool.Parse(data[10]);
+            creatureData.talkInteract = bool.Parse(data[11]);
+            creatureData.talkInterval = int.Parse(data[12]);
+            creatureData.talkMessage = data[13];
+            creatureData.isHallucination = bool.Parse(data[14]);
 
             return creatureData;
         }

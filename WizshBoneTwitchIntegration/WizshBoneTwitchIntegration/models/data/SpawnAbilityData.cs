@@ -7,6 +7,8 @@ namespace WizshBoneTwitchIntegration.Models
     {
         public float? accuracy;
         public string announceMessage;
+        public DamageData damage;
+        public float? dropVelocity = 0f;
         public float? groundOffset;
         public float? initialSpawnDelay;
         public float? maxTargetRange;

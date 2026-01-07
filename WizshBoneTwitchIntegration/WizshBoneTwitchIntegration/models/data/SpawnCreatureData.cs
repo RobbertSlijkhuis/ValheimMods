@@ -4,12 +4,14 @@ namespace WizshBoneTwitchIntegration.Models
 {
     internal class SpawnCreatureData
     {
+        public bool aggravatable = false;
         public bool allowDrops = false;
         public int amount = 1;
         public bool commandable = false;
         public bool friendly = false;
         public bool isHallucination = false;
         public int level = 1;
+        public bool mistVision = true;
         public string prefabName;
         public string position = SpawnPositionType.OnPlayer;
         public bool rename = true;

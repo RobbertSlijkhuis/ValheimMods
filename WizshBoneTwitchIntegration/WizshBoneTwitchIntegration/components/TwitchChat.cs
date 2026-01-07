@@ -105,6 +105,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void Send(string message, string announce = "")
         {
+            if (WizshBoneTwitchIntegration.useRedeemCommand && writer == null) return;
+
             writer.WriteLine($"PRIVMSG #{m_channel} :{announce} WTBI: {message}");
             writer.Flush();
         }

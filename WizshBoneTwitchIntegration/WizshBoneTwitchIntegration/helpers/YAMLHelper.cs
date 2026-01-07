@@ -42,7 +42,8 @@ namespace WizshBoneTwitchIntegration.Helpers
                     Jotunn.Logger.LogWarning(redeem.backgroundColor);
                     Jotunn.Logger.LogWarning(redeem.cooldown);
                     Jotunn.Logger.LogWarning(redeem.userInput);
-                    Jotunn.Logger.LogWarning(redeem.globalKey);
+                    Jotunn.Logger.LogWarning(redeem.globalKeyAdd);
+                    Jotunn.Logger.LogWarning(redeem.globalKeyRemove);
 
                     if (redeem.creatures != null)
                     {

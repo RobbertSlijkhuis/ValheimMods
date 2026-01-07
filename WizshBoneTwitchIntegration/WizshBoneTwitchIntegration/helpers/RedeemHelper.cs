@@ -68,6 +68,9 @@ namespace WizshBoneTwitchIntegration.Helpers
             creature.transform.localPosition = UpdateSpawnLocation(creature.transform, options.creatureData.position);
             creature.transform.localRotation = UpdateSpawnRotation(creature.transform, options.creatureData.position);
 
+            MonsterAI monsterAI = creature.GetComponent<MonsterAI>();
+            Humanoid humanoid = creature.GetComponent<Humanoid>();
+
             if (Player.m_localPlayer.InInterior())
             {
                 string dungeonType = EnvMan.instance.GetCurrentEnvironment().m_name;
@@ -79,11 +82,16 @@ namespace WizshBoneTwitchIntegration.Helpers
                     creature.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
             }
 
-            MonsterAI monsterAI = creature.GetComponent<MonsterAI>();
-
             if (monsterAI == null)
             {
+                GameObject.Destroy(creature);
                 throw new System.Exception("No monster AI available for creature spawn!");
+            }
+
+            if (humanoid == null)
+            {
+                GameObject.Destroy(creature);
+                throw new System.Exception("No humanoid available for creature spawn!");
             }
 
             if (!options.creatureData.isHallucination)
@@ -92,14 +100,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 creatureClaim.Init(options);
             }
             else 
-            { 
-                Humanoid humanoid = creature.GetComponent<Humanoid>();
-
-                if (humanoid == null)
-                {
-                    throw new System.Exception("No humanoid available for creature spawn!");
-                }
-
+            {
                 TwitchCreaturePersistentData persistentData = creature.GetComponent<TwitchCreaturePersistentData>();
                 persistentData.SetData(humanoid.m_name, options.creatureData, options.ignoreWard);
 
@@ -216,6 +217,28 @@ namespace WizshBoneTwitchIntegration.Helpers
             creature.position = SpawnPositionType.RandomBehind;
             creature.rename = false;
             SpawnCreature(new SpawnOptions(creature, Player.m_localPlayer.transform, customReward));
+        }
+
+        public static void SpawnMist(SpawnMistData options)
+        {
+            GameObject prefab = PrefabManager.Instance.GetPrefab("MistArea");
+
+            if (prefab == null)
+            {
+                Jotunn.Logger.LogError("Could not find mist prefab to spawn");
+                throw new System.Exception("Could not find mist prefab to spawn");
+            }
+
+            GameObject mist = UnityEngine.Object.Instantiate(prefab, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
+            Mister mister = mist.GetComponent<Mister>();
+            TwitchMisterDestruction misterDestruction = mist.GetComponent<TwitchMisterDestruction>();
+            misterDestruction.SetStarted(options.duration ?? 60);
+
+            if (options.height != null)
+                mister.m_height = (float)options.height;
+
+            if (options.radius != null)
+                mister.m_radius = (float)options.radius;
         }
 
         public static void SpawnSupriseChest(GameObject prefab, ChestData chestData)

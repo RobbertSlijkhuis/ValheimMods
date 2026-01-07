@@ -34,28 +34,29 @@ namespace WizshBoneTwitchIntegration
         private ButtonConfig wizshBoneWindowButton;
         public static string customConfigPath = "BepInEx/config/WizshBoneTwitchIntegration";
         public static string redeemsConfigPath = customConfigPath + "/redeems.yaml";
+        public static bool useRedeemCommand = false;
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
         public static CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();
 
-        private void Awake()
+        public void Awake()
         {
             Instance = this;
             InitAssetBundle();
             PluginConfig.Init();
-            InitRedeemsFile();
             InitStatusEffects();
             InitInputs();
             InitCommands();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
+            PrefabManager.OnVanillaPrefabsAvailable += InitRedeemsFile;
             PrefabManager.OnVanillaPrefabsAvailable += AddPieces;
-            PrefabManager.OnPrefabsRegistered += AddPersistentDataToCreatures;
+            PrefabManager.OnPrefabsRegistered += AddPersistentComponents;
             ItemManager.OnItemsRegistered += LogStatusEffects;
         }
 
-        private void Update()
+        public void Update()
         {
             try
             {
@@ -104,8 +105,9 @@ namespace WizshBoneTwitchIntegration
             PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
         }
 
-        private void AddPersistentDataToCreatures()
+        private void AddPersistentComponents()
         {
+            Jotunn.Logger.LogWarning("AddPersistentComponents()");
             foreach (string name in ZNetScene.instance.GetPrefabNames())
             {
                 GameObject prefab = PrefabManager.Instance.GetPrefab(name);
@@ -116,10 +118,19 @@ namespace WizshBoneTwitchIntegration
                 {
                     // Jotunn.Logger.LogWarning($"Adding persistent data to {name}");
                     prefab.AddComponent<TwitchCreaturePersistentData>();
+                    continue;
+                }
+
+                Mister mister = prefab.GetComponent<Mister>();
+
+                if (mister != null)
+                {
+                    // Jotunn.Logger.LogWarning($"Adding mister destruction to {name}");
+                    prefab.AddComponent<TwitchMisterDestruction>();
                 }
             }
 
-            PrefabManager.OnPrefabsRegistered -= AddPersistentDataToCreatures;
+            PrefabManager.OnPrefabsRegistered -= AddPersistentComponents;
         }
 
         private void InitRedeemsFile()
@@ -191,9 +202,8 @@ namespace WizshBoneTwitchIntegration
             // ====================================
             // Add extra stars to hud when level is higher then 3 (max level is 10)
             // Remove/add redeems when player leaves/enters a dungeon and check what kind of dungeon the player is in
-            // Prevent redeems from being used when the game is paused
             // White/black list to block users from using the mod
-            // If heal cooldown, user gets point refunded
+            // Add leader board of points spend, deaths caused, saves maybe? Other statistics?
             //
             // ====================================
             // IN PROGRESS:
@@ -209,7 +219,6 @@ namespace WizshBoneTwitchIntegration
             // LoyalBones: A red skeleton with normal damage but insane health pool
             // Chat loves this: Spawn chest with cheese (random food?) Make cheese wheel that gives random food?".
             // Add a way to be able to find spanwed creature. For the kill all spawned rule!
-            // Add temp mist fog to location
             // Drunk blur effect?
             // Flashbang?
             // Disable all twitchy wards via bits (specific amount like 1000)
@@ -240,12 +249,13 @@ namespace WizshBoneTwitchIntegration
 
 
             // What went wrong:
-            // Enable/disable redeems did not work sometimes due to DUPLICATE redeem
+            // Enable/disable redeems did not work sometimes due to DUPLICATE redeem and long time playing?
 
             // New mod ideas:
             // - Inventory in the Saddle
             // - Priortise spear slot
-
+            // - lock inventory slots so putting all in inventory does not touch it
+            // - square cultivator/hoe mod (no circle editing)
         }
     }
 }

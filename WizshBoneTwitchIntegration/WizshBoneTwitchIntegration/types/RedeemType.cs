@@ -7,6 +7,7 @@
         public static string PlayerShrink => "PlayerShrink";
         public static string SpawnCreature => "SpawnCreature";
         public static string SpawnHallucination => "SpawnHallucination";
+        public static string SpawnMist => "SpawnMist";
         public static string SpawnShower => "SpawnShower";
         public static string StatusEffect => "StatusEffect";
         public static string StatusEffectRandom => "StatusEffectRandom";
