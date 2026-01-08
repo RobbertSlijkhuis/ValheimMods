@@ -323,7 +323,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         throw new RedeemException("could not find mist data for SpawnMist", ExceptionType.Error);
 
                     RedeemHelper.SpawnMist(redeem.mist);
-                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, $"{currentRewardEvent.RedeemerName} did this to you!");
+                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, "A sudden mist sets in...");
                     Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
                     return;
                 }

@@ -1,14 +1,11 @@
 ﻿using HarmonyLib;
-using Jotunn.Managers;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
-using WizshBoneTwitchIntegration.Configs;
+using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
-using WizshBoneTwitchIntegration.Types;
-using YamlDotNet.Core.Tokens;
 using static EnemyHud;
 
 namespace WizshBoneTwitchIntegration.Harmony
@@ -163,67 +160,67 @@ namespace WizshBoneTwitchIntegration.Harmony
         //    }
         //}
 
-        //[HarmonyPrefix]
-        //[HarmonyPatch(typeof(EnemyHud), "UpdateHuds")]
-        //public static void UpdateHuds_Prefix(ref EnemyHud __instance, Player player, Sadle sadle, float dt)
-        //{
-        //    try
-        //    {
-        //        //Character character = (sadle ? sadle.GetCharacter() : null);
-        //        //Character character2 = (player ? player.GetHoverCreature() : null);
-        //        //Character character3 = null;
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(EnemyHud), "UpdateHuds")]
+        public static void UpdateHuds_Prefix(ref EnemyHud __instance, Player player, Sadle sadle, float dt)
+        {
+            try
+            {
+                RectTransform hudBase = __instance.transform.Find("HudRoot/HudBase") as RectTransform;
+                RectTransform level4Trans = hudBase.transform.Find("level_custom_4") as RectTransform;
 
-        //        Transform hudBase = __instance.transform.Find("HudRoot/HudBase");
-        //        RectTransform level4Trans = hudBase.transform.Find("level_4") as RectTransform;
+                if (level4Trans == null)
+                    EnemyHudHelper.GenerateLevels(hudBase);
 
-        //        if (level4Trans == null)
-        //        {
-        //            Jotunn.Logger.LogWarning("Setting up new levels...");
-        //            RectTransform level3 = hudBase.transform.Find("level_3") as RectTransform;
+                foreach (KeyValuePair<Character, HudData> hud in __instance.m_huds)
+                {
+                    HudData value = hud.Value;
 
-        //            GameObject level4 = UnityEngine.Object.Instantiate(level3.gameObject, hudBase);
-        //            level4.name = "level_4";
-        //            level4.SetActive(false);
+                    int level = value.m_character.GetLevel();
 
-        //            GameObject star = level4.transform.Find("star").gameObject;
-        //            GameObject newStar = UnityEngine.Object.Instantiate(star, level4.transform);
-        //            newStar.name = "star (2)";
-        //            RectTransform newStarTransform = newStar.transform as RectTransform;
-        //            newStarTransform.localPosition = new Vector3(24f, 0f, 0f);
+                    Transform hudLevel2 = value.m_level3.parent.Find("level_custom_2");
+                    Transform hudLevel3 = value.m_level3.parent.Find("level_custom_3");
+                    Transform hudLevel4 = value.m_level3.parent.Find("level_custom_4");
+                    Transform hudLevel5 = value.m_level3.parent.Find("level_custom_5");
+                    Transform hudLevel6 = value.m_level3.parent.Find("level_custom_6");
+                    Transform hudLevel7 = value.m_level3.parent.Find("level_custom_7");
+                    Transform hudLevel8 = value.m_level3.parent.Find("level_custom_8");
+                    Transform hudLevel9 = value.m_level3.parent.Find("level_custom_9");
+                    Transform hudLevel10 = value.m_level3.parent.Find("level_custom_10");
 
-        //            level4Trans = level4.transform as RectTransform;
-        //        }
+                    if (hudLevel2 != null)
+                        hudLevel2.gameObject.SetActive(level >= 4);
 
-        //        foreach (KeyValuePair<Character, HudData> hud in __instance.m_huds)
-        //        {
-        //            HudData value = hud.Value;
-                    
-        //            int level = value.m_character.GetLevel();
-        //            // Jotunn.Logger.LogWarning("Level: " + level);
+                    if (hudLevel3 != null)
+                        hudLevel3.gameObject.SetActive(level >= 4);
 
-        //            //if ((bool)value.m_level2)
-        //            //{
-        //            //    value.m_level2.gameObject.SetActive(level == 2);
-        //            //}
+                    if (hudLevel4 != null)
+                        hudLevel4.gameObject.SetActive(level >= 4);
 
-        //            //if ((bool)value.m_level3)
-        //            //{
-        //            //    value.m_level3.gameObject.SetActive(level == 3);
-        //            //}
+                    if (hudLevel5 != null)
+                        hudLevel5.gameObject.SetActive(level >= 5);
 
+                    if (hudLevel6 != null)
+                        hudLevel6.gameObject.SetActive(level >= 6);
 
-        //            if (level4Trans != null)
-        //            {
-        //                Jotunn.Logger.LogWarning("Level is greater then 3: " + (level == 4));
-        //                level4Trans.gameObject.SetActive(level == 4);
-        //            }
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Jotunn.Logger.LogError("Something went wrong in UpdateHuds_Prefix: " + e);
-        //        return;
-        //    }
-        //}
+                    if (hudLevel7 != null)
+                        hudLevel7.gameObject.SetActive(level >= 7);
+
+                    if (hudLevel8 != null)
+                        hudLevel8.gameObject.SetActive(level >= 8);
+
+                    if (hudLevel9 != null)
+                        hudLevel9.gameObject.SetActive(level >= 9);
+
+                    if (hudLevel10 != null)
+                        hudLevel10.gameObject.SetActive(level == 10);
+                }
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in UpdateHuds_Prefix: " + e);
+                return;
+            }
+        }
     }
 }

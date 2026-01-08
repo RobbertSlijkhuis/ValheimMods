@@ -118,6 +118,25 @@ namespace WizshBoneTwitchIntegration
                 {
                     // Jotunn.Logger.LogWarning($"Adding persistent data to {name}");
                     prefab.AddComponent<TwitchCreaturePersistentData>();
+
+                    Transform visualTrans = prefab.transform.Find("Visual");
+
+                    if (visualTrans == null)
+                        continue;
+
+                    LevelEffects levelEffects = visualTrans.gameObject.GetComponent<LevelEffects>();
+
+                    if (levelEffects == null)
+                        continue;
+
+                    // Jotunn.Logger.LogWarning($"Adding levelsetups to {name}");
+                    LevelEffects.LevelSetup levelSetup = levelEffects.m_levelSetups[1];
+
+                    for (int index = 0; index < 8; index++)
+                    {
+                        levelEffects.m_levelSetups.Add(levelSetup);
+                    }
+
                     continue;
                 }
 
@@ -200,7 +219,14 @@ namespace WizshBoneTwitchIntegration
             // ====================================
             // TODO:
             // ====================================
-            // Add extra stars to hud when level is higher then 3 (max level is 10)
+            // Add configurable annoucement message to spawn mist, creatures, suprise chest etc.
+            // TalkInteract always show Feo's history fact message, also does not properly show follow/rename creature
+            // Armor and shield don't get thrown out very far out of suprise chests
+            // Add configurable timers to Shrink and Grow, cancel each other and persist through death
+            // Set specific health damage to creatures in redeems.yaml
+            // Apply creature data settings to creates spawned from SpawnShower
+            // Apply creature data settings to creates spawned from Suprise chests
+            // Allow SpawnShower to be spawned from Suprise chests
             // Remove/add redeems when player leaves/enters a dungeon and check what kind of dungeon the player is in
             // White/black list to block users from using the mod
             // Add leader board of points spend, deaths caused, saves maybe? Other statistics?
