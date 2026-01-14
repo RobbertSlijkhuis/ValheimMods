@@ -15,12 +15,12 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private List<string> m_userBlacklist = new List<string>();
         public bool m_enabled;
 
-        private float m_scanRadius = 20f;
-        private float m_scanInterval = 60f;
+        public float m_scanRadius = PluginConfig.configChattingRadius.Value;
+        public float m_scanInterval = PluginConfig.configChattingInterval.Value;
         private string m_chosenUser;
         private GameObject m_chosenPrefab;
 
-        private void Awake()
+        public void Awake()
         {
             m_auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
             m_chat = Game.instance.gameObject.GetComponent<TwitchChat>();

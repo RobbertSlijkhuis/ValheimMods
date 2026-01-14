@@ -15,7 +15,7 @@ namespace WizshBoneTwitchIntegration.Models
         public SpawnMistData mist = new SpawnMistData();
         public int points = 0;
         public SpawnAbilityData shower = new SpawnAbilityData();
-        public List<string> statusEffects = new List<string>();
+        public List<StatusEffectData> statusEffects = new List<StatusEffectData>();
         public string title = "";
         public string type = RedeemType.Undefined;
         public bool userInput = false;

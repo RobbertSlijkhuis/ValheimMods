@@ -1,0 +1,142 @@
+# yaml-language-server: $schema=./redeems-schema.json
+# In this file you can add and configure your redeems for the WizshBone Twitch Integration
+#
+redeems:
+  - type: PlayerShrink
+    title: "WBTI: Shrink Player!"
+    points: 200
+  - type: PlayerGrow
+    title: "WBTI: Grow Player!"
+    points: 200
+  - type: SpawnCreature
+    title: "WBTI: Spawn Greyling!"
+    points: 50
+    backgroundColor: "#395c32"
+    creatures:
+      - prefabName: "Greyling"
+        allowDrops: true
+        commandable: true
+        friendly: true
+        position: InFrontOfPlayer
+        talks: true
+        talkInterval: 20
+        talkMessage: "Can I help you?;I'm your friend!;Let's go on an adventure!"
+  - type: SpawnCreature
+    title: "WBTI: Spawn Neck Pack!"
+    points: 100
+    backgroundColor: "#74bd66"
+    creatures:
+      - prefabName: "Neck"
+        amount: 3
+        position: InFrontOfPlayer
+        talks: true
+        talkInterval: 20
+        talkMessage: "We're gonna get you good!;You can't hide from us!;Rawr!"
+  - type: SpawnCreature
+    title: "WBTI: Spawn the Dastardly Trio!"
+    points: 150
+    backgroundColor: "#eb3434"
+    creatures:
+      - prefabName: "Neck"
+        allowDrops: true
+        position: InFrontOfPlayer
+        positionOffset:
+          x: 3
+          y: 0
+          z: 0
+      - prefabName: "Greyling"
+        allowDrops: true
+        position: InFrontOfPlayer
+      - prefabName: "Boar"
+        allowDrops: true
+        position: InFrontOfPlayer
+        positionOffset:
+          x: -3
+          y: 0
+          z: 0
+  - type: SpawnCreature
+    title: "WBTI: Spawn Troll!"
+    points: 500
+    backgroundColor: "#4e8ebf"
+    creatures:
+      - prefabName: "Troll"
+        allowDamageStructures: false
+        position: InFrontOfPlayer
+        positionOffset:
+          x: 0
+          y: 0
+          z: 7
+  - type: SpawnMist
+    title: "WBTI: Spawn Mist!"
+    points: 250
+    backgroundColor: "#bb33ff"
+    mist:
+      announceMessage: "A sudden mist sets in..."
+      duration: 30
+      height: 20
+      radius: 50
+  - type: SpawnShower
+    title: "WBTI: Spawn Log Rain!"
+    points: 250
+    backgroundColor: "#734624"
+    shower:
+      accuracy: 1
+      isBiomeList: true
+      damage:
+        blunt: 150
+        chop: 0
+      dropVelocity: -25
+      groundOffset: 50
+      maxToSpawn: 50
+      minToSpawn: 50
+      spawnRadius: 10
+      spawns:
+        - beech_log_half
+        - PineTree_log_half
+        - SwampTree1_log
+        - FirTree_log_half
+        - Birch_log_half
+        - yggashoot_log_half
+        - AshlandsTreeLogHalf2
+        - Oak_log_half
+  - type: SurpriseChest
+    title: "WBTI: Backup Gear Chest!"
+    points: 250
+    backgroundColor: "#ebc034"
+    chest:
+      amount: 5
+      announceMessage: "Backup Gear Chest inbound!"
+      random: false
+      type: "Gold"
+      yeetChance: 0
+      items:
+        - SwordWood
+        - HelmetLeather
+        - ArmorLeatherChest
+        - ArmorLeatherLegs
+        - ShieldWood
+  - type: SurpriseChest
+    title: "WBTI: Random Surprise Chest!"
+    points: 150
+    backgroundColor: "#8c8c8c"
+    chest:
+      amount: 3
+      announceMessage: "Surprise Chest inbound!"
+      random: true
+      type: "Iron"
+      yeetChance: 15
+      items:
+        - CookedMeat
+        - SwordWood
+        - Greyling
+        - HelmetLeather
+        - Resin
+  - type: StatusEffect
+    title: "WBTI: Heal/Energize Player!"
+    points: 150
+    statusEffects:
+      - HealingMinor
+      - StaminaMinor
+  - type: StatusEffectRandom
+    title: "WBTI: Random Buff/Debuff!"
+    points: 200

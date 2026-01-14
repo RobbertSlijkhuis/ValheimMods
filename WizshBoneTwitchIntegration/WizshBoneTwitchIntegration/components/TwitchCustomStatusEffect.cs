@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Jotunn;
+using Jotunn.Managers;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Helpers;
@@ -8,14 +10,14 @@ namespace WizshBoneTwitchIntegration.Components
 {
     internal class TwitchCustomStatusEffect : MonoBehaviour
     {
-        private readonly List<TwitchStatusEffect> m_statusEffects = new List<TwitchStatusEffect>();
+        private readonly List<StatusEffectData> m_statusEffects = new List<StatusEffectData>();
         private readonly float m_animDuration = 1.5f;
 
         /// <summary>
         /// Get the list of registered status effects
         /// </summary>
         /// <returns></returns>
-        public List<TwitchStatusEffect> GetStatusEffects()
+        public List<StatusEffectData> GetStatusEffects()
         {
             return m_statusEffects;
         }
@@ -25,36 +27,36 @@ namespace WizshBoneTwitchIntegration.Components
         /// </summary>
         /// <param name="entry"></param>
         /// <returns></returns>
-        public bool AddStatusEffect(TwitchStatusEffect entry)
+        public bool AddStatusEffect(StatusEffectData entry)
         {
             try
             {
-                if (m_statusEffects.Find(item => item.nameHash == entry.nameHash) != null)
+                SEMan seMan = Player.m_localPlayer.GetSEMan();
+
+                if (seMan.HaveStatusEffect(entry.nameHash))
                 {
                     Jotunn.Logger.LogWarning($"StatusEffect {entry.name} is already active!");
                     return false;
                 }
 
-                TwitchStatusEffect blockedBy = m_statusEffects.Find(item => entry.blockedByStatusEffects.Contains(item.name));
-
-                if (blockedBy != null)
+                foreach (string block in entry.blockedBy)
                 {
-                    Jotunn.Logger.LogWarning($"StatusEffect {entry.name} is blocked by {blockedBy.name}");
-                    return false;
+                    if (seMan.HaveStatusEffect(block.GetStableHashCode()))
+                    {
+                        Jotunn.Logger.LogWarning($"StatusEffect {entry.name} is blocked by {block}");
+                        return false;
+                    }
                 }
 
-                m_statusEffects.Add(entry);
+                if (entry.persistsThroughDeath)
+                    m_statusEffects.Add(entry);
 
-                if (entry.onStart == null)
-                    Player.m_localPlayer.GetSEMan().AddStatusEffect(entry.nameHash);
-                else
-                    entry.onStart(entry);
-
+                entry.onStart(entry);
                 return true;
             }
             catch(Exception e)
             {
-                Jotunn.Logger.LogWarning("Somethign went wrong while adding the StatusEffect: "+ e);
+                Jotunn.Logger.LogWarning("Something went wrong while adding the StatusEffect: "+ e);
                 return false;
             }
         }
@@ -65,11 +67,11 @@ namespace WizshBoneTwitchIntegration.Components
         /// <param name="entry"></param>
         /// <param name="removeFromPlayer"></param>
         /// <returns></returns>
-        public bool RemoveStatusEffect(TwitchStatusEffect entry, bool removeFromPlayer = true)
+        public bool RemoveStatusEffect(StatusEffectData entry, bool removeFromPlayer = true)
         {
             try
             { 
-                if (m_statusEffects.Find(item => item.nameHash == entry.nameHash) == null)
+                if (entry.persistsThroughDeath && m_statusEffects.Find(item => item.nameHash == entry.nameHash) == null)
                 {
                     Jotunn.Logger.LogWarning($"Could not find StatusEffect with name {entry.name}!");
                     return false;
@@ -85,7 +87,7 @@ namespace WizshBoneTwitchIntegration.Components
             }
             catch(Exception e)
             {
-                Jotunn.Logger.LogWarning("Somethign went wrong while removing the StatusEffect: " + e);
+                Jotunn.Logger.LogWarning("Something went wrong while removing the StatusEffect: " + e);
                 return false;
             }
         }
@@ -95,9 +97,10 @@ namespace WizshBoneTwitchIntegration.Components
         /// </summary>
         public void ReApplyStatusEffects()
         {
-            foreach (TwitchStatusEffect entry in m_statusEffects)
+            foreach (StatusEffectData entry in m_statusEffects)
             {
-                entry.onStart?.Invoke(entry);
+                if (entry.persistsThroughDeath)
+                    entry.onStart?.Invoke(entry);
             }
         }
 
@@ -105,7 +108,7 @@ namespace WizshBoneTwitchIntegration.Components
         /// Makes the player slower and smaller for a set duration
         /// </summary>
         /// <param name="duration"></param>
-        public void ShrinkPlayer(TwitchStatusEffect statusEffect)
+        public void PlayerShrink(StatusEffectData statusEffect)
         {
             StatusEffect miniMe = StatusEffectHelper.CreateSimple(statusEffect.name, statusEffect.duration, WizshBoneTwitchIntegration.Instance.sprites.MiniMeSprite);
             Player.m_localPlayer.GetSEMan().AddStatusEffect(miniMe);
@@ -119,7 +122,7 @@ namespace WizshBoneTwitchIntegration.Components
         /// Makes the player faster and bigger for a set duration
         /// </summary>
         /// <param name="duration"></param>
-        public void GrowPlayer(TwitchStatusEffect statusEffect)
+        public void PlayerGrow(StatusEffectData statusEffect)
         {
             StatusEffect bigMe = StatusEffectHelper.CreateSimple(statusEffect.name, statusEffect.duration, WizshBoneTwitchIntegration.Instance.sprites.BigMeSprite);
             Player.m_localPlayer.GetSEMan().AddStatusEffect(bigMe);
@@ -132,7 +135,7 @@ namespace WizshBoneTwitchIntegration.Components
         /// <summary>
         /// Resets any player height/speed changes
         /// </summary>
-        public void ResetPlayer()
+        public void PlayerSizeReset()
         {
             RedeemHelper.ResetPlayerSpeed(Player.m_localPlayer);
             Vector3 newScale = new Vector3(1f, 1f, 1f);

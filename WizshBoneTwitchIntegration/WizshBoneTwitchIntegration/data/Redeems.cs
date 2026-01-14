@@ -13,7 +13,7 @@ namespace WizshBoneTwitchIntegration.Data
         {
             if (FileExists())
             {
-                list = YAMLHelper.ReadRedeemsConfig();
+                list = ExtraConfigHelper.ReadRedeemsConfig();
             }
             else
             {
@@ -29,7 +29,7 @@ namespace WizshBoneTwitchIntegration.Data
                 return false;
             }
 
-            list = YAMLHelper.ReadRedeemsConfig();
+            list = ExtraConfigHelper.ReadRedeemsConfig();
             return true;
         }
 

@@ -46,7 +46,7 @@ namespace WizshBoneTwitchIntegration.Components
             TwitchCreatureClaim creatureClaim = gameObject.AddComponent<TwitchCreatureClaim>();
             creatureClaim.ReInit(m_name, creatureData);
 
-            ApplyHumanoid(m_name, creatureData.level, creatureData.rename);
+            ApplyHumanoid(m_name, creatureData.level, creatureData.maxHealth,creatureData.allowDamageStructures, creatureData.rename);
             ApplyMonsterAI(creatureData.aggravatable, creatureData.mistVision);
             ApplyAllowDrops(creatureData.allowDrops);
             ApplyTameable(creatureData.friendly, creatureData.commandable);
@@ -62,17 +62,23 @@ namespace WizshBoneTwitchIntegration.Components
             m_ignoreWard = ignoreWard;
             m_name = name;
 
-            ApplyHumanoid(name, creatureData.level, creatureData.rename);
+            ApplyHumanoid(name, creatureData.level, creatureData.maxHealth, creatureData.allowDamageStructures, creatureData.rename);
             ApplyMonsterAI(creatureData.aggravatable, creatureData.mistVision);
             ApplyAllowDrops(creatureData.allowDrops);
             ApplyTameable(creatureData.friendly, creatureData.commandable);
         }
 
-        public void ApplyHumanoid(string name, int level, bool rename = true)
+        public void ApplyHumanoid(string name, int level, float maxHealth, bool allowDamageStructures, bool rename)
         {
             Humanoid humanoid = gameObject.GetComponent<Humanoid>();
             humanoid.SetLevel(level);
             humanoid.m_faction = Character.Faction.Boss;
+
+            if (maxHealth > 0)
+                humanoid.SetMaxHealth(maxHealth);
+
+            if (!allowDamageStructures)
+                humanoid.m_group = WizshBoneTwitchIntegration.NoDamageStructureGroup;
 
             if (rename)
                 humanoid.m_name = name;
@@ -110,7 +116,7 @@ namespace WizshBoneTwitchIntegration.Components
 
         public string CreatureDataToString(SpawnCreatureData creatureData)
         {
-            return $"{creatureData.prefabName}|{creatureData.level}|{creatureData.amount}|{creatureData.position}|{creatureData.allowDrops}|{creatureData.friendly}|{creatureData.commandable}|{creatureData.aggravatable}|{creatureData.mistVision}|{creatureData.rename}|{creatureData.talks}|{creatureData.talkInteract}|{creatureData.talkInterval}|{creatureData.talkMessage}|{creatureData.isHallucination}";
+            return $"{creatureData.prefabName}|{creatureData.level}|{creatureData.amount}|{creatureData.position}|{creatureData.allowDrops}|{creatureData.friendly}|{creatureData.commandable}|{creatureData.aggravatable}|{creatureData.allowDamageStructures}|{creatureData.maxHealth}|{creatureData.mistVision}|{creatureData.rename}|{creatureData.talks}|{creatureData.talkInteract}|{creatureData.talkInterval}|{creatureData.talkMessage}|{creatureData.isHallucination}";
         }
 
         public SpawnCreatureData StringToCreatureData(string value)
@@ -118,13 +124,15 @@ namespace WizshBoneTwitchIntegration.Components
             string[] data = value.Split('|');
             SpawnCreatureData creatureData = new SpawnCreatureData(data[0], int.Parse(data[1]), int.Parse(data[2]), data[3], bool.Parse(data[4]), bool.Parse(data[5]), bool.Parse(data[6]));
             creatureData.aggravatable = bool.Parse(data[7]);
-            creatureData.mistVision = bool.Parse(data[8]);
-            creatureData.rename = bool.Parse(data[9]);
-            creatureData.talks = bool.Parse(data[10]);
-            creatureData.talkInteract = bool.Parse(data[11]);
-            creatureData.talkInterval = int.Parse(data[12]);
-            creatureData.talkMessage = data[13];
-            creatureData.isHallucination = bool.Parse(data[14]);
+            creatureData.allowDamageStructures = bool.Parse(data[8]);
+            creatureData.maxHealth = float.Parse(data[9]);
+            creatureData.mistVision = bool.Parse(data[10]);
+            creatureData.rename = bool.Parse(data[11]);
+            creatureData.talks = bool.Parse(data[12]);
+            creatureData.talkInteract = bool.Parse(data[13]);
+            creatureData.talkInterval = int.Parse(data[14]);
+            creatureData.talkMessage = data[15];
+            creatureData.isHallucination = bool.Parse(data[16]);
 
             return creatureData;
         }

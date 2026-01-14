@@ -11,7 +11,7 @@ namespace WizshBoneTwitchIntegration.Components
         private Transform colliderTrans;
         private bool isProjectorOn;
         private float radius;
-        private readonly int radiusHash = "SafezoneRadius_WBTI".GetStableHashCode();
+        private readonly int radiusHash = "SafeZoneRadius_WBTI".GetStableHashCode();
 
         public void Awake()
         {

@@ -37,6 +37,9 @@
         public static int StaminaMedium => 685847919;
         public static int StaminaLingering => 1930415553;
 
+        public static int PlayerShrink => 1043640966;
+        public static int PlayerGrow => 822944700;
+
         public static int GetByString(string name)
         {
             switch (name.ToLower())
@@ -55,22 +58,26 @@
                 case "brewofanimalwispers": return BrewOfAnimalWispers;
                 case "bzerker": return Bzerker;
                 case "frostresist": return FrostResist;
-                case "lightfoot": return LightFoot;
+                case "potion_lightfoot": return LightFoot;
                 case "lovepotion": return LovePotion;
                 case "poisonresist": return PoisonResist;
-                case "ratatosk": return Ratatosk;
+                case "potion_hasty": return Ratatosk;
                 case "trollstrength": return TrollStrength;
                 case "vananidir": return Vananidir;
 
-                case "eitrminor": return EitrMinor;
-                case "eitrlingering": return EitrLingering;
-                case "healingminor": return HealingMinor;
-                case "healingmedium": return HealingMedium;
-                case "healingmajor": return HealingMajor;
-                case "healinglingering": return HealingLingering;
-                case "staminaminor": return StaminaMinor;
-                case "staminamedium": return StaminaMedium;
-                case "staminalingering": return StaminaLingering;
+                case "potion_eitr_minor": return EitrMinor;
+                case "meadeitrlingering": return EitrLingering;
+                case "meathealthminor": return HealingMinor;
+                case "potion_health_medium": return HealingMedium;
+                case "meadhealthmajor": return HealingMajor;
+                case "meadhealthlingering": return HealingLingering;
+                case "meadstaminaminor": return StaminaMinor;
+                case "potion_stamina_medium": return StaminaMedium;
+                case "meadstaminalingering": return StaminaLingering;
+
+                case "playershrink": return PlayerShrink;
+                case "playergrow": return PlayerGrow;
+
                 default: return -1;
             }
         }

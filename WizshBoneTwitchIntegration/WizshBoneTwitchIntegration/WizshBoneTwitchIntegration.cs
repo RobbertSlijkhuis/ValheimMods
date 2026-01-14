@@ -32,9 +32,13 @@ namespace WizshBoneTwitchIntegration
         public CustomStatusEffects effects = new CustomStatusEffects();
         public CustomSprites sprites = new CustomSprites();
         private ButtonConfig wizshBoneWindowButton;
-        public static string customConfigPath = "BepInEx/config/WizshBoneTwitchIntegration";
-        public static string redeemsConfigPath = customConfigPath + "/redeems.yaml";
         public static bool useRedeemCommand = false;
+        public static readonly string NoDamageStructureGroup = "WBTI_NoDamageStructure";
+
+        public static readonly string customConfigPath = "BepInEx/config/WizshBoneTwitchIntegration";
+        public static readonly string redeemsConfigPath = customConfigPath + "/redeems.yaml";
+        public static readonly string redeemsSchemaPath = customConfigPath + "/redeems-schema.json";
+        public static readonly string bannedPath = customConfigPath + "/banned.txt";
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -100,7 +104,9 @@ namespace WizshBoneTwitchIntegration
             PieceManager.Instance.AddPiece(new CustomPiece(prefabs.GuardStone, true, pieceConfig));
 
             prefabs.ChestIron.AddComponent<TwitchSurpriseChest>();
+            prefabs.ChestIron.transform.Find("chest_top").gameObject.AddComponent<TwitchSurpriseChestInteract>();
             prefabs.ChestGold.AddComponent<TwitchSurpriseChest>();
+            prefabs.ChestGold.transform.Find("chest_top").gameObject.AddComponent<TwitchSurpriseChestInteract>();
 
             PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
         }
@@ -154,8 +160,8 @@ namespace WizshBoneTwitchIntegration
 
         private void InitRedeemsFile()
         {
-            YAMLHelper.InitRedeemsConfig();
-            YAMLHelper.ReadRedeemsConfig();
+            ExtraConfigHelper.InitRedeemsConfig();
+            ExtraConfigHelper.ReadRedeemsConfig();
         }
 
         private void InitStatusEffects()
@@ -186,8 +192,12 @@ namespace WizshBoneTwitchIntegration
 
         private void InitCommands()
         {
-            CommandManager.Instance.AddConsoleCommand(new ReloadRedeemsCommand());
             CommandManager.Instance.AddConsoleCommand(new ClearMonsterClaimsCommand());
+            CommandManager.Instance.AddConsoleCommand(new BanTwitchUser());
+            CommandManager.Instance.AddConsoleCommand(new ListBannedTwitchUsers());
+            CommandManager.Instance.AddConsoleCommand(new ReloadRedeemsCommand());
+            CommandManager.Instance.AddConsoleCommand(new SetRedeemAlias());
+            CommandManager.Instance.AddConsoleCommand(new UnbanTwitchUser());
             CommandManager.Instance.AddConsoleCommand(new UseRedeemCommand());
         }
 
@@ -219,16 +229,16 @@ namespace WizshBoneTwitchIntegration
             // ====================================
             // TODO:
             // ====================================
-            // Add configurable annoucement message to spawn mist, creatures, suprise chest etc.
+            // Add map markers where you spawned certain stuff (surprise chests are done
+            // Finish all types of statuseffects and make it decently configurable
+            // Mod says it refunded stuff from a custom redeem, should not do that.
             // TalkInteract always show Feo's history fact message, also does not properly show follow/rename creature
             // Armor and shield don't get thrown out very far out of suprise chests
             // Add configurable timers to Shrink and Grow, cancel each other and persist through death
-            // Set specific health damage to creatures in redeems.yaml
             // Apply creature data settings to creates spawned from SpawnShower
             // Apply creature data settings to creates spawned from Suprise chests
             // Allow SpawnShower to be spawned from Suprise chests
             // Remove/add redeems when player leaves/enters a dungeon and check what kind of dungeon the player is in
-            // White/black list to block users from using the mod
             // Add leader board of points spend, deaths caused, saves maybe? Other statistics?
             //
             // ====================================
@@ -236,7 +246,7 @@ namespace WizshBoneTwitchIntegration
             // ====================================
             // Remove redeems on game quit
             // Add halucinations, make player stunned/dazed when getting hit by Hallucinations? Or half damage?
-            // Suprise chests, multiple chests to gamble, add a mimic to bite the opener
+            // Suprise chests, multiple chests to gamble, add a mimic to bite the opener (add legs like the luggage from terry pratchett's novel
             //
             // ====================================
             // IDEAS:
@@ -276,6 +286,7 @@ namespace WizshBoneTwitchIntegration
 
             // What went wrong:
             // Enable/disable redeems did not work sometimes due to DUPLICATE redeem and long time playing?
+            // Poiunts somehow are not refunded...
 
             // New mod ideas:
             // - Inventory in the Saddle

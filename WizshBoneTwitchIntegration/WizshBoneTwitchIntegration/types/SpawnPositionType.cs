@@ -8,5 +8,6 @@
         public static string Flying => "Flying";
         public static string RandomBehind => "RandomBehind";
         public static string Undefined => "Undefined";
+        public static string WorldPosition => "WorldPosition";
     }
 }

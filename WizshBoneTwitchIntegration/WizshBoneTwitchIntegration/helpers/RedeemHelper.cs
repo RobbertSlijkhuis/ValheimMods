@@ -14,30 +14,31 @@ namespace WizshBoneTwitchIntegration.Helpers
         public static List<GameObject> fishList = new List<GameObject>();
         public static int hallucinationCount = 0;
 
-        public static Vector3 UpdateSpawnLocation(Transform transform, string type)
+        public static Vector3 UpdateSpawnLocation(Transform transform, string type, PositionOffsetData positionOffset)
         {
             Vector3 position;
+            Vector3 offset = positionOffset.ToVector();
 
             switch (type)
             {
                 case nameof(SpawnPositionType.InFrontOfPlayer):
-                    position = (transform.forward * 3f) + transform.position;
+                    position = (transform.forward * (3f + offset.z)) + (transform.up * offset.y) + (transform.right * offset.x) + transform.position;
                     return position;
                 case nameof(SpawnPositionType.InFrontOfPlayerHigh):
-                    position = (transform.forward * 3f) + (transform.up * 3f) + transform.position;
+                    position = (transform.forward * (3f + offset.z)) + (transform.up * (3f + offset.y)) + (transform.right * offset.x) + transform.position;
                     return position;
                 case nameof(SpawnPositionType.Flying):
-                    position = (transform.forward * 10f) + (transform.up * 7f) + transform.position;
+                    position = (transform.forward * (10f + offset.z)) + (transform.up * (7f + offset.y)) + (transform.right * offset.x) + transform.position;
                     return position;
                 case nameof(SpawnPositionType.RandomBehind):
-                    position = (transform.forward * Random.Range(-30, -50f)) + (transform.right * Random.Range(-50, 50f)) + transform.position;
+                    position = (transform.forward * Random.Range(-30, -50f)) + (transform.right * Random.Range(-50, 50f)) + positionOffset.ToVector() + transform.position;
 
                     if (ZoneSystem.instance.FindFloor(position, out var height))
                         position.y = height;
 
-                    return position;
+                    return (transform.forward * offset.z) + (transform.up * offset.y) + (transform.right * offset.x) + position;
                 default:
-                    return transform.position;
+                    return (transform.forward * offset.z) + (transform.up * offset.y) + (transform.right * offset.x) + transform.position;
             }
         }
 
@@ -64,9 +65,14 @@ namespace WizshBoneTwitchIntegration.Helpers
                 Jotunn.Logger.LogError("Could not find prefab to spawn");
             }
 
-            GameObject creature = UnityEngine.Object.Instantiate(prefab, options.transform.position, options.transform.rotation);
-            creature.transform.localPosition = UpdateSpawnLocation(creature.transform, options.creatureData.position);
-            creature.transform.localRotation = UpdateSpawnRotation(creature.transform, options.creatureData.position);
+            Vector3 positionToSpawn = options.creatureData.position == SpawnPositionType.WorldPosition ? options.creatureData.positionOffset.ToVector() : options.transform.position;
+            GameObject creature = UnityEngine.Object.Instantiate(prefab, positionToSpawn, options.transform.rotation);
+
+            if (options.creatureData.position != SpawnPositionType.WorldPosition)
+            {
+                creature.transform.localPosition = UpdateSpawnLocation(creature.transform, options.creatureData.position, options.creatureData.positionOffset);
+                creature.transform.localRotation = UpdateSpawnRotation(creature.transform, options.creatureData.position);
+            }
 
             MonsterAI monsterAI = creature.GetComponent<MonsterAI>();
             Humanoid humanoid = creature.GetComponent<Humanoid>();
@@ -245,8 +251,10 @@ namespace WizshBoneTwitchIntegration.Helpers
         {
             Transform transform = Player.m_localPlayer.transform;
             GameObject chest = UnityEngine.Object.Instantiate(prefab, transform.position, transform.rotation);
-            chest.transform.localPosition = UpdateSpawnLocation(chest.transform, SpawnPositionType.InFrontOfPlayerHigh);
+            chest.transform.localPosition = UpdateSpawnLocation(chest.transform, SpawnPositionType.InFrontOfPlayerHigh, new PositionOffsetData());
             chest.transform.localRotation = UpdateSpawnRotation(chest.transform, SpawnPositionType.InFrontOfPlayerHigh);
+
+            Minimap.instance.DiscoverLocation(chest.transform.localPosition, Minimap.PinType.Icon3, "Surprise Chest", false);
 
             TwitchSurpriseChest surpriseChest = chest.GetComponent<TwitchSurpriseChest>();
             surpriseChest.Init(chestData);

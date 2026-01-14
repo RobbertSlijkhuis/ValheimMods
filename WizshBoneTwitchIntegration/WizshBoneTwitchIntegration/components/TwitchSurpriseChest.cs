@@ -1,6 +1,7 @@
 ﻿using Jotunn.Managers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Models;
 
@@ -8,6 +9,9 @@ namespace WizshBoneTwitchIntegration.Components
 {
     internal class TwitchSurpriseChest : MonoBehaviour
     {
+        ZNetView m_netView;
+        private readonly int chestDataHash = "SurpriseChestData_WBTI".GetStableHashCode();
+
         private int m_amount;
         private float m_force;
         private List<string> m_items = new List<string>();
@@ -62,8 +66,32 @@ namespace WizshBoneTwitchIntegration.Components
 
             List<EffectList.EffectData> openingGlowList = new List<EffectList.EffectData>();
             openingGlowList.Add(openingGlowEffectData);
-            
+
             openingEffects.m_effectPrefabs = openingGlowList.ToArray();
+
+            m_netView = gameObject.GetComponent<ZNetView>();
+            m_supriseChestInteract = transform.Find("chest_top").gameObject.GetComponent<TwitchSurpriseChestInteract>();
+
+            if (m_netView == null || m_netView.GetZDO() == null)
+            {
+                Jotunn.Logger.LogError("Could not find ZNetView on surprise chest!");
+                return;
+            }
+
+            string dataString = m_netView.GetZDO().GetString(chestDataHash, "");
+
+            if (dataString == "")
+                return;
+
+            ChestData chestData = StringToChestData(dataString);
+            m_amount = chestData.amount;
+            m_force = chestData.force;
+            m_interact = chestData.interact;
+            m_items = chestData.items;
+            m_mimic = chestData.mimicChance == 0 ? false : Random.Range(0, 100) <= chestData.mimicChance;
+            m_random = chestData.random;
+            m_type = chestData.type;
+            m_yeetChance = chestData.yeetChance;
         }
 
         public void Init(ChestData chestData)
@@ -77,7 +105,7 @@ namespace WizshBoneTwitchIntegration.Components
             m_type = chestData.type;
             m_yeetChance = chestData.yeetChance;
 
-            m_supriseChestInteract = transform.Find("chest_top").gameObject.AddComponent<TwitchSurpriseChestInteract>();
+            m_netView.GetZDO().Set(chestDataHash, ChestDataToString(chestData));
 
             TriggerStartEffects();
 
@@ -143,6 +171,7 @@ namespace WizshBoneTwitchIntegration.Components
         public void OnDestroy()
         {
             TriggerEndEffects();
+            Minimap.instance.RemovePin(transform.position, 3f);
         }
 
         private void TriggerEndEffects()
@@ -181,6 +210,39 @@ namespace WizshBoneTwitchIntegration.Components
                 case 4:
                     return -100f;
             }
+        }
+
+        public string ChestDataToString(ChestData chestData)
+        {
+            string items = "";
+
+            foreach (string item in chestData.items)
+            {
+                items += $"{item};";
+            }
+
+            if (items != "")
+                items = items.Remove(items.Length - 1);
+
+            return $"{chestData.amount}|{chestData.announceMessage}|{chestData.force}|{chestData.interact}|{items}|{chestData.mimicChance}|{chestData.random}|{chestData.type}|{chestData.yeetChance}";
+        }
+
+        public ChestData StringToChestData(string value)
+        {
+            string[] data = value.Split('|');
+            string[] items = data[4].Split(';');
+            ChestData chestData = new ChestData();
+            chestData.amount = int.Parse(data[0]);
+            chestData.announceMessage = data[1];
+            chestData.force = float.Parse(data[2]);
+            chestData.interact = bool.Parse(data[3]);
+            chestData.items = items.ToList();
+            chestData.mimicChance = int.Parse(data[5]);
+            chestData.random = bool.Parse(data[6]); ;
+            chestData.type = data[7];
+            chestData.yeetChance = int.Parse(data[8]);
+
+            return chestData;
         }
     }
 }

@@ -80,7 +80,55 @@ namespace WizshBoneTwitchIntegration.Extensions
                     }
                 }
 
-                GameObject prefab = spawnAbility.m_spawnPrefab[UnityEngine.Random.Range(0, spawnAbility.m_spawnPrefab.Length)];
+                GameObject prefab;
+
+                if (spawnAbilityData.isBiomeList)
+                {
+                    Heightmap.Biome biome = Player.m_localPlayer.GetCurrentBiome();
+
+                    try
+                    {
+                        switch (biome)
+                        {
+                            case Heightmap.Biome.Meadows:
+                                prefab = spawnAbility.m_spawnPrefab[0];
+                                break;
+                            case Heightmap.Biome.BlackForest:
+                                prefab = spawnAbility.m_spawnPrefab[1];
+                                break;
+                            case Heightmap.Biome.Swamp:
+                                prefab = spawnAbility.m_spawnPrefab[2];
+                                break;
+                            case Heightmap.Biome.Mountain:
+                            case Heightmap.Biome.DeepNorth:
+                                prefab = spawnAbility.m_spawnPrefab[3];
+                                break;
+                            case Heightmap.Biome.Plains:
+                                prefab = spawnAbility.m_spawnPrefab[4];
+                                break;
+                            case Heightmap.Biome.Mistlands:
+                                prefab = spawnAbility.m_spawnPrefab[5];
+                                break;
+                            case Heightmap.Biome.AshLands:
+                                prefab = spawnAbility.m_spawnPrefab[6];
+                                break;
+                            case Heightmap.Biome.Ocean:
+                                prefab = spawnAbility.m_spawnPrefab[7];
+                                break;
+                            default:
+                                prefab = spawnAbility.m_spawnPrefab[0];
+                                break;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Jotunn.Logger.LogError("Could not pick biome spefific prefab: " + e);
+                        prefab = spawnAbility.m_spawnPrefab[0];
+                    }
+                }
+                else
+                    prefab = spawnAbility.m_spawnPrefab[UnityEngine.Random.Range(0, spawnAbility.m_spawnPrefab.Length)];
+
                 if (spawnAbility.m_maxSpawned > 0 && SpawnSystem.GetNrOfInstances(prefab) >= spawnAbility.m_maxSpawned)
                 {
                     if (spawnAbility.m_owner is Player player)
@@ -101,9 +149,16 @@ namespace WizshBoneTwitchIntegration.Extensions
                 GameObject gameObject = UnityEngine.Object.Instantiate(prefab, spawnPoint, Quaternion.Euler(0f, UnityEngine.Random.value * (float)Math.PI * 2f, 0f));
                 ZNetView component = gameObject.GetComponent<ZNetView>();
                 Projectile component2 = gameObject.GetComponent<Projectile>();
+
                 MonsterAI monsterAI = gameObject.GetComponent<MonsterAI>();
                 Humanoid humanoid1 = gameObject.GetComponent<Humanoid>();
                 ImpactEffect impactEffect = gameObject.GetComponent<ImpactEffect>();
+                Aoe aoe = gameObject.GetComponentInChildren<Aoe>();
+
+                if (gameObject.name == "lightningAOE")
+                {
+                    aoe = gameObject.GetComponentsInChildren<Aoe>()[1];
+                }
 
                 if (monsterAI != null && humanoid1 != null)
                 {
@@ -126,6 +181,12 @@ namespace WizshBoneTwitchIntegration.Extensions
                         rigidbody.AddForce(new Vector3(0f, (float)spawnAbilityData.dropVelocity, 0f) * rigidbody.mass * rigidbody.mass);
 
                     impactEffect.StartCoroutine(impactEffect.ResetShowerSettings());
+                }
+
+                if (monsterAI == null && aoe != null)
+                {
+                    if (spawnAbilityData.damage != null)
+                        aoe.m_damage = spawnAbilityData.damage.ConvertToDamageTypes();
                 }
 
                 if ((bool)component2)
@@ -208,7 +269,10 @@ namespace WizshBoneTwitchIntegration.Extensions
                 }
 
                 spawnAbility.SetupAoe(gameObject.GetComponent<Character>(), spawnPoint);
-                spawnAbility.m_spawnEffects.Create(spawnPoint, Quaternion.identity);
+
+                if (!spawnAbilityData.noSpawnEffect)
+                    spawnAbility.m_spawnEffects.Create(spawnPoint, Quaternion.identity);
+
                 if (spawnAbility.m_spawnDelay > 0f)
                 {
                     yield return new WaitForSeconds(spawnAbility.m_spawnDelay);

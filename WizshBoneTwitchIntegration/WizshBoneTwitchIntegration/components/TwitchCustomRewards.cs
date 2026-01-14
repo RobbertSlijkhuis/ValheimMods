@@ -23,13 +23,15 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private TwitchChat m_chat;
         private GameTask<EventStream<CustomRewardEvent>> m_customRewardEvents;
         public Redeems m_redeems = new Redeems();
-        private List<string> m_bannedUsers = new List<string>();
+        public List<string> m_bannedUsers = new List<string>();
         public bool m_playerIsInSafeZone = false;
         public bool m_enabled = false;
+        public string m_alias;
 
         public void Awake()
         {
             m_chat = gameObject.GetComponent<TwitchChat>();
+            m_bannedUsers = ExtraConfigHelper.ReadBannedUsersFromFile();
         }
 
         public void SubscribeToRedeemEvents()
@@ -84,6 +86,12 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (currentRewardEvent == null || currentRewardEvent.Status == CustomRewardRedemptionState.Fulfilled || currentRewardEvent.Status == CustomRewardRedemptionState.Canceled)
                     return;
 
+                if (m_alias != null && currentRewardEvent.RedeemerName == m_auth.m_userInfo.displayName)
+                {
+                    Jotunn.Logger.LogWarning($"{m_auth.m_userInfo.displayName} pretending to be {m_alias}");
+                    currentRewardEvent.RedeemerName = m_alias;
+                }
+
                 Jotunn.Logger.LogWarning($"{currentRewardEvent.RedeemerName} has bought {currentRewardEvent.CustomRewardTitle} for {currentRewardEvent.CustomRewardCost}!");
                 Jotunn.Logger.LogWarning($"Time: {currentRewardEvent.RedeemedAt}");
                 Jotunn.Logger.LogWarning($"Status: {currentRewardEvent.Status}");
@@ -94,6 +102,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     m_chat.Send($"Could not find redeem! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
                     throw new RedeemException("Could not find redeem", ExceptionType.Error);
                 }
+
+                if (m_bannedUsers.Contains(currentRewardEvent.RedeemerName.ToLower()))
+                    throw new RedeemException("Redeemer is banned", ExceptionType.Warning);
 
                 if (Game.IsPaused() || Menu.IsVisible())
                 {
@@ -188,17 +199,12 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         else
                             RedeemHelper.SpawnCreature(new SpawnOptions(creature, Player.m_localPlayer.transform, currentRewardEvent, redeem.ignoreWard));
                     }
-
-                    Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
-                    return;
                 }
 
                 if (redeem.type == RedeemType.SpawnHallucination)
                 {
                     RedeemHelper.hallucinationCount = 0;
                     InvokeRepeating(nameof(StartHallucinations), 0f, 20f);
-                    Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
-                    return;
                 }
 
                 if (redeem.type == RedeemType.SpawnShower)
@@ -220,9 +226,11 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     if (spawnAbility == null)
                         throw new RedeemException("Could not find spawn ability on shower prefab", ExceptionType.Error);
 
-                    spawnAbility.m_owner = Player.m_localPlayer;
                     spawnAbility.m_setMaxInstancesFromWeaponLevel = false;
                     spawnAbility.m_maxSummonReached = "You have reached the maximum of spawns";
+
+                    if (redeem.shower.isOwner)
+                        spawnAbility.m_owner = Player.m_localPlayer;
 
                     if (redeem.shower.accuracy != null)
                         spawnAbility.m_projectileAccuracy = (float)redeem.shower.accuracy;
@@ -313,8 +321,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                     SpawnCreatureData creatureData = new SpawnCreatureData();
                     StartCoroutine(spawnAbility.Spawn2(currentRewardEvent, redeem.shower, creatureData));
-                    Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
-                    return;
                 }
 
                 if (redeem.type == RedeemType.SpawnMist)
@@ -323,57 +329,53 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         throw new RedeemException("could not find mist data for SpawnMist", ExceptionType.Error);
 
                     RedeemHelper.SpawnMist(redeem.mist);
-                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, "A sudden mist sets in...");
-                    Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
-                    return;
+
+                    if (redeem.mist.announceMessage != null)
+                        Player.m_localPlayer.Message(MessageHud.MessageType.Center, redeem.mist.announceMessage);
                 }
 
-                if (redeem.type == RedeemType.PlayerShrink)
-                {
-                    TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
-                    TwitchStatusEffect statusEffect = new TwitchStatusEffect("MiniMe", PluginConfig.configMiniMeDuration.Value);
-                    statusEffect.blockedByStatusEffects.Add("BigMe");
-                    statusEffect.onStart = customStatusEffect.ShrinkPlayer;
-                    statusEffect.onEnd = customStatusEffect.ResetPlayer;
-                    bool success = customStatusEffect.AddStatusEffect(statusEffect);
+                //if (redeem.type == RedeemType.PlayerShrink)
+                //{
+                //    TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
+                //    StatusEffectData statusEffect = new StatusEffectData("MiniMe", PluginConfig.configMiniMeDuration.Value);
+                //    statusEffect.blockedBy.Add("BigMe");
+                //    statusEffect.onStart = customStatusEffect.ShrinkPlayer;
+                //    statusEffect.onEnd = customStatusEffect.ResetPlayer;
+                //    bool success = customStatusEffect.AddStatusEffect(statusEffect);
 
-                    if (success)
-                        Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
-                    else
-                    {
-                        m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer already has the selected StatusEffect or it is blocked by a different one! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
-                        Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Canceled);
-                    }
-                    return;
-                }
+                //    if (!success)
+                //    {
+                //        m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer already has the selected StatusEffect or it is blocked by a different one! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
+                //        throw new RedeemException("Player already has StatusEffect", ExceptionType.Warning);
+                //    }
+                //}
 
-                if (redeem.type == RedeemType.PlayerGrow)
-                {
-                    TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
-                    TwitchStatusEffect statusEffect = new TwitchStatusEffect("BigMe", PluginConfig.configMiniMeDuration.Value);
-                    statusEffect.blockedByStatusEffects.Add("MiniMe");
-                    statusEffect.onStart = customStatusEffect.GrowPlayer;
-                    statusEffect.onEnd = customStatusEffect.ResetPlayer;
-                    bool success = customStatusEffect.AddStatusEffect(statusEffect);
+                //if (redeem.type == RedeemType.PlayerGrow)
+                //{
+                //    TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
+                //    StatusEffectData statusEffect = new StatusEffectData("BigMe", PluginConfig.configMiniMeDuration.Value);
+                //    statusEffect.blockedBy.Add("MiniMe");
+                //    statusEffect.onStart = customStatusEffect.GrowPlayer;
+                //    statusEffect.onEnd = customStatusEffect.ResetPlayer;
+                //    bool success = customStatusEffect.AddStatusEffect(statusEffect);
 
-                    if (success)
-                        Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
-                    else
-                    {
-                        m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer already has the selected StatusEffect or it is blocked by a different one! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
-                        Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Canceled);
-                    }
-                    return;
-                }
+                //    if (!success)
+                //    {
+                //        m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer already has the selected StatusEffect or it is blocked by a different one! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
+                //        throw new RedeemException("Player already has StatusEffect", ExceptionType.Warning);
+                //    }
+                //}
 
                 if (redeem.type == RedeemType.StatusEffect)
                 {
                     if (redeem.statusEffects == null || redeem.statusEffects.Count == 0)
                         throw new RedeemException("Could not find a status effect to apply", ExceptionType.Error);
 
-                    foreach (string statusEffect in redeem.statusEffects)
+                    TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
+                    
+                    foreach (StatusEffectData statusEffect in redeem.statusEffects)
                     {
-                        int hash = StatusEffectType.GetByString(statusEffect);
+                        int hash = StatusEffectType.GetByString(statusEffect.name);
 
                         if (hash == -1)
                         {
@@ -381,17 +383,35 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                             continue;
                         }
 
-                        if (Player.m_localPlayer.GetSEMan().HaveStatusEffect(hash))
+                        if (!statusEffect.renew && Player.m_localPlayer.GetSEMan().HaveStatusEffect(hash))
                         {
-                            m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer already has the {statusEffect} StatusEffect! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
-                            throw new RedeemException($"Player already has the {statusEffect} status effect", ExceptionType.Warning);
+                            m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer already has the {statusEffect.name} StatusEffect! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
+                            throw new RedeemException($"Player already has the {statusEffect.name} status effect", ExceptionType.Warning);
                         }
 
-                        Player.m_localPlayer.GetSEMan().AddStatusEffect(hash);
-                    }
+                        statusEffect.Init();
 
-                    Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
-                    return;
+                        Jotunn.Logger.LogWarning("========================");
+                        Jotunn.Logger.LogWarning($"Name: {statusEffect.name}");
+                        Jotunn.Logger.LogWarning($"Hash: {hash}");
+                        Jotunn.Logger.LogWarning($"NameHash: {statusEffect.nameHash}");
+
+                        if (statusEffect.name == "PlayerShrink")
+                        {
+                            Jotunn.Logger.LogWarning("Found shrink");
+                            statusEffect.onStart = customStatusEffect.PlayerShrink;
+                            statusEffect.onEnd = customStatusEffect.PlayerSizeReset;
+                        }
+                        else if (statusEffect.name == "PlayerGrow")
+                        {
+                            Jotunn.Logger.LogWarning("Found grow");
+                            statusEffect.onStart = customStatusEffect.PlayerGrow;
+                            statusEffect.onEnd = customStatusEffect.PlayerSizeReset;
+                        }
+
+                        bool success = customStatusEffect.AddStatusEffect(statusEffect);
+                        Jotunn.Logger.LogWarning("AddStatusEffect: " + success);
+                    }
                 }
 
                 if (redeem.type == RedeemType.StatusEffectRandom)
@@ -405,8 +425,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     }
 
                     Player.m_localPlayer.GetSEMan().AddStatusEffect(hash);
-                    Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
-                    return;
                 }
 
                 if (redeem.type == RedeemType.SurpriseChest)
@@ -421,26 +439,28 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     if (redeem.chest.type == ChestType.Gold)
                         chestPrefab = WizshBoneTwitchIntegration.Instance.prefabs.ChestGold;
 
-                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Surprise Chest inbound!");
+                    if (redeem.chest.announceMessage != null)
+                        Player.m_localPlayer.Message(MessageHud.MessageType.Center, redeem.chest.announceMessage);
+
                     StartCoroutine(InitSurpriseChestWithDelay(chestPrefab, redeem.chest));
-                    Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
-                    return;
                 }
 
                 if (redeem.type == RedeemType.TerrainRemove)
                 {
                     Player.m_localPlayer.GetSEMan().AddStatusEffect(WizshBoneTwitchIntegration.Instance.effects.NoFallDamage);
                     GameObject dig = Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.RemoveTheCountry, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
-                    Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
-                    return;
                 }
 
                 if (redeem.type == RedeemType.ExplodeFish)
                 {
                     RedeemHelper.DetonateFish();
                     Invoke(nameof(DestroyFish), 0.5f);
+                }
+
+                if (PluginConfig.configAutoResolveRedeems.Value)
+                {
+                    Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft, $"{currentRewardEvent.CustomRewardTitle} fullfilled");
                     Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Fulfilled);
-                    return;
                 }
 
                 if (WizshBoneTwitchIntegration.useRedeemCommand)
@@ -456,7 +476,11 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (WizshBoneTwitchIntegration.useRedeemCommand)
                     WizshBoneTwitchIntegration.useRedeemCommand = false;
 
-                Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Canceled);
+                if (PluginConfig.configAutoResolveRedeems.Value)
+                {
+                    Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft, $"{currentRewardEvent.CustomRewardTitle} canceled");
+                    Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Canceled);
+                }
             }
         }
 

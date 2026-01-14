@@ -9,9 +9,9 @@ namespace WizshBoneTwitchIntegration.Commands
 {
     internal class UseRedeemCommand : ConsoleCommand
     {
-        public override string Name => "UseRedeem";
+        public override string Name => "UseTwitchRedeem";
 
-        public override string Help => "Invoke a redeem via command";
+        public override string Help => "Invoke a Twitch redeem via command";
 
         public override List<string> CommandOptionList()
         {

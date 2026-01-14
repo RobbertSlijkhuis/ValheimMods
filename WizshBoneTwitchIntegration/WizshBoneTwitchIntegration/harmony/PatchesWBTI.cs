@@ -42,6 +42,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                 if (customRewards == null)
                     return;
 
+                ExtraConfigHelper.WriteBannedUsersToFile(customRewards.m_bannedUsers);
                 customRewards.ClearRewards();
             }
             catch (Exception e)
@@ -124,7 +125,7 @@ namespace WizshBoneTwitchIntegration.Harmony
             {
                 int nameHash = __instance.NameHash();
                 TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
-                TwitchStatusEffect statusEffect = customStatusEffect.GetStatusEffects().Find(item => item.nameHash == nameHash);
+                StatusEffectData statusEffect = customStatusEffect.GetStatusEffects().Find(item => item.nameHash == nameHash);
 
                 if (statusEffect == null)
                     return;
@@ -160,9 +161,32 @@ namespace WizshBoneTwitchIntegration.Harmony
         //    }
         //}
 
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(WearNTear), "Damage")]
+        public static bool Damage_Prefix(WearNTear __instance, HitData hit)
+        {
+            try
+            {
+                if (__instance == null || hit == null)
+                    return true;
+
+                Character character = hit.GetAttacker();
+
+                if (character == null)
+                    return true;
+
+                return character.m_group != WizshBoneTwitchIntegration.NoDamageStructureGroup;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in Damage_Prefix: " + e);
+                return true;
+            }
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(EnemyHud), "UpdateHuds")]
-        public static void UpdateHuds_Prefix(ref EnemyHud __instance, Player player, Sadle sadle, float dt)
+        public static void UpdateHuds_Postfix(ref EnemyHud __instance, Player player, Sadle sadle, float dt)
         {
             try
             {
@@ -176,17 +200,20 @@ namespace WizshBoneTwitchIntegration.Harmony
                 {
                     HudData value = hud.Value;
 
+                    if (value == null || value.m_level3 == null)
+                        continue;
+
                     int level = value.m_character.GetLevel();
 
-                    Transform hudLevel2 = value.m_level3.parent.Find("level_custom_2");
-                    Transform hudLevel3 = value.m_level3.parent.Find("level_custom_3");
-                    Transform hudLevel4 = value.m_level3.parent.Find("level_custom_4");
-                    Transform hudLevel5 = value.m_level3.parent.Find("level_custom_5");
-                    Transform hudLevel6 = value.m_level3.parent.Find("level_custom_6");
-                    Transform hudLevel7 = value.m_level3.parent.Find("level_custom_7");
-                    Transform hudLevel8 = value.m_level3.parent.Find("level_custom_8");
-                    Transform hudLevel9 = value.m_level3.parent.Find("level_custom_9");
-                    Transform hudLevel10 = value.m_level3.parent.Find("level_custom_10");
+                    RectTransform hudLevel2 = value.m_level3.parent.Find("level_custom_2") as RectTransform;
+                    RectTransform hudLevel3 = value.m_level3.parent.Find("level_custom_3") as RectTransform;
+                    RectTransform hudLevel4 = value.m_level3.parent.Find("level_custom_4") as RectTransform;
+                    RectTransform hudLevel5 = value.m_level3.parent.Find("level_custom_5") as RectTransform;
+                    RectTransform hudLevel6 = value.m_level3.parent.Find("level_custom_6") as RectTransform;
+                    RectTransform hudLevel7 = value.m_level3.parent.Find("level_custom_7") as RectTransform;
+                    RectTransform hudLevel8 = value.m_level3.parent.Find("level_custom_8") as RectTransform;
+                    RectTransform hudLevel9 = value.m_level3.parent.Find("level_custom_9") as RectTransform;
+                    RectTransform hudLevel10 = value.m_level3.parent.Find("level_custom_10") as RectTransform;
 
                     if (hudLevel2 != null)
                         hudLevel2.gameObject.SetActive(level >= 4);
@@ -218,7 +245,7 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Something went wrong in UpdateHuds_Prefix: " + e);
+                Jotunn.Logger.LogError("Something went wrong in UpdateHuds_Postfix: " + e);
                 return;
             }
         }

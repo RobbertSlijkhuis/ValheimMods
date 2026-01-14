@@ -7,11 +7,16 @@ namespace WizshBoneTwitchIntegration.Configs
     internal static class PluginConfig
     {
         public static string sectionGeneral = "General";
+        public static string sectionChatting = "Chatting";
         public static string sectionBuffsAndDebuffs = "Buffs and debuffs";
         public static string sectionRemoveTheCountry = "Remove the Country";
 
         public static ConfigEntry<KeyboardShortcut> configWizshBoneWindow;
+        public static ConfigEntry<bool> configAutoResolveRedeems;
+
         public static ConfigEntry<bool> configChattingEnabled;
+        public static ConfigEntry<float> configChattingRadius;
+        public static ConfigEntry<float> configChattingInterval;
         public static ConfigEntry<string> configChattingBlackList;
 
         public static ConfigEntry<float> configMiniMeDuration;
@@ -34,7 +39,11 @@ namespace WizshBoneTwitchIntegration.Configs
                 new ConfigDescription("Settings of the WizshBone Twitch Integration", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
 
-            configChattingEnabled = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionGeneral, "Enable in-game chatting feature", true,
+            configAutoResolveRedeems = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionGeneral, "Auto resolve redeems", true,
+                new ConfigDescription("Wether the redeems are automaticly resolved", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+
+            configChattingEnabled = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionChatting, "Enable in-game chatting feature", true,
                 new ConfigDescription("Wether viewer chat messages are shown above creatures in-game", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
             configChattingEnabled.SettingChanged += (obj, attr) =>
@@ -43,7 +52,25 @@ namespace WizshBoneTwitchIntegration.Configs
                 chatting.m_enabled = configChattingEnabled.Value;
             };
 
-            configChattingBlackList = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionGeneral, "Chatting black list", "Nightbot, StreamElements",
+            configChattingRadius = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionChatting, "Chatting scan radius", 20f,
+                new ConfigDescription("The radius that the chatting system will scan for creatures", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+            configChattingRadius.SettingChanged += (obj, attr) =>
+            {
+                TwitchChatting chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
+                chatting.m_scanRadius = configChattingRadius.Value;
+            };
+
+            configChattingInterval = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionChatting, "Chatting scan interval", 60f,
+                new ConfigDescription("The interval that the chatting system will scan for creatures", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+            configChattingInterval.SettingChanged += (obj, attr) =>
+            {
+                TwitchChatting chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
+                chatting.m_scanInterval = configChattingInterval.Value;
+            };
+
+            configChattingBlackList = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionChatting, "Chatting black list", "Nightbot, StreamElements",
                 new ConfigDescription("Blacklist for the in-game chatting feature to prevent bots or viewers from being chosen", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
             configChattingBlackList.SettingChanged += (obj, attr) =>

@@ -6,6 +6,7 @@ namespace WizshBoneTwitchIntegration.Models
     internal class ChestData
     {
         public int amount = 1;
+        public string announceMessage;
         public float force = 200f;
         public bool interact = true;
         public List<string> items = new List<string>();

@@ -6,14 +6,17 @@ namespace WizshBoneTwitchIntegration.Models
     {
         public bool aggravatable = false;
         public bool allowDrops = false;
+        public bool allowDamageStructures = true;
         public int amount = 1;
         public bool commandable = false;
         public bool friendly = false;
         public bool isHallucination = false;
         public int level = 1;
+        public float maxHealth = 0;
         public bool mistVision = true;
         public string prefabName;
         public string position = SpawnPositionType.OnPlayer;
+        public PositionOffsetData positionOffset = new PositionOffsetData();
         public bool rename = true;
         public bool talkInteract = false;
         public int talkInterval = 0;
