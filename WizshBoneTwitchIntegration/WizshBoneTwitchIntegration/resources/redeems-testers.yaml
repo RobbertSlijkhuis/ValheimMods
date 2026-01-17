@@ -629,11 +629,12 @@ redeems:
     cooldown: 300
     statusEffects:
       - name: PlayerGrow
-        duration: 300
+        duration: 10
         persistsThroughDeath: true
+        renew: true
         blockedBy:
           - PlayerShrink
- - type: StatusEffectRandom
+  - type: StatusEffectRandom
     title: "WBTI: Random buff/debuff!"
     points: 300
     cooldown: 60
@@ -686,6 +687,7 @@ redeems:
     ignoreWard: true
     statusEffects: 
       - name: Potion_health_medium
+        duration: 0
   - type: StatusEffect
     title: "WBTI: Energize Streamer!"
     points: 250
@@ -694,6 +696,7 @@ redeems:
     ignoreWard: true
     statusEffects: 
       - name: Potion_stamina_medium
+        duration: 0
   - type: StatusEffect
     title: "WBTI: Eitrfy Streamer!"
     points: 250
@@ -702,6 +705,7 @@ redeems:
     ignoreWard: true
     statusEffects:
       - name: Potion_eitr_minor
+        duration: 0
   - type: StatusEffect
     title: "WBTI: Gone with the wind!"
     points: 450
@@ -884,4 +888,5 @@ redeems:
         - RoastedCrustPie
         - Charred_Twitcher
         - SizzlingBerryBroth
+
 
