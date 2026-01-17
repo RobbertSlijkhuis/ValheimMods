@@ -633,12 +633,51 @@ redeems:
         persistsThroughDeath: true
         blockedBy:
           - PlayerShrink
-  - type: StatusEffectRandom
+ - type: StatusEffectRandom
     title: "WBTI: Random buff/debuff!"
     points: 300
     cooldown: 60
     ignoreWard: true
     backgroundColor: "#ff6f00"
+    statusEffects: 
+      - name: BarleyWine
+        renew: true
+      - name: Burning_WBTI
+        renew: true
+      - name: MeadFrostResist
+        renew: true
+      - name: Freezing_WBTI
+        renew: true
+      - name: MeadPoisonResist
+        renew: true
+      - name: Poison_WBTI
+        renew: true
+      - name: MeadHasty
+        renew: true
+      - name: Puke
+        renew: true
+      - name: MeadBzerker
+        renew: true
+      - name: Wet
+        renew: true
+      - name: MeadLightfoot
+        renew: true
+      - name: Tared
+        renew: true
+      - name: Rested
+        renew: true
+      - name: PlayerShrink
+        duration: 300
+        renew: true
+        persistsThroughDeath: true
+        blockedBy:
+          - PlayerGrow
+      - name: PlayerGrow
+        duration: 300
+        renew: true
+        persistsThroughDeath: true
+        blockedBy:
+          - PlayerShrink
   - type: StatusEffect
     title: "WBTI: Heal Streamer!"
     points: 250
