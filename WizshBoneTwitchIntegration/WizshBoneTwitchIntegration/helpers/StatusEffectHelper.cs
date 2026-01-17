@@ -30,13 +30,13 @@ namespace WizshBoneTwitchIntegration.Helpers
         /// <returns></returns>
         public static int GetRandomStatusEffect()
         {
-            List<int> hashList = new List<int>();
+            List<string> hashList = new List<string>();
             hashList.Add(StatusEffectType.BarlyWine);
-            hashList.Add(WizshBoneTwitchIntegration.Instance.effects.Burning.NameHash());
+            hashList.Add(WizshBoneTwitchIntegration.Instance.effects.Burning.name);
             hashList.Add(StatusEffectType.FrostResist); // FrostResist
-            hashList.Add(WizshBoneTwitchIntegration.Instance.effects.Freezing.NameHash());
+            hashList.Add(WizshBoneTwitchIntegration.Instance.effects.Freezing.name);
             hashList.Add(StatusEffectType.PoisonResist); // PoisonResist
-            hashList.Add(WizshBoneTwitchIntegration.Instance.effects.Poison.NameHash());
+            hashList.Add(WizshBoneTwitchIntegration.Instance.effects.Poison.name);
             hashList.Add(StatusEffectType.Ratatosk);
             hashList.Add(StatusEffectType.Puke);
             hashList.Add(StatusEffectType.Bzerker);
@@ -47,7 +47,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             hashList.Add(StatusEffectType.Tarred);
 
             int index = Random.Range(0, hashList.Count);
-            return hashList[index];
+            return hashList[index].GetStableHashCode();
         }
     }
 }

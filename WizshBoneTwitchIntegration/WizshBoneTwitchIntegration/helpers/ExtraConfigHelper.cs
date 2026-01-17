@@ -97,6 +97,19 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
         }
 
+        public static void UpdateRedeemWithTesterFile()
+        {
+            if (!File.Exists(WizshBoneTwitchIntegration.customConfigPath + "/redeems-old.yaml"))
+                File.Move(WizshBoneTwitchIntegration.redeemsConfigPath, WizshBoneTwitchIntegration.customConfigPath + "/redeems-old.yaml");
+            else
+            {
+                string[] fileContents = File.ReadAllLines(WizshBoneTwitchIntegration.redeemsConfigPath);
+                File.WriteAllLines(WizshBoneTwitchIntegration.customConfigPath + "/redeems-old.yaml", fileContents);
+            }
+
+            WriteFromEmbeddedResourceTo("WizshBoneTwitchIntegration.resources.redeems-testers.yaml", WizshBoneTwitchIntegration.redeemsConfigPath);
+        }
+
         public static List<string> ReadBannedUsersFromFile()
         {
             if (!File.Exists(WizshBoneTwitchIntegration.bannedPath))

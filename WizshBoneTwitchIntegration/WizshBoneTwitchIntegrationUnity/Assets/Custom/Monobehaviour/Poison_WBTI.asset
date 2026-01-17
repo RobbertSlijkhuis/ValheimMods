@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 1345532120, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
   m_Name: Poison_WBTI
   m_EditorClassIdentifier: 
-  m_name: $se_poison_name
+  m_name: Poison_WBTI
   m_category: 
   m_icon: {fileID: 21300000, guid: ab7dade84b2f6664e8f41e4d163fdc85, type: 3}
   m_flashIcon: 0

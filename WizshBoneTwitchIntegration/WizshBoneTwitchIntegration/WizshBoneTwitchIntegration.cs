@@ -4,6 +4,7 @@ using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Commands;
@@ -31,6 +32,7 @@ namespace WizshBoneTwitchIntegration
         public CustomPrefabs prefabs = new CustomPrefabs();
         public CustomStatusEffects effects = new CustomStatusEffects();
         public CustomSprites sprites = new CustomSprites();
+        public CustomEffectLists effectLists = new CustomEffectLists();
         private ButtonConfig wizshBoneWindowButton;
         public static bool useRedeemCommand = false;
         public static readonly string NoDamageStructureGroup = "WBTI_NoDamageStructure";
@@ -56,6 +58,7 @@ namespace WizshBoneTwitchIntegration
 
             PrefabManager.OnVanillaPrefabsAvailable += InitRedeemsFile;
             PrefabManager.OnVanillaPrefabsAvailable += AddPieces;
+            PrefabManager.OnVanillaPrefabsAvailable += AddEffectLists;
             PrefabManager.OnPrefabsRegistered += AddPersistentComponents;
             ItemManager.OnItemsRegistered += LogStatusEffects;
         }
@@ -90,24 +93,22 @@ namespace WizshBoneTwitchIntegration
 
         private void AddPieces()
         {
+            prefabs.ChestIron.AddComponent<TwitchSurpriseChest>();
+            prefabs.ChestIron.transform.Find("chest_top").gameObject.AddComponent<TwitchSurpriseChestInteract>();
+            prefabs.ChestGold.AddComponent<TwitchSurpriseChest>();
+
+            prefabs.ChestGold.transform.Find("chest_top").gameObject.AddComponent<TwitchSurpriseChestInteract>();
+            prefabs.GuardStone.transform.Find("AreaMarker").gameObject.AddComponent<TwitchSafeZone>();
+            prefabs.GuardStone.transform.Find("controls").gameObject.AddComponent<TwitchSafeZoneControls>();
+
             PieceConfig pieceConfig = new PieceConfig();
             pieceConfig.Enabled = true;
             pieceConfig.Name = "Twitchy Ward";
             pieceConfig.Description = "A ward against mysterious and twitchy forces!";
             pieceConfig.PieceTable = PieceTables.Hammer;
             pieceConfig.Category = PieceCategories.Misc;
-            pieceConfig.AddRequirement("FineWood", 5);
-            pieceConfig.AddRequirement("GreydwarfEye", 5);
-            pieceConfig.AddRequirement("SurtlingCore", 1);
-            prefabs.GuardStone.transform.Find("AreaMarker").gameObject.AddComponent<TwitchSafeZone>();
-            prefabs.GuardStone.transform.Find("controls").gameObject.AddComponent<TwitchSafeZoneControls>();
+            pieceConfig.Requirements = RecipeHelper.GetAsRequirementConfigArray(PluginConfig.configWardRecipe.Value, null, null);
             PieceManager.Instance.AddPiece(new CustomPiece(prefabs.GuardStone, true, pieceConfig));
-
-            prefabs.ChestIron.AddComponent<TwitchSurpriseChest>();
-            prefabs.ChestIron.transform.Find("chest_top").gameObject.AddComponent<TwitchSurpriseChestInteract>();
-            prefabs.ChestGold.AddComponent<TwitchSurpriseChest>();
-            prefabs.ChestGold.transform.Find("chest_top").gameObject.AddComponent<TwitchSurpriseChestInteract>();
-
             PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
         }
 
@@ -147,15 +148,30 @@ namespace WizshBoneTwitchIntegration
                 }
 
                 Mister mister = prefab.GetComponent<Mister>();
+                Trap trap = prefab.GetComponent<Trap>();
 
-                if (mister != null)
+                if (mister != null || trap != null)
                 {
-                    // Jotunn.Logger.LogWarning($"Adding mister destruction to {name}");
-                    prefab.AddComponent<TwitchMisterDestruction>();
+                    Jotunn.Logger.LogWarning($"Adding persistent destruction to {name}");
+                    prefab.AddComponent<TwitchPersistentDestruction>();
                 }
             }
 
             PrefabManager.OnPrefabsRegistered -= AddPersistentComponents;
+        }
+
+        private void AddEffectLists()
+        {
+            EffectList.EffectData SpawnEffectData = new EffectList.EffectData();
+            SpawnEffectData.m_enabled = true;
+            SpawnEffectData.m_prefab = PrefabManager.Instance.GetPrefab("vfx_corpse_destruction_small");
+            SpawnEffectData.m_variant = -1;
+
+            List<EffectList.EffectData> SpawnEffectDataList = new List<EffectList.EffectData>();
+            SpawnEffectDataList.Add(SpawnEffectData);
+
+            effectLists.SpawnEffect.m_effectPrefabs = SpawnEffectDataList.ToArray();
+            PrefabManager.OnVanillaPrefabsAvailable -= AddEffectLists;
         }
 
         private void InitRedeemsFile()
@@ -197,6 +213,7 @@ namespace WizshBoneTwitchIntegration
             CommandManager.Instance.AddConsoleCommand(new ListBannedTwitchUsers());
             CommandManager.Instance.AddConsoleCommand(new ReloadRedeemsCommand());
             CommandManager.Instance.AddConsoleCommand(new SetRedeemAlias());
+            CommandManager.Instance.AddConsoleCommand(new UpdateRedeemsCommand());
             CommandManager.Instance.AddConsoleCommand(new UnbanTwitchUser());
             CommandManager.Instance.AddConsoleCommand(new UseRedeemCommand());
         }
@@ -229,21 +246,33 @@ namespace WizshBoneTwitchIntegration
             // ====================================
             // TODO:
             // ====================================
-            // Add map markers where you spawned certain stuff (surprise chests are done
-            // Finish all types of statuseffects and make it decently configurable
-            // Mod says it refunded stuff from a custom redeem, should not do that.
+            // Roots (enemy/friendly)
+            // Timer met warning 10min voren om opnieuw in te loggen, to fix enable/disable redeems en auto-resolve
+            // ALLOW PPL TO POST LINKS IN CHAT FOR A SMALL MOMENT
+            // Add check for resource meads, if there is cooldown and prevent usage.
+            // Trap field redeem
+            // Shrink/Grow cancel each other out
             // TalkInteract always show Feo's history fact message, also does not properly show follow/rename creature
             // Armor and shield don't get thrown out very far out of suprise chests
-            // Add configurable timers to Shrink and Grow, cancel each other and persist through death
             // Apply creature data settings to creates spawned from SpawnShower
             // Apply creature data settings to creates spawned from Suprise chests
             // Allow SpawnShower to be spawned from Suprise chests
+            // Reverse controlls redeem
+            // Temp naked redeem
             // Remove/add redeems when player leaves/enters a dungeon and check what kind of dungeon the player is in
             // Add leader board of points spend, deaths caused, saves maybe? Other statistics?
             //
             // ====================================
             // IN PROGRESS:
             // ====================================
+            // Trap field redeem
+            // DONE: Add recipe in config for twitch ward, also add option to turn of burning spawns to death
+            // DONE: Add map markers where you spawned certain stuff (surprise chests)
+            // DONE: Make surpise chests floatable in water, reduce mass to not sink ships XD, add map pin and auto remove it, make them persistent
+            // DONE: Finish all types of statuseffects and make it decently configurable
+            // DONE: Add configurable timers to status effect, persist through death, renew
+            // DONE: Mod says it refunded stuff from a custom redeem, should not do that.
+            // Wind in back (moder) and reverse redeem
             // Remove redeems on game quit
             // Add halucinations, make player stunned/dazed when getting hit by Hallucinations? Or half damage?
             // Suprise chests, multiple chests to gamble, add a mimic to bite the opener (add legs like the luggage from terry pratchett's novel

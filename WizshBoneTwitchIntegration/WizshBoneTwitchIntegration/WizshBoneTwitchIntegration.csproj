@@ -41,6 +41,7 @@
     <EmbeddedResource Include="assets\wbti_dw" />
     <EmbeddedResource Include="assets\wbti_dw.manifest" />
     <EmbeddedResource Include="resources\banned.txt" />
+    <EmbeddedResource Include="resources\redeems-testers.yaml" />
     <EmbeddedResource Include="resources\redeems-schema.json" />
     <EmbeddedResource Include="resources\redeems.yaml" />
   </ItemGroup>

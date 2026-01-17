@@ -99,8 +99,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 RedeemEntry redeem = m_redeems.list.Find(item => item.title == currentRewardEvent.CustomRewardTitle);
                 if (redeem == null)
                 {
-                    m_chat.Send($"Could not find redeem! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
-                    throw new RedeemException("Could not find redeem", ExceptionType.Error);
+                    //m_chat.Send($"Could not find redeem! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
+                    //throw new RedeemException("Could not find redeem", ExceptionType.Error);
+                    Jotunn.Logger.LogWarning($"Could not find redeem with the name: {currentRewardEvent.CustomRewardTitle}, probaly not part of the mod. Aborting...");
                 }
 
                 if (m_bannedUsers.Contains(currentRewardEvent.RedeemerName.ToLower()))
@@ -372,18 +373,17 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         throw new RedeemException("Could not find a status effect to apply", ExceptionType.Error);
 
                     TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
-                    
+                    List<string> availableStatusEffects = StatusEffectType.GetAvailableStatusEffects();
+
                     foreach (StatusEffectData statusEffect in redeem.statusEffects)
                     {
-                        int hash = StatusEffectType.GetByString(statusEffect.name);
-
-                        if (hash == -1)
+                        if (!availableStatusEffects.Contains(statusEffect.name) && !availableStatusEffects.Contains(StatusEffectType.GetByMeadID(statusEffect.name)))
                         {
                             Jotunn.Logger.LogWarning("Not a valid status effect to apply, skipping...");
                             continue;
                         }
 
-                        if (!statusEffect.renew && Player.m_localPlayer.GetSEMan().HaveStatusEffect(hash))
+                        if (!statusEffect.renew && Player.m_localPlayer.GetSEMan().HaveStatusEffect(statusEffect.name.GetStableHashCode()))
                         {
                             m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer already has the {statusEffect.name} StatusEffect! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
                             throw new RedeemException($"Player already has the {statusEffect.name} status effect", ExceptionType.Warning);
@@ -393,7 +393,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                         Jotunn.Logger.LogWarning("========================");
                         Jotunn.Logger.LogWarning($"Name: {statusEffect.name}");
-                        Jotunn.Logger.LogWarning($"Hash: {hash}");
+                        Jotunn.Logger.LogWarning($"Hash: {statusEffect.name.GetStableHashCode()}");
                         Jotunn.Logger.LogWarning($"NameHash: {statusEffect.nameHash}");
 
                         if (statusEffect.name == "PlayerShrink")
@@ -407,6 +407,11 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                             Jotunn.Logger.LogWarning("Found grow");
                             statusEffect.onStart = customStatusEffect.PlayerGrow;
                             statusEffect.onEnd = customStatusEffect.PlayerSizeReset;
+                        }
+                        else if (statusEffect.name == "WindInBack")
+                        {
+                            Jotunn.Logger.LogWarning("Found WindInback");
+                            statusEffect.onStart = customStatusEffect.WinInTheBack;
                         }
 
                         bool success = customStatusEffect.AddStatusEffect(statusEffect);

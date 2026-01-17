@@ -9,6 +9,7 @@ namespace WizshBoneTwitchIntegration.Models
         public string announceMessage;
         public DamageData damage;
         public float? dropVelocity = 0f;
+        public int duration = 60;
         public float? groundOffset;
         public float? initialSpawnDelay;
         public bool isBiomeList = false;

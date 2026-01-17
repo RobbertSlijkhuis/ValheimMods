@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 3189971224
+CRC: 507941668
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: c1500b417c9d71b66d074acd67310ab2
+    Hash: bd86cbce305b2f4863a7a2a2014d2784
   TypeTreeHash:
     serializedVersion: 2
     Hash: 26d2a9d9756f5ad66792c4f79f5b9075
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: c1500b417c9d71b66d074acd67310ab2
+    Hash: bd86cbce305b2f4863a7a2a2014d2784
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -125,6 +125,5 @@ Assets:
 - Assets/Custom/Sprite/MiniMeSprite_WBTI.png
 - Assets/Custom/Sprite/BigMeSprite_WBTI.png
 - Assets/Custom/PrefabInstance/ChestGold_WBTI.prefab
-- Assets/Custom/PrefabInstance/WBTI_arena_stone.prefab
 - Assets/Custom/PrefabInstance/WBTI_guard_stone.prefab
 Dependencies: []

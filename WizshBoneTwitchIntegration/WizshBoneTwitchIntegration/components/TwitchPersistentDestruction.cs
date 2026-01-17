@@ -3,13 +3,14 @@ using UnityEngine;
 
 namespace WizshBoneTwitchIntegration.Components
 {
-    internal class TwitchMisterDestruction : MonoBehaviour
+    internal class TwitchPersistentDestruction : MonoBehaviour
     {
         public ZNetView m_netView;
         public int m_duration;
-        public string m_durationHash = "misterDuration_WBTI";
+        public string m_durationHash = "PersistentDuration_WBTI";
         public string m_started;
-        public string m_startedHash = "misterStarted_WBTI";
+        public string m_startedHash = "PersistentStarted_WBTI";
+        public EffectList m_onDestroyEffects;
 
         public void Awake()
         {
@@ -37,7 +38,13 @@ namespace WizshBoneTwitchIntegration.Components
             timedDestruction.Trigger();
         }
 
-        public void SetStarted(int duration)
+        public void OnDestroy()
+        {
+            if (m_onDestroyEffects != null)
+                m_onDestroyEffects.Create(transform.position, transform.rotation);
+        }
+
+        public void SetStarted(int duration, EffectList onDestroyEfects = null)
         {
             TimedDestruction timedDestruction = gameObject.AddComponent<TimedDestruction>();
             timedDestruction.m_timeout = duration;
@@ -46,6 +53,9 @@ namespace WizshBoneTwitchIntegration.Components
             DateTime dateTime = DateTime.Now;
             m_netView.GetZDO().Set(m_durationHash, duration);
             m_netView.GetZDO().Set(m_startedHash, dateTime.ToString());
+
+            if (onDestroyEfects != null)
+                m_onDestroyEffects = onDestroyEfects;
         }
     }
 }

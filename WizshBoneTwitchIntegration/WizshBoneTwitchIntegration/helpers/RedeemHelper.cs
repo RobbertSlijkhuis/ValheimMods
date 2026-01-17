@@ -237,8 +237,8 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             GameObject mist = UnityEngine.Object.Instantiate(prefab, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
             Mister mister = mist.GetComponent<Mister>();
-            TwitchMisterDestruction misterDestruction = mist.GetComponent<TwitchMisterDestruction>();
-            misterDestruction.SetStarted(options.duration ?? 60);
+            TwitchPersistentDestruction persistentDestruction = mist.GetComponent<TwitchPersistentDestruction>();
+            persistentDestruction.SetStarted(options.duration ?? 60);
 
             if (options.height != null)
                 mister.m_height = (float)options.height;

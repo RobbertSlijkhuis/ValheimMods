@@ -104,14 +104,23 @@ namespace WizshBoneTwitchIntegration.Components
             }
         }
 
+        public void WindInTheBack(StatusEffectData statusEffect)
+        {
+            StatusEffect original = ObjectDB.instance.GetStatusEffect("GP_Moder".GetStableHashCode());
+            StatusEffect clone = StatusEffectHelper.CreateSimple(statusEffect.name, statusEffect.duration, original.m_icon);
+            Player.m_localPlayer.GetSEMan().AddStatusEffect(clone);
+
+            // EnvMan.instance.SetTargetWind(new Vector3(), 1f);
+        }
+
         /// <summary>
         /// Makes the player slower and smaller for a set duration
         /// </summary>
         /// <param name="duration"></param>
         public void PlayerShrink(StatusEffectData statusEffect)
         {
-            StatusEffect miniMe = StatusEffectHelper.CreateSimple(statusEffect.name, statusEffect.duration, WizshBoneTwitchIntegration.Instance.sprites.MiniMeSprite);
-            Player.m_localPlayer.GetSEMan().AddStatusEffect(miniMe);
+            StatusEffect clone = StatusEffectHelper.CreateSimple(statusEffect.name, statusEffect.duration, WizshBoneTwitchIntegration.Instance.sprites.MiniMeSprite);
+            Player.m_localPlayer.GetSEMan().AddStatusEffect(clone);
             RedeemHelper.SetPlayerSpeed(0.75f);
             Vector3 newScale = new Vector3(0.45f, 0.45f, 0.45f);
 
@@ -124,8 +133,8 @@ namespace WizshBoneTwitchIntegration.Components
         /// <param name="duration"></param>
         public void PlayerGrow(StatusEffectData statusEffect)
         {
-            StatusEffect bigMe = StatusEffectHelper.CreateSimple(statusEffect.name, statusEffect.duration, WizshBoneTwitchIntegration.Instance.sprites.BigMeSprite);
-            Player.m_localPlayer.GetSEMan().AddStatusEffect(bigMe);
+            StatusEffect clone = StatusEffectHelper.CreateSimple(statusEffect.name, statusEffect.duration, WizshBoneTwitchIntegration.Instance.sprites.BigMeSprite);
+            Player.m_localPlayer.GetSEMan().AddStatusEffect(clone);
             RedeemHelper.SetPlayerSpeed(1.25f);
             Vector3 newScale = new Vector3(1.45f, 1.45f, 1.45f);
 

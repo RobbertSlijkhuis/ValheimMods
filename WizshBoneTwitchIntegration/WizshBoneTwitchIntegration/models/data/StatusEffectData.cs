@@ -33,7 +33,6 @@ namespace WizshBoneTwitchIntegration.Models
 
             if (duration != -1f)
                 clone.m_ttl = duration;
-            // StatusEffect newStatusEffect = StatusEffectHelper.CreateSimple(name, duration == -1 ? original.m_ttl : duration, original.m_icon);
 
             if (renew)
                 Player.m_localPlayer.GetSEMan().RemoveStatusEffect(clone);

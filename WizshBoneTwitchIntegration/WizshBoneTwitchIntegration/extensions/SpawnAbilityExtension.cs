@@ -5,6 +5,7 @@ using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Models;
 using static SpawnAbility;
+using static Trap;
 
 namespace WizshBoneTwitchIntegration.Extensions
 {
@@ -145,7 +146,9 @@ namespace WizshBoneTwitchIntegration.Extensions
                     yield return new WaitForSeconds(spawnAbility.m_preSpawnDelay);
                 }
 
-                Terminal.Log("SpawnAbility spawning a " + prefab.name);
+                if (spawnAbilityData.groundOffset == 0f)
+                    spawnAbility.m_snapToTerrain = true;
+
                 GameObject gameObject = UnityEngine.Object.Instantiate(prefab, spawnPoint, Quaternion.Euler(0f, UnityEngine.Random.value * (float)Math.PI * 2f, 0f));
                 ZNetView component = gameObject.GetComponent<ZNetView>();
                 Projectile component2 = gameObject.GetComponent<Projectile>();
@@ -154,8 +157,9 @@ namespace WizshBoneTwitchIntegration.Extensions
                 Humanoid humanoid1 = gameObject.GetComponent<Humanoid>();
                 ImpactEffect impactEffect = gameObject.GetComponent<ImpactEffect>();
                 Aoe aoe = gameObject.GetComponentInChildren<Aoe>();
+                Trap trap = gameObject.GetComponentInChildren<Trap>();
 
-                if (gameObject.name == "lightningAOE")
+                if (gameObject.name == "lightningAOE(Clone)")
                 {
                     aoe = gameObject.GetComponentsInChildren<Aoe>()[1];
                 }
@@ -187,6 +191,17 @@ namespace WizshBoneTwitchIntegration.Extensions
                 {
                     if (spawnAbilityData.damage != null)
                         aoe.m_damage = spawnAbilityData.damage.ConvertToDamageTypes();
+                }
+
+                if (trap != null)
+                {
+                    Piece piece = gameObject.GetComponent<Piece>();
+                    piece.m_resources = new Piece.Requirement[0];
+
+                    TwitchPersistentDestruction persistentDestruction = gameObject.GetComponent<TwitchPersistentDestruction>();
+                    persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffect);
+
+                    trap.RequestStateChange(TrapState.Armed);
                 }
 
                 if ((bool)component2)

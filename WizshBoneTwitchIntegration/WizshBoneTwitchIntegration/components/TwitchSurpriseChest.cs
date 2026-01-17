@@ -32,16 +32,8 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void Awake()
         {
-            EffectList.EffectData chestSpawnEffectData = new EffectList.EffectData();
-            chestSpawnEffectData.m_enabled = true;
-            chestSpawnEffectData.m_prefab = PrefabManager.Instance.GetPrefab("vfx_corpse_destruction_small");
-            chestSpawnEffectData.m_variant = -1;
-
-            List<EffectList.EffectData> chestSpawnList = new List<EffectList.EffectData>();
-            chestSpawnList.Add(chestSpawnEffectData);
-
-            endEffects.m_effectPrefabs = chestSpawnList.ToArray();
-            startEffects.m_effectPrefabs = chestSpawnList.ToArray();
+            endEffects = WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffect;
+            startEffects = WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffect;
 
             EffectList.EffectData itemSpawnEffectData = new EffectList.EffectData();
             itemSpawnEffectData.m_enabled = true;
@@ -129,29 +121,36 @@ namespace WizshBoneTwitchIntegration.Components
 
         private void SpawnItems()
         {
-            float timeOffset = 0f;
-
-            for (int index = 0; index < m_amount; index++)
+            try
             {
-                float angleChange = ChangeAngleByIndex(index);
-                float force = m_force;
-                string item;
+                float timeOffset = 0f;
 
-                if (m_random)
-                    item = m_items[Random.Range(0, m_items.Count)];
-                else
-                    item = m_items[index];
+                for (int index = 0; index < m_amount; index++)
+                {
+                    float angleChange = ChangeAngleByIndex(index);
+                    float force = m_force;
+                    string item;
 
-                if (m_yeetChance > 0 && Random.Range(0, 100) <= m_yeetChance)
-                    force = 1000f;
+                    if (m_random)
+                        item = m_items[Random.Range(0, m_items.Count)];
+                    else
+                        item = m_items[index];
 
-                StartCoroutine(SpawnItem(item, force, angleChange, timeOffset));
-                timeOffset += m_spawnDelay;
+                    if (m_yeetChance > 0 && Random.Range(0, 100) <= m_yeetChance)
+                        force = 1000f;
+
+                    StartCoroutine(SpawnItem(item, force, angleChange, timeOffset));
+                    timeOffset += m_spawnDelay;
+                }
+
+                TimedDestruction timedDestruction = gameObject.AddComponent<TimedDestruction>();
+                timedDestruction.m_timeout = 10f;
+                timedDestruction.Trigger();
             }
-
-            TimedDestruction timedDestruction = gameObject.AddComponent<TimedDestruction>();
-            timedDestruction.m_timeout = 10f;
-            timedDestruction.Trigger();
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in spawning suprise chest items " + e);
+            }
         }
 
         private IEnumerator SpawnItem(string prefabName, float force, float deviation, float delay)
@@ -161,6 +160,7 @@ namespace WizshBoneTwitchIntegration.Components
             Transform spawnPointTrans = transform.Find("spawnpoint");
             spawnPointTrans.Rotate(Vector3.up, deviation);
 
+            Jotunn.Logger.LogWarning($"Spawning {prefabName}...");
             GameObject prefab = PrefabManager.Instance.GetPrefab(prefabName);
             GameObject spawned = UnityEngine.Object.Instantiate(prefab, spawnPointTrans.position, spawnPointTrans.rotation);
             Rigidbody rigidBody = spawned.GetComponent<Rigidbody>();

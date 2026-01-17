@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 1345532120, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
   m_Name: Freezing_WBTI
   m_EditorClassIdentifier: 
-  m_name: $se_freezing_name
+  m_name: Freezing_WBTI
   m_category: 
   m_icon: {fileID: 21300000, guid: ba64edd6a7edc384681ab334eaa6e7a9, type: 3}
   m_flashIcon: 0

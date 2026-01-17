@@ -1,84 +1,102 @@
-﻿namespace WizshBoneTwitchIntegration.Types
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace WizshBoneTwitchIntegration.Types
 {
     internal class StatusEffectType
     {
+        // Custom effects
+        public static string WindInBack => "WindInBack";
+
         // Negative effects
-        public static int Burning => WizshBoneTwitchIntegration.Instance.effects.Burning.NameHash();
-        public static int Freezing => WizshBoneTwitchIntegration.Instance.effects.Freezing.NameHash();
-        public static int Poison => WizshBoneTwitchIntegration.Instance.effects.Poison.NameHash();
-        public static int Puke => -629027225;
-        public static int Tarred => -1779147092;
-        public static int Wet => -1273337594;
+        public static string Burning => WizshBoneTwitchIntegration.Instance.effects.Burning.name;
+        public static string Encumbered => "Encumbered";
+        public static string Freezing => WizshBoneTwitchIntegration.Instance.effects.Freezing.name;
+        public static string Poison => WizshBoneTwitchIntegration.Instance.effects.Poison.name;
+        public static string Puke => "Puke";
+        public static string Tarred => "Tared";
+        public static string Wet => "Wet";
 
         // Positive effects
-        public static int Rested => -2079273775;
+        public static string BeltStrength => "BeltStrength";
+        public static string Demister => "Demister";
+        public static string DvergrDamage => "SE_Dvergr_buff";
+        public static string DvergrHeal => "SE_Dvergr_heal";
+        public static string GoblinShamanShield => "GoblinShaman_shield";
+        public static string GP_Bonemass => "GP_Bonemass";
+        public static string GP_Eikthyr => "GP_Eikthyr";
+        public static string GP_Fader => "GP_Fader";
+        public static string GP_Moder => "GP_Moder";
+        public static string GP_Queen => "GP_Queen";
+        public static string GP_TheElder => "GP_TheElder";
+        public static string GP_Yagluth => "GP_Yagluth";
+        public static string Rested => "Rested";
+        public static string SlowFall => "SlowFall";
+        public static string StaffShield => "Staff_shield";
+        public static string WindRun => "WindRun";
+        public static string Wishbone => "Wishbone";
 
         // Meads: effects
-        public static int AntiSting => -1157133715;
-        public static int BarlyWine => 1458612846;
-        public static int BrewOfAnimalWispers => -1944522317;
-        public static int Bzerker => -1325774533;
-        public static int FrostResist => -1768438774;
-        public static int LightFoot => 2062111878;
-        public static int LovePotion => -716013329;
-        public static int PoisonResist => -568360536;
-        public static int Ratatosk => 1965486703;
-        public static int TrollStrength => 370641789;
-        public static int Vananidir => -1907265002;
+        public static string AntiSting => "Potion_BugRepellent";
+        public static string BarlyWine => "Potion_barleywine";
+        public static string BrewOfAnimalWispers => "Potion_tamer";
+        public static string Bzerker => "Potion_bzerker";
+        public static string FrostResist => "Potion_frostresist";
+        public static string LightFoot => "Potion_LightFoot";
+        public static string LovePotion => "Potion_TrollPheromones";
+        public static string PoisonResist => "Potion_poisonresist";
+        public static string Ratatosk => "Potion_hasty";
+        public static string TrollStrength => "Potion_strength";
+        public static string Vananidir => "Potion_swimmer";
 
         // Meads: resources
-        public static int EitrMinor => 1437258388;
-        public static int EitrLingering => -1996024552;
-        public static int HealingMinor => -590058386;
-        public static int HealingMedium => -67041294;
-        public static int HealingMajor => 1251702474;
-        public static int HealingLingering => -414643894;
-        public static int StaminaMinor => 899527613;
-        public static int StaminaMedium => 685847919;
-        public static int StaminaLingering => 1930415553;
+        public static string EitrMinor => "Potion_eitr_minor";
+        public static string EitrLingering => "Potion_eitr_lingering";
+        public static string HealingMinor => "Potion_health_minor";
+        public static string HealingMedium => "Potion_health_medium";
+        public static string HealingMajor => "Potion_health_major";
+        public static string HealingLingering => "Potion_health_lingering";
+        public static string StaminaMinor => "Potion_stamina_minor";
+        public static string StaminaMedium => "Potion_stamina_medium";
+        public static string StaminaLingering => "Potion_stamina_lingering";
 
-        public static int PlayerShrink => 1043640966;
-        public static int PlayerGrow => 822944700;
+        //public static int PlayerShrink => 1043640966;
+        public static string PlayerShrink => "PlayerShrink";
+        //public static int PlayerGrow => 822944700;
+        public static string PlayerGrow => "PlayerGrow";
 
-        public static int GetByString(string name)
+        public static List<string> GetAvailableStatusEffects()
         {
-            switch (name.ToLower())
+            return typeof(StatusEffectType).GetProperties().Select(x => x.GetValue(null).ToString()).ToList();
+        }
+
+        public static string GetByMeadID(string name)
+        {
+            switch (name)
             {
-                case "burning": return Burning;
-                case "freezing": return Freezing;
-                case "poison": return Poison;
-                case "puke": return Puke;
-                case "tarred": return Tarred;
-                case "wet": return Wet;
+                case "MeadBugRepellent": return AntiSting;
+                case "BarleyWine": return BarlyWine;
+                case "MeadTamer": return BrewOfAnimalWispers;
+                case "MeadBzerker": return Bzerker;
+                case "MeadFrostResist": return FrostResist;
+                case "MeadLightfoot": return LightFoot;
+                case "MeadTrollPheromones": return LovePotion;
+                case "MeadPoisonResist": return PoisonResist;
+                case "MeadHasty": return Ratatosk;
+                case "MeadStrength": return TrollStrength;
+                case "MeadSwimmer": return Vananidir;
 
-                case "rested": return Rested;
+                case "MeadEitrMinor": return EitrMinor;
+                case "MeadEitrLingering": return EitrLingering;
+                case "MeadHealthMinor": return HealingMinor;
+                case "MeadHealthMediumr": return HealingMedium;
+                case "MeadHealthMajor": return HealingMajor;
+                case "MeadHealthLingering": return HealingLingering;
+                case "MeadStaminaMinor": return StaminaMinor;
+                case "MeadStaminaMedium": return StaminaMedium;
+                case "MeadStaminaLingering": return StaminaLingering;
 
-                case "antisting": return AntiSting;
-                case "barlywine": return BarlyWine;
-                case "brewofanimalwispers": return BrewOfAnimalWispers;
-                case "bzerker": return Bzerker;
-                case "frostresist": return FrostResist;
-                case "potion_lightfoot": return LightFoot;
-                case "lovepotion": return LovePotion;
-                case "poisonresist": return PoisonResist;
-                case "potion_hasty": return Ratatosk;
-                case "trollstrength": return TrollStrength;
-                case "vananidir": return Vananidir;
-
-                case "potion_eitr_minor": return EitrMinor;
-                case "meadeitrlingering": return EitrLingering;
-                case "meathealthminor": return HealingMinor;
-                case "potion_health_medium": return HealingMedium;
-                case "meadhealthmajor": return HealingMajor;
-                case "meadhealthlingering": return HealingLingering;
-                case "meadstaminaminor": return StaminaMinor;
-                case "potion_stamina_medium": return StaminaMedium;
-                case "meadstaminalingering": return StaminaLingering;
-
-                case "playershrink": return PlayerShrink;
-                case "playergrow": return PlayerGrow;
-
-                default: return -1;
+                default: return "";
             }
         }
     }

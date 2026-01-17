@@ -1,13 +1,14 @@
 ﻿using Jotunn.Entities;
+using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
-    internal class ReloadRedeemsCommand : ConsoleCommand
+    internal class UpdateRedeemsCommand : ConsoleCommand
     {
-        public override string Name => "ReloadTwitchRedeems";
+        public override string Name => "UpdateTwitchRedeems";
 
-        public override string Help => "Reloads the Twitch redeems from config file";
+        public override string Help => "Update the Twitch redeems to the tester file";
 
         public override void Run(string[] args)
         {
@@ -30,6 +31,8 @@ namespace WizshBoneTwitchIntegration.Commands
             //    Jotunn.Logger.LogWarning("The Twitch redeems are currently not enabled!");
             //    return;
             //}
+
+            ExtraConfigHelper.UpdateRedeemWithTesterFile();
 
             if (customRewards.ReloadRewards())
             {

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Components
@@ -50,6 +51,9 @@ namespace WizshBoneTwitchIntegration.Components
         {
             if (collider.gameObject.name != playerIdentifier)
             {
+                if (!PluginConfig.configWardBurnCreatures.Value)
+                    return;
+
                 TwitchCreaturePersistentData persistentData = collider.gameObject.GetComponent<TwitchCreaturePersistentData>();
 
                 if (persistentData == null || persistentData.m_ignoreWard)
