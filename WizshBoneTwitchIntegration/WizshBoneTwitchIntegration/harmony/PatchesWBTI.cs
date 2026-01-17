@@ -132,7 +132,7 @@ namespace WizshBoneTwitchIntegration.Harmony
 
                 if (__instance.IsDone())
                     customStatusEffect.RemoveStatusEffect(statusEffect, false);
-                else
+                else if (!statusEffect.renew)
                     statusEffect.duration = __instance.GetRemaningTime();
             }
             catch (Exception e)

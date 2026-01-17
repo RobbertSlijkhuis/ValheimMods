@@ -64,40 +64,5 @@ namespace WizshBoneTwitchIntegration.Types
         public static string PlayerShrink => "PlayerShrink";
         //public static int PlayerGrow => 822944700;
         public static string PlayerGrow => "PlayerGrow";
-
-        public static List<string> GetAvailableStatusEffects()
-        {
-            return typeof(StatusEffectType).GetProperties().Select(x => x.GetValue(null).ToString()).ToList();
-        }
-
-        public static string GetByMeadID(string name)
-        {
-            switch (name)
-            {
-                case "MeadBugRepellent": return AntiSting;
-                case "BarleyWine": return BarlyWine;
-                case "MeadTamer": return BrewOfAnimalWispers;
-                case "MeadBzerker": return Bzerker;
-                case "MeadFrostResist": return FrostResist;
-                case "MeadLightfoot": return LightFoot;
-                case "MeadTrollPheromones": return LovePotion;
-                case "MeadPoisonResist": return PoisonResist;
-                case "MeadHasty": return Ratatosk;
-                case "MeadStrength": return TrollStrength;
-                case "MeadSwimmer": return Vananidir;
-
-                case "MeadEitrMinor": return EitrMinor;
-                case "MeadEitrLingering": return EitrLingering;
-                case "MeadHealthMinor": return HealingMinor;
-                case "MeadHealthMediumr": return HealingMedium;
-                case "MeadHealthMajor": return HealingMajor;
-                case "MeadHealthLingering": return HealingLingering;
-                case "MeadStaminaMinor": return StaminaMinor;
-                case "MeadStaminaMedium": return StaminaMedium;
-                case "MeadStaminaLingering": return StaminaLingering;
-
-                default: return "";
-            }
-        }
     }
 }

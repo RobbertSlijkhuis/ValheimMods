@@ -1,6 +1,4 @@
-﻿using Jotunn;
-using Jotunn.Managers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Helpers;
@@ -33,7 +31,7 @@ namespace WizshBoneTwitchIntegration.Components
             {
                 SEMan seMan = Player.m_localPlayer.GetSEMan();
 
-                if (seMan.HaveStatusEffect(entry.nameHash))
+                if (!entry.renew && seMan.HaveStatusEffect(entry.nameHash))
                 {
                     Jotunn.Logger.LogWarning($"StatusEffect {entry.name} is already active!");
                     return false;
@@ -120,6 +118,10 @@ namespace WizshBoneTwitchIntegration.Components
         public void PlayerShrink(StatusEffectData statusEffect)
         {
             StatusEffect clone = StatusEffectHelper.CreateSimple(statusEffect.name, statusEffect.duration, WizshBoneTwitchIntegration.Instance.sprites.MiniMeSprite);
+
+            if (statusEffect.renew)
+                Player.m_localPlayer.GetSEMan().RemoveStatusEffect(clone);
+
             Player.m_localPlayer.GetSEMan().AddStatusEffect(clone);
             RedeemHelper.SetPlayerSpeed(0.75f);
             Vector3 newScale = new Vector3(0.45f, 0.45f, 0.45f);
@@ -134,6 +136,10 @@ namespace WizshBoneTwitchIntegration.Components
         public void PlayerGrow(StatusEffectData statusEffect)
         {
             StatusEffect clone = StatusEffectHelper.CreateSimple(statusEffect.name, statusEffect.duration, WizshBoneTwitchIntegration.Instance.sprites.BigMeSprite);
+
+            if (statusEffect.renew)
+                Player.m_localPlayer.GetSEMan().RemoveStatusEffect(clone);
+
             Player.m_localPlayer.GetSEMan().AddStatusEffect(clone);
             RedeemHelper.SetPlayerSpeed(1.25f);
             Vector3 newScale = new Vector3(1.45f, 1.45f, 1.45f);

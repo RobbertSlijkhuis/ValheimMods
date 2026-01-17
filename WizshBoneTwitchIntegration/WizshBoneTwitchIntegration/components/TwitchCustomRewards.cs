@@ -373,28 +373,23 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         throw new RedeemException("Could not find a status effect to apply", ExceptionType.Error);
 
                     TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
-                    List<string> availableStatusEffects = StatusEffectType.GetAvailableStatusEffects();
+                    List<string> availableStatusEffects = StatusEffectHelper.GetAvailableStatusEffects();
 
                     foreach (StatusEffectData statusEffect in redeem.statusEffects)
                     {
-                        if (!availableStatusEffects.Contains(statusEffect.name) && !availableStatusEffects.Contains(StatusEffectType.GetByMeadID(statusEffect.name)))
+                        statusEffect.Init();
+
+                        if (!availableStatusEffects.Contains(statusEffect.name))
                         {
                             Jotunn.Logger.LogWarning("Not a valid status effect to apply, skipping...");
                             continue;
                         }
 
-                        if (!statusEffect.renew && Player.m_localPlayer.GetSEMan().HaveStatusEffect(statusEffect.name.GetStableHashCode()))
+                        if (!statusEffect.renew && Player.m_localPlayer.GetSEMan().HaveStatusEffect(statusEffect.nameHash))
                         {
                             m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer already has the {statusEffect.name} StatusEffect! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
                             throw new RedeemException($"Player already has the {statusEffect.name} status effect", ExceptionType.Warning);
                         }
-
-                        statusEffect.Init();
-
-                        Jotunn.Logger.LogWarning("========================");
-                        Jotunn.Logger.LogWarning($"Name: {statusEffect.name}");
-                        Jotunn.Logger.LogWarning($"Hash: {statusEffect.name.GetStableHashCode()}");
-                        Jotunn.Logger.LogWarning($"NameHash: {statusEffect.nameHash}");
 
                         if (statusEffect.name == "PlayerShrink")
                         {
@@ -411,7 +406,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         else if (statusEffect.name == "WindInBack")
                         {
                             Jotunn.Logger.LogWarning("Found WindInback");
-                            statusEffect.onStart = customStatusEffect.WinInTheBack;
+                            statusEffect.onStart = customStatusEffect.WindInTheBack;
                         }
 
                         bool success = customStatusEffect.AddStatusEffect(statusEffect);
@@ -421,15 +416,48 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (redeem.type == RedeemType.StatusEffectRandom)
                 {
-                    int hash = StatusEffectHelper.GetRandomStatusEffect();
+                    if (redeem.statusEffects == null || redeem.statusEffects.Count == 0)
+                        throw new RedeemException("Could not find a status effect to apply", ExceptionType.Error);
 
-                    if (Player.m_localPlayer.GetSEMan().HaveStatusEffect(hash))
+                    TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
+                    List<string> availableStatusEffects = StatusEffectHelper.GetAvailableStatusEffects();
+                    StatusEffectData random = StatusEffectHelper.GetRandomStatusEffect(redeem.statusEffects);
+                    Jotunn.Logger.LogWarning(random.name);
+                    Jotunn.Logger.LogWarning(random.renew);
+                    random.Init();
+
+                    if (!availableStatusEffects.Contains(random.name))
                     {
-                        m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer already has the {Player.m_localPlayer.GetSEMan().GetStatusEffect(hash).name} StatusEffect selected by the randomizer! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
-                        throw new RedeemException($"Player already has the {Player.m_localPlayer.GetSEMan().GetStatusEffect(hash).name} status effect", ExceptionType.Warning);
+                        Jotunn.Logger.LogWarning("Not a valid status effect to apply, skipping...");
+                        throw new RedeemException($"{random.name} is not a valid status effect", ExceptionType.Warning);
                     }
 
-                    Player.m_localPlayer.GetSEMan().AddStatusEffect(hash);
+                    if (!random.renew && Player.m_localPlayer.GetSEMan().HaveStatusEffect(random.nameHash))
+                    {
+                        m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer already has the {random.name} StatusEffect! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
+                        throw new RedeemException($"Player already has the {random.name} status effect", ExceptionType.Warning);
+                    }
+
+                    if (random.name == "PlayerShrink")
+                    {
+                        Jotunn.Logger.LogWarning("Found shrink");
+                        random.onStart = customStatusEffect.PlayerShrink;
+                        random.onEnd = customStatusEffect.PlayerSizeReset;
+                    }
+                    else if (random.name == "PlayerGrow")
+                    {
+                        Jotunn.Logger.LogWarning("Found grow");
+                        random.onStart = customStatusEffect.PlayerGrow;
+                        random.onEnd = customStatusEffect.PlayerSizeReset;
+                    }
+                    else if (random.name == "WindInBack")
+                    {
+                        Jotunn.Logger.LogWarning("Found WindInback");
+                        random.onStart = customStatusEffect.WindInTheBack;
+                    }
+
+                    bool success = customStatusEffect.AddStatusEffect(random);
+                    Jotunn.Logger.LogWarning("AddRandomStatusEffect: " + success);
                 }
 
                 if (redeem.type == RedeemType.SurpriseChest)

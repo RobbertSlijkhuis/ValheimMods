@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.Helpers
@@ -25,29 +27,57 @@ namespace WizshBoneTwitchIntegration.Helpers
         }
 
         /// <summary>
+        /// Get a list of all available status effects
+        /// </summary>
+        /// <returns></returns>
+        public static List<string> GetAvailableStatusEffects()
+        {
+            return typeof(StatusEffectType).GetProperties().Select(x => x.GetValue(null).ToString()).ToList();
+        }
+
+        /// <summary>
+        /// Get the status effect id via mead name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static string GetByMeadID(string name)
+        {
+            switch (name)
+            {
+                case "MeadBugRepellent": return StatusEffectType.AntiSting;
+                case "BarleyWine": return StatusEffectType.BarlyWine;
+                case "MeadTamer": return StatusEffectType.BrewOfAnimalWispers;
+                case "MeadBzerker": return StatusEffectType.Bzerker;
+                case "MeadFrostResist": return StatusEffectType.FrostResist;
+                case "MeadLightfoot": return StatusEffectType.LightFoot;
+                case "MeadTrollPheromones": return StatusEffectType.LovePotion;
+                case "MeadPoisonResist": return StatusEffectType.PoisonResist;
+                case "MeadHasty": return StatusEffectType.Ratatosk;
+                case "MeadStrength": return StatusEffectType.TrollStrength;
+                case "MeadSwimmer": return StatusEffectType.Vananidir;
+
+                case "MeadEitrMinor": return StatusEffectType.EitrMinor;
+                case "MeadEitrLingering": return StatusEffectType.EitrLingering;
+                case "MeadHealthMinor": return StatusEffectType.HealingMinor;
+                case "MeadHealthMediumr": return StatusEffectType.HealingMedium;
+                case "MeadHealthMajor": return StatusEffectType.HealingMajor;
+                case "MeadHealthLingering": return StatusEffectType.HealingLingering;
+                case "MeadStaminaMinor": return StatusEffectType.StaminaMinor;
+                case "MeadStaminaMedium": return StatusEffectType.StaminaMedium;
+                case "MeadStaminaLingering": return StatusEffectType.StaminaLingering;
+
+                default: return "";
+            }
+        }
+
+        /// <summary>
         /// Get a random status effect from a list
         /// </summary>
         /// <returns></returns>
-        public static int GetRandomStatusEffect()
+        public static StatusEffectData GetRandomStatusEffect(List<StatusEffectData> statusEffects)
         {
-            List<string> hashList = new List<string>();
-            hashList.Add(StatusEffectType.BarlyWine);
-            hashList.Add(WizshBoneTwitchIntegration.Instance.effects.Burning.name);
-            hashList.Add(StatusEffectType.FrostResist); // FrostResist
-            hashList.Add(WizshBoneTwitchIntegration.Instance.effects.Freezing.name);
-            hashList.Add(StatusEffectType.PoisonResist); // PoisonResist
-            hashList.Add(WizshBoneTwitchIntegration.Instance.effects.Poison.name);
-            hashList.Add(StatusEffectType.Ratatosk);
-            hashList.Add(StatusEffectType.Puke);
-            hashList.Add(StatusEffectType.Bzerker);
-            hashList.Add(StatusEffectType.Wet);
-            hashList.Add(StatusEffectType.LightFoot);
-            hashList.Add(StatusEffectType.Tarred);
-            hashList.Add(StatusEffectType.Rested);
-            hashList.Add(StatusEffectType.Tarred);
-
-            int index = Random.Range(0, hashList.Count);
-            return hashList[index].GetStableHashCode();
+            int index = Random.Range(0, statusEffects.Count);
+            return statusEffects[index];
         }
     }
 }

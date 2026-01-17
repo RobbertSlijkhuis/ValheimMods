@@ -22,6 +22,13 @@ namespace WizshBoneTwitchIntegration.Models
 
         public void Init() 
         {
+            string orignalName = StatusEffectHelper.GetByMeadID(name);
+
+            if (orignalName != "")
+            {
+                name = orignalName;
+            }
+
             nameHash = name.GetStableHashCode();
             onStart = OnStart;
         }
@@ -29,6 +36,13 @@ namespace WizshBoneTwitchIntegration.Models
         public void OnStart(StatusEffectData statusEffect)
         {
             StatusEffect original = ObjectDB.instance.GetStatusEffect(statusEffect.nameHash);
+
+            if (original == null)
+            {
+                Jotunn.Logger.LogWarning($"Could not find the original for status effect {name}");
+                return;
+            }
+
             StatusEffect clone = original.Clone();
 
             if (duration != -1f)
