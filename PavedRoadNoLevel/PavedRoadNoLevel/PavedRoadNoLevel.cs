@@ -2,6 +2,7 @@ using BepInEx;
 using BepInEx.Configuration;
 using Jotunn.Managers;
 using Jotunn.Utils;
+using PavedRoadNoLevel.Helpers;
 using System;
 using System.IO;
 using UnityEngine;
@@ -10,26 +11,28 @@ namespace PavedRoadNoLevel
 {
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
-    [NetworkCompatibility(CompatibilityLevel.ClientMustHaveMod, VersionStrictness.Minor)]
+    [NetworkCompatibility(CompatibilityLevel.NotEnforced, VersionStrictness.Minor)]
     internal class PavedRoadNoLevel : BaseUnityPlugin
     {
         public const string PluginGUID = "DeathWizsh.PavedRoadNoLevel";
         public const string PluginName = "Paved Road No Level";
-        public const string PluginVersion = "1.0.7";
+        public const string PluginVersion = "1.0.8";
         private static string configFileName = PluginGUID + ".cfg";
         private static string configFileFullPath = BepInEx.Paths.ConfigPath + Path.DirectorySeparatorChar.ToString() + configFileName;
+        public static PavedRoadNoLevel Instance;
 
-        private ConfigEntry<bool> configEnable;
-        private ConfigEntry<bool> configRequireStoncutter;
+        public ConfigEntry<bool> configEnable;
+        public ConfigEntry<bool> configRequireStoncutter;
 
-        private CraftingStation stonecutterPiece;
+        public CraftingStation stonecutterPiece;
         private bool firstPatch = true;
 
         /**
          * Called when the plugin is being initialised
          */
-        private void Awake()
+        public void Awake()
         {
+            Instance = this;
             InitConfig();
 
             if (!configEnable.Value) return;
@@ -40,7 +43,7 @@ namespace PavedRoadNoLevel
         /**
          * Called when the plugin is unloaded
          */
-        private void OnDestroy()
+        public void OnDestroy()
         {
             Config.Save();
         }
@@ -52,25 +55,19 @@ namespace PavedRoadNoLevel
         {
             try
             {
-                GameObject original = PrefabManager.Instance.GetPrefab("paved_road_v2");
-                Piece pieceComp = original.GetComponent<Piece>();
-                pieceComp.m_allowAltGroundPlacement = false;
+                GameObject pavedRoadV2 = PrefabManager.Instance.GetPrefab("paved_road_v2");
+                GameObject cultivateV2 = PrefabManager.Instance.GetPrefab("cultivate_v2");
 
                 if (firstPatch)
                 {
-                    stonecutterPiece = pieceComp.m_craftingStation;
+                    Piece piece = pavedRoadV2.GetComponent<Piece>();
+                    stonecutterPiece = piece.m_craftingStation;
                     firstPatch = false;
                 }
 
-                if (!configRequireStoncutter.Value)
-                    pieceComp.m_craftingStation = null;
-                else if (pieceComp.m_craftingStation == null)
-                    pieceComp.m_craftingStation = stonecutterPiece;
-
-                TerrainOp terrainComp = original.GetComponent<TerrainOp>();
-                terrainComp.m_settings.m_smooth = false;
-
-                Jotunn.Logger.LogInfo("Successfully patched Paved Road, enjoy!");
+                TerrainToolHelper.SetSmooth(pavedRoadV2, false);
+                TerrainToolHelper.SetSmooth(cultivateV2, false);
+                TerrainToolHelper.SetStonecutter(pavedRoadV2, false);
             }
             catch (Exception error)
             {
@@ -85,17 +82,12 @@ namespace PavedRoadNoLevel
         {
             try
             {
-                GameObject original = PrefabManager.Instance.GetPrefab("paved_road_v2");
-                Piece pieceComp = original.GetComponent<Piece>();
-                pieceComp.m_allowAltGroundPlacement = true;
+                GameObject pavedRoadV2 = PrefabManager.Instance.GetPrefab("paved_road_v2");
+                GameObject cultivateV2 = PrefabManager.Instance.GetPrefab("cultivate_v2");
 
-                if (pieceComp.m_craftingStation == null)
-                    pieceComp.m_craftingStation = stonecutterPiece;
-
-                TerrainOp terrainComp = original.GetComponent<TerrainOp>();
-                terrainComp.m_settings.m_smooth = true;
-
-                Jotunn.Logger.LogInfo("Successfully unpatched Paved Road, Why u do this?!");
+                TerrainToolHelper.SetSmooth(pavedRoadV2, true);
+                TerrainToolHelper.SetSmooth(cultivateV2, true);
+                TerrainToolHelper.SetStonecutter(pavedRoadV2, true);
             }
             catch (Exception error)
             {
@@ -129,14 +121,14 @@ namespace PavedRoadNoLevel
 
                 configEnable = Config.Bind(new ConfigDefinition("General", "Enable"), true,
                     new ConfigDescription("Enable this mod", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                    new ConfigurationManagerAttributes { IsAdminOnly = false }));
                 configEnable.SettingChanged += (obj, attr) => { ApplyConfigChanges(); };
 
                 Config.SaveOnConfigSet = true;
 
                 configRequireStoncutter = Config.Bind(new ConfigDefinition("General", "Stonecutter requirement"), true,
                     new ConfigDescription("Enable the Stonecutter as a requirement (to pave roads)", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                    new ConfigurationManagerAttributes { IsAdminOnly = false }));
                 configRequireStoncutter.SettingChanged += (obj, attr) => { ApplyConfigChanges(); };
 
                 FileSystemWatcher configWatcher = new FileSystemWatcher(BepInEx.Paths.ConfigPath, configFileName);
