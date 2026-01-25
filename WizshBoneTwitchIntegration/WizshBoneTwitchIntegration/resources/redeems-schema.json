@@ -304,6 +304,11 @@
                 "description": "Velocity at which objects drop",
                 "type": "number"
               },
+              "duration": {
+                "description": "Duration of the shower effect in seconds",
+                "minimum": 0,
+                "type": "number"
+              },
               "groundOffset": {
                 "description": "Height offset from ground for spawning",
                 "type": "number"
@@ -335,6 +340,10 @@
                 "description": "Minimum number to spawn",
                 "minimum": 1,
                 "type": "integer"
+              },
+              "noSpawnEffect": {
+                "description": "Whether to disable spawn visual effects",
+                "type": "boolean"
               },
               "prefabName": {
                 "description": "The prefab name to spawn as a shower effect",
@@ -389,9 +398,36 @@
             "type": "object"
           },
           "statusEffects": {
-            "description": "Array of status effect names to apply (for StatusEffect type)",
+            "description": "Array of status effects to apply (for StatusEffect type)",
             "items": {
-              "type": "string"
+              "properties": {
+                "blockedBy": {
+                  "description": "Array of status effect names that block this effect from being applied",
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "duration": {
+                  "description": "Duration of the status effect in seconds",
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "name": {
+                  "description": "The name of the status effect to apply",
+                  "type": "string"
+                },
+                "persistsThroughDeath": {
+                  "description": "Whether the status effect persists after death",
+                  "type": "boolean"
+                },
+                "renew": {
+                  "description": "Whether to renew the effect if it already exists on the player",
+                  "type": "boolean"
+                }
+              },
+              "required": [ "name" ],
+              "type": "object"
             },
             "minItems": 1,
             "type": "array"

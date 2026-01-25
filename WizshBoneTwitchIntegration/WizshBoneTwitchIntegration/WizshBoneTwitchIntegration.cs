@@ -211,6 +211,7 @@ namespace WizshBoneTwitchIntegration
             CommandManager.Instance.AddConsoleCommand(new ClearMonsterClaimsCommand());
             CommandManager.Instance.AddConsoleCommand(new BanTwitchUser());
             CommandManager.Instance.AddConsoleCommand(new ListBannedTwitchUsers());
+            CommandManager.Instance.AddConsoleCommand(new OpenConfigFolder());
             CommandManager.Instance.AddConsoleCommand(new ReloadRedeemsCommand());
             CommandManager.Instance.AddConsoleCommand(new SetRedeemAlias());
             CommandManager.Instance.AddConsoleCommand(new UpdateRedeemsCommand());
@@ -246,11 +247,9 @@ namespace WizshBoneTwitchIntegration
             // ====================================
             // TODO:
             // ====================================
-            // PAVED ROAD NO LEVEL: CULTIVATE GROUND DOES LEVEL
+            // Player grow does not apply remaining duration on death
             // Roots (enemy/friendly)
             // Timer met warning 10min voren om opnieuw in te loggen, to fix enable/disable redeems en auto-resolve
-            // ALLOW PPL TO POST LINKS IN CHAT FOR A SMALL MOMENT
-            // Add check for resource meads, if there is cooldown and prevent usage.
             // Trap field redeem
             // Shrink/Grow cancel each other out
             // TalkInteract always show Feo's history fact message, also does not properly show follow/rename creature

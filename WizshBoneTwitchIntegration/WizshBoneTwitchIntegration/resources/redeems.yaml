@@ -2,15 +2,9 @@
 # In this file you can add and configure your redeems for the WizshBone Twitch Integration
 #
 redeems:
-  - type: PlayerShrink
-    title: "WBTI: Shrink Player!"
-    points: 200
-  - type: PlayerGrow
-    title: "WBTI: Grow Player!"
-    points: 200
   - type: SpawnCreature
     title: "WBTI: Spawn Greyling!"
-    points: 50
+    points: 100
     backgroundColor: "#395c32"
     creatures:
       - prefabName: "Greyling"
@@ -23,7 +17,7 @@ redeems:
         talkMessage: "Can I help you?;I'm your friend!;Let's go on an adventure!"
   - type: SpawnCreature
     title: "WBTI: Spawn Neck Pack!"
-    points: 100
+    points: 150
     backgroundColor: "#74bd66"
     creatures:
       - prefabName: "Neck"
@@ -31,7 +25,7 @@ redeems:
         position: InFrontOfPlayer
         talks: true
         talkInterval: 20
-        talkMessage: "We're gonna get you good!;You can't hide from us!;Rawr!"
+        talkMessage: "We're gonna get you good!;You can't hide from us!;Rawr!;Dinir time!"
   - type: SpawnCreature
     title: "WBTI: Spawn the Dastardly Trio!"
     points: 150
@@ -68,17 +62,19 @@ redeems:
           z: 7
   - type: SpawnMist
     title: "WBTI: Spawn Mist!"
-    points: 250
+    points: 300
     backgroundColor: "#bb33ff"
+    cooldown: 60
     mist:
       announceMessage: "A sudden mist sets in..."
-      duration: 30
+      duration: 60
       height: 20
       radius: 50
   - type: SpawnShower
-    title: "WBTI: Spawn Log Rain!"
-    points: 250
-    backgroundColor: "#734624"
+    title: "WBTI: Spawn Log Rain"
+    points: 350
+    backgroundColor: "#395c32"
+    cooldown: 300
     shower:
       accuracy: 1
       isBiomeList: true
@@ -103,6 +99,7 @@ redeems:
     title: "WBTI: Backup Gear Chest!"
     points: 250
     backgroundColor: "#ebc034"
+    cooldown: 60
     chest:
       amount: 5
       announceMessage: "Backup Gear Chest inbound!"
@@ -110,7 +107,7 @@ redeems:
       type: "Gold"
       yeetChance: 0
       items:
-        - SwordWood
+        - AxeFlint
         - HelmetLeather
         - ArmorLeatherChest
         - ArmorLeatherLegs
@@ -119,6 +116,7 @@ redeems:
     title: "WBTI: Random Surprise Chest!"
     points: 150
     backgroundColor: "#8c8c8c"
+    cooldown: 60
     chest:
       amount: 3
       announceMessage: "Surprise Chest inbound!"
@@ -126,17 +124,85 @@ redeems:
       type: "Iron"
       yeetChance: 15
       items:
-        - CookedMeat
-        - SwordWood
-        - Greyling
-        - HelmetLeather
-        - Resin
+        - CookedDeerMeat
+        - MeadHealthMinor
+        - Greydwarf
+        - MeadStaminaMinor
+        - DeerStew
+        - LeatherScraps
+        - DeerHide
   - type: StatusEffect
     title: "WBTI: Heal/Energize Player!"
-    points: 150
+    points: 250
+    backgroundColor: "#ff0062"
+    cooldown: 30
+    ignoreWard: true
     statusEffects:
-      - HealingMinor
-      - StaminaMinor
+      - name: MeadHealthMinor
+        duration: 30
+      - name: MeadStaminaMinor
+        duration: 30
   - type: StatusEffectRandom
     title: "WBTI: Random Buff/Debuff!"
     points: 200
+    statusEffects: 
+      - name: BarleyWine
+        renew: true
+      - name: Burning_WBTI
+        renew: true
+      - name: MeadFrostResist
+        renew: true
+      - name: Freezing_WBTI
+        renew: true
+      - name: MeadPoisonResist
+        renew: true
+      - name: Poison_WBTI
+        renew: true
+      - name: MeadHasty
+        renew: true
+      - name: Puke
+        renew: true
+      - name: MeadBzerker
+        renew: true
+      - name: Wet
+        renew: true
+      - name: MeadLightfoot
+        renew: true
+      - name: Tared
+        renew: true
+      - name: Rested
+        renew: true
+      - name: PlayerShrink
+        duration: 300
+        persistsThroughDeath: true
+        blockedBy:
+          - PlayerGrow
+      - name: PlayerGrow
+        duration: 300
+        persistsThroughDeath: true
+        blockedBy:
+          - PlayerShrink
+  - type: StatusEffect
+    title: "WBTI: Shrink Streamer"
+    points: 200
+    ignoreWard: true
+    backgroundColor: "#bb33ff"
+    cooldown: 300
+    statusEffects:
+      - name: PlayerShrink
+        duration: 300
+        persistsThroughDeath: true
+        blockedBy:
+          - PlayerGrow
+  - type: StatusEffect
+    title: "WBTI: Grow Streamer"
+    points: 200
+    ignoreWard: true
+    backgroundColor: "#bb33ff"
+    cooldown: 300
+    statusEffects:
+      - name: PlayerGrow
+        duration: 300
+        persistsThroughDeath: true
+        blockedBy:
+          - PlayerShrink
