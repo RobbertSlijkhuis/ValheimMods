@@ -110,6 +110,18 @@ namespace WizshBoneTwitchIntegration
             pieceConfig.Requirements = RecipeHelper.GetAsRequirementConfigArray(PluginConfig.configWardRecipe.Value, null, null);
             PieceManager.Instance.AddPiece(new CustomPiece(prefabs.GuardStone, true, pieceConfig));
             PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
+
+            // Temp
+            GameObject shieldGen = PrefabManager.Instance.GetPrefab("piece_shieldgenerator");
+            Demister demister = shieldGen.AddComponent<Demister>();
+            ParticleSystemForceField forceField = shieldGen.AddComponent<ParticleSystemForceField>();
+            forceField.gravity = -0.08f;
+            forceField.endRange = 30f;
+            forceField.multiplyDragByParticleSize = false;
+            forceField.multiplyDragByParticleVelocity = false;
+            forceField.rotationAttraction = 1f;
+            forceField.vectorFieldAttraction = 1f;
+            forceField.vectorFieldSpeed = 1f;
         }
 
         private void AddPersistentComponents()
@@ -120,6 +132,9 @@ namespace WizshBoneTwitchIntegration
                 GameObject prefab = PrefabManager.Instance.GetPrefab(name);
                 Humanoid humanoid = prefab.GetComponent<Humanoid>();
                 MonsterAI monsterAI = prefab.GetComponent<MonsterAI>();
+                Mister mister = prefab.GetComponent<Mister>();
+                Trap trap = prefab.GetComponent<Trap>();
+                Ship ship = prefab.GetComponent<Ship>();
 
                 if (humanoid != null && monsterAI != null)
                 {
@@ -147,13 +162,16 @@ namespace WizshBoneTwitchIntegration
                     continue;
                 }
 
-                Mister mister = prefab.GetComponent<Mister>();
-                Trap trap = prefab.GetComponent<Trap>();
-
                 if (mister != null || trap != null)
                 {
                     Jotunn.Logger.LogWarning($"Adding persistent destruction to {name}");
                     prefab.AddComponent<TwitchPersistentDestruction>();
+                }
+
+                if (ship != null)
+                {
+                    Jotunn.Logger.LogWarning($"Adding safezone to ship {name}");
+                    prefab.transform.Find("OnboardTrigger").gameObject.AddComponent<TwitchSafeZone>();
                 }
             }
 
@@ -247,10 +265,14 @@ namespace WizshBoneTwitchIntegration
             // ====================================
             // TODO:
             // ====================================
+            // Check for safezone when surprise chest actually spawns in
+            // Add command or action to delete surprise chests in the vicinity
+
+            // Prevent wolfs/fenrings from howling all the time as a setting
+
+            // Timer met warning 10min voren om opnieuw in te loggen, to fix enable/disable redeems en auto-resolve
             // Player grow does not apply remaining duration on death
             // Roots (enemy/friendly)
-            // Timer met warning 10min voren om opnieuw in te loggen, to fix enable/disable redeems en auto-resolve
-            // Trap field redeem
             // Shrink/Grow cancel each other out
             // TalkInteract always show Feo's history fact message, also does not properly show follow/rename creature
             // Armor and shield don't get thrown out very far out of suprise chests
@@ -265,7 +287,11 @@ namespace WizshBoneTwitchIntegration
             // ====================================
             // IN PROGRESS:
             // ====================================
-            // Trap field redeem
+            // DONE: Prevent redeems when on a boat
+            // DONE: Make friendly follow troops automaticly follow their owner
+            // DONE: Prevent AOE scripts from doing damage to boats (Thou shall be smited)
+            // DONE: Prevent Impact scripts from doing damage to boats (Log rain)
+            // DONE: Trap field redeem
             // DONE: Add recipe in config for twitch ward, also add option to turn of burning spawns to death
             // DONE: Add map markers where you spawned certain stuff (surprise chests)
             // DONE: Make surpise chests floatable in water, reduce mass to not sink ships XD, add map pin and auto remove it, make them persistent
@@ -314,14 +340,13 @@ namespace WizshBoneTwitchIntegration
 
 
             // What went wrong:
-            // Enable/disable redeems did not work sometimes due to DUPLICATE redeem and long time playing?
-            // Poiunts somehow are not refunded...
 
             // New mod ideas:
             // - Inventory in the Saddle
             // - Priortise spear slot
             // - lock inventory slots so putting all in inventory does not touch it
-            // - square cultivator/hoe mod (no circle editing)
+            // - square cultivator/hoe mod (no circle editing) with range scroll
+            // - Mist control mod, add demister to shield gen and configurable range for wisp light/torches and maybe even remove all mist
         }
     }
 }

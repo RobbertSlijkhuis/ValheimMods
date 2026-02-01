@@ -46,7 +46,7 @@ namespace WizshBoneTwitchIntegration.Components
             TwitchCreatureClaim creatureClaim = gameObject.AddComponent<TwitchCreatureClaim>();
             creatureClaim.ReInit(m_name, creatureData);
 
-            ApplyHumanoid(m_name, creatureData.level, creatureData.maxHealth,creatureData.allowDamageStructures, creatureData.rename);
+            ApplyHumanoid(m_name, creatureData.level, creatureData.maxHealth, creatureData.friendly, creatureData.allowDamageStructures, creatureData.rename);
             ApplyMonsterAI(creatureData.aggravatable, creatureData.mistVision);
             ApplyAllowDrops(creatureData.allowDrops);
             ApplyTameable(creatureData.friendly, creatureData.commandable);
@@ -62,17 +62,17 @@ namespace WizshBoneTwitchIntegration.Components
             m_ignoreWard = ignoreWard;
             m_name = name;
 
-            ApplyHumanoid(name, creatureData.level, creatureData.maxHealth, creatureData.allowDamageStructures, creatureData.rename);
+            ApplyHumanoid(name, creatureData.level, creatureData.maxHealth, creatureData.friendly, creatureData.allowDamageStructures, creatureData.rename);
             ApplyMonsterAI(creatureData.aggravatable, creatureData.mistVision);
             ApplyAllowDrops(creatureData.allowDrops);
             ApplyTameable(creatureData.friendly, creatureData.commandable);
         }
 
-        public void ApplyHumanoid(string name, int level, float maxHealth, bool allowDamageStructures, bool rename)
+        public void ApplyHumanoid(string name, int level, float maxHealth, bool friendly, bool allowDamageStructures, bool rename)
         {
             Humanoid humanoid = gameObject.GetComponent<Humanoid>();
             humanoid.SetLevel(level);
-            humanoid.m_faction = Character.Faction.Boss;
+            humanoid.m_faction = friendly ? Character.Faction.Players : Character.Faction.Boss;
 
             if (maxHealth > 0)
                 humanoid.SetMaxHealth(maxHealth);
@@ -111,7 +111,10 @@ namespace WizshBoneTwitchIntegration.Components
             tameable.m_monsterAI.MakeTame();
 
             if (commandable)
+            {
                 tameable.m_commandable = true;
+                tameable.m_monsterAI.SetFollowTarget(Player.m_localPlayer.gameObject);
+            }
         }
 
         public string CreatureDataToString(SpawnCreatureData creatureData)

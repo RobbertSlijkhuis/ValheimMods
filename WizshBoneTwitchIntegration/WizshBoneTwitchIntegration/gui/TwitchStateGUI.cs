@@ -18,6 +18,13 @@ namespace WizshBoneTwitchIntegration.Gui
         public UnityEvent onToggleChatting = new UnityEvent();
         public UnityEvent onClose = new UnityEvent();
 
+        float buttonSwitchWidth = 200f;
+        float buttonSwitchHeight = 60f;
+        float buttonSwitchPosX = 120f;
+
+        float descSwitchWidth = 230f;
+        float descSwitchHeight = 60f;
+
         public void ShowGUI()
         {
             if (GUIManager.Instance == null)
@@ -87,34 +94,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 addContentSizeFitter: false
             );
 
-            GameObject loginTextObj = GUIManager.Instance.CreateText(
-                text: GetLoginStatusMessage(),
-                parent: panel.transform,
-                anchorMin: new Vector2(.5f, 1f),
-                anchorMax: new Vector2(.5f, 1f),
-                position: new Vector2(-105f, -105f),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 16,
-                color: auth.m_userInfo != null ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
-                outline: true,
-                outlineColor: Color.black,
-                width: 225,
-                height: 30f,
-                addContentSizeFitter: false
-            );
-
-            GameObject loginButtonObj = GUIManager.Instance.CreateButton(
-                text: "Twitch Login",
-                parent: panel.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(110f, -100f),
-                width: 225f,
-                height: 60f
-            );
-            loginButtonObj.SetActive(true);
-            Button loginButton = loginButtonObj.GetComponent<Button>();
-            loginButton.onClick.AddListener(Login);
+            CreateTwitchButton();
 
             if (auth.m_userInfo != null)
             {
@@ -123,7 +103,6 @@ namespace WizshBoneTwitchIntegration.Gui
             }
 
             GUIManager.Instance.CreateText(
-                // text: "Please report any issues on my Discord, the link is on the mod page! Suggestions are also welcome!",
                 text: $"Redeems can be configured in \"{WizshBoneTwitchIntegration.redeemsConfigPath.Substring(0, 24)} {WizshBoneTwitchIntegration.redeemsConfigPath.Substring(24)}\". They can be reloaded during gameplay with the \"ReloadTwitchRedeems\" command.",
                 parent: panel.transform,
                 anchorMin: new Vector2(0.5f, 0f),
@@ -153,8 +132,7 @@ namespace WizshBoneTwitchIntegration.Gui
             cancelButton.onClick.AddListener(CloseGUI);
 
             GUIManager.Instance.CreateText(
-                // text: $"Redeems can be configured in \"{WizshBoneTwitchIntegration.redeemsConfigPath}\". They can be reloaded during gameplay with the \"ReloadTwitchRedeems\" command.",
-                text: "Please report any issues on my Discord, the link can be found on my mod page or Twitch channel! Suggestions are also welcome!",
+                text: "Please report any issues on my Discord, the link can be found on my mod page or Twitch channel. Suggestions are also welcome!",
                 parent: panel.transform,
                 anchorMin: new Vector2(0.5f, 0f),
                 anchorMax: new Vector2(0.5f, 0f),
@@ -170,11 +148,11 @@ namespace WizshBoneTwitchIntegration.Gui
             );
 
             GUIManager.Instance.CreateText(
-                text: "Created by: DeathWizsh, commisioned by: LoyalBones",
+                text: $"Created by: DeathWizsh, commisioned by: LoyalBones        v{WizshBoneTwitchIntegration.PluginVersion}",
                 parent: panel.transform,
                 anchorMin: new Vector2(0.5f, 0f),
                 anchorMax: new Vector2(0.5f, 0f),
-                position: new Vector2(5f, 17f),
+                position: new Vector2(10f, 17f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 14,
                 color: GUIManager.Instance.ValheimYellow,
@@ -188,7 +166,12 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void Login()
         {
-            onLogin.Invoke();
+            if (auth.m_loggedIn)
+                auth.Logout();
+            else
+                onLogin.Invoke();
+
+            UpdateGUI();
         }
 
         private void ToggleRedeems()
@@ -203,6 +186,38 @@ namespace WizshBoneTwitchIntegration.Gui
             UpdateGUI();
         }
 
+        public void CreateTwitchButton()
+        {
+            GameObject loginTextObj = GUIManager.Instance.CreateText(
+                text: GetLoginStatusMessage(),
+                parent: panel.transform,
+                anchorMin: new Vector2(.5f, 1f),
+                anchorMax: new Vector2(.5f, 1f),
+                position: new Vector2(-100f, -115f),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: 16,
+                color: auth.m_userInfo != null ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
+                outline: true,
+                outlineColor: Color.black,
+                width: descSwitchWidth,
+                height: descSwitchHeight,
+                addContentSizeFitter: false
+            );
+
+            GameObject loginButtonObj = GUIManager.Instance.CreateButton(
+                text: auth.m_loggedIn ? "Logout" : "Twitch Login",
+                parent: panel.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(buttonSwitchPosX, -100f),
+                width: buttonSwitchWidth,
+                height: buttonSwitchHeight
+            );
+            loginButtonObj.SetActive(true);
+            Button loginButton = loginButtonObj.GetComponent<Button>();
+            loginButton.onClick.AddListener(Login);
+        }
+
         public void CreateEnableRedeemsButton()
         {
             GUIManager.Instance.CreateText(
@@ -210,14 +225,14 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: panel.transform,
                 anchorMin: new Vector2(.5f, 1f),
                 anchorMax: new Vector2(.5f, 1f),
-                position: new Vector2(-105f, -245f),
+                position: new Vector2(-100f, -250f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 16,
                 color: customRewards.m_enabled ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
-                width: 225,
-                height: 60f,
+                width: descSwitchWidth,
+                height: descSwitchHeight,
                 addContentSizeFitter: false
             );
 
@@ -226,9 +241,9 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: panel.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(110f, -240f),
-                width: 225f,
-                height: 60f
+                position: new Vector2(buttonSwitchPosX, -240f),
+                width: buttonSwitchWidth,
+                height: buttonSwitchHeight
             );
             enableButtonObj.SetActive(true);
             Button enableButton = enableButtonObj.GetComponent<Button>();
@@ -242,14 +257,14 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: panel.transform,
                 anchorMin: new Vector2(.5f, 1f),
                 anchorMax: new Vector2(.5f, 1f),
-                position: new Vector2(-105f, -175f),
+                position: new Vector2(-100f, -180f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 16,
                 color: chatting.m_enabled ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
-                width: 225,
-                height: 60f,
+                width: descSwitchWidth,
+                height: descSwitchHeight,
                 addContentSizeFitter: false
             );
 
@@ -258,9 +273,9 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: panel.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(110f, -170f),
-                width: 225f,
-                height: 60f
+                position: new Vector2(buttonSwitchPosX, -170f),
+                width: buttonSwitchWidth,
+                height: buttonSwitchHeight
             );
             enableButtonObj.SetActive(true);
             Button enableButton = enableButtonObj.GetComponent<Button>();
@@ -276,7 +291,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 return "Fetching user info...";
 
             if (auth.m_waitingForCode)
-                return "Waiting for authorization,\ncheck your browser!";
+                return "Waiting for authorization,\nCHECK YOUR BROWSER!";
 
             return "Welcome! Please login into Twitch";
         }

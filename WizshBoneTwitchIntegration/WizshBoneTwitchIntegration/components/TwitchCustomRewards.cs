@@ -44,6 +44,11 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             m_customRewardEvents = Twitch.API.SubscribeToCustomRewardEvents();
         }
 
+        public void UnSubscribeFromRedeemEvents()
+        {
+            m_customRewardEvents = null;
+        }
+
         public List<RedeemEntry> GetRedeemList()
         {
             return m_redeems.list;
@@ -96,6 +101,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 Jotunn.Logger.LogWarning($"Time: {currentRewardEvent.RedeemedAt}");
                 Jotunn.Logger.LogWarning($"Status: {currentRewardEvent.Status}");
 
+                string refundAutoResolveOn = $"Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!";
+                string refundAutoResolveOff = $"Please notify the streamer to refund your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points!";
+
                 RedeemEntry redeem = m_redeems.list.Find(item => item.title == currentRewardEvent.CustomRewardTitle);
                 if (redeem == null)
                 {
@@ -109,19 +117,19 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (Game.IsPaused() || Menu.IsVisible())
                 {
-                    m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, either the game is currently paused or the streamer is busy in the menu! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
+                    m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, either the game is currently paused or the streamer is busy in the menu! {(PluginConfig.configAutoResolveRedeems.Value ? refundAutoResolveOn : refundAutoResolveOff)}");
                     throw new RedeemException("Game is paused or menu is visible", ExceptionType.Warning);
                 }
 
                 if (Player.m_localPlayer.IsSleeping())
                 {
-                    m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is currently sleeping and can't react! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
+                    m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is currently sleeping and can't react! {(PluginConfig.configAutoResolveRedeems.Value ? refundAutoResolveOn : refundAutoResolveOff)}");
                     throw new RedeemException("Player is sleeping", ExceptionType.Warning);
                 }
 
                 if (m_playerIsInSafeZone && !redeem.ignoreWard)
                 {
-                    m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is inside a Twitch safe zone! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
+                    m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is inside a Twitch safe zone! {(PluginConfig.configAutoResolveRedeems.Value ? refundAutoResolveOn : refundAutoResolveOff)}");
                     throw new RedeemException("Player is in safe zone", ExceptionType.Warning);
                 }
 
@@ -180,7 +188,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                     if (cancelRedeem)
                     {
-                        m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
+                        m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! {(PluginConfig.configAutoResolveRedeems.Value ? refundAutoResolveOn : refundAutoResolveOff)}");
                         throw new RedeemException("Player is in dungeon and redeem is not allowed", ExceptionType.Warning);
                     }
                 }
@@ -311,7 +319,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         {
                             if (SpawnSystem.GetNrOfInstances(prefab) >= redeem.shower.maxSpawned)
                             {
-                                m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, there is already a maximum number of spawns! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
+                                m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, there is already a maximum number of spawns! {(PluginConfig.configAutoResolveRedeems.Value ? refundAutoResolveOn : refundAutoResolveOff)}");
                                 throw new RedeemException("Already on max spawned for this redeeem", ExceptionType.Warning);
                             }
                         }
@@ -387,7 +395,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                         if (!statusEffect.renew && Player.m_localPlayer.GetSEMan().HaveStatusEffect(statusEffect.nameHash))
                         {
-                            m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer already has the {statusEffect.name} StatusEffect! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
+                            m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer already has the {statusEffect.name} StatusEffect! {(PluginConfig.configAutoResolveRedeems.Value ? refundAutoResolveOn : refundAutoResolveOff)}");
                             throw new RedeemException($"Player already has the {statusEffect.name} status effect", ExceptionType.Warning);
                         }
 
@@ -434,7 +442,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                     if (!random.renew && Player.m_localPlayer.GetSEMan().HaveStatusEffect(random.nameHash))
                     {
-                        m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer already has the {random.name} StatusEffect! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
+                        m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer already has the {random.name} StatusEffect! {(PluginConfig.configAutoResolveRedeems.Value ? refundAutoResolveOn : refundAutoResolveOff)}");
                         throw new RedeemException($"Player already has the {random.name} status effect", ExceptionType.Warning);
                     }
 
@@ -587,7 +595,10 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public bool ReloadRewards()
         {
             bool result = m_redeems.Reload();
-            SetRewards();
+
+            if (m_auth && m_auth.m_loggedIn)
+                SetRewards();
+
             return result;
         }
 

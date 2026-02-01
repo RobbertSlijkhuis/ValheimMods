@@ -8,6 +8,8 @@ namespace WizshBoneTwitchIntegration.Models
         public float? accuracy;
         public string announceMessage;
         public DamageData damage;
+        public bool damageShips = false;
+        public bool damageStructures = true;
         public float? dropVelocity = 0f;
         public int duration = 60;
         public float? groundOffset;
@@ -24,6 +26,7 @@ namespace WizshBoneTwitchIntegration.Models
         public float? randomAngleMax;
         public float? randomAngleMin;
         public bool? randomYRotation;
+        public bool snapToterrain = false;
         public float? spawnDelay;
         public float? spawnRadius;
         public List<string> spawns = new List<string>();

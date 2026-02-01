@@ -10,23 +10,24 @@ namespace WizshBoneTwitchIntegration.Configs
     {
         public static string sectionChatting = "Chatting";
         public static string sectionGeneral = "General";
+        public static string sectionRedeems = "Redeems";
         public static string sectionRemoveTheCountry = "Remove the Country";
-        public static string sectionTrap = "Trap Field";
         public static string sectionWard = "Twitchy Ward";
 
         public static ConfigEntry<KeyboardShortcut> configWizshBoneWindow;
-        public static ConfigEntry<bool> configAutoResolveRedeems;
 
         public static ConfigEntry<bool> configChattingEnabled;
         public static ConfigEntry<float> configChattingRadius;
         public static ConfigEntry<float> configChattingInterval;
         public static ConfigEntry<string> configChattingBlackList;
 
+        public static ConfigEntry<bool> configEnableRedeemsOnLogin;
+        public static ConfigEntry<bool> configAutoResolveRedeems;
+        public static ConfigEntry<bool> configAllowRedeemsOnBoats;
+
         public static ConfigEntry<float> configRaiseRadius;
         public static ConfigEntry<float> configRaisePower;
         public static ConfigEntry<float> configRaiseDelta;
-
-        public static ConfigEntry<float> configTrapArmTimer;
 
         public static ConfigEntry<string> configWardRecipe;
         public static ConfigEntry<bool> configWardBurnCreatures;
@@ -43,25 +44,6 @@ namespace WizshBoneTwitchIntegration.Configs
         {
             configWizshBoneWindow = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionGeneral, "Open WizshBone window", new KeyboardShortcut(KeyCode.F3),
                 new ConfigDescription("Settings of the WizshBone Twitch Integration", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
-
-            configAutoResolveRedeems = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionGeneral, "Auto resolve redeems", true,
-                new ConfigDescription("Wether the redeems are automaticly resolved", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
-
-
-            configWardRecipe = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionWard, "Twitchy Ward recipe", "FineWood:5, GreydwarfEye:5, SurtlingCore:1",
-                new ConfigDescription("The recipe to build the Twitchy Ward", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
-            configWardRecipe.SettingChanged += (obj, attr) =>
-            {
-                GameObject guardStone = PrefabManager.Instance.GetPrefab("WBTI_guard_stone");
-                Piece piece = guardStone.GetComponent<Piece>();
-                piece.m_resources = RecipeHelper.GetAsPieceRequirementArray(configWardRecipe.Value, null, null);
-            };
-
-            configWardBurnCreatures = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionWard, "Twitchy Ward burn spawned creatures", true,
-                new ConfigDescription("Wether the Twitchy Ward will burn creatures (only spawned by the mod)", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
 
 
@@ -99,6 +81,24 @@ namespace WizshBoneTwitchIntegration.Configs
             {
                 TwitchChatting chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
                 chatting.DeserializeUserBlackList(configChattingBlackList.Value);
+            };
+
+
+            configEnableRedeemsOnLogin = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionRedeems, "Enable redeems on login", true,
+                new ConfigDescription("Wether the redeems are automaticly enabled when logged in", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+
+            configAutoResolveRedeems = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionRedeems, "Auto resolve redeems", true,
+                new ConfigDescription("Wether the redeems are automaticly resolved", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+
+            configAllowRedeemsOnBoats = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionRedeems, "Allow redeems on boats", false,
+                new ConfigDescription("Wether the redeems are allowed on boats or should act like wards", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+            configAllowRedeemsOnBoats.SettingChanged += (obj, attr) =>
+            {
+                TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+                customRewards.m_playerIsInSafeZone = false;
             };
 
 
@@ -150,8 +150,19 @@ namespace WizshBoneTwitchIntegration.Configs
                 terrain.m_settings.m_raiseDelta = configRaiseDelta.Value;
             };
 
-            configTrapArmTimer = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionTrap, "Trap arming timer", 1f,
-                new ConfigDescription("How long it takes the traps will be armed after being spawned", null,
+
+            configWardRecipe = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionWard, "Twitchy Ward recipe", "FineWood:5, GreydwarfEye:5, SurtlingCore:1",
+                new ConfigDescription("The recipe to build the Twitchy Ward", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+            configWardRecipe.SettingChanged += (obj, attr) =>
+            {
+                GameObject guardStone = PrefabManager.Instance.GetPrefab("WBTI_guard_stone");
+                Piece piece = guardStone.GetComponent<Piece>();
+                piece.m_resources = RecipeHelper.GetAsPieceRequirementArray(configWardRecipe.Value, null, null);
+            };
+
+            configWardBurnCreatures = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionWard, "Twitchy Ward burn spawned creatures", true,
+                new ConfigDescription("Wether the Twitchy Ward will burn creatures (only spawned by the mod)", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
         }
 

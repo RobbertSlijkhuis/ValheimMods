@@ -146,8 +146,7 @@ namespace WizshBoneTwitchIntegration.Extensions
                     yield return new WaitForSeconds(spawnAbility.m_preSpawnDelay);
                 }
 
-                if (spawnAbilityData.groundOffset == 0f)
-                    spawnAbility.m_snapToTerrain = true;
+                spawnAbility.m_snapToTerrain = spawnAbilityData.snapToterrain;
 
                 GameObject gameObject = UnityEngine.Object.Instantiate(prefab, spawnPoint, Quaternion.Euler(0f, UnityEngine.Random.value * (float)Math.PI * 2f, 0f));
                 ZNetView component = gameObject.GetComponent<ZNetView>();
@@ -157,11 +156,14 @@ namespace WizshBoneTwitchIntegration.Extensions
                 Humanoid humanoid1 = gameObject.GetComponent<Humanoid>();
                 ImpactEffect impactEffect = gameObject.GetComponent<ImpactEffect>();
                 Aoe aoe = gameObject.GetComponentInChildren<Aoe>();
+                Aoe aoeRod = null;
                 Trap trap = gameObject.GetComponentInChildren<Trap>();
 
                 if (gameObject.name == "lightningAOE(Clone)")
                 {
-                    aoe = gameObject.GetComponentsInChildren<Aoe>()[1];
+                    Aoe[] aoes = gameObject.GetComponentsInChildren<Aoe>();
+                    aoeRod = aoes[0];
+                    aoe = aoes[1];
                 }
 
                 if (monsterAI != null && humanoid1 != null)
@@ -184,6 +186,9 @@ namespace WizshBoneTwitchIntegration.Extensions
                     if (spawnAbilityData.dropVelocity != 0f)
                         rigidbody.AddForce(new Vector3(0f, (float)spawnAbilityData.dropVelocity, 0f) * rigidbody.mass * rigidbody.mass);
 
+                    TwitchAllowDamage preventDamage = impactEffect.gameObject.AddComponent<TwitchAllowDamage>();
+                    preventDamage.Init(spawnAbilityData.damageShips, spawnAbilityData.damageStructures);
+
                     impactEffect.StartCoroutine(impactEffect.ResetShowerSettings());
                 }
 
@@ -191,6 +196,15 @@ namespace WizshBoneTwitchIntegration.Extensions
                 {
                     if (spawnAbilityData.damage != null)
                         aoe.m_damage = spawnAbilityData.damage.ConvertToDamageTypes();
+
+                    TwitchAllowDamage preventDamage = aoe.gameObject.AddComponent<TwitchAllowDamage>();
+                    preventDamage.Init(spawnAbilityData.damageShips, spawnAbilityData.damageStructures);
+
+                    if (aoeRod != null)
+                    {
+                        TwitchAllowDamage preventDamageRod = aoeRod.gameObject.AddComponent<TwitchAllowDamage>();
+                        preventDamageRod.Init(spawnAbilityData.damageShips, spawnAbilityData.damageStructures);
+                    }
                 }
 
                 if (trap != null)

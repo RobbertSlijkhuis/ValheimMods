@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using TwitchSDK;
 using TwitchSDK.Interop;
 using UnityEngine;
@@ -12,16 +13,17 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
     {
         private TwitchChat m_chat;
         private TwitchCustomRewards m_customRewards;
-        private GameTask<AuthenticationInfo> AuthInfoTask;
-        private GameTask<AuthState> currentAuthState;
+        private GameTask<AuthenticationInfo> m_authInfo;
+        private GameTask<AuthState> m_authState;
 
+        private string m_scopes = $"{TwitchOAuthScope.Bits.Read.Scope} {TwitchOAuthScope.Channel.ManageRedemptions.Scope} {TwitchOAuthScope.User.ReadSubscriptions.Scope}";
         public TwitchUserInfo m_userInfo;
         public bool m_loggedIn = false;
         public bool m_waitingForCode = false;
 
         public TwitchStateGUI loginGUI;
 
-        void Awake()
+        public void Awake()
         {
             m_chat = gameObject.GetComponent<TwitchChat>();
             m_customRewards = gameObject.GetComponent<TwitchCustomRewards>();
@@ -53,7 +55,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             try
             {
-                if (AuthInfoTask == null)
+                if (m_authInfo == null)
                 {
                     GetAuthInformation();
                     return;
@@ -74,56 +76,97 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 m_customRewards.SubscribeToRedeemEvents();
                 loginGUI.UpdateGUI();
                 CancelInvoke(nameof(InitLoginProcess));
+                InvokeRepeating(nameof(TrackAuthRepeating), 0, 60f);
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Something went wrong while loggin in: " + e);
                 CancelInvoke(nameof(InitLoginProcess));
+                CancelInvoke(nameof(TrackAuthRepeating));
             }
+        }
+
+        public void TrackAuthRepeating()
+        {
+            StartCoroutine(TrackAuthState());
+        }
+
+        public IEnumerator TrackAuthState()
+        {
+            GetBitsLeaderboard();
+
+            yield return new WaitForSeconds(5f);
+
+            GetAuthState();
         }
 
         public void GetAuthState()
         {
             try
             {
-                currentAuthState = Twitch.API.GetAuthState();
+                m_authState = Twitch.API.GetAuthState();
 
-                if (currentAuthState == null)
+                if (m_authState == null || m_authState.MaybeResult == null)
                 {
                     Jotunn.Logger.LogError("Current auth state is null");
                     return;
                 }
 
-                if (currentAuthState.MaybeResult.Status == AuthStatus.LoggedIn && !m_loggedIn)
+                Jotunn.Logger.LogWarning(m_authState.MaybeResult.Status);
+
+                if (m_authState.MaybeResult.Status == AuthStatus.LoggedIn && !m_loggedIn)
                 {
+                    Jotunn.Logger.LogWarning("LoggedIn Start");
+                    if (m_loggedIn)
+                        return;
+
                     m_loggedIn = true;
                     m_waitingForCode = false;
-                    m_customRewards.SetEnableRedeems(true);
+
+                    if (PluginConfig.configEnableRedeemsOnLogin.Value)
+                        m_customRewards.SetEnableRedeems(true);
+
                     loginGUI.UpdateGUI();
+                    Jotunn.Logger.LogWarning("LoggedIn End");
                     return;
                 }
 
-                if (currentAuthState.MaybeResult.Status == AuthStatus.LoggedOut)
+                if (m_authState.MaybeResult.Status == AuthStatus.LoggedOut)
                 {
+                    Jotunn.Logger.LogWarning("LoggedOut Start");
+                    if (!m_loggedIn)
+                        return;
 
                     m_loggedIn = false;
                     m_waitingForCode = false;
+                    m_authInfo = null;
+                    m_userInfo = null;
                     m_customRewards.SetEnableRedeems(false);
                     loginGUI.UpdateGUI();
+                    Jotunn.Logger.LogWarning("LoggedOut End");
                     return;
                 }
 
-                if (currentAuthState.MaybeResult.Status == AuthStatus.WaitingForCode)
+                if (m_authState.MaybeResult.Status == AuthStatus.WaitingForCode)
                 {
-                    AuthenticationInfo authInfo = Twitch.API.GetAuthenticationInfo(TwitchOAuthScope.Bits.Read).MaybeResult;
+                    Jotunn.Logger.LogWarning("WaitingForCode Start");
+                    if (m_waitingForCode)
+                        return;
 
-                    if (authInfo != null && !m_waitingForCode)
-                    {
-                        Application.OpenURL($"{authInfo.Uri}");
-                        m_waitingForCode = true;
-                        loginGUI.UpdateGUI();
-                    }
+                    TwitchOAuthScope tscopes = new TwitchOAuthScope(m_scopes);
+                    AuthenticationInfo authInfo = Twitch.API.GetAuthenticationInfo(tscopes).MaybeResult;
 
+                    Jotunn.Logger.LogWarning("Authinfo: " + authInfo == null ? true : false);
+
+                    if (authInfo == null)
+                        throw new Exception("auth information is null while waiting for code");
+
+                    Jotunn.Logger.LogWarning("Uri: " + authInfo.Uri);
+
+                    Application.OpenURL($"{authInfo.Uri}");
+                    m_waitingForCode = true;
+                    loginGUI.UpdateGUI();
+                    Jotunn.Logger.LogWarning("WaitingForCode End");
                     return;
                 }
             }
@@ -138,19 +181,18 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             try
             {
+                Jotunn.Logger.LogWarning("GetUserInfo Start");
                 TwitchSDK.Interop.UserInfo userInfo = Twitch.API.GetMyUserInfo().MaybeResult;
 
                 if (userInfo == null)
-                {
-                    Jotunn.Logger.LogError("UserInfo is null");
-                    return;
-                }
+                    throw new Exception("UserInfo is null");
 
                 if (userInfo != null)
                 {
                     m_userInfo = new TwitchUserInfo();
                     m_userInfo.broadcasterType = userInfo.BroadcasterType;
                     m_userInfo.displayName = userInfo.DisplayName;
+                    Jotunn.Logger.LogWarning("GetUserInfo End");
                 }
             }
             catch (Exception e)
@@ -162,14 +204,30 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void GetAuthInformation()
         {
-            if (AuthInfoTask == null)
+            Jotunn.Logger.LogWarning("GetAuthInformation Start");
+            if (m_authInfo == null)
             {
                 // This example uses all scopes, we suggest you only request the scopes you actively need.
                 // var scopes = TwitchOAuthScope.Bits.Read.Scope + " " + TwitchOAuthScope.Channel.ManageBroadcast.Scope + " " + TwitchOAuthScope.Channel.ManagePolls.Scope + " " + TwitchOAuthScope.Channel.ManagePredictions.Scope + " " + TwitchOAuthScope.Channel.ManageRedemptions.Scope + " " + TwitchOAuthScope.Channel.ReadHypeTrain.Scope + " " + TwitchOAuthScope.Clips.Edit.Scope + " " + TwitchOAuthScope.User.ReadSubscriptions.Scope;
-                string scopes = $"{TwitchOAuthScope.Bits.Read.Scope} {TwitchOAuthScope.Channel.ManageRedemptions.Scope} {TwitchOAuthScope.User.ReadSubscriptions.Scope}";
-                TwitchOAuthScope tscopes = new TwitchOAuthScope(scopes);
-                AuthInfoTask = Twitch.API.GetAuthenticationInfo(tscopes);
+                TwitchOAuthScope tscopes = new TwitchOAuthScope(m_scopes);
+                m_authInfo = Twitch.API.GetAuthenticationInfo(tscopes);
+                Jotunn.Logger.LogWarning("GetAuthInformation End");
             }
+        }
+
+        public void Logout()
+        {
+            Jotunn.Logger.LogWarning("performing logout...");
+            Twitch.API.LogOut();
+            m_customRewards.UnSubscribeFromRedeemEvents();
+            GetAuthState();
+            CancelInvoke(nameof(TrackAuthRepeating));
+        }
+
+        public void GetBitsLeaderboard()
+        {
+            Jotunn.Logger.LogWarning("Get bits leaderboard...");
+            Twitch.API.GetBitsLeaderboard();
         }
     }
 }

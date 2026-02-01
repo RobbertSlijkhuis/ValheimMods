@@ -33,6 +33,9 @@ namespace WizshBoneTwitchIntegration.Components
 
         private void HandlePlayer(Collider collider, bool value, string message = null)
         {
+            if (transform.parent.gameObject.GetComponent<Ship>() != null && PluginConfig.configAllowRedeemsOnBoats.Value)
+                return;
+
             if (collider.gameObject.name != playerIdentifier)
                 return;
 
@@ -40,6 +43,9 @@ namespace WizshBoneTwitchIntegration.Components
 
             if (player.GetPlayerID() == Player.m_localPlayer.GetPlayerID())
                 m_customRewards.m_playerIsInSafeZone = value;
+
+            if (message != null && message != "")
+                Jotunn.Logger.LogWarning(message);
 
             if (value)
                 m_playerInZone = collider.gameObject;
@@ -52,6 +58,9 @@ namespace WizshBoneTwitchIntegration.Components
             if (collider.gameObject.name != playerIdentifier)
             {
                 if (!PluginConfig.configWardBurnCreatures.Value)
+                    return;
+
+                if (transform.parent.gameObject.GetComponent<Ship>() != null && PluginConfig.configAllowRedeemsOnBoats.Value)
                     return;
 
                 TwitchCreaturePersistentData persistentData = collider.gameObject.GetComponent<TwitchCreaturePersistentData>();
