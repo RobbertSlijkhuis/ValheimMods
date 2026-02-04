@@ -5,7 +5,7 @@ using System.IO;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
-    internal class OpenConfigFolder : ConsoleCommand
+    internal class OpenConfigFolderCommand : ConsoleCommand
     {
         public override string Name => "OpenConfigFolder";
 

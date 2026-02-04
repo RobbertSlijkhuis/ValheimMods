@@ -3,7 +3,7 @@ using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
-    internal class SetRedeemAlias : ConsoleCommand
+    internal class SetRedeemAliasCommand : ConsoleCommand
     {
         public override string Name => "SetRedeemAlias";
 

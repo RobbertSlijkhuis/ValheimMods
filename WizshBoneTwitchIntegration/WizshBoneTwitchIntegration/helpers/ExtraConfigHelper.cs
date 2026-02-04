@@ -11,72 +11,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 {
     internal class ExtraConfigHelper
     {
-        public static List<RedeemEntry> ReadRedeemsConfig(bool debug = false)
-        {
-            StreamReader streamReader = new StreamReader(WizshBoneTwitchIntegration.redeemsConfigPath);
-            string fileContent = streamReader.ReadToEnd();
-
-            if (debug)
-            {
-                Jotunn.Logger.LogWarning("\n" + fileContent);
-                Jotunn.Logger.LogWarning("=================================================");
-            }
-
-            if (fileContent == null || fileContent == "")
-            {
-                Jotunn.Logger.LogError("Could not read redeems configuration or its empty");
-                return null;
-            }
-
-            StringReader stringReader = new StringReader(fileContent);
-            IDeserializer deserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
-
-            RedeemData data = deserializer.Deserialize<RedeemData>(stringReader);
-
-            if (debug)
-            {
-                foreach (RedeemEntry redeem in data.redeems)
-                {
-                    Jotunn.Logger.LogWarning(redeem.type);
-                    Jotunn.Logger.LogWarning(redeem.title);
-                    Jotunn.Logger.LogWarning(redeem.points);
-                    Jotunn.Logger.LogWarning(redeem.backgroundColor);
-                    Jotunn.Logger.LogWarning(redeem.cooldown);
-                    Jotunn.Logger.LogWarning(redeem.userInput);
-                    Jotunn.Logger.LogWarning(redeem.globalKeyAdd);
-                    Jotunn.Logger.LogWarning(redeem.globalKeyRemove);
-
-                    if (redeem.creatures != null)
-                    {
-                        foreach (SpawnCreatureData creature in redeem.creatures)
-                        {
-                            Jotunn.Logger.LogWarning(creature.prefabName);
-                            Jotunn.Logger.LogWarning(creature.level);
-                            Jotunn.Logger.LogWarning(creature.amount);
-                            Jotunn.Logger.LogWarning(creature.position);
-                            Jotunn.Logger.LogWarning(creature.allowDrops);
-                            Jotunn.Logger.LogWarning(creature.friendly);
-                            Jotunn.Logger.LogWarning(creature.commandable);
-                            Jotunn.Logger.LogWarning(creature.talks);
-                            Jotunn.Logger.LogWarning(creature.talkInteract);
-                            Jotunn.Logger.LogWarning(creature.talkInterval);
-                            Jotunn.Logger.LogWarning(creature.talkMessage);
-                            Jotunn.Logger.LogWarning(creature.isHallucination);
-                        }
-                    }
-                }
-
-                Jotunn.Logger.LogWarning("=================================================");
-            }
-
-            streamReader.Close();
-            stringReader.Close();
-            return data.redeems;
-        }
-
-        public static void InitRedeemsConfig()
+        public static void InitExtraConfigs()
         {
             if (!File.Exists(WizshBoneTwitchIntegration.redeemsConfigPath))
             {
@@ -95,6 +30,29 @@ namespace WizshBoneTwitchIntegration.Helpers
                 Directory.CreateDirectory(WizshBoneTwitchIntegration.customConfigPath);
                 WriteFromEmbeddedResourceTo("WizshBoneTwitchIntegration.resources.banned.txt", WizshBoneTwitchIntegration.bannedPath);
             }
+        }
+
+        public static List<RedeemEntry> ReadRedeemsConfig()
+        {
+            StreamReader streamReader = new StreamReader(WizshBoneTwitchIntegration.redeemsConfigPath);
+            string fileContent = streamReader.ReadToEnd();
+
+            if (fileContent == null || fileContent == "")
+            {
+                Jotunn.Logger.LogError("Could not read redeems configuration or its empty");
+                return null;
+            }
+
+            StringReader stringReader = new StringReader(fileContent);
+            IDeserializer deserializer = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+
+            RedeemData data = deserializer.Deserialize<RedeemData>(stringReader);
+
+            streamReader.Close();
+            stringReader.Close();
+            return data.redeems;
         }
 
         public static void UpdateRedeemWithTesterFile()

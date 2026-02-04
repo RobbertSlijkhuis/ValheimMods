@@ -6,7 +6,6 @@ namespace WizshBoneTwitchIntegration.Helpers
     {
         public static void GenerateLevels(RectTransform hudBase)
         {
-            Jotunn.Logger.LogWarning("Generate levels...");
             RectTransform refLevel = hudBase.transform.Find("level_2") as RectTransform;
             float moveRight = 16f;
 

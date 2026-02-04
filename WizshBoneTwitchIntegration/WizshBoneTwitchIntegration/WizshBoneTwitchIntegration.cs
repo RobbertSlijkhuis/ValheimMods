@@ -56,7 +56,7 @@ namespace WizshBoneTwitchIntegration
             InitCommands();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            PrefabManager.OnVanillaPrefabsAvailable += InitRedeemsFile;
+            PrefabManager.OnVanillaPrefabsAvailable += InitExtraConfigFiles;
             PrefabManager.OnVanillaPrefabsAvailable += AddPieces;
             PrefabManager.OnVanillaPrefabsAvailable += AddEffectLists;
             PrefabManager.OnPrefabsRegistered += AddPersistentComponents;
@@ -71,7 +71,7 @@ namespace WizshBoneTwitchIntegration
                     return;
 
                 TwitchAuth authComp = Game.instance.gameObject.GetComponent<TwitchAuth>();
-                authComp.loginGUI.ShowGUI();
+                authComp.wizshBoneGUI.ShowGUI();
             }
             catch (Exception e)
             {
@@ -173,6 +173,34 @@ namespace WizshBoneTwitchIntegration
                     Jotunn.Logger.LogWarning($"Adding safezone to ship {name}");
                     prefab.transform.Find("OnboardTrigger").gameObject.AddComponent<TwitchSafeZone>();
                 }
+
+                if (prefab.name == "fuling_trap" || prefab.name == "piece_trap_troll")
+                {
+                    Jotunn.Logger.LogWarning("Found fuling_trap, applying persistent damage");
+                    prefab.gameObject.AddComponent<TwitchPersistentDamage>();
+                }
+            }
+
+            string[] traders = new string[3] { "Vendor_BlackForest", "Hildir_camp", "BogWitch_Camp" };
+
+            foreach (string name in traders)
+            {
+                GameObject prefab = PrefabManager.Instance.GetPrefab(name);
+                Jotunn.Logger.LogWarning($"Adding safezone to Traders {name}");
+                Transform forceFieldTransform = prefab.transform.Find("ForceField");
+
+                if (forceFieldTransform == null)
+                {
+                    Jotunn.Logger.LogError("Could not find force field to add safezone!");
+                    continue;
+                }
+
+                forceFieldTransform.gameObject.layer = 14;
+                SphereCollider sphere = forceFieldTransform.gameObject.AddComponent<SphereCollider>();
+                sphere.radius = 0.5f;
+                sphere.isTrigger = true;
+
+                forceFieldTransform.gameObject.AddComponent<TwitchSafeZone>();
             }
 
             PrefabManager.OnPrefabsRegistered -= AddPersistentComponents;
@@ -192,9 +220,9 @@ namespace WizshBoneTwitchIntegration
             PrefabManager.OnVanillaPrefabsAvailable -= AddEffectLists;
         }
 
-        private void InitRedeemsFile()
+        private void InitExtraConfigFiles()
         {
-            ExtraConfigHelper.InitRedeemsConfig();
+            ExtraConfigHelper.InitExtraConfigs();
             ExtraConfigHelper.ReadRedeemsConfig();
         }
 
@@ -226,14 +254,18 @@ namespace WizshBoneTwitchIntegration
 
         private void InitCommands()
         {
-            CommandManager.Instance.AddConsoleCommand(new ClearMonsterClaimsCommand());
-            CommandManager.Instance.AddConsoleCommand(new BanTwitchUser());
+            CommandManager.Instance.AddConsoleCommand(new BanTwitchUserCommand());
             CommandManager.Instance.AddConsoleCommand(new ListBannedTwitchUsers());
-            CommandManager.Instance.AddConsoleCommand(new OpenConfigFolder());
+            CommandManager.Instance.AddConsoleCommand(new OpenConfigFolderCommand());
             CommandManager.Instance.AddConsoleCommand(new ReloadRedeemsCommand());
-            CommandManager.Instance.AddConsoleCommand(new SetRedeemAlias());
+            CommandManager.Instance.AddConsoleCommand(new RemoveCreatureClaimCommand());
+            CommandManager.Instance.AddConsoleCommand(new RemoveSurpriseChestsCommand());
+            CommandManager.Instance.AddConsoleCommand(new RemoveTwitchCreaturesCommand());
+            CommandManager.Instance.AddConsoleCommand(new RemoveTwitchMistCommand());
+            CommandManager.Instance.AddConsoleCommand(new RemoveTwitchTrapsCommand());
+            CommandManager.Instance.AddConsoleCommand(new SetRedeemAliasCommand());
             CommandManager.Instance.AddConsoleCommand(new UpdateRedeemsCommand());
-            CommandManager.Instance.AddConsoleCommand(new UnbanTwitchUser());
+            CommandManager.Instance.AddConsoleCommand(new UnbanTwitchUserCommand());
             CommandManager.Instance.AddConsoleCommand(new UseRedeemCommand());
         }
 
@@ -265,9 +297,6 @@ namespace WizshBoneTwitchIntegration
             // ====================================
             // TODO:
             // ====================================
-            // Check for safezone when surprise chest actually spawns in
-            // Add command or action to delete surprise chests in the vicinity
-
             // Prevent wolfs/fenrings from howling all the time as a setting
 
             // Timer met warning 10min voren om opnieuw in te loggen, to fix enable/disable redeems en auto-resolve
@@ -287,6 +316,10 @@ namespace WizshBoneTwitchIntegration
             // ====================================
             // IN PROGRESS:
             // ====================================
+            // DONE: Add safe zones to traders
+            // DONE: Make trap's damage persistent
+            // DONE: Add command or action to delete surprise chests / spawned creatures in the vicinity
+            // DONE: Check for safezone when surprise chest actually spawns in
             // DONE: Prevent redeems when on a boat
             // DONE: Make friendly follow troops automaticly follow their owner
             // DONE: Prevent AOE scripts from doing damage to boats (Thou shall be smited)

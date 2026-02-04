@@ -5,7 +5,7 @@ using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
-    internal class UnbanTwitchUser : ConsoleCommand
+    internal class UnbanTwitchUserCommand : ConsoleCommand
     {
         public override string Name => "UnbanTwitchUser";
 

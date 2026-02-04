@@ -5,7 +5,7 @@ using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
-    internal class ClearMonsterClaimsCommand : ConsoleCommand
+    internal class RemoveCreatureClaimCommand : ConsoleCommand
     {
         public override string Name => "RemoveCreatureClaim";
 

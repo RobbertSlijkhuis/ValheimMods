@@ -155,7 +155,7 @@ namespace WizshBoneTwitchIntegration.Extensions
                 MonsterAI monsterAI = gameObject.GetComponent<MonsterAI>();
                 Humanoid humanoid1 = gameObject.GetComponent<Humanoid>();
                 ImpactEffect impactEffect = gameObject.GetComponent<ImpactEffect>();
-                Aoe aoe = gameObject.GetComponentInChildren<Aoe>();
+                Aoe aoe = gameObject.GetComponentInChildren<Aoe>(true);
                 Aoe aoeRod = null;
                 Trap trap = gameObject.GetComponentInChildren<Trap>();
 
@@ -181,7 +181,31 @@ namespace WizshBoneTwitchIntegration.Extensions
                     Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
 
                     if (spawnAbilityData.damage != null)
-                        impactEffect.m_damages = spawnAbilityData.damage.ConvertToDamageTypes();
+                    {
+                        if (spawnAbilityData.damage.maxHealthArmorBased)
+                        {
+                            HitData.DamageTypes damages = spawnAbilityData.damage.ConvertToDamageTypes();
+                            float armor = Player.m_localPlayer.GetBodyArmor();
+                            float maxHealth = Player.m_localPlayer.GetMaxHealth();
+                            float totalDamage = damages.GetTotalDamage();
+                            float maxDamage = maxHealth * 0.6f;
+
+                            Jotunn.Logger.LogWarning("maxHealth: " + maxHealth);
+                            Jotunn.Logger.LogWarning("totalDamage: " + totalDamage);
+                            Jotunn.Logger.LogWarning("maxDamage: " + maxDamage);
+                            Jotunn.Logger.LogWarning("multiplier: " + maxDamage / totalDamage);
+
+                            damages.Modify(maxDamage / totalDamage);
+                            Jotunn.Logger.LogWarning("newDamage: " + damages.GetTotalDamage());
+                            Jotunn.Logger.LogWarning("Armor: " + armor);
+                            Jotunn.Logger.LogWarning("newDamage with armor: " + HitData.DamageTypes.ApplyArmor(damages.GetTotalDamage(), armor));
+                            damages.IncreaseEqually(armor * 0.8f);
+                            Jotunn.Logger.LogWarning("newDamage with armor offset: " + damages.GetTotalDamage());
+                            impactEffect.m_damages = damages;
+                        }
+                        else
+                            impactEffect.m_damages = spawnAbilityData.damage.ConvertToDamageTypes();
+                    }
 
                     if (spawnAbilityData.dropVelocity != 0f)
                         rigidbody.AddForce(new Vector3(0f, (float)spawnAbilityData.dropVelocity, 0f) * rigidbody.mass * rigidbody.mass);
@@ -190,21 +214,6 @@ namespace WizshBoneTwitchIntegration.Extensions
                     preventDamage.Init(spawnAbilityData.damageShips, spawnAbilityData.damageStructures);
 
                     impactEffect.StartCoroutine(impactEffect.ResetShowerSettings());
-                }
-
-                if (monsterAI == null && aoe != null)
-                {
-                    if (spawnAbilityData.damage != null)
-                        aoe.m_damage = spawnAbilityData.damage.ConvertToDamageTypes();
-
-                    TwitchAllowDamage preventDamage = aoe.gameObject.AddComponent<TwitchAllowDamage>();
-                    preventDamage.Init(spawnAbilityData.damageShips, spawnAbilityData.damageStructures);
-
-                    if (aoeRod != null)
-                    {
-                        TwitchAllowDamage preventDamageRod = aoeRod.gameObject.AddComponent<TwitchAllowDamage>();
-                        preventDamageRod.Init(spawnAbilityData.damageShips, spawnAbilityData.damageStructures);
-                    }
                 }
 
                 if (trap != null)
@@ -216,6 +225,53 @@ namespace WizshBoneTwitchIntegration.Extensions
                     persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffect);
 
                     trap.RequestStateChange(TrapState.Armed);
+                }
+
+                if (monsterAI == null && aoe != null)
+                {
+                    if (spawnAbilityData.damage != null)
+                    {
+                        HitData.DamageTypes damages = spawnAbilityData.damage.ConvertToDamageTypes();
+
+                        if (spawnAbilityData.damage.maxHealthArmorBased)
+                        {
+                            float armor = Player.m_localPlayer.GetBodyArmor();
+                            float maxHealth = Player.m_localPlayer.GetMaxHealth();
+                            float totalDamage = damages.GetTotalDamage();
+                            float maxDamage = maxHealth * 0.5f;
+
+                            Jotunn.Logger.LogWarning("maxHealth: " + maxHealth);
+                            Jotunn.Logger.LogWarning("totalDamage: " + totalDamage);
+                            Jotunn.Logger.LogWarning("maxDamage: " + maxDamage);
+                            Jotunn.Logger.LogWarning("multiplier: " + maxDamage / totalDamage);
+
+                            damages.Modify(maxDamage / totalDamage);
+                            Jotunn.Logger.LogWarning("newDamage: " + damages.GetTotalDamage());
+                            Jotunn.Logger.LogWarning("Armor: " + armor);
+                            Jotunn.Logger.LogWarning("newDamage with armor: " + HitData.DamageTypes.ApplyArmor(damages.GetTotalDamage(), armor));
+                            damages.IncreaseEqually(armor * 0.8f);
+                            Jotunn.Logger.LogWarning("newDamage with armor offset: " + damages.GetTotalDamage());
+
+                            aoe.m_damage = damages;
+                        }
+                        else 
+                            aoe.m_damage = spawnAbilityData.damage.ConvertToDamageTypes();
+
+                        TwitchPersistentDamage persistentDamage = gameObject.GetComponent<TwitchPersistentDamage>();
+
+                        if (persistentDamage != null)
+                            persistentDamage.SetData(damages);
+                    }
+
+                    TwitchAllowDamage preventDamage = aoe.gameObject.AddComponent<TwitchAllowDamage>();
+                    preventDamage.Init(spawnAbilityData.damageShips, spawnAbilityData.damageStructures);
+
+                    if (aoeRod != null)
+                    {
+                        TwitchAllowDamage preventDamageRod = aoeRod.gameObject.AddComponent<TwitchAllowDamage>();
+                        preventDamageRod.Init(spawnAbilityData.damageShips, spawnAbilityData.damageStructures);
+                        aoeRod.m_useTriggers = true;
+                    }
                 }
 
                 if ((bool)component2)

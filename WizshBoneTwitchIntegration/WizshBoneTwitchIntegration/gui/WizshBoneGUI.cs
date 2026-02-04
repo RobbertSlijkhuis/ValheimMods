@@ -6,7 +6,7 @@ using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Gui
 {
-    internal class TwitchStateGUI
+    internal class WizshBoneGUI
     {
         private GameObject panel;
         private TwitchAuth auth;

@@ -3,7 +3,7 @@ using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
-    internal class BanTwitchUser : ConsoleCommand
+    internal class BanTwitchUserCommand : ConsoleCommand
     {
         public override string Name => "BanTwitchUser";
 

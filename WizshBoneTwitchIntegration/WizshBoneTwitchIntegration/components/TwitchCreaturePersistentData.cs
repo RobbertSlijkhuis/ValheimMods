@@ -113,7 +113,9 @@ namespace WizshBoneTwitchIntegration.Components
             if (commandable)
             {
                 tameable.m_commandable = true;
-                tameable.m_monsterAI.SetFollowTarget(Player.m_localPlayer.gameObject);
+
+                if (Player.m_localPlayer != null)
+                    tameable.m_monsterAI.SetFollowTarget(Player.m_localPlayer.gameObject);
             }
         }
 
