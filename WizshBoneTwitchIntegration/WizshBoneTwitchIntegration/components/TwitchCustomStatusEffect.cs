@@ -46,10 +46,18 @@ namespace WizshBoneTwitchIntegration.Components
                     }
                 }
 
+                // We already checked if renew is allowed
                 if (entry.persistsThroughDeath)
-                    m_statusEffects.Add(entry);
+                {
+                    StatusEffectData exists = m_statusEffects.Find(item => item.nameHash == entry.nameHash);
 
-                entry.onStart(entry);
+                    if (exists != null)
+                        m_statusEffects.Remove(exists);
+
+                    m_statusEffects.Add(entry);
+                }
+
+                entry.onStart(entry, false);
                 return true;
             }
             catch(Exception e)
@@ -98,14 +106,14 @@ namespace WizshBoneTwitchIntegration.Components
             foreach (StatusEffectData entry in m_statusEffects)
             {
                 if (entry.persistsThroughDeath)
-                    entry.onStart?.Invoke(entry);
+                    entry.onStart?.Invoke(entry, true);
             }
         }
 
-        public void WindInTheBack(StatusEffectData statusEffect)
+        public void WindInTheBack(StatusEffectData statusEffect, bool restartFromDeath)
         {
             StatusEffect original = ObjectDB.instance.GetStatusEffect("GP_Moder".GetStableHashCode());
-            StatusEffect clone = StatusEffectHelper.CreateSimple(statusEffect.name, statusEffect.duration, original.m_icon);
+            StatusEffect clone = StatusEffectHelper.CreateSimple(statusEffect.name, statusEffect.durationRemaining, original.m_icon);
             Player.m_localPlayer.GetSEMan().AddStatusEffect(clone);
 
             // EnvMan.instance.SetTargetWind(new Vector3(), 1f);
@@ -115,13 +123,24 @@ namespace WizshBoneTwitchIntegration.Components
         /// Makes the player slower and smaller for a set duration
         /// </summary>
         /// <param name="duration"></param>
-        public void PlayerShrink(StatusEffectData statusEffect)
+        public void PlayerShrink(StatusEffectData statusEffect, bool restartFromDeath)
         {
-            StatusEffect clone = StatusEffectHelper.CreateSimple(statusEffect.name, statusEffect.duration, WizshBoneTwitchIntegration.Instance.sprites.MiniMeSprite);
-
+            Jotunn.Logger.LogWarning("restartFromDeath: " + restartFromDeath);
+            Jotunn.Logger.LogWarning("Duration: " + statusEffect.duration);
+            Jotunn.Logger.LogWarning("Remaining: " + statusEffect.durationRemaining);
             if (statusEffect.renew)
-                Player.m_localPlayer.GetSEMan().RemoveStatusEffect(clone);
+            {
+                StatusEffect currentStatusEffect = Player.m_localPlayer.GetSEMan().GetStatusEffect(statusEffect.nameHash);
 
+                if (currentStatusEffect != null)
+                {
+                    currentStatusEffect.m_ttl = statusEffect.duration;
+                    currentStatusEffect.ResetTime();
+                    return;
+                }
+            }
+
+            StatusEffect clone = StatusEffectHelper.CreateSimple(statusEffect.name, restartFromDeath ? statusEffect.durationRemaining : statusEffect.duration, WizshBoneTwitchIntegration.Instance.sprites.MiniMeSprite);
             Player.m_localPlayer.GetSEMan().AddStatusEffect(clone);
             RedeemHelper.SetPlayerSpeed(0.75f);
             Vector3 newScale = new Vector3(0.45f, 0.45f, 0.45f);
@@ -133,13 +152,24 @@ namespace WizshBoneTwitchIntegration.Components
         /// Makes the player faster and bigger for a set duration
         /// </summary>
         /// <param name="duration"></param>
-        public void PlayerGrow(StatusEffectData statusEffect)
+        public void PlayerGrow(StatusEffectData statusEffect, bool restartFromDeath)
         {
-            StatusEffect clone = StatusEffectHelper.CreateSimple(statusEffect.name, statusEffect.duration, WizshBoneTwitchIntegration.Instance.sprites.BigMeSprite);
-
+            Jotunn.Logger.LogWarning("restartFromDeath: " + restartFromDeath);
+            Jotunn.Logger.LogWarning("Duration: " + statusEffect.duration);
+            Jotunn.Logger.LogWarning("Remaining: " + statusEffect.durationRemaining);
             if (statusEffect.renew)
-                Player.m_localPlayer.GetSEMan().RemoveStatusEffect(clone);
+            {
+                StatusEffect currentStatusEffect = Player.m_localPlayer.GetSEMan().GetStatusEffect(statusEffect.nameHash);
 
+                if (currentStatusEffect != null)
+                {
+                    currentStatusEffect.m_ttl = statusEffect.duration;
+                    currentStatusEffect.ResetTime();
+                    return;
+                }
+            }
+
+            StatusEffect clone = StatusEffectHelper.CreateSimple(statusEffect.name, restartFromDeath ? statusEffect.durationRemaining : statusEffect.duration, WizshBoneTwitchIntegration.Instance.sprites.BigMeSprite);
             Player.m_localPlayer.GetSEMan().AddStatusEffect(clone);
             RedeemHelper.SetPlayerSpeed(1.25f);
             Vector3 newScale = new Vector3(1.45f, 1.45f, 1.45f);

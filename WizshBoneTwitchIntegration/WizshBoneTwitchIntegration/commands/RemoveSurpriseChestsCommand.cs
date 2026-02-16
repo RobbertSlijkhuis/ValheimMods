@@ -30,7 +30,7 @@ namespace WizshBoneTwitchIntegration.Commands
                 foreach (Collider obj in objects)
                 {
                     GameObject gameObject = obj.transform.root.gameObject;
-                    Jotunn.Logger.LogWarning(gameObject.name);
+                    
                     if (gameObject.GetComponent<TwitchSurpriseChest>() != null)
                     {
                         ZNetView netView = gameObject.GetComponent<ZNetView>();

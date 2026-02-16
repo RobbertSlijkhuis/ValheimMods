@@ -4,6 +4,10 @@ namespace WizshBoneTwitchIntegration.Helpers
 {
     internal class EnemyHudHelper
     {
+        /// <summary>
+        /// Generate hud game objects to display more stars
+        /// </summary>
+        /// <param name="hudBase"></param>
         public static void GenerateLevels(RectTransform hudBase)
         {
             RectTransform refLevel = hudBase.transform.Find("level_2") as RectTransform;

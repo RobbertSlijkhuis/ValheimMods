@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 
 namespace WizshBoneTwitchIntegration.Components
@@ -14,7 +15,7 @@ namespace WizshBoneTwitchIntegration.Components
         {
             m_netView = gameObject.GetComponent<ZNetView>();
 
-            if (m_netView == null || m_netView.GetZDO == null)
+            if (m_netView == null || m_netView.GetZDO() == null)
             {
                 Jotunn.Logger.LogError("Could not find ZNetView in persistent damage!");
                 return;
@@ -37,11 +38,11 @@ namespace WizshBoneTwitchIntegration.Components
 
             if (aoe == null)
             {
-                Jotunn.Logger.LogError("Could not find aoe to apply persistent damage to!");
+                Jotunn.Logger.LogError("Could not find AOE to apply persistent damage to!");
                 return;
             }
             
-            aoe.m_damage = damageData.ConvertToDamageTypes();
+            aoe.m_damage = DamageHelper.ConvertToDamageTypes(damageData);
         }
 
         public void SetData(DamageData damageData)
@@ -56,13 +57,13 @@ namespace WizshBoneTwitchIntegration.Components
         public void SetData(HitData.DamageTypes damages)
         {
             DamageData damageData = new DamageData();
-            damageData.SetFromDamageTypes(damages);
+            DamageHelper.SetFromDamageTypes(damageData, damages);
             SetData(damageData);
         }
 
         public string DamageDataToString(DamageData damageData)
         {
-            return $"{damageData.blunt}|{damageData.chop}|{damageData.damage}|{damageData.fire}|{damageData.frost}|{damageData.lightning}|{damageData.pickaxe}|{damageData.pierce}|{damageData.poison}|{damageData.slash}|{damageData.spirit}|{damageData.maxHealthArmorBased}";
+            return $"{damageData.blunt}|{damageData.chop}|{damageData.damage}|{damageData.fire}|{damageData.frost}|{damageData.lightning}|{damageData.pickaxe}|{damageData.pierce}|{damageData.poison}|{damageData.slash}|{damageData.spirit}|{damageData.basedOnMaxHealthAndArmor}|{damageData.maxHealthPercentage}|{damageData.armorPercentage}";
         }
 
         public DamageData StringToDamageData(string value)
@@ -80,7 +81,9 @@ namespace WizshBoneTwitchIntegration.Components
             damageData.poison = float.Parse(data[8]);
             damageData.slash = float.Parse(data[9]);
             damageData.spirit = float.Parse(data[10]);
-            damageData.maxHealthArmorBased = bool.Parse(data[11]);
+            damageData.basedOnMaxHealthAndArmor = bool.Parse(data[11]);
+            damageData.maxHealthPercentage = float.Parse(data[12]);
+            damageData.armorPercentage = float.Parse(data[13]);
 
             return damageData;
         }

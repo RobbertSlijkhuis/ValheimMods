@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using TwitchSDK;
 using TwitchSDK.Interop;
 using UnityEngine;
@@ -18,6 +17,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private string m_scopes = $"{TwitchOAuthScope.Bits.Read.Scope} {TwitchOAuthScope.Channel.ManageRedemptions.Scope} {TwitchOAuthScope.User.ReadSubscriptions.Scope}";
         public TwitchUserInfo m_userInfo;
         public bool m_loggedIn = false;
+        private DateTime m_loggedinInTime;
+        private int m_logOutTime = 225;
+        // private int m_logOutTime = 1;
         public bool m_waitingForCode = false;
 
         public WizshBoneGUI wizshBoneGUI;
@@ -87,17 +89,23 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void TrackAuthRepeating()
         {
-            StartCoroutine(TrackAuthState());
+            TimeSpan timeSpan = DateTime.Now.Subtract(m_loggedinInTime);
+            Jotunn.Logger.LogWarning(timeSpan.TotalMinutes);
+
+            if (timeSpan.TotalMinutes > m_logOutTime)
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "You are about to be logged out from Twitch, do you want to refresh login?", 10);
+
+            //StartCoroutine(TrackAuthState());
         }
 
-        public IEnumerator TrackAuthState()
-        {
-            GetBitsLeaderboard();
+        //public IEnumerator TrackAuthState()
+        //{
+        //    GetBitsLeaderboard();
 
-            yield return new WaitForSeconds(5f);
+        //    yield return new WaitForSeconds(5f);
 
-            GetAuthState();
-        }
+        //    GetAuthState();
+        //}
 
         public void GetAuthState()
         {
@@ -118,6 +126,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     if (m_loggedIn)
                         return;
 
+                    m_loggedinInTime = DateTime.Now;
                     m_loggedIn = true;
                     m_waitingForCode = false;
 

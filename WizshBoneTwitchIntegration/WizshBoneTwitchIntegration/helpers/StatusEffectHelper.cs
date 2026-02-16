@@ -9,6 +9,21 @@ namespace WizshBoneTwitchIntegration.Helpers
     internal class StatusEffectHelper
     {
         /// <summary>
+        /// Reset the timer on a statuseffect on the player
+        /// </summary>
+        /// <param name="statusEffect"></param>
+        public static void ResetTimer(StatusEffectData statusEffect)
+        {
+            StatusEffect currentStatusEffect = Player.m_localPlayer.GetSEMan().GetStatusEffect(statusEffect.nameHash);
+
+            if (currentStatusEffect == null)
+                return;
+
+            currentStatusEffect.m_ttl = statusEffect.duration;
+            currentStatusEffect.ResetTime();
+        }
+
+        /// <summary>
         /// Create a simple status effect instance
         /// </summary>
         /// <param name="name"></param>

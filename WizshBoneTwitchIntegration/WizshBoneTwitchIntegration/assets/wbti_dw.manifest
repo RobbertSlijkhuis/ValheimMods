@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 3828677099
+CRC: 1783963741
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 78a5c988dc6b8951cc69e8d2be0fe7a1
+    Hash: 0df9b885cbe415161a95e22355469c8c
   TypeTreeHash:
     serializedVersion: 2
     Hash: 26d2a9d9756f5ad66792c4f79f5b9075
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 78a5c988dc6b8951cc69e8d2be0fe7a1
+    Hash: 0df9b885cbe415161a95e22355469c8c
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -121,6 +121,7 @@ Assets:
 - Assets/Custom/PrefabInstance/RemoveTheCountry_WBTI.prefab
 - Assets/Custom/Monobehaviour/Burning_WBTI.asset
 - Assets/Custom/PrefabInstance/FeoTheHistorian_WBTI.prefab
+- Assets/Custom/Texture2D/Creatures/Bjorn_mat_WBTI.mat
 - Assets/Custom/Monobehaviour/Poison_WBTI.asset
 - Assets/Custom/Sprite/MiniMeSprite_WBTI.png
 - Assets/Custom/Sprite/BigMeSprite_WBTI.png

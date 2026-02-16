@@ -1,6 +1,7 @@
 ﻿using BepInEx.Configuration;
 using Jotunn.Managers;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Extensions;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
@@ -99,6 +100,8 @@ namespace WizshBoneTwitchIntegration.Configs
             {
                 TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
                 customRewards.m_playerIsInSafeZone = false;
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "");
+                MessageHud.instance.HideCenterMessage();
             };
 
 

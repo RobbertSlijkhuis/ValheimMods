@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using WizshBoneTwitchIntegration.Configs;
+using WizshBoneTwitchIntegration.Data;
+using WizshBoneTwitchIntegration.Extensions;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Components
@@ -9,26 +11,32 @@ namespace WizshBoneTwitchIntegration.Components
         private TwitchCustomRewards m_customRewards;
         private GameObject m_playerInZone;
         private readonly string playerIdentifier = "Player(Clone)";
+        public bool m_burnCreatures;
 
         public void Awake()
         {
             m_customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+            m_burnCreatures = true;
         }
 
         public void OnTriggerEnter(Collider collider)
         {
             HandlePlayer(collider, true, "Player entered");
+            HandleDeleteBySafeZone(collider);
+            Jotunn.Logger.LogWarning($"Enter: {collider.gameObject.name}");
         }
 
         public void OnTriggerStay(Collider collider)
         {
             HandlePlayer(collider, true);
-            HandleSpawns(collider);
+            HandleCreatures(collider);
+            // Jotunn.Logger.LogWarning($"Stay: {collider.gameObject.name}");
         }
 
         public void OnTriggerExit(Collider collider)
         {
             HandlePlayer(collider, false, "Player left");
+            Jotunn.Logger.LogWarning($"Leave: {collider.gameObject.name}");
         }
 
         private void HandlePlayer(Collider collider, bool value, string message = null)
@@ -48,16 +56,38 @@ namespace WizshBoneTwitchIntegration.Components
                 Jotunn.Logger.LogWarning(message);
 
             if (value)
+            {
                 m_playerInZone = collider.gameObject;
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Streamer is in a safe zone!");
+            }
             else
+            {
                 m_playerInZone = null;
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "");
+                MessageHud.instance.HideCenterMessage();
+            }
         }
 
-        public void HandleSpawns(Collider collider)
+        public void HandleDeleteBySafeZone(Collider collider)
+        {
+            if (transform.parent.gameObject.GetComponent<Ship>() != null && PluginConfig.configAllowRedeemsOnBoats.Value)
+                return;
+
+            TwitchDeleteBySafeZone deleteBySafeZone = collider.gameObject.GetComponent<TwitchDeleteBySafeZone>();
+
+            if (deleteBySafeZone == null)
+                return;
+
+            ZNetView netView = collider.gameObject.GetComponent<ZNetView>();
+            netView.Destroy();
+            GameObject.Destroy(collider.gameObject);
+        }
+
+        public void HandleCreatures(Collider collider)
         {
             if (collider.gameObject.name != playerIdentifier)
             {
-                if (!PluginConfig.configWardBurnCreatures.Value)
+                if (!PluginConfig.configWardBurnCreatures.Value || !m_burnCreatures)
                     return;
 
                 if (transform.parent.gameObject.GetComponent<Ship>() != null && PluginConfig.configAllowRedeemsOnBoats.Value)

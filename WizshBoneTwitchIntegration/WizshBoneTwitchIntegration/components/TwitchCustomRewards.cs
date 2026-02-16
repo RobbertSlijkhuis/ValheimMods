@@ -398,8 +398,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
                     List<string> availableStatusEffects = StatusEffectHelper.GetAvailableStatusEffects();
                     StatusEffectData random = StatusEffectHelper.GetRandomStatusEffect(redeem.statusEffects);
-                    Jotunn.Logger.LogWarning(random.name);
-                    Jotunn.Logger.LogWarning(random.renew);
                     random.Init();
 
                     if (!availableStatusEffects.Contains(random.name))

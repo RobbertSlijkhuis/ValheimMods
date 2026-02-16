@@ -5381,7 +5381,7 @@ GameObject:
   - component: {fileID: 1375124272607804238}
   - component: {fileID: 6135916292141883190}
   m_Layer: 14
-  m_Name: AreaMarker
+  m_Name: safezone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5412,7 +5412,7 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1024
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0

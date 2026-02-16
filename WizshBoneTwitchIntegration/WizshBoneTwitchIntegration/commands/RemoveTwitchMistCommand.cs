@@ -15,7 +15,7 @@ namespace WizshBoneTwitchIntegration.Commands
         {
             try
             {
-                float scanRadius = 30f;
+                float scanRadius = 100f;
 
                 if (args.Length > 0)
                 {
@@ -30,8 +30,8 @@ namespace WizshBoneTwitchIntegration.Commands
                 foreach (Collider obj in objects)
                 {
                     GameObject gameObject = obj.transform.root.gameObject;
-                    Jotunn.Logger.LogWarning(gameObject.name);
-                    if (gameObject.GetComponent<TwitchPersistentDestruction>() != null)
+                    
+                    if (gameObject.GetComponent<Mister>() && gameObject.GetComponent<TwitchPersistentDestruction>())
                     {
                         ZNetView netView = gameObject.GetComponent<ZNetView>();
                         netView.Destroy();

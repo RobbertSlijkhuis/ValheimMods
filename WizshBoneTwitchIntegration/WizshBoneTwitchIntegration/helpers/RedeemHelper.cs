@@ -1,10 +1,13 @@
 ﻿using Jotunn.Managers;
 using System.Collections.Generic;
+using System.Drawing;
 using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.Types;
+using static LevelEffects;
+using Color = UnityEngine.Color;
 
 namespace WizshBoneTwitchIntegration.Helpers
 {

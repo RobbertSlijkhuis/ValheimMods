@@ -30,6 +30,7 @@ namespace WizshBoneTwitchIntegration
 
         private AssetBundle assetBundle;
         public CustomPrefabs prefabs = new CustomPrefabs();
+        public CustomMaterials materials = new CustomMaterials();
         public CustomStatusEffects effects = new CustomStatusEffects();
         public CustomSprites sprites = new CustomSprites();
         public CustomEffectLists effectLists = new CustomEffectLists();
@@ -96,9 +97,9 @@ namespace WizshBoneTwitchIntegration
             prefabs.ChestIron.AddComponent<TwitchSurpriseChest>();
             prefabs.ChestIron.transform.Find("chest_top").gameObject.AddComponent<TwitchSurpriseChestInteract>();
             prefabs.ChestGold.AddComponent<TwitchSurpriseChest>();
-
             prefabs.ChestGold.transform.Find("chest_top").gameObject.AddComponent<TwitchSurpriseChestInteract>();
-            prefabs.GuardStone.transform.Find("AreaMarker").gameObject.AddComponent<TwitchSafeZone>();
+
+            prefabs.GuardStone.transform.Find("safezone").gameObject.AddComponent<TwitchSafeZone>();
             prefabs.GuardStone.transform.Find("controls").gameObject.AddComponent<TwitchSafeZoneControls>();
 
             PieceConfig pieceConfig = new PieceConfig();
@@ -171,7 +172,21 @@ namespace WizshBoneTwitchIntegration
                 if (ship != null)
                 {
                     Jotunn.Logger.LogWarning($"Adding safezone to ship {name}");
-                    prefab.transform.Find("OnboardTrigger").gameObject.AddComponent<TwitchSafeZone>();
+                    Transform onboardTriggerTrans = prefab.transform.Find("OnboardTrigger");
+                    BoxCollider boxCollider = onboardTriggerTrans.gameObject.GetComponent<BoxCollider>();
+                    onboardTriggerTrans.gameObject.AddComponent<TwitchSafeZone>();
+                    boxCollider.includeLayers = LayerMask.GetMask("piece");
+
+                    if (prefab.name == "VikingShip_Ashlands")
+                    {
+                        boxCollider.center = new Vector3(0.01260833f, 4.1f, 0.0135176f);
+                        boxCollider.size = new Vector3(4.536945f, 10f, 3.080277f);
+                    }
+                    else
+                    {
+                        boxCollider.center = new Vector3(0, 1.2f, 0);
+                        boxCollider.size = new Vector3(1, 3.5f, 1);
+                    }
                 }
 
                 if (prefab.name == "fuling_trap" || prefab.name == "piece_trap_troll")
@@ -196,11 +211,14 @@ namespace WizshBoneTwitchIntegration
                 }
 
                 forceFieldTransform.gameObject.layer = 14;
-                SphereCollider sphere = forceFieldTransform.gameObject.AddComponent<SphereCollider>();
-                sphere.radius = 0.5f;
-                sphere.isTrigger = true;
+                CapsuleCollider capsuleCollider = forceFieldTransform.gameObject.AddComponent<CapsuleCollider>();
+                capsuleCollider.radius = 0.5f;
+                capsuleCollider.height = 200f;
+                capsuleCollider.isTrigger = true;
+                capsuleCollider.includeLayers = LayerMask.GetMask("piece");
 
-                forceFieldTransform.gameObject.AddComponent<TwitchSafeZone>();
+                TwitchSafeZone safezone = forceFieldTransform.gameObject.AddComponent<TwitchSafeZone>();
+                safezone.m_burnCreatures = false;
             }
 
             PrefabManager.OnPrefabsRegistered -= AddPersistentComponents;
@@ -255,6 +273,7 @@ namespace WizshBoneTwitchIntegration
         private void InitCommands()
         {
             CommandManager.Instance.AddConsoleCommand(new BanTwitchUserCommand());
+            CommandManager.Instance.AddConsoleCommand(new ClearCustomStatusEffectsCommand());
             CommandManager.Instance.AddConsoleCommand(new ListBannedTwitchUsers());
             CommandManager.Instance.AddConsoleCommand(new OpenConfigFolderCommand());
             CommandManager.Instance.AddConsoleCommand(new ReloadRedeemsCommand());
@@ -264,6 +283,7 @@ namespace WizshBoneTwitchIntegration
             CommandManager.Instance.AddConsoleCommand(new RemoveTwitchMistCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveTwitchTrapsCommand());
             CommandManager.Instance.AddConsoleCommand(new SetRedeemAliasCommand());
+            CommandManager.Instance.AddConsoleCommand(new TestCommand());
             CommandManager.Instance.AddConsoleCommand(new UpdateRedeemsCommand());
             CommandManager.Instance.AddConsoleCommand(new UnbanTwitchUserCommand());
             CommandManager.Instance.AddConsoleCommand(new UseRedeemCommand());
@@ -294,15 +314,21 @@ namespace WizshBoneTwitchIntegration
             sprites.MiniMeSprite = assetBundle.LoadAsset<Sprite>("MiniMeSprite_WBTI");
             sprites.BigMeSprite = assetBundle.LoadAsset<Sprite>("BigMeSprite_WBTI");
 
+            materials.RecolorBjorn = assetBundle.LoadAsset<Material>("Bjorn_mat_WBTI");
+
             // ====================================
             // TODO:
             // ====================================
-            // Prevent wolfs/fenrings from howling all the time as a setting
-
-            // Timer met warning 10min voren om opnieuw in te loggen, to fix enable/disable redeems en auto-resolve
-            // Player grow does not apply remaining duration on death
-            // Roots (enemy/friendly)
+            // Surprise chest map marker not dissapearing automaticly correctly
+            // Add a redeem that can boost boat speed
+            // Shrink/grow the boat when player is sailing
+            // Make safezones square (option)
             // Shrink/Grow cancel each other out
+            // Add limit of how much the mob can be active on one time
+            // Prevent wolfs/fenrings from howling all the time as a setting
+            // Log creatures dieing from safezone
+
+            // Roots (enemy/friendly)
             // TalkInteract always show Feo's history fact message, also does not properly show follow/rename creature
             // Armor and shield don't get thrown out very far out of suprise chests
             // Apply creature data settings to creates spawned from SpawnShower
@@ -312,16 +338,22 @@ namespace WizshBoneTwitchIntegration
             // Temp naked redeem
             // Remove/add redeems when player leaves/enters a dungeon and check what kind of dungeon the player is in
             // Add leader board of points spend, deaths caused, saves maybe? Other statistics?
+            // Make certain creatures smaller in dungeons so they be spawned
             //
             // ====================================
             // IN PROGRESS:
             // ====================================
+            // DONE: Fixed timer for being logged out by Twitch warning
+            // DONE: Fixed refreshing buffs and persist through death
+            // DONE: Stop spawning things when streamer walks into a safezone
             // DONE: Add safe zones to traders
+            // DONE: Make trap/log/smite damage health/armor base
             // DONE: Make trap's damage persistent
             // DONE: Add command or action to delete surprise chests / spawned creatures in the vicinity
             // DONE: Check for safezone when surprise chest actually spawns in
             // DONE: Prevent redeems when on a boat
             // DONE: Make friendly follow troops automaticly follow their owner
+            // DONE: Friendly troops now attack bosses
             // DONE: Prevent AOE scripts from doing damage to boats (Thou shall be smited)
             // DONE: Prevent Impact scripts from doing damage to boats (Log rain)
             // DONE: Trap field redeem
@@ -340,6 +372,7 @@ namespace WizshBoneTwitchIntegration
             // IDEAS:
             // ====================================
             // MORE POSITIVE EFFECTS
+            // More loot if mob is grown?
             // LoyalBones: A red skeleton with normal damage but insane health pool
             // Chat loves this: Spawn chest with cheese (random food?) Make cheese wheel that gives random food?".
             // Add a way to be able to find spanwed creature. For the kill all spawned rule!
@@ -357,6 +390,7 @@ namespace WizshBoneTwitchIntegration
             // - Soma_af a bear (reskinned as a white/pink teddybear with antlers as soma has a bear with antlers emote) Spawns when cooking? Drops random food when sneezing? Adds a 4th food slot?
             // - Make DurdyJay exactly like Odin, and spawns randomly in like Odin. But instead of dissappearing straight away he gets Googly Eyes and a stick out Tongue and says something nice/somewhat durdy. And his name changes to DurdyJay at that moment ofc (blessing?)
             // - Xxainty iets van een greydwarf ofzo
+            // - Kassie The god of chaos, makes map dissapear when pissed off?
             // - itsnanobug?
             // - Azeriath? Blessing: Less fall damage he said
             // - jaqkEquips

@@ -16,7 +16,7 @@ namespace WizshBoneTwitchIntegration.Components
         {
             m_netView = gameObject.GetComponent<ZNetView>();
 
-            if (m_netView == null || m_netView.GetZDO == null)
+            if (m_netView == null || m_netView.GetZDO() == null)
             {
                 Jotunn.Logger.LogError("Could not find ZNetView in mister destruction!");
                 return;

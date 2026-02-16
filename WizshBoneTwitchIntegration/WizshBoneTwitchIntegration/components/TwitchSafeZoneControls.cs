@@ -22,7 +22,7 @@ namespace WizshBoneTwitchIntegration.Components
                 if (m_netView != null && m_netView.GetZDO() != null)
                 {
                     projectorTransform = transform.Find("projector");
-                    colliderTrans = transform.parent.Find("AreaMarker");
+                    colliderTrans = transform.parent.Find("safezone");
                     isProjectorOn = false;
                     radius = m_netView.GetZDO().GetFloat(radiusHash, 30f);
 

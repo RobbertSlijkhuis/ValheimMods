@@ -131,9 +131,15 @@ namespace WizshBoneTwitchIntegration.Harmony
                     return;
 
                 if (__instance.IsDone())
+                {
+                    Jotunn.Logger.LogWarning("Removing StatusEffect: " + statusEffect.name);
                     customStatusEffect.RemoveStatusEffect(statusEffect, false);
-                else if (!statusEffect.renew)
-                    statusEffect.duration = __instance.GetRemaningTime();
+                }
+                else if (statusEffect.persistsThroughDeath)
+                {
+                    Jotunn.Logger.LogWarning("Setting StatusEffect remaining time: " + statusEffect.name + ", " + __instance.GetRemaningTime());
+                    statusEffect.durationRemaining = __instance.GetRemaningTime();
+                }
             }
             catch (Exception e)
             {
