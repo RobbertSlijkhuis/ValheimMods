@@ -91,9 +91,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (currentRewardEvent == null || currentRewardEvent.Status == CustomRewardRedemptionState.Fulfilled || currentRewardEvent.Status == CustomRewardRedemptionState.Canceled)
                     return;
 
-                if (m_alias != null && currentRewardEvent.RedeemerName == m_auth.m_userInfo.displayName)
+                if (m_alias != null && (currentRewardEvent.RedeemerName == m_auth?.m_userInfo?.displayName || WizshBoneTwitchIntegration.useRedeemCommand))
                 {
-                    Jotunn.Logger.LogWarning($"{m_auth.m_userInfo.displayName} pretending to be {m_alias}");
+                    Jotunn.Logger.LogWarning($"{m_auth?.m_userInfo?.displayName} pretending to be {m_alias}");
                     currentRewardEvent.RedeemerName = m_alias;
                 }
 
@@ -176,7 +176,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                                 break;
                         }
 
-                        foreach (SpawnCreatureData creature in redeem.creatures)
+                        foreach (CreatureData creature in redeem.creatures)
                         {
                             if (notAllowedList.Contains(creature.prefabName.ToLower()))
                             {
@@ -198,15 +198,16 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     if (redeem.creatures == null)
                         throw new RedeemException("Could not find creature data for SpawnCreature", ExceptionType.Error);
 
-                    foreach (SpawnCreatureData creature in redeem.creatures)
+                    foreach (CreatureData creature in redeem.creatures)
                     {
+                        if (!ProgressionHelper.IsAllowedByGlobalKeys(creature.globalKeyAdd, creature.globalKeyRemove))
+                            continue;
+
                         if (redeem.userInput)
                             creature.talkMessage = m_chat.GetLastMessageOfUser(currentRewardEvent.RedeemerName)?.message;
 
-                        if (creature.amount > 1)
+                        if (creature.amount > 0)
                             RedeemHelper.SpawnCreatures(new SpawnOptions(creature, Player.m_localPlayer.transform, currentRewardEvent, redeem.ignoreWard));
-                        else
-                            RedeemHelper.SpawnCreature(new SpawnOptions(creature, Player.m_localPlayer.transform, currentRewardEvent, redeem.ignoreWard));
                     }
                 }
 
@@ -328,7 +329,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     if (redeem.shower.announceMessage != null)
                         Player.m_localPlayer.Message(MessageHud.MessageType.Center, redeem.shower.announceMessage);
 
-                    SpawnCreatureData creatureData = new SpawnCreatureData();
+                    CreatureData creatureData = new CreatureData();
                     StartCoroutine(spawnAbility.Spawn2(currentRewardEvent, redeem.shower, creatureData));
                 }
 
@@ -511,11 +512,10 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             RedeemHelper.fishList.Clear();
         }
 
-        public IEnumerator InitSurpriseChestWithDelay(GameObject prefab, ChestData chestData, CustomRewardEvent currentRewardEvent)
+        public IEnumerator InitSurpriseChestWithDelay(GameObject prefab, SurpriseChestData chestData, CustomRewardEvent currentRewardEvent)
         {
             yield return new WaitForSeconds(3f);
 
-            Jotunn.Logger.LogWarning("PlayerIsInSafeZone: " + m_playerIsInSafeZone);
             if (m_playerIsInSafeZone)
             {
                 WizshBoneTwitchIntegration.useRedeemCommand = true;
@@ -548,7 +548,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
             foreach (RedeemEntry redeem in redeems)
             {
-                if ((redeem.globalKeyAdd == "" && (redeem.globalKeyRemove == "" || !ZoneSystem.instance.GetGlobalKey(redeem.globalKeyRemove))) || (ZoneSystem.instance.GetGlobalKey(redeem.globalKeyAdd) && !ZoneSystem.instance.GetGlobalKey(redeem.globalKeyRemove)))
+                if (ProgressionHelper.IsAllowedByGlobalKeys(redeem.globalKeyAdd, redeem.globalKeyRemove))
                 {
                     listRewards.Add(new CustomRewardDefinition()
                     {

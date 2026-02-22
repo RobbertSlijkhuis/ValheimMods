@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using UnityEngine;
-using YamlDotNet.Core.Tokens;
 
 namespace WizshBoneTwitchIntegration.Extensions
 {

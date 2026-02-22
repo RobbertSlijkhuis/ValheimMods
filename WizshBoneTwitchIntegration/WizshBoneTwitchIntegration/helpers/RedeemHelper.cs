@@ -1,13 +1,11 @@
 ﻿using Jotunn.Managers;
 using System.Collections.Generic;
-using System.Drawing;
 using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
+using WizshBoneTwitchIntegration.Extensions;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.Types;
-using static LevelEffects;
-using Color = UnityEngine.Color;
 
 namespace WizshBoneTwitchIntegration.Helpers
 {
@@ -103,6 +101,14 @@ namespace WizshBoneTwitchIntegration.Helpers
                 throw new System.Exception("No humanoid available for creature spawn!");
             }
 
+            Jotunn.Logger.LogWarning($"Creature name: {creature.name}");
+            Jotunn.Logger.LogWarning($"Creature in list?: {RecolorHelper.IsCreatureInList($"{creature.name.Replace("(Clone)", "")}")}");
+            Jotunn.Logger.LogWarning($"Special viewer?: {RecolorHelper.IsRedeemerSpecialViewer(options.customReward.RedeemerName)}");
+            if (RecolorHelper.IsRedeemerSpecialViewer(options.customReward.RedeemerName) && RecolorHelper.IsCreatureInList($"{creature.name.Replace("(Clone)", "")}"))
+            {
+                RecolorHelper.RecolorCreature(creature, options.customReward.RedeemerName);
+            }
+
             if (!options.creatureData.isHallucination)
             {
                 TwitchCreatureClaim creatureClaim = creature.AddComponent<TwitchCreatureClaim>();
@@ -120,6 +126,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 humanoid.SetMaxHealth(10f);
             }
 
+            monsterAI.StartCoroutine(monsterAI.WakeUpAfterDelay(1f));
             monsterAI.LookAt(options.transform.position);
         }
 
@@ -221,14 +228,14 @@ namespace WizshBoneTwitchIntegration.Helpers
             string monster = monsterList[index];
 
             CustomRewardEvent customReward = new CustomRewardEvent();
-            SpawnCreatureData creature = new SpawnCreatureData(monster);
+            CreatureData creature = new CreatureData(monster);
             creature.isHallucination = true;
             creature.position = SpawnPositionType.RandomBehind;
             creature.rename = false;
             SpawnCreature(new SpawnOptions(creature, Player.m_localPlayer.transform, customReward));
         }
 
-        public static void SpawnMist(SpawnMistData options)
+        public static void SpawnMist(MistData options)
         {
             GameObject prefab = PrefabManager.Instance.GetPrefab("MistArea");
 
@@ -250,14 +257,12 @@ namespace WizshBoneTwitchIntegration.Helpers
                 mister.m_radius = (float)options.radius;
         }
 
-        public static void SpawnSupriseChest(GameObject prefab, ChestData chestData)
+        public static void SpawnSupriseChest(GameObject prefab, SurpriseChestData chestData)
         {
             Transform transform = Player.m_localPlayer.transform;
             GameObject chest = UnityEngine.Object.Instantiate(prefab, transform.position, transform.rotation);
             chest.transform.localPosition = UpdateSpawnLocation(chest.transform, SpawnPositionType.InFrontOfPlayerHigh, new PositionOffsetData());
             chest.transform.localRotation = UpdateSpawnRotation(chest.transform, SpawnPositionType.InFrontOfPlayerHigh);
-
-            Minimap.instance.DiscoverLocation(chest.transform.localPosition, Minimap.PinType.Icon3, "Surprise Chest", false);
 
             TwitchSurpriseChest surpriseChest = chest.GetComponent<TwitchSurpriseChest>();
             surpriseChest.Init(chestData);

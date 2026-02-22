@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 1783963741
+CRC: 1439499108
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 0df9b885cbe415161a95e22355469c8c
+    Hash: 3dc652ffd64211c5a966b7a0d618de88
   TypeTreeHash:
     serializedVersion: 2
     Hash: 26d2a9d9756f5ad66792c4f79f5b9075
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 0df9b885cbe415161a95e22355469c8c
+    Hash: 3dc652ffd64211c5a966b7a0d618de88
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -114,17 +114,35 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: TerrainOp/Settings
 Assets:
+- Assets/Custom/Texture2D/Creatures/Bjorn/Bjorn_recolor_zebra_WBTI.mat
+- Assets/Custom/Texture2D/Creatures/Wraith/Wraith_recolor_zebra_WBTI.mat
 - Assets/Custom/PrefabInstance/ChestIron_WBTI.prefab
 - Assets/Custom/PrefabInstance/spawn_fish_WBTI.prefab
+- Assets/Custom/Texture2D/Creatures/Draugr/Draugr_Ranged_recolor_WBTI.mat
+- Assets/Custom/Texture2D/Creatures/Boar/Boar_recolor_WBTI.mat
+- Assets/Custom/Texture2D/Creatures/Ghost/Ghost_recolor_WBTI.mat
 - Assets/Custom/Monobehaviour/NoFallDamage_WBTI.asset
 - Assets/Custom/Monobehaviour/Freezing_WBTI.asset
+- Assets/Custom/Texture2D/Creatures/Skeleton/Skeleton_recolor_WBTI.mat
+- Assets/Custom/Texture2D/Creatures/Draugr/Draugr_recolor_WBTI.mat
 - Assets/Custom/PrefabInstance/RemoveTheCountry_WBTI.prefab
 - Assets/Custom/Monobehaviour/Burning_WBTI.asset
+- Assets/Custom/Texture2D/Creatures/Draugr/Draugr_Elite_recolor_WBTI.mat
 - Assets/Custom/PrefabInstance/FeoTheHistorian_WBTI.prefab
-- Assets/Custom/Texture2D/Creatures/Bjorn_mat_WBTI.mat
+- Assets/Custom/Texture2D/Creatures/Wraith/Wraith_recolor_WBTI.mat
+- Assets/Custom/Texture2D/Creatures/Greydwarf/Greydwarf_recolor_WBTI.mat
+- Assets/Custom/Texture2D/Creatures/Bjorn/Bjorn_recolor_WBTI.mat
 - Assets/Custom/Monobehaviour/Poison_WBTI.asset
+- Assets/Custom/Texture2D/Creatures/Boar/BoarTusk_recolor_WBTI.mat
 - Assets/Custom/Sprite/MiniMeSprite_WBTI.png
 - Assets/Custom/Sprite/BigMeSprite_WBTI.png
+- Assets/Custom/Texture2D/Creatures/Abomination/Abomination_recolor_WBTI.mat
+- Assets/Custom/Texture2D/Creatures/Blob/Blob_recolor_WBTI.mat
 - Assets/Custom/PrefabInstance/ChestGold_WBTI.prefab
+- Assets/Custom/Texture2D/Creatures/Troll/Troll_recolor_WBTI.mat
+- Assets/Custom/Texture2D/Creatures/Blob/BlobSlime_recolor_WBTI.mat
+- Assets/Custom/Texture2D/Creatures/Neck/Neck_recolor_WBTI.mat
+- Assets/Custom/Texture2D/Creatures/Greydwarf/Greydwarf_Shaman_recolor_WBTI.mat
 - Assets/Custom/PrefabInstance/WBTI_guard_stone.prefab
+- Assets/Custom/Texture2D/Creatures/Greydwarf/RootSword_recolor_WBTI.mat
 Dependencies: []

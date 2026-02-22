@@ -2,7 +2,7 @@
 
 namespace WizshBoneTwitchIntegration.Models
 {
-    internal class SpawnCreatureData
+    internal class CreatureData
     {
         public bool aggravatable = false;
         public bool allowDrops = false;
@@ -10,6 +10,8 @@ namespace WizshBoneTwitchIntegration.Models
         public int amount = 1;
         public bool commandable = false;
         public bool friendly = false;
+        public string globalKeyAdd = "";
+        public string globalKeyRemove = "";
         public bool isHallucination = false;
         public int level = 1;
         public float maxHealth = 0;
@@ -23,9 +25,9 @@ namespace WizshBoneTwitchIntegration.Models
         public string talkMessage;
         public bool talks = false;
 
-        public SpawnCreatureData() { }
+        public CreatureData() { }
 
-        public SpawnCreatureData(string prefabName, int level = 1, int amount = 1, string position = nameof(SpawnPositionType.OnPlayer), bool allowDrops = false, bool friendly = false, bool commandable = false)
+        public CreatureData(string prefabName, int level = 1, int amount = 1, string position = nameof(SpawnPositionType.OnPlayer), bool allowDrops = false, bool friendly = false, bool commandable = false)
         {
             this.allowDrops = allowDrops;
             this.commandable = commandable;

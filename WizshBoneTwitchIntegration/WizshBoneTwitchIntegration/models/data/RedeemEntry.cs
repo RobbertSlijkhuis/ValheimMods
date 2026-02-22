@@ -7,12 +7,12 @@ namespace WizshBoneTwitchIntegration.Models
     {
         public string backgroundColor = "#a970ff";
         public int cooldown = 0;
-        public ChestData chest = new ChestData();
-        public List<SpawnCreatureData> creatures = new List<SpawnCreatureData>();
+        public SurpriseChestData chest = new SurpriseChestData();
+        public List<CreatureData> creatures = new List<CreatureData>();
         public string globalKeyAdd = "";
         public string globalKeyRemove = "";
         public bool ignoreWard = false;
-        public SpawnMistData mist = new SpawnMistData();
+        public MistData mist = new MistData();
         public int points = 0;
         public SpawnAbilityData shower = new SpawnAbilityData();
         public List<StatusEffectData> statusEffects = new List<StatusEffectData>();
@@ -22,7 +22,7 @@ namespace WizshBoneTwitchIntegration.Models
 
         public RedeemEntry() { }
 
-        public RedeemEntry(string type, string title, int points, string backgroundColor, int cooldown = 0, bool userInput = false, string globalKeyAdd = null, string globalKeyRemove = null, List<SpawnCreatureData> creatures = null)
+        public RedeemEntry(string type, string title, int points, string backgroundColor, int cooldown = 0, bool userInput = false, string globalKeyAdd = null, string globalKeyRemove = null, List<CreatureData> creatures = null)
         {
             this.backgroundColor = backgroundColor;
             this.cooldown = cooldown;

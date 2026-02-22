@@ -71,7 +71,7 @@ namespace WizshBoneTwitchIntegration.Components
             InvokeRepeating(nameof(CheckChatForMessage), 0f, 3f);
         }
 
-        public void ReInit(string userName, SpawnCreatureData creatureData)
+        public void ReInit(string userName, CreatureData creatureData)
         {
             if (userName == null || creatureData == null)
             {
@@ -104,7 +104,7 @@ namespace WizshBoneTwitchIntegration.Components
                 Unassign();
         }
 
-        private void SetupNpcTalk(SpawnCreatureData creatureData = null)
+        private void SetupNpcTalk(CreatureData creatureData = null)
         {
             NpcTalk npcTalk = gameObject.GetComponent<NpcTalk>();
 

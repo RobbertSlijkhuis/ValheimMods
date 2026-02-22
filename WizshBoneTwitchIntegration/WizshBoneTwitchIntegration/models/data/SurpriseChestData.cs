@@ -3,7 +3,7 @@ using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.Models
 {
-    internal class ChestData
+    internal class SurpriseChestData
     {
         public int amount = 1;
         public string announceMessage;
@@ -12,9 +12,10 @@ namespace WizshBoneTwitchIntegration.Models
         public List<string> items = new List<string>();
         public int mimicChance = 0;
         public bool random = true;
+        public float spawnDelay = 0.7f;
         public string type = ChestType.Iron;
         public int yeetChance = 0;
 
-        public ChestData() { }
+        public SurpriseChestData() { }
     }
 }

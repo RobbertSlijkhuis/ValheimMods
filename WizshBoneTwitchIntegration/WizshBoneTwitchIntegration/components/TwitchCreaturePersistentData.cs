@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Extensions;
+using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 
 namespace WizshBoneTwitchIntegration.Components
@@ -9,6 +11,7 @@ namespace WizshBoneTwitchIntegration.Components
         private ZNetView m_netView;
         private string m_creatureDataString;
         public bool m_ignoreWard;
+        public bool m_isFollowing;
         private string m_name;
 
         private readonly int creatureDataHash = "WTBIPersistentCreatureData".GetStableHashCode();
@@ -42,7 +45,7 @@ namespace WizshBoneTwitchIntegration.Components
 
             Jotunn.Logger.LogWarning($"Found data: {m_name}, {m_creatureDataString}");
 
-            SpawnCreatureData creatureData = StringToCreatureData(m_creatureDataString);
+            CreatureData creatureData = StringToCreatureData(m_creatureDataString);
             TwitchCreatureClaim creatureClaim = gameObject.AddComponent<TwitchCreatureClaim>();
             creatureClaim.ReInit(m_name, creatureData);
 
@@ -50,9 +53,14 @@ namespace WizshBoneTwitchIntegration.Components
             ApplyMonsterAI(creatureData.aggravatable, creatureData.mistVision);
             ApplyAllowDrops(creatureData.allowDrops);
             ApplyTameable(creatureData.friendly, creatureData.commandable);
+
+            if (RecolorHelper.IsRedeemerSpecialViewer(m_name) && RecolorHelper.IsCreatureInList($"{gameObject.name.Replace("(Clone)", "")}"))
+            {
+                RecolorHelper.RecolorCreature(gameObject, m_name);
+            }
         }
 
-        public void SetData(string name, SpawnCreatureData creatureData, bool ignoreWard)
+        public void SetData(string name, CreatureData creatureData, bool ignoreWard)
         {
             string creatureDataString = CreatureDataToString(creatureData);
             m_netView.GetZDO().Set(creatureDataHash, creatureDataString);
@@ -61,6 +69,7 @@ namespace WizshBoneTwitchIntegration.Components
             m_creatureDataString = creatureDataString;
             m_ignoreWard = ignoreWard;
             m_name = name;
+            m_isFollowing = creatureData.commandable;
 
             ApplyHumanoid(name, creatureData.level, creatureData.maxHealth, creatureData.friendly, creatureData.allowDamageStructures, creatureData.rename);
             ApplyMonsterAI(creatureData.aggravatable, creatureData.mistVision);
@@ -114,20 +123,20 @@ namespace WizshBoneTwitchIntegration.Components
             {
                 tameable.m_commandable = true;
 
-                if (Player.m_localPlayer != null)
-                    tameable.m_monsterAI.SetFollowTarget(Player.m_localPlayer.gameObject);
+                if (m_isFollowing && Player.m_localPlayer != null)
+                    tameable.m_monsterAI.SetFollowPlayer(Player.m_localPlayer.gameObject);
             }
         }
 
-        public string CreatureDataToString(SpawnCreatureData creatureData)
+        public string CreatureDataToString(CreatureData creatureData)
         {
             return $"{creatureData.prefabName}|{creatureData.level}|{creatureData.amount}|{creatureData.position}|{creatureData.allowDrops}|{creatureData.friendly}|{creatureData.commandable}|{creatureData.aggravatable}|{creatureData.allowDamageStructures}|{creatureData.maxHealth}|{creatureData.mistVision}|{creatureData.rename}|{creatureData.talks}|{creatureData.talkInteract}|{creatureData.talkInterval}|{creatureData.talkMessage}|{creatureData.isHallucination}";
         }
 
-        public SpawnCreatureData StringToCreatureData(string value)
+        public CreatureData StringToCreatureData(string value)
         {
             string[] data = value.Split('|');
-            SpawnCreatureData creatureData = new SpawnCreatureData(data[0], int.Parse(data[1]), int.Parse(data[2]), data[3], bool.Parse(data[4]), bool.Parse(data[5]), bool.Parse(data[6]));
+            CreatureData creatureData = new CreatureData(data[0], int.Parse(data[1]), int.Parse(data[2]), data[3], bool.Parse(data[4]), bool.Parse(data[5]), bool.Parse(data[6]));
             creatureData.aggravatable = bool.Parse(data[7]);
             creatureData.allowDamageStructures = bool.Parse(data[8]);
             creatureData.maxHealth = float.Parse(data[9]);

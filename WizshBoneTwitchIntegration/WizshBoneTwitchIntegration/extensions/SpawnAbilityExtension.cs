@@ -15,7 +15,7 @@ namespace WizshBoneTwitchIntegration.Extensions
 {
     internal static class SpawnAbilityExtension
     {
-        public static IEnumerator Spawn2(this SpawnAbility spawnAbility, CustomRewardEvent currentRewardEvent, SpawnAbilityData spawnAbilityData, SpawnCreatureData creatureData)
+        public static IEnumerator Spawn2(this SpawnAbility spawnAbility, CustomRewardEvent currentRewardEvent, SpawnAbilityData spawnAbilityData, CreatureData creatureData)
         {
             if (spawnAbility.m_initialSpawnDelay > 0f)
             {

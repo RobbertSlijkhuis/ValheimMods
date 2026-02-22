@@ -273,6 +273,7 @@ namespace WizshBoneTwitchIntegration
         private void InitCommands()
         {
             CommandManager.Instance.AddConsoleCommand(new BanTwitchUserCommand());
+            CommandManager.Instance.AddConsoleCommand(new ClearBossKeysCommand());
             CommandManager.Instance.AddConsoleCommand(new ClearCustomStatusEffectsCommand());
             CommandManager.Instance.AddConsoleCommand(new ListBannedTwitchUsers());
             CommandManager.Instance.AddConsoleCommand(new OpenConfigFolderCommand());
@@ -314,26 +315,42 @@ namespace WizshBoneTwitchIntegration
             sprites.MiniMeSprite = assetBundle.LoadAsset<Sprite>("MiniMeSprite_WBTI");
             sprites.BigMeSprite = assetBundle.LoadAsset<Sprite>("BigMeSprite_WBTI");
 
-            materials.RecolorBjorn = assetBundle.LoadAsset<Material>("Bjorn_mat_WBTI");
+            materials.RecolorAbomination = assetBundle.LoadAsset<Material>("Abomination_recolor_WBTI");
+            materials.RecolorBjorn = assetBundle.LoadAsset<Material>("Bjorn_recolor_WBTI");
+            materials.RecolorBjornZebra = assetBundle.LoadAsset<Material>("Bjorn_recolor_zebra_WBTI");
+            materials.RecolorBlob = assetBundle.LoadAsset<Material>("Blob_recolor_WBTI");
+            materials.RecolorBlobSlime = assetBundle.LoadAsset<Material>("BlobSlime_recolor_WBTI");
+            materials.RecolorBoar = assetBundle.LoadAsset<Material>("Boar_recolor_WBTI");
+            materials.RecolorBoarTusk = assetBundle.LoadAsset<Material>("BoarTusk_recolor_WBTI");
+            materials.RecolorDraugr = assetBundle.LoadAsset<Material>("Draugr_recolor_WBTI");
+            materials.RecolorDraugrFem = assetBundle.LoadAsset<Material>("Draugr_Ranged_recolor_WBTI");
+            materials.RecolorDraugrElite = assetBundle.LoadAsset<Material>("Draugr_Elite_recolor_WBTI");
+            materials.RecolorGhost = assetBundle.LoadAsset<Material>("Ghost_recolor_WBTI");
+            materials.RecolorGreydwarf = assetBundle.LoadAsset<Material>("Greydwarf_recolor_WBTI");
+            materials.RecolorGreydwarfShaman = assetBundle.LoadAsset<Material>("Greydwarf_Shaman_recolor_WBTI");
+            materials.RecolorGreydwarfRootsword = assetBundle.LoadAsset<Material>("RootSword_recolor_WBTI");
+            materials.RecolorNeck = assetBundle.LoadAsset<Material>("Neck_recolor_WBTI");
+            materials.RecolorSkeleton = assetBundle.LoadAsset<Material>("Skeleton_recolor_WBTI");
+            materials.RecolorTroll = assetBundle.LoadAsset<Material>("Troll_recolor_WBTI");
+            materials.RecolorWraith = assetBundle.LoadAsset<Material>("Wraith_recolor_WBTI");
+            materials.RecolorWraithZebra = assetBundle.LoadAsset<Material>("Wraith_recolor_zebra_WBTI");
 
             // ====================================
             // TODO:
             // ====================================
-            // Surprise chest map marker not dissapearing automaticly correctly
+            // Add CreatureData to SpawnAbility/SurpriseChests
+            // Add new SpawnItem method with quality and stack amount etc. Also add this to SpawnAbility/SurpriseChests
+
+            // Shrink/Grow cancel each other out
+            // Add limit of how much the mob can be active on one time
             // Add a redeem that can boost boat speed
             // Shrink/grow the boat when player is sailing
             // Make safezones square (option)
-            // Shrink/Grow cancel each other out
-            // Add limit of how much the mob can be active on one time
             // Prevent wolfs/fenrings from howling all the time as a setting
             // Log creatures dieing from safezone
-
             // Roots (enemy/friendly)
             // TalkInteract always show Feo's history fact message, also does not properly show follow/rename creature
             // Armor and shield don't get thrown out very far out of suprise chests
-            // Apply creature data settings to creates spawned from SpawnShower
-            // Apply creature data settings to creates spawned from Suprise chests
-            // Allow SpawnShower to be spawned from Suprise chests
             // Reverse controlls redeem
             // Temp naked redeem
             // Remove/add redeems when player leaves/enters a dungeon and check what kind of dungeon the player is in
@@ -343,6 +360,10 @@ namespace WizshBoneTwitchIntegration
             // ====================================
             // IN PROGRESS:
             // ====================================
+            // DONE: Surprise chest map marker not dissapearing automaticly correctly
+            // DONE: Don't refresh timer of buffs under 5 seconds to prevent endless buff bugg
+            // DONE: Wake up mosnter programmaticly so they engange straight away
+            // DONE: Follow status is resetted to follow when player moves to far away (portal)
             // DONE: Fixed timer for being logged out by Twitch warning
             // DONE: Fixed refreshing buffs and persist through death
             // DONE: Stop spawning things when streamer walks into a safezone

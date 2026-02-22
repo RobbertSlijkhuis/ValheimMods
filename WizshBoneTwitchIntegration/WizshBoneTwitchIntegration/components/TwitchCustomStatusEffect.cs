@@ -105,7 +105,7 @@ namespace WizshBoneTwitchIntegration.Components
         {
             foreach (StatusEffectData entry in m_statusEffects)
             {
-                if (entry.persistsThroughDeath)
+                if (entry.persistsThroughDeath && entry.durationRemaining > 5f)
                     entry.onStart?.Invoke(entry, true);
             }
         }
@@ -125,9 +125,6 @@ namespace WizshBoneTwitchIntegration.Components
         /// <param name="duration"></param>
         public void PlayerShrink(StatusEffectData statusEffect, bool restartFromDeath)
         {
-            Jotunn.Logger.LogWarning("restartFromDeath: " + restartFromDeath);
-            Jotunn.Logger.LogWarning("Duration: " + statusEffect.duration);
-            Jotunn.Logger.LogWarning("Remaining: " + statusEffect.durationRemaining);
             if (statusEffect.renew)
             {
                 StatusEffect currentStatusEffect = Player.m_localPlayer.GetSEMan().GetStatusEffect(statusEffect.nameHash);
@@ -154,9 +151,6 @@ namespace WizshBoneTwitchIntegration.Components
         /// <param name="duration"></param>
         public void PlayerGrow(StatusEffectData statusEffect, bool restartFromDeath)
         {
-            Jotunn.Logger.LogWarning("restartFromDeath: " + restartFromDeath);
-            Jotunn.Logger.LogWarning("Duration: " + statusEffect.duration);
-            Jotunn.Logger.LogWarning("Remaining: " + statusEffect.durationRemaining);
             if (statusEffect.renew)
             {
                 StatusEffect currentStatusEffect = Player.m_localPlayer.GetSEMan().GetStatusEffect(statusEffect.nameHash);
