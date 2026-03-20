@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
+using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
@@ -31,23 +32,68 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Game), "Shutdown")]
-        public static void Shutdown_Postfix()
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Menu), "OnLogoutYes")]
+        public static bool OnLogoutYes_Postfix()
         {
             try
             {
-                TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+                Jotunn.Logger.LogWarning("=== OnLogoutYes ===");
+                TwitchAuth auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
 
-                if (customRewards == null)
-                    return;
+                if (auth == null)
+                    return true;
 
-                ExtraConfigHelper.WriteBannedUsersToFile(customRewards.m_bannedUsers);
-                customRewards.ClearRewards();
+                if (auth.m_loggedIn)
+                {
+                    Jotunn.Logger.LogWarning("Logged in, clearing redeems");
+                    ExtraConfigHelper.WriteBannedUsersToFile(auth.m_customRewards.m_bannedUsers);
+                    auth.LogoutBackToMainMenu();
+                    return false;
+                }
+
+                Jotunn.Logger.LogWarning("NOT logged in, proceed as normal");
+
+                return true;
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not clear rewards on Shutdown_Postfix: " + e);
+                Jotunn.Logger.LogError("Could not clear rewards on OnLogoutYes_Postfix: " + e);
+                return true;
+            }
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Menu), "OnQuitYes")]
+        public static bool OnQuitYes_Prefix(ref Menu __instance)
+        {
+            try
+            {
+                if (__instance == null)
+                    return true;
+
+                TwitchAuth auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
+
+                if (auth == null)
+                    return true;
+
+
+                if (auth.m_loggedIn)
+                {
+                    Jotunn.Logger.LogWarning("Clearing redeems on Quit!");
+                    // __instance.m_quitDialog.transform.gameObject.SetActive(false);
+                    ExtraConfigHelper.WriteBannedUsersToFile(auth.m_customRewards.m_bannedUsers);
+                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Clearing redeems, please wait!", 1000);
+                    auth.LogoutQuitApplication();
+                    return false;
+                }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not clear rewards on OnQuitYes_Prefix: " + e);
+                return true;
             }
         }
 
@@ -276,6 +322,62 @@ namespace WizshBoneTwitchIntegration.Harmony
             {
                 Jotunn.Logger.LogError("Something went wrong in OnCollisionEnter_Prefix: " + e);
                 return true;
+            }
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(TerrainOp), "Awake")]
+        public static bool TerrainOpAwake_Prefix(TerrainOp __instance)
+        {
+            try
+            {
+                if (__instance == null) 
+                    return true;
+
+                if (!__instance.name.Contains("WBTI"))
+                    return true;
+
+                Collider[] objects = Physics.OverlapSphere(Player.m_localPlayer.transform.position, PluginConfig.configRaiseRadius.Value);
+
+                foreach (Collider collider in objects)
+                {
+                    Jotunn.Logger.LogWarning(collider.gameObject.name);
+                    if (collider.gameObject.GetComponentInChildren<TwitchSafeZone>())
+                    {
+                        Jotunn.Logger.LogWarning("IN SAFE ZONE, PREVENT");
+                        UnityEngine.Object.Destroy(__instance.gameObject);
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in TerrainOpAwake_Prefix: " + e);
+                return true;
+            }
+        }
+
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Emote), "DoEmote")]
+        public static void DoEmote_Postfix(Emotes emote)
+        {
+            try
+            {
+                if (emote == Emotes.ComeHere)
+                {
+                    CreatureHelper.SetFollowInRadius(true);
+                }
+                else if (emote == Emotes.NoNoNo)
+                {
+                    CreatureHelper.SetFollowInRadius(false);
+                }
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in DoEmote_Postfix: " + e);
             }
         }
 

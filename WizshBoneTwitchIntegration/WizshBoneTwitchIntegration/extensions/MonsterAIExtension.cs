@@ -9,12 +9,16 @@ namespace WizshBoneTwitchIntegration.Extensions
         public static bool SetFollowPlayer(this MonsterAI monsterAI, GameObject gameObject)
         {
             TwitchCreaturePersistentData persistentCreatureData = monsterAI.gameObject.GetComponent<TwitchCreaturePersistentData>();
+            Tameable tameable = monsterAI.gameObject.GetComponent<Tameable>();
 
-            if (persistentCreatureData != null)
+            if (tameable != null && tameable.IsTamed() && persistentCreatureData != null)
+            {
                 persistentCreatureData.m_isFollowing = gameObject != null ? true : false;
+                monsterAI.m_follow = gameObject;
+                return true;
+            }
 
-            monsterAI.m_follow = gameObject;
-            return true;
+            return false;
         }
 
         public static IEnumerator WakeUpAfterDelay(this MonsterAI monsterAI, float delay)

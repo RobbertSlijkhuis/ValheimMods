@@ -49,7 +49,7 @@ namespace WizshBoneTwitchIntegration.Components
             TwitchCreatureClaim creatureClaim = gameObject.AddComponent<TwitchCreatureClaim>();
             creatureClaim.ReInit(m_name, creatureData);
 
-            ApplyHumanoid(m_name, creatureData.level, creatureData.maxHealth, creatureData.friendly, creatureData.allowDamageStructures, creatureData.rename);
+            ApplyHumanoid(m_name, creatureData.name, creatureData.level, creatureData.maxHealth, creatureData.friendly, creatureData.allowDamageStructures, creatureData.rename);
             ApplyMonsterAI(creatureData.aggravatable, creatureData.mistVision);
             ApplyAllowDrops(creatureData.allowDrops);
             ApplyTameable(creatureData.friendly, creatureData.commandable);
@@ -71,13 +71,15 @@ namespace WizshBoneTwitchIntegration.Components
             m_name = name;
             m_isFollowing = creatureData.commandable;
 
-            ApplyHumanoid(name, creatureData.level, creatureData.maxHealth, creatureData.friendly, creatureData.allowDamageStructures, creatureData.rename);
+            transform.localScale = new Vector3(creatureData.size, creatureData.size, creatureData.size);
+
+            ApplyHumanoid(name, creatureData.name, creatureData.level, creatureData.maxHealth, creatureData.friendly, creatureData.allowDamageStructures, creatureData.rename);
             ApplyMonsterAI(creatureData.aggravatable, creatureData.mistVision);
             ApplyAllowDrops(creatureData.allowDrops);
             ApplyTameable(creatureData.friendly, creatureData.commandable);
         }
 
-        public void ApplyHumanoid(string name, int level, float maxHealth, bool friendly, bool allowDamageStructures, bool rename)
+        public void ApplyHumanoid(string redeemerName, string name, int level, float maxHealth, bool friendly, bool allowDamageStructures, bool rename)
         {
             Humanoid humanoid = gameObject.GetComponent<Humanoid>();
             humanoid.SetLevel(level);
@@ -90,7 +92,7 @@ namespace WizshBoneTwitchIntegration.Components
                 humanoid.m_group = WizshBoneTwitchIntegration.NoDamageStructureGroup;
 
             if (rename)
-                humanoid.m_name = name;
+                humanoid.m_name = name ?? redeemerName;
         }
 
         public void ApplyMonsterAI(bool aggravatable, bool misVision)
@@ -130,7 +132,7 @@ namespace WizshBoneTwitchIntegration.Components
 
         public string CreatureDataToString(CreatureData creatureData)
         {
-            return $"{creatureData.prefabName}|{creatureData.level}|{creatureData.amount}|{creatureData.position}|{creatureData.allowDrops}|{creatureData.friendly}|{creatureData.commandable}|{creatureData.aggravatable}|{creatureData.allowDamageStructures}|{creatureData.maxHealth}|{creatureData.mistVision}|{creatureData.rename}|{creatureData.talks}|{creatureData.talkInteract}|{creatureData.talkInterval}|{creatureData.talkMessage}|{creatureData.isHallucination}";
+            return $"{creatureData.prefabName}|{creatureData.level}|{creatureData.amount}|{creatureData.position}|{creatureData.allowDrops}|{creatureData.friendly}|{creatureData.commandable}|{creatureData.aggravatable}|{creatureData.allowDamageStructures}|{creatureData.maxHealth}|{creatureData.mistVision}|{creatureData.rename}|{creatureData.talks}|{creatureData.talkInteract}|{creatureData.talkInterval}|{creatureData.talkMessage}|{creatureData.isHallucination}|{m_isFollowing}";
         }
 
         public CreatureData StringToCreatureData(string value)
@@ -147,6 +149,7 @@ namespace WizshBoneTwitchIntegration.Components
             creatureData.talkInterval = int.Parse(data[14]);
             creatureData.talkMessage = data[15];
             creatureData.isHallucination = bool.Parse(data[16]);
+            m_isFollowing = bool.Parse(data[17]);
 
             return creatureData;
         }

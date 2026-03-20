@@ -1,12 +1,11 @@
-﻿using Jotunn.Managers;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using TwitchSDK;
 using TwitchSDK.Interop;
 using UnityEngine;
-using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Data;
 using WizshBoneTwitchIntegration.Exceptions;
@@ -27,6 +26,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public bool m_playerIsInSafeZone = false;
         public bool m_enabled = false;
         public string m_alias;
+        public static string m_refundAutoResolveOn;
+        public static string m_refundAutoResolveOff;
 
         public void Awake()
         {
@@ -101,104 +102,72 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 Jotunn.Logger.LogWarning($"Time: {currentRewardEvent.RedeemedAt}");
                 Jotunn.Logger.LogWarning($"Status: {currentRewardEvent.Status}");
 
-                string refundAutoResolveOn = $"Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!";
-                string refundAutoResolveOff = $"Please notify the streamer to refund your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points!";
+                m_refundAutoResolveOn = $"Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!";
+                m_refundAutoResolveOff = $"Please notify the streamer to refund your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points!";
 
                 RedeemEntry redeem = m_redeems.list.Find(item => item.title == currentRewardEvent.CustomRewardTitle);
                 if (redeem == null)
                 {
                     //m_chat.Send($"Could not find redeem! Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!");
                     //throw new RedeemException("Could not find redeem", ExceptionType.Error);
-                    Jotunn.Logger.LogWarning($"Could not find redeem with the name: {currentRewardEvent.CustomRewardTitle}, probaly not part of the mod. Aborting...");
+                    throw new RedeemException($"Could not find redeem with the name: {currentRewardEvent.CustomRewardTitle}, probaly not part of the mod. Aborting...", ExceptionType.Warning);
                 }
 
                 if (m_bannedUsers.Contains(currentRewardEvent.RedeemerName.ToLower()))
-                    throw new RedeemException("Redeemer is banned", ExceptionType.Warning);
+                    throw new RedeemException($"{currentRewardEvent.RedeemerName} is banned", ExceptionType.Warning);
+
+                if (m_playerIsInSafeZone && !redeem.ignoreWard)
+                {
+                    m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is inside a Twitch safe zone! {(PluginConfig.configAutoResolveRedeems.Value ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
+                    throw new RedeemException("Player is in safe zone", ExceptionType.Warning);
+                }
 
                 if (Game.IsPaused() || Menu.IsVisible())
                 {
-                    m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, either the game is currently paused or the streamer is busy in the menu! {(PluginConfig.configAutoResolveRedeems.Value ? refundAutoResolveOn : refundAutoResolveOff)}");
+                    m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, either the game is currently paused or the streamer is busy in the menu! {(PluginConfig.configAutoResolveRedeems.Value ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
                     throw new RedeemException("Game is paused or menu is visible", ExceptionType.Warning);
                 }
 
                 if (Player.m_localPlayer.IsSleeping())
                 {
-                    m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is currently sleeping and can't react! {(PluginConfig.configAutoResolveRedeems.Value ? refundAutoResolveOn : refundAutoResolveOff)}");
+                    m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is currently sleeping and can't react! {(PluginConfig.configAutoResolveRedeems.Value ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
                     throw new RedeemException("Player is sleeping", ExceptionType.Warning);
                 }
 
-                if (m_playerIsInSafeZone && !redeem.ignoreWard)
+                if (Player.m_localPlayer.IsTeleporting())
                 {
-                    m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is inside a Twitch safe zone! {(PluginConfig.configAutoResolveRedeems.Value ? refundAutoResolveOn : refundAutoResolveOff)}");
-                    throw new RedeemException("Player is in safe zone", ExceptionType.Warning);
+                    m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is currently teleporting and can't react! {(PluginConfig.configAutoResolveRedeems.Value ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
+                    throw new RedeemException("Player is teleporting", ExceptionType.Warning);
                 }
 
                 if (Player.m_localPlayer.InInterior())
                 {
-                    string dungeonType = EnvMan.instance.GetCurrentEnvironment().m_name;
                     bool cancelRedeem = false;
 
-                    if (redeem.type == RedeemType.TerrainRemove || redeem.type == RedeemType.SpawnHallucination || redeem.type == RedeemType.SpawnShower)
+                    cancelRedeem = CreatureHelper.CancelRedeemCauseOfDungeon(redeem.creatureData);
+
+                    if (redeem.type == RedeemType.TerrainEdit || redeem.type == RedeemType.SpawnHallucination || redeem.type == RedeemType.SpawnAbility)
                         cancelRedeem = true;
-
-                    if (redeem.creatures != null)
-                    {
-                        List<string> notAllowedList = new List<string>();
-                        notAllowedList.Add("abomination");
-                        notAllowedList.Add("bat");
-                        notAllowedList.Add("bjorn");
-                        notAllowedList.Add("deathsquito");
-                        notAllowedList.Add("gjall");
-                        notAllowedList.Add("goblinbrute");
-                        notAllowedList.Add("golem");
-                        notAllowedList.Add("hatchling");
-                        notAllowedList.Add("lox");
-                        notAllowedList.Add("seekerbrute");
-                        notAllowedList.Add("troll");
-                        notAllowedList.Add("unbjorn");
-
-                        switch (dungeonType)
-                        {
-                            case nameof(DungeonType.FrostCave):
-                            case nameof(DungeonType.HowlingCavern):
-                                notAllowedList.Remove("golem");
-                                break;
-                            case nameof(DungeonType.InfestedMine):
-                                notAllowedList.Remove("seekerbrute");
-                                notAllowedList.Remove("golem");
-                                break;
-                            case nameof(DungeonType.Queen):
-                                notAllowedList.Remove("bat");
-                                notAllowedList.Remove("deathsquito");
-                                notAllowedList.Remove("gjall");
-                                notAllowedList.Remove("golem");
-                                notAllowedList.Remove("seekerbrute");
-                                break;
-                        }
-
-                        foreach (CreatureData creature in redeem.creatures)
-                        {
-                            if (notAllowedList.Contains(creature.prefabName.ToLower()))
-                            {
-                                cancelRedeem = true;
-                                break;
-                            }
-                        }
-                    }
 
                     if (cancelRedeem)
                     {
-                        m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! {(PluginConfig.configAutoResolveRedeems.Value ? refundAutoResolveOn : refundAutoResolveOff)}");
+                        m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! {(PluginConfig.configAutoResolveRedeems.Value ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
                         throw new RedeemException("Player is in dungeon and redeem is not allowed", ExceptionType.Warning);
                     }
                 }
 
                 if (redeem.type == RedeemType.SpawnCreature)
                 {
-                    if (redeem.creatures == null)
+                    if (redeem.creatureData == null)
                         throw new RedeemException("Could not find creature data for SpawnCreature", ExceptionType.Error);
 
-                    foreach (CreatureData creature in redeem.creatures)
+                    if (CreatureHelper.GetNrOfTwitchInstances(PluginConfig.configCreaturesMaxRadius.Value) >= PluginConfig.configCreaturesMaxAmount.Value)
+                    {
+                        m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the maximum spawned creature limit has been reached! {(PluginConfig.configAutoResolveRedeems.Value ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
+                        throw new RedeemException("To many spawned creatures", ExceptionType.Warning);
+                    }
+
+                    foreach (CreatureData creature in redeem.creatureData)
                     {
                         if (!ProgressionHelper.IsAllowedByGlobalKeys(creature.globalKeyAdd, creature.globalKeyRemove))
                             continue;
@@ -207,262 +176,90 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                             creature.talkMessage = m_chat.GetLastMessageOfUser(currentRewardEvent.RedeemerName)?.message;
 
                         if (creature.amount > 0)
-                            RedeemHelper.SpawnCreatures(new SpawnOptions(creature, Player.m_localPlayer.transform, currentRewardEvent, redeem.ignoreWard));
+                            CreatureHelper.SpawnCreatures(creature, Player.m_localPlayer.transform, currentRewardEvent, redeem.ignoreWard);
                     }
                 }
 
                 if (redeem.type == RedeemType.SpawnHallucination)
                 {
-                    RedeemHelper.hallucinationCount = 0;
-                    InvokeRepeating(nameof(StartHallucinations), 0f, 20f);
+                    CreatureHelper.hallucinationCount = 0;
+                    InvokeRepeating(nameof(CreatureHelper.StartHallucinations), 0f, 20f);
                 }
 
-                if (redeem.type == RedeemType.SpawnShower)
+                if (redeem.type == RedeemType.SpawnAbility)
                 {
-                    if (redeem.shower == null)
-                        throw new RedeemException("Could not find shower data for SpawnShower", ExceptionType.Error);
+                    if (redeem.spawnAbilityData == null)
+                        throw new RedeemException("Could not find data for SpawnAbility", ExceptionType.Error);
 
-                    GameObject showerPrefab;
-
-                    if (redeem.shower.prefabName == null)
-                        showerPrefab = WizshBoneTwitchIntegration.Instance.prefabs.FishRainScript;
-                    else
-                        showerPrefab = PrefabManager.Instance.GetPrefab(redeem.shower.prefabName);
-
-                    GameObject shower = Instantiate(showerPrefab, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
-                    SpawnAbility spawnAbility = shower.GetComponent<SpawnAbility>();
-                    shower.transform.SetParent(Player.m_localPlayer.transform);
-
-                    if (spawnAbility == null)
-                        throw new RedeemException("Could not find spawn ability on shower prefab", ExceptionType.Error);
-
-                    spawnAbility.m_setMaxInstancesFromWeaponLevel = false;
-                    spawnAbility.m_maxSummonReached = "You have reached the maximum of spawns";
-
-                    if (redeem.shower.isOwner)
-                        spawnAbility.m_owner = Player.m_localPlayer;
-
-                    if (redeem.shower.accuracy != null)
-                        spawnAbility.m_projectileAccuracy = (float)redeem.shower.accuracy;
-
-                    if (redeem.shower.groundOffset != null)
-                        spawnAbility.m_spawnGroundOffset = (float)redeem.shower.groundOffset;
-
-                    if (redeem.shower.initialSpawnDelay != null)
-                        spawnAbility.m_initialSpawnDelay = (float)redeem.shower.initialSpawnDelay;
-
-                    if (redeem.shower.maxTargetRange != null)
-                        spawnAbility.m_maxTargetRange = (int)redeem.shower.maxTargetRange;
-
-                    if (redeem.shower.maxSpawned != null)
-                        spawnAbility.m_maxSpawned = (int)redeem.shower.maxSpawned;
-
-                    if (redeem.shower.maxToSpawn != null)
-                        spawnAbility.m_maxToSpawn = (int)redeem.shower.maxToSpawn;
-
-                    if (redeem.shower.minToSpawn != null)
-                        spawnAbility.m_minToSpawn = (int)redeem.shower.minToSpawn;
-
-                    if (redeem.shower.randomDirection != null)
-                        spawnAbility.m_randomDirection = (bool)redeem.shower.randomDirection;
-
-                    if (redeem.shower.randomAngleMax != null)
-                        spawnAbility.m_randomAngleMax = (float)redeem.shower.randomAngleMax;
-
-                    if (redeem.shower.randomAngleMin != null)
-                        spawnAbility.m_randomAngleMin = (float)redeem.shower.randomAngleMin;
-
-                    if (redeem.shower.randomYRotation != null)
-                        spawnAbility.m_randomYRotation = (bool)redeem.shower.randomYRotation;
-
-                    if (redeem.shower.spawnDelay != null)
-                        spawnAbility.m_spawnDelay = (float)redeem.shower.spawnDelay;
-
-                    if (redeem.shower.spawnRadius != null)
-                        spawnAbility.m_spawnRadius = (float)redeem.shower.spawnRadius;
-
-                    if (redeem.shower.velocity != null)
-                        spawnAbility.m_projectileVelocity = (float)redeem.shower.velocity;
-
-                    if (redeem.shower.velocityMax != null)
-                        spawnAbility.m_projectileVelocityMax = (float)redeem.shower.velocityMax;
-
-                    if (redeem.shower.spawns != null && redeem.shower.spawns.Count > 0)
-                    {
-                        List<GameObject> spawns = new List<GameObject>();
-
-                        foreach (string spawn in redeem.shower.spawns)
-                        {
-                            GameObject prefab = PrefabManager.Instance.GetPrefab(spawn);
-
-                            if (prefab == null)
-                            {
-                                Jotunn.Logger.LogWarning($"Could not find prefab {spawn} for SpawnAbility, skipping...");
-                                continue;
-                            }
-
-                            spawns.Add(prefab);
-                        }
-
-                        spawnAbility.m_spawnPrefab = spawns.ToArray();
-                    }
-
-                    SpawnAbility.TargetType? targetType = SpawnAbilityTargetType.ConvertToTargetType(redeem.shower.targetType);
-
-                    if (targetType != null)
-                        spawnAbility.m_targetType = (SpawnAbility.TargetType)targetType;
-                    else
-                        Jotunn.Logger.LogWarning("SpawnAbility target type is null");
-
-                    if (redeem.shower.maxSpawned != null && redeem.shower.maxSpawned > 0)
-                    {
-                        foreach (GameObject prefab in spawnAbility.m_spawnPrefab)
-                        {
-                            if (SpawnSystem.GetNrOfInstances(prefab) >= redeem.shower.maxSpawned)
-                            {
-                                m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, there is already a maximum number of spawns! {(PluginConfig.configAutoResolveRedeems.Value ? refundAutoResolveOn : refundAutoResolveOff)}");
-                                throw new RedeemException("Already on max spawned for this redeeem", ExceptionType.Warning);
-                            }
-                        }
-                    }
-
-                    if (redeem.shower.announceMessage != null)
-                        Player.m_localPlayer.Message(MessageHud.MessageType.Center, redeem.shower.announceMessage);
-
-                    CreatureData creatureData = new CreatureData();
-                    StartCoroutine(spawnAbility.Spawn2(currentRewardEvent, redeem.shower, creatureData));
+                    SpawnAbilityHelper.SpawnAbility(redeem.spawnAbilityData, currentRewardEvent, m_chat);
                 }
 
                 if (redeem.type == RedeemType.SpawnMist)
                 {
-                    if (redeem.mist == null)
-                        throw new RedeemException("could not find mist data for SpawnMist", ExceptionType.Error);
+                    if (redeem.mistData == null)
+                        throw new RedeemException("could not find data for SpawnMist", ExceptionType.Error);
 
-                    RedeemHelper.SpawnMist(redeem.mist);
-
-                    if (redeem.mist.announceMessage != null)
-                        Player.m_localPlayer.Message(MessageHud.MessageType.Center, redeem.mist.announceMessage);
+                    MistHelper.SpawnMist(redeem.mistData, currentRewardEvent);
                 }
 
                 if (redeem.type == RedeemType.StatusEffect)
                 {
-                    if (redeem.statusEffects == null || redeem.statusEffects.Count == 0)
+                    if (redeem.statusEffectData == null || redeem.statusEffectData.Count == 0)
                         throw new RedeemException("Could not find a status effect to apply", ExceptionType.Error);
 
-                    TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
-                    List<string> availableStatusEffects = StatusEffectHelper.GetAvailableStatusEffects();
-
-                    foreach (StatusEffectData statusEffect in redeem.statusEffects)
-                    {
-                        statusEffect.Init();
-
-                        if (!availableStatusEffects.Contains(statusEffect.name))
-                        {
-                            Jotunn.Logger.LogWarning("Not a valid status effect to apply, skipping...");
-                            continue;
-                        }
-
-                        if (!statusEffect.renew && Player.m_localPlayer.GetSEMan().HaveStatusEffect(statusEffect.nameHash))
-                        {
-                            m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer already has the {statusEffect.name} StatusEffect! {(PluginConfig.configAutoResolveRedeems.Value ? refundAutoResolveOn : refundAutoResolveOff)}");
-                            throw new RedeemException($"Player already has the {statusEffect.name} status effect", ExceptionType.Warning);
-                        }
-
-                        if (statusEffect.name == "PlayerShrink")
-                        {
-                            Jotunn.Logger.LogWarning("Found shrink");
-                            statusEffect.onStart = customStatusEffect.PlayerShrink;
-                            statusEffect.onEnd = customStatusEffect.PlayerSizeReset;
-                        }
-                        else if (statusEffect.name == "PlayerGrow")
-                        {
-                            Jotunn.Logger.LogWarning("Found grow");
-                            statusEffect.onStart = customStatusEffect.PlayerGrow;
-                            statusEffect.onEnd = customStatusEffect.PlayerSizeReset;
-                        }
-                        else if (statusEffect.name == "WindInBack")
-                        {
-                            Jotunn.Logger.LogWarning("Found WindInback");
-                            statusEffect.onStart = customStatusEffect.WindInTheBack;
-                        }
-
-                        bool success = customStatusEffect.AddStatusEffect(statusEffect);
-                        Jotunn.Logger.LogWarning("AddStatusEffect: " + success);
-                    }
+                    StatusEffectHelper.ApplyStatusEffects(redeem.statusEffectData, currentRewardEvent, m_chat);
                 }
 
                 if (redeem.type == RedeemType.StatusEffectRandom)
                 {
-                    if (redeem.statusEffects == null || redeem.statusEffects.Count == 0)
+                    if (redeem.statusEffectData == null || redeem.statusEffectData.Count == 0)
                         throw new RedeemException("Could not find a status effect to apply", ExceptionType.Error);
 
-                    TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
-                    List<string> availableStatusEffects = StatusEffectHelper.GetAvailableStatusEffects();
-                    StatusEffectData random = StatusEffectHelper.GetRandomStatusEffect(redeem.statusEffects);
-                    random.Init();
-
-                    if (!availableStatusEffects.Contains(random.name))
-                    {
-                        Jotunn.Logger.LogWarning("Not a valid status effect to apply, skipping...");
-                        throw new RedeemException($"{random.name} is not a valid status effect", ExceptionType.Warning);
-                    }
-
-                    if (!random.renew && Player.m_localPlayer.GetSEMan().HaveStatusEffect(random.nameHash))
-                    {
-                        m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer already has the {random.name} StatusEffect! {(PluginConfig.configAutoResolveRedeems.Value ? refundAutoResolveOn : refundAutoResolveOff)}");
-                        throw new RedeemException($"Player already has the {random.name} status effect", ExceptionType.Warning);
-                    }
-
-                    if (random.name == "PlayerShrink")
-                    {
-                        Jotunn.Logger.LogWarning("Found shrink");
-                        random.onStart = customStatusEffect.PlayerShrink;
-                        random.onEnd = customStatusEffect.PlayerSizeReset;
-                    }
-                    else if (random.name == "PlayerGrow")
-                    {
-                        Jotunn.Logger.LogWarning("Found grow");
-                        random.onStart = customStatusEffect.PlayerGrow;
-                        random.onEnd = customStatusEffect.PlayerSizeReset;
-                    }
-                    else if (random.name == "WindInBack")
-                    {
-                        Jotunn.Logger.LogWarning("Found WindInback");
-                        random.onStart = customStatusEffect.WindInTheBack;
-                    }
-
-                    bool success = customStatusEffect.AddStatusEffect(random);
-                    Jotunn.Logger.LogWarning("AddRandomStatusEffect: " + success);
+                    StatusEffectHelper.ApplyRandomStatusEffects(redeem.statusEffectData, currentRewardEvent, m_chat);
                 }
 
                 if (redeem.type == RedeemType.SurpriseChest)
                 {
-                    if (redeem.chest == null)
+                    if (redeem.chestData == null)
                     {
                         throw new RedeemException("Could not find chest data for SurpriseChest", ExceptionType.Error);
                     }
 
                     GameObject chestPrefab = WizshBoneTwitchIntegration.Instance.prefabs.ChestIron;
 
-                    if (redeem.chest.type == ChestType.Gold)
+                    if (redeem.chestData.type == ChestType.Gold)
                         chestPrefab = WizshBoneTwitchIntegration.Instance.prefabs.ChestGold;
 
-                    if (redeem.chest.announceMessage != null)
-                        Player.m_localPlayer.Message(MessageHud.MessageType.Center, redeem.chest.announceMessage);
+                    if (redeem.chestData.announceMessage != null)
+                        Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", currentRewardEvent.RedeemerName, redeem.chestData.announceMessage));
 
-                    StartCoroutine(InitSurpriseChestWithDelay(chestPrefab, redeem.chest, currentRewardEvent));
+                    StartCoroutine(InitSurpriseChestWithDelay(chestPrefab, redeem.chestData, currentRewardEvent));
                 }
 
-                if (redeem.type == RedeemType.TerrainRemove)
+                if (redeem.type == RedeemType.TerrainEdit)
                 {
                     Player.m_localPlayer.GetSEMan().AddStatusEffect(WizshBoneTwitchIntegration.Instance.effects.NoFallDamage);
                     GameObject dig = Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.RemoveTheCountry, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
                 }
 
-                if (redeem.type == RedeemType.ExplodeFish)
+                if (redeem.type == RedeemType.FlashBang)
                 {
-                    RedeemHelper.DetonateFish();
-                    Invoke(nameof(DestroyFish), 0.5f);
+                    if (redeem.flashbangData == null)
+                    {
+                        throw new RedeemException("Could not find data for flashbang", ExceptionType.Error);
+                    }
+
+                    StartCoroutine(FlashBangHelper.AttachFlashBang(redeem.flashbangData));
+                }
+
+                if (redeem.type == RedeemType.Detonate)
+                {
+                    if (redeem.detonateData == null)
+                    {
+                        throw new RedeemException("Could not find data for detonate", ExceptionType.Error);
+                    }
+
+                    DetonateHelper.DetonateFish(redeem.detonateData);
                 }
 
                 if (PluginConfig.configAutoResolveRedeems.Value)
@@ -492,47 +289,27 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
         }
 
-        private void StartHallucinations()
-        {
-            if (RedeemHelper.hallucinationCount > 6)
-                CancelInvoke(nameof(StartHallucinations));
-            else
-                RedeemHelper.SpawnHallucination();
-        }
-
-        private void DestroyFish()
-        {
-            foreach (GameObject fish in RedeemHelper.fishList)
-            {
-                ZNetView netView = fish.GetComponent<ZNetView>();
-                netView.Destroy();
-                Destroy(fish);
-            }
-
-            RedeemHelper.fishList.Clear();
-        }
-
-        public IEnumerator InitSurpriseChestWithDelay(GameObject prefab, SurpriseChestData chestData, CustomRewardEvent currentRewardEvent)
+        public IEnumerator InitSurpriseChestWithDelay(GameObject prefab, SurpriseChestData chestData, CustomRewardEvent customRewardEvent)
         {
             yield return new WaitForSeconds(3f);
 
             if (m_playerIsInSafeZone)
             {
                 WizshBoneTwitchIntegration.useRedeemCommand = true;
-                string refundAutoResolveOn = $"Your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points has been refunded!";
-                string refundAutoResolveOff = $"Please notify the streamer to refund your redeem {currentRewardEvent.CustomRewardTitle} of {currentRewardEvent.CustomRewardCost} points!";
+                string refundAutoResolveOn = $"Your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points has been refunded!";
+                string refundAutoResolveOff = $"Please notify the streamer to refund your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points!";
 
-                m_chat.Send($"Sorry @{currentRewardEvent.RedeemerName}, the streamer is inside a Twitch safe zone! {(PluginConfig.configAutoResolveRedeems.Value ? refundAutoResolveOn : refundAutoResolveOff)}");
+                m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a Twitch safe zone! {(PluginConfig.configAutoResolveRedeems.Value ? refundAutoResolveOn : refundAutoResolveOff)}");
 
                 if (PluginConfig.configAutoResolveRedeems.Value)
                 {
-                    Twitch.API.ResolveCustomReward(currentRewardEvent, CustomRewardRedemptionState.Canceled);
+                    Twitch.API.ResolveCustomReward(customRewardEvent, CustomRewardRedemptionState.Canceled);
                 }
                 WizshBoneTwitchIntegration.useRedeemCommand = false;
             }
             else
             {
-                RedeemHelper.SpawnSupriseChest(prefab, chestData);
+                RedeemHelper.SpawnSupriseChest(prefab, chestData, customRewardEvent);
             }
         }
 
@@ -565,14 +342,12 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             Twitch.API.ReplaceCustomRewards(listRewards.ToArray());
         }
 
-        public async void ClearRewards(bool applicationQuit = false)
+        public TaskAwaiter ClearRewards()
         {
             Jotunn.Logger.LogWarning("ClearRewards()");
             List<CustomRewardDefinition> list = new List<CustomRewardDefinition>();
-            await Twitch.API.ReplaceCustomRewards(list.ToArray());
-
-            if (applicationQuit)
-                Invoke(nameof(Quit), 10f);
+            GameTask gameTask = Twitch.API.ReplaceCustomRewards(list.ToArray());
+            return gameTask.GetAwaiter();
         }
 
         public bool ReloadRewards()
@@ -583,12 +358,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 SetRewards();
 
             return result;
-        }
-
-        private void Quit()
-        {
-            Jotunn.Logger.LogWarning("Quitting NOW!");
-            Application.Quit();
         }
 
         public string ToRFC3339String(DateTime dateTime)

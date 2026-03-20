@@ -7,26 +7,28 @@ namespace WizshBoneTwitchIntegration.Models
     {
         public string backgroundColor = "#a970ff";
         public int cooldown = 0;
-        public SurpriseChestData chest = new SurpriseChestData();
-        public List<CreatureData> creatures = new List<CreatureData>();
+        public SurpriseChestData chestData = new SurpriseChestData();
+        public List<CreatureData> creatureData = new List<CreatureData>();
+        public DetonateData detonateData = new DetonateData();
+        public FlashBangData flashbangData = new FlashBangData();
         public string globalKeyAdd = "";
         public string globalKeyRemove = "";
         public bool ignoreWard = false;
-        public MistData mist = new MistData();
+        public MistData mistData = new MistData();
         public int points = 0;
-        public SpawnAbilityData shower = new SpawnAbilityData();
-        public List<StatusEffectData> statusEffects = new List<StatusEffectData>();
+        public SpawnAbilityData spawnAbilityData = new SpawnAbilityData();
+        public List<StatusEffectData> statusEffectData = new List<StatusEffectData>();
         public string title = "";
         public string type = RedeemType.Undefined;
         public bool userInput = false;
 
         public RedeemEntry() { }
 
-        public RedeemEntry(string type, string title, int points, string backgroundColor, int cooldown = 0, bool userInput = false, string globalKeyAdd = null, string globalKeyRemove = null, List<CreatureData> creatures = null)
+        public RedeemEntry(string type, string title, int points, string backgroundColor, int cooldown = 0, bool userInput = false, string globalKeyAdd = null, string globalKeyRemove = null, List<CreatureData> creatureData = null)
         {
             this.backgroundColor = backgroundColor;
             this.cooldown = cooldown;
-            this.creatures = creatures;
+            this.creatureData = creatureData;
             this.globalKeyAdd = globalKeyAdd;
             this.globalKeyRemove = globalKeyRemove;
             this.points = points;

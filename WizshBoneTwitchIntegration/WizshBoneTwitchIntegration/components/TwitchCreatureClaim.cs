@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
@@ -34,23 +35,23 @@ namespace WizshBoneTwitchIntegration.Components
             }
         }
 
-        public void Init(SpawnOptions options)
+        public void Init(CreatureData creatureData, CustomRewardEvent customRewardEvent, bool ignoreWard)
         {
-            if (options == null)
+            if (creatureData == null || customRewardEvent == null)
             {
                 Jotunn.Logger.LogWarning("Cannot assign a user to this creature claim, options is null");
                 return;
             }
 
             m_isSpawn = true;
-            m_assignment = new TwitchCreatureAssignment(options.customReward.RedeemerName, gameObject);
+            m_assignment = new TwitchCreatureAssignment(customRewardEvent.RedeemerName, gameObject);
             m_originalName = m_humanoid.m_name;
 
             TwitchCreaturePersistentData persistentData = gameObject.GetComponent<TwitchCreaturePersistentData>();
-            persistentData.SetData(m_assignment.userName, options.creatureData, options.ignoreWard);
+            persistentData.SetData(m_assignment.userName, creatureData, ignoreWard);
 
             m_chatting.AddCreatureAssignment(m_assignment);
-            SetupNpcTalk(options.creatureData);
+            SetupNpcTalk(creatureData);
             InvokeRepeating(nameof(CheckChatForMessage), 0f, 3f);
         }
 

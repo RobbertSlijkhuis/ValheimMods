@@ -26,6 +26,7 @@ namespace WizshBoneTwitchIntegration.Models
         public float? randomAngleMax;
         public float? randomAngleMin;
         public bool? randomYRotation;
+        public bool rescanForSafezones = true;
         public bool snapToterrain = false;
         public float? spawnDelay;
         public float? spawnRadius;

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Runtime.CompilerServices;
 using TwitchSDK;
 using TwitchSDK.Interop;
 using UnityEngine;
@@ -11,7 +13,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
     internal class TwitchAuth : MonoBehaviour
     {
         private TwitchChat m_chat;
-        private TwitchCustomRewards m_customRewards;
+        public TwitchCustomRewards m_customRewards;
         private GameTask<AuthenticationInfo> m_authInfo;
         private GameTask<AuthState> m_authState;
         private string m_scopes = $"{TwitchOAuthScope.Bits.Read.Scope} {TwitchOAuthScope.Channel.ManageRedemptions.Scope} {TwitchOAuthScope.User.ReadSubscriptions.Scope}";
@@ -75,6 +77,10 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 m_chat.Connect();
                 m_customRewards.SubscribeToRedeemEvents();
+
+                if (PluginConfig.configEnableRedeemsOnLogin.Value)
+                    m_customRewards.SetEnableRedeems(true);
+
                 wizshBoneGUI.UpdateGUI();
                 CancelInvoke(nameof(InitLoginProcess));
                 InvokeRepeating(nameof(TrackAuthRepeating), 0, 60f);
@@ -93,19 +99,19 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             Jotunn.Logger.LogWarning(timeSpan.TotalMinutes);
 
             if (timeSpan.TotalMinutes > m_logOutTime)
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "You are about to be logged out from Twitch, do you want to refresh login?", 10);
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "You will be logged out from Twitch in 15 minutes!", 10);
 
-            //StartCoroutine(TrackAuthState());
+            StartCoroutine(TrackAuthState());
         }
 
-        //public IEnumerator TrackAuthState()
-        //{
-        //    GetBitsLeaderboard();
+        public IEnumerator TrackAuthState()
+        {
+            GetBitsLeaderboard();
 
-        //    yield return new WaitForSeconds(5f);
+            yield return new WaitForSeconds(5f);
 
-        //    GetAuthState();
-        //}
+            GetAuthState();
+        }
 
         public void GetAuthState()
         {
@@ -129,10 +135,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     m_loggedinInTime = DateTime.Now;
                     m_loggedIn = true;
                     m_waitingForCode = false;
-
-                    if (PluginConfig.configEnableRedeemsOnLogin.Value)
-                        m_customRewards.SetEnableRedeems(true);
-
                     wizshBoneGUI.UpdateGUI();
                     return;
                 }
@@ -146,10 +148,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     m_waitingForCode = false;
                     m_authInfo = null;
                     m_userInfo = null;
-                    m_customRewards.SetEnableRedeems(false);
                     wizshBoneGUI.UpdateGUI();
-
-                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, "YOU ARE NO LONGER LOGGED IN INTO TWITCH!", 3);
                     return;
                 }
 
@@ -208,10 +207,43 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void Logout()
         {
-            Twitch.API.LogOut();
+            m_customRewards.ClearRewards();
             m_customRewards.UnSubscribeFromRedeemEvents();
-            GetAuthState();
+
+            Twitch.API.LogOut();
             CancelInvoke(nameof(TrackAuthRepeating));
+            GetAuthState();
+        }
+
+        public void LogoutBackToMainMenu()
+        {
+            TaskAwaiter awaiter = m_customRewards.ClearRewards();
+            awaiter.OnCompleted(OnLogoutBackToMainMenu);
+        }
+
+        private void OnLogoutBackToMainMenu()
+        {
+            Twitch.API.LogOut();
+            CancelInvoke(nameof(TrackAuthRepeating));
+            GetAuthState();
+            Jotunn.Logger.LogWarning("Logged out.., recalling: OnLogoutYes");
+            Menu.instance.OnLogoutYes();
+        }
+
+        public void LogoutQuitApplication()
+        {
+            TaskAwaiter awaiter = m_customRewards.ClearRewards();
+            awaiter.OnCompleted(ShowQuitMessage);
+        }
+
+        public void ShowQuitMessage()
+        {
+            Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Quiting game now...", 10);
+            Twitch.API.LogOut();
+            CancelInvoke(nameof(TrackAuthRepeating));
+            GetAuthState();
+            Jotunn.Logger.LogWarning("Logged out.., recalling: OnQuitYes");
+            Menu.instance.OnQuitYes();
         }
 
         public void GetBitsLeaderboard()

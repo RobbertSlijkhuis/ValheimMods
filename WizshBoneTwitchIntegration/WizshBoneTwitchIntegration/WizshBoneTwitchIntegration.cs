@@ -196,6 +196,11 @@ namespace WizshBoneTwitchIntegration
                 }
             }
 
+            IndestructibleHelper.SetBoats(PluginConfig.configIndestructibleBoats.Value);
+            IndestructibleHelper.SetChests(PluginConfig.configIndestructibleChests.Value);
+            IndestructibleHelper.SetPortals(PluginConfig.configIndestructiblePortals.Value);
+            IndestructibleHelper.SetVegetables(PluginConfig.configIndestructibleVegetables.Value);
+
             string[] traders = new string[3] { "Vendor_BlackForest", "Hildir_camp", "BogWitch_Camp" };
 
             foreach (string name in traders)
@@ -275,6 +280,7 @@ namespace WizshBoneTwitchIntegration
             CommandManager.Instance.AddConsoleCommand(new BanTwitchUserCommand());
             CommandManager.Instance.AddConsoleCommand(new ClearBossKeysCommand());
             CommandManager.Instance.AddConsoleCommand(new ClearCustomStatusEffectsCommand());
+            //CommandManager.Instance.AddConsoleCommand(new ClearFlashbangCommand());
             CommandManager.Instance.AddConsoleCommand(new ListBannedTwitchUsers());
             CommandManager.Instance.AddConsoleCommand(new OpenConfigFolderCommand());
             CommandManager.Instance.AddConsoleCommand(new ReloadRedeemsCommand());
@@ -296,6 +302,7 @@ namespace WizshBoneTwitchIntegration
 
             prefabs.DetectFish = assetBundle.LoadAsset<GameObject>("Detect_Fish_WBTI");
             prefabs.FishRainScript = assetBundle.LoadAsset<GameObject>("spawn_fish_WBTI");
+            prefabs.Flashbang = assetBundle.LoadAsset<GameObject>("Flashbang_WBTI");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.FishRainScript, true));
             prefabs.GuardStone = assetBundle.LoadAsset<GameObject>("WBTI_guard_stone");
             prefabs.RemoveTheCountry = assetBundle.LoadAsset<GameObject>("RemoveTheCountry_WBTI");
@@ -336,30 +343,75 @@ namespace WizshBoneTwitchIntegration
             materials.RecolorWraithZebra = assetBundle.LoadAsset<Material>("Wraith_recolor_zebra_WBTI");
 
             // ====================================
+            // ValCON:
+            // ====================================
+            // Setup Twitch integration for a tower defense game? Section of the stream.
+            // Add a nuke all creatures command/redeem? Kills all creatures and refunds points
+            // Setup different types of surprise chests liked food, creatures, materials? and streamer doesnt know content
+
+            // ====================================
             // TODO:
             // ====================================
-            // Add CreatureData to SpawnAbility/SurpriseChests
-            // Add new SpawnItem method with quality and stack amount etc. Also add this to SpawnAbility/SurpriseChests
-
-            // Shrink/Grow cancel each other out
+            // Redeems still re-enabling when supose to be disabled
+            // Add options to allow monsters to fight each other
+            // Greydwarfds friendlies do no attack enemy greyfwards
             // Add limit of how much the mob can be active on one time
-            // Add a redeem that can boost boat speed
+            // Add name option to creatureData (ZDO)
+            // Add size option to creatureData (ZDO)
+            // Save/load recolors from a file
+            // Shrink/Grow cancel each other out
             // Shrink/grow the boat when player is sailing
+            // Reset redeem cooldown somehow when something went wrong? Update CustomRewards?
+            // Add internal user/global cooldown functionality cause Twitch's is DODGY AF
+
+            // Add CreatureData and ItemData to SpawnAbility
             // Make safezones square (option)
-            // Prevent wolfs/fenrings from howling all the time as a setting
-            // Log creatures dieing from safezone
-            // Roots (enemy/friendly)
-            // TalkInteract always show Feo's history fact message, also does not properly show follow/rename creature
             // Armor and shield don't get thrown out very far out of suprise chests
+            // Boat speed redeem, positive and negative
+            // Roots (enemy/friendly) redeem
             // Reverse controlls redeem
             // Temp naked redeem
-            // Remove/add redeems when player leaves/enters a dungeon and check what kind of dungeon the player is in
+            // Spawn items redeem
+            // Change weather/tod redeem
+            // Drop all equipment/inventory redeem
+            // Multiplayer execute redeem for all players
             // Add leader board of points spend, deaths caused, saves maybe? Other statistics?
-            // Make certain creatures smaller in dungeons so they be spawned
-            //
+
+            // TalkInteract always show Feo's history fact message, also does not properly show follow/rename creature
+            // Log creatures dieing from safezone
+            // Prevent wolfs/fenrings from howling all the time as helpers
+
+            // ====================================
+            // IDEAS:
+            // ====================================
+            // Allow redeemers to give specific item
+            // Allow redeemers to choose the surprise for surprise chests
+            // Timeout redeemers as a chance when redeeming surprise chests
+            // Remove/add redeems when player leaves/enters a dungeon and check what kind of dungeon the player is in
+            // Make certain creatures smaller in dungeons so they can be spawned
+            // More loot if mob is grown?
+            // LoyalBones: A red skeleton with normal damage but insane health pool
+            // Chat loves this: Spawn chest with cheese (random food?) Make cheese wheel that gives random food?".
+            // Add a way to be able to find spanwed creature. For the kill all spawned rule!
+            // Drunk blur effect?
+            // Disable all twitchy wards via bits (specific amount like 1000)
+            // Add commands for claimed creatures to do things (flee, stop, attack player/base, activate specific attack, emote?)
+            // Add options to super charge a spawned creature, more hp, damage, equip gear?
+
             // ====================================
             // IN PROGRESS:
             // ====================================
+            // DONE: Add a mass follow/unfollow method
+            // DONE: Sausage rain for Bearded
+            // DONE: Fix starred mobs recolors
+            // DONE: Add options to make portals/chests industructable
+            // DONE: Safezones don't allow hoe actions
+            // DONE: Allow messages to parse variables like RedeemerName
+            // DONE: Bug: thou shall be smited used in dungeon
+            // DONE: Remove redeems on logout/quit
+            // DONE: Added CreatureData and ItemData to Surprise chests
+            // DONE: Cancel redeem when player is teleporting
+            // DONE: Add globalkey add/remove to creatures
             // DONE: Surprise chest map marker not dissapearing automaticly correctly
             // DONE: Don't refresh timer of buffs under 5 seconds to prevent endless buff bugg
             // DONE: Wake up mosnter programmaticly so they engange straight away
@@ -385,23 +437,8 @@ namespace WizshBoneTwitchIntegration
             // DONE: Add configurable timers to status effect, persist through death, renew
             // DONE: Mod says it refunded stuff from a custom redeem, should not do that.
             // Wind in back (moder) and reverse redeem
-            // Remove redeems on game quit
             // Add halucinations, make player stunned/dazed when getting hit by Hallucinations? Or half damage?
             // Suprise chests, multiple chests to gamble, add a mimic to bite the opener (add legs like the luggage from terry pratchett's novel
-            //
-            // ====================================
-            // IDEAS:
-            // ====================================
-            // MORE POSITIVE EFFECTS
-            // More loot if mob is grown?
-            // LoyalBones: A red skeleton with normal damage but insane health pool
-            // Chat loves this: Spawn chest with cheese (random food?) Make cheese wheel that gives random food?".
-            // Add a way to be able to find spanwed creature. For the kill all spawned rule!
-            // Drunk blur effect?
-            // Flashbang?
-            // Disable all twitchy wards via bits (specific amount like 1000)
-            // Add commands for claimed creatures to do things (flee, stop, attack player/base, activate specific attack, emote?)
-            // Add options to super charge a spawned creature, more hp, damage, equip gear?
 
             // Add references to friends, streamers, viewers in a seperate mod. Like I did with troll Betuti line
             // - DeathWizsh the Raven landing on streamers shoulder saying "There is a mod for that" every time someone says that in chat
@@ -435,6 +472,7 @@ namespace WizshBoneTwitchIntegration
             // - lock inventory slots so putting all in inventory does not touch it
             // - square cultivator/hoe mod (no circle editing) with range scroll
             // - Mist control mod, add demister to shield gen and configurable range for wisp light/torches and maybe even remove all mist
+            // - Beewax mod that allows you to put wax on wood to protect against water dammage. Mix it with other things to creat colors as well
         }
     }
 }

@@ -9,9 +9,10 @@ namespace WizshBoneTwitchIntegration.Models
         public string announceMessage;
         public float force = 200f;
         public bool interact = true;
-        public List<string> items = new List<string>();
+        public List<SurpriseChestSpawnData> items = new List<SurpriseChestSpawnData>();
         public int mimicChance = 0;
         public bool random = true;
+        public string redeemTitle;
         public float spawnDelay = 0.7f;
         public string type = ChestType.Iron;
         public int yeetChance = 0;

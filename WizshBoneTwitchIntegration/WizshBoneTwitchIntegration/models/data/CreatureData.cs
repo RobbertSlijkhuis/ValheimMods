@@ -4,6 +4,7 @@ namespace WizshBoneTwitchIntegration.Models
 {
     internal class CreatureData
     {
+        public string announceMessage;
         public bool aggravatable = false;
         public bool allowDrops = false;
         public bool allowDamageStructures = true;
@@ -16,6 +17,7 @@ namespace WizshBoneTwitchIntegration.Models
         public int level = 1;
         public float maxHealth = 0;
         public bool mistVision = true;
+        public string name;
         public string prefabName;
         public string position = SpawnPositionType.OnPlayer;
         public PositionOffsetData positionOffset = new PositionOffsetData();
@@ -24,6 +26,7 @@ namespace WizshBoneTwitchIntegration.Models
         public int talkInterval = 0;
         public string talkMessage;
         public bool talks = false;
+        public float size = 1f;
 
         public CreatureData() { }
 

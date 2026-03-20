@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 1439499108
+CRC: 3756512585
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 3dc652ffd64211c5a966b7a0d618de88
+    Hash: 81c303553470b11759a937ea1054b6c3
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 26d2a9d9756f5ad66792c4f79f5b9075
+    Hash: 2c4cea50917af293e332106395f75782
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 3dc652ffd64211c5a966b7a0d618de88
+    Hash: 81c303553470b11759a937ea1054b6c3
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -36,6 +36,10 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 74
   Script: {instanceID: 0}
+- Class: 82
+  Script: {instanceID: 0}
+- Class: 83
+  Script: {instanceID: 0}
 - Class: 90
   Script: {instanceID: 0}
 - Class: 91
@@ -50,6 +54,10 @@ ClassTypes:
   Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
 - Class: 114
   Script: {fileID: 1137906148, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -79,7 +87,11 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 788646874, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: 313648218, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: -917656959, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
 - Class: 115
   Script: {instanceID: 0}
 - Class: 134
@@ -96,7 +108,25 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 213
   Script: {instanceID: 0}
+- Class: 222
+  Script: {instanceID: 0}
+- Class: 223
+  Script: {instanceID: 0}
+- Class: 224
+  Script: {instanceID: 0}
+- Class: 225
+  Script: {instanceID: 0}
+- Class: 241
+  Script: {instanceID: 0}
+- Class: 243
+  Script: {instanceID: 0}
+- Class: 245
+  Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers:
+- AssemblyName: UnityEngine.CoreModule
+  ClassName: UnityEngine.Events.PersistentCallGroup
+- AssemblyName: UnityEngine.UI
+  ClassName: UnityEngine.UI.MaskableGraphic/CullStateChangedEvent
 - AssemblyName: assembly_valheim
   ClassName: CharacterDrop/Drop
 - AssemblyName: assembly_valheim
@@ -129,6 +159,7 @@ Assets:
 - Assets/Custom/Monobehaviour/Burning_WBTI.asset
 - Assets/Custom/Texture2D/Creatures/Draugr/Draugr_Elite_recolor_WBTI.mat
 - Assets/Custom/PrefabInstance/FeoTheHistorian_WBTI.prefab
+- Assets/Custom/PrefabInstance/Flashbang_WBTI.prefab
 - Assets/Custom/Texture2D/Creatures/Wraith/Wraith_recolor_WBTI.mat
 - Assets/Custom/Texture2D/Creatures/Greydwarf/Greydwarf_recolor_WBTI.mat
 - Assets/Custom/Texture2D/Creatures/Bjorn/Bjorn_recolor_WBTI.mat

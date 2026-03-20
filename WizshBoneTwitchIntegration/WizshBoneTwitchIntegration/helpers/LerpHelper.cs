@@ -69,6 +69,51 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
         }
 
+        public static IEnumerator LerpLight(Light light, float from, float to, float duration)
+        {
+            float timestep = 0;
+
+            while (timestep <= duration)
+            {
+                timestep = timestep + Time.deltaTime;
+                float step = Mathf.Clamp01(timestep / duration);
+                float result = Mathf.Lerp(from, to, step);
+                light.intensity = result;
+                Jotunn.Logger.LogWarning(result);
+                yield return null;
+            }
+        }
+
+        public static IEnumerator LerpLightFlicker(LightFlicker light, float from, float to, float duration)
+        {
+            float timestep = 0;
+
+            while (timestep <= duration)
+            {
+                timestep = timestep + Time.deltaTime;
+                float step = Mathf.Clamp01(timestep / duration);
+                float result = Mathf.Lerp(from, to, step);
+                light.m_flickerIntensity = result;
+                Jotunn.Logger.LogWarning(result);
+                yield return null;
+            }
+        }
+
+        public static IEnumerator LerpCanvasGroup(CanvasGroup canvasGroup, float from, float to, float duration)
+        {
+            float timestep = 0;
+
+            while (timestep <= duration)
+            {
+                timestep = timestep + Time.deltaTime;
+                float step = Mathf.Clamp01(timestep / duration);
+                float result = Mathf.Lerp(from, to, step);
+                canvasGroup.alpha = result;
+                Jotunn.Logger.LogWarning(result);
+                yield return null;
+            }
+        }
+
         public static Vector3 RandomPosition(Vector3 start, float min, float max)
         {
             Vector3 end = new Vector3(start.x, start.y, start.z);

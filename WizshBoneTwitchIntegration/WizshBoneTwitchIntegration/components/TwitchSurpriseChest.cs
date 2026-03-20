@@ -1,7 +1,7 @@
 ﻿using Jotunn.Managers;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
@@ -12,10 +12,12 @@ namespace WizshBoneTwitchIntegration.Components
     {
         ZNetView m_netView;
         private readonly int chestDataHash = "SurpriseChestData_WBTI".GetStableHashCode();
+        private readonly int chestRedeemDataHash = "SurpriseChestRedeemData_WBTI".GetStableHashCode();
 
+        private string m_redeemTitle;
+        private string m_redeemerName;
         private int m_amount;
         private float m_force;
-        private List<string> m_items = new List<string>();
         private float m_openDelay = 1.5f;
         private bool m_mimic;
         private bool m_random;
@@ -71,16 +73,28 @@ namespace WizshBoneTwitchIntegration.Components
                 return;
             }
 
-            string dataString = m_netView.GetZDO().GetString(chestDataHash, "");
+            string chestDataString = m_netView.GetZDO().GetString(chestDataHash, "");
 
-            if (dataString == "")
+            if (chestDataString == "")
                 return;
 
-            SurpriseChestData chestData = StringToChestData(dataString);
+            string chestRedeemDataString = m_netView.GetZDO().GetString(chestRedeemDataHash, "");
+
+            if (chestDataString == "")
+            {
+                Jotunn.Logger.LogError("Could not find corresponding redeem data for this chest!");
+                return;
+            }
+
+            string[] chestRedeemData = chestRedeemDataString.Split('|');
+            Jotunn.Logger.LogWarning("Retrieved Surprise Chest persitent data! " + chestRedeemData[0] + ", " + chestRedeemData[1]);
+
+            SurpriseChestData chestData = StringToChestData(chestDataString);
+            m_redeemerName = chestRedeemData[0];
+            m_redeemTitle = chestRedeemData[1];
             m_amount = chestData.amount;
             m_force = chestData.force;
             m_interact = chestData.interact;
-            m_items = chestData.items;
             m_mimic = chestData.mimicChance == 0 ? false : Random.Range(0, 100) <= chestData.mimicChance;
             m_random = chestData.random;
             m_spawnDelay = chestData.spawnDelay;
@@ -88,13 +102,14 @@ namespace WizshBoneTwitchIntegration.Components
             m_yeetChance = chestData.yeetChance;
         }
 
-        public void Init(SurpriseChestData chestData)
+        public void Init(SurpriseChestData chestData, CustomRewardEvent customRewardEvent)
         {
+            m_redeemerName = customRewardEvent.RedeemerName;
+            m_redeemTitle = customRewardEvent.CustomRewardTitle;
             //m_amount = chestData.amount > 5 ? 5 : chestData.amount < 1 ? 1 : chestData.amount;
             m_amount = chestData.amount;
             m_force = chestData.force;
             m_interact = chestData.interact;
-            m_items = chestData.items;
             m_mimic = chestData.mimicChance == 0 ? false : Random.Range(0, 100) <= chestData.mimicChance;
             m_random = chestData.random;
             m_spawnDelay = chestData.spawnDelay;
@@ -104,6 +119,7 @@ namespace WizshBoneTwitchIntegration.Components
             Minimap.instance.DiscoverLocation(transform.localPosition, Minimap.PinType.Icon3, "Surprise Chest", false);
 
             m_netView.GetZDO().Set(chestDataHash, ChestDataToString(chestData));
+            m_netView.GetZDO().Set(chestRedeemDataHash, $"{m_redeemerName}|{m_redeemTitle}");
 
             TriggerStartEffects();
 
@@ -130,25 +146,32 @@ namespace WizshBoneTwitchIntegration.Components
             try
             {
                 float timeOffset = 0f;
+                List<SurpriseChestSpawnData> spawnList = RedeemHelper.GetSurpriseChestSpawnDataByTitle(m_redeemTitle);
+
+                if (spawnList == null)
+                {
+                    Jotunn.Logger.LogError("Spawn list is null");
+                    return;
+                }
 
                 if (!m_random)
-                    m_amount = m_items.Count;
+                    m_amount = spawnList.Count;
 
                 for (int index = 0; index < m_amount; index++)
                 {
                     float angleChange = ChangeAngleByIndex(index);
                     float force = m_force;
-                    string item;
+                    SurpriseChestSpawnData spawnData;
 
                     if (m_random)
-                        item = m_items[Random.Range(0, m_items.Count)];
+                        spawnData = spawnList[Random.Range(0, spawnList.Count)];
                     else
-                        item = m_items[index];
+                        spawnData = spawnList[index];
 
                     if (m_yeetChance > 0 && Random.Range(0, 100) <= m_yeetChance)
                         force = 1000f;
 
-                    StartCoroutine(SpawnItem(item, force, angleChange, timeOffset));
+                    StartCoroutine(SpawnItem(spawnData, force, angleChange, timeOffset));
                     timeOffset += m_spawnDelay;
                 }
 
@@ -162,81 +185,27 @@ namespace WizshBoneTwitchIntegration.Components
             }
         }
 
-        private IEnumerator SpawnItem(string prefabName, float force, float deviation, float delay)
+        private IEnumerator SpawnItem(SurpriseChestSpawnData spawnData, float force, float deviation, float delay)
         {
             yield return new WaitForSeconds(delay);
 
             Transform spawnPointTrans = transform.Find("spawnpoint");
             spawnPointTrans.Rotate(Vector3.up, deviation);
 
-            //if (item.creatures != null)
-            //{
-            //    foreach (CreatureData creature in item.creatures)
-            //    {
-            //        if (!ProgressionHelper.IsAllowedByGlobalKeys(creature.globalKeyAdd, creature.globalKeyRemove))
-            //            continue;
-
-            //        if (creature.amount > 0)
-            //            RedeemHelper.SpawnCreatures(new SpawnOptions(creature, Player.m_localPlayer.transform, m_currentRewardEvent, false));
-            //    }
-            //}
-
-            //if (item.ItemData != null)
-            //{
-            //    Jotunn.Logger.LogWarning($"Spawning {item.ItemData.prefabName}...");
-            //    GameObject prefab = PrefabManager.Instance.GetPrefab(item.ItemData.prefabName);
-
-            //    if (prefab == null)
-            //    {
-            //        Jotunn.Logger.LogError($"Could not find prefab {item.ItemData.prefabName} to spawn!");
-            //        yield break;
-            //    }
-
-            //    GameObject spawned = UnityEngine.Object.Instantiate(prefab, spawnPointTrans.position, spawnPointTrans.rotation);
-            //    ItemDrop itemDrop = spawned.GetComponent<ItemDrop>();
-            //    Rigidbody rigidBody = spawned.GetComponent<Rigidbody>();
-
-            //    if (item.ItemData.quality > 1)
-            //        itemDrop.SetQuality(item.ItemData.quality);
-
-            //    if (item.ItemData.stackSize > 1)
-            //        itemDrop.SetStack(item.ItemData.stackSize);
-
-            //    itemDrop.m_itemData.m_durability = itemDrop.m_itemData.m_shared.m_maxDurability + itemDrop.m_itemData.m_shared.m_durabilityPerLevel * item.ItemData.quality;
-            //    rigidBody.AddForce((spawnPointTrans.forward * force) + (spawnPointTrans.up * force));
-            //}
-
-            int amount = 1;
-            int quality = 1;
-
-            if (prefabName.Contains("*"))
+            if (spawnData.creatureData != null)
             {
-                string[] split = prefabName.Split('*');
-                prefabName = split[0];
-                amount = int.Parse(split[1]);
+                foreach (CreatureData creature in spawnData.creatureData)
+                {
+                    if (!ProgressionHelper.IsAllowedByGlobalKeys(creature.globalKeyAdd, creature.globalKeyRemove))
+                        continue;
+
+                    if (creature.amount > 0)
+                        CreatureHelper.SpawnCreatures(creature, spawnPointTrans, new CustomRewardEvent() { RedeemerName = m_redeemerName }, false);
+                }
             }
 
-            if (prefabName.Contains("#"))
-            {
-                string[] split = prefabName.Split('#');
-                prefabName = split[0];
-                quality = int.Parse(split[1]);
-            }
-
-            Jotunn.Logger.LogWarning($"Spawning {prefabName}...");
-            GameObject prefab = PrefabManager.Instance.GetPrefab(prefabName);
-            GameObject spawned = UnityEngine.Object.Instantiate(prefab, spawnPointTrans.position, spawnPointTrans.rotation);
-            Rigidbody rigidBody = spawned.GetComponent<Rigidbody>();
-            rigidBody.AddForce((spawnPointTrans.forward * force) + (spawnPointTrans.up * force));
-
-            ItemDrop itemDrop = spawned.GetComponent<ItemDrop>();
-
-            if (itemDrop != null)
-            {
-                itemDrop.SetQuality(quality);
-                itemDrop.SetStack(amount);
-                itemDrop.m_itemData.m_durability = itemDrop.m_itemData.m_shared.m_maxDurability + itemDrop.m_itemData.m_shared.m_durabilityPerLevel * quality;
-            }
+            if (spawnData.itemData != null)
+                ItemHelper.SpawnItem(spawnData.itemData, spawnPointTrans, force);
 
             TriggerItemSpawnEffect();
         }
@@ -289,15 +258,10 @@ namespace WizshBoneTwitchIntegration.Components
         {
             string items = "";
 
-            foreach (string item in chestData.items)
-            {
-                items += $"{item};";
-            }
-
             if (items != "")
                 items = items.Remove(items.Length - 1);
 
-            return $"{chestData.amount}|{chestData.announceMessage}|{chestData.force}|{chestData.interact}|{items}|{chestData.mimicChance}|{chestData.random}|{chestData.spawnDelay}|{chestData.type}|{chestData.yeetChance}";
+            return $"{chestData.amount}|{chestData.announceMessage}|{chestData.force}|{chestData.interact}|{chestData.mimicChance}|{chestData.random}|{chestData.spawnDelay}|{chestData.type}|{chestData.yeetChance}";
         }
 
         public SurpriseChestData StringToChestData(string value)
@@ -309,12 +273,11 @@ namespace WizshBoneTwitchIntegration.Components
             chestData.announceMessage = data[1];
             chestData.force = float.Parse(data[2]);
             chestData.interact = bool.Parse(data[3]);
-            chestData.items = items.ToList();
-            chestData.mimicChance = int.Parse(data[5]);
-            chestData.random = bool.Parse(data[6]);
-            chestData.spawnDelay = int.Parse(data[7]);
-            chestData.type = data[8];
-            chestData.yeetChance = int.Parse(data[9]);
+            chestData.mimicChance = int.Parse(data[4]);
+            chestData.random = bool.Parse(data[5]);
+            chestData.spawnDelay = float.Parse(data[6]);
+            chestData.type = data[7];
+            chestData.yeetChance = int.Parse(data[8]);
 
             return chestData;
         }

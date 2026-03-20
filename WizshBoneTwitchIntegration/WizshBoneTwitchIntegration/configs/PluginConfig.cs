@@ -10,6 +10,8 @@ namespace WizshBoneTwitchIntegration.Configs
     internal static class PluginConfig
     {
         public static string sectionChatting = "Chatting";
+        public static string sectionCreatures = "Creatures";
+        public static string sectionIndestructible = "Indestructible";
         public static string sectionGeneral = "General";
         public static string sectionRedeems = "Redeems";
         public static string sectionRemoveTheCountry = "Remove the Country";
@@ -21,6 +23,15 @@ namespace WizshBoneTwitchIntegration.Configs
         public static ConfigEntry<float> configChattingRadius;
         public static ConfigEntry<float> configChattingInterval;
         public static ConfigEntry<string> configChattingBlackList;
+
+        public static ConfigEntry<float> configCreaturesMaxAmount;
+        public static ConfigEntry<float> configCreaturesMaxRadius;
+        public static ConfigEntry<float> configCreaturesFollowRadius;
+
+        public static ConfigEntry<bool> configIndestructibleBoats;
+        public static ConfigEntry<bool> configIndestructibleChests;
+        public static ConfigEntry<bool> configIndestructiblePortals;
+        public static ConfigEntry<bool> configIndestructibleVegetables;
 
         public static ConfigEntry<bool> configEnableRedeemsOnLogin;
         public static ConfigEntry<bool> configAutoResolveRedeems;
@@ -82,6 +93,52 @@ namespace WizshBoneTwitchIntegration.Configs
             {
                 TwitchChatting chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
                 chatting.DeserializeUserBlackList(configChattingBlackList.Value);
+            };
+
+
+            configCreaturesMaxAmount = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionCreatures, "Max creatures amount", 100f,
+                new ConfigDescription("The maximum amount of creatures allowed in an area", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+
+            configCreaturesMaxRadius = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionCreatures, "Max creatures radius", 100f,
+                new ConfigDescription("The radius to check for maximum amount of creatures allowed in an area", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+
+            configCreaturesFollowRadius = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionCreatures, "Friendly follow radius", 30f,
+                new ConfigDescription("The radius in which friendlies will toggle their follow state", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+
+
+            configIndestructibleBoats = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionIndestructible, "Indestructible boats", false,
+                new ConfigDescription("Wether all boats are completely indestructible", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+            configIndestructibleBoats.SettingChanged += (obj, attr) =>
+            {
+                IndestructibleHelper.SetBoats(configIndestructibleBoats.Value);
+            };
+
+            configIndestructibleChests = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionIndestructible, "Indestructible chests", false,
+                new ConfigDescription("Wether all chests are completely indestructible", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+            configIndestructibleChests.SettingChanged += (obj, attr) =>
+            {
+                IndestructibleHelper.SetChests(configIndestructibleChests.Value);
+            };
+
+            configIndestructiblePortals = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionIndestructible, "Indestructible portals", false,
+                new ConfigDescription("Wether all portals are completely indestructible", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+            configIndestructiblePortals.SettingChanged += (obj, attr) =>
+            {
+                IndestructibleHelper.SetPortals(configIndestructiblePortals.Value);
+            };
+
+            configIndestructibleVegetables = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionIndestructible, "Indestructible vegetables", false,
+                new ConfigDescription("Wether all vegetables are completely indestructible", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+            configIndestructibleVegetables.SettingChanged += (obj, attr) =>
+            {
+                IndestructibleHelper.SetVegetables(configIndestructibleVegetables.Value);
             };
 
 

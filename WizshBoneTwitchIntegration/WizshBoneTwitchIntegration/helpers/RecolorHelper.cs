@@ -13,20 +13,20 @@ namespace WizshBoneTwitchIntegration.Helpers
             // Subs
             {"beardedfeo", new Color(1, 0.412f, 0.706f)},
             {"cloudedrogue", new Color(0.384f, 0.004f, 0.004f)},
-            {"daitjen", new Color(0.471f, 0.839f, 0.384f)},
+            {"daitjen", new Color(0.239f, 0.271f, 0.278f)},
             {"firgaardttv", new Color(0.6f, 0.443f, 0.224f)},
             {"karambiee", new Color(0.522f, 0.176f, 0.435f)},
             {"kimetsu159", new Color(0.686f, 1f, 0.004f)},
             {"lothren147", new Color(0.859f, 0.29f, 0.247f)},
             {"velmira12", new Color(0.192f, 0.604f, 0.141f)},
 
-            // Dragonmander
+            // Dragonmancer123456789
             // Awesome ppl or gift subs
             {"1mmun1tyy", new Color(0.471f, 0.839f, 0.384f)},
             {"dragonmancer123456789", new Color(0.75f, 0f, 0f)},
             {"durdyjay", new Color(1f, 0f, 0.298f)},
             {"itzsjoeky", new Color(0.851f, 0.239f, 0.447f)},
-            {"kassiethelittlepumpkin", new Color(0.957f, 0.827f, 0.388f)},
+            {"kassiethelittlepumpkin", new Color(1f, 0.271f, 0f)},
             {"phenazo", new Color(0.686f, 0.922f, 0.71f)},
             {"soma_af", new Color(1f, 0.733f, 0.875f)},
             {"waterfox1316", new Color(0.259f, 0.773f, 0.886f)},
@@ -48,6 +48,13 @@ namespace WizshBoneTwitchIntegration.Helpers
                 new RecolorCreatureData("Visual/Sphere") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorBjorn, emissive = true },
             }},
             { "Blob", new List<RecolorCreatureData>() {
+                new RecolorCreatureData("Visual/blob/Cube") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorBlob, emissive = true, emissiveMultiplier = 1f },
+                new RecolorCreatureData("Visual/Point light") { isLight = true },
+                new RecolorCreatureData("Visual/particles/ooz") { isParticle = true },
+                new RecolorCreatureData("Visual/particles/wetsplsh") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorBlobSlime, emissive = true, emissiveMultiplier = 0.5f, isParticle = true },
+                new RecolorCreatureData("Visual/particles/wetsplsh_local") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorBlobSlime, emissive = true, emissiveMultiplier = 0.5f, isParticle = true },
+            }},
+            { "BlobElite", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/blob/Cube") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorBlob, emissive = true, emissiveMultiplier = 1f },
                 new RecolorCreatureData("Visual/Point light") { isLight = true },
                 new RecolorCreatureData("Visual/particles/ooz") { isParticle = true },
@@ -115,7 +122,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 new RecolorCreatureData("Visual/Hair") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorTroll, emissive = true },
             }},
             { "Wraith", new List<RecolorCreatureData>() {
-                new RecolorCreatureData("Visual/wraith/wraith") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorWraith, emissive = true },
+                new RecolorCreatureData("Visual/wraith/wraith") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorWraith, emissive = true, zebraMaterial = WizshBoneTwitchIntegration.Instance.materials.RecolorWraithZebra },
                 new RecolorCreatureData("Visual/wraith/chain") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorWraith, emissive = true },
                 new RecolorCreatureData("Visual/wraith/RagPlanes") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorWraith, emissive = false },
                 new RecolorCreatureData("Visual/wraith/Armature/root/spine1/spine2/spine3/neck/head/Point light") { isLight = true },
@@ -125,8 +132,8 @@ namespace WizshBoneTwitchIntegration.Helpers
         public static void RecolorCreature(GameObject creature, string redeemerName)
         {
             Jotunn.Logger.LogWarning($"Found creature {creature.name} and {redeemerName} is very special!");
-            Color color = RecolorHelper.GetColorByKey(redeemerName);
-            List<RecolorCreatureData> list = RecolorHelper.GetRecolorCreatureDataByKey(creature.name.Replace("(Clone)", ""));
+            Color color = GetColorByKey(redeemerName);
+            List<RecolorCreatureData> list = GetRecolorCreatureDataByKey(creature.name.Replace("(Clone)", ""));
 
             foreach (RecolorCreatureData recolorCreatureData in list)
             {
@@ -221,7 +228,13 @@ namespace WizshBoneTwitchIntegration.Helpers
                     Jotunn.Logger.LogWarning($"Material is null for recolor creature: {recolorCreatureData.transformPath}");
                     continue;
                 }
-                
+
+                Transform visualTrans = creature.transform.Find("Visual");
+                LevelEffects levelEffects = visualTrans.gameObject.GetComponent<LevelEffects>();
+
+                if (levelEffects != null)
+                    levelEffects.m_levelSetups.Clear();
+
                 Recolor(recolorCreatureData, color, mat, recolorCreatureData.emissiveMultiplier);
             }
         }
