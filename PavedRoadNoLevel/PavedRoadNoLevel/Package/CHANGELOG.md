@@ -1,3 +1,6 @@
+### 1.0.8
+- Smoothing is now also removed from the Cultivate ground
+
 ### 1.0.7
 - Updated to Call to Arms update, increased Jotunn dependency to 2.26.1
 

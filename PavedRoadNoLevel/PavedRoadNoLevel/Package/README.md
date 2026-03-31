@@ -9,7 +9,7 @@ The mod comes with a config, be sure to check wether the config has changed in f
  - **Stonecutter requirement**: Enable the Stonecutter as a requirement (to pave roads). Default: *true*
 
 ## Roadmap
-Might add a way to increase/decrease area with mouse wheel for finer ground editing
+No features are planned for this mod. I do have plans to create a new mod for terrain modifications that will have these features in them.
 
 ## Bug/Suggestion
 Found a bug or have some suggestions? You can leave a post or bug report here: https://www.nexusmods.com/valheim/mods/2524/
