@@ -423,28 +423,6 @@ namespace WizshBoneTwitchIntegration
             materials.RecolorWraithZebra = assetBundle.LoadAsset<Material>("Wraith_recolor_zebra_WBTI");
 
             // ====================================
-            // ValCON:
-            // ====================================
-            // SHOULD
-            // Add a nuke all creatures command/redeem? Kills all creatures and refunds points
-            // Add options to allow monsters to fight each other
-            // Add options for creatures health/damage to be configurable (percentage based)
-            // Spawn locations redeem
-
-            // COULD
-            // Setup Twitch integration for a tower defense game? Section of the stream.
-            // Drop all equipment/inventory redeem
-            // Add multiple surprise chests where some them can explose
-            // Add redeem that adds extra death markers on the map to confuse the streamer, alsoa add gravestones that can explode
-            // Shrink/grow the boat when player is sailing
-            // Shrink/Grow cancel each other out
-            // Disable redeems show popup to refund points Yes or no
-            // Fix streamer is in safe zone message overwriting others
-            // Setting friendly on follow via pressing E makes the emote not work on them
-            // Add categories to redeems and then prevent spam
-            // Add a redeem that fills your inventory with stone Or somethign else that is heavy
-
-            // ====================================
             // TODO:
             // ====================================
             // Serpent, noodle detonate
@@ -456,54 +434,12 @@ namespace WizshBoneTwitchIntegration
             // - Crys the Fueling
             // - NECK SQUAD (Lothren, Soma, Phenazo, 1mmun1tyy, DeathWizsh, Bonkerz)
 
-
-            // Abomination can still spawn in dungeon via Surprice chests
-            // Add GUI element that shows enable status
-            // Redeems still re-enabling when supose to be disabled
-
-            // Add name option to creatureData (ZDO)
-            // Add size option to creatureData (ZDO)
-            // Reset redeem cooldown somehow when something went wrong? Update CustomRewards?
-            // Add internal user/global cooldown functionality cause Twitch's is DODGY AF
-            // Allow viewers to vote on random happening in chat (1: puke, 2: gain buff, 3: spawn random monsters, 4: Give random item
-            // Add CreatureData and ItemData to SpawnAbility
-            // Add redeem that adds pillars or other terrain modification
-            // Make safezones square (option)
-            // Boat speed redeem, positive and negative
-            // Roots (enemy/friendly) redeem
-            // One time use portal spawn redeem
-            // Reverse controlls redeem
-            // Temp naked redeem
-            // Spawn items redeem
-            // Multiplayer execute redeem for all players
-            // Add leader board of points spend, deaths caused, saves maybe? Other statistics?
-            // TalkInteract always show Feo's history fact message, also does not properly show follow/rename creature
-            // Log creatures dieing from safezone
-            // Prevent wolfs/fenrings from howling all the time as helpers
-
-            // ====================================
-            // IDEAS:
-            // ====================================
-            // Kassie mentioned to lower the hp/damage creatures do when there is more
-            // Babbenabbe add a rush/adrenaline whe there is many mobs
-            // Waterfox setting a timer, then do something (she explain later what she meant)
-            // Allow redeemers to give specific item
-            // Allow redeemers to choose the surprise for surprise chests
-            // Timeout redeemers as a chance when redeeming surprise chests
-            // Remove/add redeems when streamer leaves/enters a dungeon and check what kind of dungeon the player is in
-            // Make certain creatures smaller in dungeons so they can be spawned
-            // More loot if mob is grown?
-            // LoyalBones: A red skeleton with normal damage but insane health pool
-            // Chat loves this: Spawn chest with cheese (random food?) Make cheese wheel that gives random food?".
-            // Add a way to be able to find spanwed creature. For the kill all spawned rule!
-            // Drunk blur effect?
-            // Disable all twitchy wards via bits (specific amount like 1000)
-            // Add commands for claimed creatures to do things (flee, stop, attack player/base, activate specific attack, emote?)
-            // Add options to super charge a spawned creature, more hp, damage, equip gear?
-
             // ====================================
             // DONE
             // ====================================
+            // DONE: Add claim to a tame by renaming it with claim:insertnamehere
+            // DONE: Fix message showing for split second of creature claims
+            // DONE: Allow permanent claiming with the chatting system
             // DONE: Add maximum limit of how many of the same spawned creatures are allowed
             // DONE: Add maximum limit of total spawned creaturs are allowed
             // DONE: Change weather/tod redeem
@@ -583,6 +519,7 @@ namespace WizshBoneTwitchIntegration
             // - Inventory in the Saddle
             // - Priortise spear slot
             // - lock inventory slots so putting all in inventory does not touch it
+            // - Troll pacify, give them something to become neutral and in that state you can backpack them
             // - square cultivator/hoe mod (no circle editing) with range scroll
             // - Mist control mod, add demister to shield gen and configurable range for wisp light/torches and maybe even remove all mist
             // - Beewax mod that allows you to put wax on wood to protect against water dammage. Mix it with other things to creat colors as well

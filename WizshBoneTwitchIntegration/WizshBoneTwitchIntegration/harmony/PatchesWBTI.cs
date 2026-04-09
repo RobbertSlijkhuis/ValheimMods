@@ -144,6 +144,44 @@ namespace WizshBoneTwitchIntegration.Harmony
         }
 
         [HarmonyPostfix]
+        [HarmonyPatch(typeof(TextInput), "RequestText")]
+        public static void RequestText_Postfix(ref TextInput __instance, TextReceiver sign, string topic, ref int charLimit)
+        {
+            try
+            {
+                if (sign.ToString().Contains("(Tameable)") && topic == "$hud_rename")
+                    __instance.m_inputField.characterLimit = 60;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in RequestText_Postfix: " + e);
+            }
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Tameable), "RPC_SetName")]
+        public static void RPC_SetName_Prefix(ref Tameable __instance, long sender, ref string name, string authorId)
+        {
+            try
+            { 
+                if (!name.Contains("claim:"))
+                    return;
+
+                TwitchCreatureClaim creatureClaim = __instance.gameObject.GetComponent<TwitchCreatureClaim>();
+
+                if (creatureClaim == null)
+                    creatureClaim = __instance.gameObject.AddComponent<TwitchCreatureClaim>();
+
+                name = name.Replace("claim:", "");
+                creatureClaim.Init(name);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in RPC_SetName_Prefix: " + e);
+            }
+        }
+
+        [HarmonyPostfix]
         [HarmonyPatch(typeof(Player), "OnSpawned")]
         public static void OnSpawned_Postfix(ref Player __instance)
         {

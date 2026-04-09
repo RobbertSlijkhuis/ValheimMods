@@ -164,6 +164,9 @@ namespace WizshBoneTwitchIntegration.Components
 
         private void CheckChatForMessage(TwitchChatMessage message)
         {
+            if (m_assignment.userName.ToLower() != message.userName)
+                return;
+
             if (m_lastMessageTime != DateTime.MinValue)
             {
                 TimeSpan timeSpan = DateTime.Now.Subtract(m_lastMessageTime);
