@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.Sockets;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Models;
-using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.TwitchIntegration
 {
@@ -163,6 +162,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
             if (m_chatHistory.Count > m_historyLength)
                 m_chatHistory.RemoveAt(0);
+
+            m_chatting.onNewMessage.Invoke(m_chatHistory.Last());
         }
     }
 }

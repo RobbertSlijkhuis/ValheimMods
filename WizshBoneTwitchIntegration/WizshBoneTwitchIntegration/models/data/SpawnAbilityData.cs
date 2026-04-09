@@ -6,12 +6,13 @@ namespace WizshBoneTwitchIntegration.Models
     internal class SpawnAbilityData
     {
         public float? accuracy;
+        public bool allowDrops = true;
         public string announceMessage;
         public DamageData damage;
         public bool damageShips = false;
         public bool damageStructures = true;
         public float? dropVelocity = 0f;
-        public int duration = 60;
+        public int duration = 0;
         public float? groundOffset;
         public float? initialSpawnDelay;
         public bool isBiomeList = false;

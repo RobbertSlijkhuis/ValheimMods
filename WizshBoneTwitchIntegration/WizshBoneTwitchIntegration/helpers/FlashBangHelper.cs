@@ -1,5 +1,6 @@
 ﻿using Jotunn.Managers;
 using System.Collections;
+using TwitchSDK.Interop;
 using UnityEngine;
 using UnityEngine.UI;
 using WizshBoneTwitchIntegration.Models;
@@ -13,7 +14,7 @@ namespace WizshBoneTwitchIntegration.Helpers
         public static int width = Screen.width;
         public static int height = Screen.height;
 
-        public static IEnumerator AttachFlashBang(FlashBangData flashbangData)
+        public static IEnumerator AttachFlashBang(FlashBangData flashbangData, CustomRewardEvent customRewardEvent)
         {
             yield return new WaitForSeconds(flashbangData.delay);
 
@@ -29,6 +30,9 @@ namespace WizshBoneTwitchIntegration.Helpers
             flashBang.transform.localScale = new Vector3(2f, 2f, 2f);
             Projectile projectile = flashBang.GetComponent<Projectile>();
             projectile.m_spawnOnHit = null;
+
+            //if (flashbangData.announceMessage != null)
+            //    Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, flashbangData.announceMessage), 3000);
 
             yield return new WaitForSeconds(0.5f);
             yield return new WaitForEndOfFrame();

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
+using UnityEngine.InputSystem.Utilities;
 using WizshBoneTwitchIntegration.Configs;
-using WizshBoneTwitchIntegration.Data;
 using WizshBoneTwitchIntegration.Extensions;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
@@ -11,18 +11,16 @@ namespace WizshBoneTwitchIntegration.Components
         private TwitchCustomRewards m_customRewards;
         private GameObject m_playerInZone;
         private readonly string playerIdentifier = "Player(Clone)";
-        public bool m_burnCreatures;
 
         public void Awake()
         {
             m_customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
-            m_burnCreatures = true;
         }
 
         public void OnTriggerEnter(Collider collider)
         {
             HandlePlayer(collider, true, "Player entered");
-            HandleDeleteBySafeZone(collider);
+            //HandleDeleteBySafeZone(collider);
             Jotunn.Logger.LogWarning($"Enter: {collider.gameObject.name}");
         }
 
@@ -87,7 +85,7 @@ namespace WizshBoneTwitchIntegration.Components
         {
             if (collider.gameObject.name != playerIdentifier)
             {
-                if (!PluginConfig.configWardBurnCreatures.Value || !m_burnCreatures)
+                if (!PluginConfig.configWardBurnCreatures.Value && !PluginConfig.configWardPushCreatures.Value)
                     return;
 
                 if (transform.parent.gameObject.GetComponent<Ship>() != null && PluginConfig.configAllowRedeemsOnBoats.Value)
@@ -111,13 +109,27 @@ namespace WizshBoneTwitchIntegration.Components
                 if (!creatureClaim.m_isSpawn)
                     return;
 
-                if (humanoid != null && !humanoid.GetSEMan().HaveStatusEffect(WizshBoneTwitchIntegration.Instance.effects.Burning.m_nameHash))
+                if (humanoid != null && PluginConfig.configWardBurnCreatures.Value && !humanoid.GetSEMan().HaveStatusEffect(WizshBoneTwitchIntegration.Instance.effects.Burning.m_nameHash))
                 {
                     float duration = 10f;
                     SE_Stats burning = Instantiate(WizshBoneTwitchIntegration.Instance.effects.Burning);
-                    burning.m_healthPerTick = Mathf.RoundToInt(humanoid.GetMaxHealth() / (duration - 1f) * -1f);
+                    burning.m_healthPerTick = Mathf.Round(humanoid.GetMaxHealth() / (duration - 1f) * -1f);
                     burning.m_ttl = duration;
                     humanoid.GetSEMan().AddStatusEffect(burning);
+                }
+
+                if (humanoid != null)
+                {
+                    float force = PluginConfig.configWardPushForce.Value;
+                    Vector3 pushDir = (collider.transform.position - transform.position).normalized;
+                    pushDir.y = 0;
+                    Rigidbody rb = collider.GetComponent<Rigidbody>();
+
+                    if (rb != null)
+                    {
+                        // rb.AddForce((transform.forward * -force) + (transform.up * force), ForceMode.Acceleration);
+                        rb.AddForce(pushDir * force, ForceMode.Acceleration);
+                    }
                 }
             }
         }

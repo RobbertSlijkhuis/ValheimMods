@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using TwitchSDK.Interop;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Configs;
+using WizshBoneTwitchIntegration.Extensions;
+using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
@@ -20,7 +23,6 @@ namespace WizshBoneTwitchIntegration.Components
         public bool m_isSpawn = false;
         private string m_originalName;
         private DateTime m_lastMessageTime;
-        private int m_unclaimTimer = 120;
         private bool m_isUnclaimDestroy = false;
 
         public void Awake()
@@ -44,7 +46,7 @@ namespace WizshBoneTwitchIntegration.Components
             }
 
             m_isSpawn = true;
-            m_assignment = new TwitchCreatureAssignment(customRewardEvent.RedeemerName, gameObject);
+            m_assignment = new TwitchCreatureAssignment(customRewardEvent.RedeemerName, gameObject, PluginConfig.configChattingClaimDuration.Value);
             m_originalName = m_humanoid.m_name;
 
             TwitchCreaturePersistentData persistentData = gameObject.GetComponent<TwitchCreaturePersistentData>();
@@ -52,7 +54,7 @@ namespace WizshBoneTwitchIntegration.Components
 
             m_chatting.AddCreatureAssignment(m_assignment);
             SetupNpcTalk(creatureData);
-            InvokeRepeating(nameof(CheckChatForMessage), 0f, 3f);
+            m_chatting.onNewMessage.AddListener(CheckChatForMessage);
         }
 
         public void Init(string userName)
@@ -63,39 +65,51 @@ namespace WizshBoneTwitchIntegration.Components
                 return;
             }
 
-            m_assignment = new TwitchCreatureAssignment(userName, gameObject);
+            m_assignment = new TwitchCreatureAssignment(userName, gameObject, PluginConfig.configChattingClaimDuration.Value);
             m_originalName = m_humanoid.m_name;
             m_humanoid.m_name = userName;
 
+            if (PluginConfig.configChattingClaimDuration.Value == 0)
+            {
+                TwitchCreaturePersistentData persistentData = gameObject.GetComponent<TwitchCreaturePersistentData>();
+                persistentData.SetData(m_assignment.userName);
+            }
+
+            if (RecolorHelper.CanRecolorCreature(m_assignment.userName, m_assignment.creature.name))
+                RecolorHelper.RecolorCreature(m_assignment.userName, gameObject);
+
             m_chatting.AddCreatureAssignment(m_assignment);
             SetupNpcTalk();
-            InvokeRepeating(nameof(CheckChatForMessage), 0f, 3f);
+            m_chatting.onNewMessage.AddListener(CheckChatForMessage);
         }
 
-        public void ReInit(string userName, CreatureData creatureData)
+        public void ReInit(string userName, CreatureData creatureData = null)
         {
-            if (userName == null || creatureData == null)
+            if (userName == null)
             {
-                Jotunn.Logger.LogWarning("Cannot assign a user to this creature claim, either user name or options is null");
+                Jotunn.Logger.LogWarning("Cannot assign a user to this creature claim, user name is null");
                 return;
             }
 
             m_isSpawn = true;
-            m_assignment = new TwitchCreatureAssignment(userName, gameObject);
+            m_assignment = new TwitchCreatureAssignment(userName, gameObject, PluginConfig.configChattingClaimDuration.Value);
             m_originalName = m_humanoid.m_name;
 
             m_chatting.AddCreatureAssignment(m_assignment);
             SetupNpcTalk(creatureData);
-            InvokeRepeating(nameof(CheckChatForMessage), 0f, 3f);
+            m_chatting.onNewMessage.AddListener(CheckChatForMessage);
         }
 
         public void OnDestroy()
         {
-            CancelInvoke(nameof(CheckChatForMessage));
+            m_chatting.onNewMessage.RemoveListener(CheckChatForMessage);
             Destroy(m_npcTalk);
 
             if (m_creatureInteract != null)
                 Destroy(m_creatureInteract);
+
+            if (RecolorHelper.CanRecolorCreature(m_assignment.userName, m_assignment.creature.name))
+                RecolorHelper.UnColorCreature(m_assignment.creature);
 
             m_assignment.creature = null;
             m_humanoid.m_name = m_originalName;
@@ -148,15 +162,13 @@ namespace WizshBoneTwitchIntegration.Components
                 SayAMessage();
         }
 
-        private void CheckChatForMessage()
+        private void CheckChatForMessage(TwitchChatMessage message)
         {
-            TwitchChatMessage message = m_chat.GetLastMessageOfUser(m_assignment.userName);
-
             if (m_lastMessageTime != DateTime.MinValue)
             {
                 TimeSpan timeSpan = DateTime.Now.Subtract(m_lastMessageTime);
 
-                if (!m_isSpawn && timeSpan.TotalSeconds > m_unclaimTimer)
+                if (!m_isSpawn && timeSpan.TotalSeconds > m_assignment.duration)
                 {
                     m_isUnclaimDestroy = true;
                     Unassign();
@@ -164,12 +176,11 @@ namespace WizshBoneTwitchIntegration.Components
                 }
             }
 
-            if (message == null || message.hasBeenBroadcasted)
+            if (message == null)
                 return;
 
             if (message.message.Equals("!unclaim", StringComparison.OrdinalIgnoreCase))
             {
-                SetMessageAsBroadcasted(message);
                 m_isUnclaimDestroy = true;
                 Unassign();
                 return;
@@ -194,26 +205,18 @@ namespace WizshBoneTwitchIntegration.Components
                     return;
                 }
 
-                SetMessageAsBroadcasted(message);
-                m_npcTalk.Say("Alright... healing!", "Aggravated");
+                m_npcTalk.Say2("Alright... healing!", "Aggravated");
                 m_humanoid.EquipBestWeapon(m_humanoid, null, m_humanoid, null);
                 monsterAI.DoAttack(m_humanoid, true);
                 return;
             }
 
-            SetMessageAsBroadcasted(message);
-            m_npcTalk.Say(message.message, "Aggravated");
+            m_npcTalk.Say2(message.message, "Aggravated");
         }
 
         public void SayAMessage()
         {
             m_npcTalk.OnBecameAggravated(BaseAI.AggravatedReason.Damage);
-        }
-
-        private void SetMessageAsBroadcasted(TwitchChatMessage message)
-        {
-            message.hasBeenBroadcasted = true;
-            m_lastMessageTime = DateTime.Now;
         }
 
         private void Unassign()
@@ -223,7 +226,7 @@ namespace WizshBoneTwitchIntegration.Components
                 Jotunn.Logger.LogError("Can not remove creature assignment, either the assignment or userName is null");
                 return;
             }
-            
+
             m_chatting.RemoveCreatureAssignment(m_assignment);
         }
     }

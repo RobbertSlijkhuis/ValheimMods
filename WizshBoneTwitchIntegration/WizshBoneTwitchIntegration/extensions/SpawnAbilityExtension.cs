@@ -14,7 +14,7 @@ namespace WizshBoneTwitchIntegration.Extensions
 {
     internal static class SpawnAbilityExtension
     {
-        public static IEnumerator Spawn2(this SpawnAbility spawnAbility, CustomRewardEvent currentRewardEvent, SpawnAbilityData spawnAbilityData, CreatureData creatureData)
+        public static IEnumerator Spawn2(this SpawnAbility spawnAbility, CustomRewardEvent customRewardEvent, SpawnAbilityData spawnAbilityData, CreatureData creatureData)
         {
             if (spawnAbility.m_initialSpawnDelay > 0f)
             {
@@ -214,6 +214,7 @@ namespace WizshBoneTwitchIntegration.Extensions
                 Aoe aoe = gameObject.GetComponentInChildren<Aoe>(true);
                 Aoe aoeRod = null;
                 Trap trap = gameObject.GetComponentInChildren<Trap>();
+                Piece piece = gameObject.GetComponentInChildren<Piece>();
 
                 if (gameObject.name == "lightningAOE(Clone)")
                 {
@@ -227,7 +228,7 @@ namespace WizshBoneTwitchIntegration.Extensions
                     TwitchCreaturePersistentData creaturePersistentData = gameObject.GetComponent<TwitchCreaturePersistentData>();
 
                     if (creaturePersistentData != null)
-                        creaturePersistentData.SetData(currentRewardEvent.RedeemerName, creatureData, false);
+                        creaturePersistentData.SetData(customRewardEvent.RedeemerName, creatureData, false);
                     else
                         Jotunn.Logger.LogWarning("Creature does not have persistent data somehow!");
                 }
@@ -250,7 +251,14 @@ namespace WizshBoneTwitchIntegration.Extensions
                     TwitchAllowDamage preventDamage = impactEffect.gameObject.AddComponent<TwitchAllowDamage>();
                     preventDamage.Init(spawnAbilityData.damageShips, spawnAbilityData.damageStructures);
 
+                    if (spawnAbilityData.duration > 0)
+                    {
+                        TwitchPersistentDestruction persistentDestruction = gameObject.GetComponent<TwitchPersistentDestruction>();
+                        persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium);
+                    }
+
                     //gameObject.AddComponent<TwitchDeleteBySafeZone>();
+                    impactEffect.m_damagePlayers = true;
 
                     DamageData resetDamage = new DamageData();
                     resetDamage.blunt = 50f;
@@ -262,14 +270,17 @@ namespace WizshBoneTwitchIntegration.Extensions
                 {
                     trap.RequestStateChange(TrapState.Unarmed);
 
-                    Piece piece = gameObject.GetComponent<Piece>();
-                    piece.m_resources = new Piece.Requirement[0];
+                    if (piece != null)
+                        piece.m_resources = new Piece.Requirement[0];
 
                     //TwitchDeleteBySafeZone deleteBySafeZone = gameObject.AddComponent<TwitchDeleteBySafeZone>();
                     //deleteBySafeZone.SetKinematic(true);
 
-                    TwitchPersistentDestruction persistentDestruction = gameObject.GetComponent<TwitchPersistentDestruction>();
-                    persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffect);
+                    if (spawnAbilityData.duration > 0)
+                    {
+                        TwitchPersistentDestruction persistentDestruction = gameObject.GetComponent<TwitchPersistentDestruction>();
+                        persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall);
+                    }
 
                     trap.StartCoroutine(trap.ArmTrapAfterDelay(1f));
                 }
@@ -325,8 +336,22 @@ namespace WizshBoneTwitchIntegration.Extensions
                     //}
                 }
 
+                if (piece != null)
+                {
+                    TwitchPiecePersistentData piecePersistentData = gameObject.GetComponent<TwitchPiecePersistentData>();
+                    piecePersistentData.SetData(customRewardEvent, spawnAbilityData);
+                }
+
                 if ((bool)component2)
                 {
+                    if (spawnAbilityData.damage != null)
+                    {
+                        if (spawnAbilityData.damage.basedOnMaxHealthAndArmor)
+                            component2.m_damage = SpawnAbilityHelper.CalculateDamageBasedOnMaxHealthAndArmor(spawnAbilityData);
+                        else
+                            component2.m_damage = DamageHelper.ConvertToDamageTypes(spawnAbilityData.damage);
+                    }
+
                     spawnAbility.SetupProjectile(component2, targetPosition);
                 }
 

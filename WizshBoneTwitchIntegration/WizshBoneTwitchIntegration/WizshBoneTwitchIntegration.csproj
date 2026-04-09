@@ -35,6 +35,7 @@
     <None Remove="resources\banned.txt" />
     <None Remove="resources\redeems-schema.json" />
     <None Remove="resources\redeems.yaml" />
+    <None Remove="resources\viewers.yaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,6 +45,7 @@
     <EmbeddedResource Include="resources\redeems-testers.yaml" />
     <EmbeddedResource Include="resources\redeems-schema.json" />
     <EmbeddedResource Include="resources\redeems.yaml" />
+    <EmbeddedResource Include="resources\viewers.yaml" />
   </ItemGroup>
 
   <ItemGroup>

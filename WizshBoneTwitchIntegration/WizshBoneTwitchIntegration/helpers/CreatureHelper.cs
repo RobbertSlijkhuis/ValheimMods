@@ -4,7 +4,6 @@ using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Configs;
-using WizshBoneTwitchIntegration.Data;
 using WizshBoneTwitchIntegration.Extensions;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.Types;
@@ -16,13 +15,14 @@ namespace WizshBoneTwitchIntegration.Helpers
     {
         public static int hallucinationCount = 0;
 
-        public static void SpawnCreature(CreatureData creatureData, Transform transform, CustomRewardEvent customRewardEvent, bool ignoreWard = false)
+        public static void SpawnCreature(CreatureData creatureData, Transform transform, CustomRewardEvent customRewardEvent, bool ignoreWard = false, float force = 0f)
         {
             GameObject prefab = PrefabManager.Instance.GetPrefab(creatureData.prefabName);
 
             if (prefab == null)
             {
                 Jotunn.Logger.LogError("Could not find prefab to spawn");
+                return;
             }
 
             Vector3 positionToSpawn = creatureData.position == SpawnPositionType.WorldPosition ? creatureData.positionOffset.ToVector() : transform.position;
@@ -44,8 +44,20 @@ namespace WizshBoneTwitchIntegration.Helpers
             //    Jotunn.Logger.LogWarning("Dungeon: " + dungeonType);
             //    Jotunn.Logger.LogWarning("Name: " + creature.name);
 
-            //    if (dungeonType == DungeonType.Queen && creature.name == "Gjall(Clone)")
-            //        creature.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+            //    if (dungeonType == DungeonType.BurialChamber || dungeonType == DungeonType.SunkenCrypt) {
+
+            //        if (creature.name == "Greydwarf_Elite(Clone)")
+            //        {
+            //            creature.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
+            //            Jotunn.Logger.LogWarning("Down sizing Greyfwarf Brute");
+            //        }
+
+            //        if (creature.name == "Greydwarf_Shaman(Clone)")
+            //        {
+            //            creature.transform.localScale = new Vector3(1f, 1f, 1f);
+            //            Jotunn.Logger.LogWarning("Down sizing Greyfwarf Shaman");
+            //        }
+            //    }
             //}
 
             if (monsterAI == null)
@@ -60,13 +72,16 @@ namespace WizshBoneTwitchIntegration.Helpers
                 throw new System.Exception("No humanoid available for creature spawn!");
             }
 
-            if (RecolorHelper.IsRedeemerSpecialViewer(customRewardEvent.RedeemerName) && RecolorHelper.IsCreatureInList($"{creature.name.Replace("(Clone)", "")}"))
-                RecolorHelper.RecolorCreature(creature, customRewardEvent.RedeemerName);
-
             if (!creatureData.isHallucination)
             {
                 TwitchCreatureClaim creatureClaim = creature.AddComponent<TwitchCreatureClaim>();
                 creatureClaim.Init(creatureData, customRewardEvent, ignoreWard);
+
+                if (force > 0f)
+                {
+                    Rigidbody rigidBody = creature.GetComponent<Rigidbody>();
+                    rigidBody.AddForce((transform.forward * force) + (transform.up * force), ForceMode.Acceleration);
+                }
             }
             else
             {
@@ -84,15 +99,17 @@ namespace WizshBoneTwitchIntegration.Helpers
             monsterAI.LookAt(transform.position);
 
             if (creatureData.announceMessage != null)
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, creatureData.announceMessage));
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, creatureData.announceMessage), 3000);
+
+            WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium.Create(creature.transform.position, creature.transform.rotation);
         }
 
-        public static void SpawnCreatures(CreatureData creatureData, Transform transform, CustomRewardEvent customRewardEvent, bool ignoreWard)
+        public static void SpawnCreatures(CreatureData creatureData, Transform transform, CustomRewardEvent customRewardEvent, bool ignoreWard = false, float force = 0f)
         {                
             for (int i = 0; i < creatureData.amount; i++)
             {
                 Jotunn.Logger.LogWarning($"Spawning {creatureData.prefabName}...");
-                SpawnCreature(creatureData, transform, customRewardEvent, ignoreWard);
+                SpawnCreature(creatureData, transform, customRewardEvent, ignoreWard, force);
             }
         }
 
@@ -118,10 +135,11 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return false;
 
             List<string> notAllowedList = new List<string>();
-            notAllowedList.Add("Greydwarf_Elite");
+            //notAllowedList.Add("greydwarf_elite");
             notAllowedList.Add("abomination");
             notAllowedList.Add("bat");
             notAllowedList.Add("bjorn");
+            notAllowedList.Add("bonemawserpent");
             notAllowedList.Add("deathsquito");
             notAllowedList.Add("gjall");
             notAllowedList.Add("goblinbrute");
@@ -129,6 +147,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             notAllowedList.Add("hatchling");
             notAllowedList.Add("lox");
             notAllowedList.Add("seekerbrute");
+            notAllowedList.Add("serpent");
             notAllowedList.Add("troll");
             notAllowedList.Add("unbjorn");
 
@@ -171,7 +190,39 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 if (maxRange > 0f && Vector3.Distance(Player.m_localPlayer.transform.position, creature.transform.position) > maxRange)
                 {
-                    Jotunn.Logger.LogWarning("Out of range?");
+                    Jotunn.Logger.LogWarning("Out of range!");
+                    continue;
+                }
+
+                num++;
+            }
+
+            return num;
+        }
+
+        public static int GetNrOfSpecificTwitchInstances(string prefabName, float maxRange = 100f)
+        {
+            GameObject prefab = PrefabManager.Instance.GetPrefab(prefabName);
+            int num = 0;
+
+            if (prefab == null)
+            {
+                Jotunn.Logger.LogWarning($"Could not find prefab: {prefabName} ");
+                return 0;
+            }
+
+            foreach (BaseAI creature in BaseAI.BaseAIInstances)
+            {
+                if (creature.GetComponent<TwitchCreatureClaim>() == null)
+                    continue;
+
+                Jotunn.Logger.LogWarning($"{creature.name} - {prefabName}(Clone)");
+                if (creature.name != prefabName + "(Clone)")
+                    continue;
+
+                if (maxRange > 0f && Vector3.Distance(Player.m_localPlayer.transform.position, creature.transform.position) > maxRange)
+                {
+                    Jotunn.Logger.LogWarning("Out of range!");
                     continue;
                 }
 

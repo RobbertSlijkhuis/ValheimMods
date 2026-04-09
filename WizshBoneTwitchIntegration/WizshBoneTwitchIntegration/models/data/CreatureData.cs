@@ -16,6 +16,7 @@ namespace WizshBoneTwitchIntegration.Models
         public bool isHallucination = false;
         public int level = 1;
         public float maxHealth = 0;
+        public int maxSpawned = 0;
         public bool mistVision = true;
         public string name;
         public string prefabName;

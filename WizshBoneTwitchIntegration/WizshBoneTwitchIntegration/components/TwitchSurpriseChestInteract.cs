@@ -15,7 +15,7 @@ namespace WizshBoneTwitchIntegration.Components
 
         public string GetHoverText()
         {
-            if (!m_surpriseChest.m_interact || m_animator.enabled)
+            if (!m_surpriseChest.m_interact)
                 return "";
 
             string inputString = Localization.instance.Localize("[<color=yellow>$KEY_Use</color>]");
@@ -32,7 +32,7 @@ namespace WizshBoneTwitchIntegration.Components
         {
             try
             {
-                if (!m_surpriseChest.m_interact || m_animator.enabled)
+                if (!m_surpriseChest.m_interact)
                     return false;
 
                 if (hold || alt)

@@ -16,11 +16,13 @@ namespace WizshBoneTwitchIntegration.Models
         public bool ignoreWard = false;
         public MistData mistData = new MistData();
         public int points = 0;
+        public TerrainEditData terrainEditData = new TerrainEditData();
         public SpawnAbilityData spawnAbilityData = new SpawnAbilityData();
         public List<StatusEffectData> statusEffectData = new List<StatusEffectData>();
         public string title = "";
         public string type = RedeemType.Undefined;
         public bool userInput = false;
+        public WeatherData weatherData = new WeatherData();
 
         public RedeemEntry() { }
 

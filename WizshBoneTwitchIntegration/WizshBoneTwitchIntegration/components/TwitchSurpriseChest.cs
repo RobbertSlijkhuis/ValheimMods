@@ -1,5 +1,4 @@
-﻿using Jotunn.Managers;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using TwitchSDK.Interop;
 using UnityEngine;
@@ -12,12 +11,12 @@ namespace WizshBoneTwitchIntegration.Components
     {
         ZNetView m_netView;
         private readonly int chestDataHash = "SurpriseChestData_WBTI".GetStableHashCode();
-        private readonly int chestRedeemDataHash = "SurpriseChestRedeemData_WBTI".GetStableHashCode();
 
         private string m_redeemTitle;
         private string m_redeemerName;
         private int m_amount;
         private float m_force;
+        private List<SurpriseChestSpawnData> m_items;
         private float m_openDelay = 1.5f;
         private bool m_mimic;
         private bool m_random;
@@ -28,41 +27,17 @@ namespace WizshBoneTwitchIntegration.Components
         public TwitchSurpriseChestInteract m_supriseChestInteract;
         public string m_type;
 
-        EffectList endEffects = new EffectList();
-        EffectList itemSpawnEffects = new EffectList();
-        EffectList openingEffects = new EffectList();
-        EffectList startEffects = new EffectList();
+        EffectList chestOpeningEffects = new EffectList();
+        EffectList despawnEffect = new EffectList();
+        EffectList spawnEffects = new EffectList();
+        EffectList spawnItemEffects = new EffectList();
 
         public void Awake()
         {
-            endEffects = WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffect;
-            startEffects = WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffect;
-
-            EffectList.EffectData itemSpawnEffectData = new EffectList.EffectData();
-            itemSpawnEffectData.m_enabled = true;
-            itemSpawnEffectData.m_prefab = PrefabManager.Instance.GetPrefab("vfx_Place_wood_pole");
-            itemSpawnEffectData.m_variant = -1;
-
-            EffectList.EffectData itemSpawnSoundEffectData = new EffectList.EffectData();
-            itemSpawnSoundEffectData.m_enabled = true;
-            itemSpawnSoundEffectData.m_prefab = PrefabManager.Instance.GetPrefab("sfx_cooking_station_take");
-            itemSpawnSoundEffectData.m_variant = -1;
-
-            List<EffectList.EffectData> itemSpawnList = new List<EffectList.EffectData>();
-            itemSpawnList.Add(itemSpawnEffectData);
-            itemSpawnList.Add(itemSpawnSoundEffectData);
-
-            itemSpawnEffects.m_effectPrefabs = itemSpawnList.ToArray();
-
-            EffectList.EffectData openingGlowEffectData = new EffectList.EffectData();
-            openingGlowEffectData.m_enabled = true;
-            openingGlowEffectData.m_prefab = PrefabManager.Instance.GetPrefab("fx_HildirChest_Unlock");
-            openingGlowEffectData.m_variant = 0;
-
-            List<EffectList.EffectData> openingGlowList = new List<EffectList.EffectData>();
-            openingGlowList.Add(openingGlowEffectData);
-
-            openingEffects.m_effectPrefabs = openingGlowList.ToArray();
+            chestOpeningEffects = WizshBoneTwitchIntegration.Instance.effectLists.ChestOpenEffect;
+            despawnEffect = WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium;
+            spawnEffects = WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium;
+            spawnItemEffects = WizshBoneTwitchIntegration.Instance.effectLists.SpawnItemEffect;
 
             m_netView = gameObject.GetComponent<ZNetView>();
             m_supriseChestInteract = transform.Find("chest_top").gameObject.GetComponent<TwitchSurpriseChestInteract>();
@@ -78,22 +53,23 @@ namespace WizshBoneTwitchIntegration.Components
             if (chestDataString == "")
                 return;
 
-            string chestRedeemDataString = m_netView.GetZDO().GetString(chestRedeemDataHash, "");
+            string[] chestRedeemData = chestDataString.Split('|');
+            m_redeemerName = chestRedeemData[0];
+            m_redeemTitle = chestRedeemData[1];
+            Jotunn.Logger.LogWarning("Retrieved Surprise Chest persitent data: " + m_redeemerName + ", " + m_redeemTitle);
 
-            if (chestDataString == "")
+            RedeemEntry redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
+
+            if (redeem == null || redeem.chestData == null)
             {
-                Jotunn.Logger.LogError("Could not find corresponding redeem data for this chest!");
+                Jotunn.Logger.LogError("Could not find redeem by title or chestdata is null!");
                 return;
             }
 
-            string[] chestRedeemData = chestRedeemDataString.Split('|');
-            Jotunn.Logger.LogWarning("Retrieved Surprise Chest persitent data! " + chestRedeemData[0] + ", " + chestRedeemData[1]);
-
-            SurpriseChestData chestData = StringToChestData(chestDataString);
-            m_redeemerName = chestRedeemData[0];
-            m_redeemTitle = chestRedeemData[1];
+            SurpriseChestData chestData = redeem.chestData;
             m_amount = chestData.amount;
             m_force = chestData.force;
+            m_items = chestData.items;
             m_interact = chestData.interact;
             m_mimic = chestData.mimicChance == 0 ? false : Random.Range(0, 100) <= chestData.mimicChance;
             m_random = chestData.random;
@@ -106,9 +82,9 @@ namespace WizshBoneTwitchIntegration.Components
         {
             m_redeemerName = customRewardEvent.RedeemerName;
             m_redeemTitle = customRewardEvent.CustomRewardTitle;
-            //m_amount = chestData.amount > 5 ? 5 : chestData.amount < 1 ? 1 : chestData.amount;
             m_amount = chestData.amount;
             m_force = chestData.force;
+            m_items = chestData.items;
             m_interact = chestData.interact;
             m_mimic = chestData.mimicChance == 0 ? false : Random.Range(0, 100) <= chestData.mimicChance;
             m_random = chestData.random;
@@ -118,10 +94,9 @@ namespace WizshBoneTwitchIntegration.Components
 
             Minimap.instance.DiscoverLocation(transform.localPosition, Minimap.PinType.Icon3, "Surprise Chest", false);
 
-            m_netView.GetZDO().Set(chestDataHash, ChestDataToString(chestData));
-            m_netView.GetZDO().Set(chestRedeemDataHash, $"{m_redeemerName}|{m_redeemTitle}");
+            m_netView.GetZDO().Set(chestDataHash, $"{m_redeemerName}|{m_redeemTitle}");
 
-            TriggerStartEffects();
+            TriggerSpawnEffects();
 
             if (!m_interact)
                 StartCoroutine(OpenDelay());
@@ -129,8 +104,8 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void Open()
         {
-            m_supriseChestInteract.m_animator.enabled = true;
-            TriggerOpeningEffect();
+            m_supriseChestInteract.m_animator.SetTrigger("Open");
+            TriggerChestOpeningEffect();
             Invoke(nameof(SpawnItems), 4f);
         }
 
@@ -146,16 +121,15 @@ namespace WizshBoneTwitchIntegration.Components
             try
             {
                 float timeOffset = 0f;
-                List<SurpriseChestSpawnData> spawnList = RedeemHelper.GetSurpriseChestSpawnDataByTitle(m_redeemTitle);
 
-                if (spawnList == null)
+                if (m_items == null)
                 {
-                    Jotunn.Logger.LogError("Spawn list is null");
+                    Jotunn.Logger.LogError("No items to spawn!");
                     return;
                 }
 
                 if (!m_random)
-                    m_amount = spawnList.Count;
+                    m_amount = m_items.Count;
 
                 for (int index = 0; index < m_amount; index++)
                 {
@@ -164,9 +138,9 @@ namespace WizshBoneTwitchIntegration.Components
                     SurpriseChestSpawnData spawnData;
 
                     if (m_random)
-                        spawnData = spawnList[Random.Range(0, spawnList.Count)];
+                        spawnData = m_items[Random.Range(0, m_items.Count)];
                     else
-                        spawnData = spawnList[index];
+                        spawnData = m_items[index];
 
                     if (m_yeetChance > 0 && Random.Range(0, 100) <= m_yeetChance)
                         force = 1000f;
@@ -200,45 +174,45 @@ namespace WizshBoneTwitchIntegration.Components
                         continue;
 
                     if (creature.amount > 0)
-                        CreatureHelper.SpawnCreatures(creature, spawnPointTrans, new CustomRewardEvent() { RedeemerName = m_redeemerName }, false);
+                        CreatureHelper.SpawnCreatures(creature, spawnPointTrans, new CustomRewardEvent() { RedeemerName = m_redeemerName }, false, force);
                 }
             }
 
             if (spawnData.itemData != null)
                 ItemHelper.SpawnItem(spawnData.itemData, spawnPointTrans, force);
 
-            TriggerItemSpawnEffect();
+            TriggerSpawnItemEffect();
         }
 
         public void OnDestroy()
         {
-            TriggerEndEffects();
+            TriggerDespawnEffects();
             Minimap.instance.RemovePin(transform.position, 5f);
         }
 
-        private void TriggerEndEffects()
+        private void TriggerChestOpeningEffect()
         {
-            endEffects.Create(transform.position, transform.rotation);
+            chestOpeningEffects.Create(transform.position, transform.rotation);
         }
 
-        private void TriggerItemSpawnEffect()
+        private void TriggerDespawnEffects()
         {
-            itemSpawnEffects.Create(transform.position, transform.rotation);
+            despawnEffect.Create(transform.position, transform.rotation);
         }
 
-        private void TriggerOpeningEffect()
+        private void TriggerSpawnEffects()
         {
-            openingEffects.Create(transform.position, transform.rotation);
+            spawnEffects.Create(transform.position, transform.rotation);
         }
 
-        private void TriggerStartEffects()
+        private void TriggerSpawnItemEffect()
         {
-            startEffects.Create(transform.position, transform.rotation);
+            spawnItemEffects.Create(transform.position, transform.rotation);
         }
 
         private float ChangeAngleByIndex(int index)
         {
-            switch (index)
+            switch (index % 5)
             {
                 case 0:
                 default:
@@ -252,34 +226,6 @@ namespace WizshBoneTwitchIntegration.Components
                 case 4:
                     return -100f;
             }
-        }
-
-        public string ChestDataToString(SurpriseChestData chestData)
-        {
-            string items = "";
-
-            if (items != "")
-                items = items.Remove(items.Length - 1);
-
-            return $"{chestData.amount}|{chestData.announceMessage}|{chestData.force}|{chestData.interact}|{chestData.mimicChance}|{chestData.random}|{chestData.spawnDelay}|{chestData.type}|{chestData.yeetChance}";
-        }
-
-        public SurpriseChestData StringToChestData(string value)
-        {
-            string[] data = value.Split('|');
-            string[] items = data[4].Split(';');
-            SurpriseChestData chestData = new SurpriseChestData();
-            chestData.amount = int.Parse(data[0]);
-            chestData.announceMessage = data[1];
-            chestData.force = float.Parse(data[2]);
-            chestData.interact = bool.Parse(data[3]);
-            chestData.mimicChance = int.Parse(data[4]);
-            chestData.random = bool.Parse(data[5]);
-            chestData.spawnDelay = float.Parse(data[6]);
-            chestData.type = data[7];
-            chestData.yeetChance = int.Parse(data[8]);
-
-            return chestData;
         }
     }
 }

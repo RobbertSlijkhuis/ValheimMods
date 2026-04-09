@@ -114,7 +114,8 @@ namespace WizshBoneTwitchIntegration.Harmony
                 if (customRewards == null)
                     return;
 
-                customRewards.SetRewards();
+                if (customRewards.m_enabled)
+                    customRewards.SetRewards();
             }
             catch (Exception e)
             {
@@ -225,7 +226,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                 Character character = hit.GetAttacker();
 
                 if (character != null)
-                    return character.m_group != WizshBoneTwitchIntegration.NoDamageStructureGroup;
+                    return character.m_group != WizshBoneTwitchIntegration.HumanoidGroupNoDamageStructure;
 
                 return true;
             }
@@ -283,6 +284,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                 GameObject gameObject = Projectile.FindHitObject(contactPoint.otherCollider);
                 Ship ship = null;
                 WearNTear wearNTear = null;
+                Piece piece = null;
 
                 if (gameObject == null)
                     return true;
@@ -293,26 +295,28 @@ namespace WizshBoneTwitchIntegration.Harmony
                 {
                     ship = gameObject.GetComponent<Ship>();
                     wearNTear = gameObject.GetComponent<WearNTear>();
+                    piece = gameObject.GetComponent<Piece>();
                 }
                 else
                 {
                     allowDamage = gameObject.gameObject.GetComponent<TwitchAllowDamage>();
                     ship = __instance.GetComponent<Ship>();
                     wearNTear = __instance.GetComponent<WearNTear>();
+                    piece = __instance.GetComponent<Piece>();
                 }
 
-                if (allowDamage == null)
+                if (allowDamage == null || piece == null || piece.GetCreator() == 0)
                     return true;
 
                 if (ship != null && !allowDamage.m_allowDamageShips)
                 {
-                    Jotunn.Logger.LogWarning("Prevent IMPACT damage to ship! " + gameObject.name);
+                    // Jotunn.Logger.LogWarning("Prevent IMPACT damage to ship! " + gameObject.name);
                     return false;
                 }
 
                 else if (wearNTear != null && !allowDamage.m_allowDamageStructures)
                 {
-                    Jotunn.Logger.LogWarning("Prevent IMPACT damage to structures! " + gameObject.name);
+                    // Jotunn.Logger.LogWarning("Prevent IMPACT damage to structures! " + gameObject.name);
                     return false;
                 }
 
@@ -341,10 +345,8 @@ namespace WizshBoneTwitchIntegration.Harmony
 
                 foreach (Collider collider in objects)
                 {
-                    Jotunn.Logger.LogWarning(collider.gameObject.name);
                     if (collider.gameObject.GetComponentInChildren<TwitchSafeZone>())
                     {
-                        Jotunn.Logger.LogWarning("IN SAFE ZONE, PREVENT");
                         UnityEngine.Object.Destroy(__instance.gameObject);
                         return false;
                     }

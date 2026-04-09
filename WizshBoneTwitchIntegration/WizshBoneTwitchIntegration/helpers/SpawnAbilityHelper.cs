@@ -8,6 +8,7 @@ using WizshBoneTwitchIntegration.Extensions;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 using WizshBoneTwitchIntegration.Types;
+using static SpawnAbility;
 
 namespace WizshBoneTwitchIntegration.Helpers
 {
@@ -76,6 +77,9 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (spawnAbilityData.spawnRadius != null)
                 spawnAbility.m_spawnRadius = (float)spawnAbilityData.spawnRadius;
 
+            if (spawnAbilityData.targetType != null)
+                spawnAbility.m_targetType = (TargetType)SpawnAbilityTargetType.ConvertToTargetType(spawnAbilityData.targetType);
+
             if (spawnAbilityData.velocity != null)
                 spawnAbility.m_projectileVelocity = (float)spawnAbilityData.velocity;
 
@@ -122,7 +126,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
 
             if (spawnAbilityData.announceMessage != null)
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, spawnAbilityData.announceMessage));
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, spawnAbilityData.announceMessage), 3000);
 
             CreatureData creatureData = new CreatureData();
             m_chat.StartCoroutine(spawnAbility.Spawn2(customRewardEvent, spawnAbilityData, creatureData));

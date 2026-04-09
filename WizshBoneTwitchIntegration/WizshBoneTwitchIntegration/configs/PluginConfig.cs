@@ -19,10 +19,12 @@ namespace WizshBoneTwitchIntegration.Configs
 
         public static ConfigEntry<KeyboardShortcut> configWizshBoneWindow;
 
-        public static ConfigEntry<bool> configChattingEnabled;
-        public static ConfigEntry<float> configChattingRadius;
-        public static ConfigEntry<float> configChattingInterval;
         public static ConfigEntry<string> configChattingBlackList;
+        public static ConfigEntry<bool> configChattingEnabled;
+        public static ConfigEntry<int> configChattingClaimDuration;
+        public static ConfigEntry<float> configChattingCullingRange;
+        public static ConfigEntry<float> configChattingInterval;
+        public static ConfigEntry<float> configChattingRadius;      
 
         public static ConfigEntry<float> configCreaturesMaxAmount;
         public static ConfigEntry<float> configCreaturesMaxRadius;
@@ -43,6 +45,8 @@ namespace WizshBoneTwitchIntegration.Configs
 
         public static ConfigEntry<string> configWardRecipe;
         public static ConfigEntry<bool> configWardBurnCreatures;
+        public static ConfigEntry<bool> configWardPushCreatures;
+        public static ConfigEntry<float> configWardPushForce;
 
         // Other
         private static int entryCount = 1000;
@@ -59,6 +63,23 @@ namespace WizshBoneTwitchIntegration.Configs
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
 
 
+            configChattingBlackList = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionChatting, "Chatting black list", "Nightbot, StreamElements",
+                new ConfigDescription("Blacklist for the in-game chatting feature to prevent bots or viewers from being chosen", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+            configChattingBlackList.SettingChanged += (obj, attr) =>
+            {
+                TwitchChatting chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
+                chatting.DeserializeUserBlackList(configChattingBlackList.Value);
+            };
+
+            configChattingClaimDuration = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionChatting, "Chatting claim duration", 300,
+                new ConfigDescription("The duration of the creature claim (0 means permanent)", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+
+            configChattingCullingRange = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionChatting, "Chatting culling range", 50f,
+                new ConfigDescription("The range where creature messages are still visible", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+
             configChattingEnabled = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionChatting, "Enable in-game chatting feature", true,
                 new ConfigDescription("Wether viewer chat messages are shown above creatures in-game", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
@@ -68,15 +89,6 @@ namespace WizshBoneTwitchIntegration.Configs
                 chatting.m_enabled = configChattingEnabled.Value;
             };
 
-            configChattingRadius = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionChatting, "Chatting scan radius", 20f,
-                new ConfigDescription("The radius that the chatting system will scan for creatures", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
-            configChattingRadius.SettingChanged += (obj, attr) =>
-            {
-                TwitchChatting chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
-                chatting.m_scanRadius = configChattingRadius.Value;
-            };
-
             configChattingInterval = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionChatting, "Chatting scan interval", 60f,
                 new ConfigDescription("The interval that the chatting system will scan for creatures", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
@@ -84,15 +96,16 @@ namespace WizshBoneTwitchIntegration.Configs
             {
                 TwitchChatting chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
                 chatting.m_scanInterval = configChattingInterval.Value;
+                chatting.InvokeRepeatingScan();
             };
 
-            configChattingBlackList = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionChatting, "Chatting black list", "Nightbot, StreamElements",
-                new ConfigDescription("Blacklist for the in-game chatting feature to prevent bots or viewers from being chosen", null,
+            configChattingRadius = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionChatting, "Chatting scan radius", 30f,
+                new ConfigDescription("The radius that the chatting system will scan for creatures", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
-            configChattingBlackList.SettingChanged += (obj, attr) =>
+            configChattingRadius.SettingChanged += (obj, attr) =>
             {
                 TwitchChatting chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
-                chatting.DeserializeUserBlackList(configChattingBlackList.Value);
+                chatting.m_scanRadius = configChattingRadius.Value;
             };
 
 
@@ -221,8 +234,15 @@ namespace WizshBoneTwitchIntegration.Configs
                 piece.m_resources = RecipeHelper.GetAsPieceRequirementArray(configWardRecipe.Value, null, null);
             };
 
-            configWardBurnCreatures = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionWard, "Twitchy Ward burn spawned creatures", true,
+            configWardBurnCreatures = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionWard, "Ward burn spawned creatures", false,
                 new ConfigDescription("Wether the Twitchy Ward will burn creatures (only spawned by the mod)", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+
+            configWardPushCreatures = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionWard, "Ward push out spawned creatures", true,
+                new ConfigDescription("Wether the Twitchy Ward will push out creatures (only spawned by the mod)", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+            configWardPushForce = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionWard, "Ward push force", 2000f,
+                new ConfigDescription("How much force the Twitchy Ward will push out creatures (only spawned by the mod)", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
         }
 

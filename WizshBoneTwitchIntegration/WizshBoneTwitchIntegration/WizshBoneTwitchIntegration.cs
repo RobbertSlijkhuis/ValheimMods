@@ -36,12 +36,15 @@ namespace WizshBoneTwitchIntegration
         public CustomEffectLists effectLists = new CustomEffectLists();
         private ButtonConfig wizshBoneWindowButton;
         public static bool useRedeemCommand = false;
-        public static readonly string NoDamageStructureGroup = "WBTI_NoDamageStructure";
+        public static readonly string HumanoidGroupNoDamageStructure = "WBTI_HumanoidGroupNoDamageStructure";
+        public static readonly string HumanoidGroupSpawnEnemy = "WBTI_HumanoidGroupSpawnEnemy";
+        public static readonly string HumanoidGroupSpawnFriendly = "WBTI_HumanoidGroupSpawnFriendly";
 
         public static readonly string customConfigPath = "BepInEx/config/WizshBoneTwitchIntegration";
         public static readonly string redeemsConfigPath = customConfigPath + "/redeems.yaml";
         public static readonly string redeemsSchemaPath = customConfigPath + "/redeems-schema.json";
         public static readonly string bannedPath = customConfigPath + "/banned.txt";
+        public static readonly string viewersPath = customConfigPath + "/viewers.yaml";
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -102,6 +105,8 @@ namespace WizshBoneTwitchIntegration
             prefabs.GuardStone.transform.Find("safezone").gameObject.AddComponent<TwitchSafeZone>();
             prefabs.GuardStone.transform.Find("controls").gameObject.AddComponent<TwitchSafeZoneControls>();
 
+            prefabs.WeatherZone.AddComponent<TwitchPersistentDestruction>();
+
             PieceConfig pieceConfig = new PieceConfig();
             pieceConfig.Enabled = true;
             pieceConfig.Name = "Twitchy Ward";
@@ -110,7 +115,6 @@ namespace WizshBoneTwitchIntegration
             pieceConfig.Category = PieceCategories.Misc;
             pieceConfig.Requirements = RecipeHelper.GetAsRequirementConfigArray(PluginConfig.configWardRecipe.Value, null, null);
             PieceManager.Instance.AddPiece(new CustomPiece(prefabs.GuardStone, true, pieceConfig));
-            PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
 
             // Temp
             GameObject shieldGen = PrefabManager.Instance.GetPrefab("piece_shieldgenerator");
@@ -123,16 +127,20 @@ namespace WizshBoneTwitchIntegration
             forceField.rotationAttraction = 1f;
             forceField.vectorFieldAttraction = 1f;
             forceField.vectorFieldSpeed = 1f;
+
+            PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
         }
 
         private void AddPersistentComponents()
         {
-            Jotunn.Logger.LogWarning("AddPersistentComponents()");
+            //Jotunn.Logger.LogWarning("AddPersistentComponents()");
             foreach (string name in ZNetScene.instance.GetPrefabNames())
             {
                 GameObject prefab = PrefabManager.Instance.GetPrefab(name);
                 Humanoid humanoid = prefab.GetComponent<Humanoid>();
                 MonsterAI monsterAI = prefab.GetComponent<MonsterAI>();
+                Piece piece = prefab.GetComponent<Piece>();
+                ImpactEffect impactEffect = prefab.GetComponent<ImpactEffect>();
                 Mister mister = prefab.GetComponent<Mister>();
                 Trap trap = prefab.GetComponent<Trap>();
                 Ship ship = prefab.GetComponent<Ship>();
@@ -163,15 +171,21 @@ namespace WizshBoneTwitchIntegration
                     continue;
                 }
 
-                if (mister != null || trap != null)
+                if (piece != null)
                 {
-                    Jotunn.Logger.LogWarning($"Adding persistent destruction to {name}");
+                    // Jotunn.Logger.LogWarning($"Adding persistent piece data to {name}");
+                    prefab.AddComponent<TwitchPiecePersistentData>();
+                }
+
+                if (impactEffect != null || mister != null || trap != null)
+                {
+                    //Jotunn.Logger.LogWarning($"Adding persistent destruction to {name}");
                     prefab.AddComponent<TwitchPersistentDestruction>();
                 }
 
                 if (ship != null)
                 {
-                    Jotunn.Logger.LogWarning($"Adding safezone to ship {name}");
+                    //Jotunn.Logger.LogWarning($"Adding safezone to ship {name}");
                     Transform onboardTriggerTrans = prefab.transform.Find("OnboardTrigger");
                     BoxCollider boxCollider = onboardTriggerTrans.gameObject.GetComponent<BoxCollider>();
                     onboardTriggerTrans.gameObject.AddComponent<TwitchSafeZone>();
@@ -191,7 +205,7 @@ namespace WizshBoneTwitchIntegration
 
                 if (prefab.name == "fuling_trap" || prefab.name == "piece_trap_troll")
                 {
-                    Jotunn.Logger.LogWarning("Found fuling_trap, applying persistent damage");
+                    //Jotunn.Logger.LogWarning("Found fuling_trap, applying persistent damage");
                     prefab.gameObject.AddComponent<TwitchPersistentDamage>();
                 }
             }
@@ -206,7 +220,7 @@ namespace WizshBoneTwitchIntegration
             foreach (string name in traders)
             {
                 GameObject prefab = PrefabManager.Instance.GetPrefab(name);
-                Jotunn.Logger.LogWarning($"Adding safezone to Traders {name}");
+                //Jotunn.Logger.LogWarning($"Adding safezone to Traders {name}");
                 Transform forceFieldTransform = prefab.transform.Find("ForceField");
 
                 if (forceFieldTransform == null)
@@ -223,7 +237,7 @@ namespace WizshBoneTwitchIntegration
                 capsuleCollider.includeLayers = LayerMask.GetMask("piece");
 
                 TwitchSafeZone safezone = forceFieldTransform.gameObject.AddComponent<TwitchSafeZone>();
-                safezone.m_burnCreatures = false;
+                // safezone.m_burnCreatures = false;
             }
 
             PrefabManager.OnPrefabsRegistered -= AddPersistentComponents;
@@ -231,15 +245,65 @@ namespace WizshBoneTwitchIntegration
 
         private void AddEffectLists()
         {
-            EffectList.EffectData SpawnEffectData = new EffectList.EffectData();
-            SpawnEffectData.m_enabled = true;
-            SpawnEffectData.m_prefab = PrefabManager.Instance.GetPrefab("vfx_corpse_destruction_small");
-            SpawnEffectData.m_variant = -1;
+            // Spawn cloud effects
+            EffectList.EffectData SpawnEffectSmallData = new EffectList.EffectData();
+            SpawnEffectSmallData.m_enabled = true;
+            SpawnEffectSmallData.m_prefab = PrefabManager.Instance.GetPrefab("vfx_corpse_destruction_small");
+            SpawnEffectSmallData.m_variant = -1;
 
-            List<EffectList.EffectData> SpawnEffectDataList = new List<EffectList.EffectData>();
-            SpawnEffectDataList.Add(SpawnEffectData);
+            List<EffectList.EffectData> SpawnEffectSmallDataList = new List<EffectList.EffectData>();
+            SpawnEffectSmallDataList.Add(SpawnEffectSmallData);
 
-            effectLists.SpawnEffect.m_effectPrefabs = SpawnEffectDataList.ToArray();
+            effectLists.SpawnEffectSmall.m_effectPrefabs = SpawnEffectSmallDataList.ToArray();
+
+            EffectList.EffectData SpawnEffectMediumData = new EffectList.EffectData();
+            SpawnEffectMediumData.m_enabled = true;
+            SpawnEffectMediumData.m_prefab = PrefabManager.Instance.GetPrefab("vfx_corpse_destruction_medium");
+            SpawnEffectMediumData.m_variant = -1;
+
+            List<EffectList.EffectData> SpawnEffectMediumDataList = new List<EffectList.EffectData>();
+            SpawnEffectMediumDataList.Add(SpawnEffectMediumData);
+
+            effectLists.SpawnEffectMedium.m_effectPrefabs = SpawnEffectMediumDataList.ToArray();
+
+            EffectList.EffectData SpawnEffectLargeData = new EffectList.EffectData();
+            SpawnEffectLargeData.m_enabled = true;
+            SpawnEffectLargeData.m_prefab = PrefabManager.Instance.GetPrefab("vfx_corpse_destruction_large");
+            SpawnEffectLargeData.m_variant = -1;
+
+            List<EffectList.EffectData> SpawnEffectLargeDataList = new List<EffectList.EffectData>();
+            SpawnEffectLargeDataList.Add(SpawnEffectLargeData);
+
+            effectLists.SpawnEffectLarge.m_effectPrefabs = SpawnEffectLargeDataList.ToArray();
+
+            // Spawn item smoke and sound effect
+            EffectList.EffectData itemSpawnEffectData = new EffectList.EffectData();
+            itemSpawnEffectData.m_enabled = true;
+            itemSpawnEffectData.m_prefab = PrefabManager.Instance.GetPrefab("vfx_Place_wood_pole");
+            itemSpawnEffectData.m_variant = -1;
+
+            EffectList.EffectData itemSpawnSoundEffectData = new EffectList.EffectData();
+            itemSpawnSoundEffectData.m_enabled = true;
+            itemSpawnSoundEffectData.m_prefab = PrefabManager.Instance.GetPrefab("sfx_cooking_station_take");
+            itemSpawnSoundEffectData.m_variant = -1;
+
+            List<EffectList.EffectData> itemSpawnList = new List<EffectList.EffectData>();
+            itemSpawnList.Add(itemSpawnEffectData);
+            itemSpawnList.Add(itemSpawnSoundEffectData);
+
+            effectLists.SpawnItemEffect.m_effectPrefabs = itemSpawnList.ToArray();
+
+            // Chest open glow effect
+            EffectList.EffectData openingGlowEffectData = new EffectList.EffectData();
+            openingGlowEffectData.m_enabled = true;
+            openingGlowEffectData.m_prefab = PrefabManager.Instance.GetPrefab("fx_HildirChest_Unlock");
+            openingGlowEffectData.m_variant = 0;
+
+            List<EffectList.EffectData> openingGlowList = new List<EffectList.EffectData>();
+            openingGlowList.Add(openingGlowEffectData);
+
+            effectLists.ChestOpenEffect.m_effectPrefabs = openingGlowList.ToArray();
+
             PrefabManager.OnVanillaPrefabsAvailable -= AddEffectLists;
         }
 
@@ -278,12 +342,13 @@ namespace WizshBoneTwitchIntegration
         private void InitCommands()
         {
             CommandManager.Instance.AddConsoleCommand(new BanTwitchUserCommand());
+            CommandManager.Instance.AddConsoleCommand(new ClaimCreatureCommand());
             CommandManager.Instance.AddConsoleCommand(new ClearBossKeysCommand());
             CommandManager.Instance.AddConsoleCommand(new ClearCustomStatusEffectsCommand());
-            //CommandManager.Instance.AddConsoleCommand(new ClearFlashbangCommand());
             CommandManager.Instance.AddConsoleCommand(new ListBannedTwitchUsers());
             CommandManager.Instance.AddConsoleCommand(new OpenConfigFolderCommand());
             CommandManager.Instance.AddConsoleCommand(new ReloadRedeemsCommand());
+            CommandManager.Instance.AddConsoleCommand(new ReloadViewersCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveCreatureClaimCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveSurpriseChestsCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveTwitchCreaturesCommand());
@@ -313,6 +378,8 @@ namespace WizshBoneTwitchIntegration
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ChestIron, true));
             prefabs.ChestGold = assetBundle.LoadAsset<GameObject>("ChestGold_WBTI");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ChestGold, true));
+            prefabs.WeatherZone = assetBundle.LoadAsset<GameObject>("WBTI_WeatherZone");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.WeatherZone, true));
 
             effects.Burning = assetBundle.LoadAsset<SE_Stats>("Burning_WBTI");
             effects.Freezing = assetBundle.LoadAsset<StatusEffect>("Freezing_WBTI");
@@ -323,60 +390,93 @@ namespace WizshBoneTwitchIntegration
             sprites.BigMeSprite = assetBundle.LoadAsset<Sprite>("BigMeSprite_WBTI");
 
             materials.RecolorAbomination = assetBundle.LoadAsset<Material>("Abomination_recolor_WBTI");
+            materials.RecolorBat = assetBundle.LoadAsset<Material>("Bat_recolor_WBTI");
             materials.RecolorBjorn = assetBundle.LoadAsset<Material>("Bjorn_recolor_WBTI");
             materials.RecolorBjornZebra = assetBundle.LoadAsset<Material>("Bjorn_recolor_zebra_WBTI");
             materials.RecolorBlob = assetBundle.LoadAsset<Material>("Blob_recolor_WBTI");
             materials.RecolorBlobSlime = assetBundle.LoadAsset<Material>("BlobSlime_recolor_WBTI");
             materials.RecolorBoar = assetBundle.LoadAsset<Material>("Boar_recolor_WBTI");
             materials.RecolorBoarTusk = assetBundle.LoadAsset<Material>("BoarTusk_recolor_WBTI");
+            materials.RecolorCultist = assetBundle.LoadAsset<Material>("Cultist_recolor_WBTI");
+            materials.RecolorCultistCape = assetBundle.LoadAsset<Material>("CultistCape_recolor_WBTI");
             materials.RecolorDraugr = assetBundle.LoadAsset<Material>("Draugr_recolor_WBTI");
             materials.RecolorDraugrFem = assetBundle.LoadAsset<Material>("Draugr_Ranged_recolor_WBTI");
             materials.RecolorDraugrElite = assetBundle.LoadAsset<Material>("Draugr_Elite_recolor_WBTI");
+            materials.RecolorFenring = assetBundle.LoadAsset<Material>("Fenring_recolor_WBTI");
             materials.RecolorGhost = assetBundle.LoadAsset<Material>("Ghost_recolor_WBTI");
             materials.RecolorGreydwarf = assetBundle.LoadAsset<Material>("Greydwarf_recolor_WBTI");
             materials.RecolorGreydwarfShaman = assetBundle.LoadAsset<Material>("Greydwarf_Shaman_recolor_WBTI");
             materials.RecolorGreydwarfRootsword = assetBundle.LoadAsset<Material>("RootSword_recolor_WBTI");
+            materials.RecolorHatchling = assetBundle.LoadAsset<Material>("Hatchling_recolor_WBTI");
+            materials.RecolorLeech = assetBundle.LoadAsset<Material>("Leech_recolor_WBTI");
+            materials.RecolorLox = assetBundle.LoadAsset<Material>("Lox_recolor_WBTI");
             materials.RecolorNeck = assetBundle.LoadAsset<Material>("Neck_recolor_WBTI");
+            materials.RecolorSerpent = assetBundle.LoadAsset<Material>("Serpent_recolor_WBTI");
             materials.RecolorSkeleton = assetBundle.LoadAsset<Material>("Skeleton_recolor_WBTI");
+            materials.RecolorStoneGolem = assetBundle.LoadAsset<Material>("StoneGolem_recolor_WBTI");
+            materials.RecolorStoneGolemClubs = assetBundle.LoadAsset<Material>("StoneGolemClubs_recolor_WBTI");
+            materials.RecolorSurtling = assetBundle.LoadAsset<Material>("Surtling_recolor_WBTI");
             materials.RecolorTroll = assetBundle.LoadAsset<Material>("Troll_recolor_WBTI");
+            materials.RecolorUlv = assetBundle.LoadAsset<Material>("Ulv_recolor_WBTI");
+            materials.RecolorWolf = assetBundle.LoadAsset<Material>("Wolf_recolor_WBTI");
             materials.RecolorWraith = assetBundle.LoadAsset<Material>("Wraith_recolor_WBTI");
             materials.RecolorWraithZebra = assetBundle.LoadAsset<Material>("Wraith_recolor_zebra_WBTI");
 
             // ====================================
             // ValCON:
             // ====================================
-            // Setup Twitch integration for a tower defense game? Section of the stream.
+            // SHOULD
             // Add a nuke all creatures command/redeem? Kills all creatures and refunds points
-            // Setup different types of surprise chests liked food, creatures, materials? and streamer doesnt know content
+            // Add options to allow monsters to fight each other
+            // Add options for creatures health/damage to be configurable (percentage based)
+            // Spawn locations redeem
+
+            // COULD
+            // Setup Twitch integration for a tower defense game? Section of the stream.
+            // Drop all equipment/inventory redeem
+            // Add multiple surprise chests where some them can explose
+            // Add redeem that adds extra death markers on the map to confuse the streamer, alsoa add gravestones that can explode
+            // Shrink/grow the boat when player is sailing
+            // Shrink/Grow cancel each other out
+            // Disable redeems show popup to refund points Yes or no
+            // Fix streamer is in safe zone message overwriting others
+            // Setting friendly on follow via pressing E makes the emote not work on them
+            // Add categories to redeems and then prevent spam
+            // Add a redeem that fills your inventory with stone Or somethign else that is heavy
 
             // ====================================
             // TODO:
             // ====================================
+            // Serpent, noodle detonate
+            // Teleport allies to streamer emote
+            // SPAWN MISILE (mistile) redeem!
+            // Ppl specific monsters
+            // - Xainty the Greydwarf
+            // - Flow the Deathsquito
+            // - Crys the Fueling
+            // - NECK SQUAD (Lothren, Soma, Phenazo, 1mmun1tyy, DeathWizsh, Bonkerz)
+
+
+            // Abomination can still spawn in dungeon via Surprice chests
+            // Add GUI element that shows enable status
             // Redeems still re-enabling when supose to be disabled
-            // Add options to allow monsters to fight each other
-            // Greydwarfds friendlies do no attack enemy greyfwards
-            // Add limit of how much the mob can be active on one time
+
             // Add name option to creatureData (ZDO)
             // Add size option to creatureData (ZDO)
-            // Save/load recolors from a file
-            // Shrink/Grow cancel each other out
-            // Shrink/grow the boat when player is sailing
             // Reset redeem cooldown somehow when something went wrong? Update CustomRewards?
             // Add internal user/global cooldown functionality cause Twitch's is DODGY AF
-
+            // Allow viewers to vote on random happening in chat (1: puke, 2: gain buff, 3: spawn random monsters, 4: Give random item
             // Add CreatureData and ItemData to SpawnAbility
+            // Add redeem that adds pillars or other terrain modification
             // Make safezones square (option)
-            // Armor and shield don't get thrown out very far out of suprise chests
             // Boat speed redeem, positive and negative
             // Roots (enemy/friendly) redeem
+            // One time use portal spawn redeem
             // Reverse controlls redeem
             // Temp naked redeem
             // Spawn items redeem
-            // Change weather/tod redeem
-            // Drop all equipment/inventory redeem
             // Multiplayer execute redeem for all players
             // Add leader board of points spend, deaths caused, saves maybe? Other statistics?
-
             // TalkInteract always show Feo's history fact message, also does not properly show follow/rename creature
             // Log creatures dieing from safezone
             // Prevent wolfs/fenrings from howling all the time as helpers
@@ -384,10 +484,13 @@ namespace WizshBoneTwitchIntegration
             // ====================================
             // IDEAS:
             // ====================================
+            // Kassie mentioned to lower the hp/damage creatures do when there is more
+            // Babbenabbe add a rush/adrenaline whe there is many mobs
+            // Waterfox setting a timer, then do something (she explain later what she meant)
             // Allow redeemers to give specific item
             // Allow redeemers to choose the surprise for surprise chests
             // Timeout redeemers as a chance when redeeming surprise chests
-            // Remove/add redeems when player leaves/enters a dungeon and check what kind of dungeon the player is in
+            // Remove/add redeems when streamer leaves/enters a dungeon and check what kind of dungeon the player is in
             // Make certain creatures smaller in dungeons so they can be spawned
             // More loot if mob is grown?
             // LoyalBones: A red skeleton with normal damage but insane health pool
@@ -399,8 +502,18 @@ namespace WizshBoneTwitchIntegration
             // Add options to super charge a spawned creature, more hp, damage, equip gear?
 
             // ====================================
-            // IN PROGRESS:
+            // DONE
             // ====================================
+            // DONE: Add maximum limit of how many of the same spawned creatures are allowed
+            // DONE: Add maximum limit of total spawned creaturs are allowed
+            // DONE: Change weather/tod redeem
+            // DONE: Save/load recolors from a file
+            // DONE: Add new rains like meteors from Yagluth and Fader, Karve rain etc.
+            // DONE: Add persistend data for pieces, like allow drops
+            // DONE: Armor, shield, weapons, monsters don't get thrown out very far out of suprise chests
+            // DONE: Fix noodles spawning in dungeons
+            // DONE: Add option to block/push out enemies from Safezones
+            // DONE: Greydwarfds friendlies do no attack enemy greyfwards
             // DONE: Add a mass follow/unfollow method
             // DONE: Sausage rain for Bearded
             // DONE: Fix starred mobs recolors
@@ -448,7 +561,7 @@ namespace WizshBoneTwitchIntegration
             // - Soma_af a bear (reskinned as a white/pink teddybear with antlers as soma has a bear with antlers emote) Spawns when cooking? Drops random food when sneezing? Adds a 4th food slot?
             // - Make DurdyJay exactly like Odin, and spawns randomly in like Odin. But instead of dissappearing straight away he gets Googly Eyes and a stick out Tongue and says something nice/somewhat durdy. And his name changes to DurdyJay at that moment ofc (blessing?)
             // - Xxainty iets van een greydwarf ofzo
-            // - Kassie The god of chaos, makes map dissapear when pissed off?
+            // - Kassie (Kassandra) The god of chaos, makes map dissapear when pissed off?
             // - itsnanobug?
             // - Azeriath? Blessing: Less fall damage he said
             // - jaqkEquips

@@ -29,48 +29,54 @@ namespace WizshBoneTwitchIntegration.Components
             }
 
             m_name = m_netView.GetZDO().GetString(nameHash, "");
+            m_ignoreWard = m_netView.GetZDO().GetBool(ignoreWardHash, false);
 
             if (m_name == "")
                 return;
 
+            TwitchCreatureClaim creatureClaim = gameObject.AddComponent<TwitchCreatureClaim>();
             m_creatureDataString = m_netView.GetZDO().GetString(creatureDataHash, "");
 
             if (m_creatureDataString == "")
             {
-                Jotunn.Logger.LogError("Could not find creature data string in persistent data!");
+                Humanoid humanoid = gameObject.GetComponent<Humanoid>();
+                creatureClaim.ReInit(m_name);
+                humanoid.m_name = m_name;
                 return;
             }
-
-            m_ignoreWard = m_netView.GetZDO().GetBool(ignoreWardHash, false);
 
             Jotunn.Logger.LogWarning($"Found data: {m_name}, {m_creatureDataString}");
 
             CreatureData creatureData = StringToCreatureData(m_creatureDataString);
-            TwitchCreatureClaim creatureClaim = gameObject.AddComponent<TwitchCreatureClaim>();
             creatureClaim.ReInit(m_name, creatureData);
 
             ApplyHumanoid(m_name, creatureData.name, creatureData.level, creatureData.maxHealth, creatureData.friendly, creatureData.allowDamageStructures, creatureData.rename);
             ApplyMonsterAI(creatureData.aggravatable, creatureData.mistVision);
             ApplyAllowDrops(creatureData.allowDrops);
             ApplyTameable(creatureData.friendly, creatureData.commandable);
-
-            if (RecolorHelper.IsRedeemerSpecialViewer(m_name) && RecolorHelper.IsCreatureInList($"{gameObject.name.Replace("(Clone)", "")}"))
-            {
-                RecolorHelper.RecolorCreature(gameObject, m_name);
-            }
         }
 
-        public void SetData(string name, CreatureData creatureData, bool ignoreWard)
+        public void Start()
         {
-            string creatureDataString = CreatureDataToString(creatureData);
-            m_netView.GetZDO().Set(creatureDataHash, creatureDataString);
+            if (RecolorHelper.CanRecolorCreature(m_name, gameObject.name))
+                RecolorHelper.RecolorCreature(m_name, gameObject);
+        }
+
+        public void SetData(string name, CreatureData creatureData = null, bool ignoreWard = false)
+        {
             m_netView.GetZDO().Set(ignoreWardHash, ignoreWard);
             m_netView.GetZDO().Set(nameHash, name);
-            m_creatureDataString = creatureDataString;
+            
             m_ignoreWard = ignoreWard;
             m_name = name;
-            m_isFollowing = creatureData.commandable;
 
+            if (creatureData == null)
+                return;
+
+            string creatureDataString = CreatureDataToString(creatureData);
+            m_netView.GetZDO().Set(creatureDataHash, creatureDataString);
+            m_creatureDataString = creatureDataString;
+            m_isFollowing = creatureData.commandable;
             transform.localScale = new Vector3(creatureData.size, creatureData.size, creatureData.size);
 
             ApplyHumanoid(name, creatureData.name, creatureData.level, creatureData.maxHealth, creatureData.friendly, creatureData.allowDamageStructures, creatureData.rename);
@@ -84,12 +90,10 @@ namespace WizshBoneTwitchIntegration.Components
             Humanoid humanoid = gameObject.GetComponent<Humanoid>();
             humanoid.SetLevel(level);
             humanoid.m_faction = friendly ? Character.Faction.Players : Character.Faction.Boss;
+            humanoid.m_group = friendly ? WizshBoneTwitchIntegration.HumanoidGroupSpawnFriendly : allowDamageStructures ? WizshBoneTwitchIntegration.HumanoidGroupSpawnEnemy : WizshBoneTwitchIntegration.HumanoidGroupNoDamageStructure;
 
             if (maxHealth > 0)
                 humanoid.SetMaxHealth(maxHealth);
-
-            if (!allowDamageStructures)
-                humanoid.m_group = WizshBoneTwitchIntegration.NoDamageStructureGroup;
 
             if (rename)
                 humanoid.m_name = name ?? redeemerName;

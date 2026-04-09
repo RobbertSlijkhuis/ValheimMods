@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Models;
@@ -14,6 +15,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private List<TwitchCreatureAssignment> m_creatureAssignments = new List<TwitchCreatureAssignment>();
         private List<string> m_userBlacklist = new List<string>();
         public bool m_enabled;
+        public UnityEvent<TwitchChatMessage> onNewMessage = new UnityEvent<TwitchChatMessage>();
 
         public float m_scanRadius = PluginConfig.configChattingRadius.Value;
         public float m_scanInterval = PluginConfig.configChattingInterval.Value;
@@ -27,7 +29,12 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             m_enabled = PluginConfig.configChattingEnabled.Value;
 
             DeserializeUserBlackList(PluginConfig.configChattingBlackList.Value);
-            InvokeRepeating(nameof(DetectCreaturesAndAssignUsers), 0f, m_scanInterval);
+
+            foreach (string entry in m_userBlacklist) {
+                Jotunn.Logger.LogWarning(entry);
+            }
+
+            InvokeRepeatingScan();
         }
 
         public void AddCreatureAssignment(TwitchCreatureAssignment assignment)
@@ -80,19 +87,29 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             return m_creatureAssignments.Find(item => item.userName == userName);
         }
 
-        private void DetectCreaturesAndAssignUsers()
+        public void InvokeRepeatingScan()
         {
-            if (!m_auth.m_loggedIn || !m_enabled)
+            CancelInvoke(nameof(ChattingScan));
+            InvokeRepeating(nameof(ChattingScan), 0f, m_scanInterval);
+        }
+
+        public void ChattingScan()
+        {
+            ScanAndAssignUsers();
+        }
+
+        public void ScanAndAssignUsers(bool command = false)
+        {
+            if (!command && (!m_auth.m_loggedIn || !m_enabled))
                 return;
 
-            Jotunn.Logger.LogWarning("DetectCreaturesAndAssignUsers()");
             List<GameObject> creatures = new List<GameObject>();
 
             // Player is likely dead
             if (Player.m_localPlayer == null)
                 return;
 
-            Collider[] objects = Physics.OverlapSphere(Player.m_localPlayer.transform.position, m_scanRadius);
+            Collider[] objects = Physics.OverlapSphere(Player.m_localPlayer.transform.position, m_scanRadius, LayerMask.GetMask("character"));
 
             foreach (Collider obj in objects)
             {
@@ -106,6 +123,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 List<string> users = m_chat.GetUsersInChatHistory();
                 List<string> assignedUsers = m_creatureAssignments.Select(item => item.userName).ToList();
                 users.RemoveAll(item => assignedUsers.Contains(item));
+
+                if (command)
+                {
+                    TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+                    TwitchCreatureClaim newCreatureClaimn = obj.gameObject.AddComponent<TwitchCreatureClaim>();
+                    newCreatureClaimn.Init(customRewards.m_alias ?? "DeathWizsh");
+                    return;
+                }
 
                 if (users.Count == 0)
                 {
@@ -163,7 +188,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             
             foreach (string entry in data)
             {
-                m_userBlacklist.Add(entry.ToLower());
+                m_userBlacklist.Add(entry.ToLower().Trim());
             }
         }
     }

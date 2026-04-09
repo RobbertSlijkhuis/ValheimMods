@@ -5,12 +5,16 @@ namespace WizshBoneTwitchIntegration.Models
 {
     internal class RecolorCreatureData
     {
+        public bool isSurtling = false;
+        public bool disable = false;
+        public bool enable = false;
         public bool emissive = false;
         public float emissiveMultiplier = 2f;
-        public Material material;
         public bool isLight = false;
         public bool isParticle = false;
-        public bool disable = false;
+        public Material material;
+        public int materialIndex = 0;
+        public float particleAlpha = 0.2f;
         public string transformPath;
         public Material zebraMaterial;
 

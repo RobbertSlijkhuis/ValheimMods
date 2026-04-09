@@ -5,6 +5,7 @@ namespace WizshBoneTwitchIntegration.Models
 {
     internal class DetonateData
     {
+        public string announceMessage;
         public DamageData damageData;
         public bool onlySpawned = false;
         public float radius = 20f;

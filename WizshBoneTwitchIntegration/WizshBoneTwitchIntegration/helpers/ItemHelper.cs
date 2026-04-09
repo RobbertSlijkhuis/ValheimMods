@@ -28,7 +28,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 itemDrop.SetStack(itemData.stackSize);
 
             itemDrop.m_itemData.m_durability = itemDrop.m_itemData.m_shared.m_maxDurability + itemDrop.m_itemData.m_shared.m_durabilityPerLevel * itemData.quality;
-            rigidBody.AddForce((transform.forward * force) + (transform.up * force));
+            rigidBody.AddForce((transform.forward * force) + (transform.up * force), ForceMode.Acceleration);
         }
     }
 }

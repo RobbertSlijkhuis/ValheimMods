@@ -13,5 +13,7 @@ namespace WizshBoneTwitchIntegration.Models
 
         public GameObject ChestIron;
         public GameObject ChestGold;
+
+        public GameObject WeatherZone;
     }
 }

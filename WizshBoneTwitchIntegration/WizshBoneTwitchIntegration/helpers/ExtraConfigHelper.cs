@@ -30,6 +30,13 @@ namespace WizshBoneTwitchIntegration.Helpers
                 Directory.CreateDirectory(WizshBoneTwitchIntegration.customConfigPath);
                 WriteFromEmbeddedResourceTo("WizshBoneTwitchIntegration.resources.banned.txt", WizshBoneTwitchIntegration.bannedPath);
             }
+
+            if (!File.Exists(WizshBoneTwitchIntegration.viewersPath))
+            {
+                Jotunn.Logger.LogWarning("Could not find viewers file! Writting...");
+                Directory.CreateDirectory(WizshBoneTwitchIntegration.customConfigPath);
+                WriteFromEmbeddedResourceTo("WizshBoneTwitchIntegration.resources.viewers.yaml", WizshBoneTwitchIntegration.viewersPath);
+            }
         }
 
         public static List<RedeemEntry> ReadRedeemsConfig()
@@ -53,6 +60,29 @@ namespace WizshBoneTwitchIntegration.Helpers
             streamReader.Close();
             stringReader.Close();
             return data.redeems;
+        }
+
+        public static List<ViewerEntry> ReadViewersConfig()
+        {
+            StreamReader streamReader = new StreamReader(WizshBoneTwitchIntegration.viewersPath);
+            string fileContent = streamReader.ReadToEnd();
+
+            if (fileContent == null || fileContent == "")
+            {
+                Jotunn.Logger.LogError("Could not read redeems configuration or its empty");
+                return null;
+            }
+
+            StringReader stringReader = new StringReader(fileContent);
+            IDeserializer deserializer = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+
+            ViewerData data = deserializer.Deserialize<ViewerData>(stringReader);
+
+            streamReader.Close();
+            stringReader.Close();
+            return data.viewers;
         }
 
         public static void UpdateRedeemWithTesterFile()

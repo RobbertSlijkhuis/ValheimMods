@@ -21,16 +21,13 @@ namespace WizshBoneTwitchIntegration.Helpers
             GameObject mist = UnityEngine.Object.Instantiate(prefab, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
             Mister mister = mist.GetComponent<Mister>();
             TwitchPersistentDestruction persistentDestruction = mist.GetComponent<TwitchPersistentDestruction>();
-            persistentDestruction.SetStarted(mistData.duration ?? 60);
+            persistentDestruction.SetStarted(mistData.duration);
 
-            if (mistData.height != null)
-                mister.m_height = (float)mistData.height;
-
-            if (mistData.radius != null)
-                mister.m_radius = (float)mistData.radius;
+            mister.m_height = mistData.height;
+            mister.m_radius = mistData.radius;
 
             if (mistData.announceMessage != null)
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, mistData.announceMessage));
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, mistData.announceMessage), 3000);
         }
     }
 }

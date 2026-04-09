@@ -4,6 +4,7 @@ namespace WizshBoneTwitchIntegration.Models
 {
     internal class FlashBangData
     {
+        public string announceMessage;
         public float delay = 0.5f;
         public string flashColor = "#fff";
         public float flashDuration = 2f;

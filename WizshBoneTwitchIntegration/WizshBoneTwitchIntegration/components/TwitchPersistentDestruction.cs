@@ -12,6 +12,9 @@ namespace WizshBoneTwitchIntegration.Components
         public string m_startedHash = "PersistentStarted_WBTI";
         public EffectList m_onDestroyEffects;
 
+        public delegate void onEndDelegate(GameObject prefab);
+        public onEndDelegate onEnd;
+
         public void Awake()
         {
             m_netView = gameObject.GetComponent<ZNetView>();
@@ -42,6 +45,8 @@ namespace WizshBoneTwitchIntegration.Components
         {
             if (m_onDestroyEffects != null)
                 m_onDestroyEffects.Create(transform.position, transform.rotation);
+
+            onEnd?.Invoke(gameObject);
         }
 
         public void SetStarted(int duration, EffectList onDestroyEfects = null)

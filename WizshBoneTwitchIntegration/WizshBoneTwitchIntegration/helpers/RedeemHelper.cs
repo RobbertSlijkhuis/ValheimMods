@@ -13,7 +13,7 @@ namespace WizshBoneTwitchIntegration.Helpers
     {
         public static PlayerSnapshot playerSnapshot;
 
-        public static List<SurpriseChestSpawnData> GetSurpriseChestSpawnDataByTitle(string value)
+        public static RedeemEntry GetRedeemByTitle(string value)
         {
             TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
 
@@ -23,26 +23,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return null;
             }
 
-            RedeemEntry redeem = customRewards.m_redeems.list.Find(item => item.title == value);
-
-            if (redeem == null)
-            {
-                Jotunn.Logger.LogError("Could not find redeem to retrieve surprise chest spawn data");
-                return null;
-            }
-
-            return redeem.chestData.items;
-        }
-
-        public static void SpawnSupriseChest(GameObject prefab, SurpriseChestData chestData, CustomRewardEvent customRewardEvent)
-        {
-            Transform transform = Player.m_localPlayer.transform;
-            GameObject chest = UnityEngine.Object.Instantiate(prefab, transform.position, transform.rotation);
-            chest.transform.localPosition = TransformHelper.UpdateSpawnLocation(SpawnPositionType.InFrontOfPlayerHigh, chest.transform, new PositionOffsetData());
-            chest.transform.localRotation = TransformHelper.UpdateSpawnRotation(SpawnPositionType.InFrontOfPlayerHigh, chest.transform);
-
-            TwitchSurpriseChest surpriseChest = chest.GetComponent<TwitchSurpriseChest>();
-            surpriseChest.Init(chestData, customRewardEvent);
+            return customRewards.m_redeems.list.Find(item => item.title == value);
         }
 
         public static void SetPlayerSpeed(float multiplier)

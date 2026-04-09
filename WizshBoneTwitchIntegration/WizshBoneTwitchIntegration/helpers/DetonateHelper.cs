@@ -1,5 +1,6 @@
 ﻿using Jotunn.Managers;
 using System.Collections.Generic;
+using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Models;
@@ -11,7 +12,7 @@ namespace WizshBoneTwitchIntegration.Helpers
     {
         public static List<GameObject> prefabList = new List<GameObject>();
 
-        public static void DetonateFish(DetonateData detonateData)
+        public static void Detonate(DetonateData detonateData, CustomRewardEvent customRewardEvent)
         {
             int layerMask = 0;
 
@@ -29,7 +30,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             foreach (var item in found)
             {
                 GameObject rootObject = item.transform.root.gameObject;
-                Jotunn.Logger.LogWarning(rootObject.name);
+                // Jotunn.Logger.LogWarning(rootObject.name);
 
                 if (detonateData.type == DetonateType.Creature || detonateData.type == DetonateType.CreatureSpawned)
                 {
@@ -68,9 +69,12 @@ namespace WizshBoneTwitchIntegration.Helpers
                 }
             }
 
-            Jotunn.Logger.LogWarning("In list: " + prefabList.Count);
+            // Jotunn.Logger.LogWarning("In list: " + prefabList.Count);
             GameObject explosionFX = PrefabManager.Instance.GetPrefab("BlobLava_explosion");
             GameObject explosionSFX = PrefabManager.Instance.GetPrefab("sfx_bloblava_death");
+
+            if (detonateData.announceMessage != null)
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, detonateData.announceMessage), 3000);
 
             foreach (GameObject prefab in prefabList)
             {

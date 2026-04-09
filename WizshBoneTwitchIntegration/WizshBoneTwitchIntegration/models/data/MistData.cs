@@ -3,9 +3,9 @@
     internal class MistData
     {
         public string announceMessage;
-        public int? duration;
-        public float? height;
-        public float? radius;
+        public int duration = 60;
+        public float height = 15f;
+        public float radius = 60f;
 
         public MistData() { }
     }
