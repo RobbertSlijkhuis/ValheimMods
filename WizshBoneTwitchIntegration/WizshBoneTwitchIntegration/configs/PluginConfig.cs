@@ -26,6 +26,7 @@ namespace WizshBoneTwitchIntegration.Configs
         public static ConfigEntry<float> configChattingInterval;
         public static ConfigEntry<float> configChattingRadius;      
 
+        public static ConfigEntry<bool> configCreaturesSameFaction;
         public static ConfigEntry<float> configCreaturesMaxAmount;
         public static ConfigEntry<float> configCreaturesMaxRadius;
         public static ConfigEntry<float> configCreaturesFollowRadius;
@@ -108,6 +109,10 @@ namespace WizshBoneTwitchIntegration.Configs
                 chatting.m_scanRadius = configChattingRadius.Value;
             };
 
+
+            configCreaturesSameFaction = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionCreatures, "Creatures same faction", true,
+                new ConfigDescription("Wether spawned creatures will only target players", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
 
             configCreaturesMaxAmount = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionCreatures, "Max creatures amount", 100f,
                 new ConfigDescription("The maximum amount of creatures allowed in an area", null,

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Extensions;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
@@ -89,8 +90,20 @@ namespace WizshBoneTwitchIntegration.Components
         {
             Humanoid humanoid = gameObject.GetComponent<Humanoid>();
             humanoid.SetLevel(level);
-            humanoid.m_faction = friendly ? Character.Faction.Players : Character.Faction.Boss;
-            humanoid.m_group = friendly ? WizshBoneTwitchIntegration.HumanoidGroupSpawnFriendly : allowDamageStructures ? WizshBoneTwitchIntegration.HumanoidGroupSpawnEnemy : WizshBoneTwitchIntegration.HumanoidGroupNoDamageStructure;
+            // Gotta refactor this, or no damage structure creatures won't attack eachother
+            // humanoid.m_group = allowDamageStructures ? WizshBoneTwitchIntegration.HumanoidGroupSpawnEnemy : WizshBoneTwitchIntegration.HumanoidGroupNoDamageStructure;
+
+            if (PluginConfig.configCreaturesSameFaction.Value)
+            {
+                humanoid.m_faction = Character.Faction.Boss;
+                humanoid.m_group = WizshBoneTwitchIntegration.HumanoidGroupSpawnEnemy;
+            }
+
+            if (friendly)
+            {
+                humanoid.m_faction = Character.Faction.Players;
+                humanoid.m_group = WizshBoneTwitchIntegration.HumanoidGroupSpawnFriendly;
+            }
 
             if (maxHealth > 0)
                 humanoid.SetMaxHealth(maxHealth);
