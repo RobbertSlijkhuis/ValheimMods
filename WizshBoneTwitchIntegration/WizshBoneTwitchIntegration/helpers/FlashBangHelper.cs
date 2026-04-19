@@ -23,13 +23,10 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (customRewards.m_playerIsInSafeZone == true || Player.m_localPlayer.IsTeleporting())
                 yield break;
 
-            GameObject bombBlobFrost = PrefabManager.Instance.GetPrefab("BombBlob_Frost_projectile");
-            GameObject flashBang = GameObject.Instantiate(bombBlobFrost, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
-            flashBang.transform.localPosition = TransformHelper.UpdateSpawnLocation(SpawnPositionType.InFrontOfPlayer, flashBang.transform, new PositionOffsetData() { y = 1f });
-            flashBang.transform.localRotation = TransformHelper.UpdateSpawnRotation(SpawnPositionType.InFrontOfPlayer, flashBang.transform);
-            flashBang.transform.localScale = new Vector3(2f, 2f, 2f);
-            Projectile projectile = flashBang.GetComponent<Projectile>();
-            projectile.m_spawnOnHit = null;
+            // GameObject bombBlobFrost = PrefabManager.Instance.GetPrefab("BombBlob_Frost_projectile");
+            Vector3 spawnPosition = TransformHelper.UpdateSpawnLocation(SpawnPositionType.InFrontOfPlayer, Player.m_localPlayer.transform, new PositionOffsetData() { y = 1f });
+            Quaternion spawnRotation = TransformHelper.UpdateSpawnRotation(SpawnPositionType.InFrontOfPlayer, Player.m_localPlayer.transform.rotation);
+            GameObject flashBang = GameObject.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.FlashbangVial, spawnPosition, spawnRotation);
 
             //if (flashbangData.announceMessage != null)
             //    Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, flashbangData.announceMessage), 3000);

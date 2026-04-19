@@ -43,24 +43,24 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 if (statusEffect.name == "PlayerShrink")
                 {
-                    Jotunn.Logger.LogWarning("Found shrink");
+                    //Jotunn.Logger.LogWarning("Found shrink");
                     statusEffect.onStart = customStatusEffect.PlayerShrink;
                     statusEffect.onEnd = customStatusEffect.PlayerSizeReset;
                 }
                 else if (statusEffect.name == "PlayerGrow")
                 {
-                    Jotunn.Logger.LogWarning("Found grow");
+                    //Jotunn.Logger.LogWarning("Found grow");
                     statusEffect.onStart = customStatusEffect.PlayerGrow;
                     statusEffect.onEnd = customStatusEffect.PlayerSizeReset;
                 }
                 else if (statusEffect.name == "WindInBack")
                 {
-                    Jotunn.Logger.LogWarning("Found WindInback");
+                    //Jotunn.Logger.LogWarning("Found WindInback");
                     statusEffect.onStart = customStatusEffect.WindInTheBack;
                 }
 
                 bool success = customStatusEffect.AddStatusEffect(statusEffect);
-                Jotunn.Logger.LogWarning("AddStatusEffect: " + success);
+                //Jotunn.Logger.LogWarning("AddStatusEffect: " + success);
             }
         }
 
@@ -92,24 +92,24 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             if (random.name == "PlayerShrink")
             {
-                Jotunn.Logger.LogWarning("Found shrink");
+                //Jotunn.Logger.LogWarning("Found shrink");
                 random.onStart = customStatusEffect.PlayerShrink;
                 random.onEnd = customStatusEffect.PlayerSizeReset;
             }
             else if (random.name == "PlayerGrow")
             {
-                Jotunn.Logger.LogWarning("Found grow");
+                //Jotunn.Logger.LogWarning("Found grow");
                 random.onStart = customStatusEffect.PlayerGrow;
                 random.onEnd = customStatusEffect.PlayerSizeReset;
             }
             else if (random.name == "WindInBack")
             {
-                Jotunn.Logger.LogWarning("Found WindInback");
+                //Jotunn.Logger.LogWarning("Found WindInback");
                 random.onStart = customStatusEffect.WindInTheBack;
             }
 
             bool success = customStatusEffect.AddStatusEffect(random);
-            Jotunn.Logger.LogWarning("AddRandomStatusEffect: " + success);
+            //Jotunn.Logger.LogWarning("AddRandomStatusEffect: " + success);
         }
 
         /// <summary>

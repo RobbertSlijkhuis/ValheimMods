@@ -26,7 +26,7 @@ namespace WizshBoneTwitchIntegration.Components
             if (m_damageString == "")
                 return;
 
-            Jotunn.Logger.LogWarning("Found damage string: " + m_damageString);
+            //Jotunn.Logger.LogWarning("Found damage string: " + m_damageString);
             m_damage = StringToDamageData(m_damageString);
 
             ApplyDamageToAOE(m_damage);

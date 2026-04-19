@@ -29,6 +29,10 @@ namespace WizshBoneTwitchIntegration.Configs
         public static ConfigEntry<bool> configCreaturesSameFaction;
         public static ConfigEntry<float> configCreaturesMaxAmount;
         public static ConfigEntry<float> configCreaturesMaxRadius;
+        public static ConfigEntry<bool> configCreaturesScaling;
+        public static ConfigEntry<float> configCreaturesDeltaScale;
+        public static ConfigEntry<float> configCreaturesdamageScale;
+        public static ConfigEntry<float> configCreaturesHealthScale;
         public static ConfigEntry<float> configCreaturesFollowRadius;
 
         public static ConfigEntry<bool> configIndestructibleBoats;
@@ -120,6 +124,22 @@ namespace WizshBoneTwitchIntegration.Configs
 
             configCreaturesMaxRadius = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionCreatures, "Max creatures radius", 100f,
                 new ConfigDescription("The radius to check for maximum amount of creatures allowed in an area", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+
+            configCreaturesScaling = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionCreatures, "Creature scaling", true,
+                new ConfigDescription("Wether spawned creatures will scale to player progression", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+
+            configCreaturesdamageScale = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionCreatures, "Creature damage scaling per biome tier", 0.35f,
+                new ConfigDescription("The amount of damage that is scaled up/down per tier/biome for creatures", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+
+            configCreaturesHealthScale = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionCreatures, "Creature health scaling per biome tier", 0.5f,
+                new ConfigDescription("The amount of health that is scaled up/down per tier/biome for creatures", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+
+            configCreaturesDeltaScale = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionCreatures, "Scaling Delta", 0.65f,
+                new ConfigDescription("The amount to adjust the scaling ", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
 
             configCreaturesFollowRadius = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionCreatures, "Friendly follow radius", 30f,

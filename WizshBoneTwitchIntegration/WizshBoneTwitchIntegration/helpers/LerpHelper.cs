@@ -79,7 +79,6 @@ namespace WizshBoneTwitchIntegration.Helpers
                 float step = Mathf.Clamp01(timestep / duration);
                 float result = Mathf.Lerp(from, to, step);
                 light.intensity = result;
-                Jotunn.Logger.LogWarning(result);
                 yield return null;
             }
         }
@@ -94,7 +93,6 @@ namespace WizshBoneTwitchIntegration.Helpers
                 float step = Mathf.Clamp01(timestep / duration);
                 float result = Mathf.Lerp(from, to, step);
                 light.m_flickerIntensity = result;
-                Jotunn.Logger.LogWarning(result);
                 yield return null;
             }
         }
@@ -109,7 +107,6 @@ namespace WizshBoneTwitchIntegration.Helpers
                 float step = Mathf.Clamp01(timestep / duration);
                 float result = Mathf.Lerp(from, to, step);
                 canvasGroup.alpha = result;
-                Jotunn.Logger.LogWarning(result);
                 yield return null;
             }
         }

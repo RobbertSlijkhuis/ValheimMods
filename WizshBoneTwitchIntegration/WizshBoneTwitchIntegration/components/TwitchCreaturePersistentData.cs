@@ -10,14 +10,16 @@ namespace WizshBoneTwitchIntegration.Components
     internal class TwitchCreaturePersistentData : MonoBehaviour
     {
         private ZNetView m_netView;
-        private string m_creatureDataString;
+        private readonly int creatureDataHash = "CreatureData_WBTI".GetStableHashCode();
+
+        private string m_redeemerName;
+        private string m_redeemTitle;
+        private int m_creatureIndex;
         public bool m_ignoreWard;
         public bool m_isFollowing;
-        private string m_name;
-
-        private readonly int creatureDataHash = "WTBIPersistentCreatureData".GetStableHashCode();
-        private readonly int ignoreWardHash = "WTBIPersistentIgnoreWard".GetStableHashCode();
-        private readonly int nameHash = "WTBIPersistentName".GetStableHashCode();
+        public bool m_allowDamageStructures = true;
+        public float m_damageScale = 0;
+        public float m_healthScale = 0;
 
         public void Awake()
         {
@@ -29,99 +31,124 @@ namespace WizshBoneTwitchIntegration.Components
                 return;
             }
 
-            m_name = m_netView.GetZDO().GetString(nameHash, "");
-            m_ignoreWard = m_netView.GetZDO().GetBool(ignoreWardHash, false);
+            string creatureStringData = m_netView.GetZDO().GetString(creatureDataHash, "");
 
-            if (m_name == "")
+            if (creatureStringData == "")
                 return;
 
-            TwitchCreatureClaim creatureClaim = gameObject.AddComponent<TwitchCreatureClaim>();
-            m_creatureDataString = m_netView.GetZDO().GetString(creatureDataHash, "");
+            string[] creatureRedeemData = creatureStringData.Split('|');
+            m_redeemerName = creatureRedeemData[0];
+            m_redeemTitle = creatureRedeemData[1];
 
-            if (m_creatureDataString == "")
+            if (creatureRedeemData[2] != "")
+                m_creatureIndex = int.Parse(creatureRedeemData[2]);
+
+            m_ignoreWard = bool.Parse(creatureRedeemData[3]);
+
+            TwitchCreatureClaim creatureClaim = gameObject.AddComponent<TwitchCreatureClaim>();
+
+            if (m_redeemTitle == "")
             {
                 Humanoid humanoid = gameObject.GetComponent<Humanoid>();
-                creatureClaim.ReInit(m_name);
-                humanoid.m_name = m_name;
+                creatureClaim.ReInit(m_redeemerName);
+                humanoid.m_name = m_redeemerName;
                 return;
             }
 
-            Jotunn.Logger.LogWarning($"Found data: {m_name}, {m_creatureDataString}");
+            RedeemData redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
+            CreatureData creatureData = redeem.creatureData.list[m_creatureIndex];
+            creatureClaim.ReInit(m_redeemerName, creatureData);
 
-            CreatureData creatureData = StringToCreatureData(m_creatureDataString);
-            creatureClaim.ReInit(m_name, creatureData);
-
-            ApplyHumanoid(m_name, creatureData.name, creatureData.level, creatureData.maxHealth, creatureData.friendly, creatureData.allowDamageStructures, creatureData.rename);
-            ApplyMonsterAI(creatureData.aggravatable, creatureData.mistVision);
-            ApplyAllowDrops(creatureData.allowDrops);
-            ApplyTameable(creatureData.friendly, creatureData.commandable);
+            ApplyVariables(creatureData);
+            ApplyHumanoid(m_redeemerName, creatureData);
+            ApplyMonsterAI(creatureData);
+            ApplyAllowDrops(creatureData);
+            ApplyTameable(creatureData);
         }
 
         public void Start()
         {
-            if (RecolorHelper.CanRecolorCreature(m_name, gameObject.name))
-                RecolorHelper.RecolorCreature(m_name, gameObject);
+            if (m_redeemerName != null && RecolorHelper.CanRecolorCreature(m_redeemerName, gameObject.name))
+                RecolorHelper.RecolorCreature(m_redeemerName, gameObject);
         }
 
-        public void SetData(string name, CreatureData creatureData = null, bool ignoreWard = false)
+        public void SetData(string name, CreatureData creatureData = null, string redeemTitle = "", bool ignoreWard = false)
         {
-            m_netView.GetZDO().Set(ignoreWardHash, ignoreWard);
-            m_netView.GetZDO().Set(nameHash, name);
-            
+            m_redeemerName = name;
+            m_redeemTitle = redeemTitle;
             m_ignoreWard = ignoreWard;
-            m_name = name;
+
+            m_netView.GetZDO().Set(creatureDataHash, $"{name}|{redeemTitle}|{creatureData?.index}|{ignoreWard}");
 
             if (creatureData == null)
                 return;
 
-            string creatureDataString = CreatureDataToString(creatureData);
-            m_netView.GetZDO().Set(creatureDataHash, creatureDataString);
-            m_creatureDataString = creatureDataString;
-            m_isFollowing = creatureData.commandable;
-            transform.localScale = new Vector3(creatureData.size, creatureData.size, creatureData.size);
-
-            ApplyHumanoid(name, creatureData.name, creatureData.level, creatureData.maxHealth, creatureData.friendly, creatureData.allowDamageStructures, creatureData.rename);
-            ApplyMonsterAI(creatureData.aggravatable, creatureData.mistVision);
-            ApplyAllowDrops(creatureData.allowDrops);
-            ApplyTameable(creatureData.friendly, creatureData.commandable);
+            ApplyVariables(creatureData);
+            ApplyHumanoid(name, creatureData);
+            ApplyMonsterAI(creatureData);
+            ApplyAllowDrops(creatureData);
+            ApplyTameable(creatureData);
         }
 
-        public void ApplyHumanoid(string redeemerName, string name, int level, float maxHealth, bool friendly, bool allowDamageStructures, bool rename)
+        public void ApplyVariables(CreatureData creatureData)
+        {
+            m_creatureIndex = creatureData.index;
+            m_isFollowing = creatureData.commandable;
+            m_allowDamageStructures = creatureData.allowDamageStructures;
+            m_damageScale = creatureData.damageScale;
+            m_healthScale = creatureData.healthScale;
+            transform.localScale = new Vector3(creatureData.size, creatureData.size, creatureData.size);
+        }
+
+        public void ApplyHumanoid(string redeemerName, CreatureData creatureData)
         {
             Humanoid humanoid = gameObject.GetComponent<Humanoid>();
-            humanoid.SetLevel(level);
-            // Gotta refactor this, or no damage structure creatures won't attack eachother
-            // humanoid.m_group = allowDamageStructures ? WizshBoneTwitchIntegration.HumanoidGroupSpawnEnemy : WizshBoneTwitchIntegration.HumanoidGroupNoDamageStructure;
+            humanoid.SetLevel(creatureData.level);
 
             if (PluginConfig.configCreaturesSameFaction.Value)
-            {
                 humanoid.m_faction = Character.Faction.Boss;
-                humanoid.m_group = WizshBoneTwitchIntegration.HumanoidGroupSpawnEnemy;
-            }
 
-            if (friendly)
+            if (creatureData.friendly)
             {
                 humanoid.m_faction = Character.Faction.Players;
                 humanoid.m_group = WizshBoneTwitchIntegration.HumanoidGroupSpawnFriendly;
             }
 
-            if (maxHealth > 0)
-                humanoid.SetMaxHealth(maxHealth);
+            if (creatureData.group != null)
+                humanoid.m_group = creatureData.group;
 
-            if (rename)
-                humanoid.m_name = name ?? redeemerName;
+            if (creatureData.maxHealth > 0)
+                humanoid.SetMaxHealth(creatureData.maxHealth);
+
+            if (creatureData.rename)
+                humanoid.m_name = creatureData.name ?? redeemerName;
+
+            if (PluginConfig.configCreaturesScaling.Value)
+            {
+                ValheimCreature creature = CreatureHelper.GetValheimCreature(gameObject.name);
+                float playerTier = ProgressionHelper.GetPlayerTier();
+                float healthScale = m_healthScale != 0 ? m_healthScale : PluginConfig.configCreaturesHealthScale.Value;
+                float scale = CreatureHelper.CalculateScale(playerTier, creature.tier, healthScale);
+
+                //Jotunn.Logger.LogWarning($"Old max health: {humanoid.GetMaxHealth()}");
+
+                humanoid.SetMaxHealth(humanoid.GetMaxHealth() * scale);
+                humanoid.SetHealth(humanoid.GetMaxHealth());
+
+                //Jotunn.Logger.LogWarning($"New max health: {humanoid.GetMaxHealth()}");
+            }
         }
 
-        public void ApplyMonsterAI(bool aggravatable, bool misVision)
+        public void ApplyMonsterAI(CreatureData creatureData)
         {
             MonsterAI monserAI = gameObject.GetComponent<MonsterAI>();
-            monserAI.m_aggravatable = aggravatable;
-            monserAI.m_mistVision = misVision;
+            monserAI.m_aggravatable = creatureData.aggravatable;
+            monserAI.m_mistVision = creatureData.mistVision;
         }
 
-        public void ApplyAllowDrops(bool allowDrops)
+        public void ApplyAllowDrops(CreatureData creatureData)
         {
-            if (allowDrops)
+            if (creatureData.allowDrops)
                 return;
 
             CharacterDrop characterDrop = gameObject.GetComponent<CharacterDrop>();
@@ -130,45 +157,21 @@ namespace WizshBoneTwitchIntegration.Components
                 characterDrop.m_drops = new List<CharacterDrop.Drop>();
         }
 
-        public void ApplyTameable(bool friendly, bool commandable)
+        public void ApplyTameable(CreatureData creatureData)
         {
-            if (!friendly)
+            if (!creatureData.friendly)
                 return;
 
             Tameable tameable = gameObject.AddComponent<Tameable>();
             tameable.m_monsterAI.MakeTame();
 
-            if (commandable)
+            if (creatureData.commandable)
             {
                 tameable.m_commandable = true;
 
                 if (m_isFollowing && Player.m_localPlayer != null)
                     tameable.m_monsterAI.SetFollowPlayer(Player.m_localPlayer.gameObject);
             }
-        }
-
-        public string CreatureDataToString(CreatureData creatureData)
-        {
-            return $"{creatureData.prefabName}|{creatureData.level}|{creatureData.amount}|{creatureData.position}|{creatureData.allowDrops}|{creatureData.friendly}|{creatureData.commandable}|{creatureData.aggravatable}|{creatureData.allowDamageStructures}|{creatureData.maxHealth}|{creatureData.mistVision}|{creatureData.rename}|{creatureData.talks}|{creatureData.talkInteract}|{creatureData.talkInterval}|{creatureData.talkMessage}|{creatureData.isHallucination}|{m_isFollowing}";
-        }
-
-        public CreatureData StringToCreatureData(string value)
-        {
-            string[] data = value.Split('|');
-            CreatureData creatureData = new CreatureData(data[0], int.Parse(data[1]), int.Parse(data[2]), data[3], bool.Parse(data[4]), bool.Parse(data[5]), bool.Parse(data[6]));
-            creatureData.aggravatable = bool.Parse(data[7]);
-            creatureData.allowDamageStructures = bool.Parse(data[8]);
-            creatureData.maxHealth = float.Parse(data[9]);
-            creatureData.mistVision = bool.Parse(data[10]);
-            creatureData.rename = bool.Parse(data[11]);
-            creatureData.talks = bool.Parse(data[12]);
-            creatureData.talkInteract = bool.Parse(data[13]);
-            creatureData.talkInterval = int.Parse(data[14]);
-            creatureData.talkMessage = data[15];
-            creatureData.isHallucination = bool.Parse(data[16]);
-            m_isFollowing = bool.Parse(data[17]);
-
-            return creatureData;
         }
     }
 }

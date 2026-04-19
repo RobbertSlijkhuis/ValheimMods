@@ -21,7 +21,7 @@ namespace WizshBoneTwitchIntegration.Components
         {
             HandlePlayer(collider, true, "Player entered");
             //HandleDeleteBySafeZone(collider);
-            Jotunn.Logger.LogWarning($"Enter: {collider.gameObject.name}");
+            //Jotunn.Logger.LogWarning($"Enter: {collider.gameObject.name}");
         }
 
         public void OnTriggerStay(Collider collider)
@@ -34,7 +34,7 @@ namespace WizshBoneTwitchIntegration.Components
         public void OnTriggerExit(Collider collider)
         {
             HandlePlayer(collider, false, "Player left");
-            Jotunn.Logger.LogWarning($"Leave: {collider.gameObject.name}");
+            //Jotunn.Logger.LogWarning($"Leave: {collider.gameObject.name}");
         }
 
         private void HandlePlayer(Collider collider, bool value, string message = null)

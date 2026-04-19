@@ -10,16 +10,17 @@ namespace WizshBoneTwitchIntegration.Commands
 
         public override void Run(string[] args)
         {
-            if (args.Length == 0)
-            {
-                foreach (string recipe in Player.m_localPlayer.m_knownRecipes)
-                {
-                    Jotunn.Logger.LogWarning(recipe);
-                }
-                return;
-            }
+            //if (args.Length == 0)
+            //{
+            //    foreach (string recipe in Player.m_localPlayer.m_knownRecipes)
+            //    {
+            //        Jotunn.Logger.LogWarning(recipe);
+            //    }
+            //    return;
+            //}
 
-            Jotunn.Logger.LogWarning(Player.m_localPlayer.IsRecipeKnown(args[0]));
+            // Jotunn.Logger.LogWarning(Player.m_localPlayer.IsRecipeKnown(args[0]));
+            WizshBoneTwitchIntegration.Instance.SpawnSystemLogging();
         }
     }
 }

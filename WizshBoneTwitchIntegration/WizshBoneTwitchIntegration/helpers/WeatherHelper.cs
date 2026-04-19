@@ -31,12 +31,12 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             if (weatherData.items.Count == 0)
             {
-                Jotunn.Logger.LogWarning("Could not find any weather in the list, adding clear!");
+                //Jotunn.Logger.LogWarning("Could not find any weather in the list, adding clear!");
                 weatherData.items.Add("Clear");
             }
 
             string weather = weatherData.items[Random.Range(0, weatherData.items.Count)];
-            Jotunn.Logger.LogWarning("Chosen weather: " + weather);
+            //Jotunn.Logger.LogWarning("Chosen weather: " + weather);
 
             GameObject gameObject = UnityEngine.Object.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.WeatherZone, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
             //GameObject gameObject;
@@ -72,7 +72,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return;
             }
 
-            Jotunn.Logger.LogWarning($"Weather {envZone.m_environment} has been reset!");
+            //Jotunn.Logger.LogWarning($"Weather {envZone.m_environment} has been reset!");
             envZone.m_environment = null;
 
             if (envZone.m_force)

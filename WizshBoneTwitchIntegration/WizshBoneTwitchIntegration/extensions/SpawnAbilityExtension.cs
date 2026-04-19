@@ -129,7 +129,7 @@ namespace WizshBoneTwitchIntegration.Extensions
 
                     if (skip)
                     {
-                        Jotunn.Logger.LogWarning("Spawnpoint in safezone, skipping...");
+                        //Jotunn.Logger.LogWarning("Spawnpoint in safezone, skipping...");
                         continue;
                     }
                 }
@@ -228,7 +228,7 @@ namespace WizshBoneTwitchIntegration.Extensions
                     TwitchCreaturePersistentData creaturePersistentData = gameObject.GetComponent<TwitchCreaturePersistentData>();
 
                     if (creaturePersistentData != null)
-                        creaturePersistentData.SetData(customRewardEvent.RedeemerName, creatureData, false);
+                        creaturePersistentData.SetData(customRewardEvent.RedeemerName, creatureData, customRewardEvent.CustomRewardTitle, false);
                     else
                         Jotunn.Logger.LogWarning("Creature does not have persistent data somehow!");
                 }

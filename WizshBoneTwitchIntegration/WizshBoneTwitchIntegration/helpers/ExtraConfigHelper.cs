@@ -39,7 +39,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
         }
 
-        public static List<RedeemEntry> ReadRedeemsConfig()
+        public static ModData ReadRedeemsConfig()
         {
             StreamReader streamReader = new StreamReader(WizshBoneTwitchIntegration.redeemsConfigPath);
             string fileContent = streamReader.ReadToEnd();
@@ -55,11 +55,11 @@ namespace WizshBoneTwitchIntegration.Helpers
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
-            RedeemData data = deserializer.Deserialize<RedeemData>(stringReader);
+            ModData data = deserializer.Deserialize<ModData>(stringReader);
 
             streamReader.Close();
             stringReader.Close();
-            return data.redeems;
+            return data;
         }
 
         public static List<ViewerEntry> ReadViewersConfig()

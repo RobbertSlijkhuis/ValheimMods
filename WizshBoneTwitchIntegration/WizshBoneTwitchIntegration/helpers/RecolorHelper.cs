@@ -54,11 +54,11 @@ namespace WizshBoneTwitchIntegration.Helpers
             { "Draugr", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/_draugr_base/Cube.001") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorDraugr, emissive = true },
             }},
-            { "Draugr_Ranged", new List<RecolorCreatureData>() {
-                new RecolorCreatureData("Visual/_draugr_base/Cube.001") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorDraugrFem, emissive = true },
-            }},
             { "Draugr_Elite", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/_draugr_base/Cube.001") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorDraugrElite, emissive = true },
+            }},
+            { "Draugr_Ranged", new List<RecolorCreatureData>() {
+                new RecolorCreatureData("Visual/_draugr_base/Cube.001") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorDraugrFem, emissive = true },
             }},
             { "Fenring", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/Fenring.001") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorFenring, emissive = true },
@@ -82,14 +82,14 @@ namespace WizshBoneTwitchIntegration.Helpers
                 new RecolorCreatureData("Visual/Cube") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorGreydwarf, emissive = true },
                 new RecolorCreatureData("Visual/Cube.001") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorGreydwarf, emissive = true },
             }},
-            { "Greydwarf_Shaman", new List<RecolorCreatureData>() {
-                new RecolorCreatureData("Visual/Cube") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorGreydwarfShaman, emissive = true },
-                new RecolorCreatureData("Visual/Cube.001") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorGreydwarfShaman, emissive = true },
-            }},
             { "Greydwarf_Elite", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/Cube") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorGreydwarf, emissive = true },
                 new RecolorCreatureData("Visual/Cube.001") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorGreydwarf, emissive = true },
                 new RecolorCreatureData("Visual/Armature.001/root/spine1/spine2/spine3/r_shoulder/r_arm1/r_arm2/r_hand/Rootsword/default") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorGreydwarfRootsword, emissive = true },
+            }},
+            { "Greydwarf_Shaman", new List<RecolorCreatureData>() {
+                new RecolorCreatureData("Visual/Cube") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorGreydwarfShaman, emissive = true },
+                new RecolorCreatureData("Visual/Cube.001") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorGreydwarfShaman, emissive = true },
             }},
             { "Hatchling", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/Hatchling_mountain/Hatchling") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorHatchling, emissive = true },
@@ -163,12 +163,12 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static void RecolorCreature(string redeemerName, GameObject creature)
         {
-            Jotunn.Logger.LogWarning($"Found creature {creature.name} and {redeemerName} is very special!");
+            //Jotunn.Logger.LogWarning($"Found creature {creature.name} and {redeemerName} is very special!");
             ViewerEntry viewerEntry = GetViewer(redeemerName);
 
             if (viewerEntry == null)
             {
-                Jotunn.Logger.LogWarning($"Could not find viewer entry!");
+                //Jotunn.Logger.LogWarning($"Could not find viewer entry!");
                 return;
             }
 
@@ -181,7 +181,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 if (transform == null)
                 {
-                    Jotunn.Logger.LogWarning($"Could not find transform to recolor creature: {recolorCreatureData.transformPath}");
+                    //Jotunn.Logger.LogWarning($"Could not find transform to recolor creature: {recolorCreatureData.transformPath}");
                     continue;
                 }
 
@@ -198,7 +198,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 if (recolorCreatureData.isLight)
                 {
-                    Jotunn.Logger.LogWarning("Changing light...");
+                    //Jotunn.Logger.LogWarning("Changing light...");
                     Light light = transform.gameObject.GetComponent<Light>();
                     light.color = viewerEntry.parsedColor1;
                     continue;
@@ -206,7 +206,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 if (recolorCreatureData.isParticle)
                 {
-                    Jotunn.Logger.LogWarning("Changing Particle...");
+                    //Jotunn.Logger.LogWarning("Changing Particle...");
                     ParticleSystem particleSystem = transform.gameObject.GetComponent<ParticleSystem>();
 
                     if (recolorCreatureData.material != null)
@@ -229,8 +229,8 @@ namespace WizshBoneTwitchIntegration.Helpers
                     if (recolorCreatureData.isSurtling)
                     {
                         CustomDataModule customData = particleSystem.customData;
-                        Jotunn.Logger.LogWarning("Color1: " + customData.GetMode(ParticleSystemCustomData.Custom1));
-                        Jotunn.Logger.LogWarning("Color2: " + customData.GetMode(ParticleSystemCustomData.Custom2));
+                        //Jotunn.Logger.LogWarning("Color1: " + customData.GetMode(ParticleSystemCustomData.Custom1));
+                        //Jotunn.Logger.LogWarning("Color2: " + customData.GetMode(ParticleSystemCustomData.Custom2));
                         MinMaxGradient gradient1 = customData.GetColor(ParticleSystemCustomData.Custom1);
                         MinMaxGradient gradient2 = customData.GetColor(ParticleSystemCustomData.Custom2);
 
@@ -260,7 +260,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 if (skinnedMeshRenderer == null && meshRenderer == null)
                 {
-                    Jotunn.Logger.LogWarning($"Could not find any mesh renderer to recolor creature: {recolorCreatureData.transformPath}");
+                    //Jotunn.Logger.LogWarning($"Could not find any mesh renderer to recolor creature: {recolorCreatureData.transformPath}");
                     continue;
                 }
 
@@ -284,7 +284,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 if (mat == null)
                 {
-                    Jotunn.Logger.LogWarning($"Material is null for recolor creature: {recolorCreatureData.transformPath}");
+                    //Jotunn.Logger.LogWarning($"Material is null for recolor creature: {recolorCreatureData.transformPath}");
                     continue;
                 }
 
@@ -300,14 +300,14 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static void UnColorCreature(GameObject creature)
         {
-            Jotunn.Logger.LogWarning($"Uncolor Creature: {creature.name}");
+            //Jotunn.Logger.LogWarning($"Uncolor Creature: {creature.name}");
             List<RecolorCreatureData> list = GetRecolorCreatureDataByKey(creature.name);
             GameObject original = PrefabManager.Instance.GetPrefab(creature.name.Replace("(Clone)", ""));
-            Jotunn.Logger.LogWarning("Original found? " + original != null);
+            //Jotunn.Logger.LogWarning("Original found? " + original != null);
 
             if (original == null)
             {
-                Jotunn.Logger.LogWarning("Could not find original to uncolor!");
+                //Jotunn.Logger.LogWarning("Could not find original to uncolor!");
                 return;
             }
 
@@ -318,7 +318,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 if (transform == null || transformOriginal == null)
                 {
-                    Jotunn.Logger.LogWarning($"Could not find transform to uncolor creature: {recolorCreatureData.transformPath}");
+                    //Jotunn.Logger.LogWarning($"Could not find transform to uncolor creature: {recolorCreatureData.transformPath}");
                     continue;
                 }
 
@@ -335,7 +335,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 if (recolorCreatureData.isLight)
                 {
-                    Jotunn.Logger.LogWarning("Changing light...");
+                    //Jotunn.Logger.LogWarning("Changing light...");
                     Light light = transform.gameObject.GetComponent<Light>();
                     Light lightOrignal = transformOriginal.gameObject.GetComponent<Light>();
                     light.color = lightOrignal.color;
@@ -344,7 +344,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 if (recolorCreatureData.isParticle)
                 {
-                    Jotunn.Logger.LogWarning("Changing Particle...");
+                    //Jotunn.Logger.LogWarning("Changing Particle...");
                     ParticleSystem particleSystem = transform.gameObject.GetComponent<ParticleSystem>();
                     ParticleSystem particleSystemOriginal = transformOriginal.gameObject.GetComponent<ParticleSystem>();
 
@@ -369,7 +369,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 if (skinnedMeshRenderer == null && meshRenderer == null)
                 {
-                    Jotunn.Logger.LogWarning($"Could not find any mesh renderer to uncolor creature: {recolorCreatureData.transformPath}");
+                    //Jotunn.Logger.LogWarning($"Could not find any mesh renderer to uncolor creature: {recolorCreatureData.transformPath}");
                     continue;
                 }
 
@@ -378,7 +378,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 if (skinnedMeshRendererOriginal == null && meshRendererOriginal == null)
                 {
-                    Jotunn.Logger.LogWarning($"Could not find any original mesh renderer to uncolor creature: {recolorCreatureData.transformPath}");
+                    //Jotunn.Logger.LogWarning($"Could not find any original mesh renderer to uncolor creature: {recolorCreatureData.transformPath}");
                     continue;
                 }
 

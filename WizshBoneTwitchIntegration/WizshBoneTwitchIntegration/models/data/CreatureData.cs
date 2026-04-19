@@ -10,9 +10,13 @@ namespace WizshBoneTwitchIntegration.Models
         public bool allowDamageStructures = true;
         public int amount = 1;
         public bool commandable = false;
+        public float damageScale = 0;
         public bool friendly = false;
         public string globalKeyAdd = "";
         public string globalKeyRemove = "";
+        public string group;
+        public float healthScale = 0;
+        public int index;
         public bool isHallucination = false;
         public int level = 1;
         public float maxHealth = 0;
@@ -20,8 +24,10 @@ namespace WizshBoneTwitchIntegration.Models
         public bool mistVision = true;
         public string name;
         public string prefabName;
-        public string position = SpawnPositionType.OnPlayer;
+        public string position = SpawnPositionType.Random;
         public PositionOffsetData positionOffset = new PositionOffsetData();
+        public float positionRadius = 10f;
+        public bool random = false;
         public bool rename = true;
         public bool talkInteract = false;
         public int talkInterval = 0;
@@ -30,16 +36,5 @@ namespace WizshBoneTwitchIntegration.Models
         public float size = 1f;
 
         public CreatureData() { }
-
-        public CreatureData(string prefabName, int level = 1, int amount = 1, string position = nameof(SpawnPositionType.OnPlayer), bool allowDrops = false, bool friendly = false, bool commandable = false)
-        {
-            this.allowDrops = allowDrops;
-            this.commandable = commandable;
-            this.amount = amount;
-            this.friendly = friendly;
-            this.level = level;
-            this.prefabName = prefabName;
-            this.position = position;
-        }
     }
 }

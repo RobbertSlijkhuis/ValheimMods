@@ -50,7 +50,7 @@ namespace WizshBoneTwitchIntegration.Components
             m_originalName = m_humanoid.m_name;
 
             TwitchCreaturePersistentData persistentData = gameObject.GetComponent<TwitchCreaturePersistentData>();
-            persistentData.SetData(m_assignment.userName, creatureData, ignoreWard);
+            persistentData.SetData(m_assignment.userName, creatureData, customRewardEvent.CustomRewardTitle, ignoreWard);
 
             m_chatting.AddCreatureAssignment(m_assignment);
             SetupNpcTalk(creatureData);

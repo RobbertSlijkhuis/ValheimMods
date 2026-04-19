@@ -61,7 +61,7 @@ namespace WizshBoneTwitchIntegration
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             PrefabManager.OnVanillaPrefabsAvailable += InitExtraConfigFiles;
-            PrefabManager.OnVanillaPrefabsAvailable += AddPieces;
+            PrefabManager.OnVanillaPrefabsAvailable += SetupPieces;
             PrefabManager.OnVanillaPrefabsAvailable += AddEffectLists;
             PrefabManager.OnPrefabsRegistered += AddPersistentComponents;
             ItemManager.OnItemsRegistered += LogStatusEffects;
@@ -95,7 +95,7 @@ namespace WizshBoneTwitchIntegration
             ItemManager.OnItemsRegistered -= LogStatusEffects;
         }
 
-        private void AddPieces()
+        private void SetupPieces()
         {
             prefabs.ChestIron.AddComponent<TwitchSurpriseChest>();
             prefabs.ChestIron.transform.Find("chest_top").gameObject.AddComponent<TwitchSurpriseChestInteract>();
@@ -106,6 +106,11 @@ namespace WizshBoneTwitchIntegration
             prefabs.GuardStone.transform.Find("controls").gameObject.AddComponent<TwitchSafeZoneControls>();
 
             prefabs.WeatherZone.AddComponent<TwitchPersistentDestruction>();
+
+            prefabs.FlashbangVial = PrefabManager.Instance.CreateClonedPrefab("FlashbangVial_WBTI", "BombBlob_Frost_projectile");
+            Projectile projectile = prefabs.FlashbangVial.GetComponent<Projectile>();
+            projectile.m_spawnOnHit = null;
+            prefabs.FlashbangVial.transform.localScale = new Vector3(2f, 2f, 2f);
 
             PieceConfig pieceConfig = new PieceConfig();
             pieceConfig.Enabled = true;
@@ -128,7 +133,31 @@ namespace WizshBoneTwitchIntegration
             forceField.vectorFieldAttraction = 1f;
             forceField.vectorFieldSpeed = 1f;
 
-            PrefabManager.OnVanillaPrefabsAvailable -= AddPieces;
+            PrefabManager.OnVanillaPrefabsAvailable -= SetupPieces;
+        }
+
+        public void SpawnSystemLogging()
+        {
+            Jotunn.Logger.LogWarning("Loggin spawn systems...");
+            foreach (SpawnSystem spawnSystem in SpawnSystem.m_instances)
+            {
+                //Jotunn.Logger.LogWarning("=============================");
+                //Jotunn.Logger.LogWarning("Lists: " + spawnSystem.m_spawnLists.Count);
+                foreach (SpawnSystemList spawnList in spawnSystem.m_spawnLists)
+                {
+                    Jotunn.Logger.LogWarning("+++++++++++++++++++++++++++++");
+                    Jotunn.Logger.LogWarning("List name: " + spawnList.name);
+                    Jotunn.Logger.LogWarning("Spawners: " + spawnList.m_spawners.Count);
+                    Jotunn.Logger.LogWarning("+++++++++++++++++++++++++++++");
+                    foreach (SpawnSystem.SpawnData spawnData in spawnList.m_spawners)
+                    {
+                        Jotunn.Logger.LogWarning("=============================");
+                        Jotunn.Logger.LogWarning("Name: " + spawnData.m_name);
+                        Jotunn.Logger.LogWarning("prefabName: " + spawnData.m_prefab.name);
+                        Jotunn.Logger.LogWarning("Biome: " + spawnData.m_biome);
+                    }
+                }
+            }
         }
 
         private void AddPersistentComponents()

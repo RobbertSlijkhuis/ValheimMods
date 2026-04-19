@@ -8,7 +8,7 @@ namespace WizshBoneTwitchIntegration.Helpers
     {
         public static void SpawnItem(ItemData itemData, Transform transform, float force)
         {
-            Jotunn.Logger.LogWarning($"Spawning {itemData.prefabName}...");
+            //Jotunn.Logger.LogWarning($"Spawning {itemData.prefabName}...");
             GameObject prefab = PrefabManager.Instance.GetPrefab(itemData.prefabName);
 
             if (prefab == null)

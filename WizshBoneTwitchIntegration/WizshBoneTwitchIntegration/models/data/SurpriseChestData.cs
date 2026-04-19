@@ -11,6 +11,8 @@ namespace WizshBoneTwitchIntegration.Models
         public bool interact = true;
         public List<SurpriseChestSpawnData> items = new List<SurpriseChestSpawnData>();
         public int mimicChance = 0;
+        public string position = SpawnPositionType.InFrontOfPlayer;
+        public PositionOffsetData positionOffset = new PositionOffsetData();
         public bool random = true;
         public string redeemTitle;
         public float spawnDelay = 0.7f;

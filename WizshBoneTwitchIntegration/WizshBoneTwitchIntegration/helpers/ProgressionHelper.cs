@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using WizshBoneTwitchIntegration.Data;
 using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.Helpers
@@ -31,6 +30,19 @@ namespace WizshBoneTwitchIntegration.Helpers
                 list.Add(GlobalKeyType.DefeatedFader);
 
             return list;
+        }
+
+        public static float GetPlayerTier()
+        {
+            if (ZoneSystem.instance.GetGlobalKey(GlobalKeyType.DefeatedFader)) return 8.5f;
+            if (ZoneSystem.instance.GetGlobalKey(GlobalKeyType.DefeatedQueen)) return 7.5f;
+            if (ZoneSystem.instance.GetGlobalKey(GlobalKeyType.DefeatedYagluth)) return 6.5f;
+            if (ZoneSystem.instance.GetGlobalKey(GlobalKeyType.DefeatedModer)) return 5.5f;
+            if (ZoneSystem.instance.GetGlobalKey(GlobalKeyType.DefeatedBonemass)) return 4.5f;
+            if (ZoneSystem.instance.GetGlobalKey(GlobalKeyType.DefeatedElder)) return 3.5f;
+            if (ZoneSystem.instance.GetGlobalKey(GlobalKeyType.DefeatedEikthyr)) return 2.5f;
+
+            return 1f;
         }
 
         public static bool IsAllowedByGlobalKeys(string add, string remove)

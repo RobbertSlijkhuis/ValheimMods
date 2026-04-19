@@ -37,9 +37,9 @@ namespace WizshBoneTwitchIntegration.Models
 
         public void OnStart(StatusEffectData statusEffect, bool restartFromDeath)
         {
-            Jotunn.Logger.LogWarning("restartFromDeath: " + restartFromDeath);
-            Jotunn.Logger.LogWarning("Duration: " + statusEffect.duration);
-            Jotunn.Logger.LogWarning("Remaining: " + statusEffect.durationRemaining);
+            //Jotunn.Logger.LogWarning("restartFromDeath: " + restartFromDeath);
+            //Jotunn.Logger.LogWarning("Duration: " + statusEffect.duration);
+            //Jotunn.Logger.LogWarning("Remaining: " + statusEffect.durationRemaining);
             if (statusEffect.renew)
             {
                 StatusEffect currentStatusEffect = Player.m_localPlayer.GetSEMan().GetStatusEffect(statusEffect.nameHash);

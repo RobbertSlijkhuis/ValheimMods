@@ -1,5 +1,4 @@
-﻿using Jotunn.Managers;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -8,7 +7,6 @@ using TwitchSDK;
 using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Configs;
-using WizshBoneTwitchIntegration.Data;
 using WizshBoneTwitchIntegration.Exceptions;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
@@ -21,7 +19,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private TwitchAuth m_auth;
         private TwitchChat m_chat;
         private GameTask<EventStream<CustomRewardEvent>> m_customRewardEvents;
-        public Redeems m_redeems = new Redeems();
         public List<string> m_bannedUsers = new List<string>();
         public bool m_playerIsInSafeZone = false;
         public bool m_enabled = false;
@@ -33,6 +30,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             m_chat = gameObject.GetComponent<TwitchChat>();
             m_bannedUsers = ExtraConfigHelper.ReadBannedUsersFromFile();
+            RedeemHelper.ReadRedeems();
         }
 
         public void SubscribeToRedeemEvents()
@@ -50,9 +48,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             m_customRewardEvents = null;
         }
 
-        public List<RedeemEntry> GetRedeemList()
+        public List<RedeemData> GetRedeemList()
         {
-            return m_redeems.list;
+            return RedeemHelper.redeems;
         }
 
         public void SetEnableRedeems(bool value)
@@ -94,18 +92,18 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (m_alias != null && (customRewardEvent.RedeemerName == m_auth?.m_userInfo?.displayName || WizshBoneTwitchIntegration.useRedeemCommand))
                 {
-                    Jotunn.Logger.LogWarning($"{m_auth?.m_userInfo?.displayName} pretending to be {m_alias}");
+                    //Jotunn.Logger.LogWarning($"{m_auth?.m_userInfo?.displayName} pretending to be {m_alias}");
                     customRewardEvent.RedeemerName = m_alias;
                 }
 
-                Jotunn.Logger.LogWarning($"{customRewardEvent.RedeemerName} has bought {customRewardEvent.CustomRewardTitle} for {customRewardEvent.CustomRewardCost}!");
-                Jotunn.Logger.LogWarning($"Time: {customRewardEvent.RedeemedAt}");
-                Jotunn.Logger.LogWarning($"Status: {customRewardEvent.Status}");
+                //Jotunn.Logger.LogWarning($"{customRewardEvent.RedeemerName} has bought {customRewardEvent.CustomRewardTitle} for {customRewardEvent.CustomRewardCost}!");
+                //Jotunn.Logger.LogWarning($"Time: {customRewardEvent.RedeemedAt}");
+                //Jotunn.Logger.LogWarning($"Status: {customRewardEvent.Status}");
 
                 m_refundAutoResolveOn = $"Your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points has been refunded!";
                 m_refundAutoResolveOff = $"Please notify the streamer to refund your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points!";
 
-                RedeemEntry redeem = m_redeems.list.Find(item => item.title == customRewardEvent.CustomRewardTitle);
+                RedeemData redeem = GetRedeemList().Find(item => item.title == customRewardEvent.CustomRewardTitle);
                 if (redeem == null)
                 {
                     //m_chat.Send($"Could not find redeem! Your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points has been refunded!");
@@ -144,7 +142,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 {
                     bool cancelRedeem = false;
 
-                    cancelRedeem = CreatureHelper.CancelRedeemCauseOfDungeon(redeem.creatureData);
+                    cancelRedeem = CreatureHelper.CancelRedeemCauseOfDungeon(redeem.creatureData.list);
 
                     if (redeem.type == RedeemType.TerrainEdit || redeem.type == RedeemType.SpawnHallucination || redeem.type == RedeemType.SpawnAbility)
                         cancelRedeem = true;
@@ -167,18 +165,48 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         throw new RedeemException("To many spawned creatures", ExceptionType.Warning);
                     }
 
-                    foreach (CreatureData creature in redeem.creatureData)
+                    List<CreatureData> spawnList = new List<CreatureData>();
+
+                    if (redeem.creatureData.random)
                     {
+                        CreatureData creatureData = CreatureHelper.GetRandomCreatureData(redeem.creatureData.list);
+                        //Jotunn.Logger.LogWarning("Random creature: " + creatureData.prefabName);
+                        //Jotunn.Logger.LogWarning("Random group: " + creatureData.group);
+
+                        if (creatureData.group != null)
+                        {
+                            CreatureGroupData creatureGroup = RedeemHelper.creatureGroups.Find(item => item.group == creatureData.group);
+
+                            if (creatureGroup == null)
+                                throw new RedeemException("Could not find referenced group!", ExceptionType.Error);
+
+                            foreach (CreatureData groupCreature in creatureGroup.list)
+                            {
+                                // Make sure the group creature has the group set
+                                groupCreature.group = creatureGroup.group;
+                                spawnList.Add(groupCreature);
+                            }
+                        }
+                        else
+                            spawnList.Add(creatureData);
+                    }
+                    else
+                        spawnList = redeem.creatureData.list;
+
+                    //Jotunn.Logger.LogWarning("Spawnlist count: " + spawnList.Count);
+
+                    for (int index = 0; index < spawnList.Count; index++)
+                    {
+                        CreatureData creature = spawnList[index];
+                        creature.index = index;
+
                         if (!ProgressionHelper.IsAllowedByGlobalKeys(creature.globalKeyAdd, creature.globalKeyRemove))
                             continue;
 
-                        if (redeem.userInput)
-                            creature.talkMessage = m_chat.GetLastMessageOfUser(customRewardEvent.RedeemerName)?.message;
-
                         if (creature.maxSpawned > 0)
                         {
-                            Jotunn.Logger.LogWarning("Creature has max spawns set! " + creature.maxSpawned);
-                            Jotunn.Logger.LogWarning(CreatureHelper.GetNrOfSpecificTwitchInstances(creature.prefabName));
+                            //Jotunn.Logger.LogWarning("Creature has max spawns set! " + creature.maxSpawned);
+                            //Jotunn.Logger.LogWarning(CreatureHelper.GetNrOfSpecificTwitchInstances(creature.prefabName));
 
                             if (CreatureHelper.GetNrOfSpecificTwitchInstances(creature.prefabName) >= creature.maxSpawned)
                             {
@@ -186,6 +214,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                                 throw new RedeemException("To many of the same spawned creatures", ExceptionType.Warning);
                             }
                         }
+
+                        if (redeem.userInput)
+                            creature.talkMessage = m_chat.GetLastMessageOfUser(customRewardEvent.RedeemerName)?.message;
 
                         if (creature.amount > 0)
                             CreatureHelper.SpawnCreatures(creature, Player.m_localPlayer.transform, customRewardEvent, redeem.ignoreWard);
@@ -253,7 +284,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     if (redeem.chestData.announceMessage != null)
                         Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, redeem.chestData.announceMessage));
 
-                    StartCoroutine(SpawnSurpriseChestWithDelay(chestPrefab, redeem.chestData, customRewardEvent));
+                    StartCoroutine(SpawnSurpriseChestWithDelay(chestPrefab, redeem, customRewardEvent));
                 }
 
                 if (redeem.type == RedeemType.TerrainEdit)
@@ -322,9 +353,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
         }
 
-        public bool IsPlayerInSafeZone(CustomRewardEvent customRewardEvent)
+        public bool IsPlayerInSafeZone(CustomRewardEvent customRewardEvent, bool ignoreWard = false)
         {
-            if (m_playerIsInSafeZone)
+            if (m_playerIsInSafeZone && !ignoreWard)
             {
                 WizshBoneTwitchIntegration.useRedeemCommand = true;
                 m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a Twitch safe zone! {(PluginConfig.configAutoResolveRedeems.Value ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
@@ -335,25 +366,25 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             return false;
         }
 
-        public IEnumerator SpawnSurpriseChestWithDelay(GameObject prefab, SurpriseChestData chestData, CustomRewardEvent customRewardEvent)
+        public IEnumerator SpawnSurpriseChestWithDelay(GameObject prefab, RedeemData redeem, CustomRewardEvent customRewardEvent)
         {
             yield return new WaitForSeconds(3f);
 
-            if (!IsPlayerInSafeZone(customRewardEvent))
-                SurpriseChestHelper.SpawnSupriseChest(prefab, chestData, customRewardEvent);
+            if (!IsPlayerInSafeZone(customRewardEvent, redeem.ignoreWard))
+                SurpriseChestHelper.SpawnSupriseChest(prefab, redeem.chestData, customRewardEvent);
         }
 
-        public void SetRewards(List<RedeemEntry> redeems = null)
+        public void SetRewards(List<RedeemData> redeems = null)
         {
-            Jotunn.Logger.LogWarning("SetRewards()");
+            //Jotunn.Logger.LogWarning("SetRewards()");
             List<CustomRewardDefinition> listRewards = new List<CustomRewardDefinition>();
 
             if (redeems == null)
-                redeems = m_redeems.list;
+                redeems = GetRedeemList();
 
             redeems.RemoveAll(item => item.type == RedeemType.Undefined);
 
-            foreach (RedeemEntry redeem in redeems)
+            foreach (RedeemData redeem in redeems)
             {
                 if (ProgressionHelper.IsAllowedByGlobalKeys(redeem.globalKeyAdd, redeem.globalKeyRemove))
                 {
@@ -374,7 +405,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public TaskAwaiter ClearRewards()
         {
-            Jotunn.Logger.LogWarning("ClearRewards()");
+            //Jotunn.Logger.LogWarning("ClearRewards()");
             List<CustomRewardDefinition> list = new List<CustomRewardDefinition>();
             GameTask gameTask = Twitch.API.ReplaceCustomRewards(list.ToArray());
             return gameTask.GetAwaiter();
@@ -382,7 +413,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public bool ReloadRewards()
         {
-            bool result = m_redeems.Reload();
+            bool result = RedeemHelper.Reload();
 
             if (m_auth && m_auth.m_loggedIn && m_enabled)
                 SetRewards();

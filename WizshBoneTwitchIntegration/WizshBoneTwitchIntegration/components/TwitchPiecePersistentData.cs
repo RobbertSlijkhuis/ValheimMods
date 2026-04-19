@@ -32,9 +32,9 @@ namespace WizshBoneTwitchIntegration.Components
             string[] data = pieceDataString.Split('|');
             m_redeemerName = data[0];
             m_redeemTitle = data[1];
-            Jotunn.Logger.LogWarning("Retrieved Piece persitent data: " + m_redeemerName + ", " + m_redeemTitle);
+            //Jotunn.Logger.LogWarning("Retrieved Piece persitent data: " + m_redeemerName + ", " + m_redeemTitle);
 
-            RedeemEntry redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
+            RedeemData redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
 
             if (redeem == null || redeem.spawnAbilityData == null)
             {

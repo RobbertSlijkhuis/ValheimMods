@@ -12,8 +12,8 @@ namespace WizshBoneTwitchIntegration.Components
         ZNetView m_netView;
         private readonly int chestDataHash = "SurpriseChestData_WBTI".GetStableHashCode();
 
-        private string m_redeemTitle;
         private string m_redeemerName;
+        private string m_redeemTitle;
         private int m_amount;
         private float m_force;
         private List<SurpriseChestSpawnData> m_items;
@@ -56,9 +56,9 @@ namespace WizshBoneTwitchIntegration.Components
             string[] chestRedeemData = chestDataString.Split('|');
             m_redeemerName = chestRedeemData[0];
             m_redeemTitle = chestRedeemData[1];
-            Jotunn.Logger.LogWarning("Retrieved Surprise Chest persitent data: " + m_redeemerName + ", " + m_redeemTitle);
+            //Jotunn.Logger.LogWarning("Retrieved Surprise Chest persitent data: " + m_redeemerName + ", " + m_redeemTitle);
 
-            RedeemEntry redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
+            RedeemData redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
 
             if (redeem == null || redeem.chestData == null)
             {

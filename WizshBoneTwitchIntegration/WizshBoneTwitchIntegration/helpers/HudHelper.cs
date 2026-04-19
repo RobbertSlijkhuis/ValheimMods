@@ -2,7 +2,7 @@
 
 namespace WizshBoneTwitchIntegration.Helpers
 {
-    internal class EnemyHudHelper
+    internal class HudHelper
     {
         /// <summary>
         /// Generate hud game objects to display more stars

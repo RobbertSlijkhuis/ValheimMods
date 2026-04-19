@@ -31,7 +31,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             // ADD changing ZDO data aswell, so earlier placed pieces will update to be indestructible and vice versa
             foreach (GameObject prefab in prefabs)
             {
-                Jotunn.Logger.LogWarning($"{prefab.name}!");
+                //Jotunn.Logger.LogWarning($"{prefab.name}!");
                 WearNTear wearNTear = prefab.GetComponent<WearNTear>();
 
                 if (wearNTear == null)
@@ -61,7 +61,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             foreach (GameObject prefab in prefabs)
             {
-                Jotunn.Logger.LogWarning(prefab.name);
+                //Jotunn.Logger.LogWarning(prefab.name);
                 Destructible destructible = prefab.GetComponent<Destructible>();
 
                 if (destructible != null)
