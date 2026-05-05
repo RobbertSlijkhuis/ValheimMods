@@ -1,0 +1,7 @@
+{
+  "name": "RestingRockFace",
+  "description": "A simple mod that allows you to set a specific face to your Rockies! Building a Rocky village or a scene? Open the \"Rename\" window and you can set its name and face!",
+  "version_number": "0.0.2",
+  "dependencies": [ "ValheimModding-Jotunn-2.29.0" ],
+  "website_url": ""
+}
