@@ -12,7 +12,7 @@ namespace PlantCart.Helpers
         {
             ItemConfig itemConfig = new ItemConfig();
             itemConfig.Name = config.name.Value;
-            itemConfig.Enabled = config.enable.Value;
+            //itemConfig.Enabled = config.enable.Value;
             itemConfig.Description = config.description.Value;
 
             ItemManager.Instance.AddItem(new CustomItem(prefab, true, itemConfig));

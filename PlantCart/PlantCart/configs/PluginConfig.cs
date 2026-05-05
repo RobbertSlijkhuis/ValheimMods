@@ -26,7 +26,7 @@ namespace PlantCart.Configs
             {
                 BuildPieceConfigOptions options = new BuildPieceConfigOptions(PlantCart.Instance.prefabs.PlantCart, piece1Name, piece1Recipe)
                 {
-                    description = "A card that plants your seeds!",
+                    description = "Plant crops effortlessly with a cart that sows seeds as you go.",
                     craftingStation = CraftingStationType.Workbench,
                 };
                 piece1.GenerateConfig(options);
@@ -43,7 +43,7 @@ namespace PlantCart.Configs
             {
                 MaterialConfigOptions options = new MaterialConfigOptions(PlantCart.Instance.prefabs.Plow, material1Name, null)
                 {
-                    description = "An old rusted plow, maybe it can be restored?",
+                    description = "An old rusted plow, maybe it can be restored and used for something?",
                     craftingStation = null,
                 };
                 rustedPlow.GenerateConfig(options);

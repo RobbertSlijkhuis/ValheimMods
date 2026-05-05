@@ -1,5 +1,4 @@
 using BepInEx;
-using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
 using PlantCart.Components;
@@ -12,7 +11,7 @@ namespace PlantCart
 {
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
-    [NetworkCompatibility(CompatibilityLevel.NotEnforced, VersionStrictness.Minor)]
+    [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     internal class PlantCart : BaseUnityPlugin
     {
         public const string PluginGUID = "DeathWizsh.PlantCart";
@@ -23,10 +22,6 @@ namespace PlantCart
         private AssetBundle assetBundle;
         public CustomPrefabs prefabs = new CustomPrefabs();
         public static string currentTrader;
-
-        // Use this class to add your own localization to the game
-        // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
-        public static CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();
 
         public void Awake()
         {

@@ -93,10 +93,10 @@ namespace PlantCart.Components {
                         Physics.Raycast(adjustedPosBack, Vector3.down, out raycastBack, 1f);
                         Physics.Raycast(adjustedPosFront, Vector3.down, out raycastFront, 1f);
 
-                        LineRenderer lineRenderer = plantTransform.gameObject.GetComponent<LineRenderer>();
-                        lineRenderer.enabled = true;
-                        lineRenderer.SetPosition(0, adjustedPosFront);
-                        lineRenderer.SetPosition(1, adjustedPosFront + Vector3.down * 1f);
+                        //LineRenderer lineRenderer = plantTransform.gameObject.GetComponent<LineRenderer>();
+                        //lineRenderer.enabled = true;
+                        //lineRenderer.SetPosition(0, adjustedPosFront);
+                        //lineRenderer.SetPosition(1, adjustedPosFront + Vector3.down * 1f);
 
                         if (!IsValidPlantPoint(raycast) || !IsValidPlantPoint(raycastBack) || !IsValidPlantPoint(raycastFront))
                         {

@@ -15,12 +15,13 @@ namespace PlantCart.Configs
         public static string[] traderOptions = new string[] { TraderType.BogWitch, TraderType.Haldor, TraderType.Hildir };
 
         // The config fields to generate
-        public ConfigEntry<bool> enable;
+        //public ConfigEntry<bool> enable;
         public ConfigEntry<string> name;
         public ConfigEntry<string> description;
         public ConfigEntry<string> trader;
         public ConfigEntry<int> cost;
         public ConfigEntry<int> stack;
+        public ConfigEntry<bool> teleportable;
         public ConfigEntry<string> requiredGlobalKey;
 
         // Other
@@ -30,18 +31,18 @@ namespace PlantCart.Configs
         {
             ConfigFile Config = PlantCart.Instance.Config;
 
-            enable = Config.Bind(new ConfigDefinition(options.sectionName, "Enable"), (bool)options.enable,
-               new ConfigDescription("Enable " + options.name, null,
-               new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
-            enable.SettingChanged += (obj, attr) =>
-            {
-                RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
-                {
-                    name = options.recipeName,
-                    updateType = RecipeUpdateType.ENABLE,
-                    enable = enable.Value,
-                });
-            };
+            //enable = Config.Bind(new ConfigDefinition(options.sectionName, "Enable"), (bool)options.enable,
+            //   new ConfigDescription("Enable " + options.name, null,
+            //   new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+            //enable.SettingChanged += (obj, attr) =>
+            //{
+            //    RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
+            //    {
+            //        name = options.recipeName,
+            //        updateType = RecipeUpdateType.ENABLE,
+            //        enable = enable.Value,
+            //    });
+            //};
 
             name = Config.Bind(new ConfigDefinition(options.sectionName, "Name"), options.name,
               new ConfigDescription("The name given to the item", null,
@@ -62,6 +63,17 @@ namespace PlantCart.Configs
                 UpdateHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
                 {
                     description = description.Value,
+                });
+            };
+
+            teleportable = Config.Bind(new ConfigDefinition(options.sectionName, "Teleportable"), false,
+                new ConfigDescription("Whether the item is teleportable", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+            teleportable.SettingChanged += (obj, attr) =>
+            {
+                UpdateHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
+                {
+                    teleportable = teleportable.Value,
                 });
             };
 

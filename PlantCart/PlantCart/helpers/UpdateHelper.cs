@@ -24,6 +24,7 @@ namespace PlantCart.Helpers
 
             if (options.name != null) { itemData.m_shared.m_name = options.name; }
             if (options.description != null) { itemData.m_shared.m_description = options.description; }
+            if (options.teleportable != null) { itemData.m_shared.m_teleportable = (bool)options.teleportable; }
         }
 
         public static void UpdateTrader(UpdateTraderOptions options)

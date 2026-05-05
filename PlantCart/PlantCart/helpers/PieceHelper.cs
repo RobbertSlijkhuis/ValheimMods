@@ -28,8 +28,6 @@ namespace PlantCart.Helpers
                 else
                     pieceConfig.Requirements = requirements;
 
-                PieceManager.Instance.AddPiece(new CustomPiece(prefab, true, pieceConfig));
-
                 UpdateEnabled(prefab, config.enable.Value);
                 UpdateName(prefab, config.name.Value);
                 UpdateDescription(prefab, config.name.Value);
@@ -37,6 +35,8 @@ namespace PlantCart.Helpers
                 UpdateRecipe(prefab, config.recipe.Value);
                 UpdateInventorySize(prefab, config.inventoryColumns.Value, config.inventoryRows.Value);
                 UpdateMass(prefab, config.cartMass.Value);
+
+                PieceManager.Instance.AddPiece(new CustomPiece(prefab, true, pieceConfig));
             }
             catch (Exception e)
             {
@@ -71,12 +71,14 @@ namespace PlantCart.Helpers
                 if (prefab == null)
                     throw new Exception("Prefab is null");
 
-                Piece comp = prefab.GetComponent<Piece>();
+                Piece piece = prefab.GetComponent<Piece>();
+                Vagon vagon = prefab.GetComponent<Vagon>();
 
-                if (comp == null)
-                    throw new Exception("Could not find Piece component");
+                if (piece == null || vagon == null)
+                    throw new Exception("Could not find Piece or Vagon component");
 
-                comp.m_name = value;
+                piece.m_name = value;
+                vagon.m_name = value;
             }
             catch (Exception e)
             {

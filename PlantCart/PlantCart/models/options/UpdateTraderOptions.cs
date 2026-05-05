@@ -7,6 +7,7 @@ namespace PlantCart.Models
         public int? cost;
         public string? globalKey;
         public int? stack;
+        public bool? teleportable;
         public string? trader;
     }
 }
