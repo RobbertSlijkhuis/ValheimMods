@@ -104,6 +104,7 @@ namespace WizshBoneTwitchIntegration.Components
         {
             Humanoid humanoid = gameObject.GetComponent<Humanoid>();
             humanoid.SetLevel(creatureData.level);
+            humanoid.m_bossEvent = creatureData.bossEvent;
 
             if (PluginConfig.configCreaturesSameFaction.Value)
                 humanoid.m_faction = Character.Faction.Boss;

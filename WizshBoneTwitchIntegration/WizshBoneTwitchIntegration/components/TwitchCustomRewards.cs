@@ -298,6 +298,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, redeem.terrainEditData.announceMessage), 3000);
 
                     Player.m_localPlayer.GetSEMan().AddStatusEffect(WizshBoneTwitchIntegration.Instance.effects.NoFallDamage);
+                    // Check if this does not snap to ground and then not work
                     GameObject dig = Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.RemoveTheCountry, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
                 }
 

@@ -25,7 +25,7 @@ namespace WizshBoneTwitchIntegration.Commands
                 if (Player.m_localPlayer == null)
                     throw new Exception("Player is null");
 
-                Collider[] objects = Physics.OverlapSphere(Player.m_localPlayer.transform.position, scanRadius);
+                Collider[] objects = Physics.OverlapSphere(Player.m_localPlayer.transform.position, scanRadius, LayerMask.GetMask("piece"));
 
                 foreach (Collider obj in objects)
                 {

@@ -9,6 +9,7 @@ namespace WizshBoneTwitchIntegration.Models
         public bool allowDrops = false;
         public bool allowDamageStructures = true;
         public int amount = 1;
+        public string bossEvent = "";
         public bool commandable = false;
         public float damageScale = 0;
         public bool friendly = false;
