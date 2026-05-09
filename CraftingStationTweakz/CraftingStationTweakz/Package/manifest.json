@@ -1,0 +1,7 @@
+{
+  "name": "CraftingStationTweakz",
+  "description": "A small mod that gives you more control over how crafting stations and their upgrades work. Customize things like build range, upgrade connection distance, spacing requirements between upgrades, and more!",
+  "version_number": "0.0.1",
+  "dependencies": [ "ValheimModding-Jotunn-2.29.0" ],
+  "website_url": ""
+}
