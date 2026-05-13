@@ -1,0 +1,9 @@
+ManifestFileVersion: 0
+UnityVersion: 6000.0.61f1
+CRC: 2427821893
+HashAppended: 0
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: modularmagic_bloodmagic_dw
+      Dependencies: {}
