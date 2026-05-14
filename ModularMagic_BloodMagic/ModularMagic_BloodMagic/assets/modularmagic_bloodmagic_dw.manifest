@@ -1,16 +1,16 @@
 ManifestFileVersion: 0
 UnityVersion: 6000.0.61f1
-CRC: 4094375819
+CRC: 3849702751
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: b41b6441a275a09a380d6d40e4faf591
+    Hash: 82392ec88b3e3ee86b2ef8c2388b4c95
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 88d7323147701508b703dd8ea60ce680
+    Hash: de8013926d7135175b951224c0f9fd4a
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 9cb1b018497182837592a21f4ca53475
+    Hash: 6fc733988c22a58d3d4bb387118bd950
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -36,15 +36,23 @@ ClassTypes:
 - Class: 108
   Script: {instanceID: 0}
 - Class: 114
-  Script: {fileID: -585565762, guid: be46fc1827d72f94cae908c3d8dd7af8, type: 3}
+  Script: {fileID: -179248876, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 825357479, guid: be46fc1827d72f94cae908c3d8dd7af8, type: 3}
+  Script: {fileID: -1044604064, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 1521249158, guid: be46fc1827d72f94cae908c3d8dd7af8, type: 3}
+  Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 1109157524, guid: be46fc1827d72f94cae908c3d8dd7af8, type: 3}
+  Script: {fileID: -585565762, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 2053127972, guid: be46fc1827d72f94cae908c3d8dd7af8, type: 3}
+  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 115
   Script: {instanceID: 0}
 - Class: 198
@@ -67,5 +75,8 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: ItemStand/OrientationSettings
 Assets:
+- Assets/Custom/Scythe/MMBM_Scythe2.prefab
+- Assets/Custom/Scythe/spawn_skeleton_MMBM.prefab
 - Assets/Custom/Scythe/MMBM_Scythe1.prefab
+- Assets/Custom/Scythe/vfx_scythe_hit_MMBM.prefab
 Dependencies: []

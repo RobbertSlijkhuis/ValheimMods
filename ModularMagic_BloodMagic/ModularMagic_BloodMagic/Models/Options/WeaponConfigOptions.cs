@@ -51,12 +51,14 @@ namespace ModularMagic_BloodMagic.Models
         public float movementSpeed = -0.05f;
         public float weight = 0.3f;
 
-        public int attackEitr = 10;
-        public float projectileVelocity = 15f;
-        public float projectileAccuracy = 1f;
+        public int? attackEitr;
+        public float? projectileVelocity;
+        public float? projectileAccuracy;
         public float? projectileBurst;
 
         public string? selectedSecondaryAttack;
+
+        public string? summonPrefab;
 
         public WeaponConfigOptions(GameObject prefab, string name, string recipe, string upgradeRecipe)
         {

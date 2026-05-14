@@ -2,6 +2,7 @@
 using ModularMagic_BloodMagic.Helpers;
 using ModularMagic_BloodMagic.Models;
 using ModularMagic_BloodMagic.Types;
+using System.Security.Permissions;
 
 namespace ModularMagic_BloodMagic.Configs
 {
@@ -53,6 +54,7 @@ namespace ModularMagic_BloodMagic.Configs
         public ConfigEntry<int> blockArmor;
         public ConfigEntry<int> deflectionForce;
         public ConfigEntry<int> attackForce;
+        public ConfigEntry<string> summonPrefab;
 
         private int entryCount = 100;
 
@@ -442,40 +444,48 @@ namespace ModularMagic_BloodMagic.Configs
                 };
             }
 
-            attackEitr = Config.Bind(new ConfigDefinition(options.sectionName, "Attack eitr cost"), options.attackEitr,
-                new ConfigDescription("Normal attack eitr cost", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
-            attackEitr.SettingChanged += (obj, attr) =>
-            {
-                ItemHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
+            if (options.attackEitr != null) { 
+                attackEitr = Config.Bind(new ConfigDefinition(options.sectionName, "Attack eitr cost"), (int)options.attackEitr,
+                    new ConfigDescription("Normal attack eitr cost", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+                attackEitr.SettingChanged += (obj, attr) =>
                 {
-                    attackEitr = attackEitr.Value,
-                });
-            };
+                    ItemHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
+                    {
+                        attackEitr = attackEitr.Value,
+                    });
+                };
+            }
 
-            projectileVelocity = Config.Bind(new ConfigDefinition(options.sectionName, "Projectile velocity"), options.projectileVelocity,
-                new ConfigDescription("The velocity of the projectiles emitted from this item", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
-            projectileVelocity.SettingChanged += (obj, attr) =>
+            if (options.projectileVelocity != null)
             {
-                ItemHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
+                projectileVelocity = Config.Bind(new ConfigDefinition(options.sectionName, "Projectile velocity"), (float)options.projectileVelocity,
+                    new ConfigDescription("The velocity of the projectiles emitted from this item", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+                projectileVelocity.SettingChanged += (obj, attr) =>
                 {
-                    projectileVelocity = projectileVelocity.Value,
-                });
-            };
+                    ItemHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
+                    {
+                        projectileVelocity = projectileVelocity.Value,
+                    });
+                };
+            }
 
-            projectileAccuracy = Config.Bind(new ConfigDefinition(options.sectionName, "Projectile accuracy"), options.projectileAccuracy,
+            if (options.projectileAccuracy != null)
+            {
+                projectileAccuracy = Config.Bind(new ConfigDefinition(options.sectionName, "Projectile accuracy"), (float)options.projectileAccuracy,
                 new ConfigDescription("The accuracy (spread) of the projectiles emitted from this item", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
-            projectileAccuracy.SettingChanged += (obj, attr) =>
-            {
-                ItemHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
+                projectileAccuracy.SettingChanged += (obj, attr) =>
                 {
-                    projectileAccuracy = projectileAccuracy.Value,
-                });
-            };
+                    ItemHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
+                    {
+                        projectileAccuracy = projectileAccuracy.Value,
+                    });
+                };
+            }
 
-            if (options.projectileBurst > -1)
+            if (options.projectileBurst != null)
             {
                 projectileBurst = Config.Bind(new ConfigDefinition(options.sectionName, "Projectile burst"), (float)options.projectileBurst,
                     new ConfigDescription("The burst (attack speed) of the projectiles emitted from this item", null,
@@ -554,6 +564,13 @@ namespace ModularMagic_BloodMagic.Configs
                     attackForce = attackForce.Value,
                 });
             };
+
+            if (options.summonPrefab != null)
+            {
+                summonPrefab = Config.Bind(new ConfigDefinition(options.sectionName, "Summon prefab name"), options.summonPrefab,
+                    new ConfigDescription("The prefab name of the monster summoned on a charged hit", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+            }
         }
 
         private int HandleOrder()

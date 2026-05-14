@@ -60,8 +60,7 @@ namespace ModularMagic_BloodMagic.Helpers
                 movementModifier = config.movementSpeed.Value,
                 weight           = config.weight.Value,
 
-                attackEitr           = config.attackEitr.Value,
-
+                attackEitr         = config.attackEitr?.Value ?? 0f,
                 projectileAccuracy = config.projectileAccuracy?.Value ?? 0f,
                 projectileBurst    = config.projectileBurst?.Value ?? 0f,
                 projectileVelocity = config.projectileVelocity?.Value ?? 0f,
