@@ -126,10 +126,14 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             List<CreatureData> spawnList = ResolveSpawnList(redeem.creatureData);
 
-            for (int index = 0; index < spawnList.Count; index++)
+            if (Player.m_localPlayer.InInterior() && CancelRedeemCauseOfDungeon(spawnList))
             {
-                CreatureData creature = spawnList[index];
+                chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! {(PluginConfig.configAutoResolveRedeems.Value ? TwitchCustomRewards.m_refundAutoResolveOn : TwitchCustomRewards.m_refundAutoResolveOff)}");
+                throw new RedeemException("Player is in dungeon and redeem is not allowed", ExceptionType.Warning);
+            }
 
+            foreach (CreatureData creature in spawnList)
+            {
                 if (!ProgressionHelper.IsAllowedByGlobalKeys(creature.globalKeyAdd, creature.globalKeyRemove))
                     continue;
 
@@ -275,6 +279,19 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (creatures == null)
                 return false;
 
+            List<string> notAllowedList = GetDungeonForbiddenCreatures();
+
+            foreach (CreatureData creature in creatures)
+            {
+                if (notAllowedList.Contains(creature.prefabName))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public static List<string> GetDungeonForbiddenCreatures()
+        {
             string dungeonType = EnvMan.instance.GetCurrentEnvironment().m_name;
 
             List<string> notAllowedList = new List<string>
@@ -315,13 +332,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                     break;
             }
 
-            foreach (CreatureData creature in creatures)
-            {
-                if (notAllowedList.Contains(creature.prefabName))
-                    return true;
-            }
-
-            return false;
+            return notAllowedList;
         }
 
         public static int GetNrOfTwitchInstances(float maxRange = 100f)
@@ -366,10 +377,21 @@ namespace WizshBoneTwitchIntegration.Helpers
         private static List<CreatureData> ResolveSpawnList(SpawnCreatureData creatureData)
         {
             List<CreatureData> spawnList = new List<CreatureData>();
+            List<CreatureData> source = creatureData.list;
 
-            List<CreatureData> source = creatureData.random
-                ? new List<CreatureData> { GetRandomCreatureData(creatureData.list) }
-                : creatureData.list;
+            if (creatureData.random)
+            {
+                if (Player.m_localPlayer.InInterior())
+                {
+                    List<string> forbidden = GetDungeonForbiddenCreatures();
+                    source = source.FindAll(c => !forbidden.Contains(c.prefabName));
+                }
+
+                if (source.Count == 0)
+                    throw new RedeemException("No valid creatures available to spawn in this dungeon!", ExceptionType.Warning);
+
+                source = new List<CreatureData> { GetRandomCreatureData(source) };
+            }
 
             foreach (CreatureData entry in source)
             {

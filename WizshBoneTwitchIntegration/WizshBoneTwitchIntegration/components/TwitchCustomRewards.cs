@@ -140,14 +140,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (Player.m_localPlayer.InInterior())
                 {
-                    bool cancelRedeem = false;
-
-                    cancelRedeem = CreatureHelper.CancelRedeemCauseOfDungeon(redeem.creatureData.list);
-
                     if (redeem.type == RedeemType.TerrainEdit || redeem.type == RedeemType.SpawnHallucination || redeem.type == RedeemType.SpawnAbility)
-                        cancelRedeem = true;
-
-                    if (cancelRedeem)
                     {
                         m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! {(PluginConfig.configAutoResolveRedeems.Value ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
                         throw new RedeemException("Player is in dungeon and redeem is not allowed", ExceptionType.Warning);
