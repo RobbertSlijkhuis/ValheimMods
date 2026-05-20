@@ -34,6 +34,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             spawnAbility.m_setMaxInstancesFromWeaponLevel = false;
             spawnAbility.m_maxSummonReached = "You have reached the maximum of spawns";
+            spawnAbility.m_snapToTerrain = spawnAbilityData.snapToterrain;
 
             if (spawnAbilityData.isOwner)
                 spawnAbility.m_owner = Player.m_localPlayer;

@@ -11,11 +11,12 @@ namespace WizshBoneTwitchIntegration.Models
         public int amount = 1;
         public string bossEvent = "";
         public bool commandable = false;
+        public string color = null;
         public float damageScale = 0;
         public bool friendly = false;
         public string globalKeyAdd = "";
         public string globalKeyRemove = "";
-        public string group;
+        public string group = null;
         public float healthScale = 0;
         public int index;
         public bool isHallucination = false;

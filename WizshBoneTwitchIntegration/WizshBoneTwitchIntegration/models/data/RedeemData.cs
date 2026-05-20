@@ -10,6 +10,7 @@ namespace WizshBoneTwitchIntegration.Models
         public SurpriseChestData chestData = new SurpriseChestData();
         public SpawnCreatureData creatureData = new SpawnCreatureData();
         public DetonateData detonateData = new DetonateData();
+        public string description = "";
         public FlashBangData flashbangData = new FlashBangData();
         public string globalKeyAdd = "";
         public string globalKeyRemove = "";

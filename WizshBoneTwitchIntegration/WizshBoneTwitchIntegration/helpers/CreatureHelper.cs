@@ -5,8 +5,10 @@ using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Configs;
+using WizshBoneTwitchIntegration.Exceptions;
 using WizshBoneTwitchIntegration.Extensions;
 using WizshBoneTwitchIntegration.Models;
+using WizshBoneTwitchIntegration.TwitchIntegration;
 using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.Helpers
@@ -14,85 +16,135 @@ namespace WizshBoneTwitchIntegration.Helpers
     internal class CreatureHelper
     {
         public static int hallucinationCount = 0;
-        public static readonly Dictionary<string, ValheimCreature> valheimCreatures = new()
+        private static Dictionary<string, ValheimCreature> _valheimCreatures;
+        public static Dictionary<string, ValheimCreature> valheimCreatures
         {
-            // MEADOWS
-            { ValheimCreatureType.Boar, new ValheimCreature(1.0f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Eikthyr, new ValheimCreature(1.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-            { ValheimCreatureType.Greyling, new ValheimCreature(1.1f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Neck, new ValheimCreature(1.0f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
+            get
+            {
+                if (_valheimCreatures == null)
+                    _valheimCreatures = BuildValheimCreatures();
+                return _valheimCreatures;
+            }
+        }
 
-            // BLACK FOREST
-            { ValheimCreatureType.Bjorn, new ValheimCreature(2.8f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-            { ValheimCreatureType.Ghost, new ValheimCreature(2.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Greydwarf, new ValheimCreature(2.0f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Greydwarf_Elite, new ValheimCreature(2.4f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Greydwarf_Shaman, new ValheimCreature(2.4f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Serpent, new ValheimCreature(2.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-            { ValheimCreatureType.Skeleton, new ValheimCreature(2.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Skeleton_Poison, new ValheimCreature(2.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.TheElder, new ValheimCreature(2.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-            { ValheimCreatureType.Troll, new ValheimCreature(2.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
+        private static Dictionary<string, ValheimCreature> BuildValheimCreatures()
+        {
+            var e = WizshBoneTwitchIntegration.Instance.effectLists;
+            return new Dictionary<string, ValheimCreature>
+            {
+                // MEADOWS
+                { ValheimCreatureType.Boar, new ValheimCreature(1.0f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Eikthyr, new ValheimCreature(1.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Greyling, new ValheimCreature(1.1f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Neck, new ValheimCreature(1.0f, e.SpawnEffectSmall) },
 
-            // SWAMP
-            { ValheimCreatureType.Abomination, new ValheimCreature(3.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-            { ValheimCreatureType.Blob, new ValheimCreature(3.0f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.BlobElite, new ValheimCreature(3.0f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Bonemass, new ValheimCreature(3.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-            { ValheimCreatureType.Draugr, new ValheimCreature(3.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Draugr_Elite, new ValheimCreature(3.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Draugr_Ranged, new ValheimCreature(3.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Leech, new ValheimCreature(3.0f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Surtling, new ValheimCreature(3.5f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Wraith, new ValheimCreature(3.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
+                // BLACK FOREST
+                { ValheimCreatureType.Bjorn, new ValheimCreature(2.8f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Ghost, new ValheimCreature(2.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Greydwarf, new ValheimCreature(2.0f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Greydwarf_Elite, new ValheimCreature(2.4f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Greydwarf_Shaman, new ValheimCreature(2.4f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Serpent, new ValheimCreature(2.2f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Skeleton, new ValheimCreature(2.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Skeleton_Poison, new ValheimCreature(2.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.TheElder, new ValheimCreature(2.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Troll, new ValheimCreature(2.6f, e.SpawnEffectMedium) },
 
-            // MOUNTAIN
-            { ValheimCreatureType.Bat, new ValheimCreature(4.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Fenring, new ValheimCreature(4.3f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Fenring_Cultist, new ValheimCreature(4.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Hatchling, new ValheimCreature(4.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Moder, new ValheimCreature(4.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-            { ValheimCreatureType.StoneGolem, new ValheimCreature(4.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-            { ValheimCreatureType.Ulv, new ValheimCreature(4.4f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Wolf, new ValheimCreature(4.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
+                // SWAMP
+                { ValheimCreatureType.Abomination, new ValheimCreature(3.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Blob, new ValheimCreature(3.0f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.BlobElite, new ValheimCreature(3.0f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Bonemass, new ValheimCreature(3.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Draugr, new ValheimCreature(3.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Draugr_Elite, new ValheimCreature(3.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Draugr_Ranged, new ValheimCreature(3.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Leech, new ValheimCreature(3.0f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Surtling, new ValheimCreature(3.5f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Wraith, new ValheimCreature(3.6f, e.SpawnEffectSmall) },
 
-            // PLAINS
-            { ValheimCreatureType.Deathsquito, new ValheimCreature(5.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Goblin, new ValheimCreature(5.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.GoblinBrute, new ValheimCreature(5.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-            { ValheimCreatureType.GoblinShaman, new ValheimCreature(5.4f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.BlobTar, new ValheimCreature(5.3f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Lox, new ValheimCreature(5.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Unbjorn, new ValheimCreature(5.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-            { ValheimCreatureType.Yagluth, new ValheimCreature(5.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
+                // MOUNTAIN
+                { ValheimCreatureType.Bat, new ValheimCreature(4.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Fenring, new ValheimCreature(4.3f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Fenring_Cultist, new ValheimCreature(4.6f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Hatchling, new ValheimCreature(4.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Moder, new ValheimCreature(4.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.StoneGolem, new ValheimCreature(4.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Ulv, new ValheimCreature(4.4f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Wolf, new ValheimCreature(4.2f, e.SpawnEffectSmall) },
 
-            // MISTLANDS
-            { ValheimCreatureType.Dverger, new ValheimCreature(6.4f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.DvergerMage, new ValheimCreature(6.4f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Gjall, new ValheimCreature(6.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-            { ValheimCreatureType.Queen, new ValheimCreature(6.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-            { ValheimCreatureType.Seeker, new ValheimCreature(6.3f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.SeekerBrood, new ValheimCreature(6.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.SeekerBrute, new ValheimCreature(6.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-            { ValheimCreatureType.Tick, new ValheimCreature(6.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
+                // PLAINS
+                { ValheimCreatureType.Deathsquito, new ValheimCreature(5.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Goblin, new ValheimCreature(5.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.GoblinBrute, new ValheimCreature(5.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.GoblinShaman, new ValheimCreature(5.4f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.BlobTar, new ValheimCreature(5.3f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Lox, new ValheimCreature(5.6f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Unbjorn, new ValheimCreature(5.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Yagluth, new ValheimCreature(5.6f, e.SpawnEffectMedium) },
 
-            // ASHLANDS
-            { ValheimCreatureType.Asksvin, new ValheimCreature(7.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.BlobLava, new ValheimCreature(7.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.BonemawSerpent, new ValheimCreature(7.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-            { ValheimCreatureType.Charred_Archer, new ValheimCreature(7.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Charred_Melee, new ValheimCreature(7.2f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Charred_Mage, new ValheimCreature(7.4f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall) },
-            { ValheimCreatureType.Fader, new ValheimCreature(7.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-            { ValheimCreatureType.LordReto, new ValheimCreature(7.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-            { ValheimCreatureType.Morgen, new ValheimCreature(7.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-            { ValheimCreatureType.FallenValkyrie, new ValheimCreature(7.6f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-            { ValheimCreatureType.Volture, new ValheimCreature(7.3f, WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium) },
-        };
+                // MISTLANDS
+                { ValheimCreatureType.Dverger, new ValheimCreature(6.4f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.DvergerMage, new ValheimCreature(6.4f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Gjall, new ValheimCreature(6.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Queen, new ValheimCreature(6.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Seeker, new ValheimCreature(6.3f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.SeekerBrood, new ValheimCreature(6.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.SeekerBrute, new ValheimCreature(6.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Tick, new ValheimCreature(6.2f, e.SpawnEffectSmall) },
+
+                // ASHLANDS
+                { ValheimCreatureType.Asksvin, new ValheimCreature(7.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.BlobLava, new ValheimCreature(7.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.BonemawSerpent, new ValheimCreature(7.2f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Charred_Archer, new ValheimCreature(7.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Charred_Melee, new ValheimCreature(7.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Charred_Mage, new ValheimCreature(7.4f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Charred_Twitcher, new ValheimCreature(7.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Fader, new ValheimCreature(7.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.LordReto, new ValheimCreature(7.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Morgen, new ValheimCreature(7.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.FallenValkyrie, new ValheimCreature(7.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Volture, new ValheimCreature(7.3f, e.SpawnEffectMedium) },
+            };
+        }
 
         public static ValheimCreature GetValheimCreature(string name)
         {
             return valheimCreatures.GetValueSafe(name.Replace("(Clone)", ""));
+        }
+
+        public static void HandleSpawnCreatureRedeem(RedeemData redeem, CustomRewardEvent customRewardEvent, TwitchChat chat)
+        {
+            if (redeem.creatureData == null)
+                throw new RedeemException("Could not find creature data for SpawnCreature", ExceptionType.Error);
+
+            if (GetNrOfTwitchInstances(PluginConfig.configCreaturesMaxRadius.Value) >= PluginConfig.configCreaturesMaxAmount.Value)
+            {
+                chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the maximum spawned creature limit has been reached! {(PluginConfig.configAutoResolveRedeems.Value ? TwitchCustomRewards.m_refundAutoResolveOn : TwitchCustomRewards.m_refundAutoResolveOff)}");
+                throw new RedeemException("To many spawned creatures", ExceptionType.Warning);
+            }
+
+            List<CreatureData> spawnList = ResolveSpawnList(redeem.creatureData);
+
+            for (int index = 0; index < spawnList.Count; index++)
+            {
+                CreatureData creature = spawnList[index];
+
+                if (!ProgressionHelper.IsAllowedByGlobalKeys(creature.globalKeyAdd, creature.globalKeyRemove))
+                    continue;
+
+                if (creature.maxSpawned > 0 && GetNrOfSpecificTwitchInstances(creature.prefabName) >= creature.maxSpawned)
+                {
+                    chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the maximum spawned limit of {creature.prefabName} has been reached! {(PluginConfig.configAutoResolveRedeems.Value ? TwitchCustomRewards.m_refundAutoResolveOn : TwitchCustomRewards.m_refundAutoResolveOff)}");
+                    throw new RedeemException("To many of the same spawned creatures", ExceptionType.Warning);
+                }
+
+                if (redeem.userInput)
+                    creature.talkMessage = chat.GetLastMessageOfUser(customRewardEvent.RedeemerName)?.message;
+
+                if (creature.amount > 0)
+                    SpawnCreatures(creature, Player.m_localPlayer.transform, customRewardEvent, redeem.ignoreWard);
+            }
         }
 
         public static void SpawnCreature(CreatureData creatureData, Transform transform, CustomRewardEvent customRewardEvent, bool ignoreWard = false, float force = 0f)
@@ -119,29 +171,6 @@ namespace WizshBoneTwitchIntegration.Helpers
             GameObject creature = UnityEngine.Object.Instantiate(prefab, spawnPosition, spawnRotation);
             MonsterAI monsterAI = creature.GetComponent<MonsterAI>();
             Humanoid humanoid = creature.GetComponent<Humanoid>();
-
-            //if (Player.m_localPlayer.InInterior())
-            //{
-            //    string dungeonType = EnvMan.instance.GetCurrentEnvironment().m_name;
-
-            //    Jotunn.Logger.LogWarning("Dungeon: " + dungeonType);
-            //    Jotunn.Logger.LogWarning("Name: " + creature.name);
-
-            //    if (dungeonType == DungeonType.BurialChamber || dungeonType == DungeonType.SunkenCrypt) {
-
-            //        if (creature.name == "Greydwarf_Elite(Clone)")
-            //        {
-            //            creature.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
-            //            Jotunn.Logger.LogWarning("Down sizing Greyfwarf Brute");
-            //        }
-
-            //        if (creature.name == "Greydwarf_Shaman(Clone)")
-            //        {
-            //            creature.transform.localScale = new Vector3(1f, 1f, 1f);
-            //            Jotunn.Logger.LogWarning("Down sizing Greyfwarf Shaman");
-            //        }
-            //    }
-            //}
 
             if (monsterAI == null)
             {
@@ -171,6 +200,13 @@ namespace WizshBoneTwitchIntegration.Helpers
                 Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, creatureData.announceMessage), 3000);
 
             ValheimCreature valheimCreature = GetValheimCreature(creature.name);
+
+            if (valheimCreature == null)
+            {
+                Jotunn.Logger.LogWarning($"No ValheimCreature entry found for {creature.name}, skipping spawn effect.");
+                return;
+            }
+
             valheimCreature.spawnEffects.Create(creature.transform.position, creature.transform.rotation);
         }
 
@@ -236,50 +272,52 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static bool CancelRedeemCauseOfDungeon(List<CreatureData> creatures)
         {
-            string dungeonType = EnvMan.instance.GetCurrentEnvironment().m_name;
-
             if (creatures == null)
                 return false;
 
-            List<string> notAllowedList = new List<string>();
-            notAllowedList.Add("greydwarf_elite");
-            notAllowedList.Add("abomination");
-            notAllowedList.Add("bat");
-            notAllowedList.Add("bjorn");
-            notAllowedList.Add("bonemawserpent");
-            notAllowedList.Add("deathsquito");
-            notAllowedList.Add("gjall");
-            notAllowedList.Add("goblinbrute");
-            notAllowedList.Add("golem");
-            notAllowedList.Add("hatchling");
-            notAllowedList.Add("lox");
-            notAllowedList.Add("seekerbrute");
-            notAllowedList.Add("serpent");
-            notAllowedList.Add("troll");
-            notAllowedList.Add("unbjorn");
+            string dungeonType = EnvMan.instance.GetCurrentEnvironment().m_name;
+
+            List<string> notAllowedList = new List<string>
+            {
+                ValheimCreatureType.Greydwarf_Elite,
+                ValheimCreatureType.Abomination,
+                ValheimCreatureType.Bat,
+                ValheimCreatureType.Bjorn,
+                ValheimCreatureType.BonemawSerpent,
+                ValheimCreatureType.Deathsquito,
+                ValheimCreatureType.Gjall,
+                ValheimCreatureType.GoblinBrute,
+                ValheimCreatureType.StoneGolem,
+                ValheimCreatureType.Hatchling,
+                ValheimCreatureType.Lox,
+                ValheimCreatureType.SeekerBrute,
+                ValheimCreatureType.Serpent,
+                ValheimCreatureType.Troll,
+                ValheimCreatureType.Unbjorn,
+            };
 
             switch (dungeonType)
             {
                 case nameof(DungeonType.FrostCave):
                 case nameof(DungeonType.HowlingCavern):
-                    notAllowedList.Remove("golem");
+                    notAllowedList.Remove(ValheimCreatureType.StoneGolem);
                     break;
                 case nameof(DungeonType.InfestedMine):
-                    notAllowedList.Remove("seekerbrute");
-                    notAllowedList.Remove("golem");
+                    notAllowedList.Remove(ValheimCreatureType.SeekerBrute);
+                    notAllowedList.Remove(ValheimCreatureType.StoneGolem);
                     break;
                 case nameof(DungeonType.Queen):
-                    notAllowedList.Remove("bat");
-                    notAllowedList.Remove("deathsquito");
-                    notAllowedList.Remove("gjall");
-                    notAllowedList.Remove("golem");
-                    notAllowedList.Remove("seekerbrute");
+                    notAllowedList.Remove(ValheimCreatureType.Bat);
+                    notAllowedList.Remove(ValheimCreatureType.Deathsquito);
+                    notAllowedList.Remove(ValheimCreatureType.Gjall);
+                    notAllowedList.Remove(ValheimCreatureType.StoneGolem);
+                    notAllowedList.Remove(ValheimCreatureType.SeekerBrute);
                     break;
             }
 
             foreach (CreatureData creature in creatures)
             {
-                if (notAllowedList.Contains(creature.prefabName.ToLower()))
+                if (notAllowedList.Contains(creature.prefabName))
                     return true;
             }
 
@@ -296,10 +334,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                     continue;
 
                 if (maxRange > 0f && Vector3.Distance(Player.m_localPlayer.transform.position, creature.transform.position) > maxRange)
-                {
-                    //Jotunn.Logger.LogWarning("Out of range!");
                     continue;
-                }
 
                 num++;
             }
@@ -309,29 +344,18 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static int GetNrOfSpecificTwitchInstances(string prefabName, float maxRange = 100f)
         {
-            GameObject prefab = PrefabManager.Instance.GetPrefab(prefabName);
             int num = 0;
-
-            if (prefab == null)
-            {
-                //Jotunn.Logger.LogWarning($"Could not find prefab: {prefabName} ");
-                return 0;
-            }
 
             foreach (BaseAI creature in BaseAI.BaseAIInstances)
             {
                 if (creature.GetComponent<TwitchCreatureClaim>() == null)
                     continue;
 
-                //Jotunn.Logger.LogWarning($"{creature.name} - {prefabName}(Clone)");
                 if (creature.name != prefabName + "(Clone)")
                     continue;
 
                 if (maxRange > 0f && Vector3.Distance(Player.m_localPlayer.transform.position, creature.transform.position) > maxRange)
-                {
-                    //Jotunn.Logger.LogWarning("Out of range!");
                     continue;
-                }
 
                 num++;
             }
@@ -339,109 +363,34 @@ namespace WizshBoneTwitchIntegration.Helpers
             return num;
         }
 
-        public static void SpawnHallucination()
+        private static List<CreatureData> ResolveSpawnList(SpawnCreatureData creatureData)
         {
-            hallucinationCount++;
+            List<CreatureData> spawnList = new List<CreatureData>();
 
-            if (hallucinationCount > 6)
-                return;
+            List<CreatureData> source = creatureData.random
+                ? new List<CreatureData> { GetRandomCreatureData(creatureData.list) }
+                : creatureData.list;
 
-            Heightmap.Biome biome = Player.m_localPlayer.GetCurrentBiome();
-            //Jotunn.Logger.LogWarning("Current biome: " + biome);
-            bool isNight = EnvMan.IsNight();
-            //Jotunn.Logger.LogWarning("Is night: " + isNight);
-
-            List<string> monsterList = new List<string>();
-
-            switch (biome)
+            foreach (CreatureData entry in source)
             {
-                case Heightmap.Biome.Meadows:
-                    monsterList.Add("Neck");
-                    monsterList.Add("Greyling");
-                    monsterList.Add("Boar");
-                    break;
-                case Heightmap.Biome.BlackForest:
-                    monsterList.Add("Greydwarf");
-                    monsterList.Add("Bjorn");
-                    monsterList.Add("Troll");
-                    monsterList.Add("Greydwarf_Shaman");
-                    monsterList.Add("Bjorn");
-                    monsterList.Add("Troll");
-                    monsterList.Add("Greydwarf_Elite");
-                    monsterList.Add("Bjorn");
-                    monsterList.Add("Skeleton");
-                    break;
-                case Heightmap.Biome.Swamp:
-                    monsterList.Add("Draugr");
+                if (entry.group != null)
+                {
+                    CreatureGroupData creatureGroup = RedeemHelper.creatureGroups.Find(item => item.group == entry.group);
 
-                    if (isNight)
-                        monsterList.Add("Wraith");
+                    if (creatureGroup == null)
+                        throw new RedeemException("Could not find referenced group!", ExceptionType.Error);
 
-                    monsterList.Add("Abomination");
-                    monsterList.Add("BlobElite");
-                    monsterList.Add("Blob");
-                    monsterList.Add("Abomination");
-                    monsterList.Add("Draugr_Elite");
-
-                    if (isNight)
-                        monsterList.Add("Wraith");
-                    break;
-                case Heightmap.Biome.Mountain:
-                    monsterList.Add("Wolf");
-                    monsterList.Add("Hatchling");
-                    monsterList.Add("StoneGolem");
-                    monsterList.Add("Wolf");
-
-                    if (isNight)
-                        monsterList.Add("Fenring");
-                    break;
-                case Heightmap.Biome.Plains:
-                    monsterList.Add("Deathsquito");
-
-                    if (isNight)
-                        monsterList.Add("Unbjorn");
-
-                    monsterList.Add("Goblin");
-                    monsterList.Add("Lox");
-                    monsterList.Add("Deathsquito");
-
-                    if (isNight)
-                        monsterList.Add("Unbjorn");
-                    break;
-                case Heightmap.Biome.Mistlands:
-                    monsterList.Add("Seeker");
-                    monsterList.Add("SeekerBrute");
-                    monsterList.Add("Gjall");
-                    break;
-                case Heightmap.Biome.AshLands:
-                    monsterList.Add("Charred_Melee");
-                    monsterList.Add("FallenValkyrie");
-                    monsterList.Add("Asksvin");
-                    monsterList.Add("Charred_Archer");
-                    monsterList.Add("BlobLava");
-                    monsterList.Add("Morgen");
-                    monsterList.Add("Charred_Twitcher");
-                    monsterList.Add("Volture");
-                    break;
+                    foreach (CreatureData groupCreature in creatureGroup.list)
+                    {
+                        groupCreature.group = creatureGroup.group;
+                        spawnList.Add(groupCreature);
+                    }
+                }
+                else
+                    spawnList.Add(entry);
             }
 
-            int index = UnityEngine.Random.Range(0, monsterList.Count);
-            string monster = monsterList[index];
-
-            CustomRewardEvent customReward = new CustomRewardEvent();
-            CreatureData creature = new CreatureData();
-            creature.isHallucination = true;
-            creature.position = SpawnPositionType.RandomBehind;
-            creature.rename = false;
-            SpawnCreature(creature, Player.m_localPlayer.transform, customReward);
-        }
-
-        public static void StartHallucinations()
-        {
-            if (hallucinationCount > 6)
-                Game.instance.CancelInvoke(nameof(StartHallucinations));
-            else
-                SpawnHallucination();
+            return spawnList;
         }
     }
 }

@@ -11,26 +11,6 @@ namespace WizshBoneTwitchIntegration.Harmony
     [HarmonyPatch]
     public class DamagePatchesWBTI
     {
-        //[HarmonyPostfix]
-        //[HarmonyPatch(typeof(Player), "OnDamaged")]
-        //public static void OnDamaged_Postfix(Player __instance, HitData hit)
-        //{
-        //    try
-        //    {
-        //        if (__instance == null || hit == null)
-        //            return;
-
-        //        Jotunn.Logger.LogWarning("Player got hit!");
-        //        Jotunn.Logger.LogWarning($"type: {hit.m_hitType}");
-        //        Jotunn.Logger.LogWarning($"damage: {hit.m_damage}");
-        //        Jotunn.Logger.LogWarning($"attacker: {hit.m_attacker}");
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Jotunn.Logger.LogError("Something went wrong in OnCollisionEnter_Postfix: " + e);
-        //    }
-        //}
-
         [HarmonyPrefix]
         [HarmonyPatch(typeof(WearNTear), "Damage")]
         public static bool WearNTearDamage_Prefix(WearNTear __instance, HitData hit)
@@ -46,12 +26,15 @@ namespace WizshBoneTwitchIntegration.Harmony
                     return true;
 
                 TwitchCreaturePersistentData persistentData = character.gameObject.GetComponent<TwitchCreaturePersistentData>();
-                //Jotunn.Logger.LogWarning(!persistentData.m_allowDamageStructures);
+
+                if (persistentData == null)
+                    return true;
+
                 return persistentData.m_allowDamageStructures;
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Something went wrong in Damage_Prefix: " + e);
+                Jotunn.Logger.LogError("Something went wrong in WearNTearDamage_Prefix: " + e);
                 return true;
             }
         }
@@ -60,25 +43,37 @@ namespace WizshBoneTwitchIntegration.Harmony
         [HarmonyPatch(typeof(Character), "Damage")]
         public static void CharacterDamage_Prefix(Character __instance, ref HitData hit)
         {
-            Character attacker = hit.GetAttacker();
+            try
+            {
+                Character attacker = hit.GetAttacker();
 
-            if (attacker == null)
-                return;
+                if (attacker == null)
+                    return;
 
-            //Jotunn.Logger.LogWarning("Found attacker: " + attacker.gameObject.name);
-            //Jotunn.Logger.LogWarning("Hit type: " + hit.GetType());
+                TwitchCreatureClaim creatureClaim = attacker.gameObject.GetComponent<TwitchCreatureClaim>();
 
-            TwitchCreatureClaim creatureClaim = attacker.gameObject.GetComponent<TwitchCreatureClaim>();
+                if (creatureClaim == null || !creatureClaim.m_isSpawn)
+                    return;
 
-            if (creatureClaim == null || !creatureClaim.m_isSpawn)
-                return;
+                TwitchCreaturePersistentData persistentData = attacker.gameObject.GetComponent<TwitchCreaturePersistentData>();
 
-            TwitchCreaturePersistentData persistentData = attacker.gameObject.GetComponent<TwitchCreaturePersistentData>();
-            ValheimCreature creature = CreatureHelper.GetValheimCreature(attacker.gameObject.name);
-            float playerTier = ProgressionHelper.GetPlayerTier();
-            float damageScale = persistentData.m_damageScale != 0 ? persistentData.m_damageScale : PluginConfig.configCreaturesdamageScale.Value;
-            float scale = CreatureHelper.CalculateScale(playerTier, creature.tier, damageScale);
-            CreatureHelper.ScaleHitDamage(ref hit, scale);
+                if (persistentData == null)
+                    return;
+
+                ValheimCreature creature = CreatureHelper.GetValheimCreature(attacker.gameObject.name);
+
+                if (creature == null)
+                    return;
+
+                float playerTier = ProgressionHelper.GetPlayerTier();
+                float damageScale = persistentData.m_damageScale != 0 ? persistentData.m_damageScale : PluginConfig.configCreaturesdamageScale.Value;
+                float scale = CreatureHelper.CalculateScale(playerTier, creature.tier, damageScale);
+                CreatureHelper.ScaleHitDamage(ref hit, scale);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in CharacterDamage_Prefix: " + e);
+            }
         }
 
         [HarmonyPostfix]

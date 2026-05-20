@@ -18,19 +18,24 @@ namespace WizshBoneTwitchIntegration.Components
         private float m_force;
         private List<SurpriseChestSpawnData> m_items;
         private float m_openDelay = 1.5f;
+        // TODO: implement mimic behaviour
         private bool m_mimic;
         private bool m_random;
         private int m_yeetChance = 5;
         private float m_spawnDelay = 0.7f;
+        private Transform m_spawnPoint;
+        private Quaternion m_spawnPointOriginalRotation;
 
         public bool m_interact;
-        public TwitchSurpriseChestInteract m_supriseChestInteract;
+        public TwitchSurpriseChestInteract m_surpriseChestInteract;
         public string m_type;
 
         EffectList chestOpeningEffects = new EffectList();
         EffectList despawnEffect = new EffectList();
         EffectList spawnEffects = new EffectList();
         EffectList spawnItemEffects = new EffectList();
+
+        private Minimap.PinData m_mapPin;
 
         public void Awake()
         {
@@ -40,7 +45,9 @@ namespace WizshBoneTwitchIntegration.Components
             spawnItemEffects = WizshBoneTwitchIntegration.Instance.effectLists.SpawnItemEffect;
 
             m_netView = gameObject.GetComponent<ZNetView>();
-            m_supriseChestInteract = transform.Find("chest_top").gameObject.GetComponent<TwitchSurpriseChestInteract>();
+            m_surpriseChestInteract = transform.Find("chest_top").gameObject.GetComponent<TwitchSurpriseChestInteract>();
+            m_spawnPoint = transform.Find("spawnpoint");
+            m_spawnPointOriginalRotation = m_spawnPoint.rotation;
 
             if (m_netView == null || m_netView.GetZDO() == null)
             {
@@ -56,7 +63,6 @@ namespace WizshBoneTwitchIntegration.Components
             string[] chestRedeemData = chestDataString.Split('|');
             m_redeemerName = chestRedeemData[0];
             m_redeemTitle = chestRedeemData[1];
-            //Jotunn.Logger.LogWarning("Retrieved Surprise Chest persitent data: " + m_redeemerName + ", " + m_redeemTitle);
 
             RedeemData redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
 
@@ -66,35 +72,19 @@ namespace WizshBoneTwitchIntegration.Components
                 return;
             }
 
-            SurpriseChestData chestData = redeem.chestData;
-            m_amount = chestData.amount;
-            m_force = chestData.force;
-            m_items = chestData.items;
-            m_interact = chestData.interact;
-            m_mimic = chestData.mimicChance == 0 ? false : Random.Range(0, 100) <= chestData.mimicChance;
-            m_random = chestData.random;
-            m_spawnDelay = chestData.spawnDelay;
-            m_type = chestData.type;
-            m_yeetChance = chestData.yeetChance;
+            ApplyChestData(redeem.chestData);
+            m_mapPin = Minimap.instance.AddPin(transform.position, Minimap.PinType.Icon3, "Surprise Chest", false, false);
         }
 
         public void Init(SurpriseChestData chestData, CustomRewardEvent customRewardEvent)
         {
             m_redeemerName = customRewardEvent.RedeemerName;
             m_redeemTitle = customRewardEvent.CustomRewardTitle;
-            m_amount = chestData.amount;
-            m_force = chestData.force;
-            m_items = chestData.items;
-            m_interact = chestData.interact;
-            m_mimic = chestData.mimicChance == 0 ? false : Random.Range(0, 100) <= chestData.mimicChance;
-            m_random = chestData.random;
-            m_spawnDelay = chestData.spawnDelay;
-            m_type = chestData.type;
-            m_yeetChance = chestData.yeetChance;
 
-            Minimap.instance.DiscoverLocation(transform.localPosition, Minimap.PinType.Icon3, "Surprise Chest", false);
+            ApplyChestData(chestData);
 
             m_netView.GetZDO().Set(chestDataHash, $"{m_redeemerName}|{m_redeemTitle}");
+            m_mapPin = Minimap.instance.AddPin(transform.position, Minimap.PinType.Icon3, "Surprise Chest", false, false);
 
             TriggerSpawnEffects();
 
@@ -102,26 +92,56 @@ namespace WizshBoneTwitchIntegration.Components
                 StartCoroutine(OpenDelay());
         }
 
+        private void ApplyChestData(SurpriseChestData chestData)
+        {
+            m_amount = chestData.amount;
+            m_force = chestData.force;
+            m_items = chestData.items;
+            m_interact = chestData.interact;
+            m_mimic = chestData.mimicChance == 0 ? false : Random.Range(0, 100) <= chestData.mimicChance;
+            m_random = chestData.random;
+            m_spawnDelay = chestData.spawnDelay;
+            m_type = chestData.type;
+            m_yeetChance = chestData.yeetChance;
+        }
+
         public void Open()
         {
-            m_supriseChestInteract.m_animator.SetTrigger("Open");
+            m_surpriseChestInteract.m_animator.SetTrigger("Open");
             TriggerChestOpeningEffect();
-            Invoke(nameof(SpawnItems), 4f);
+            StartCoroutine(SpawnItemsDelay());
+        }
+
+        public void OnDestroy()
+        {
+            TriggerDespawnEffects();
+
+            if (m_mapPin != null)
+                Minimap.instance.RemovePin(m_mapPin);
+        }
+
+        public void Update()
+        {
+            if (m_mapPin != null)
+                m_mapPin.m_pos = transform.position;
         }
 
         public IEnumerator OpenDelay()
         {
             yield return new WaitForSeconds(m_openDelay);
-
             Open();
+        }
+
+        private IEnumerator SpawnItemsDelay()
+        {
+            yield return new WaitForSeconds(4f);
+            SpawnItems();
         }
 
         private void SpawnItems()
         {
             try
             {
-                float timeOffset = 0f;
-
                 if (m_items == null)
                 {
                     Jotunn.Logger.LogError("No items to spawn!");
@@ -131,19 +151,13 @@ namespace WizshBoneTwitchIntegration.Components
                 if (!m_random)
                     m_amount = m_items.Count;
 
+                float timeOffset = 0f;
+
                 for (int index = 0; index < m_amount; index++)
                 {
                     float angleChange = ChangeAngleByIndex(index);
-                    float force = m_force;
-                    SurpriseChestSpawnData spawnData;
-
-                    if (m_random)
-                        spawnData = m_items[Random.Range(0, m_items.Count)];
-                    else
-                        spawnData = m_items[index];
-
-                    if (m_yeetChance > 0 && Random.Range(0, 100) <= m_yeetChance)
-                        force = 1000f;
+                    float force = m_yeetChance > 0 && Random.Range(0, 100) <= m_yeetChance ? 1000f : m_force;
+                    SurpriseChestSpawnData spawnData = m_random ? m_items[Random.Range(0, m_items.Count)] : m_items[index];
 
                     StartCoroutine(SpawnItem(spawnData, force, angleChange, timeOffset));
                     timeOffset += m_spawnDelay;
@@ -163,8 +177,8 @@ namespace WizshBoneTwitchIntegration.Components
         {
             yield return new WaitForSeconds(delay);
 
-            Transform spawnPointTrans = transform.Find("spawnpoint");
-            spawnPointTrans.Rotate(Vector3.up, deviation);
+            m_spawnPoint.rotation = m_spawnPointOriginalRotation;
+            m_spawnPoint.Rotate(Vector3.up, deviation);
 
             if (spawnData.creatureData != null)
             {
@@ -174,20 +188,14 @@ namespace WizshBoneTwitchIntegration.Components
                         continue;
 
                     if (creature.amount > 0)
-                        CreatureHelper.SpawnCreatures(creature, spawnPointTrans, new CustomRewardEvent() { RedeemerName = m_redeemerName }, false, force);
+                        CreatureHelper.SpawnCreatures(creature, m_spawnPoint, new CustomRewardEvent() { RedeemerName = m_redeemerName }, false, force);
                 }
             }
 
             if (spawnData.itemData != null)
-                ItemHelper.SpawnItem(spawnData.itemData, spawnPointTrans, force);
+                ItemHelper.SpawnItem(spawnData.itemData, m_spawnPoint, force);
 
             TriggerSpawnItemEffect();
-        }
-
-        public void OnDestroy()
-        {
-            TriggerDespawnEffects();
-            Minimap.instance.RemovePin(transform.position, 5f);
         }
 
         private void TriggerChestOpeningEffect()
@@ -220,11 +228,11 @@ namespace WizshBoneTwitchIntegration.Components
                 case 1:
                     return 25f;
                 case 2:
-                    return -50f;
+                    return -25f;
                 case 3:
-                    return 75f;
+                    return 50f;
                 case 4:
-                    return -100f;
+                    return -50f;
             }
         }
     }

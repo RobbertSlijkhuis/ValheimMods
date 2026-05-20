@@ -20,10 +20,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                 TwitchCreatureInteract creatureInteract = __instance.gameObject.GetComponent<TwitchCreatureInteract>();
 
                 if (creatureInteract != null)
-                {
                     __result = creatureInteract.GetHoverText();
-                    return;
-                }
             }
             catch (Exception e)
             {
@@ -51,7 +48,7 @@ namespace WizshBoneTwitchIntegration.Harmony
         public static void RPC_SetName_Prefix(ref Tameable __instance, long sender, ref string name, string authorId)
         {
             try
-            { 
+            {
                 if (!name.Contains("claim:"))
                     return;
 
@@ -131,7 +128,6 @@ namespace WizshBoneTwitchIntegration.Harmony
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Something went wrong in UpdateHuds_Postfix: " + e);
-                return;
             }
         }
     }

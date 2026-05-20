@@ -23,14 +23,18 @@ namespace WizshBoneTwitchIntegration.Extensions
 
             TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
 
-            Collider[] objects = Physics.OverlapSphere(spawnAbility.transform.position, spawnAbility.m_spawnRadius, LayerMask.GetMask("character_trigger"));
+            Collider[] objects = Array.Empty<Collider>();
             List<Collider> safezoneColliders = new List<Collider>();
 
-            foreach (Collider collider in objects)
+            if (!spawnAbilityData.rescanForSafezones)
             {
-                if (collider.gameObject.GetComponentInChildren<TwitchSafeZone>())
+                objects = Physics.OverlapSphere(spawnAbility.transform.position, spawnAbility.m_spawnRadius, LayerMask.GetMask("character_trigger"));
+                foreach (Collider collider in objects)
                 {
-                    safezoneColliders.Add(collider);
+                    if (collider.gameObject.GetComponentInChildren<TwitchSafeZone>())
+                    {
+                        safezoneColliders.Add(collider);
+                    }
                 }
             }
 
@@ -101,13 +105,13 @@ namespace WizshBoneTwitchIntegration.Extensions
                 {
                     objects = Physics.OverlapSphere(spawnAbility.transform.position, spawnAbility.m_spawnRadius, LayerMask.GetMask("character_trigger"));
                     safezoneColliders = new List<Collider>();
-                }
 
-                foreach (Collider collider in objects)
-                {
-                    if (collider.gameObject.GetComponentInChildren<TwitchSafeZone>())
+                    foreach (Collider collider in objects)
                     {
-                        safezoneColliders.Add(collider);
+                        if (collider.gameObject.GetComponentInChildren<TwitchSafeZone>())
+                        {
+                            safezoneColliders.Add(collider);
+                        }
                     }
                 }
 
@@ -193,16 +197,12 @@ namespace WizshBoneTwitchIntegration.Extensions
                     continue;
                 }
 
-                spawnAbility.m_preSpawnEffects.Create(spawnPoint, Quaternion.identity);
-                if (spawnAbility.m_preSpawnDelay > 0f)
-                {
-                    yield return new WaitForSeconds(spawnAbility.m_preSpawnDelay);
-                }
-
-                spawnAbility.m_snapToTerrain = spawnAbilityData.snapToterrain;
-
                 if (customRewards.m_playerIsInSafeZone)
                     yield break;
+
+                spawnAbility.m_preSpawnEffects.Create(spawnPoint, Quaternion.identity);
+                if (spawnAbility.m_preSpawnDelay > 0f)
+                    yield return new WaitForSeconds(spawnAbility.m_preSpawnDelay);
 
                 GameObject gameObject = UnityEngine.Object.Instantiate(prefab, spawnPoint, Quaternion.Euler(0f, UnityEngine.Random.value * (float)Math.PI * 2f, 0f));
                 ZNetView component = gameObject.GetComponent<ZNetView>();
@@ -246,7 +246,12 @@ namespace WizshBoneTwitchIntegration.Extensions
                     }
 
                     if (spawnAbilityData.dropVelocity != 0f)
-                        rigidbody.AddForce(new Vector3(0f, (float)spawnAbilityData.dropVelocity, 0f) * rigidbody.mass * rigidbody.mass);
+                    {
+                        if (rigidbody != null)
+                            rigidbody.AddForce(new Vector3(0f, (float)spawnAbilityData.dropVelocity, 0f) * rigidbody.mass * rigidbody.mass);
+                        else
+                            Jotunn.Logger.LogWarning("Rigidbody missing, cannot apply dropVelocity.");
+                    }
 
                     TwitchAllowDamage preventDamage = impactEffect.gameObject.AddComponent<TwitchAllowDamage>();
                     preventDamage.Init(spawnAbilityData.damageShips, spawnAbilityData.damageStructures);
@@ -254,10 +259,12 @@ namespace WizshBoneTwitchIntegration.Extensions
                     if (spawnAbilityData.duration > 0)
                     {
                         TwitchPersistentDestruction persistentDestruction = gameObject.GetComponent<TwitchPersistentDestruction>();
-                        persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium);
+                        if (persistentDestruction != null)
+                            persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium);
+                        else
+                            Jotunn.Logger.LogWarning("TwitchPersistentDestruction missing on impactEffect object.");
                     }
 
-                    //gameObject.AddComponent<TwitchDeleteBySafeZone>();
                     impactEffect.m_damagePlayers = true;
 
                     DamageData resetDamage = new DamageData();
@@ -273,13 +280,13 @@ namespace WizshBoneTwitchIntegration.Extensions
                     if (piece != null)
                         piece.m_resources = new Piece.Requirement[0];
 
-                    //TwitchDeleteBySafeZone deleteBySafeZone = gameObject.AddComponent<TwitchDeleteBySafeZone>();
-                    //deleteBySafeZone.SetKinematic(true);
-
                     if (spawnAbilityData.duration > 0)
                     {
                         TwitchPersistentDestruction persistentDestruction = gameObject.GetComponent<TwitchPersistentDestruction>();
-                        persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall);
+                        if (persistentDestruction != null)
+                            persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall);
+                        else
+                            Jotunn.Logger.LogWarning("TwitchPersistentDestruction missing on trap object.");
                     }
 
                     trap.StartCoroutine(trap.ArmTrapAfterDelay(1f));
@@ -287,28 +294,12 @@ namespace WizshBoneTwitchIntegration.Extensions
 
                 if (monsterAI == null && aoe != null)
                 {
-                    //if (gameObject.name == "lightningAOE(Clone)")
-                    //{
-                    //    gameObject.DeleteInactiveChildren();
-                    //    gameObject.SetActiveAllChildren(false);
-                    //}
-
                     if (spawnAbilityData.damage != null)
                     {
-                        HitData.DamageTypes damages = DamageHelper.ConvertToDamageTypes(spawnAbilityData.damage);
-
-                        if (spawnAbilityData.damage.basedOnMaxHealthAndArmor)
-                        {
-                            damages = SpawnAbilityHelper.CalculateDamageBasedOnMaxHealthAndArmor(spawnAbilityData);
-                            aoe.m_damage = damages;
-                        }
-                        else 
-                            aoe.m_damage = DamageHelper.ConvertToDamageTypes(spawnAbilityData.damage);
-
-                        //TwitchDeleteBySafeZone deleteBySafeZone = gameObject.AddComponent<TwitchDeleteBySafeZone>();
-
-                        //if (gameObject.name == "lightningAOE(Clone)")
-                        //    deleteBySafeZone.SetKinematic(true);
+                        HitData.DamageTypes damages = spawnAbilityData.damage.basedOnMaxHealthAndArmor
+                            ? SpawnAbilityHelper.CalculateDamageBasedOnMaxHealthAndArmor(spawnAbilityData)
+                            : DamageHelper.ConvertToDamageTypes(spawnAbilityData.damage);
+                        aoe.m_damage = damages;
 
                         TwitchPersistentDamage persistentDamage = gameObject.GetComponent<TwitchPersistentDamage>();
 
@@ -329,17 +320,15 @@ namespace WizshBoneTwitchIntegration.Extensions
                         preventDamageRod.Init(spawnAbilityData.damageShips, spawnAbilityData.damageStructures);
                         aoeRod.m_useTriggers = true;
                     }
-
-                    //if (gameObject.name == "lightningAOE(Clone)")
-                    //{
-                    //    component.StartCoroutine(gameObject.SetActiveAllChildrenAfterDelay(1f, true));
-                    //}
                 }
 
                 if (piece != null)
                 {
                     TwitchPiecePersistentData piecePersistentData = gameObject.GetComponent<TwitchPiecePersistentData>();
-                    piecePersistentData.SetData(customRewardEvent, spawnAbilityData);
+                    if (piecePersistentData != null)
+                        piecePersistentData.SetData(customRewardEvent, spawnAbilityData);
+                    else
+                        Jotunn.Logger.LogWarning("TwitchPiecePersistentData missing on piece object.");
                 }
 
                 if ((bool)component2)

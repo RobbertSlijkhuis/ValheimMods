@@ -7,44 +7,28 @@ namespace WizshBoneTwitchIntegration.Helpers
 {
     internal class WeatherHelper
     {
+        private static GameObject _activeWeatherZone;
+
         public static void SpawnWeather(WeatherData weatherData, CustomRewardEvent customRewardEvent)
         {
-            //List<string> weathers = new List<string>();
-            //weathers.Add("Clear");
-            //weathers.Add("Heath_clear");
-            //weathers.Add("Mistlands_clear");
-            //weathers.Add("Twilight_Clear");
-            //weathers.Add("Eikthyr");
-            //weathers.Add("GDKing");
-            //weathers.Add("Bonemass");
-            //weathers.Add("Moder");
-            //weathers.Add("GoblinKing");
-            //weathers.Add("Queen");
-            //weathers.Add("Fader");
-            //weathers.Add("Misty");
-            //weathers.Add("ThunderStorm");
-            //weathers.Add("SnowStorm");
-            //weathers.Add("Twilight_SnowStorm");
-            //weathers.Add("Mistlands_thunder");
-            //weathers.Add("Ghosts");
-            //weathers.Add("CavesHildir");
-
             if (weatherData.items.Count == 0)
             {
-                //Jotunn.Logger.LogWarning("Could not find any weather in the list, adding clear!");
                 weatherData.items.Add("Clear");
+                Jotunn.Logger.LogWarning("Could not find any weather in the list, adding clear!");
+            }
+
+            if (_activeWeatherZone != null)
+            {
+                Jotunn.Logger.LogInfo("Replacing active weather zone with new one.");
+                UnityEngine.Object.Destroy(_activeWeatherZone);
+                _activeWeatherZone = null;
             }
 
             string weather = weatherData.items[Random.Range(0, weatherData.items.Count)];
-            //Jotunn.Logger.LogWarning("Chosen weather: " + weather);
+            Jotunn.Logger.LogWarning("Chosen weather: " + weather);
 
             GameObject gameObject = UnityEngine.Object.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.WeatherZone, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
-            //GameObject gameObject;
-
-            //if (weatherData.attach)
-            //    gameObject = UnityEngine.Object.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.WeatherZone, Player.m_localPlayer.transform);
-            //else
-            //    gameObject = UnityEngine.Object.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.WeatherZone, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
+            _activeWeatherZone = gameObject;
 
             CapsuleCollider capsuleCollider = gameObject.GetComponent<CapsuleCollider>();
             EnvZone envZone = gameObject.GetComponent<EnvZone>();
@@ -56,7 +40,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             capsuleCollider.radius = weatherData.radius;
 
             if (weatherData.announceMessage != null)
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, weatherData.announceMessage), 3000);
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, weatherData.announceMessage) + $" \n{weather}", 3000);
 
             persistentDestruction.SetStarted(weatherData.duration);
             persistentDestruction.onEnd = OnDestroy;
@@ -72,11 +56,12 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return;
             }
 
-            //Jotunn.Logger.LogWarning($"Weather {envZone.m_environment} has been reset!");
             envZone.m_environment = null;
 
             if (envZone.m_force)
                 EnvMan.instance.SetForceEnvironment("");
+
+            _activeWeatherZone = null;
         }
     }
 }

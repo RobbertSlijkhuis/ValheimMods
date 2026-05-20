@@ -155,79 +155,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 }
 
                 if (redeem.type == RedeemType.SpawnCreature)
-                {
-                    if (redeem.creatureData == null)
-                        throw new RedeemException("Could not find creature data for SpawnCreature", ExceptionType.Error);
-
-                    if (CreatureHelper.GetNrOfTwitchInstances(PluginConfig.configCreaturesMaxRadius.Value) >= PluginConfig.configCreaturesMaxAmount.Value)
-                    {
-                        m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the maximum spawned creature limit has been reached! {(PluginConfig.configAutoResolveRedeems.Value ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
-                        throw new RedeemException("To many spawned creatures", ExceptionType.Warning);
-                    }
-
-                    List<CreatureData> spawnList = new List<CreatureData>();
-
-                    if (redeem.creatureData.random)
-                    {
-                        CreatureData creatureData = CreatureHelper.GetRandomCreatureData(redeem.creatureData.list);
-                        //Jotunn.Logger.LogWarning("Random creature: " + creatureData.prefabName);
-                        //Jotunn.Logger.LogWarning("Random group: " + creatureData.group);
-
-                        if (creatureData.group != null)
-                        {
-                            CreatureGroupData creatureGroup = RedeemHelper.creatureGroups.Find(item => item.group == creatureData.group);
-
-                            if (creatureGroup == null)
-                                throw new RedeemException("Could not find referenced group!", ExceptionType.Error);
-
-                            foreach (CreatureData groupCreature in creatureGroup.list)
-                            {
-                                // Make sure the group creature has the group set
-                                groupCreature.group = creatureGroup.group;
-                                spawnList.Add(groupCreature);
-                            }
-                        }
-                        else
-                            spawnList.Add(creatureData);
-                    }
-                    else
-                        spawnList = redeem.creatureData.list;
-
-                    //Jotunn.Logger.LogWarning("Spawnlist count: " + spawnList.Count);
-
-                    for (int index = 0; index < spawnList.Count; index++)
-                    {
-                        CreatureData creature = spawnList[index];
-                        creature.index = index;
-
-                        if (!ProgressionHelper.IsAllowedByGlobalKeys(creature.globalKeyAdd, creature.globalKeyRemove))
-                            continue;
-
-                        if (creature.maxSpawned > 0)
-                        {
-                            //Jotunn.Logger.LogWarning("Creature has max spawns set! " + creature.maxSpawned);
-                            //Jotunn.Logger.LogWarning(CreatureHelper.GetNrOfSpecificTwitchInstances(creature.prefabName));
-
-                            if (CreatureHelper.GetNrOfSpecificTwitchInstances(creature.prefabName) >= creature.maxSpawned)
-                            {
-                                m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the maximum spawned limit of {creature.prefabName} has been reached! {(PluginConfig.configAutoResolveRedeems.Value ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
-                                throw new RedeemException("To many of the same spawned creatures", ExceptionType.Warning);
-                            }
-                        }
-
-                        if (redeem.userInput)
-                            creature.talkMessage = m_chat.GetLastMessageOfUser(customRewardEvent.RedeemerName)?.message;
-
-                        if (creature.amount > 0)
-                            CreatureHelper.SpawnCreatures(creature, Player.m_localPlayer.transform, customRewardEvent, redeem.ignoreWard);
-                    }
-                }
-
-                if (redeem.type == RedeemType.SpawnHallucination)
-                {
-                    CreatureHelper.hallucinationCount = 0;
-                    InvokeRepeating(nameof(CreatureHelper.StartHallucinations), 0f, 20f);
-                }
+                    CreatureHelper.HandleSpawnCreatureRedeem(redeem, customRewardEvent, m_chat);
 
                 if (redeem.type == RedeemType.SpawnAbility)
                 {
@@ -396,6 +324,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         IsGlobalCooldownEnabled = redeem.cooldown > 0,
                         IsUserInputRequired = redeem.userInput,
                         Cost = redeem.points,
+                        Prompt = redeem.description,
                         Title = redeem.title,
                     });
                 }

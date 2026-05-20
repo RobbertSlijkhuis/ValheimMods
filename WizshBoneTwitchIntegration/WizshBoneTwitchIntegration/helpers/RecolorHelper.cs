@@ -161,18 +161,26 @@ namespace WizshBoneTwitchIntegration.Helpers
             RecolorCreature(redeemerName, creature);
         }
 
-        public static void RecolorCreature(string redeemerName, GameObject creature)
+        public static void RecolorCreature(string redeemerName, GameObject creature, string colorOverride = null)
         {
-            //Jotunn.Logger.LogWarning($"Found creature {creature.name} and {redeemerName} is very special!");
             ViewerEntry viewerEntry = GetViewer(redeemerName);
 
-            if (viewerEntry == null)
+            Color resolvedColor;
+
+            if (colorOverride != null && ColorUtility.TryParseHtmlString(colorOverride, out Color parsedOverride))
             {
-                //Jotunn.Logger.LogWarning($"Could not find viewer entry!");
+                resolvedColor = parsedOverride;
+            }
+            else if (viewerEntry != null)
+            {
+                viewerEntry.Init();
+                resolvedColor = viewerEntry.parsedColor1;
+            }
+            else
+            {
                 return;
             }
 
-            viewerEntry.Init();
             List<RecolorCreatureData> list = GetRecolorCreatureDataByKey(creature.name);
 
             foreach (RecolorCreatureData recolorCreatureData in list)
@@ -294,7 +302,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 if (levelEffects != null)
                     levelEffects.m_levelSetups.Clear();
 
-                Recolor(recolorCreatureData, viewerEntry.parsedColor1, mat, recolorCreatureData.emissiveMultiplier);
+                Recolor(recolorCreatureData, resolvedColor, mat, recolorCreatureData.emissiveMultiplier);
             }
         }
 

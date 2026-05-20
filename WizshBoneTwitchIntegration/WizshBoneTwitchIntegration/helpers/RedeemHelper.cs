@@ -84,6 +84,30 @@ namespace WizshBoneTwitchIntegration.Helpers
             playerSnapshot.Apply(player);
         }
 
+        public static List<CreatureData> GetResolvedCreatureList(SpawnCreatureData spawnCreatureData)
+        {
+            List<CreatureData> resolved = new List<CreatureData>();
+
+            foreach (CreatureData entry in spawnCreatureData.list)
+            {
+                if (!string.IsNullOrEmpty(entry.prefabName))
+                {
+                    resolved.Add(entry);
+                    continue;
+                }
+
+                if (entry.group == null)
+                    continue;
+
+                CreatureGroupData group = creatureGroups.Find(g => g.group == entry.group);
+
+                if (group != null)
+                    resolved.AddRange(group.list);
+            }
+
+            return resolved;
+        }
+
         //private static void ClearDamage(GameObject attack)
         //{
         //    ItemDrop itemDrop = attack.GetComponent<ItemDrop>();
