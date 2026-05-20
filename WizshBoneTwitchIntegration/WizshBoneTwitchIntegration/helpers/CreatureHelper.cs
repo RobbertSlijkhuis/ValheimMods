@@ -387,8 +387,10 @@ namespace WizshBoneTwitchIntegration.Helpers
                     source = source.FindAll(c => !forbidden.Contains(c.prefabName));
                 }
 
+                source = source.FindAll(c => c.maxSpawned <= 0 || GetNrOfSpecificTwitchInstances(c.prefabName) < c.maxSpawned);
+
                 if (source.Count == 0)
-                    throw new RedeemException("No valid creatures available to spawn in this dungeon!", ExceptionType.Warning);
+                    throw new RedeemException("No valid creatures available to spawn!", ExceptionType.Warning);
 
                 source = new List<CreatureData> { GetRandomCreatureData(source) };
             }
