@@ -16,6 +16,7 @@ namespace WizshBoneTwitchIntegration.Configs
         public static string sectionRedeems = "Redeems";
         public static string sectionRemoveTheCountry = "Remove the Country";
         public static string sectionWard = "Twitchy Ward";
+        public static string sectionHUD = "HUD";
 
         public static ConfigEntry<KeyboardShortcut> configWizshBoneWindow;
 
@@ -52,6 +53,11 @@ namespace WizshBoneTwitchIntegration.Configs
         public static ConfigEntry<bool> configWardBurnCreatures;
         public static ConfigEntry<bool> configWardPushCreatures;
         public static ConfigEntry<float> configWardPushForce;
+
+        // HUD
+        public static ConfigEntry<HudPosition> configHudPosition;
+        public static ConfigEntry<float> configHudOffsetX;
+        public static ConfigEntry<float> configHudOffsetY;
 
         // Other
         private static int entryCount = 1000;
@@ -269,6 +275,34 @@ namespace WizshBoneTwitchIntegration.Configs
             configWardPushForce = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionWard, "Ward push force", 2000f,
                 new ConfigDescription("How much force the Twitchy Ward will push out creatures (only spawned by the mod)", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+
+
+            configHudPosition = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionHUD, "HUD position", HudPosition.BottomRight,
+                new ConfigDescription("The predefined position of the status HUD panel. Set to Custom to use the X and Y offset below.", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+            configHudPosition.SettingChanged += (obj, attr) =>
+            {
+                TwitchAuth auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
+                auth.wizshBoneHUD.RepositionHUD();
+            };
+
+            configHudOffsetX = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionHUD, "HUD custom offset X", 0f,
+                new ConfigDescription("Horizontal offset from the screen center when HUD position is set to Custom.", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+            configHudOffsetX.SettingChanged += (obj, attr) =>
+            {
+                TwitchAuth auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
+                auth.wizshBoneHUD.RepositionHUD();
+            };
+
+            configHudOffsetY = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionHUD, "HUD custom offset Y", 0f,
+                new ConfigDescription("Vertical offset from the screen center when HUD position is set to Custom.", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+            configHudOffsetY.SettingChanged += (obj, attr) =>
+            {
+                TwitchAuth auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
+                auth.wizshBoneHUD.RepositionHUD();
+            };
         }
 
         private static int HandleOrder()

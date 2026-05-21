@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jotunn.Managers;
+using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using TwitchSDK;
@@ -25,6 +26,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public bool m_waitingForCode = false;
 
         public WizshBoneGUI wizshBoneGUI;
+        public WizshBoneHUD wizshBoneHUD;
 
         public void Awake()
         {
@@ -35,16 +37,34 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             wizshBoneGUI.onLogin.AddListener(InvokeAuth);
             wizshBoneGUI.onToggleRedeems.AddListener(ToggleRedeems);
             wizshBoneGUI.onToggleChatting.AddListener(ToggleChatting);
+
+            wizshBoneHUD = new WizshBoneHUD();
+            GUIManager.OnCustomGUIAvailable += OnGUIAvailable;
+        }
+
+        private void OnGUIAvailable()
+        {
+            wizshBoneHUD.ShowHUD();
+            GUIManager.OnCustomGUIAvailable -= OnGUIAvailable;
         }
 
         public void InvokeAuth()
         {
+            CancelInvoke(nameof(InitLoginProcess));
+            m_waitingForCode = false;
             InvokeRepeating(nameof(InitLoginProcess), 0f, 0.3f);
+        }
+
+        private void UpdateAllGUI()
+        {
+            wizshBoneGUI.UpdateGUI();
+            wizshBoneHUD.UpdateHUD();
         }
 
         public void ToggleRedeems()
         {
             m_customRewards.SetEnableRedeems(!m_customRewards.m_enabled);
+            UpdateAllGUI();
         }
 
         public void ToggleChatting()
@@ -81,7 +101,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (PluginConfig.configEnableRedeemsOnLogin.Value)
                     m_customRewards.SetEnableRedeems(true);
 
-                wizshBoneGUI.UpdateGUI();
+                UpdateAllGUI();
                 CancelInvoke(nameof(InitLoginProcess));
                 InvokeRepeating(nameof(TrackAuthRepeating), 0, 60f);
             }
@@ -135,7 +155,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     m_loggedinInTime = DateTime.Now;
                     m_loggedIn = true;
                     m_waitingForCode = false;
-                    wizshBoneGUI.UpdateGUI();
+                    UpdateAllGUI();
                     return;
                 }
 
@@ -148,7 +168,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     m_waitingForCode = false;
                     m_authInfo = null;
                     m_userInfo = null;
-                    wizshBoneGUI.UpdateGUI();
+                    UpdateAllGUI();
                     return;
                 }
 
@@ -165,7 +185,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                     Application.OpenURL($"{authInfo.Uri}");
                     m_waitingForCode = true;
-                    wizshBoneGUI.UpdateGUI();
+                    UpdateAllGUI();
                     return;
                 }
             }

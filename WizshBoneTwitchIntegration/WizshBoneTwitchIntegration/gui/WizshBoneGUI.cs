@@ -18,12 +18,22 @@ namespace WizshBoneTwitchIntegration.Gui
         public UnityEvent onToggleChatting = new UnityEvent();
         public UnityEvent onClose = new UnityEvent();
 
-        float buttonSwitchWidth = 200f;
-        float buttonSwitchHeight = 60f;
-        float buttonSwitchPosX = 120f;
+        private readonly float buttonSwitchWidth = 200f;
+        private readonly float buttonSwitchHeight = 60f;
+        private readonly float buttonSwitchPosX = 120f;
+        private readonly float descSwitchWidth = 230f;
+        private readonly float descSwitchHeight = 60f;
 
-        float descSwitchWidth = 230f;
-        float descSwitchHeight = 60f;
+        // Mutable element references
+        private Text m_loginStatusText;
+        private Text m_loginButtonText;
+        private GameObject m_redeemsSection;
+        private Text m_redeemsSectionStatusText;
+        private Text m_redeemsSectionButtonText;
+        private GameObject m_chattingSection;
+        private Text m_chattingSectionStatusText;
+        private Text m_chattingSectionButtonText;
+        private WizshBoneSettingsGUI m_settingsGUI = new WizshBoneSettingsGUI();
 
         public void ShowGUI()
         {
@@ -68,12 +78,40 @@ namespace WizshBoneTwitchIntegration.Gui
 
         public void UpdateGUI()
         {
-            foreach (Transform child in panel.transform)
-            {
-                GameObject.Destroy(child.gameObject);
-            }
+            if (panel == null)
+                return;
 
-            CreateGUI();
+            // Update login section
+            m_loginStatusText.text = GetLoginStatusMessage();
+            m_loginStatusText.color = auth.m_userInfo != null
+                ? GUIManager.Instance.ValheimYellow
+                : GUIManager.Instance.ValheimBeige;
+            m_loginButtonText.text = GetLoginButtonText();
+
+            // Show/hide and update conditional sections
+            bool loggedIn = auth.m_userInfo != null;
+            m_redeemsSection.SetActive(loggedIn);
+            m_chattingSection.SetActive(loggedIn);
+
+            if (loggedIn)
+            {
+                m_redeemsSectionStatusText.text = customRewards.m_enabled
+                    ? "Redeems are currently enabled"
+                    : "Redeems are currently disabled";
+                m_redeemsSectionStatusText.color = customRewards.m_enabled
+                    ? GUIManager.Instance.ValheimYellow
+                    : GUIManager.Instance.ValheimBeige;
+                m_redeemsSectionButtonText.text = customRewards.m_enabled
+                    ? "Disable Redeems"
+                    : "Enable Redeems";
+
+                m_chattingSectionStatusText.color = chatting.m_enabled
+                    ? GUIManager.Instance.ValheimYellow
+                    : GUIManager.Instance.ValheimBeige;
+                m_chattingSectionButtonText.text = chatting.m_enabled
+                    ? "Disable in-game chat messages"
+                    : "Enable in-game chat messages";
+            }
         }
 
         private void CreateGUI()
@@ -94,29 +132,25 @@ namespace WizshBoneTwitchIntegration.Gui
                 addContentSizeFitter: false
             );
 
-            CreateTwitchButton();
+            CreateTwitchSection();
+            CreateRedeemsSection();
+            CreateChattingSection();
 
-            if (auth.m_userInfo != null)
-            {
-                CreateEnableRedeemsButton();
-                CreateEnableChattingButton();
-            }
-
-            GUIManager.Instance.CreateText(
-                text: $"Redeems can be configured in \"{WizshBoneTwitchIntegration.redeemsConfigPath.Substring(0, 24)} {WizshBoneTwitchIntegration.redeemsConfigPath.Substring(24)}\". They can be reloaded during gameplay with the \"ReloadTwitchRedeems\" command.",
-                parent: panel.transform,
-                anchorMin: new Vector2(0.5f, 0f),
-                anchorMax: new Vector2(0.5f, 0f),
-                position: new Vector2(10f, 140f),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 14,
-                color: GUIManager.Instance.ValheimBeige,
-                outline: true,
-                outlineColor: Color.black,
-                width: 450,
-                height: 60f,
-                addContentSizeFitter: false
-            );
+            //GUIManager.Instance.CreateText(
+            //    text: $"Redeems can be configured in \"{WizshBoneTwitchIntegration.redeemsConfigPath.Substring(0, 24)} {WizshBoneTwitchIntegration.redeemsConfigPath.Substring(24)}\". They can be reloaded during gameplay with the \"ReloadTwitchRedeems\" command.",
+            //    parent: panel.transform,
+            //    anchorMin: new Vector2(0.5f, 0f),
+            //    anchorMax: new Vector2(0.5f, 0f),
+            //    position: new Vector2(10f, 140f),
+            //    font: GUIManager.Instance.AveriaSerifBold,
+            //    fontSize: 14,
+            //    color: GUIManager.Instance.ValheimBeige,
+            //    outline: true,
+            //    outlineColor: Color.black,
+            //    width: 450,
+            //    height: 60f,
+            //    addContentSizeFitter: false
+            //);
 
             GameObject cancelButtonObj = GUIManager.Instance.CreateButton(
                 text: "Close",
@@ -128,24 +162,35 @@ namespace WizshBoneTwitchIntegration.Gui
                 height: 60f
             );
             cancelButtonObj.SetActive(true);
-            Button cancelButton = cancelButtonObj.GetComponent<Button>();
-            cancelButton.onClick.AddListener(CloseGUI);
+            cancelButtonObj.GetComponent<Button>().onClick.AddListener(CloseGUI);
 
-            GUIManager.Instance.CreateText(
-                text: "Please report any issues on my Discord, the link can be found on my mod page or Twitch channel. Suggestions are also welcome!",
+            GameObject settingsButtonObj = GUIManager.Instance.CreateButton(
+                text: "Settings",
                 parent: panel.transform,
                 anchorMin: new Vector2(0.5f, 0f),
                 anchorMax: new Vector2(0.5f, 0f),
-                position: new Vector2(110f, 50f),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 14,
-                color: GUIManager.Instance.ValheimBeige,
-                outline: true,
-                outlineColor: Color.black,
-                width: 235,
-                height: 120f,
-                addContentSizeFitter: false
+                position: new Vector2(120f, 75f),
+                width: 200f,
+                height: 60f
             );
+            settingsButtonObj.SetActive(true);
+            settingsButtonObj.GetComponent<Button>().onClick.AddListener(OpenSettings);
+
+            //GUIManager.Instance.CreateText(
+            //    text: "Please report any issues on my Discord, the link can be found on my mod page or Twitch channel. Suggestions are also welcome!",
+            //    parent: panel.transform,
+            //    anchorMin: new Vector2(0.5f, 0f),
+            //    anchorMax: new Vector2(0.5f, 0f),
+            //    position: new Vector2(110f, 50f),
+            //    font: GUIManager.Instance.AveriaSerifBold,
+            //    fontSize: 14,
+            //    color: GUIManager.Instance.ValheimBeige,
+            //    outline: true,
+            //    outlineColor: Color.black,
+            //    width: 235,
+            //    height: 120f,
+            //    addContentSizeFitter: false
+            //);
 
             GUIManager.Instance.CreateText(
                 text: $"Created by: DeathWizsh, commisioned by: LoyalBones        v{WizshBoneTwitchIntegration.PluginVersion}",
@@ -164,14 +209,133 @@ namespace WizshBoneTwitchIntegration.Gui
             );
         }
 
+        private void CreateTwitchSection()
+        {
+            m_loginStatusText = GUIManager.Instance.CreateText(
+                text: GetLoginStatusMessage(),
+                parent: panel.transform,
+                anchorMin: new Vector2(.5f, 1f),
+                anchorMax: new Vector2(.5f, 1f),
+                position: new Vector2(-100f, -115f),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: 16,
+                color: auth.m_userInfo != null ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
+                outline: true,
+                outlineColor: Color.black,
+                width: descSwitchWidth,
+                height: descSwitchHeight,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+
+            GameObject loginButtonObj = GUIManager.Instance.CreateButton(
+                text: GetLoginButtonText(),
+                parent: panel.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(buttonSwitchPosX, -100f),
+                width: buttonSwitchWidth,
+                height: buttonSwitchHeight
+            );
+            loginButtonObj.SetActive(true);
+            loginButtonObj.GetComponent<Button>().onClick.AddListener(Login);
+            m_loginButtonText = loginButtonObj.GetComponentInChildren<Text>();
+        }
+
+        private void CreateRedeemsSection()
+        {
+            m_redeemsSection = new GameObject("RedeemsSection");
+            m_redeemsSection.transform.SetParent(panel.transform, false);
+            RectTransform rt = m_redeemsSection.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            m_redeemsSectionStatusText = GUIManager.Instance.CreateText(
+                text: customRewards.m_enabled ? "Redeems are currently enabled" : "Redeems are currently disabled",
+                parent: m_redeemsSection.transform,
+                anchorMin: new Vector2(.5f, 1f),
+                anchorMax: new Vector2(.5f, 1f),
+                position: new Vector2(-100f, -250f),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: 16,
+                color: customRewards.m_enabled ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
+                outline: true,
+                outlineColor: Color.black,
+                width: descSwitchWidth,
+                height: descSwitchHeight,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+
+            GameObject enableButtonObj = GUIManager.Instance.CreateButton(
+                text: customRewards.m_enabled ? "Disable Redeems" : "Enable Redeems",
+                parent: m_redeemsSection.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(buttonSwitchPosX, -240f),
+                width: buttonSwitchWidth,
+                height: buttonSwitchHeight
+            );
+            enableButtonObj.SetActive(true);
+            enableButtonObj.GetComponent<Button>().onClick.AddListener(ToggleRedeems);
+            m_redeemsSectionButtonText = enableButtonObj.GetComponentInChildren<Text>();
+
+            m_redeemsSection.SetActive(auth.m_userInfo != null);
+        }
+
+        private void CreateChattingSection()
+        {
+            m_chattingSection = new GameObject("ChattingSection");
+            m_chattingSection.transform.SetParent(panel.transform, false);
+            RectTransform rt = m_chattingSection.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            m_chattingSectionStatusText = GUIManager.Instance.CreateText(
+                text: "Random creatures can show chat messages from viewers",
+                parent: m_chattingSection.transform,
+                anchorMin: new Vector2(.5f, 1f),
+                anchorMax: new Vector2(.5f, 1f),
+                position: new Vector2(-100f, -180f),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: 16,
+                color: chatting.m_enabled ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
+                outline: true,
+                outlineColor: Color.black,
+                width: descSwitchWidth,
+                height: descSwitchHeight,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+
+            GameObject enableButtonObj = GUIManager.Instance.CreateButton(
+                text: chatting.m_enabled ? "Disable in-game chat messages" : "Enable in-game chat messages",
+                parent: m_chattingSection.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(buttonSwitchPosX, -170f),
+                width: buttonSwitchWidth,
+                height: buttonSwitchHeight
+            );
+            enableButtonObj.SetActive(true);
+            enableButtonObj.GetComponent<Button>().onClick.AddListener(ToggleChatting);
+            m_chattingSectionButtonText = enableButtonObj.GetComponentInChildren<Text>();
+
+            m_chattingSection.SetActive(auth.m_userInfo != null);
+        }
+
         private void Login()
         {
             if (auth.m_loggedIn)
+            {
                 auth.Logout();
+                UpdateGUI();
+            }
             else
+            {
                 onLogin.Invoke();
-
-            UpdateGUI();
+            }
         }
 
         private void ToggleRedeems()
@@ -186,100 +350,20 @@ namespace WizshBoneTwitchIntegration.Gui
             UpdateGUI();
         }
 
-        public void CreateTwitchButton()
+        private void OpenSettings()
         {
-            GameObject loginTextObj = GUIManager.Instance.CreateText(
-                text: GetLoginStatusMessage(),
-                parent: panel.transform,
-                anchorMin: new Vector2(.5f, 1f),
-                anchorMax: new Vector2(.5f, 1f),
-                position: new Vector2(-100f, -115f),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 16,
-                color: auth.m_userInfo != null ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
-                outline: true,
-                outlineColor: Color.black,
-                width: descSwitchWidth,
-                height: descSwitchHeight,
-                addContentSizeFitter: false
-            );
-
-            GameObject loginButtonObj = GUIManager.Instance.CreateButton(
-                text: auth.m_loggedIn ? "Logout" : "Twitch Login",
-                parent: panel.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(buttonSwitchPosX, -100f),
-                width: buttonSwitchWidth,
-                height: buttonSwitchHeight
-            );
-            loginButtonObj.SetActive(true);
-            Button loginButton = loginButtonObj.GetComponent<Button>();
-            loginButton.onClick.AddListener(Login);
+            m_settingsGUI.ShowSettings();
         }
 
-        public void CreateEnableRedeemsButton()
+        private string GetLoginButtonText()
         {
-            GUIManager.Instance.CreateText(
-                text: customRewards.m_enabled ? "Redeems are currently enabled" : "Redeems are currently disabled",
-                parent: panel.transform,
-                anchorMin: new Vector2(.5f, 1f),
-                anchorMax: new Vector2(.5f, 1f),
-                position: new Vector2(-100f, -250f),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 16,
-                color: customRewards.m_enabled ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
-                outline: true,
-                outlineColor: Color.black,
-                width: descSwitchWidth,
-                height: descSwitchHeight,
-                addContentSizeFitter: false
-            );
+            if (auth.m_loggedIn)
+                return "Logout";
 
-            GameObject enableButtonObj = GUIManager.Instance.CreateButton(
-                text: customRewards.m_enabled ? "Disable Redeems" : "Enable Redeems",
-                parent: panel.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(buttonSwitchPosX, -240f),
-                width: buttonSwitchWidth,
-                height: buttonSwitchHeight
-            );
-            enableButtonObj.SetActive(true);
-            Button enableButton = enableButtonObj.GetComponent<Button>();
-            enableButton.onClick.AddListener(ToggleRedeems);
-        }
+            if (auth.m_waitingForCode)
+                return "Open Browser Again";
 
-        public void CreateEnableChattingButton()
-        {
-            GUIManager.Instance.CreateText(
-                text: "Random creatures can show chat messages from viewers",
-                parent: panel.transform,
-                anchorMin: new Vector2(.5f, 1f),
-                anchorMax: new Vector2(.5f, 1f),
-                position: new Vector2(-100f, -180f),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 16,
-                color: chatting.m_enabled ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige,
-                outline: true,
-                outlineColor: Color.black,
-                width: descSwitchWidth,
-                height: descSwitchHeight,
-                addContentSizeFitter: false
-            );
-
-            GameObject enableButtonObj = GUIManager.Instance.CreateButton(
-                text: chatting.m_enabled ? "Disable in-game chat messages" : "Enable in-game chat messages",
-                parent: panel.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(buttonSwitchPosX, -170f),
-                width: buttonSwitchWidth,
-                height: buttonSwitchHeight
-            );
-            enableButtonObj.SetActive(true);
-            Button enableButton = enableButtonObj.GetComponent<Button>();
-            enableButton.onClick.AddListener(ToggleChatting);
+            return "Twitch Login";
         }
 
         private string GetLoginStatusMessage()
