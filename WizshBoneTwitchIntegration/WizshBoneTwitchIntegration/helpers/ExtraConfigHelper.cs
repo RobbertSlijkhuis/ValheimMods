@@ -13,11 +13,7 @@ namespace WizshBoneTwitchIntegration.Helpers
     {
         public static void InitExtraConfigs()
         {
-            if (!File.Exists(WizshBoneTwitchIntegration.redeemsConfigPath))
-            {
-                Directory.CreateDirectory(WizshBoneTwitchIntegration.customConfigPath);
-                WriteFromEmbeddedResourceTo("WizshBoneTwitchIntegration.resources.redeems.yaml", WizshBoneTwitchIntegration.redeemsConfigPath);
-            }
+            ProfileManager.Init();
 
             if (!File.Exists(WizshBoneTwitchIntegration.redeemsSchemaPath))
             {
@@ -39,63 +35,16 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
         }
 
-        public static ModData ReadRedeemsConfig()
+        public static ModData ReadRedeemsConfig(string path = null)
         {
-            StreamReader streamReader = new StreamReader(WizshBoneTwitchIntegration.redeemsConfigPath);
-            string fileContent = streamReader.ReadToEnd();
-
-            if (fileContent == null || fileContent == "")
-            {
-                Jotunn.Logger.LogError("Could not read redeems configuration or its empty");
-                return null;
-            }
-
-            StringReader stringReader = new StringReader(fileContent);
-            IDeserializer deserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
-
-            ModData data = deserializer.Deserialize<ModData>(stringReader);
-
-            streamReader.Close();
-            stringReader.Close();
-            return data;
+            path = path ?? ProfileManager.GetActiveRedeemPath();
+            return DeserializeYaml<ModData>(path);
         }
 
         public static List<ViewerEntry> ReadViewersConfig()
         {
-            StreamReader streamReader = new StreamReader(WizshBoneTwitchIntegration.viewersPath);
-            string fileContent = streamReader.ReadToEnd();
-
-            if (fileContent == null || fileContent == "")
-            {
-                Jotunn.Logger.LogError("Could not read redeems configuration or its empty");
-                return null;
-            }
-
-            StringReader stringReader = new StringReader(fileContent);
-            IDeserializer deserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
-
-            ViewerData data = deserializer.Deserialize<ViewerData>(stringReader);
-
-            streamReader.Close();
-            stringReader.Close();
-            return data.viewers;
-        }
-
-        public static void UpdateRedeemWithTesterFile()
-        {
-            if (!File.Exists(WizshBoneTwitchIntegration.customConfigPath + "/redeems-old.yaml"))
-                File.Move(WizshBoneTwitchIntegration.redeemsConfigPath, WizshBoneTwitchIntegration.customConfigPath + "/redeems-old.yaml");
-            else
-            {
-                string[] fileContents = File.ReadAllLines(WizshBoneTwitchIntegration.redeemsConfigPath);
-                File.WriteAllLines(WizshBoneTwitchIntegration.customConfigPath + "/redeems-old.yaml", fileContents);
-            }
-
-            WriteFromEmbeddedResourceTo("WizshBoneTwitchIntegration.resources.redeems-testers.yaml", WizshBoneTwitchIntegration.redeemsConfigPath);
+            ViewerData data = DeserializeYaml<ViewerData>(WizshBoneTwitchIntegration.viewersPath);
+            return data?.viewers;
         }
 
         public static List<string> ReadBannedUsersFromFile()
@@ -103,8 +52,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (!File.Exists(WizshBoneTwitchIntegration.bannedPath))
                 throw new System.Exception("Cannot find file");
 
-            string[] fileContents = File.ReadAllLines(WizshBoneTwitchIntegration.bannedPath);
-            return fileContents.ToList();
+            return File.ReadAllLines(WizshBoneTwitchIntegration.bannedPath).ToList();
         }
 
         public static void WriteBannedUsersToFile(List<string> bannedUsers)
@@ -133,16 +81,39 @@ namespace WizshBoneTwitchIntegration.Helpers
             customRewards.m_bannedUsers.Remove(user);
         }
 
+        public static void WriteDefaultRedeemsTo(string path)
+        {
+            WriteFromEmbeddedResourceTo("WizshBoneTwitchIntegration.resources.redeems.yaml", path);
+        }
+
+        private static T DeserializeYaml<T>(string path) where T : class
+        {
+            string fileContent;
+
+            using (StreamReader reader = new StreamReader(path))
+                fileContent = reader.ReadToEnd();
+
+            if (string.IsNullOrEmpty(fileContent))
+            {
+                Jotunn.Logger.LogError($"Could not read yaml file or it is empty: {path}");
+                return null;
+            }
+
+            IDeserializer deserializer = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+
+            using (StringReader stringReader = new StringReader(fileContent))
+                return deserializer.Deserialize<T>(stringReader);
+        }
+
         private static void WriteFromEmbeddedResourceTo(string resourceFullName, string path)
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
-            StreamReader reader = new StreamReader(assembly.GetManifestResourceStream(resourceFullName));
-            string fileContents = reader.ReadToEnd();
-            reader.Close();
 
-            StreamWriter writer = File.CreateText(path);
-            writer.WriteLine(fileContents);
-            writer.Close();
+            using (StreamReader reader = new StreamReader(assembly.GetManifestResourceStream(resourceFullName)))
+            using (StreamWriter writer = File.CreateText(path))
+                writer.WriteLine(reader.ReadToEnd());
         }
     }
 }

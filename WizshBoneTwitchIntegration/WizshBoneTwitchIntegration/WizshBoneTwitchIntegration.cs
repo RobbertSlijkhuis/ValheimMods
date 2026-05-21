@@ -385,7 +385,6 @@ namespace WizshBoneTwitchIntegration
             CommandManager.Instance.AddConsoleCommand(new RemoveTwitchTrapsCommand());
             CommandManager.Instance.AddConsoleCommand(new SetRedeemAliasCommand());
             CommandManager.Instance.AddConsoleCommand(new TestCommand());
-            CommandManager.Instance.AddConsoleCommand(new UpdateRedeemsCommand());
             CommandManager.Instance.AddConsoleCommand(new UnbanTwitchUserCommand());
             CommandManager.Instance.AddConsoleCommand(new UseRedeemCommand());
         }

@@ -33,7 +33,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private GameObject m_chattingSection;
         private Text m_chattingSectionStatusText;
         private Text m_chattingSectionButtonText;
-        private WizshBoneSettingsGUI m_settingsGUI = new WizshBoneSettingsGUI();
+        private WizshBoneSettingsGUI m_settingsGUI;
 
         public void ShowGUI()
         {
@@ -52,6 +52,9 @@ namespace WizshBoneTwitchIntegration.Gui
             auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
             customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
             chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
+
+            if (m_settingsGUI == null)
+                m_settingsGUI = new WizshBoneSettingsGUI(auth);
 
             panel = GUIManager.Instance.CreateWoodpanel(
                 parent: GUIManager.CustomGUIFront.transform,

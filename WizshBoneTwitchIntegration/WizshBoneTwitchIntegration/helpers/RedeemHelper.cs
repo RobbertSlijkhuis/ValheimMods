@@ -14,18 +14,16 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static bool ReadRedeems()
         {
-            if (FileExists())
-            {
-                ModData data = ExtraConfigHelper.ReadRedeemsConfig();
-                redeems = data.redeems;
-                creatureGroups = data.creatureGroups;
-                return true;
-            }
-            else
+            if (!FileExists())
             {
                 Jotunn.Logger.LogError("Could not find redeems configuration");
                 return false;
             }
+
+            ModData data = ExtraConfigHelper.ReadRedeemsConfig();
+            redeems = data.redeems;
+            creatureGroups = data.creatureGroups;
+            return true;
         }
 
         public static bool Reload()
@@ -44,7 +42,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         private static bool FileExists()
         {
-            return File.Exists(WizshBoneTwitchIntegration.redeemsConfigPath);
+            return File.Exists(ProfileManager.GetActiveRedeemPath());
         }
 
         public static RedeemData GetRedeemByTitle(string value)
