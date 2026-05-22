@@ -92,5 +92,26 @@ namespace WizshBoneTwitchIntegration.Harmony
                 Jotunn.Logger.LogError("Something went wrong in DoEmote_Postfix: " + e);
             }
         }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Tameable), "Command")]
+        public static void TameableCommand_Postfix(Tameable __instance)
+        {
+            try
+            {
+                TwitchCreaturePersistentData persistentData = __instance.gameObject.GetComponent<TwitchCreaturePersistentData>();
+
+                if (persistentData == null)
+                    return;
+
+                // After Command toggles the follow target, read back the actual state and persist it
+                bool isNowFollowing = __instance.m_monsterAI.GetFollowTarget() != null;
+                persistentData.SetFollowing(isNowFollowing);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in TameableCommand_Postfix: " + e);
+            }
+        }
     }
 }

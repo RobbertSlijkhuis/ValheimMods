@@ -269,8 +269,16 @@ namespace WizshBoneTwitchIntegration.Helpers
                 GameObject rootObject = item.transform.root.gameObject;
                 MonsterAI monsterAI = rootObject.GetComponent<MonsterAI>();
 
-                if (monsterAI != null)
-                    monsterAI.SetFollowPlayer(value ? Player.m_localPlayer.gameObject : null);
+                if (monsterAI == null)
+                    continue;
+
+                TwitchCreaturePersistentData persistentData = rootObject.GetComponent<TwitchCreaturePersistentData>();
+
+                if (persistentData != null)
+                {
+                    persistentData.SetFollowing(value);
+                    monsterAI.SetFollowTarget(value ? Player.m_localPlayer.gameObject : null);
+                }
             }
         }
 

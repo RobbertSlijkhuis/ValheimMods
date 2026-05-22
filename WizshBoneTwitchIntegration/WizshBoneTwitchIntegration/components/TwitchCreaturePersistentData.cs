@@ -39,11 +39,12 @@ namespace WizshBoneTwitchIntegration.Components
                 if (creatureStringData == "")
                     return;
 
-                string[] creatureRedeemData = creatureStringData.Split('|');
-                m_redeemerName = creatureRedeemData[0];
-                m_redeemTitle = creatureRedeemData[1];
-                m_savedPrefabName = creatureRedeemData[2];
-                m_ignoreWard = bool.Parse(creatureRedeemData[3]);
+                string[] data = creatureStringData.Split('|');
+                m_redeemerName    = data[0];
+                m_redeemTitle     = data[1];
+                m_savedPrefabName = data[2];
+                m_ignoreWard      = bool.Parse(data[3]);
+                m_isFollowing     = data.Length > 4 && bool.Parse(data[4]);
 
                 TwitchCreatureClaim creatureClaim = gameObject.AddComponent<TwitchCreatureClaim>();
 
@@ -89,13 +90,16 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void SetData(string name, CreatureData creatureData = null, string redeemTitle = "", bool ignoreWard = false)
         {
-            m_redeemerName = name;
-            m_redeemTitle = redeemTitle;
-            m_ignoreWard = ignoreWard;
-
+            m_redeemerName    = name;
+            m_redeemTitle     = redeemTitle;
+            m_ignoreWard      = ignoreWard;
             m_savedPrefabName = creatureData?.prefabName ?? "";
-            m_colorOverride = creatureData?.color;
-            m_netView.GetZDO().Set(creatureDataHash, $"{name}|{redeemTitle}|{m_savedPrefabName}|{ignoreWard}");
+            m_colorOverride   = creatureData?.color;
+
+            // isFollowing defaults to commandable for new spawns
+            m_isFollowing = creatureData?.commandable ?? false;
+
+            WriteZDO();
 
             if (creatureData == null)
                 return;
@@ -107,13 +111,24 @@ namespace WizshBoneTwitchIntegration.Components
             ApplyTameable(creatureData);
         }
 
+        public void SetFollowing(bool following)
+        {
+            m_isFollowing = following;
+            WriteZDO();
+        }
+
+        private void WriteZDO()
+        {
+            m_netView.GetZDO().Set(creatureDataHash, $"{m_redeemerName}|{m_redeemTitle}|{m_savedPrefabName}|{m_ignoreWard}|{m_isFollowing}");
+        }
+
         private void ApplyVariables(CreatureData creatureData)
         {
-            m_isFollowing = creatureData.commandable;
+            // m_isFollowing is managed via SetData/SetFollowing — not overwritten here
             m_allowDamageStructures = creatureData.allowDamageStructures;
-            m_damageScale = creatureData.damageScale;
-            m_healthScale = creatureData.healthScale;
-            transform.localScale = new Vector3(creatureData.size, creatureData.size, creatureData.size);
+            m_damageScale           = creatureData.damageScale;
+            m_healthScale           = creatureData.healthScale;
+            transform.localScale    = new Vector3(creatureData.size, creatureData.size, creatureData.size);
         }
 
         private void ApplyHumanoid(string redeemerName, CreatureData creatureData)
@@ -127,7 +142,7 @@ namespace WizshBoneTwitchIntegration.Components
             }
 
             humanoid.SetLevel(creatureData.level);
-            humanoid.m_bossEvent = creatureData.bossEvent;
+            humanoid.m_bossEvent          = creatureData.bossEvent;
             humanoid.m_defeatSetGlobalKey = "";
 
             if (PluginConfig.configCreaturesSameFaction.Value)
@@ -136,7 +151,7 @@ namespace WizshBoneTwitchIntegration.Components
             if (creatureData.friendly)
             {
                 humanoid.m_faction = Character.Faction.Players;
-                humanoid.m_group = WizshBoneTwitchIntegration.HumanoidGroupSpawnFriendly;
+                humanoid.m_group   = WizshBoneTwitchIntegration.HumanoidGroupSpawnFriendly;
             }
 
             if (creatureData.group != null)
@@ -158,9 +173,9 @@ namespace WizshBoneTwitchIntegration.Components
                     return;
                 }
 
-                float playerTier = ProgressionHelper.GetPlayerTier();
+                float playerTier  = ProgressionHelper.GetPlayerTier();
                 float healthScale = m_healthScale != 0 ? m_healthScale : PluginConfig.configCreaturesHealthScale.Value;
-                float scale = CreatureHelper.CalculateScale(playerTier, valheimCreature.tier, healthScale);
+                float scale       = CreatureHelper.CalculateScale(playerTier, valheimCreature.tier, healthScale);
 
                 humanoid.SetMaxHealth(humanoid.GetMaxHealth() * scale);
                 humanoid.SetHealth(humanoid.GetMaxHealth());
@@ -178,7 +193,7 @@ namespace WizshBoneTwitchIntegration.Components
             }
 
             monsterAI.m_aggravatable = creatureData.aggravatable;
-            monsterAI.m_mistVision = creatureData.mistVision;
+            monsterAI.m_mistVision   = creatureData.mistVision;
         }
 
         private void ApplyAllowDrops(CreatureData creatureData)
@@ -202,7 +217,11 @@ namespace WizshBoneTwitchIntegration.Components
             if (!creatureData.friendly)
                 return;
 
-            Tameable tameable = gameObject.AddComponent<Tameable>();
+            Tameable tameable = gameObject.GetComponent<Tameable>();
+
+            if (tameable == null)
+                tameable = gameObject.AddComponent<Tameable>();
+
             tameable.m_monsterAI.MakeTame();
 
             if (creatureData.commandable)
@@ -210,7 +229,7 @@ namespace WizshBoneTwitchIntegration.Components
                 tameable.m_commandable = true;
 
                 if (m_isFollowing && Player.m_localPlayer != null)
-                    tameable.m_monsterAI.SetFollowPlayer(Player.m_localPlayer.gameObject);
+                    tameable.m_monsterAI.SetFollowTarget(Player.m_localPlayer.gameObject);
             }
         }
     }
