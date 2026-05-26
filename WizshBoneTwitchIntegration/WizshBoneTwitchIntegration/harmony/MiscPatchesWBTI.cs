@@ -37,15 +37,13 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
         }
 
-      
-
         [HarmonyPrefix]
         [HarmonyPatch(typeof(TerrainOp), "Awake")]
         public static bool TerrainOpAwake_Prefix(TerrainOp __instance)
         {
             try
             {
-                if (__instance == null) 
+                if (__instance == null)
                     return true;
 
                 if (!__instance.name.Contains("WBTI"))
@@ -71,7 +69,6 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
         }
 
-
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Emote), "DoEmote")]
         public static void DoEmote_Postfix(Emotes emote)
@@ -79,13 +76,9 @@ namespace WizshBoneTwitchIntegration.Harmony
             try
             {
                 if (emote == Emotes.ComeHere)
-                {
                     CreatureHelper.SetFollowInRadius(true);
-                }
                 else if (emote == Emotes.NoNoNo)
-                {
                     CreatureHelper.SetFollowInRadius(false);
-                }
             }
             catch (Exception e)
             {
@@ -104,7 +97,6 @@ namespace WizshBoneTwitchIntegration.Harmony
                 if (persistentData == null)
                     return;
 
-                // After Command toggles the follow target, read back the actual state and persist it
                 bool isNowFollowing = __instance.m_monsterAI.GetFollowTarget() != null;
                 persistentData.SetFollowing(isNowFollowing);
             }

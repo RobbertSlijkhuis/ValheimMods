@@ -382,5 +382,9 @@ namespace WizshBoneTwitchIntegration.Gui
 
             return "Welcome! Please login into Twitch";
         }
+
+        public bool IsAnyGUIVisible =>
+            (panel != null && panel.activeSelf) ||
+            (m_settingsGUI != null && m_settingsGUI.IsVisible);
     }
 }

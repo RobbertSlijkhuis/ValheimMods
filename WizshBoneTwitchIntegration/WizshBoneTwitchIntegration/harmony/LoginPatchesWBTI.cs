@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using WizshBoneTwitchIntegration.Components;
+using WizshBoneTwitchIntegration.GUI;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
@@ -20,6 +21,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                 Game.instance.gameObject.AddComponent<TwitchAuth>();
                 Game.instance.gameObject.AddComponent<TwitchChatting>();
                 Game.instance.gameObject.AddComponent<TwitchCustomStatusEffect>();
+                Game.instance.gameObject.AddComponent<SafeZoneHUDPanel>();
             }
             catch (Exception e)
             {
@@ -33,7 +35,6 @@ namespace WizshBoneTwitchIntegration.Harmony
         {
             try
             {
-                //Jotunn.Logger.LogWarning("=== OnLogoutYes ===");
                 TwitchAuth auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
 
                 if (auth == null)
@@ -41,13 +42,10 @@ namespace WizshBoneTwitchIntegration.Harmony
 
                 if (auth.m_loggedIn)
                 {
-                    //Jotunn.Logger.LogWarning("Logged in, clearing redeems");
                     ExtraConfigHelper.WriteBannedUsersToFile(auth.m_customRewards.m_bannedUsers);
                     auth.LogoutBackToMainMenu();
                     return false;
                 }
-
-                //Jotunn.Logger.LogWarning("NOT logged in, proceed as normal");
 
                 return true;
             }
@@ -72,11 +70,8 @@ namespace WizshBoneTwitchIntegration.Harmony
                 if (auth == null)
                     return true;
 
-
                 if (auth.m_loggedIn)
                 {
-                    //Jotunn.Logger.LogWarning("Clearing redeems on Quit!");
-                    // __instance.m_quitDialog.transform.gameObject.SetActive(false);
                     ExtraConfigHelper.WriteBannedUsersToFile(auth.m_customRewards.m_bannedUsers);
                     Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Clearing redeems, please wait!", 1000);
                     auth.LogoutQuitApplication();

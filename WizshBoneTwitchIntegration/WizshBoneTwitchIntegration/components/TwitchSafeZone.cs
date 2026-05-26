@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-using UnityEngine.InputSystem.Utilities;
 using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Extensions;
+using WizshBoneTwitchIntegration.GUI;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Components
@@ -26,7 +26,7 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void OnTriggerStay(Collider collider)
         {
-            HandlePlayer(collider, true);
+            // HandlePlayer(collider, true);
             HandleCreatures(collider);
             // Jotunn.Logger.LogWarning($"Stay: {collider.gameObject.name}");
         }
@@ -56,13 +56,12 @@ namespace WizshBoneTwitchIntegration.Components
             if (value)
             {
                 m_playerInZone = collider.gameObject;
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Streamer is in a safe zone!");
+                Game.instance.gameObject.GetComponent<SafeZoneHUDPanel>()?.Show();
             }
             else
             {
                 m_playerInZone = null;
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "");
-                MessageHud.instance.HideCenterMessage();
+                Game.instance.gameObject.GetComponent<SafeZoneHUDPanel>()?.Hide();
             }
         }
 
@@ -142,7 +141,10 @@ namespace WizshBoneTwitchIntegration.Components
             Player player = m_playerInZone.GetComponent<Player>();
 
             if (player.GetPlayerID() == Player.m_localPlayer.GetPlayerID())
+            {
                 m_customRewards.m_playerIsInSafeZone = false;
+                Game.instance.gameObject.GetComponent<SafeZoneHUDPanel>()?.Hide();
+            }
         }
     }
 }

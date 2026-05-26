@@ -247,5 +247,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             return content;
         }
+
+        public bool IsVisible => panel != null && panel.activeSelf;
     }
 }
