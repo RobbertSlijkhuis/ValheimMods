@@ -5,9 +5,9 @@ using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
-    internal class UnbanTwitchUserCommand : ConsoleCommand
+    internal class UserUnbanCommand : ConsoleCommand
     {
-        public override string Name => "UnbanTwitchUser";
+        public override string Name => "WBTIUnbanUser";
 
         public override string Help => "Unban a Twitch user";
 

@@ -5,7 +5,7 @@ namespace WizshBoneTwitchIntegration.Commands
 {
     internal class ReloadRedeemsCommand : ConsoleCommand
     {
-        public override string Name => "ReloadTwitchRedeems";
+        public override string Name => "WBTIReloadRedeems";
 
         public override string Help => "Reloads the Twitch redeems from config file";
 
@@ -18,18 +18,6 @@ namespace WizshBoneTwitchIntegration.Commands
             
             TwitchAuth authComp = Game.instance.gameObject.GetComponent<TwitchAuth>();
             TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
-
-            //if (!authComp.m_loggedIn)
-            //{
-            //    Jotunn.Logger.LogWarning("You are currently not logged in to Twitch!");
-            //    return;
-            //}
-
-            //if (!customRewards.m_enabled)
-            //{
-            //    Jotunn.Logger.LogWarning("The Twitch redeems are currently not enabled!");
-            //    return;
-            //}
 
             if (customRewards.ReloadRewards())
             {

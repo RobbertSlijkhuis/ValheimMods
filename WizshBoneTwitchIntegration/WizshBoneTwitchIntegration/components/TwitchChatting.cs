@@ -24,17 +24,23 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void Awake()
         {
-            m_auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
-            m_chat = Game.instance.gameObject.GetComponent<TwitchChat>();
-            m_enabled = PluginConfig.configChattingEnabled.Value;
+            try
+            {
+                m_auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
+                m_chat = Game.instance.gameObject.GetComponent<TwitchChat>();
+                m_enabled = PluginConfig.configChattingEnabled.Value;
 
-            DeserializeUserBlackList(PluginConfig.configChattingBlackList.Value);
+                DeserializeUserBlackList(PluginConfig.configChattingBlackList.Value);
 
-            foreach (string entry in m_userBlacklist) {
-                Jotunn.Logger.LogWarning(entry);
+                foreach (string entry in m_userBlacklist)
+                    Jotunn.Logger.LogWarning(entry);
+
+                InvokeRepeatingScan();
             }
-
-            InvokeRepeatingScan();
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchChatting.Awake failed: " + e);
+            }
         }
 
         public void AddCreatureAssignment(TwitchCreatureAssignment assignment)
@@ -95,7 +101,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void ChattingScan()
         {
-            ScanAndAssignUsers();
+            try
+            {
+                ScanAndAssignUsers();
+            }
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchChatting.ChattingScan failed: " + e);
+            }
         }
 
         public void ScanAndAssignUsers(bool command = false)

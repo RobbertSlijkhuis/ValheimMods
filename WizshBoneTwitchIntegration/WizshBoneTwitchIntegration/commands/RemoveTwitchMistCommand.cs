@@ -7,7 +7,7 @@ namespace WizshBoneTwitchIntegration.Commands
 {
     internal class RemoveTwitchMistCommand : ConsoleCommand
     {
-        public override string Name => "RemoveTwitchMist";
+        public override string Name => "WBTIRemoveMist";
 
         public override string Help => "Remove nearby mist spawned in by Twitch integration";
 
@@ -30,10 +30,14 @@ namespace WizshBoneTwitchIntegration.Commands
                 foreach (Collider obj in objects)
                 {
                     GameObject gameObject = obj.transform.root.gameObject;
-                    
+
                     if (gameObject.GetComponent<Mister>() && gameObject.GetComponent<TwitchPersistentDestruction>())
                     {
                         ZNetView netView = gameObject.GetComponent<ZNetView>();
+
+                        if (netView == null || !netView.IsValid())
+                            return;
+
                         netView.Destroy();
                         GameObject.Destroy(gameObject);
                     }

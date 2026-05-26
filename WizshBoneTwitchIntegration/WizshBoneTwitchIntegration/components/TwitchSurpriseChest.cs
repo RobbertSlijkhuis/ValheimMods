@@ -39,41 +39,45 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void Awake()
         {
-            chestOpeningEffects = WizshBoneTwitchIntegration.Instance.effectLists.ChestOpenEffect;
-            despawnEffect = WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium;
-            spawnEffects = WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium;
-            spawnItemEffects = WizshBoneTwitchIntegration.Instance.effectLists.SpawnItemEffect;
-
-            m_netView = gameObject.GetComponent<ZNetView>();
-            m_surpriseChestInteract = transform.Find("chest_top").gameObject.GetComponent<TwitchSurpriseChestInteract>();
-            m_spawnPoint = transform.Find("spawnpoint");
-            m_spawnPointOriginalRotation = m_spawnPoint.rotation;
-
-            if (m_netView == null || m_netView.GetZDO() == null)
+            try
             {
-                Jotunn.Logger.LogError("Could not find ZNetView on surprise chest!");
-                return;
+                chestOpeningEffects = WizshBoneTwitchIntegration.Instance.effectLists.ChestOpenEffect;
+                despawnEffect = WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium;
+                spawnEffects = WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium;
+                spawnItemEffects = WizshBoneTwitchIntegration.Instance.effectLists.SpawnItemEffect;
+
+                m_netView = gameObject.GetComponent<ZNetView>();
+                m_surpriseChestInteract = transform.Find("chest_top").gameObject.GetComponent<TwitchSurpriseChestInteract>();
+                m_spawnPoint = transform.Find("spawnpoint");
+                m_spawnPointOriginalRotation = m_spawnPoint.rotation;
+
+                if (m_netView == null || !m_netView.IsValid())
+                    return;
+
+                string chestDataString = m_netView.GetZDO().GetString(chestDataHash, "");
+
+                if (chestDataString == "")
+                    return;
+
+                string[] chestRedeemData = chestDataString.Split('|');
+                m_redeemerName = chestRedeemData[0];
+                m_redeemTitle = chestRedeemData[1];
+
+                RedeemData redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
+
+                if (redeem == null || redeem.chestData == null)
+                {
+                    Jotunn.Logger.LogError("Could not find redeem by title or chestdata is null!");
+                    return;
+                }
+
+                ApplyChestData(redeem.chestData);
+                m_mapPin = Minimap.instance.AddPin(transform.position, Minimap.PinType.Icon3, "Surprise Chest", false, false);
             }
-
-            string chestDataString = m_netView.GetZDO().GetString(chestDataHash, "");
-
-            if (chestDataString == "")
-                return;
-
-            string[] chestRedeemData = chestDataString.Split('|');
-            m_redeemerName = chestRedeemData[0];
-            m_redeemTitle = chestRedeemData[1];
-
-            RedeemData redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
-
-            if (redeem == null || redeem.chestData == null)
+            catch (System.Exception e)
             {
-                Jotunn.Logger.LogError("Could not find redeem by title or chestdata is null!");
-                return;
+                Jotunn.Logger.LogError("TwitchSurpriseChest.Awake failed: " + e);
             }
-
-            ApplyChestData(redeem.chestData);
-            m_mapPin = Minimap.instance.AddPin(transform.position, Minimap.PinType.Icon3, "Surprise Chest", false, false);
         }
 
         public void Init(SurpriseChestData chestData, CustomRewardEvent customRewardEvent)
@@ -114,16 +118,31 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void OnDestroy()
         {
-            TriggerDespawnEffects();
+            try
+            {
+                if (despawnEffect != null)
+                    despawnEffect.Create(transform.position, transform.rotation);
 
-            if (m_mapPin != null)
-                Minimap.instance.RemovePin(m_mapPin);
+                if (m_mapPin != null && Minimap.instance != null)
+                    Minimap.instance.RemovePin(m_mapPin);
+            }
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchSurpriseChest.OnDestroy failed: " + e);
+            }
         }
 
         public void Update()
         {
-            if (m_mapPin != null)
-                m_mapPin.m_pos = transform.position;
+            try
+            {
+                if (m_mapPin != null)
+                    m_mapPin.m_pos = transform.position;
+            }
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchSurpriseChest.Update failed: " + e);
+            }
         }
 
         public IEnumerator OpenDelay()
@@ -177,25 +196,32 @@ namespace WizshBoneTwitchIntegration.Components
         {
             yield return new WaitForSeconds(delay);
 
-            m_spawnPoint.rotation = m_spawnPointOriginalRotation;
-            m_spawnPoint.Rotate(Vector3.up, deviation);
-
-            if (spawnData.creatureData != null)
+            try
             {
-                foreach (CreatureData creature in spawnData.creatureData)
+                m_spawnPoint.rotation = m_spawnPointOriginalRotation;
+                m_spawnPoint.Rotate(Vector3.up, deviation);
+
+                if (spawnData.creatureData != null)
                 {
-                    if (!ProgressionHelper.IsAllowedByGlobalKeys(creature.globalKeyAdd, creature.globalKeyRemove))
-                        continue;
+                    foreach (CreatureData creature in spawnData.creatureData)
+                    {
+                        if (!ProgressionHelper.IsAllowedByGlobalKeys(creature.globalKeyAdd, creature.globalKeyRemove))
+                            continue;
 
-                    if (creature.amount > 0)
-                        CreatureHelper.SpawnCreatures(creature, m_spawnPoint, new CustomRewardEvent() { RedeemerName = m_redeemerName }, false, force);
+                        if (creature.amount > 0)
+                            CreatureHelper.SpawnCreatures(creature, m_spawnPoint, new CustomRewardEvent() { RedeemerName = m_redeemerName }, false, force);
+                    }
                 }
+
+                if (spawnData.itemData != null)
+                    ItemHelper.SpawnItem(spawnData.itemData, m_spawnPoint, force);
+
+                TriggerSpawnItemEffect();
             }
-
-            if (spawnData.itemData != null)
-                ItemHelper.SpawnItem(spawnData.itemData, m_spawnPoint, force);
-
-            TriggerSpawnItemEffect();
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchSurpriseChest.SpawnItem failed: " + e);
+            }
         }
 
         private void TriggerChestOpeningEffect()

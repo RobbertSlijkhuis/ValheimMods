@@ -3,9 +3,9 @@ using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
-    internal class BanTwitchUserCommand : ConsoleCommand
+    internal class UserBanCommand : ConsoleCommand
     {
-        public override string Name => "BanTwitchUser";
+        public override string Name => "WBTIBanUser";
 
         public override string Help => "Ban a Twitch user from interacting with the mod";
 

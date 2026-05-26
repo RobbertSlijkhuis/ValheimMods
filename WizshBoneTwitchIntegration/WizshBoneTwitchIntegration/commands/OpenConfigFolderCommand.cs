@@ -7,7 +7,7 @@ namespace WizshBoneTwitchIntegration.Commands
 {
     internal class OpenConfigFolderCommand : ConsoleCommand
     {
-        public override string Name => "OpenConfigFolder";
+        public override string Name => "WBTIOpenConfigFolder";
 
         public override string Help => "Opens the location of the mod's configs in explorer";
 

@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 726945868
+CRC: 1907505341
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 234bec9e11b7ca842752f3837e444b7b
+    Hash: 39521371c90505cb306f5c653b8ec8fe
   TypeTreeHash:
     serializedVersion: 2
     Hash: ff5a1a41dfc0e5c3d6cface0835157dc
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 234bec9e11b7ca842752f3837e444b7b
+    Hash: 39521371c90505cb306f5c653b8ec8fe
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -146,50 +146,50 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: TerrainOp/Settings
 Assets:
-- Assets/Custom/Texture2D/Creatures/Bjorn/Bjorn_recolor_zebra_WBTI.mat
+- Assets/Custom/Creatures/Bjorn/Bjorn_recolor_zebra_WBTI.mat
 - Assets/Custom/PrefabInstance/Chest/ChestIron_WBTI.prefab
-- Assets/Custom/Texture2D/Creatures/Greydwarf/RootSword_recolor_WBTI.mat
+- Assets/Custom/Creatures/Greydwarf/RootSword_recolor_WBTI.mat
 - Assets/Custom/PrefabInstance/Redeems/spawn_fish_WBTI.prefab
-- Assets/Custom/PrefabInstance/WBTI_WeatherZone.prefab
-- Assets/Custom/Texture2D/Creatures/Cultist/Cultist_recolor_WBTI.mat
+- Assets/Custom/PrefabInstance/Redeems/WBTI_WeatherZone.prefab
+- Assets/Custom/Creatures/Cultist/Cultist_recolor_WBTI.mat
 - Assets/Custom/Monobehaviour/NoFallDamage_WBTI.asset
-- Assets/Custom/Texture2D/Creatures/Leech/Leech_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/Skeleton/Skeleton_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/Cultist/CultistCape_recolor_WBTI.mat
+- Assets/Custom/Creatures/Leech/Leech_recolor_WBTI.mat
+- Assets/Custom/Creatures/Skeleton/Skeleton_recolor_WBTI.mat
+- Assets/Custom/Creatures/Cultist/CultistCape_recolor_WBTI.mat
 - Assets/Custom/PrefabInstance/Redeems/RemoveTheCountry_WBTI.prefab
 - Assets/Custom/Monobehaviour/Burning_WBTI.asset
 - Assets/Custom/PrefabInstance/Redeems/Flashbang_WBTI.prefab
-- Assets/Custom/Texture2D/Creatures/Greydwarf/Greydwarf_recolor_WBTI.mat
+- Assets/Custom/Creatures/Greydwarf/Greydwarf_recolor_WBTI.mat
 - Assets/Custom/Sprite/MiniMeSprite_WBTI.png
-- Assets/Custom/Texture2D/Creatures/Abomination/Abomination_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/Hatchling/Hatchling_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/Blob/Blob_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/Ulv/Ulv_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/Neck/Neck_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/Greydwarf/Greydwarf_Shaman_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/Wraith/Wraith_recolor_zebra_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/Surtling/Surtling_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/Draugr/Draugr_Ranged_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/StoneGolem/StoneGolemClubs_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/Boar/Boar_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/Ghost/Ghost_recolor_WBTI.mat
+- Assets/Custom/Creatures/Abomination/Abomination_recolor_WBTI.mat
+- Assets/Custom/Creatures/Hatchling/Hatchling_recolor_WBTI.mat
+- Assets/Custom/Creatures/Blob/Blob_recolor_WBTI.mat
+- Assets/Custom/Creatures/Ulv/Ulv_recolor_WBTI.mat
+- Assets/Custom/Creatures/Neck/Neck_recolor_WBTI.mat
+- Assets/Custom/Creatures/Greydwarf/Greydwarf_Shaman_recolor_WBTI.mat
+- Assets/Custom/Creatures/Wraith/Wraith_recolor_zebra_WBTI.mat
+- Assets/Custom/Creatures/Surtling/Surtling_recolor_WBTI.mat
+- Assets/Custom/Creatures/Draugr/Draugr_Ranged_recolor_WBTI.mat
+- Assets/Custom/Creatures/StoneGolem/StoneGolemClubs_recolor_WBTI.mat
+- Assets/Custom/Creatures/Boar/Boar_recolor_WBTI.mat
+- Assets/Custom/Creatures/Ghost/Ghost_recolor_WBTI.mat
 - Assets/Custom/Monobehaviour/Freezing_WBTI.asset
-- Assets/Custom/Texture2D/Creatures/Draugr/Draugr_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/Draugr/Draugr_Elite_recolor_WBTI.mat
+- Assets/Custom/Creatures/Draugr/Draugr_recolor_WBTI.mat
+- Assets/Custom/Creatures/Draugr/Draugr_Elite_recolor_WBTI.mat
 - Assets/Custom/PrefabInstance/FeoTheHistorian/FeoTheHistorian_WBTI.prefab
-- Assets/Custom/Texture2D/Creatures/Wraith/Wraith_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/Bjorn/Bjorn_recolor_WBTI.mat
+- Assets/Custom/Creatures/Wraith/Wraith_recolor_WBTI.mat
+- Assets/Custom/Creatures/Bjorn/Bjorn_recolor_WBTI.mat
 - Assets/Custom/Monobehaviour/Poison_WBTI.asset
-- Assets/Custom/Texture2D/Creatures/Bat/Bat_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/Boar/BoarTusk_recolor_WBTI.mat
+- Assets/Custom/Creatures/Bat/Bat_recolor_WBTI.mat
+- Assets/Custom/Creatures/Boar/BoarTusk_recolor_WBTI.mat
 - Assets/Custom/Sprite/BigMeSprite_WBTI.png
-- Assets/Custom/Texture2D/Creatures/Fenring/Fenring_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/Serpent/Serpent_recolor_WBTI.mat
+- Assets/Custom/Creatures/Fenring/Fenring_recolor_WBTI.mat
+- Assets/Custom/Creatures/Serpent/Serpent_recolor_WBTI.mat
 - Assets/Custom/PrefabInstance/Chest/ChestGold_WBTI.prefab
-- Assets/Custom/Texture2D/Creatures/Wolf/Wolf_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/Troll/Troll_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/Blob/BlobSlime_recolor_WBTI.mat
+- Assets/Custom/Creatures/Wolf/Wolf_recolor_WBTI.mat
+- Assets/Custom/Creatures/Troll/Troll_recolor_WBTI.mat
+- Assets/Custom/Creatures/Blob/BlobSlime_recolor_WBTI.mat
 - Assets/Custom/PrefabInstance/WBTI_guard_stone.prefab
-- Assets/Custom/Texture2D/Creatures/Lox/Lox_recolor_WBTI.mat
-- Assets/Custom/Texture2D/Creatures/StoneGolem/StoneGolem_recolor_WBTI.mat
+- Assets/Custom/Creatures/Lox/Lox_recolor_WBTI.mat
+- Assets/Custom/Creatures/StoneGolem/StoneGolem_recolor_WBTI.mat
 Dependencies: []

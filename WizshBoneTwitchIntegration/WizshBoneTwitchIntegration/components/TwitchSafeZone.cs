@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using WizshBoneTwitchIntegration.Configs;
-using WizshBoneTwitchIntegration.Extensions;
 using WizshBoneTwitchIntegration.GUI;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
@@ -14,27 +14,50 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void Awake()
         {
-            m_customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+            try
+            {
+                m_customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchSafeZone.Awake failed: " + e);
+            }
         }
 
         public void OnTriggerEnter(Collider collider)
         {
-            HandlePlayer(collider, true, "Player entered");
-            //HandleDeleteBySafeZone(collider);
-            //Jotunn.Logger.LogWarning($"Enter: {collider.gameObject.name}");
+            try
+            {
+                HandlePlayer(collider, true, "Player entered");
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchSafeZone.OnTriggerEnter failed: " + e);
+            }
         }
 
         public void OnTriggerStay(Collider collider)
         {
-            // HandlePlayer(collider, true);
-            HandleCreatures(collider);
-            // Jotunn.Logger.LogWarning($"Stay: {collider.gameObject.name}");
+            try
+            {
+                HandleCreatures(collider);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchSafeZone.OnTriggerStay failed: " + e);
+            }
         }
 
         public void OnTriggerExit(Collider collider)
         {
-            HandlePlayer(collider, false, "Player left");
-            //Jotunn.Logger.LogWarning($"Leave: {collider.gameObject.name}");
+            try
+            {
+                HandlePlayer(collider, false, "Player left");
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchSafeZone.OnTriggerExit failed: " + e);
+            }
         }
 
         private void HandlePlayer(Collider collider, bool value, string message = null)
@@ -63,21 +86,6 @@ namespace WizshBoneTwitchIntegration.Components
                 m_playerInZone = null;
                 Game.instance.gameObject.GetComponent<SafeZoneHUDPanel>()?.Hide();
             }
-        }
-
-        public void HandleDeleteBySafeZone(Collider collider)
-        {
-            if (transform.parent.gameObject.GetComponent<Ship>() != null && PluginConfig.configAllowRedeemsOnBoats.Value)
-                return;
-
-            TwitchDeleteBySafeZone deleteBySafeZone = collider.gameObject.GetComponent<TwitchDeleteBySafeZone>();
-
-            if (deleteBySafeZone == null)
-                return;
-
-            ZNetView netView = collider.gameObject.GetComponent<ZNetView>();
-            netView.Destroy();
-            GameObject.Destroy(collider.gameObject);
         }
 
         public void HandleCreatures(Collider collider)
@@ -135,15 +143,22 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void OnDestroy()
         {
-            if (m_playerInZone == null)
-                return;
-
-            Player player = m_playerInZone.GetComponent<Player>();
-
-            if (player.GetPlayerID() == Player.m_localPlayer.GetPlayerID())
+            try
             {
-                m_customRewards.m_playerIsInSafeZone = false;
-                Game.instance.gameObject.GetComponent<SafeZoneHUDPanel>()?.Hide();
+                if (m_playerInZone == null)
+                    return;
+
+                Player player = m_playerInZone.GetComponent<Player>();
+
+                if (player.GetPlayerID() == Player.m_localPlayer.GetPlayerID())
+                {
+                    m_customRewards.m_playerIsInSafeZone = false;
+                    Game.instance.gameObject.GetComponent<SafeZoneHUDPanel>()?.Hide();
+                }
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchSafeZone.OnDestroy failed: " + e);
             }
         }
     }

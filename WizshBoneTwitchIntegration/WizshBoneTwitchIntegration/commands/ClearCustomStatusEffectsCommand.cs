@@ -7,7 +7,7 @@ namespace WizshBoneTwitchIntegration.Commands
 {
     internal class ClearCustomStatusEffectsCommand : ConsoleCommand
     {
-        public override string Name => "ClearCustomStatusEffects";
+        public override string Name => "WBTIClearStatus";
 
         public override string Help => "Remove all custom status effects set by the Twitch integration";
 

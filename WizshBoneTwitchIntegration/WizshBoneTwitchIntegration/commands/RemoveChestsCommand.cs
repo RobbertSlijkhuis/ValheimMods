@@ -5,9 +5,9 @@ using WizshBoneTwitchIntegration.Components;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
-    internal class RemoveSurpriseChestsCommand : ConsoleCommand
+    internal class RemoveChestsCommand : ConsoleCommand
     {
-        public override string Name => "RemoveSurpriseChest";
+        public override string Name => "WBTIRemoveChests";
 
         public override string Help => "Remove nearby surprise chests";
 
@@ -30,10 +30,14 @@ namespace WizshBoneTwitchIntegration.Commands
                 foreach (Collider obj in objects)
                 {
                     GameObject gameObject = obj.transform.root.gameObject;
-                    
+
                     if (gameObject.GetComponent<TwitchSurpriseChest>() != null)
                     {
                         ZNetView netView = gameObject.GetComponent<ZNetView>();
+
+                        if (netView == null || !netView.IsValid())
+                            return;
+
                         netView.Destroy();
                         GameObject.Destroy(gameObject);
                     }

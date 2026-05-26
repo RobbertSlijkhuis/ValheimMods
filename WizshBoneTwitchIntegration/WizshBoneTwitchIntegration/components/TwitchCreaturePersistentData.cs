@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Configs;
-using WizshBoneTwitchIntegration.Extensions;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 
@@ -28,11 +28,8 @@ namespace WizshBoneTwitchIntegration.Components
             {
                 m_netView = gameObject.GetComponent<ZNetView>();
 
-                if (m_netView == null || m_netView.GetZDO() == null)
-                {
-                    Jotunn.Logger.LogError("Could not find ZNetView in persistent data!");
+                if (m_netView == null || !m_netView.IsValid())
                     return;
-                }
 
                 string creatureStringData = m_netView.GetZDO().GetString(creatureDataHash, "");
 
@@ -84,8 +81,15 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void Start()
         {
-            if (m_redeemerName != null && RecolorHelper.CanRecolorCreature(m_redeemerName, gameObject.name))
-                RecolorHelper.RecolorCreature(m_redeemerName, gameObject, m_colorOverride);
+            try
+            {
+                if (m_redeemerName != null && RecolorHelper.CanRecolorCreature(m_redeemerName, gameObject.name))
+                    RecolorHelper.RecolorCreature(m_redeemerName, gameObject, m_colorOverride);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchCreaturePersistentData.Start failed: " + e);
+            }
         }
 
         public void SetData(string name, CreatureData creatureData = null, string redeemTitle = "", bool ignoreWard = false)

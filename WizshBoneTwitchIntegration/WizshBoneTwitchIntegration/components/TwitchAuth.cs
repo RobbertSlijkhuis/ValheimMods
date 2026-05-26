@@ -30,22 +30,36 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void Awake()
         {
-            m_chat = gameObject.GetComponent<TwitchChat>();
-            m_customRewards = gameObject.GetComponent<TwitchCustomRewards>();
+            try
+            {
+                m_chat = gameObject.GetComponent<TwitchChat>();
+                m_customRewards = gameObject.GetComponent<TwitchCustomRewards>();
 
-            wizshBoneGUI = new WizshBoneGUI();
-            wizshBoneGUI.onLogin.AddListener(InvokeAuth);
-            wizshBoneGUI.onToggleRedeems.AddListener(ToggleRedeems);
-            wizshBoneGUI.onToggleChatting.AddListener(ToggleChatting);
+                wizshBoneGUI = new WizshBoneGUI();
+                wizshBoneGUI.onLogin.AddListener(InvokeAuth);
+                wizshBoneGUI.onToggleRedeems.AddListener(ToggleRedeems);
+                wizshBoneGUI.onToggleChatting.AddListener(ToggleChatting);
 
-            wizshBoneHUD = new WizshBoneHUD();
-            GUIManager.OnCustomGUIAvailable += OnGUIAvailable;
+                wizshBoneHUD = new WizshBoneHUD();
+                GUIManager.OnCustomGUIAvailable += OnGUIAvailable;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchAuth.Awake failed: " + e);
+            }
         }
 
         private void OnGUIAvailable()
         {
-            wizshBoneHUD.ShowHUD();
-            GUIManager.OnCustomGUIAvailable -= OnGUIAvailable;
+            try
+            {
+                wizshBoneHUD.ShowHUD();
+                GUIManager.OnCustomGUIAvailable -= OnGUIAvailable;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchAuth.OnGUIAvailable failed: " + e);
+            }
         }
 
         public void InvokeAuth()
@@ -115,13 +129,20 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void TrackAuthRepeating()
         {
-            TimeSpan timeSpan = DateTime.Now.Subtract(m_loggedinInTime);
-            Jotunn.Logger.LogWarning(timeSpan.TotalMinutes);
+            try
+            {
+                TimeSpan timeSpan = DateTime.Now.Subtract(m_loggedinInTime);
+                Jotunn.Logger.LogWarning(timeSpan.TotalMinutes);
 
-            if (timeSpan.TotalMinutes > m_logOutTime)
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "You will be logged out from Twitch in 15 minutes!", 10);
+                if (timeSpan.TotalMinutes > m_logOutTime)
+                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, "You will be logged out from Twitch in 15 minutes!", 10);
 
-            StartCoroutine(TrackAuthState());
+                StartCoroutine(TrackAuthState());
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchAuth.TrackAuthRepeating failed: " + e);
+            }
         }
 
         public IEnumerator TrackAuthState()
@@ -130,7 +151,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
             yield return new WaitForSeconds(5f);
 
-            GetAuthState();
+            try
+            {
+                GetAuthState();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchAuth.TrackAuthState failed: " + e);
+            }
         }
 
         public void GetAuthState()

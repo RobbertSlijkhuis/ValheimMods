@@ -1,4 +1,5 @@
-﻿using TwitchSDK.Interop;
+﻿using System;
+using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
@@ -16,34 +17,37 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void Awake()
         {
-            m_netView = gameObject.GetComponent<ZNetView>();
-
-            if (m_netView == null || m_netView.GetZDO() == null)
+            try
             {
-                Jotunn.Logger.LogError("Could not find ZNetView in persistent data!");
-                return;
+                m_netView = gameObject.GetComponent<ZNetView>();
+
+                if (m_netView == null || !m_netView.IsValid())
+                    return;
+
+                string pieceDataString = m_netView.GetZDO().GetString(pieceDataHash, "");
+
+                if (pieceDataString == "")
+                    return;
+
+                string[] data = pieceDataString.Split('|');
+                m_redeemerName = data[0];
+                m_redeemTitle = data[1];
+
+                RedeemData redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
+
+                if (redeem == null || redeem.spawnAbilityData == null)
+                {
+                    Jotunn.Logger.LogError("Could not find redeem by title or spawnAbilityData is null!");
+                    return;
+                }
+
+                m_allowDrops = redeem.spawnAbilityData.allowDrops;
+                ApplyAllowDrops(m_allowDrops);
             }
-
-            string pieceDataString = m_netView.GetZDO().GetString(pieceDataHash, "");
-
-            if (pieceDataString == "")
-                return;
-
-            string[] data = pieceDataString.Split('|');
-            m_redeemerName = data[0];
-            m_redeemTitle = data[1];
-            //Jotunn.Logger.LogWarning("Retrieved Piece persitent data: " + m_redeemerName + ", " + m_redeemTitle);
-
-            RedeemData redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
-
-            if (redeem == null || redeem.spawnAbilityData == null)
+            catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not find redeem by title or spawnAbilityData is null!");
-                return;
+                Jotunn.Logger.LogError("TwitchPiecePersistentData.Awake failed: " + e);
             }
-
-            m_allowDrops = redeem.spawnAbilityData.allowDrops;
-            ApplyAllowDrops(m_allowDrops);
         }
 
         public void SetData(CustomRewardEvent customRewardEvent, SpawnAbilityData spawnAbilityData)

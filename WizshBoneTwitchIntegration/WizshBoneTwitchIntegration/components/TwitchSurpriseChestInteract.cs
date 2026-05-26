@@ -10,14 +10,21 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void Awake()
         {
-            m_surpriseChest = transform.parent.gameObject.GetComponent<TwitchSurpriseChest>();
-            m_animator = gameObject.GetComponent<Animator>();
+            try
+            {
+                m_surpriseChest = transform.parent.gameObject.GetComponent<TwitchSurpriseChest>();
+                m_animator = gameObject.GetComponent<Animator>();
 
-            if (m_surpriseChest == null)
-                Jotunn.Logger.LogError("Could not find TwitchSurpriseChest on parent of TwitchSurpriseChestInteract!");
+                if (m_surpriseChest == null)
+                    Jotunn.Logger.LogError("Could not find TwitchSurpriseChest on parent of TwitchSurpriseChestInteract!");
 
-            if (m_animator == null)
-                Jotunn.Logger.LogError("Could not find Animator on TwitchSurpriseChestInteract!");
+                if (m_animator == null)
+                    Jotunn.Logger.LogError("Could not find Animator on TwitchSurpriseChestInteract!");
+            }
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchSurpriseChestInteract.Awake failed: " + e);
+            }
         }
 
         public string GetHoverText()

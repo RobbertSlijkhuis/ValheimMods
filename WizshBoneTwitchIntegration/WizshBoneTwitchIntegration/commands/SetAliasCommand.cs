@@ -3,9 +3,9 @@ using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
-    internal class SetRedeemAliasCommand : ConsoleCommand
+    internal class SetAliasCommand : ConsoleCommand
     {
-        public override string Name => "SetRedeemAlias";
+        public override string Name => "WBTISetAlias";
 
         public override string Help => "Set an alias which will be used as the redeemer name";
 

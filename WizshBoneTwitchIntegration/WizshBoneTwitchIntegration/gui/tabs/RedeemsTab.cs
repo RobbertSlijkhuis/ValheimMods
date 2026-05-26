@@ -30,6 +30,19 @@ namespace WizshBoneTwitchIntegration.Gui
         private InputField m_descriptionInput;
         private Dropdown m_typeDropdown;
         private Text m_createFeedbackText;
+        private GameObject m_editorContainer;
+
+        // Editor registry — keyed by RedeemType string
+        private readonly Dictionary<string, IRedeemEditor> m_editors = new Dictionary<string, IRedeemEditor>
+        {
+            [RedeemType.Detonate]           = new DetonateEditor(),
+            [RedeemType.Flashbang]          = new FlashbangEditor(),
+            [RedeemType.SpawnMist]          = new SpawnMistEditor(),
+            [RedeemType.SpawnWeather]       = new SpawnWeatherEditor(),
+            [RedeemType.StatusEffectRandom] = new StatusEffectRandomEditor(),
+            [RedeemType.TerrainEdit]        = new TerrainEditEditor(),
+        };
+        private IRedeemEditor m_activeEditor;
 
         // Working copy — only flushed to disk on Save
         private List<RedeemData> m_workingRedeems = new List<RedeemData>();
@@ -60,7 +73,7 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             m_onCloseRequested = onCloseRequested;
 
-            m_root = CreateContainer("RedeemsTab", parent, fullStretch: true);
+            m_root = CreateContainer("RedeemsTab", parent);
 
             CreateListView(createScrollable);
             CreateCreateView();
@@ -83,7 +96,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void CreateListView(CreateScrollableContainerDelegate createScrollable)
         {
-            m_listView = CreateContainer("ListView", m_root, fullStretch: true);
+            m_listView = CreateContainer("ListView", m_root);
 
             m_activeProfileLabel = GUIManager.Instance.CreateText(
                 text: $"Active profile: {ProfileManager.ActiveProfile}",
@@ -258,7 +271,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void CreateCreateView()
         {
-            m_createView = CreateContainer("CreateView", m_root, fullStretch: true);
+            m_createView = CreateContainer("CreateView", m_root);
 
             GUIManager.Instance.CreateText(
                 text: "New Redeem",
@@ -276,7 +289,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 addContentSizeFitter: false
             ).GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
 
-            // Form fields
+            // Common fields
             GUIManager.Instance.CreateText(
                 text: "Title",
                 parent: m_createView.transform,
@@ -358,14 +371,42 @@ namespace WizshBoneTwitchIntegration.Gui
             m_typeDropdown.AddOptions(new List<string>(RedeemTypes));
             m_typeDropdown.value = 0;
             m_typeDropdown.RefreshShownValue();
+            m_typeDropdown.onValueChanged.AddListener(_ => OnTypeChanged());
 
-            // Feedback
-            m_createFeedbackText = GUIManager.Instance.CreateText(
-                text: "",
+            // Divider
+            GUIManager.Instance.CreateText(
+                text: "Type settings:",
                 parent: m_createView.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(0f, -240f),
+                position: new Vector2(-290f, -235f),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: 13,
+                color: GUIManager.Instance.ValheimBeige,
+                outline: true,
+                outlineColor: Color.black,
+                width: 200f,
+                height: 20f,
+                addContentSizeFitter: false
+            );
+
+            // Editor container — fills space between divider and bottom buttons
+            m_editorContainer = new GameObject("EditorContainer");
+            m_editorContainer.transform.SetParent(m_createView.transform, false);
+            RectTransform ecRt = m_editorContainer.AddComponent<RectTransform>();
+            ecRt.anchorMin      = new Vector2(0f, 0f);
+            ecRt.anchorMax      = new Vector2(1f, 1f);
+            ecRt.offsetMin      = new Vector2(60f, 100f);  // leave room for bottom buttons
+            ecRt.offsetMax      = new Vector2(-40f, -255f); // start just below divider
+            m_editorContainer.SetActive(true);
+
+            // Feedback — anchored to bottom
+            m_createFeedbackText = GUIManager.Instance.CreateText(
+                text: "",
+                parent: m_createView.transform,
+                anchorMin: new Vector2(0.5f, 0f),
+                anchorMax: new Vector2(0.5f, 0f),
+                position: new Vector2(0f, 115f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 12,
                 color: GUIManager.Instance.ValheimYellow,
@@ -376,26 +417,25 @@ namespace WizshBoneTwitchIntegration.Gui
                 addContentSizeFitter: false
             ).GetComponent<Text>();
 
-            // Back button
+            // Back / Add — anchored to bottom
             GameObject backBtn = GUIManager.Instance.CreateButton(
                 text: "< Back",
                 parent: m_createView.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(-280f, -270f),
+                anchorMin: new Vector2(0.5f, 0f),
+                anchorMax: new Vector2(0.5f, 0f),
+                position: new Vector2(-160f, 75f),
                 width: 120f,
                 height: 40f
             );
             backBtn.SetActive(true);
             backBtn.GetComponent<Button>().onClick.AddListener(ShowListView);
 
-            // Add button
             GameObject addBtn = GUIManager.Instance.CreateButton(
                 text: "+ Add",
                 parent: m_createView.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(280f, -270f),
+                anchorMin: new Vector2(0.5f, 0f),
+                anchorMax: new Vector2(0.5f, 0f),
+                position: new Vector2(160f, 75f),
                 width: 120f,
                 height: 40f
             );
@@ -403,6 +443,20 @@ namespace WizshBoneTwitchIntegration.Gui
             addBtn.GetComponent<Button>().onClick.AddListener(OnAddRedeem);
 
             m_createView.SetActive(false);
+        }
+
+        private void OnTypeChanged()
+        {
+            string selectedType = RedeemTypes[m_typeDropdown.value];
+
+            ClearContainer(m_editorContainer);
+            m_activeEditor = null;
+
+            if (!m_editors.TryGetValue(selectedType, out IRedeemEditor editor))
+                return;
+
+            m_activeEditor = editor;
+            m_activeEditor.BuildUI(m_editorContainer);
         }
 
         private void OnAddRedeem()
@@ -427,22 +481,22 @@ namespace WizshBoneTwitchIntegration.Gui
 
             RedeemData newRedeem = new RedeemData
             {
-                title = title,
-                points = points,
+                title       = title,
+                points      = points,
                 description = m_descriptionInput.text.Trim(),
-                type = RedeemTypes[m_typeDropdown.value],
+                type        = RedeemTypes[m_typeDropdown.value],
             };
+
+            m_activeEditor?.ApplyTo(newRedeem);
 
             m_workingRedeems.Add(newRedeem);
             m_unsavedTitles.Add(title);
-
-            // Sync to memory so the redeem is testable immediately
             RedeemHelper.redeems = new List<RedeemData>(m_workingRedeems);
 
-            m_titleInput.text = "";
-            m_pointsInput.text = "";
+            m_titleInput.text       = "";
+            m_pointsInput.text      = "";
             m_descriptionInput.text = "";
-            m_typeDropdown.value = 0;
+            m_typeDropdown.value    = 0;
 
             ShowListView();
             m_listFeedbackText.text = $"'{title}' added (unsaved). Press Save to persist.";
@@ -456,11 +510,11 @@ namespace WizshBoneTwitchIntegration.Gui
 
             CustomRewardEvent rewardEvent = new CustomRewardEvent
             {
-                RedeemerName = "DevWizsh",
-                RedeemedAt = System.DateTime.Now.ToShortDateString(),
-                CustomRewardTitle = redeem.title,
-                CustomRewardCost = redeem.points,
-                Status = CustomRewardRedemptionState.Unfulfilled
+                RedeemerName       = "DevWizsh",
+                RedeemedAt         = System.DateTime.Now.ToShortDateString(),
+                CustomRewardTitle  = redeem.title,
+                CustomRewardCost   = redeem.points,
+                Status             = CustomRewardRedemptionState.Unfulfilled
             };
 
             WizshBoneTwitchIntegration.useRedeemCommand = true;
@@ -481,6 +535,11 @@ namespace WizshBoneTwitchIntegration.Gui
         private void ShowCreateView()
         {
             m_createFeedbackText.text = "";
+            m_titleInput.text         = "";
+            m_pointsInput.text        = "";
+            m_descriptionInput.text   = "";
+            m_typeDropdown.value      = 0;
+            OnTypeChanged();
             m_listView.SetActive(false);
             m_createView.SetActive(true);
         }
@@ -489,7 +548,7 @@ namespace WizshBoneTwitchIntegration.Gui
         // Helpers
         // =====================================================================
 
-        private static GameObject CreateContainer(string name, GameObject parent, bool fullStretch)
+        private static GameObject CreateContainer(string name, GameObject parent)
         {
             GameObject container = new GameObject(name);
             container.transform.SetParent(parent.transform, false);
@@ -499,7 +558,7 @@ namespace WizshBoneTwitchIntegration.Gui
             rt.anchorMax = Vector2.one;
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
-            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.pivot     = new Vector2(0.5f, 0.5f);
 
             container.SetActive(false);
             return container;
@@ -511,10 +570,10 @@ namespace WizshBoneTwitchIntegration.Gui
             inputObj.transform.SetParent(parent.transform, false);
 
             RectTransform rt = inputObj.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 1f);
-            rt.anchorMax = new Vector2(0.5f, 1f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = size;
+            rt.anchorMin      = new Vector2(0.5f, 1f);
+            rt.anchorMax      = new Vector2(0.5f, 1f);
+            rt.pivot          = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta      = size;
             rt.anchoredPosition = position;
 
             inputObj.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.1f, 0.8f);
@@ -529,13 +588,13 @@ namespace WizshBoneTwitchIntegration.Gui
             textRt.offsetMin = new Vector2(5f, 2f);
             textRt.offsetMax = new Vector2(-5f, -2f);
             Text text = textObj.AddComponent<Text>();
-            text.font = GUIManager.Instance.AveriaSerifBold;
-            text.fontSize = 12;
-            text.color = Color.white;
+            text.font            = GUIManager.Instance.AveriaSerifBold;
+            text.fontSize        = 12;
+            text.color           = Color.white;
             text.supportRichText = false;
 
             inputField.textComponent = text;
-            inputField.text = "";
+            inputField.text          = "";
             inputObj.SetActive(true);
             return inputField;
         }

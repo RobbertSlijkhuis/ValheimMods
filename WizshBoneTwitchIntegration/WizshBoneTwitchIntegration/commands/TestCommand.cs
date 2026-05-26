@@ -1,69 +1,86 @@
 ﻿using Jotunn.Entities;
 using Jotunn.Managers;
-using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
+using UnityEngine;
+using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
     internal class TestCommand : ConsoleCommand
     {
-        public List<string> redeemNames = new List<string>();
-        public override string Name => "testWBTI";
+        public override string Name => "WBTITest";
+        public override string Help => "Start/stop random redeem stress test. Usage: WBTITest [interval] — no args stops the test.";
 
-        public override string Help => "Test command for things";
+        private static Coroutine m_testCoroutine;
+        private static int m_redeemIndex;
 
         public override void Run(string[] args)
         {
-            //if (args.Length == 0)
-            //{
-            //    foreach (string recipe in Player.m_localPlayer.m_knownRecipes)
-            //    {
-            //        Jotunn.Logger.LogWarning(recipe);
-            //    }
-            //    return;
-            //}
-
-            // Jotunn.Logger.LogWarning(Player.m_localPlayer.IsRecipeKnown(args[0]));
-
-            // WizshBoneTwitchIntegration.Instance.SpawnSystemLogging();
-
             if (args.Length == 0)
             {
-                Jotunn.Logger.LogWarning("Canceling test spawning...");
-                Game.instance.CancelInvoke(nameof(SpawnRandomShit));
+                StopTest();
                 return;
             }
 
-            if (redeemNames.Count == 0)
-            {
-                redeemNames.Add("WBTI Random creature: Light");
-                redeemNames.Add("WBTI Random creature: Medium");
-                redeemNames.Add("WBTI Random creature: Heavy");
-                redeemNames.Add("WBTI Random creature group");
-                redeemNames.Add("WBTI Random creature group: BIOME");
-                redeemNames.Add("WBTI Creatures: BOSSES!");
-            }
+            float interval = 3f;
+            if (float.TryParse(args[0], out float parsed))
+                interval = parsed;
 
-            Jotunn.Logger.LogWarning("Start test spawning...");
-            SpawnRandomShit();
+            StartTest(interval);
         }
 
-        private void SpawnRandomShit(int repeat = 5)
+        private void StartTest(float interval)
         {
-            Jotunn.Logger.LogWarning("SpawnRandomShit");
-            ConsoleCommand command = CommandManager.Instance.CustomCommands.First(item => item.Name == "UseTwitchRedeem");
+            if (RedeemHelper.redeems == null || RedeemHelper.redeems.Count == 0)
+            {
+                Jotunn.Logger.LogError("No redeems are loaded, cannot start test!");
+                return;
+            }
+
+            if (m_testCoroutine != null)
+            {
+                Jotunn.Logger.LogWarning("Test already running, restarting...");
+                WizshBoneTwitchIntegration.Instance.StopCoroutine(m_testCoroutine);
+            }
+
+            m_redeemIndex = 0;
+            Jotunn.Logger.LogWarning($"Starting redeem stress test every {interval}s with {RedeemHelper.redeems.Count} loaded redeems. Run 'testWBTI' with no args to stop.");
+            m_testCoroutine = WizshBoneTwitchIntegration.Instance.StartCoroutine(TestLoop(interval));
+        }
+
+        private void StopTest()
+        {
+            if (m_testCoroutine == null)
+            {
+                Jotunn.Logger.LogWarning("No test is currently running.");
+                return;
+            }
+
+            WizshBoneTwitchIntegration.Instance.StopCoroutine(m_testCoroutine);
+            m_testCoroutine = null;
+            Jotunn.Logger.LogWarning("Redeem stress test stopped.");
+        }
+
+        private IEnumerator TestLoop(float interval)
+        {
+            ConsoleCommand command = CommandManager.Instance.CustomCommands.FirstOrDefault(item => item.Name == "WBTIUseRedeem");
 
             if (command == null)
             {
-                Jotunn.Logger.LogWarning($"Could not find command!");
-                return;
+                Jotunn.Logger.LogError("Could not find WBTIUseRedeem command!");
+                m_testCoroutine = null;
+                yield break;
             }
 
-            for (int i = 0; i < repeat; i++) {
-                foreach (string name in redeemNames)
-                {
-                    command.Run(new string[] { name });
-                }
+            while (true)
+            {
+                string redeem = RedeemHelper.redeems[m_redeemIndex].title;
+                Jotunn.Logger.LogWarning($"[TestWBTI] Firing redeem ({m_redeemIndex + 1}/{RedeemHelper.redeems.Count}): {redeem}");
+                command.Run(new string[] { redeem });
+
+                m_redeemIndex = (m_redeemIndex + 1) % RedeemHelper.redeems.Count;
+                yield return new WaitForSeconds(interval);
             }
         }
     }

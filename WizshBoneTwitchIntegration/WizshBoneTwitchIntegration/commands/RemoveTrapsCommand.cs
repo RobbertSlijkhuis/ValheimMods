@@ -5,9 +5,9 @@ using WizshBoneTwitchIntegration.Components;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
-    internal class RemoveTwitchTrapsCommand : ConsoleCommand
+    internal class RemoveTrapsCommand : ConsoleCommand
     {
-        public override string Name => "RemoveTwitchTraps";
+        public override string Name => "WBTIRemoveTraps";
 
         public override string Help => "Remove nearby traps spawned in by Twitch integration";
 
@@ -30,10 +30,14 @@ namespace WizshBoneTwitchIntegration.Commands
                 foreach (Collider obj in objects)
                 {
                     GameObject gameObject = obj.transform.root.gameObject;
-                    
+
                     if (gameObject.GetComponent<Trap>() != null && gameObject.GetComponent<TwitchPersistentDestruction>() != null)
                     {
                         ZNetView netView = gameObject.GetComponent<ZNetView>();
+
+                        if (netView == null || !netView.IsValid())
+                            return;
+
                         netView.Destroy();
                         GameObject.Destroy(gameObject);
                     }

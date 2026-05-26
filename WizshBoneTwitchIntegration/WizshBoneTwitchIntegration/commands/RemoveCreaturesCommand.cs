@@ -5,9 +5,9 @@ using WizshBoneTwitchIntegration.Components;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
-    internal class RemoveTwitchCreaturesCommand : ConsoleCommand
+    internal class RemoveCreaturesCommand : ConsoleCommand
     {
-        public override string Name => "RemoveTwitchCreatures";
+        public override string Name => "WBTIRemoveCreatures";
 
         public override string Help => "Remove nearby creatures spawned in by Twitch integration";
 
@@ -30,10 +30,14 @@ namespace WizshBoneTwitchIntegration.Commands
                 foreach (Collider obj in objects)
                 {
                     GameObject gameObject = obj.transform.root.gameObject;
-                    
+
                     if (gameObject.GetComponent<TwitchCreatureClaim>() != null)
                     {
                         ZNetView netView = gameObject.GetComponent<ZNetView>();
+
+                        if (netView == null || !netView.IsValid())
+                            return;
+
                         netView.Destroy();
                         GameObject.Destroy(gameObject);
                     }

@@ -28,9 +28,16 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void Awake()
         {
-            m_chat = gameObject.GetComponent<TwitchChat>();
-            m_bannedUsers = ExtraConfigHelper.ReadBannedUsersFromFile();
-            RedeemHelper.ReadRedeems();
+            try
+            {
+                m_chat = gameObject.GetComponent<TwitchChat>();
+                m_bannedUsers = ExtraConfigHelper.ReadBannedUsersFromFile();
+                RedeemHelper.ReadRedeems();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchCustomRewards.Awake failed: " + e);
+            }
         }
 
         public void SubscribeToRedeemEvents()
@@ -302,7 +309,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 SurpriseChestHelper.SpawnSupriseChest(prefab, redeem.chestData, customRewardEvent);
         }
 
-        public void SetRewards(List<RedeemData> redeems = null)
+        public void SetRewards(List<RedeemData> redeems = null, bool isEnabled = true)
         {
             //Jotunn.Logger.LogWarning("SetRewards()");
             List<CustomRewardDefinition> listRewards = new List<CustomRewardDefinition>();
@@ -325,6 +332,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         Cost = redeem.points,
                         Prompt = redeem.description,
                         Title = redeem.title,
+                        IsEnabled = isEnabled,
                     });
                 }
             }

@@ -10,9 +10,16 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void Awake()
         {
-            m_creatureClaim = gameObject.GetComponent<TwitchCreatureClaim>();
-            m_humanoid = gameObject.GetComponent<Humanoid>();
-            m_humanoid.SetTamed(true);
+            try
+            {
+                m_creatureClaim = gameObject.GetComponent<TwitchCreatureClaim>();
+                m_humanoid = gameObject.GetComponent<Humanoid>();
+                m_humanoid.SetTamed(true);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchCreatureInteract.Awake failed: " + e);
+            }
         }
 
         public string GetHoverText()

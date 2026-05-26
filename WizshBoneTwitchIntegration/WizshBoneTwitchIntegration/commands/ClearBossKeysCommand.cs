@@ -6,7 +6,7 @@ namespace WizshBoneTwitchIntegration.Commands
 {
     internal class ClearBossKeysCommand : ConsoleCommand
     {
-        public override string Name => "ClearBossKeys";
+        public override string Name => "WBTIClearBossKeys";
 
         public override string Help => "Remove all global boss keys";
 

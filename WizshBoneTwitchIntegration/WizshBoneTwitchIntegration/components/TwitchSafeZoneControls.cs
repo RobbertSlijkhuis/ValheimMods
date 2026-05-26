@@ -19,15 +19,15 @@ namespace WizshBoneTwitchIntegration.Components
             {
                 m_netView = transform.parent.gameObject.GetComponent<ZNetView>();
 
-                if (m_netView != null && m_netView.GetZDO() != null)
-                {
-                    projectorTransform = transform.Find("projector");
-                    colliderTrans = transform.parent.Find("safezone");
-                    isProjectorOn = false;
-                    radius = m_netView.GetZDO().GetFloat(radiusHash, 30f);
+                if (m_netView == null || !m_netView.IsValid())
+                    return;
 
-                    SetRadius(radius);
-                }
+                projectorTransform = transform.Find("projector");
+                colliderTrans = transform.parent.Find("safezone");
+                isProjectorOn = false;
+                radius = m_netView.GetZDO().GetFloat(radiusHash, 30f);
+
+                SetRadius(radius);
             }
             catch (Exception e)
             {

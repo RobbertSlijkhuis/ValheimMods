@@ -27,13 +27,20 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void Awake()
         {
-            m_netView = gameObject.GetComponent<ZNetView>();
-
-            if (m_netView != null && m_netView.GetZDO() != null)
+            try
             {
+                m_netView = gameObject.GetComponent<ZNetView>();
+
+                if (m_netView == null || !m_netView.IsValid())
+                    return;
+
                 m_chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
                 m_chat = Game.instance.gameObject.GetComponent<TwitchChat>();
                 m_humanoid = gameObject.GetComponent<Humanoid>();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchCreatureClaim.Awake failed: " + e);
             }
         }
 
@@ -102,21 +109,28 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void OnDestroy()
         {
-            m_chatting.onNewMessage.RemoveListener(CheckChatForMessage);
-            Destroy(m_npcTalk);
+            try
+            {
+                m_chatting.onNewMessage.RemoveListener(CheckChatForMessage);
+                Destroy(m_npcTalk);
 
-            if (m_creatureInteract != null)
-                Destroy(m_creatureInteract);
+                if (m_creatureInteract != null)
+                    Destroy(m_creatureInteract);
 
-            if (RecolorHelper.CanRecolorCreature(m_assignment.userName, m_assignment.creature.name))
-                RecolorHelper.UnColorCreature(m_assignment.creature);
+                if (m_assignment?.creature != null && RecolorHelper.CanRecolorCreature(m_assignment.userName, m_assignment.creature.name))
+                    RecolorHelper.UnColorCreature(m_assignment.creature);
 
-            m_assignment.creature = null;
-            m_humanoid.m_name = m_originalName;
-            m_lastMessageTime = DateTime.MinValue;
+                m_assignment.creature = null;
+                m_humanoid.m_name = m_originalName;
+                m_lastMessageTime = DateTime.MinValue;
 
-            if (!m_isUnclaimDestroy)
-                Unassign();
+                if (!m_isUnclaimDestroy)
+                    Unassign();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchCreatureClaim.OnDestroy failed: " + e);
+            }
         }
 
         private void SetupNpcTalk(CreatureData creatureData = null)
@@ -208,13 +222,13 @@ namespace WizshBoneTwitchIntegration.Components
                     return;
                 }
 
-                m_npcTalk.Say2("Alright... healing!", "Aggravated");
+                m_npcTalk.SayForce("Alright... healing!", "Aggravated");
                 m_humanoid.EquipBestWeapon(m_humanoid, null, m_humanoid, null);
                 monsterAI.DoAttack(m_humanoid, true);
                 return;
             }
 
-            m_npcTalk.Say2(message.message, "Aggravated");
+            m_npcTalk.SayForce(message.message, "Aggravated");
         }
 
         public void SayAMessage()

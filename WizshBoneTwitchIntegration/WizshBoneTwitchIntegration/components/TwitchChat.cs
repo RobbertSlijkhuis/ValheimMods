@@ -29,34 +29,55 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void Update()
         {
-            Read();
+            try
+            {
+                Read();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchChat.Update failed: " + e);
+            }
         }
 
         public void Connect()
         {
-            GetOAuth(new string[] { "chat:read", "chat:edit", "channel:bot" });
+            try
+            {
+                GetOAuth(new string[] { "chat:read", "chat:edit", "channel:bot" });
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchChat.Connect failed: " + e);
+            }
         }
 
         public void LogIn()
         {
-            m_auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
+            try
+            {
+                m_auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
 
-            if (m_sOAuth == null || m_sOAuth == "")
-                return;
+                if (m_sOAuth == null || m_sOAuth == "")
+                    return;
 
-            string userName = "WizshBoneBot".ToLower();
-            string password = "oauth:" + m_sOAuth;
-            m_channel = m_auth.m_userInfo.displayName.ToLower();
+                string userName = "WizshBoneBot".ToLower();
+                string password = "oauth:" + m_sOAuth;
+                m_channel = m_auth.m_userInfo.displayName.ToLower();
 
-            tcpClient = new TcpClient("irc.chat.twitch.tv", 6667);
-            reader = new StreamReader(tcpClient.GetStream());
-            writer = new StreamWriter(tcpClient.GetStream());
+                tcpClient = new TcpClient("irc.chat.twitch.tv", 6667);
+                reader = new StreamReader(tcpClient.GetStream());
+                writer = new StreamWriter(tcpClient.GetStream());
 
-            writer.WriteLine("PASS " + password);
-            writer.WriteLine("NICK " + userName);
-            writer.WriteLine("USER " + userName + " 8 * :" + userName);
-            writer.WriteLine("JOIN #" + m_channel);
-            writer.Flush();
+                writer.WriteLine("PASS " + password);
+                writer.WriteLine("NICK " + userName);
+                writer.WriteLine("USER " + userName + " 8 * :" + userName);
+                writer.WriteLine("JOIN #" + m_channel);
+                writer.Flush();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchChat.LogIn failed: " + e);
+            }
         }
 
         public void GetOAuth(params string[] scopes)

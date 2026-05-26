@@ -370,22 +370,22 @@ namespace WizshBoneTwitchIntegration
 
         private void InitCommands()
         {
-            CommandManager.Instance.AddConsoleCommand(new BanTwitchUserCommand());
-            CommandManager.Instance.AddConsoleCommand(new ClaimCreatureCommand());
-            CommandManager.Instance.AddConsoleCommand(new ClearBossKeysCommand());
             CommandManager.Instance.AddConsoleCommand(new ClearCustomStatusEffectsCommand());
-            CommandManager.Instance.AddConsoleCommand(new ListBannedTwitchUsers());
+            CommandManager.Instance.AddConsoleCommand(new RemoveChestsCommand());
+            CommandManager.Instance.AddConsoleCommand(new RemoveCreaturesCommand());
+            CommandManager.Instance.AddConsoleCommand(new RemoveTwitchMistCommand());
+            CommandManager.Instance.AddConsoleCommand(new RemoveTrapsCommand());
+
+            CommandManager.Instance.AddConsoleCommand(new UsersBanList());
+            CommandManager.Instance.AddConsoleCommand(new UserBanCommand());
+            CommandManager.Instance.AddConsoleCommand(new UserUnbanCommand());
+
+            CommandManager.Instance.AddConsoleCommand(new ClearBossKeysCommand());
             CommandManager.Instance.AddConsoleCommand(new OpenConfigFolderCommand());
             CommandManager.Instance.AddConsoleCommand(new ReloadRedeemsCommand());
             CommandManager.Instance.AddConsoleCommand(new ReloadViewersCommand());
-            CommandManager.Instance.AddConsoleCommand(new RemoveCreatureClaimCommand());
-            CommandManager.Instance.AddConsoleCommand(new RemoveSurpriseChestsCommand());
-            CommandManager.Instance.AddConsoleCommand(new RemoveTwitchCreaturesCommand());
-            CommandManager.Instance.AddConsoleCommand(new RemoveTwitchMistCommand());
-            CommandManager.Instance.AddConsoleCommand(new RemoveTwitchTrapsCommand());
-            CommandManager.Instance.AddConsoleCommand(new SetRedeemAliasCommand());
+            CommandManager.Instance.AddConsoleCommand(new SetAliasCommand());
             CommandManager.Instance.AddConsoleCommand(new TestCommand());
-            CommandManager.Instance.AddConsoleCommand(new UnbanTwitchUserCommand());
             CommandManager.Instance.AddConsoleCommand(new UseRedeemCommand());
         }
 

@@ -3,9 +3,9 @@ using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
-    internal class ListBannedTwitchUsers : ConsoleCommand
+    internal class UsersBanList : ConsoleCommand
     {
-        public override string Name => "ListBannedTwitchUsers";
+        public override string Name => "WBTIBanList";
 
         public override string Help => "Show a list of banned Twitch users";
 

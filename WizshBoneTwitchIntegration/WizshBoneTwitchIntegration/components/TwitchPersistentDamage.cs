@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 
@@ -13,23 +14,25 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void Awake()
         {
-            m_netView = gameObject.GetComponent<ZNetView>();
-
-            if (m_netView == null || m_netView.GetZDO() == null)
+            try
             {
-                Jotunn.Logger.LogError("Could not find ZNetView in persistent damage!");
-                return;
+                m_netView = gameObject.GetComponent<ZNetView>();
+
+                if (m_netView == null || !m_netView.IsValid())
+                    return;
+
+                m_damageString = m_netView.GetZDO().GetString(m_damageHash, "");
+
+                if (m_damageString == "")
+                    return;
+
+                m_damage = StringToDamageData(m_damageString);
+                ApplyDamageToAOE(m_damage);
             }
-
-            m_damageString = m_netView.GetZDO().GetString(m_damageHash, "");
-
-            if (m_damageString == "")
-                return;
-
-            //Jotunn.Logger.LogWarning("Found damage string: " + m_damageString);
-            m_damage = StringToDamageData(m_damageString);
-
-            ApplyDamageToAOE(m_damage);
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchPersistentDamage.Awake failed: " + e);
+            }
         }
 
         public void ApplyDamageToAOE(DamageData damageData)
