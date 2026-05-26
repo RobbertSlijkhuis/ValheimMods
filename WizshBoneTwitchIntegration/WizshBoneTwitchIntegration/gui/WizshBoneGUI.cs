@@ -17,6 +17,7 @@ namespace WizshBoneTwitchIntegration.Gui
         public UnityEvent onToggleRedeems = new UnityEvent();
         public UnityEvent onToggleChatting = new UnityEvent();
         public UnityEvent onClose = new UnityEvent();
+        public UnityEvent onOpenRedeemHistory = new UnityEvent();
 
         private readonly float buttonSwitchWidth = 200f;
         private readonly float buttonSwitchHeight = 60f;
@@ -34,6 +35,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private Text m_chattingSectionStatusText;
         private Text m_chattingSectionButtonText;
         private WizshBoneSettingsGUI m_settingsGUI;
+        private WizshBoneRedeemHistoryGUI m_redeemHistoryGUI;
 
         public void ShowGUI()
         {
@@ -56,13 +58,16 @@ namespace WizshBoneTwitchIntegration.Gui
             if (m_settingsGUI == null)
                 m_settingsGUI = new WizshBoneSettingsGUI(auth);
 
+            if (m_redeemHistoryGUI == null)
+                m_redeemHistoryGUI = new WizshBoneRedeemHistoryGUI(customRewards);
+
             panel = GUIManager.Instance.CreateWoodpanel(
                 parent: GUIManager.CustomGUIFront.transform,
                 anchorMin: new Vector2(0.5f, 0.5f),
                 anchorMax: new Vector2(0.5f, 0.5f),
                 position: new Vector2(0, 0),
                 width: 480,
-                height: 450,
+                height: 520,
                 draggable: false
             );
             panel.SetActive(false);
@@ -283,6 +288,18 @@ namespace WizshBoneTwitchIntegration.Gui
             enableButtonObj.GetComponent<Button>().onClick.AddListener(ToggleRedeems);
             m_redeemsSectionButtonText = enableButtonObj.GetComponentInChildren<Text>();
 
+            GameObject historyButtonObj = GUIManager.Instance.CreateButton(
+                text: "Redeem History",
+                parent: m_redeemsSection.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(buttonSwitchPosX, -310f),
+                width: buttonSwitchWidth,
+                height: buttonSwitchHeight
+            );
+            historyButtonObj.SetActive(true);
+            historyButtonObj.GetComponent<Button>().onClick.AddListener(OpenRedeemHistory);
+
             m_redeemsSection.SetActive(auth.m_userInfo != null);
         }
 
@@ -358,6 +375,11 @@ namespace WizshBoneTwitchIntegration.Gui
             m_settingsGUI.ShowSettings();
         }
 
+        private void OpenRedeemHistory()
+        {
+            m_redeemHistoryGUI.ShowGUI();
+        }
+
         private string GetLoginButtonText()
         {
             if (auth.m_loggedIn)
@@ -385,6 +407,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         public bool IsAnyGUIVisible =>
             (panel != null && panel.activeSelf) ||
-            (m_settingsGUI != null && m_settingsGUI.IsVisible);
+            (m_settingsGUI != null && m_settingsGUI.IsVisible) ||
+            (m_redeemHistoryGUI != null && m_redeemHistoryGUI.IsVisible);
     }
 }

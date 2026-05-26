@@ -29,20 +29,7 @@ namespace WizshBoneTwitchIntegration.Commands
                     return;
                 }
 
-                // TwitchAuth auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
                 TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
-
-                //if (!auth.m_loggedIn)
-                //{
-                //    Jotunn.Logger.LogWarning("You are currently not logged in to Twitch!");
-                //    return;
-                //}
-
-                //if (!customRewards.m_enabled)
-                //{
-                //    Jotunn.Logger.LogWarning("The Twitch redeems are currently not enabled!");
-                //    return;
-                //}
 
                 string title = "";
 
@@ -52,7 +39,8 @@ namespace WizshBoneTwitchIntegration.Commands
                 }
 
                 CustomRewardEvent currentRewardEvent = new CustomRewardEvent();
-                currentRewardEvent.RedeemerName = "DevWizsh";
+                currentRewardEvent.RedemptionId = Guid.Empty.ToString();
+                currentRewardEvent.RedeemerName = "WizshBone";
                 currentRewardEvent.RedeemedAt = DateTime.Now.ToShortDateString();
                 currentRewardEvent.CustomRewardTitle = title.TrimEnd();
                 currentRewardEvent.CustomRewardCost = 100;

@@ -26,6 +26,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public static string m_refundAutoResolveOn;
         public static string m_refundAutoResolveOff;
 
+        public readonly List<CustomRewardEvent> m_redeemHistory = new List<CustomRewardEvent>();
+        private const int m_redeemHistoryMaxSize = 500;
+
         public void Awake()
         {
             try
@@ -94,8 +97,13 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (customRewardEvent == null)
                     return;
 
-                if (customRewardEvent == null || customRewardEvent.Status == CustomRewardRedemptionState.Fulfilled || customRewardEvent.Status == CustomRewardRedemptionState.Canceled)
+                if (customRewardEvent.Status == CustomRewardRedemptionState.Fulfilled || customRewardEvent.Status == CustomRewardRedemptionState.Canceled)
                     return;
+
+                m_redeemHistory.Add(customRewardEvent);
+
+                if (m_redeemHistory.Count > m_redeemHistoryMaxSize)
+                    m_redeemHistory.RemoveAt(0);
 
                 if (m_alias != null && (customRewardEvent.RedeemerName == m_auth?.m_userInfo?.displayName || WizshBoneTwitchIntegration.useRedeemCommand))
                 {
