@@ -136,16 +136,12 @@ namespace WizshBoneTwitchIntegration.Configs
                 new ConfigDescription("Wether spawned creatures will scale to player progression", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
 
-            configCreaturesdamageScale = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionCreatures, "Creature damage scaling per biome tier", 0.35f,
-                new ConfigDescription("The amount of damage that is scaled up/down per tier/biome for creatures", null,
+            configCreaturesdamageScale = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionCreatures, "Creature damage scaling per biome tier", 0.15f,
+                new ConfigDescription("Percentage of damage scaled up/down per tier difference (e.g. 0.15 = 15% per tier). Positive delta scales up, negative scales down.", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
 
-            configCreaturesHealthScale = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionCreatures, "Creature health scaling per biome tier", 0.5f,
-                new ConfigDescription("The amount of health that is scaled up/down per tier/biome for creatures", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
-
-            configCreaturesDeltaScale = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionCreatures, "Scaling Delta", 0.65f,
-                new ConfigDescription("The amount to adjust the scaling ", null,
+            configCreaturesHealthScale = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionCreatures, "Creature health scaling per biome tier", 0.15f,
+                new ConfigDescription("Percentage of health scaled up/down per tier difference (e.g. 0.15 = 15% per tier). Positive delta scales up, negative scales down.", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
 
             configCreaturesFollowRadius = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionCreatures, "Friendly follow radius", 30f,

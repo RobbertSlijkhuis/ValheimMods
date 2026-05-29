@@ -23,6 +23,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private Button m_nextButton;
         private bool m_hideTestRedeems = false;
         private Button m_filterButton;
+        private string m_searchText = "";
 
         public WizshBoneRedeemHistoryGUI(TwitchCustomRewards customRewards)
         {
@@ -84,7 +85,21 @@ namespace WizshBoneTwitchIntegration.Gui
                 addContentSizeFitter: false
             );
 
-            m_contentRoot = CreateScrollableContainer();
+            InputField searchField = FieldUIBuilder.CreateInputField(
+                parent: m_panel,
+                position: new Vector2(0f, -80f),
+                width: 500f,
+                initialValue: ""
+            );
+            searchField.GetComponent<InputField>().placeholder.GetComponent<Text>().text = "Search by name or redeem...";
+            searchField.onValueChanged.AddListener(OnSearchChanged);
+
+            m_contentRoot = ScrollableView.CreateStretched(
+                parent: m_panel,
+                name: "History",
+                offsetMin: new Vector2(30f, 155f),
+                offsetMax: new Vector2(-30f, -110f)
+            );
 
             // Pagination row
             GameObject prevButtonObj = GUIManager.Instance.CreateButton(
@@ -130,12 +145,36 @@ namespace WizshBoneTwitchIntegration.Gui
             m_nextButton = nextButtonObj.GetComponent<Button>();
             m_nextButton.onClick.AddListener(NextPage);
 
+            GameObject completeAllBtn = GUIManager.Instance.CreateButton(
+                text: "Complete All",
+                parent: m_panel.transform,
+                anchorMin: new Vector2(0.5f, 0f),
+                anchorMax: new Vector2(0.5f, 0f),
+                position: new Vector2(-260f, 45f),
+                width: 160f,
+                height: 60f
+            );
+            completeAllBtn.SetActive(true);
+            completeAllBtn.GetComponent<Button>().onClick.AddListener(OnCompleteAll);
+
+            GameObject refundAllBtn = GUIManager.Instance.CreateButton(
+                text: "Refund All",
+                parent: m_panel.transform,
+                anchorMin: new Vector2(0.5f, 0f),
+                anchorMax: new Vector2(0.5f, 0f),
+                position: new Vector2(-80f, 45f),
+                width: 160f,
+                height: 60f
+            );
+            refundAllBtn.SetActive(true);
+            refundAllBtn.GetComponent<Button>().onClick.AddListener(OnRefundAll);
+
             GameObject filterButtonObj = GUIManager.Instance.CreateButton(
                 text: "Test Redeems: ON",
                 parent: m_panel.transform,
                 anchorMin: new Vector2(0.5f, 0f),
                 anchorMax: new Vector2(0.5f, 0f),
-                position: new Vector2(260f, 45f),
+                position: new Vector2(100f, 45f),
                 width: 200f,
                 height: 60f
             );
@@ -148,12 +187,19 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: m_panel.transform,
                 anchorMin: new Vector2(0.5f, 0f),
                 anchorMax: new Vector2(0.5f, 0f),
-                position: new Vector2(0f, 45f),
-                width: 200f,
+                position: new Vector2(290f, 45f),
+                width: 120f,
                 height: 60f
             );
             closeButton.SetActive(true);
             closeButton.GetComponent<Button>().onClick.AddListener(CloseGUI);
+        }
+
+        private void OnSearchChanged(string value)
+        {
+            m_searchText  = value;
+            m_currentPage = 0;
+            RefreshPage();
         }
 
         private void RefreshPage()
@@ -297,6 +343,36 @@ namespace WizshBoneTwitchIntegration.Gui
             RefreshPage();
         }
 
+        private void OnCompleteAll()
+        {
+            List<CustomRewardEvent> history = GetFilteredHistory();
+            foreach (CustomRewardEvent entry in history)
+            {
+                if (entry.Status == CustomRewardRedemptionState.Fulfilled || entry.Status == CustomRewardRedemptionState.Canceled)
+                    continue;
+
+                entry.Status = CustomRewardRedemptionState.Fulfilled;
+                Twitch.API.ResolveCustomReward(entry, CustomRewardRedemptionState.Fulfilled);
+            }
+
+            RefreshPage();
+        }
+
+        private void OnRefundAll()
+        {
+            List<CustomRewardEvent> history = GetFilteredHistory();
+            foreach (CustomRewardEvent entry in history)
+            {
+                if (entry.Status == CustomRewardRedemptionState.Fulfilled || entry.Status == CustomRewardRedemptionState.Canceled)
+                    continue;
+
+                entry.Status = CustomRewardRedemptionState.Canceled;
+                Twitch.API.ResolveCustomReward(entry, CustomRewardRedemptionState.Canceled);
+            }
+
+            RefreshPage();
+        }
+
         private void PrevPage()
         {
             m_currentPage--;
@@ -307,86 +383,6 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             m_currentPage++;
             RefreshPage();
-        }
-
-        private GameObject CreateScrollableContainer()
-        {
-            GameObject scrollRoot = new GameObject("HistoryScrollView");
-            scrollRoot.transform.SetParent(m_panel.transform, false);
-
-            RectTransform scrollRt = scrollRoot.AddComponent<RectTransform>();
-            scrollRt.anchorMin = new Vector2(0f, 0f);
-            scrollRt.anchorMax = new Vector2(1f, 1f);
-            scrollRt.offsetMin = new Vector2(30f, 155f);
-            scrollRt.offsetMax = new Vector2(-30f, -80f);
-
-            scrollRoot.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0f);
-
-            ScrollRect scrollRect = scrollRoot.AddComponent<ScrollRect>();
-            scrollRect.horizontal = false;
-            scrollRect.vertical = true;
-            scrollRect.scrollSensitivity = 30f;
-            scrollRect.movementType = ScrollRect.MovementType.Clamped;
-
-            GameObject viewport = new GameObject("Viewport");
-            viewport.transform.SetParent(scrollRoot.transform, false);
-
-            RectTransform viewportRt = viewport.AddComponent<RectTransform>();
-            viewportRt.anchorMin = Vector2.zero;
-            viewportRt.anchorMax = Vector2.one;
-            viewportRt.offsetMin = Vector2.zero;
-            viewportRt.offsetMax = new Vector2(-16f, 0f);
-
-            viewport.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.01f);
-            viewport.AddComponent<Mask>().showMaskGraphic = false;
-
-            scrollRect.viewport = viewportRt;
-
-            GameObject content = new GameObject("Content");
-            content.transform.SetParent(viewport.transform, false);
-
-            RectTransform contentRt = content.AddComponent<RectTransform>();
-            contentRt.anchorMin = new Vector2(0f, 1f);
-            contentRt.anchorMax = new Vector2(1f, 1f);
-            contentRt.pivot = new Vector2(0.5f, 1f);
-            contentRt.sizeDelta = Vector2.zero;
-            contentRt.anchoredPosition = Vector2.zero;
-
-            scrollRect.content = contentRt;
-
-            GameObject scrollbarObj = new GameObject("Scrollbar");
-            scrollbarObj.transform.SetParent(scrollRoot.transform, false);
-
-            RectTransform scrollbarRt = scrollbarObj.AddComponent<RectTransform>();
-            scrollbarRt.anchorMin = new Vector2(1f, 0f);
-            scrollbarRt.anchorMax = new Vector2(1f, 1f);
-            scrollbarRt.pivot = new Vector2(1f, 0.5f);
-            scrollbarRt.sizeDelta = new Vector2(16f, 0f);
-            scrollbarRt.anchoredPosition = Vector2.zero;
-
-            scrollbarObj.AddComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
-
-            Scrollbar scrollbar = scrollbarObj.AddComponent<Scrollbar>();
-            scrollbar.direction = Scrollbar.Direction.BottomToTop;
-
-            GameObject handleObj = new GameObject("Handle");
-            handleObj.transform.SetParent(scrollbarObj.transform, false);
-
-            RectTransform handleRt = handleObj.AddComponent<RectTransform>();
-            handleRt.anchorMin = Vector2.zero;
-            handleRt.anchorMax = Vector2.one;
-            handleRt.sizeDelta = Vector2.zero;
-
-            Image handleImage = handleObj.AddComponent<Image>();
-            handleImage.color = new Color(0.6f, 0.6f, 0.6f, 1f);
-
-            scrollbar.handleRect = handleRt;
-            scrollbar.targetGraphic = handleImage;
-
-            scrollRect.verticalScrollbar = scrollbar;
-            scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
-
-            return content;
         }
 
         private void ToggleTestFilter()
@@ -402,15 +398,23 @@ namespace WizshBoneTwitchIntegration.Gui
         private List<CustomRewardEvent> GetFilteredHistory()
         {
             List<CustomRewardEvent> history = m_customRewards.m_redeemHistory;
-
-            if (!m_hideTestRedeems)
-                return history;
-
             List<CustomRewardEvent> filtered = new List<CustomRewardEvent>();
+
             foreach (CustomRewardEvent entry in history)
             {
-                if (entry.RedemptionId != Guid.Empty.ToString())
-                    filtered.Add(entry);
+                if (m_hideTestRedeems && entry.RedemptionId == Guid.Empty.ToString())
+                    continue;
+
+                if (!string.IsNullOrEmpty(m_searchText))
+                {
+                    bool matchesName   = entry.RedeemerName.IndexOf(m_searchText, StringComparison.OrdinalIgnoreCase) >= 0;
+                    bool matchesRedeem = entry.CustomRewardTitle.IndexOf(m_searchText, StringComparison.OrdinalIgnoreCase) >= 0;
+
+                    if (!matchesName && !matchesRedeem)
+                        continue;
+                }
+
+                filtered.Add(entry);
             }
 
             return filtered;

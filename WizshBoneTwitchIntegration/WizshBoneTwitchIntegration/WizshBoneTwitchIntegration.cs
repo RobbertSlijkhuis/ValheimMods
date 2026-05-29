@@ -10,6 +10,7 @@ using UnityEngine;
 using WizshBoneTwitchIntegration.Commands;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Configs;
+using WizshBoneTwitchIntegration.Gui;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
@@ -45,6 +46,8 @@ namespace WizshBoneTwitchIntegration
         public static readonly string redeemsSchemaPath = customConfigPath + "/redeems-schema.json";
         public static readonly string bannedPath = customConfigPath + "/banned.txt";
         public static readonly string viewersPath = customConfigPath + "/viewers.yaml";
+
+        public static TestGUI testGUI = new TestGUI();
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -386,6 +389,7 @@ namespace WizshBoneTwitchIntegration
             CommandManager.Instance.AddConsoleCommand(new ReloadViewersCommand());
             CommandManager.Instance.AddConsoleCommand(new SetAliasCommand());
             CommandManager.Instance.AddConsoleCommand(new TestCommand());
+            CommandManager.Instance.AddConsoleCommand(new TestGUICommand());
             CommandManager.Instance.AddConsoleCommand(new UseRedeemCommand());
         }
 

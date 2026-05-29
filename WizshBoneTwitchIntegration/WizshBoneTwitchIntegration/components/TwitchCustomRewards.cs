@@ -267,6 +267,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (PluginConfig.configAutoResolveRedeems.Value)
                 {
                     Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft, $"{customRewardEvent.CustomRewardTitle} fullfilled");
+                    customRewardEvent.Status = CustomRewardRedemptionState.Fulfilled;
                     Twitch.API.ResolveCustomReward(customRewardEvent, CustomRewardRedemptionState.Fulfilled);
                 }
 
@@ -292,6 +293,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             if (PluginConfig.configAutoResolveRedeems.Value)
             {
                 Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft, $"{customRewardEvent.CustomRewardTitle} canceled");
+                customRewardEvent.Status = CustomRewardRedemptionState.Canceled;
                 Twitch.API.ResolveCustomReward(customRewardEvent, CustomRewardRedemptionState.Canceled);
             }
         }

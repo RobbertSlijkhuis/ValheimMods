@@ -5,6 +5,7 @@ using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Gui
 {
+    // Delegate for creating scrollable containers
     internal delegate GameObject CreateScrollableContainerDelegate(string name, GameObject parent, float topOffset);
 
     internal class WizshBoneSettingsGUI

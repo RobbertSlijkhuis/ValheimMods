@@ -245,19 +245,26 @@ namespace WizshBoneTwitchIntegration.Helpers
             //Jotunn.Logger.LogWarning(hit.GetTotalDamage());
         }
 
-        public static float CalculateScale(float playerTier, float creatureTier, float strength)
+        /// <summary>
+        /// Calculates a linear health/damage multiplier based on the tier gap between
+        /// the player and the creature.
+        /// Returns <c>1.0</c> when both are in the same biome band (no scaling applied).
+        /// A positive delta (creature below player) scales the stat <b>up</b>;
+        /// a negative delta (creature above player) scales it <b>down</b>.
+        /// <c>percentagePerTier</c> is the fraction applied per unit of tier difference,
+        /// e.g. <c>0.15</c> = 15% per tier.
+        /// </summary>
+        public static float CalculateScale(float playerTier, float creatureTier, float percentagePerTier)
         {
-            float delta = (playerTier - creatureTier) * PluginConfig.configCreaturesDeltaScale.Value;
-            float scale = Mathf.Pow(1f + strength, delta);
+            // Same biome band — leave the creature completely untouched
+            if (Mathf.Floor(playerTier) == Mathf.Floor(creatureTier))
+                return 1f;
 
-            //Jotunn.Logger.LogWarning($"playerTier: {playerTier}");
-            //Jotunn.Logger.LogWarning($"creatureTier: {creatureTier}");
-            //Jotunn.Logger.LogWarning($"Strenght: {strength}");
-            //Jotunn.Logger.LogWarning($"delta: {delta}");
-            //Jotunn.Logger.LogWarning($"Scale: {scale}");
+            float delta = playerTier - creatureTier;
+            float scale = 1f + (delta * percentagePerTier);
 
-            //return Mathf.Clamp(scale, 0.50f, 1.60f);
-            return scale;
+            // Never reduce below 10% or scale past 500% to avoid absurd edge cases
+            return Mathf.Clamp(scale, 0.1f, 5f);
         }
 
         public static void SetFollowInRadius(bool value)

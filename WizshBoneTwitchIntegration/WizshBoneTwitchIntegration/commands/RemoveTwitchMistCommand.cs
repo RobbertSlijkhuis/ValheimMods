@@ -36,7 +36,7 @@ namespace WizshBoneTwitchIntegration.Commands
                         ZNetView netView = gameObject.GetComponent<ZNetView>();
 
                         if (netView == null || !netView.IsValid())
-                            return;
+                            continue;
 
                         netView.Destroy();
                         GameObject.Destroy(gameObject);
