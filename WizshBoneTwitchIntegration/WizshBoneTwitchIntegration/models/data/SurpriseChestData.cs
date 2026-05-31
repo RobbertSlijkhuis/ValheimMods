@@ -1,18 +1,19 @@
 ﻿using System.Collections.Generic;
+using WizshBoneTwitchIntegration.Gui;
 using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.Models
 {
-    internal class SurpriseChestData
+    internal class SurpriseChestData : CloneableData
     {
         public int amount = 1;
         public string announceMessage;
         public float force = 200f;
-        public bool interact = true;
+        [EditorHidden] public bool interact = true;
         public List<SurpriseChestSpawnData> items = new List<SurpriseChestSpawnData>();
-        public int mimicChance = 0;
-        public string position = SpawnPositionType.InFrontOfPlayer;
-        public PositionOffsetData positionOffset = new PositionOffsetData();
+        [EditorHidden] public int mimicChance = 0;
+        [EditorHidden] public string position = SpawnPositionType.InFrontOfPlayer;
+        [EditorHidden] public PositionOffsetData positionOffset = new PositionOffsetData();
         public bool random = true;
         public string redeemTitle;
         public float spawnDelay = 0.7f;

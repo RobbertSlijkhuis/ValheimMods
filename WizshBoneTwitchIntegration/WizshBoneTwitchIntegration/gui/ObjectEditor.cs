@@ -43,6 +43,9 @@ namespace WizshBoneTwitchIntegration.Gui
 
             foreach (FieldInfo field in fields)
             {
+                if (field.GetCustomAttribute<EditorHiddenAttribute>() != null)
+                    continue;
+
                 List<string> dropdownOptions = GetDropdownOptionsForField(target, field);
 
                 bool built = FieldUIBuilder.Build(
@@ -55,16 +58,9 @@ namespace WizshBoneTwitchIntegration.Gui
                 );
 
                 if (built)
-                {
-                    if (field.FieldType == typeof(List<string>))
-                        yOffset -= ListEntryHeight + EntrySpacing;
-                    else
-                        yOffset -= FieldUIBuilder.EntryHeight + EntrySpacing;
-                }
+                    yOffset -= FieldUIBuilder.GetEntryHeight(field) + EntrySpacing;
             }
 
-            // yOffset is negative; its absolute value is the total height consumed.
-            // Subtract m_startY so only the rows themselves are measured.
             return Mathf.Abs(yOffset - m_startY);
         }
 

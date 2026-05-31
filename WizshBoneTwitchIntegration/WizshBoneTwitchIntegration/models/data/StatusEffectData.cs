@@ -3,7 +3,7 @@ using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Models
 {
-    internal class StatusEffectData
+    internal class StatusEffectData : CloneableData
     {
         public float duration = -1f;
         public float durationRemaining = -1f;

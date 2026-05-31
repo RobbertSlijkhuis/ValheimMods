@@ -1,6 +1,6 @@
 ﻿namespace WizshBoneTwitchIntegration.Models
 {
-    internal class MistData
+    internal class MistData : CloneableData
     {
         public string announceMessage;
         public int duration = 60;

@@ -3,7 +3,7 @@ using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.Models
 {
-    internal class DetonateData
+    internal class DetonateData : CloneableData
     {
         public string announceMessage;
         public DamageData damageData;

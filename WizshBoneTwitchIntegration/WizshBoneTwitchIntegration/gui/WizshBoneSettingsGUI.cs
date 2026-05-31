@@ -101,9 +101,9 @@ namespace WizshBoneTwitchIntegration.Gui
             GameObject closeButtonObj = GUIManager.Instance.CreateButton(
                 text: "Close",
                 parent: panel.transform,
-                anchorMin: new Vector2(0.5f, 0f),
-                anchorMax: new Vector2(0.5f, 0f),
-                position: new Vector2(0f, 40f),
+                anchorMin: new Vector2(0f, 0f),
+                anchorMax: new Vector2(0f, 0f),
+                position: new Vector2(150f, 50f),
                 width: 200f,
                 height: 60f
             );
@@ -116,9 +116,9 @@ namespace WizshBoneTwitchIntegration.Gui
             GameObject profilesTabBtn = GUIManager.Instance.CreateButton(
                 text: "Profiles",
                 parent: panel.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(-200f, -90f),
+                anchorMin: new Vector2(0f, 1f),
+                anchorMax: new Vector2(0f, 1f),
+                position: new Vector2(140f, -90f),
                 width: 180f,
                 height: 40f
             );
@@ -130,9 +130,9 @@ namespace WizshBoneTwitchIntegration.Gui
             GameObject redeemsTabBtn = GUIManager.Instance.CreateButton(
                 text: "Redeems",
                 parent: panel.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(0f, -90f),
+                anchorMin: new Vector2(0f, 1f),
+                anchorMax: new Vector2(0f, 1f),
+                position: new Vector2(325f, -90f),
                 width: 180f,
                 height: 40f
             );
@@ -171,82 +171,14 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private GameObject CreateScrollableContainer(string name, GameObject parent, float topOffset)
         {
-            GameObject scrollRoot = new GameObject(name + "ScrollView");
-            scrollRoot.transform.SetParent(parent.transform, false);
-
-            RectTransform scrollRt = scrollRoot.AddComponent<RectTransform>();
-            scrollRt.anchorMin = new Vector2(0f, 0f);
-            scrollRt.anchorMax = new Vector2(1f, 1f);
-            scrollRt.offsetMin = new Vector2(50f, 80f);
-            scrollRt.offsetMax = new Vector2(-50f, topOffset);
-
-            scrollRoot.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0f);
-
-            ScrollRect scrollRect = scrollRoot.AddComponent<ScrollRect>();
-            scrollRect.horizontal = false;
-            scrollRect.vertical = true;
-            scrollRect.scrollSensitivity = 30f;
-            scrollRect.movementType = ScrollRect.MovementType.Clamped;
-
-            GameObject viewport = new GameObject("Viewport");
-            viewport.transform.SetParent(scrollRoot.transform, false);
-
-            RectTransform viewportRt = viewport.AddComponent<RectTransform>();
-            viewportRt.anchorMin = Vector2.zero;
-            viewportRt.anchorMax = Vector2.one;
-            viewportRt.offsetMin = Vector2.zero;
-            viewportRt.offsetMax = new Vector2(-16f, 0f);
-
-            viewport.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.01f);
-            viewport.AddComponent<Mask>().showMaskGraphic = false;
-
-            scrollRect.viewport = viewportRt;
-
-            GameObject content = new GameObject("Content");
-            content.transform.SetParent(viewport.transform, false);
-
-            RectTransform contentRt = content.AddComponent<RectTransform>();
-            contentRt.anchorMin = new Vector2(0f, 1f);
-            contentRt.anchorMax = new Vector2(1f, 1f);
-            contentRt.pivot = new Vector2(0.5f, 1f);
-            contentRt.sizeDelta = Vector2.zero;
-            contentRt.anchoredPosition = Vector2.zero;
-
-            scrollRect.content = contentRt;
-
-            GameObject scrollbarObj = new GameObject("Scrollbar");
-            scrollbarObj.transform.SetParent(scrollRoot.transform, false);
-
-            RectTransform scrollbarRt = scrollbarObj.AddComponent<RectTransform>();
-            scrollbarRt.anchorMin = new Vector2(1f, 0f);
-            scrollbarRt.anchorMax = new Vector2(1f, 1f);
-            scrollbarRt.pivot = new Vector2(1f, 0.5f);
-            scrollbarRt.sizeDelta = new Vector2(16f, 0f);
-            scrollbarRt.anchoredPosition = Vector2.zero;
-
-            scrollbarObj.AddComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
-
-            Scrollbar scrollbar = scrollbarObj.AddComponent<Scrollbar>();
-            scrollbar.direction = Scrollbar.Direction.BottomToTop;
-
-            GameObject handleObj = new GameObject("Handle");
-            handleObj.transform.SetParent(scrollbarObj.transform, false);
-
-            RectTransform handleRt = handleObj.AddComponent<RectTransform>();
-            handleRt.anchorMin = Vector2.zero;
-            handleRt.anchorMax = Vector2.one;
-            handleRt.sizeDelta = Vector2.zero;
-
-            Image handleImage = handleObj.AddComponent<Image>();
-            handleImage.color = new Color(0.6f, 0.6f, 0.6f, 1f);
-
-            scrollbar.handleRect = handleRt;
-            scrollbar.targetGraphic = handleImage;
-
-            scrollRect.verticalScrollbar = scrollbar;
-            scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
-
-            return content;
+            return ScrollableView.CreateStretched(
+                parent: parent,
+                name: name,
+                offsetMin: new Vector2(50f, 90f),
+                offsetMax: new Vector2(-50f, topOffset),
+                backgroundColor: new Color(0f, 0f, 0f, 0.5f),
+                autoHideScrollbar: true
+            );
         }
 
         public bool IsVisible => panel != null && panel.activeSelf;

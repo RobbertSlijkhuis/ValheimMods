@@ -3,7 +3,7 @@ using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.Models
 {
-    internal class SpawnAbilityData
+    internal class SpawnAbilityData : CloneableData
     {
         public float? accuracy;
         public bool allowDrops = true;

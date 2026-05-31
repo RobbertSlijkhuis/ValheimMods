@@ -2,7 +2,7 @@
 
 namespace WizshBoneTwitchIntegration.Models
 {
-    internal class DamageData
+    internal class DamageData : CloneableData
     {
         public float? blunt;
         public float? chop;

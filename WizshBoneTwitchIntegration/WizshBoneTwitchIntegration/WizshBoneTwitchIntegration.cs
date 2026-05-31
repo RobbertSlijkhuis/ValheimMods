@@ -58,6 +58,7 @@ namespace WizshBoneTwitchIntegration
             Instance = this;
             InitAssetBundle();
             PluginConfig.Init();
+            ProfileSyncHelper.Init(); // <-- add this line
             InitStatusEffects();
             InitInputs();
             InitCommands();

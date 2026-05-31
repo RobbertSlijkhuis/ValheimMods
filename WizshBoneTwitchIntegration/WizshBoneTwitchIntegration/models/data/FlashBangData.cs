@@ -1,10 +1,7 @@
-﻿using UnityEngine;
-
-namespace WizshBoneTwitchIntegration.Models
+﻿namespace WizshBoneTwitchIntegration.Models
 {
-    internal class FlashBangData
+    internal class FlashBangData : CloneableData
     {
-        public string announceMessage;
         public float delay = 0.5f;
         public string flashColor = "#fff";
         public float flashDuration = 2f;

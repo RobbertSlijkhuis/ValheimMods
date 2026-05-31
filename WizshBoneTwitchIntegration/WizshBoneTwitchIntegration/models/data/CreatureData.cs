@@ -2,7 +2,7 @@
 
 namespace WizshBoneTwitchIntegration.Models
 {
-    internal class CreatureData
+    internal class CreatureData : CloneableData
     {
         public string announceMessage;
         public bool aggravatable = false;

@@ -2,7 +2,7 @@
 
 namespace WizshBoneTwitchIntegration.Models
 {
-    internal class CreatureGroupData
+    internal class CreatureGroupData : CloneableData
     {
         public string group;
         public List<CreatureData> list = new List<CreatureData>();

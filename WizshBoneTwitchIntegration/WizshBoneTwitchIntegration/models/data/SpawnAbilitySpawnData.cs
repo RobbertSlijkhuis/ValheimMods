@@ -2,7 +2,7 @@
 
 namespace WizshBoneTwitchIntegration.Models
 {
-    internal class SpawnAbilitySpawnData
+    internal class SpawnAbilitySpawnData : CloneableData
     {
         public List<CreatureData> creatureData;
         public ItemData itemData;

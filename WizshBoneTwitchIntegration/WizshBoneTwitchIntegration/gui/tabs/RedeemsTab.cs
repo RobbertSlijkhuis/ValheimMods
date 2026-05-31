@@ -19,22 +19,23 @@ namespace WizshBoneTwitchIntegration.Gui
 
         // List view
         private GameObject m_listView;
-        private Text m_activeProfileLabel;
+        private Text m_redeemsLabel;
         private GameObject m_redeemListContainer;
         private Text m_listFeedbackText;
+        private string m_searchText = "";
 
         // Create view
         private GameObject m_createView;
-        private InputField m_titleInput;
-        private InputField m_pointsInput;
-        private InputField m_descriptionInput;
         private Dropdown m_typeDropdown;
         private Text m_createFeedbackText;
+        private GameObject m_standardFieldsContainer;
         private GameObject m_editorContainer;
+        private Button m_confirmButton;
+        private RedeemData m_editingOriginal;
 
         // Working redeem — sub-data objects are written into directly by ObjectEditor
         private RedeemData m_newRedeem = new RedeemData();
-        private readonly ObjectEditor m_objectEditor = new ObjectEditor(startX: -80f, startY: -20f, fieldWidth: 200f);
+        private readonly ObjectEditor m_objectEditor = new ObjectEditor(startX: -220f, startY: -20f, fieldWidth: 200f);
 
         // Stored so CreateCreateView can create a scrollable editor container
         private CreateScrollableContainerDelegate m_createScrollable;
@@ -58,18 +59,51 @@ namespace WizshBoneTwitchIntegration.Gui
             RedeemType.TerrainEdit,
         };
 
-        private const float ButtonHeight  = 40f;
-        private const float ButtonSpacing = 5f;
-        private const float ItemHeight    = 40f;
+        private const float ButtonHeight        = 40f;
+        private const float ButtonSpacing       = 5f;
+        private const float ItemHeight          = 40f;
+        private const float ListTopPadding      = 15f;
+        private const float HeaderTopPadding    = 45f;
+        private const float ActionButtonWidth   = 80f;
+
+        private const float ColTitleX  = -230f;
+        private const float ColTitleW  = 200f;
+        private const float ColTypeX   = -55f;
+        private const float ColTypeW   = 140f;
+        private const float ColCostX   = 70f;
+        private const float ColCostW   = 100f;
+
+        private const float BtnTestX   = 165f;
+        private const float BtnEditX   = 250f;
+        private const float BtnDeleteX = 315f;
+
+        private const float ListLeftEdgeX        = -350f;
+        private const float ContentTopY          = -(110f + HeaderTopPadding);
+        private const float RedeemLabelY         = ContentTopY - 53f;
+        private const float ScrollTopOffset      = ContentTopY - 71f;
+        private const float SearchWidth          = 400f;
+        private const float NewRedeemBtnWidth    = 160f;
+        private const float SaveBtnWidth         = 80f;
+        private const float SearchCenterX        = ListLeftEdgeX + SearchWidth / 2f;
+        private const float NewRedeemBtnCenterX  = SearchCenterX + SearchWidth / 2f + ButtonSpacing + NewRedeemBtnWidth / 2f;
+        private const float SaveBtnCenterX       = NewRedeemBtnCenterX + NewRedeemBtnWidth / 2f + ButtonSpacing + SaveBtnWidth / 2f;
+
+        private const float TypeLabelX    = -220f;
+        private const float TypeLabelW    = 130f;
+        private const float TypeDropdownW = 200f;
+        private const float TypeDropdownX = TypeLabelX + TypeLabelW / 2f + 10f + TypeDropdownW / 2f;
 
         private System.Action m_onCloseRequested;
 
+        // Create view title — stored to allow "New Redeem" / "Edit Redeem" switching
+        private Text m_createViewTitle;
+
         public GameObject Create(GameObject parent, CreateScrollableContainerDelegate createScrollable, System.Action onCloseRequested)
         {
-            m_onCloseRequested  = onCloseRequested;
-            m_createScrollable  = createScrollable;
+            m_onCloseRequested = onCloseRequested;
+            m_createScrollable = createScrollable;
 
-            m_root = CreateContainer("RedeemsTab", parent);
+            m_root = UIContainer.Create(parent, "RedeemsTab");
 
             CreateListView(createScrollable);
             CreateCreateView();
@@ -82,7 +116,7 @@ namespace WizshBoneTwitchIntegration.Gui
         public void Refresh()
         {
             m_workingRedeems = new List<RedeemData>(RedeemHelper.redeems);
-            m_activeProfileLabel.text = $"Active profile: {ProfileManager.ActiveProfile}";
+            m_redeemsLabel.text = $"Redeems - {ProfileManager.ActiveProfile}:";
             RefreshList();
         }
 
@@ -92,73 +126,64 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void CreateListView(CreateScrollableContainerDelegate createScrollable)
         {
-            m_listView = CreateContainer("ListView", m_root);
+            m_listView = UIContainer.Create(m_root, "ListView");
 
-            m_activeProfileLabel = GUIManager.Instance.CreateText(
-                text: $"Active profile: {ProfileManager.ActiveProfile}",
-                parent: m_listView.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(-100f, -120f),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 14,
-                color: GUIManager.Instance.ValheimYellow,
-                outline: true,
-                outlineColor: Color.black,
-                width: 400f,
-                height: 20f,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
+            InputField searchField = FieldUIBuilder.CreateInputField(
+                parent: m_listView,
+                position: new Vector2(SearchCenterX, ContentTopY),
+                width: SearchWidth
+            );
+            searchField.placeholder.GetComponent<Text>().text = "Search redeems...";
+            searchField.onValueChanged.AddListener(OnSearchChanged);
 
-            // Add New button
             GameObject addNewBtn = GUIManager.Instance.CreateButton(
                 text: "+ New Redeem",
                 parent: m_listView.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(260f, -120f),
-                width: 160f,
+                position: new Vector2(NewRedeemBtnCenterX, ContentTopY),
+                width: NewRedeemBtnWidth,
                 height: 36f
             );
             addNewBtn.SetActive(true);
             addNewBtn.GetComponent<Button>().onClick.AddListener(ShowCreateView);
 
-            // Save button
             GameObject saveBtn = GUIManager.Instance.CreateButton(
                 text: "Save",
                 parent: m_listView.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(350f, -120f),
-                width: 80f,
+                position: new Vector2(SaveBtnCenterX, ContentTopY),
+                width: SaveBtnWidth,
                 height: 36f
             );
             saveBtn.SetActive(true);
             saveBtn.GetComponentInChildren<Text>().color = new Color(0.2f, 0.8f, 0.2f);
             saveBtn.GetComponent<Button>().onClick.AddListener(OnSave);
 
-            GUIManager.Instance.CreateText(
-                text: "Redeems:",
+            m_redeemsLabel = GUIManager.Instance.CreateText(
+                text: $"Redeems — {ProfileManager.ActiveProfile}:",
                 parent: m_listView.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(-310f, -155f),
+                position: new Vector2(-150f, RedeemLabelY),
                 font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 14,
-                color: GUIManager.Instance.ValheimBeige,
+                fontSize: 18,
+                color: GUIManager.Instance.ValheimOrange,
                 outline: true,
                 outlineColor: Color.black,
-                width: 160f,
-                height: 20f,
+                width: 400f,
+                height: 25f,
                 addContentSizeFitter: false
-            );
+            ).GetComponent<Text>();
+            m_redeemsLabel.alignment = TextAnchor.MiddleLeft;
 
             m_listFeedbackText = GUIManager.Instance.CreateText(
                 text: "",
                 parent: m_listView.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(50f, -155f),
+                position: new Vector2(50f, RedeemLabelY),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 12,
                 color: GUIManager.Instance.ValheimYellow,
@@ -169,61 +194,115 @@ namespace WizshBoneTwitchIntegration.Gui
                 addContentSizeFitter: false
             ).GetComponent<Text>();
 
-            m_redeemListContainer = createScrollable("RedeemList", m_listView, -173f);
+            m_redeemListContainer = createScrollable("RedeemList", m_listView, ScrollTopOffset);
         }
 
         private void RefreshList()
         {
             ClearContainer(m_redeemListContainer);
 
-            float yOffset = -(ItemHeight / 2f);
+            float yOffset = -(ListTopPadding + ItemHeight / 2f);
 
             foreach (RedeemData redeem in m_workingRedeems)
             {
+                if (!string.IsNullOrEmpty(m_searchText)
+                    && redeem.title.IndexOf(m_searchText, System.StringComparison.OrdinalIgnoreCase) < 0
+                    && redeem.type.IndexOf(m_searchText, System.StringComparison.OrdinalIgnoreCase) < 0)
+                    continue;
+
                 RedeemData captured = redeem;
                 bool isUnsaved = m_unsavedTitles.Contains(redeem.title);
+                Color labelColor = isUnsaved ? GUIManager.Instance.ValheimOrange : GUIManager.Instance.ValheimBeige;
 
-                GUIManager.Instance.CreateText(
-                    text: $"{redeem.title}  [{redeem.type}]  {redeem.points} pts",
+                Text titleText = GUIManager.Instance.CreateText(
+                    text: redeem.title,
                     parent: m_redeemListContainer.transform,
                     anchorMin: new Vector2(0.5f, 1f),
                     anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(-50f, yOffset),
+                    position: new Vector2(ColTitleX, yOffset),
                     font: GUIManager.Instance.AveriaSerifBold,
                     fontSize: 13,
-                    color: isUnsaved ? GUIManager.Instance.ValheimOrange : GUIManager.Instance.ValheimBeige,
+                    color: labelColor,
                     outline: true,
                     outlineColor: Color.black,
-                    width: 460f,
+                    width: ColTitleW,
                     height: ItemHeight,
                     addContentSizeFitter: false
-                );
+                ).GetComponent<Text>();
+                titleText.alignment = TextAnchor.MiddleLeft;
 
-                GameObject deleteBtn = GUIManager.Instance.CreateButton(
-                    text: "X",
+                Text typeText = GUIManager.Instance.CreateText(
+                    text: $"[{redeem.type}]",
                     parent: m_redeemListContainer.transform,
                     anchorMin: new Vector2(0.5f, 1f),
                     anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(260f, yOffset),
-                    width: ButtonHeight,
-                    height: ButtonHeight
-                );
-                deleteBtn.SetActive(true);
-                deleteBtn.GetComponentInChildren<Text>().color = Color.red;
-                deleteBtn.GetComponent<Button>().onClick.AddListener(() => OnDeleteRedeem(captured));
+                    position: new Vector2(ColTypeX, yOffset),
+                    font: GUIManager.Instance.AveriaSerifBold,
+                    fontSize: 13,
+                    color: labelColor,
+                    outline: true,
+                    outlineColor: Color.black,
+                    width: ColTypeW,
+                    height: ItemHeight,
+                    addContentSizeFitter: false
+                ).GetComponent<Text>();
+                typeText.alignment = TextAnchor.MiddleCenter;
+
+                Text costText = GUIManager.Instance.CreateText(
+                    text: $"{redeem.points} pts",
+                    parent: m_redeemListContainer.transform,
+                    anchorMin: new Vector2(0.5f, 1f),
+                    anchorMax: new Vector2(0.5f, 1f),
+                    position: new Vector2(ColCostX, yOffset),
+                    font: GUIManager.Instance.AveriaSerifBold,
+                    fontSize: 13,
+                    color: labelColor,
+                    outline: true,
+                    outlineColor: Color.black,
+                    width: ColCostW,
+                    height: ItemHeight,
+                    addContentSizeFitter: false
+                ).GetComponent<Text>();
+                costText.alignment = TextAnchor.MiddleRight;
 
                 GameObject testBtn = GUIManager.Instance.CreateButton(
                     text: "Test",
                     parent: m_redeemListContainer.transform,
                     anchorMin: new Vector2(0.5f, 1f),
                     anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(310f, yOffset),
-                    width: ButtonHeight,
+                    position: new Vector2(BtnTestX, yOffset),
+                    width: ActionButtonWidth,
                     height: ButtonHeight
                 );
                 testBtn.SetActive(true);
                 testBtn.GetComponentInChildren<Text>().color = Color.yellow;
                 testBtn.GetComponent<Button>().onClick.AddListener(() => OnTestRedeem(captured));
+
+                GameObject editBtn = GUIManager.Instance.CreateButton(
+                    text: "Edit",
+                    parent: m_redeemListContainer.transform,
+                    anchorMin: new Vector2(0.5f, 1f),
+                    anchorMax: new Vector2(0.5f, 1f),
+                    position: new Vector2(BtnEditX, yOffset),
+                    width: ActionButtonWidth,
+                    height: ButtonHeight
+                );
+                editBtn.SetActive(true);
+                editBtn.GetComponentInChildren<Text>().color = Color.cyan;
+                editBtn.GetComponent<Button>().onClick.AddListener(() => ShowEditView(captured));
+
+                GameObject deleteBtn = GUIManager.Instance.CreateButton(
+                    text: "X",
+                    parent: m_redeemListContainer.transform,
+                    anchorMin: new Vector2(0.5f, 1f),
+                    anchorMax: new Vector2(0.5f, 1f),
+                    position: new Vector2(BtnDeleteX, yOffset),
+                    width: ButtonHeight,
+                    height: ButtonHeight
+                );
+                deleteBtn.SetActive(true);
+                deleteBtn.GetComponentInChildren<Text>().color = Color.red;
+                deleteBtn.GetComponent<Button>().onClick.AddListener(() => OnDeleteRedeem(captured));
 
                 yOffset -= ItemHeight + ButtonSpacing;
             }
@@ -246,14 +325,25 @@ namespace WizshBoneTwitchIntegration.Gui
             string path = ProfileManager.GetActiveRedeemPath();
 
             ModData data = ExtraConfigHelper.ReadRedeemsConfig(path) ?? new ModData();
-            data.redeems = m_workingRedeems;
+
+            List<Dictionary<string, object>> minimalRedeems = new List<Dictionary<string, object>>();
+            foreach (RedeemData redeem in m_workingRedeems)
+                minimalRedeems.Add(redeem.ToMinimalDictionary());
+
+            Dictionary<string, object> output = new Dictionary<string, object>
+            {
+                { "redeems", minimalRedeems }
+            };
+
+            if (data.creatureGroups != null && data.creatureGroups.Count > 0)
+                output["creatureGroups"] = data.creatureGroups;
 
             ISerializer serializer = new SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
             using (StreamWriter writer = new StreamWriter(path, append: false))
-                serializer.Serialize(writer, data);
+                serializer.Serialize(writer, output);
 
             RedeemHelper.Reload();
             m_unsavedTitles.Clear();
@@ -267,19 +357,15 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void CreateCreateView()
         {
-            m_createView = CreateContainer("CreateView", m_root);
+            m_createView = UIContainer.Create(m_root, "CreateView");
 
-            // Create a single scroll container for ALL content in the create view
-            GameObject scrollContent = m_createScrollable("CreateViewContent", m_createView, -140f);
-
-            float yPos = -20f;
-
-            GUIManager.Instance.CreateText(
+            // Title — aligned to scroll view left edge
+            m_createViewTitle = GUIManager.Instance.CreateText(
                 text: "New Redeem",
-                parent: scrollContent.transform,
+                parent: m_createView.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(0f, yPos),
+                position: new Vector2(-200f, -153f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 18,
                 color: GUIManager.Instance.ValheimOrange,
@@ -288,85 +374,85 @@ namespace WizshBoneTwitchIntegration.Gui
                 width: 300f,
                 height: 25f,
                 addContentSizeFitter: false
-            ).GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
+            ).GetComponent<Text>();
+            m_createViewTitle.alignment = TextAnchor.MiddleLeft;
 
-            yPos -= 40f;
-
-            // Common fields
-            GUIManager.Instance.CreateText(
-                text: "Title",
-                parent: scrollContent.transform,
+            // Feedback text
+            m_createFeedbackText = GUIManager.Instance.CreateText(
+                text: "",
+                parent: m_createView.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(-290f, yPos),
+                position: new Vector2(-100f, -158f),
                 font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 13,
-                color: GUIManager.Instance.ValheimBeige,
+                fontSize: 12,
+                color: GUIManager.Instance.ValheimYellow,
                 outline: true,
                 outlineColor: Color.black,
-                width: 180f,
+                width: 400f,
                 height: 20f,
                 addContentSizeFitter: false
-            );
-            m_titleInput = CreateInputField(scrollContent, new Vector2(-290f, yPos - 30f), new Vector2(180f, 36f));
+            ).GetComponent<Text>();
 
-            GUIManager.Instance.CreateText(
-                text: "Points",
-                parent: scrollContent.transform,
+            // Back button — right-aligned to scroll view right edge
+            GameObject backBtn = GUIManager.Instance.CreateButton(
+                text: "< Back",
+                parent: m_createView.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(-80f, yPos),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 13,
-                color: GUIManager.Instance.ValheimBeige,
-                outline: true,
-                outlineColor: Color.black,
+                position: new Vector2(165f, -145f),
                 width: 120f,
-                height: 20f,
-                addContentSizeFitter: false
+                height: 40f
             );
-            m_pointsInput = CreateInputField(scrollContent, new Vector2(-80f, yPos - 30f), new Vector2(120f, 36f));
+            backBtn.SetActive(true);
+            backBtn.GetComponent<Button>().onClick.AddListener(ShowListView);
 
-            GUIManager.Instance.CreateText(
-                text: "Description",
-                parent: scrollContent.transform,
+            // Confirm button — flush to scroll view right edge
+            GameObject confirmBtnObj = GUIManager.Instance.CreateButton(
+                text: "+ Add",
+                parent: m_createView.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(80f, yPos),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 13,
-                color: GUIManager.Instance.ValheimBeige,
-                outline: true,
-                outlineColor: Color.black,
-                width: 180f,
-                height: 20f,
-                addContentSizeFitter: false
+                position: new Vector2(290f, -145f),
+                width: 120f,
+                height: 40f
             );
-            m_descriptionInput = CreateInputField(scrollContent, new Vector2(80f, yPos - 30f), new Vector2(180f, 36f));
+            confirmBtnObj.SetActive(true);
+            m_confirmButton = confirmBtnObj.GetComponent<Button>();
+            m_confirmButton.onClick.AddListener(OnConfirm);
 
-            GUIManager.Instance.CreateText(
+            // Scroll view starts below the header
+            GameObject scrollContent = m_createScrollable("CreateViewContent", m_createView, -175f);
+
+            float yPos = -20f;
+
+            m_standardFieldsContainer = CreateStaticContainer("StandardFields", scrollContent, yPos);
+            yPos -= 460f;
+
+            Text typeLabelComp = GUIManager.Instance.CreateText(
                 text: "Type",
                 parent: scrollContent.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(280f, yPos),
+                position: new Vector2(TypeLabelX, yPos),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 13,
                 color: GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
-                width: 160f,
-                height: 20f,
+                width: TypeLabelW,
+                height: 36f,
                 addContentSizeFitter: false
-            );
+            ).GetComponent<Text>();
+            typeLabelComp.alignment = TextAnchor.MiddleLeft;
 
             GameObject dropdownObj = GUIManager.Instance.CreateDropDown(
                 parent: scrollContent.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(280f, yPos - 30f),
+                position: new Vector2(TypeDropdownX, yPos),
                 fontSize: 12,
-                width: 160f,
+                width: TypeDropdownW,
                 height: 36f
             );
             m_typeDropdown = dropdownObj.GetComponent<Dropdown>();
@@ -378,57 +464,11 @@ namespace WizshBoneTwitchIntegration.Gui
 
             yPos -= 70f;
 
-            // Container for type-specific fields (non-scrollable now, part of parent scroll)
             m_editorContainer = CreateStaticContainer("EditorContainer", scrollContent, yPos);
+            yPos -= 400f;
 
-            yPos -= 400f; // Reserve space for editor content
-
-            // Buttons
-            GameObject backBtn = GUIManager.Instance.CreateButton(
-                text: "< Back",
-                parent: scrollContent.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(-160f, yPos),
-                width: 120f,
-                height: 40f
-            );
-            backBtn.SetActive(true);
-            backBtn.GetComponent<Button>().onClick.AddListener(ShowListView);
-
-            GameObject addBtn = GUIManager.Instance.CreateButton(
-                text: "+ Add",
-                parent: scrollContent.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(160f, yPos),
-                width: 120f,
-                height: 40f
-            );
-            addBtn.SetActive(true);
-            addBtn.GetComponent<Button>().onClick.AddListener(OnAddRedeem);
-
-            yPos -= 60f;
-
-            m_createFeedbackText = GUIManager.Instance.CreateText(
-                text: "",
-                parent: scrollContent.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(0f, yPos),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 12,
-                color: GUIManager.Instance.ValheimYellow,
-                outline: true,
-                outlineColor: Color.black,
-                width: 600f,
-                height: 20f,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-
-            // Update scroll content size
             RectTransform scrollContentRt = scrollContent.GetComponent<RectTransform>();
-            scrollContentRt.sizeDelta = new Vector2(scrollContentRt.sizeDelta.x, Mathf.Abs(yPos) + 40f);
+            scrollContentRt.sizeDelta = new Vector2(scrollContentRt.sizeDelta.x, Mathf.Abs(yPos) + 20f);
 
             m_createView.SetActive(false);
         }
@@ -451,51 +491,61 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void OnTypeChanged()
         {
+            m_newRedeem.type = RedeemTypes[m_typeDropdown.value];
             ClearContainer(m_editorContainer);
 
-            string selectedType = RedeemTypes[m_typeDropdown.value];
-
-            if (selectedType == RedeemType.Detonate)
+            if (m_newRedeem.type == RedeemType.Detonate)
                 m_objectEditor.Build(m_editorContainer, m_newRedeem.detonateData);
-            else if (selectedType == RedeemType.Flashbang)
+            else if (m_newRedeem.type == RedeemType.Flashbang)
                 m_objectEditor.Build(m_editorContainer, m_newRedeem.flashbangData);
-            else if (selectedType == RedeemType.SpawnMist)
+            else if (m_newRedeem.type == RedeemType.SpawnMist)
                 m_objectEditor.Build(m_editorContainer, m_newRedeem.mistData);
-            else if (selectedType == RedeemType.TerrainEdit)
+            else if (m_newRedeem.type == RedeemType.TerrainEdit)
                 m_objectEditor.Build(m_editorContainer, m_newRedeem.terrainEditData);
-            else if (selectedType == RedeemType.SpawnWeather)
+            else if (m_newRedeem.type == RedeemType.SpawnWeather)
                 m_objectEditor.Build(m_editorContainer, m_newRedeem.weatherData);
         }
 
-        private void OnAddRedeem()
+        private void OnConfirm()
         {
-            string title = m_titleInput.text.Trim();
-
-            if (string.IsNullOrEmpty(title))
+            if (string.IsNullOrEmpty(m_newRedeem.title))
             {
                 m_createFeedbackText.text = "Title is required.";
                 return;
             }
 
-            if (m_workingRedeems.Exists(r => r.title == title))
+            if (m_editingOriginal != null)
             {
-                m_createFeedbackText.text = $"A redeem named '{title}' already exists.";
-                return;
+                int index = m_workingRedeems.IndexOf(m_editingOriginal);
+                if (index >= 0)
+                    m_workingRedeems[index] = m_newRedeem;
+
+                m_unsavedTitles.Add(m_newRedeem.title);
+                RedeemHelper.redeems = new List<RedeemData>(m_workingRedeems);
+                ShowListView();
+                m_listFeedbackText.text = $"'{m_newRedeem.title}' updated (unsaved). Press Save to persist.";
             }
+            else
+            {
+                if (m_workingRedeems.Exists(r => r.title == m_newRedeem.title))
+                {
+                    m_createFeedbackText.text = $"A redeem named '{m_newRedeem.title}' already exists.";
+                    return;
+                }
 
-            if (!string.IsNullOrEmpty(m_pointsInput.text))
-                int.TryParse(m_pointsInput.text, out m_newRedeem.points);
+                m_workingRedeems.Add(m_newRedeem);
+                m_unsavedTitles.Add(m_newRedeem.title);
+                RedeemHelper.redeems = new List<RedeemData>(m_workingRedeems);
+                ShowListView();
+                m_listFeedbackText.text = $"'{m_newRedeem.title}' added (unsaved). Press Save to persist.";
+            }
+        }
 
-            m_newRedeem.title       = title;
-            m_newRedeem.description = m_descriptionInput.text.Trim();
-            m_newRedeem.type        = RedeemTypes[m_typeDropdown.value];
-
-            m_workingRedeems.Add(m_newRedeem);
-            m_unsavedTitles.Add(title);
-            RedeemHelper.redeems = new List<RedeemData>(m_workingRedeems);
-
-            ShowListView();
-            m_listFeedbackText.text = $"'{title}' added (unsaved). Press Save to persist.";
+        private void RebuildStandardFields()
+        {
+            ClearContainer(m_standardFieldsContainer);
+            float height = m_objectEditor.Build(m_standardFieldsContainer, m_newRedeem);
+            m_standardFieldsContainer.GetComponent<RectTransform>().sizeDelta = new Vector2(700f, height + 40f);
         }
 
         private void OnTestRedeem(RedeemData redeem)
@@ -506,7 +556,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             CustomRewardEvent rewardEvent = new CustomRewardEvent
             {
-                RedeemerName       = "DevWizsh",
+                RedeemerName       = "WizshBone",
                 RedeemedAt         = System.DateTime.Now.ToShortDateString(),
                 CustomRewardTitle  = redeem.title,
                 CustomRewardCost   = redeem.points,
@@ -530,14 +580,35 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void ShowCreateView()
         {
-            m_newRedeem = new RedeemData();
+            m_editingOriginal             = null;
+            m_newRedeem                   = new RedeemData();
+            m_createFeedbackText.text     = "";
+            m_createViewTitle.text        = "New Redeem";
+            m_typeDropdown.value          = 0;
+            m_typeDropdown.interactable   = true;
+            m_confirmButton.GetComponentInChildren<Text>().text = "+ Add";
 
-            m_createFeedbackText.text = "";
-            m_titleInput.text         = "";
-            m_pointsInput.text        = "";
-            m_descriptionInput.text   = "";
-            m_typeDropdown.value      = 0;
+            RebuildStandardFields();
             ClearContainer(m_editorContainer);
+
+            m_listView.SetActive(false);
+            m_createView.SetActive(true);
+        }
+
+        private void ShowEditView(RedeemData redeem)
+        {
+            m_editingOriginal             = redeem;
+            m_newRedeem                   = redeem.DeepClone<RedeemData>();
+            m_createFeedbackText.text     = "";
+            m_createViewTitle.text        = "Edit Redeem";
+            m_typeDropdown.interactable   = false;
+            m_confirmButton.GetComponentInChildren<Text>().text = "Save";
+
+            int typeIndex = System.Array.IndexOf(RedeemTypes, redeem.type);
+            m_typeDropdown.value = typeIndex >= 0 ? typeIndex : 0;
+
+            RebuildStandardFields();
+            OnTypeChanged();
 
             m_listView.SetActive(false);
             m_createView.SetActive(true);
@@ -547,55 +618,10 @@ namespace WizshBoneTwitchIntegration.Gui
         // Helpers
         // =====================================================================
 
-        private static GameObject CreateContainer(string name, GameObject parent)
+        private void OnSearchChanged(string value)
         {
-            GameObject container = new GameObject(name);
-            container.transform.SetParent(parent.transform, false);
-
-            RectTransform rt = container.AddComponent<RectTransform>();
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
-            rt.pivot     = new Vector2(0.5f, 0.5f);
-
-            container.SetActive(false);
-            return container;
-        }
-
-        private static InputField CreateInputField(GameObject parent, Vector2 position, Vector2 size)
-        {
-            GameObject inputObj = new GameObject("InputField");
-            inputObj.transform.SetParent(parent.transform, false);
-
-            RectTransform rt = inputObj.AddComponent<RectTransform>();
-            rt.anchorMin        = new Vector2(0.5f, 1f);
-            rt.anchorMax        = new Vector2(0.5f, 1f);
-            rt.pivot            = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta        = size;
-            rt.anchoredPosition = position;
-
-            inputObj.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.1f, 0.8f);
-
-            InputField inputField = inputObj.AddComponent<InputField>();
-
-            GameObject textObj = new GameObject("Text");
-            textObj.transform.SetParent(inputField.transform, false);
-            RectTransform textRt = textObj.AddComponent<RectTransform>();
-            textRt.anchorMin = Vector2.zero;
-            textRt.anchorMax = Vector2.one;
-            textRt.offsetMin = new Vector2(5f, 2f);
-            textRt.offsetMax = new Vector2(-5f, -2f);
-            Text text = textObj.AddComponent<Text>();
-            text.font            = GUIManager.Instance.AveriaSerifBold;
-            text.fontSize        = 12;
-            text.color           = Color.white;
-            text.supportRichText = false;
-
-            inputField.textComponent = text;
-            inputField.text          = "";
-            inputObj.SetActive(true);
-            return inputField;
+            m_searchText = value;
+            RefreshList();
         }
 
         private static void ClearContainer(GameObject container)

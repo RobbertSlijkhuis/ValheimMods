@@ -251,13 +251,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void CreateRedeemsSection()
         {
-            m_redeemsSection = new GameObject("RedeemsSection");
-            m_redeemsSection.transform.SetParent(panel.transform, false);
-            RectTransform rt = m_redeemsSection.AddComponent<RectTransform>();
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
+            m_redeemsSection = UIContainer.Create(panel, "RedeemsSection", startActive: false);
 
             m_redeemsSectionStatusText = GUIManager.Instance.CreateText(
                 text: customRewards.m_enabled ? "Redeems are currently enabled" : "Redeems are currently disabled",
@@ -305,13 +299,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void CreateChattingSection()
         {
-            m_chattingSection = new GameObject("ChattingSection");
-            m_chattingSection.transform.SetParent(panel.transform, false);
-            RectTransform rt = m_chattingSection.AddComponent<RectTransform>();
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
+            m_chattingSection = UIContainer.Create(panel, "ChattingSection", startActive: false);
 
             m_chattingSectionStatusText = GUIManager.Instance.CreateText(
                 text: "Random creatures can show chat messages from viewers",

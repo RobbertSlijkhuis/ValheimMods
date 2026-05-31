@@ -205,6 +205,11 @@ namespace WizshBoneTwitchIntegration.Extensions
                     yield return new WaitForSeconds(spawnAbility.m_preSpawnDelay);
 
                 GameObject gameObject = UnityEngine.Object.Instantiate(prefab, spawnPoint, Quaternion.Euler(0f, UnityEngine.Random.value * (float)Math.PI * 2f, 0f));
+
+                // Remove any safe zones that may be on the spawned prefab (e.g. boat rain)
+                foreach (TwitchSafeZone safeZone in gameObject.GetComponentsInChildren<TwitchSafeZone>(true))
+                    UnityEngine.Object.Destroy(safeZone);
+
                 ZNetView component = gameObject.GetComponent<ZNetView>();
                 Projectile component2 = gameObject.GetComponent<Projectile>();
 

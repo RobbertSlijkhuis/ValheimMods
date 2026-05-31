@@ -1,6 +1,6 @@
 ﻿namespace WizshBoneTwitchIntegration.Models
 {
-    internal class ItemData
+    internal class ItemData : CloneableData
     {
         public string prefabName;
         public int stackSize = 1;

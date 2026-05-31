@@ -1,17 +1,16 @@
 ﻿using System.Collections.Generic;
+using WizshBoneTwitchIntegration.Gui;
 
 namespace WizshBoneTwitchIntegration.Models
 {
-    internal class WeatherData
+    internal class WeatherData : CloneableData
     {
-        public string announceMessage;
-        public bool attach = false;
-        public int duration = 60;
-        public bool force = false;
-        public float height = 200f;
-        public float radius = 60f;
-        public List<string> items = new List<string>();
-
+        [EditorLabel("Announce message")] public string announceMessage;
+        [EditorLabel("Duration")] public int duration = 60;
+        [EditorLabel("Force")] public bool force = false;
+        [EditorLabel("Height")] public float height = 200f;
+        [EditorLabel("Radius")] public float radius = 60f;
+        [EditorLabel("Weathers")] public List<string> items = new List<string>();
         public WeatherData() { }
     }
 }
