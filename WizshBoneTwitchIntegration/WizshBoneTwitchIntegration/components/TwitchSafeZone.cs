@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Configs;
-using WizshBoneTwitchIntegration.GUI;
+using WizshBoneTwitchIntegration.Gui;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Components

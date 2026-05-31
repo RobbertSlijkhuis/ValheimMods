@@ -16,6 +16,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private GameObject m_profileListContainer;
         private Text m_profileFeedbackText;
         private Button m_syncButton;
+        private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
 
         private const float ButtonWidth = 330f;
         private const float ButtonHeight = 40f;
@@ -81,6 +82,8 @@ namespace WizshBoneTwitchIntegration.Gui
         public GameObject Create(GameObject parent, CreateScrollableContainerDelegate createScrollable)
         {
             m_root = UIContainer.Create(parent, "ProfilesTab");
+
+            m_confirmDialog.Init();
 
             CreateTabTitle("New profile name:", m_root, new Vector2(InputFieldCenterX, ContentTopY), width: ButtonWidth);
 
@@ -396,12 +399,18 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void OnDeleteProfile(string name)
         {
-            bool deleted = ProfileManager.DeleteProfile(name);
-            m_profileFeedbackText.text = deleted
-                ? $"Profile '{name}' deleted."
-                : $"Cannot delete profile '{name}'.";
-
-            Refresh();
+            m_confirmDialog.Show(
+                title:       "Delete Profile",
+                description: $"Are you sure you want to delete '{name}'?\nThis cannot be undone.",
+                onConfirm:   () =>
+                {
+                    bool deleted = ProfileManager.DeleteProfile(name);
+                    m_profileFeedbackText.text = deleted
+                        ? $"Profile '{name}' deleted."
+                        : $"Cannot delete profile '{name}'.";
+                    Refresh();
+                }
+            );
         }
 
         private Text CreateTabTitle(string text, GameObject parent, Vector2 position, float width = 300f)

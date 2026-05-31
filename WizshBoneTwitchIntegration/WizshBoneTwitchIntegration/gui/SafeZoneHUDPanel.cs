@@ -1,7 +1,7 @@
 using Jotunn.Managers;
 using UnityEngine;
 
-namespace WizshBoneTwitchIntegration.GUI
+namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
     /// Renders a persistent safe zone label slightly above center screen

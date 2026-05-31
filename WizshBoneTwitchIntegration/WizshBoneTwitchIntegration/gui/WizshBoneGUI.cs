@@ -1,7 +1,9 @@
 ﻿using Jotunn.Managers;
+using TwitchSDK.Interop;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Gui
@@ -36,6 +38,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private Text m_chattingSectionButtonText;
         private WizshBoneSettingsGUI m_settingsGUI;
         private WizshBoneRedeemHistoryGUI m_redeemHistoryGUI;
+        private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
 
         public void ShowGUI()
         {
@@ -71,6 +74,9 @@ namespace WizshBoneTwitchIntegration.Gui
                 draggable: false
             );
             panel.SetActive(false);
+
+            m_confirmDialog.Init();
+
             CreateGUI();
 
             panel.SetActive(true);
@@ -144,22 +150,6 @@ namespace WizshBoneTwitchIntegration.Gui
             CreateRedeemsSection();
             CreateChattingSection();
 
-            //GUIManager.Instance.CreateText(
-            //    text: $"Redeems can be configured in \"{WizshBoneTwitchIntegration.redeemsConfigPath.Substring(0, 24)} {WizshBoneTwitchIntegration.redeemsConfigPath.Substring(24)}\". They can be reloaded during gameplay with the \"ReloadTwitchRedeems\" command.",
-            //    parent: panel.transform,
-            //    anchorMin: new Vector2(0.5f, 0f),
-            //    anchorMax: new Vector2(0.5f, 0f),
-            //    position: new Vector2(10f, 140f),
-            //    font: GUIManager.Instance.AveriaSerifBold,
-            //    fontSize: 14,
-            //    color: GUIManager.Instance.ValheimBeige,
-            //    outline: true,
-            //    outlineColor: Color.black,
-            //    width: 450,
-            //    height: 60f,
-            //    addContentSizeFitter: false
-            //);
-
             GameObject cancelButtonObj = GUIManager.Instance.CreateButton(
                 text: "Close",
                 parent: panel.transform,
@@ -183,22 +173,6 @@ namespace WizshBoneTwitchIntegration.Gui
             );
             settingsButtonObj.SetActive(true);
             settingsButtonObj.GetComponent<Button>().onClick.AddListener(OpenSettings);
-
-            //GUIManager.Instance.CreateText(
-            //    text: "Please report any issues on my Discord, the link can be found on my mod page or Twitch channel. Suggestions are also welcome!",
-            //    parent: panel.transform,
-            //    anchorMin: new Vector2(0.5f, 0f),
-            //    anchorMax: new Vector2(0.5f, 0f),
-            //    position: new Vector2(110f, 50f),
-            //    font: GUIManager.Instance.AveriaSerifBold,
-            //    fontSize: 14,
-            //    color: GUIManager.Instance.ValheimBeige,
-            //    outline: true,
-            //    outlineColor: Color.black,
-            //    width: 235,
-            //    height: 120f,
-            //    addContentSizeFitter: false
-            //);
 
             GUIManager.Instance.CreateText(
                 text: $"Created by: DeathWizsh, commisioned by: LoyalBones        v{WizshBoneTwitchIntegration.PluginVersion}",
@@ -348,6 +322,26 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void ToggleRedeems()
         {
+            if (customRewards.m_enabled && !PluginConfig.configAutoResolveRedeems.Value && customRewards.m_redeemHistory.FindAll(item => item.Status == CustomRewardRedemptionState.Unfulfilled).Count > 0)
+            {
+                m_confirmDialog.Show(
+                    title:       "Disable Redeems",
+                    description: "Auto-resolve is off. Pending redeems won't be refunded automatically. Are you sure?",
+                    onConfirm:   () =>
+                    {
+                        onToggleRedeems.Invoke();
+                        UpdateGUI();
+                    },
+                    confirmText: "Disable",
+                    cancelText:  "Open history",
+                    onCancel: () =>
+                    {
+                        OpenRedeemHistory();
+                    }
+                );
+                return;
+            }
+
             onToggleRedeems.Invoke();
             UpdateGUI();
         }

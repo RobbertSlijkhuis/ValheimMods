@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using WizshBoneTwitchIntegration.Components;
-using WizshBoneTwitchIntegration.GUI;
+using WizshBoneTwitchIntegration.Gui;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 

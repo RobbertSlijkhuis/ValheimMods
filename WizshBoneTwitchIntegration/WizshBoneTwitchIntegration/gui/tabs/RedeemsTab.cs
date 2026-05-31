@@ -23,6 +23,8 @@ namespace WizshBoneTwitchIntegration.Gui
         private GameObject m_redeemListContainer;
         private Text m_listFeedbackText;
         private string m_searchText = "";
+        private Button m_addNewBtn;
+        private Button m_saveBtn;
 
         // Create view
         private GameObject m_createView;
@@ -32,6 +34,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private GameObject m_editorContainer;
         private Button m_confirmButton;
         private RedeemData m_editingOriginal;
+        private bool m_isReadOnly;
 
         // Working redeem — sub-data objects are written into directly by ObjectEditor
         private RedeemData m_newRedeem = new RedeemData();
@@ -95,8 +98,9 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private System.Action m_onCloseRequested;
 
-        // Create view title — stored to allow "New Redeem" / "Edit Redeem" switching
+        // Create view title — stored to allow "New Redeem" / "Edit Redeem" / "View Redeem" switching
         private Text m_createViewTitle;
+        private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
 
         public GameObject Create(GameObject parent, CreateScrollableContainerDelegate createScrollable, System.Action onCloseRequested)
         {
@@ -104,6 +108,8 @@ namespace WizshBoneTwitchIntegration.Gui
             m_createScrollable = createScrollable;
 
             m_root = UIContainer.Create(parent, "RedeemsTab");
+
+            m_confirmDialog.Init();
 
             CreateListView(createScrollable);
             CreateCreateView();
@@ -117,6 +123,11 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             m_workingRedeems = new List<RedeemData>(RedeemHelper.redeems);
             m_redeemsLabel.text = $"Redeems - {ProfileManager.ActiveProfile}:";
+
+            bool isSynced = ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile);
+            if (m_addNewBtn != null) m_addNewBtn.interactable = !isSynced;
+            if (m_saveBtn != null)   m_saveBtn.interactable   = !isSynced;
+
             RefreshList();
         }
 
@@ -136,7 +147,7 @@ namespace WizshBoneTwitchIntegration.Gui
             searchField.placeholder.GetComponent<Text>().text = "Search redeems...";
             searchField.onValueChanged.AddListener(OnSearchChanged);
 
-            GameObject addNewBtn = GUIManager.Instance.CreateButton(
+            GameObject addNewBtnObj = GUIManager.Instance.CreateButton(
                 text: "+ New Redeem",
                 parent: m_listView.transform,
                 anchorMin: new Vector2(0.5f, 1f),
@@ -145,10 +156,11 @@ namespace WizshBoneTwitchIntegration.Gui
                 width: NewRedeemBtnWidth,
                 height: 36f
             );
-            addNewBtn.SetActive(true);
-            addNewBtn.GetComponent<Button>().onClick.AddListener(ShowCreateView);
+            addNewBtnObj.SetActive(true);
+            m_addNewBtn = addNewBtnObj.GetComponent<Button>();
+            m_addNewBtn.onClick.AddListener(ShowCreateView);
 
-            GameObject saveBtn = GUIManager.Instance.CreateButton(
+            GameObject saveBtnObj = GUIManager.Instance.CreateButton(
                 text: "Save",
                 parent: m_listView.transform,
                 anchorMin: new Vector2(0.5f, 1f),
@@ -157,26 +169,17 @@ namespace WizshBoneTwitchIntegration.Gui
                 width: SaveBtnWidth,
                 height: 36f
             );
-            saveBtn.SetActive(true);
-            saveBtn.GetComponentInChildren<Text>().color = new Color(0.2f, 0.8f, 0.2f);
-            saveBtn.GetComponent<Button>().onClick.AddListener(OnSave);
+            saveBtnObj.SetActive(true);
+            saveBtnObj.GetComponentInChildren<Text>().color = new Color(0.2f, 0.8f, 0.2f);
+            m_saveBtn = saveBtnObj.GetComponent<Button>();
+            m_saveBtn.onClick.AddListener(OnSave);
 
-            m_redeemsLabel = GUIManager.Instance.CreateText(
-                text: $"Redeems — {ProfileManager.ActiveProfile}:",
-                parent: m_listView.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(-150f, RedeemLabelY),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 18,
-                color: GUIManager.Instance.ValheimOrange,
-                outline: true,
-                outlineColor: Color.black,
-                width: 400f,
-                height: 25f,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-            m_redeemsLabel.alignment = TextAnchor.MiddleLeft;
+            m_redeemsLabel = CreateTabTitle(
+                $"Redeems — {ProfileManager.ActiveProfile}:",
+                m_listView,
+                new Vector2(-150f, RedeemLabelY),
+                width: 400f
+            );
 
             m_listFeedbackText = GUIManager.Instance.CreateText(
                 text: "",
@@ -201,6 +204,7 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             ClearContainer(m_redeemListContainer);
 
+            bool isSynced = ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile);
             float yOffset = -(ListTopPadding + ItemHeight / 2f);
 
             foreach (RedeemData redeem in m_workingRedeems)
@@ -278,31 +282,50 @@ namespace WizshBoneTwitchIntegration.Gui
                 testBtn.GetComponentInChildren<Text>().color = Color.yellow;
                 testBtn.GetComponent<Button>().onClick.AddListener(() => OnTestRedeem(captured));
 
-                GameObject editBtn = GUIManager.Instance.CreateButton(
-                    text: "Edit",
-                    parent: m_redeemListContainer.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(BtnEditX, yOffset),
-                    width: ActionButtonWidth,
-                    height: ButtonHeight
-                );
-                editBtn.SetActive(true);
-                editBtn.GetComponentInChildren<Text>().color = Color.cyan;
-                editBtn.GetComponent<Button>().onClick.AddListener(() => ShowEditView(captured));
+                if (isSynced)
+                {
+                    // Synced profile — show read-only view, no delete
+                    GameObject showBtn = GUIManager.Instance.CreateButton(
+                        text: "Show",
+                        parent: m_redeemListContainer.transform,
+                        anchorMin: new Vector2(0.5f, 1f),
+                        anchorMax: new Vector2(0.5f, 1f),
+                        position: new Vector2(BtnEditX, yOffset),
+                        width: ActionButtonWidth,
+                        height: ButtonHeight
+                    );
+                    showBtn.SetActive(true);
+                    showBtn.GetComponentInChildren<Text>().color = GUIManager.Instance.ValheimBeige;
+                    showBtn.GetComponent<Button>().onClick.AddListener(() => ShowViewOnlyView(captured));
+                }
+                else
+                {
+                    GameObject editBtn = GUIManager.Instance.CreateButton(
+                        text: "Edit",
+                        parent: m_redeemListContainer.transform,
+                        anchorMin: new Vector2(0.5f, 1f),
+                        anchorMax: new Vector2(0.5f, 1f),
+                        position: new Vector2(BtnEditX, yOffset),
+                        width: ActionButtonWidth,
+                        height: ButtonHeight
+                    );
+                    editBtn.SetActive(true);
+                    editBtn.GetComponentInChildren<Text>().color = Color.cyan;
+                    editBtn.GetComponent<Button>().onClick.AddListener(() => ShowEditView(captured));
 
-                GameObject deleteBtn = GUIManager.Instance.CreateButton(
-                    text: "X",
-                    parent: m_redeemListContainer.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(BtnDeleteX, yOffset),
-                    width: ButtonHeight,
-                    height: ButtonHeight
-                );
-                deleteBtn.SetActive(true);
-                deleteBtn.GetComponentInChildren<Text>().color = Color.red;
-                deleteBtn.GetComponent<Button>().onClick.AddListener(() => OnDeleteRedeem(captured));
+                    GameObject deleteBtn = GUIManager.Instance.CreateButton(
+                        text: "X",
+                        parent: m_redeemListContainer.transform,
+                        anchorMin: new Vector2(0.5f, 1f),
+                        anchorMax: new Vector2(0.5f, 1f),
+                        position: new Vector2(BtnDeleteX, yOffset),
+                        width: ButtonHeight,
+                        height: ButtonHeight
+                    );
+                    deleteBtn.SetActive(true);
+                    deleteBtn.GetComponentInChildren<Text>().color = Color.red;
+                    deleteBtn.GetComponent<Button>().onClick.AddListener(() => OnDeleteRedeem(captured));
+                }
 
                 yOffset -= ItemHeight + ButtonSpacing;
             }
@@ -313,11 +336,20 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void OnDeleteRedeem(RedeemData redeem)
         {
-            m_workingRedeems.Remove(redeem);
-            m_unsavedTitles.Remove(redeem.title);
-            RedeemHelper.redeems = new List<RedeemData>(m_workingRedeems);
-            m_listFeedbackText.text = $"'{redeem.title}' removed. Press Save to apply.";
-            RefreshList();
+            m_confirmDialog.Show(
+                title:       "Delete Redeem",
+                description: $"Are you sure you want to delete '{redeem.title}'?\nThis cannot be undone.",
+                onConfirm:   () =>
+                {
+                    m_workingRedeems.Remove(redeem);
+                    m_unsavedTitles.Remove(redeem.title);
+                    RedeemHelper.redeems = new List<RedeemData>(m_workingRedeems);
+                    m_listFeedbackText.text = $"'{redeem.title}' removed. Press Save to apply.";
+                    RefreshList();
+                },
+                confirmText: "Delete",
+                cancelText:  "Cancel"
+            );
         }
 
         private void OnSave()
@@ -359,25 +391,12 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             m_createView = UIContainer.Create(m_root, "CreateView");
 
-            // Title — aligned to scroll view left edge
-            m_createViewTitle = GUIManager.Instance.CreateText(
-                text: "New Redeem",
-                parent: m_createView.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(-200f, -153f),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 18,
-                color: GUIManager.Instance.ValheimOrange,
-                outline: true,
-                outlineColor: Color.black,
-                width: 300f,
-                height: 25f,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-            m_createViewTitle.alignment = TextAnchor.MiddleLeft;
+            m_createViewTitle = CreateTabTitle(
+                "New Redeem",
+                m_createView,
+                new Vector2(-200f, -153f)
+            );
 
-            // Feedback text
             m_createFeedbackText = GUIManager.Instance.CreateText(
                 text: "",
                 parent: m_createView.transform,
@@ -394,7 +413,6 @@ namespace WizshBoneTwitchIntegration.Gui
                 addContentSizeFitter: false
             ).GetComponent<Text>();
 
-            // Back button — right-aligned to scroll view right edge
             GameObject backBtn = GUIManager.Instance.CreateButton(
                 text: "< Back",
                 parent: m_createView.transform,
@@ -407,7 +425,6 @@ namespace WizshBoneTwitchIntegration.Gui
             backBtn.SetActive(true);
             backBtn.GetComponent<Button>().onClick.AddListener(ShowListView);
 
-            // Confirm button — flush to scroll view right edge
             GameObject confirmBtnObj = GUIManager.Instance.CreateButton(
                 text: "+ Add",
                 parent: m_createView.transform,
@@ -421,7 +438,6 @@ namespace WizshBoneTwitchIntegration.Gui
             m_confirmButton = confirmBtnObj.GetComponent<Button>();
             m_confirmButton.onClick.AddListener(OnConfirm);
 
-            // Scroll view starts below the header
             GameObject scrollContent = m_createScrollable("CreateViewContent", m_createView, -175f);
 
             float yPos = -20f;
@@ -473,7 +489,6 @@ namespace WizshBoneTwitchIntegration.Gui
             m_createView.SetActive(false);
         }
 
-        // Add this helper method
         private static GameObject CreateStaticContainer(string name, GameObject parent, float yPos)
         {
             GameObject container = new GameObject(name);
@@ -504,6 +519,12 @@ namespace WizshBoneTwitchIntegration.Gui
                 m_objectEditor.Build(m_editorContainer, m_newRedeem.terrainEditData);
             else if (m_newRedeem.type == RedeemType.SpawnWeather)
                 m_objectEditor.Build(m_editorContainer, m_newRedeem.weatherData);
+
+            if (m_isReadOnly)
+            {
+                SetContainerInteractable(m_editorContainer, false);
+                SetContainerInteractable(m_standardFieldsContainer, false);
+            }
         }
 
         private void OnConfirm()
@@ -573,6 +594,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void ShowListView()
         {
+            m_isReadOnly = false;
             RefreshList();
             m_createView.SetActive(false);
             m_listView.SetActive(true);
@@ -580,12 +602,14 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void ShowCreateView()
         {
+            m_isReadOnly                  = false;
             m_editingOriginal             = null;
             m_newRedeem                   = new RedeemData();
             m_createFeedbackText.text     = "";
             m_createViewTitle.text        = "New Redeem";
             m_typeDropdown.value          = 0;
             m_typeDropdown.interactable   = true;
+            m_confirmButton.gameObject.SetActive(true);
             m_confirmButton.GetComponentInChildren<Text>().text = "+ Add";
 
             RebuildStandardFields();
@@ -597,11 +621,13 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void ShowEditView(RedeemData redeem)
         {
+            m_isReadOnly                  = false;
             m_editingOriginal             = redeem;
             m_newRedeem                   = redeem.DeepClone<RedeemData>();
             m_createFeedbackText.text     = "";
             m_createViewTitle.text        = "Edit Redeem";
             m_typeDropdown.interactable   = false;
+            m_confirmButton.gameObject.SetActive(true);
             m_confirmButton.GetComponentInChildren<Text>().text = "Save";
 
             int typeIndex = System.Array.IndexOf(RedeemTypes, redeem.type);
@@ -614,9 +640,66 @@ namespace WizshBoneTwitchIntegration.Gui
             m_createView.SetActive(true);
         }
 
+        private void ShowViewOnlyView(RedeemData redeem)
+        {
+            m_isReadOnly                  = true;
+            m_editingOriginal             = null;
+            m_newRedeem                   = redeem.DeepClone<RedeemData>();
+            m_createFeedbackText.text     = "Read-only — this profile is synced.";
+            m_createViewTitle.text        = "View Redeem";
+            m_typeDropdown.interactable   = false;
+            m_confirmButton.gameObject.SetActive(false);
+
+            int typeIndex = System.Array.IndexOf(RedeemTypes, redeem.type);
+            m_typeDropdown.value = typeIndex >= 0 ? typeIndex : 0;
+
+            RebuildStandardFields();
+            OnTypeChanged();
+
+            // Lock down all inputs after building
+            SetContainerInteractable(m_standardFieldsContainer, false);
+            SetContainerInteractable(m_editorContainer, false);
+
+            m_listView.SetActive(false);
+            m_createView.SetActive(true);
+        }
+
         // =====================================================================
         // Helpers
         // =====================================================================
+
+        private static void SetContainerInteractable(GameObject container, bool interactable)
+        {
+            foreach (InputField input in container.GetComponentsInChildren<InputField>(true))
+                input.interactable = interactable;
+
+            foreach (Toggle toggle in container.GetComponentsInChildren<Toggle>(true))
+                toggle.interactable = interactable;
+
+            foreach (Dropdown dropdown in container.GetComponentsInChildren<Dropdown>(true))
+                dropdown.interactable = interactable;
+        }
+
+        private Text CreateTabTitle(string text, GameObject parent, Vector2 position, float width = 300f)
+        {
+            Text label = GUIManager.Instance.CreateText(
+                text: text,
+                parent: parent.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: position,
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: 16,
+                color: GUIManager.Instance.ValheimOrange,
+                outline: true,
+                outlineColor: Color.black,
+                width: width,
+                height: 25f,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+            label.alignment = TextAnchor.MiddleLeft;
+            return label;
+        }
 
         private void OnSearchChanged(string value)
         {
