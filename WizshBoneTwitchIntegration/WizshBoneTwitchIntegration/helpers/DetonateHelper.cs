@@ -79,8 +79,21 @@ namespace WizshBoneTwitchIntegration.Helpers
             foreach (GameObject prefab in prefabList)
             {
                 ZNetView netView = prefab.GetComponent<ZNetView>();
-                UnityEngine.Object.Instantiate(explosionFX, prefab.transform.position, prefab.transform.rotation);
+                GameObject explosionInstance = UnityEngine.Object.Instantiate(explosionFX, prefab.transform.position, prefab.transform.rotation);
                 UnityEngine.Object.Instantiate(explosionSFX, prefab.transform.position, prefab.transform.rotation);
+
+                if (detonateData.damageData != null)
+                {
+                    Aoe aoe = explosionInstance.GetComponentInChildren<Aoe>(true);
+
+                    if (aoe != null)
+                    {
+                        aoe.m_damage = detonateData.damageData.basedOnMaxHealthAndArmor
+                            ? DamageHelper.CalculateDamageBasedOnMaxHealthAndArmor(detonateData.damageData)
+                            : DamageHelper.ConvertToDamageTypes(detonateData.damageData);
+                    }
+                }
+
                 netView.Destroy();
                 GameObject.Destroy(prefab);
             }

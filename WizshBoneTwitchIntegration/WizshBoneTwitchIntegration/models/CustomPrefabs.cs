@@ -9,12 +9,12 @@ namespace WizshBoneTwitchIntegration.Models
         public GameObject Flashbang;
         public GameObject FlashbangVial;
         public GameObject GuardStone;
-        public GameObject RemoveTheCountry;
+        public GameObject TerrainEdit;
         public GameObject NeckBeard;
 
         public GameObject ChestIron;
         public GameObject ChestGold;
 
-        public GameObject WeatherZone;
+        public GameObject EnvZone;
     }
 }

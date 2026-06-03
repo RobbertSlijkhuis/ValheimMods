@@ -47,5 +47,24 @@ namespace WizshBoneTwitchIntegration.Helpers
             damageData.slash = damages.m_slash;
             damageData.spirit = damages.m_spirit;
         }
+
+        /// <summary>
+        /// Calculate damage scaled by the player's max health and body armor.
+        /// </summary>
+        /// <param name="damageData"></param>
+        /// <returns></returns>
+        public static HitData.DamageTypes CalculateDamageBasedOnMaxHealthAndArmor(DamageData damageData)
+        {
+            HitData.DamageTypes damages = ConvertToDamageTypes(damageData);
+            float armor = Player.m_localPlayer.GetBodyArmor();
+            float maxHealth = Player.m_localPlayer.GetMaxHealth();
+            float totalDamage = damages.GetTotalDamage();
+            float maxDamage = maxHealth * damageData.maxHealthPercentage;
+
+            damages.Modify(maxDamage / totalDamage);
+            damages.IncreaseEqually(armor * damageData.armorPercentage);
+
+            return damages;
+        }
     }
 }

@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 1907505341
+CRC: 3342627375
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 39521371c90505cb306f5c653b8ec8fe
+    Hash: f8c02d6411eafd059ca9d718059d6e3c
   TypeTreeHash:
     serializedVersion: 2
-    Hash: ff5a1a41dfc0e5c3d6cface0835157dc
+    Hash: 31e407dceb42bf3814e7b3ef215d02ca
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 39521371c90505cb306f5c653b8ec8fe
+    Hash: f8c02d6411eafd059ca9d718059d6e3c
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -53,8 +53,6 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
   Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
@@ -86,8 +84,6 @@ ClassTypes:
   Script: {fileID: 1345532120, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: -179248876, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 788646874, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 313648218, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -143,20 +139,18 @@ SerializeReferenceClassIdentifiers:
   ClassName: HitData/DamageTypes
 - AssemblyName: assembly_valheim
   ClassName: LevelEffects/LevelSetup
-- AssemblyName: assembly_valheim
-  ClassName: TerrainOp/Settings
 Assets:
 - Assets/Custom/Creatures/Bjorn/Bjorn_recolor_zebra_WBTI.mat
 - Assets/Custom/PrefabInstance/Chest/ChestIron_WBTI.prefab
 - Assets/Custom/Creatures/Greydwarf/RootSword_recolor_WBTI.mat
+- Assets/Custom/PrefabInstance/Redeems/TerrainEdit_WBTI.prefab
 - Assets/Custom/PrefabInstance/Redeems/spawn_fish_WBTI.prefab
-- Assets/Custom/PrefabInstance/Redeems/WBTI_WeatherZone.prefab
+- Assets/Custom/PrefabInstance/Redeems/EnvZone_WBTI.prefab
 - Assets/Custom/Creatures/Cultist/Cultist_recolor_WBTI.mat
 - Assets/Custom/Monobehaviour/NoFallDamage_WBTI.asset
 - Assets/Custom/Creatures/Leech/Leech_recolor_WBTI.mat
 - Assets/Custom/Creatures/Skeleton/Skeleton_recolor_WBTI.mat
 - Assets/Custom/Creatures/Cultist/CultistCape_recolor_WBTI.mat
-- Assets/Custom/PrefabInstance/Redeems/RemoveTheCountry_WBTI.prefab
 - Assets/Custom/Monobehaviour/Burning_WBTI.asset
 - Assets/Custom/PrefabInstance/Redeems/Flashbang_WBTI.prefab
 - Assets/Custom/Creatures/Greydwarf/Greydwarf_recolor_WBTI.mat

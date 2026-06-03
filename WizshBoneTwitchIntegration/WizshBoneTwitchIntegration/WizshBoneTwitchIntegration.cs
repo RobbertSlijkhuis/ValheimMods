@@ -109,7 +109,9 @@ namespace WizshBoneTwitchIntegration
             prefabs.GuardStone.transform.Find("safezone").gameObject.AddComponent<TwitchSafeZone>();
             prefabs.GuardStone.transform.Find("controls").gameObject.AddComponent<TwitchSafeZoneControls>();
 
-            prefabs.WeatherZone.AddComponent<TwitchPersistentDestruction>();
+            prefabs.EnvZone.AddComponent<TwitchPersistentDestruction>();
+
+            prefabs.TerrainEdit.AddComponent<TwitchTerrainReset>();
 
             prefabs.FlashbangVial = PrefabManager.Instance.CreateClonedPrefab("FlashbangVial_WBTI", "BombBlob_Frost_projectile");
             Projectile projectile = prefabs.FlashbangVial.GetComponent<Projectile>();
@@ -379,16 +381,16 @@ namespace WizshBoneTwitchIntegration
             prefabs.Flashbang = assetBundle.LoadAsset<GameObject>("Flashbang_WBTI");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.FishRainScript, true));
             prefabs.GuardStone = assetBundle.LoadAsset<GameObject>("WBTI_guard_stone");
-            prefabs.RemoveTheCountry = assetBundle.LoadAsset<GameObject>("RemoveTheCountry_WBTI");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RemoveTheCountry, true));
+            prefabs.TerrainEdit = assetBundle.LoadAsset<GameObject>("TerrainEdit_WBTI");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.TerrainEdit, true));
             prefabs.NeckBeard = assetBundle.LoadAsset<GameObject>("FeoTheHistorian_WBTI");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.NeckBeard, true));
             prefabs.ChestIron = assetBundle.LoadAsset<GameObject>("ChestIron_WBTI");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ChestIron, true));
             prefabs.ChestGold = assetBundle.LoadAsset<GameObject>("ChestGold_WBTI");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ChestGold, true));
-            prefabs.WeatherZone = assetBundle.LoadAsset<GameObject>("WBTI_WeatherZone");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.WeatherZone, true));
+            prefabs.EnvZone = assetBundle.LoadAsset<GameObject>("EnvZone_WBTI");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.EnvZone, true));
 
             effects.Burning = assetBundle.LoadAsset<SE_Stats>("Burning_WBTI");
             effects.Freezing = assetBundle.LoadAsset<StatusEffect>("Freezing_WBTI");

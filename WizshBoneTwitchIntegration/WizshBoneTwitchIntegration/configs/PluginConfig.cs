@@ -14,7 +14,6 @@ namespace WizshBoneTwitchIntegration.Configs
         public static string sectionIndestructible = "Indestructible";
         public static string sectionGeneral = "General";
         public static string sectionRedeems = "Redeems";
-        public static string sectionRemoveTheCountry = "Remove the Country";
         public static string sectionWard = "Twitchy Ward";
         public static string sectionHUD = "HUD";
 
@@ -197,55 +196,6 @@ namespace WizshBoneTwitchIntegration.Configs
             {
                 TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
                 customRewards.m_playerIsInSafeZone = false;
-            };
-
-
-            configRaiseRadius = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionRemoveTheCountry, "Remove The Country Rdeem: raise radius", 8f,
-                new ConfigDescription("How big the radius is of the Remove The Country Rdeem", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
-            configRaiseRadius.SettingChanged += (obj, attr) =>
-            {
-                if (configRaiseRadius.Value == float.NaN)
-                {
-                    Jotunn.Logger.LogWarning("Incorrect value");
-                    return;
-                }
-
-                GameObject prefab = WizshBoneTwitchIntegration.Instance.prefabs.RemoveTheCountry;
-                TerrainOp terrain = prefab.GetComponent<TerrainOp>();
-                terrain.m_settings.m_raiseRadius = configRaiseRadius.Value;
-            };
-
-            configRaisePower = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionRemoveTheCountry, "Remove The Country Rdeem: raise power", 0f,
-                new ConfigDescription("How big the power is of the Remove The Country Rdeem", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
-            configRaisePower.SettingChanged += (obj, attr) =>
-            {
-                if (configRaisePower.Value == float.NaN)
-                {
-                    Jotunn.Logger.LogWarning("Incorrect value");
-                    return;
-                }
-
-                GameObject prefab = WizshBoneTwitchIntegration.Instance.prefabs.RemoveTheCountry;
-                TerrainOp terrain = prefab.GetComponent<TerrainOp>();
-                terrain.m_settings.m_raisePower = configRaisePower.Value;
-            };
-
-            configRaiseDelta = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionRemoveTheCountry, "Remove The Country Rdeem: raise delta", -8f,
-                new ConfigDescription("How big the delta is of the Remove The Country Rdeem", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
-            configRaiseDelta.SettingChanged += (obj, attr) =>
-            {
-                if (configRaiseDelta.Value == float.NaN)
-                {
-                    Jotunn.Logger.LogWarning("Incorrect value");
-                    return;
-                }
-
-                GameObject prefab = WizshBoneTwitchIntegration.Instance.prefabs.RemoveTheCountry;
-                TerrainOp terrain = prefab.GetComponent<TerrainOp>();
-                terrain.m_settings.m_raiseDelta = configRaiseDelta.Value;
             };
 
 

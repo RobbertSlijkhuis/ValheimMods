@@ -89,6 +89,18 @@ namespace WizshBoneTwitchIntegration.Gui
             return BuildInterior(scrollRoot, autoHideScrollbar);
         }
 
+        /// <summary>
+        /// Sets the height of a content <see cref="GameObject"/> previously returned by
+        /// <see cref="CreateFixed"/> or <see cref="CreateStretched"/>, preserving its width.
+        /// </summary>
+        /// <param name="content">The content container returned by the Create methods.</param>
+        /// <param name="height">The new total height in pixels.</param>
+        public static void SetContentHeight(GameObject content, float height)
+        {
+            RectTransform rt = content.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, height);
+        }
+
         // ── private helpers ──────────────────────────────────────────────────
 
         private static GameObject CreateScrollRoot(

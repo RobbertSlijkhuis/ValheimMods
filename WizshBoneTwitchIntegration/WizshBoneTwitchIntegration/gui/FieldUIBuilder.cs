@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
+using WizshBoneTwitchIntegration.Models;
 
 namespace WizshBoneTwitchIntegration.Gui
 {
@@ -13,7 +14,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float LabelWidth    = 130f;
         private const float LabelFieldGap = 10f;
         private const float TooltipGap    = 12f;
-        private const float TooltipWidth  = 180f;
+        private const float TooltipWidth  = 240f;
         private const float TooltipHeight = 36f;
         public  const float FieldHeight   = 36f;
 
@@ -26,7 +27,9 @@ namespace WizshBoneTwitchIntegration.Gui
         /// </summary>
         public static float GetEntryHeight(FieldInfo field)
         {
-            return field.FieldType == typeof(List<string>) ? 210f : FieldHeight;
+            if (field.FieldType == typeof(List<string>))   return 210f;
+            if (field.FieldType == typeof(PositionOffsetData)) return FieldHeight;
+            return FieldHeight;
         }
 
         public static bool Build(GameObject parent, object target, FieldInfo field, Vector2 rowPosition, float fieldWidth = 200f, List<string> listDropdownOptions = null)
@@ -40,13 +43,13 @@ namespace WizshBoneTwitchIntegration.Gui
             // Special case: List<string>
             if (fieldType == typeof(List<string>))
             {
-                bool listBuilt = BuildListField(parent, field, currentValue as List<string>, rowPosition, listDropdownOptions, labelText);
-                if (listBuilt && tooltip != null)
-                {
-                    float tooltipX = rowPosition.x + (LabelWidth + 200f) / 2f + TooltipGap + TooltipWidth / 2f;
-                    BuildTooltip(parent, tooltip, new Vector2(tooltipX, rowPosition.y));
-                }
-                return listBuilt;
+                return BuildListField(parent, field, currentValue as List<string>, rowPosition, fieldWidth, listDropdownOptions, labelText, tooltip);
+            }
+
+            // Special case: PositionOffsetData
+            if (fieldType == typeof(PositionOffsetData))
+            {
+                return BuildPositionOffsetField(parent, currentValue as PositionOffsetData, rowPosition, fieldWidth, labelText, tooltip);
             }
 
             if (fieldType != typeof(string) && fieldType != typeof(int) && fieldType != typeof(float) && fieldType != typeof(bool))
@@ -75,7 +78,17 @@ namespace WizshBoneTwitchIntegration.Gui
             Vector2 fieldPos = new Vector2(fieldX, rowPosition.y);
 
             if (fieldType == typeof(string))
-                BuildStringField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth);
+            {
+                var colorAttr    = field.GetCustomAttribute<ColorPickerAttribute>();
+                var dropdownAttr = field.GetCustomAttribute<DropdownOptionsAttribute>();
+
+                if (colorAttr != null)
+                    BuildColorField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth);
+                else if (dropdownAttr != null)
+                    BuildStringDropdownField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth, dropdownAttr.Options);
+                else
+                    BuildStringField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth);
+            }
             else if (fieldType == typeof(int))
                 BuildIntField(parent, target, field, currentValue is int i ? i : 0, fieldPos, fieldWidth);
             else if (fieldType == typeof(float))
@@ -169,9 +182,9 @@ namespace WizshBoneTwitchIntegration.Gui
             toggle.onValueChanged.AddListener(val => field.SetValue(target, val));
         }
 
-        private static bool BuildListField(GameObject parent, FieldInfo field, List<string> currentValue, Vector2 rowPosition, List<string> dropdownOptions, string labelText)
+        private static bool BuildListField(GameObject parent, FieldInfo field, List<string> currentValue, Vector2 rowPosition, float fieldWidth, List<string> dropdownOptions, string labelText, string tooltip)
         {
-            // Label — same width and position as all other field labels
+            // Label — same as all other fields
             Text listLabelComp = GUIManager.Instance.CreateText(
                 text: labelText,
                 parent: parent.transform,
@@ -189,15 +202,105 @@ namespace WizshBoneTwitchIntegration.Gui
             ).GetComponent<Text>();
             listLabelComp.alignment = TextAnchor.MiddleLeft;
 
-            // Editor — starts immediately to the right of the label, same row
-            float editorAnchorX = rowPosition.x + LabelWidth / 2f + LabelFieldGap + ListEditorAnchorOffset;
-            Vector2 editorPosition = new Vector2(editorAnchorX, rowPosition.y);
+            // Input/dropdown center — identical to all other field types
+            float fieldX     = rowPosition.x + LabelWidth / 2f + LabelFieldGap + fieldWidth / 2f;
+            Vector2 fieldPos = new Vector2(fieldX, rowPosition.y);
 
             ListEditor editor = dropdownOptions != null && dropdownOptions.Count > 0
                 ? new ListEditor(currentValue ?? new List<string>(), dropdownOptions)
                 : new ListEditor(currentValue ?? new List<string>());
 
-            editor.Build(parent, editorPosition);
+            editor.Build(parent, fieldPos, fieldWidth);
+
+            // Tooltip — to the right of the field, same as all other field types
+            if (tooltip != null)
+            {
+                float tooltipX = fieldX + fieldWidth / 2f + TooltipGap + TooltipWidth / 2f;
+                BuildTooltip(parent, tooltip, new Vector2(tooltipX, rowPosition.y));
+            }
+
+            return true;
+        }
+
+        private static bool BuildPositionOffsetField(GameObject parent, PositionOffsetData currentValue, Vector2 rowPosition, float fieldWidth, string labelText, string tooltip)
+        {
+            // Label
+            Text labelComp = GUIManager.Instance.CreateText(
+                text: labelText,
+                parent: parent.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: rowPosition,
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: 13,
+                color: GUIManager.Instance.ValheimBeige,
+                outline: true,
+                outlineColor: Color.black,
+                width: LabelWidth,
+                height: FieldHeight,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+            labelComp.alignment = TextAnchor.MiddleLeft;
+
+            // Three inputs — X, Y, Z — evenly split across fieldWidth
+            float fieldStartX = rowPosition.x + LabelWidth / 2f + LabelFieldGap;
+            float subWidth    = (fieldWidth - 10f) / 3f; // 10f = 2 gaps of 5f
+            float subHeight   = FieldHeight;
+            const float subGap = 5f;
+            const float subLabelW = 14f;
+            const float subInputW = 14f; // label inside the sub-area
+
+            string[] labels = { "X", "Y", "Z" };
+            float[]  values = { currentValue.x, currentValue.y, currentValue.z };
+
+            for (int i = 0; i < 3; i++)
+            {
+                float centerX = fieldStartX + i * (subWidth + subGap) + subWidth / 2f;
+
+                // Small axis label
+                Text axisLabel = GUIManager.Instance.CreateText(
+                    text: labels[i],
+                    parent: parent.transform,
+                    anchorMin: new Vector2(0.5f, 1f),
+                    anchorMax: new Vector2(0.5f, 1f),
+                    position: new Vector2(centerX - subWidth / 2f + subLabelW / 2f, rowPosition.y),
+                    font: GUIManager.Instance.AveriaSerifBold,
+                    fontSize: 11,
+                    color: GUIManager.Instance.ValheimBeige,
+                    outline: false,
+                    outlineColor: Color.black,
+                    width: subLabelW,
+                    height: subHeight,
+                    addContentSizeFitter: false
+                ).GetComponent<Text>();
+                axisLabel.alignment = TextAnchor.MiddleCenter;
+
+                float inputW  = subWidth - subLabelW - 2f;
+                float inputCX = centerX - subWidth / 2f + subLabelW + inputW / 2f + 2f;
+
+                int capturedIndex = i;
+                InputField input = CreateInputField(
+                    parent,
+                    new Vector2(inputCX, rowPosition.y),
+                    inputW,
+                    values[i].ToString("G")
+                );
+                input.contentType = InputField.ContentType.DecimalNumber;
+                input.onValueChanged.AddListener(val =>
+                {
+                    if (!float.TryParse(val, out float result)) return;
+                    if (capturedIndex == 0) currentValue.x = result;
+                    else if (capturedIndex == 1) currentValue.y = result;
+                    else currentValue.z = result;
+                });
+            }
+
+            if (tooltip != null)
+            {
+                float fieldEndX  = fieldStartX + fieldWidth;
+                float tooltipX   = fieldEndX + TooltipGap + TooltipWidth / 2f;
+                BuildTooltip(parent, tooltip, new Vector2(tooltipX, rowPosition.y));
+            }
 
             return true;
         }
@@ -261,6 +364,92 @@ namespace WizshBoneTwitchIntegration.Gui
             InputField inputField = inputObj.GetComponent<InputField>();
             inputField.text = initialValue;
             return inputField;
+        }
+
+        private static void BuildStringDropdownField(GameObject parent, object target, FieldInfo field, string currentValue, Vector2 position, float width, List<string> options)
+        {
+            GameObject dropdownObj = GUIManager.Instance.CreateDropDown(
+                parent: parent.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: position,
+                fontSize: 12,
+                width: width,
+                height: FieldHeight
+            );
+
+            Dropdown dropdown = dropdownObj.GetComponent<Dropdown>();
+            dropdown.ClearOptions();
+            dropdown.AddOptions(options);
+
+            int index = options.IndexOf(currentValue);
+            dropdown.value = index >= 0 ? index : 0;
+            dropdown.RefreshShownValue();
+
+            // Write the selected string value back to the field
+            dropdown.onValueChanged.AddListener(i => field.SetValue(target, options[i]));
+        }
+
+        private static void BuildColorField(GameObject parent, object target, FieldInfo field, string currentValue, Vector2 position, float width)
+        {
+            Color initialColor = ParseHexColor(currentValue);
+
+            // Button — keeps its default Valheim style so borders are visible
+            GameObject swatchBtn = GUIManager.Instance.CreateButton(
+                text: "",
+                parent: parent.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: position,
+                width: width,
+                height: FieldHeight
+            );
+            swatchBtn.SetActive(true);
+
+            // Solid color overlay — slightly inset so button borders remain visible
+            const float inset = 4f;
+            GameObject swatchOverlay = new GameObject("ColorOverlay");
+            swatchOverlay.transform.SetParent(swatchBtn.transform, false);
+
+            RectTransform overlayRt = swatchOverlay.AddComponent<RectTransform>();
+            overlayRt.anchorMin        = new Vector2(0f, 0f);
+            overlayRt.anchorMax        = new Vector2(1f, 1f);
+            overlayRt.offsetMin        = new Vector2(inset, inset);
+            overlayRt.offsetMax        = new Vector2(-inset, -inset);
+
+            Image overlayImage = swatchOverlay.AddComponent<Image>();
+            overlayImage.color        = initialColor;
+            overlayImage.raycastTarget = false; // clicks pass through to the button
+
+            swatchBtn.GetComponent<Button>().onClick.AddListener(() =>
+            {
+                Color currentColor = ParseHexColor(field.GetValue(target) as string ?? "");
+
+                GUIManager.Instance.CreateColorPicker(
+                    anchorMin:       new Vector2(0.5f, 0.5f),
+                    anchorMax:       new Vector2(0.5f, 0.5f),
+                    position:        Vector2.zero,
+                    original:        currentColor,
+                    message:         field.GetCustomAttribute<EditorLabelAttribute>()?.Label ?? field.Name,
+                    onColorChanged:  (Color c) =>
+                    {
+                        field.SetValue(target, "#" + ColorUtility.ToHtmlStringRGB(c));
+                        overlayImage.color = c;
+                    },
+                    onColorSelected: (Color c) =>
+                    {
+                        field.SetValue(target, "#" + ColorUtility.ToHtmlStringRGB(c));
+                        overlayImage.color = c;
+                    }
+                );
+            });
+        }
+
+        private static Color ParseHexColor(string hex)
+        {
+            if (ColorUtility.TryParseHtmlString(hex, out Color color))
+                return color;
+            return Color.white;
         }
     }
 }

@@ -245,7 +245,7 @@ namespace WizshBoneTwitchIntegration.Extensions
                     if (spawnAbilityData.damage != null)
                     {
                         if (spawnAbilityData.damage.basedOnMaxHealthAndArmor)
-                            impactEffect.m_damages = SpawnAbilityHelper.CalculateDamageBasedOnMaxHealthAndArmor(spawnAbilityData);
+                            impactEffect.m_damages = DamageHelper.CalculateDamageBasedOnMaxHealthAndArmor(spawnAbilityData.damage);
                         else
                             impactEffect.m_damages = DamageHelper.ConvertToDamageTypes(spawnAbilityData.damage);
                     }
@@ -302,7 +302,7 @@ namespace WizshBoneTwitchIntegration.Extensions
                     if (spawnAbilityData.damage != null)
                     {
                         HitData.DamageTypes damages = spawnAbilityData.damage.basedOnMaxHealthAndArmor
-                            ? SpawnAbilityHelper.CalculateDamageBasedOnMaxHealthAndArmor(spawnAbilityData)
+                            ? DamageHelper.CalculateDamageBasedOnMaxHealthAndArmor(spawnAbilityData.damage)
                             : DamageHelper.ConvertToDamageTypes(spawnAbilityData.damage);
                         aoe.m_damage = damages;
 
@@ -341,7 +341,7 @@ namespace WizshBoneTwitchIntegration.Extensions
                     if (spawnAbilityData.damage != null)
                     {
                         if (spawnAbilityData.damage.basedOnMaxHealthAndArmor)
-                            component2.m_damage = SpawnAbilityHelper.CalculateDamageBasedOnMaxHealthAndArmor(spawnAbilityData);
+                            component2.m_damage = DamageHelper.CalculateDamageBasedOnMaxHealthAndArmor(spawnAbilityData.damage);
                         else
                             component2.m_damage = DamageHelper.ConvertToDamageTypes(spawnAbilityData.damage);
                     }

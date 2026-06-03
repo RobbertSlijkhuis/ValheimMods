@@ -236,12 +236,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         throw new RedeemException("Could not find terrain edit data for TerrainEdit", ExceptionType.Error);
                     }
 
-                    if (redeem.terrainEditData.announceMessage != null)
-                        Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, redeem.terrainEditData.announceMessage), 3000);
-
-                    Player.m_localPlayer.GetSEMan().AddStatusEffect(WizshBoneTwitchIntegration.Instance.effects.NoFallDamage);
-                    // Check if this does not snap to ground and then not work
-                    GameObject dig = Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.RemoveTheCountry, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
+                    TerrainEditHelper.ApplyTerrainEdit(redeem.terrainEditData, customRewardEvent);
                 }
 
                 if (redeem.type == RedeemType.Flashbang)

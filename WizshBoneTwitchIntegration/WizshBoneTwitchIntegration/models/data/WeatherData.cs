@@ -5,12 +5,29 @@ namespace WizshBoneTwitchIntegration.Models
 {
     internal class WeatherData : CloneableData
     {
-        [EditorLabel("Announce message")] public string announceMessage;
-        [EditorLabel("Duration")] public int duration = 60;
-        [EditorLabel("Force")] public bool force = false;
-        [EditorLabel("Height")] public float height = 200f;
-        [EditorLabel("Radius")] public float radius = 60f;
-        [EditorLabel("Weathers")] public List<string> items = new List<string>();
+        [EditorLabel("Announce message")]
+        [EditorTooltip("A custom message to announce that a weather event is about to occur. {{user}} will be replaced with the player's name.")]
+        public string announceMessage;
+
+        [EditorLabel("Duration")]
+        [EditorTooltip("The duration of the weather event in seconds.")]
+        public int duration = 60;
+
+        [EditorLabel("Force")] 
+        [EditorTooltip("Whether to force the weather event to occur.")]
+        public bool force = false;
+
+        [EditorLabel("Height")] 
+        [EditorTooltip("The height of the weather event in meters.")]
+        public float height = 200f;
+
+        [EditorLabel("Radius")] 
+        [EditorTooltip("The radius of the weather event in meters.")]
+        public float radius = 60f;
+
+        [EditorLabel("Weathers")]
+        [EditorTooltip("A list of weather types that can occur during this event.")]
+        public List<string> items = new List<string>();
         public WeatherData() { }
     }
 }

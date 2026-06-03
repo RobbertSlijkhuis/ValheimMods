@@ -102,6 +102,10 @@ namespace WizshBoneTwitchIntegration.Gui
         private Text m_createViewTitle;
         private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
 
+        // Stored to allow scroll content resize on type change
+        private GameObject m_createScrollContent;
+        private float m_editorContainerYPos;
+
         public GameObject Create(GameObject parent, CreateScrollableContainerDelegate createScrollable, System.Action onCloseRequested)
         {
             m_onCloseRequested = onCloseRequested;
@@ -358,13 +362,13 @@ namespace WizshBoneTwitchIntegration.Gui
 
             ModData data = ExtraConfigHelper.ReadRedeemsConfig(path) ?? new ModData();
 
-            List<Dictionary<string, object>> minimalRedeems = new List<Dictionary<string, object>>();
+            List<Dictionary<string, object>> redeems = new List<Dictionary<string, object>>();
             foreach (RedeemData redeem in m_workingRedeems)
-                minimalRedeems.Add(redeem.ToMinimalDictionary());
+                redeems.Add(redeem.ToDictionary());
 
             Dictionary<string, object> output = new Dictionary<string, object>
             {
-                { "redeems", minimalRedeems }
+                { "redeems", redeems }
             };
 
             if (data.creatureGroups != null && data.creatureGroups.Count > 0)
@@ -439,6 +443,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_confirmButton.onClick.AddListener(OnConfirm);
 
             GameObject scrollContent = m_createScrollable("CreateViewContent", m_createView, -175f);
+            m_createScrollContent = scrollContent;
 
             float yPos = -20f;
 
@@ -479,12 +484,12 @@ namespace WizshBoneTwitchIntegration.Gui
             m_typeDropdown.onValueChanged.AddListener(_ => OnTypeChanged());
 
             yPos -= 70f;
+            m_editorContainerYPos = yPos;
 
             m_editorContainer = CreateStaticContainer("EditorContainer", scrollContent, yPos);
-            yPos -= 400f;
 
-            RectTransform scrollContentRt = scrollContent.GetComponent<RectTransform>();
-            scrollContentRt.sizeDelta = new Vector2(scrollContentRt.sizeDelta.x, Mathf.Abs(yPos) + 20f);
+            // Initial scroll content height — editor is empty at start
+            UpdateScrollContentHeight(0f);
 
             m_createView.SetActive(false);
         }
@@ -509,16 +514,23 @@ namespace WizshBoneTwitchIntegration.Gui
             m_newRedeem.type = RedeemTypes[m_typeDropdown.value];
             ClearContainer(m_editorContainer);
 
+            float editorHeight = 0f;
+
             if (m_newRedeem.type == RedeemType.Detonate)
-                m_objectEditor.Build(m_editorContainer, m_newRedeem.detonateData);
+                editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.detonateData);
             else if (m_newRedeem.type == RedeemType.Flashbang)
-                m_objectEditor.Build(m_editorContainer, m_newRedeem.flashbangData);
+                editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.flashbangData);
             else if (m_newRedeem.type == RedeemType.SpawnMist)
-                m_objectEditor.Build(m_editorContainer, m_newRedeem.mistData);
+                editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.mistData);
             else if (m_newRedeem.type == RedeemType.TerrainEdit)
-                m_objectEditor.Build(m_editorContainer, m_newRedeem.terrainEditData);
+                editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.terrainEditData);
             else if (m_newRedeem.type == RedeemType.SpawnWeather)
-                m_objectEditor.Build(m_editorContainer, m_newRedeem.weatherData);
+                editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.weatherData);
+
+            RectTransform editorRt = m_editorContainer.GetComponent<RectTransform>();
+            editorRt.sizeDelta = new Vector2(editorRt.sizeDelta.x, editorHeight + 20f);
+
+            UpdateScrollContentHeight(editorHeight);
 
             if (m_isReadOnly)
             {
@@ -711,6 +723,12 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             foreach (Transform child in container.transform)
                 GameObject.Destroy(child.gameObject);
+        }
+
+        private void UpdateScrollContentHeight(float editorHeight)
+        {
+            float totalHeight = Mathf.Abs(m_editorContainerYPos) + editorHeight + 40f;
+            ScrollableView.SetContentHeight(m_createScrollContent, totalHeight);
         }
     }
 }

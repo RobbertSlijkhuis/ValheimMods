@@ -2,7 +2,7 @@
 
 namespace WizshBoneTwitchIntegration.Models
 {
-    internal class PositionOffsetData
+    internal class PositionOffsetData : CloneableData
     {
         public float x = 0f;
         public float y = 0f;

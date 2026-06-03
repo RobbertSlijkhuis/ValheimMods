@@ -11,7 +11,6 @@ namespace WizshBoneTwitchIntegration.Gui
     /// </summary>
     internal class ListEditor
     {
-        private const float InputWidth    = 200f;
         private const float InputHeight   = 36f;
         private const float ButtonWidth   = 60f;
         private const float ButtonHeight  = 36f;
@@ -25,39 +24,42 @@ namespace WizshBoneTwitchIntegration.Gui
         private InputField m_inputField;
         private Dropdown m_dropdown;
         private bool m_useDropdown;
+        private float m_fieldWidth;
 
         public ListEditor(List<string> targetList)
         {
-            m_targetList = targetList;
+            m_targetList      = targetList;
             m_dropdownOptions = null;
-            m_useDropdown = false;
+            m_useDropdown     = false;
         }
 
         public ListEditor(List<string> targetList, List<string> dropdownOptions)
         {
-            m_targetList = targetList;
+            m_targetList      = targetList;
             m_dropdownOptions = dropdownOptions;
-            m_useDropdown = dropdownOptions != null && dropdownOptions.Count > 0;
+            m_useDropdown     = dropdownOptions != null && dropdownOptions.Count > 0;
         }
 
         /// <summary>
         /// Builds the list editor UI starting at <paramref name="startPosition"/>.
+        /// <paramref name="fieldWidth"/> controls the width of the input and scroll view,
+        /// matching the width used by all other field types.
         /// Returns the total height consumed.
         /// </summary>
-        public float Build(GameObject parent, Vector2 startPosition)
+        public float Build(GameObject parent, Vector2 startPosition, float fieldWidth)
         {
+            m_fieldWidth  = fieldWidth;
             float yOffset = startPosition.y;
 
             if (m_useDropdown)
             {
-                // Dropdown — left side
                 GameObject dropdownObj = GUIManager.Instance.CreateDropDown(
                     parent: parent.transform,
                     anchorMin: new Vector2(0.5f, 1f),
                     anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(startPosition.x - ButtonWidth / 2f - 5f, yOffset),
+                    position: new Vector2(startPosition.x, yOffset),
                     fontSize: 12,
-                    width: InputWidth,
+                    width: fieldWidth,
                     height: InputHeight
                 );
                 m_dropdown = dropdownObj.GetComponent<Dropdown>();
@@ -71,39 +73,38 @@ namespace WizshBoneTwitchIntegration.Gui
             }
             else
             {
-                // Input field — left side
                 GameObject inputObj = GUIManager.Instance.CreateInputField(
                     parent: parent.transform,
                     anchorMin: new Vector2(0.5f, 1f),
                     anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(startPosition.x - ButtonWidth / 2f - 5f, yOffset),
+                    position: new Vector2(startPosition.x, yOffset),
                     contentType: InputField.ContentType.Standard,
                     placeholderText: "Enter item...",
                     fontSize: 12,
-                    width: InputWidth,
+                    width: fieldWidth,
                     height: InputHeight
                 );
                 m_inputField = inputObj.GetComponent<InputField>();
             }
 
-            // Add button — right side
+            yOffset -= InputHeight + 10f;
+
+            // Scroll view — below the input, same center X and width
+            m_itemContainer = CreateScrollableList(parent, new Vector2(startPosition.x, yOffset), fieldWidth);
+            RefreshItemList();
+
+            // Add button — to the right of the scroll view, top-aligned
             GameObject addBtn = GUIManager.Instance.CreateButton(
                 text: "Add",
                 parent: parent.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(startPosition.x + InputWidth / 2f + 5f + ButtonWidth / 2f, yOffset),
+                position: new Vector2(startPosition.x + fieldWidth / 2f + 5f + ButtonWidth / 2f, yOffset - ButtonHeight / 2f),
                 width: ButtonWidth,
                 height: ButtonHeight
             );
             addBtn.SetActive(true);
             addBtn.GetComponent<Button>().onClick.AddListener(OnAddItem);
-
-            yOffset -= InputHeight + 10f;
-
-            // Scrollable item list container
-            m_itemContainer = CreateScrollableList(parent, new Vector2(startPosition.x, yOffset));
-            RefreshItemList();
 
             return InputHeight + 10f + ListMaxHeight;
         }
@@ -141,6 +142,12 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             ClearContainer(m_itemContainer);
 
+            // Content width is the viewport width — scrollbar takes 16px off the right
+            float contentWidth  = m_fieldWidth - 16f;
+            float itemTextWidth = contentWidth - ButtonWidth - 10f;
+            float textCenterX   = -contentWidth / 2f + itemTextWidth / 2f;
+            float btnCenterX    = contentWidth / 2f - ButtonWidth / 2f;
+
             float yOffset = -(ItemHeight / 2f);
 
             for (int i = 0; i < m_targetList.Count; i++)
@@ -153,13 +160,13 @@ namespace WizshBoneTwitchIntegration.Gui
                     parent: m_itemContainer.transform,
                     anchorMin: new Vector2(0.5f, 1f),
                     anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(-30f, yOffset),
+                    position: new Vector2(textCenterX, yOffset),
                     font: GUIManager.Instance.AveriaSerifBold,
                     fontSize: 12,
                     color: GUIManager.Instance.ValheimBeige,
                     outline: true,
                     outlineColor: Color.black,
-                    width: InputWidth - ButtonWidth - 10f,
+                    width: itemTextWidth,
                     height: ItemHeight,
                     addContentSizeFitter: false
                 );
@@ -169,7 +176,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     parent: m_itemContainer.transform,
                     anchorMin: new Vector2(0.5f, 1f),
                     anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(InputWidth / 2f - ButtonWidth / 2f, yOffset),
+                    position: new Vector2(btnCenterX, yOffset),
                     width: ButtonWidth,
                     height: ItemHeight
                 );
@@ -193,25 +200,25 @@ namespace WizshBoneTwitchIntegration.Gui
             }
         }
 
-        private GameObject CreateScrollableList(GameObject parent, Vector2 position)
+        private GameObject CreateScrollableList(GameObject parent, Vector2 position, float fieldWidth)
         {
             GameObject scrollRoot = new GameObject("ListScrollView");
             scrollRoot.transform.SetParent(parent.transform, false);
 
             RectTransform scrollRt = scrollRoot.AddComponent<RectTransform>();
-            scrollRt.anchorMin = new Vector2(0.5f, 1f);
-            scrollRt.anchorMax = new Vector2(0.5f, 1f);
-            scrollRt.pivot     = new Vector2(0.5f, 1f);
-            scrollRt.sizeDelta = new Vector2(InputWidth + ButtonWidth + 10f, ListMaxHeight);
+            scrollRt.anchorMin        = new Vector2(0.5f, 1f);
+            scrollRt.anchorMax        = new Vector2(0.5f, 1f);
+            scrollRt.pivot            = new Vector2(0.5f, 1f);
+            scrollRt.sizeDelta        = new Vector2(fieldWidth, ListMaxHeight);
             scrollRt.anchoredPosition = position;
 
             scrollRoot.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.1f, 0.5f);
 
             ScrollRect scrollRect = scrollRoot.AddComponent<ScrollRect>();
-            scrollRect.horizontal = false;
-            scrollRect.vertical   = true;
+            scrollRect.horizontal        = false;
+            scrollRect.vertical          = true;
             scrollRect.scrollSensitivity = 30f;
-            scrollRect.movementType = ScrollRect.MovementType.Clamped;
+            scrollRect.movementType      = ScrollRect.MovementType.Clamped;
 
             GameObject viewport = new GameObject("Viewport");
             viewport.transform.SetParent(scrollRoot.transform, false);
@@ -221,7 +228,7 @@ namespace WizshBoneTwitchIntegration.Gui
             viewportRt.offsetMin = Vector2.zero;
             viewportRt.offsetMax = new Vector2(-16f, 0f);
 
-            viewport.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.01f);
+            viewport.AddComponent<Image>().color         = new Color(0f, 0f, 0f, 0.01f);
             viewport.AddComponent<Mask>().showMaskGraphic = false;
 
             scrollRect.viewport = viewportRt;
@@ -229,10 +236,10 @@ namespace WizshBoneTwitchIntegration.Gui
             GameObject content = new GameObject("Content");
             content.transform.SetParent(viewport.transform, false);
             RectTransform contentRt = content.AddComponent<RectTransform>();
-            contentRt.anchorMin = new Vector2(0f, 1f);
-            contentRt.anchorMax = new Vector2(1f, 1f);
-            contentRt.pivot     = new Vector2(0.5f, 1f);
-            contentRt.sizeDelta = Vector2.zero;
+            contentRt.anchorMin        = new Vector2(0f, 1f);
+            contentRt.anchorMax        = new Vector2(1f, 1f);
+            contentRt.pivot            = new Vector2(0.5f, 1f);
+            contentRt.sizeDelta        = Vector2.zero;
             contentRt.anchoredPosition = Vector2.zero;
 
             scrollRect.content = contentRt;
@@ -240,10 +247,10 @@ namespace WizshBoneTwitchIntegration.Gui
             GameObject scrollbarObj = new GameObject("Scrollbar");
             scrollbarObj.transform.SetParent(scrollRoot.transform, false);
             RectTransform scrollbarRt = scrollbarObj.AddComponent<RectTransform>();
-            scrollbarRt.anchorMin = new Vector2(1f, 0f);
-            scrollbarRt.anchorMax = new Vector2(1f, 1f);
-            scrollbarRt.pivot     = new Vector2(1f, 0.5f);
-            scrollbarRt.sizeDelta = new Vector2(16f, 0f);
+            scrollbarRt.anchorMin        = new Vector2(1f, 0f);
+            scrollbarRt.anchorMax        = new Vector2(1f, 1f);
+            scrollbarRt.pivot            = new Vector2(1f, 0.5f);
+            scrollbarRt.sizeDelta        = new Vector2(16f, 0f);
             scrollbarRt.anchoredPosition = Vector2.zero;
 
             scrollbarObj.AddComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
@@ -261,10 +268,10 @@ namespace WizshBoneTwitchIntegration.Gui
             Image handleImage = handleObj.AddComponent<Image>();
             handleImage.color = new Color(0.6f, 0.6f, 0.6f, 1f);
 
-            scrollbar.handleRect   = handleRt;
+            scrollbar.handleRect    = handleRt;
             scrollbar.targetGraphic = handleImage;
 
-            scrollRect.verticalScrollbar = scrollbar;
+            scrollRect.verticalScrollbar           = scrollbar;
             scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
 
             return content;

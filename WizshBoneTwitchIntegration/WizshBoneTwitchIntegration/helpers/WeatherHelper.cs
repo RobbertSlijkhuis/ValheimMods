@@ -27,7 +27,13 @@ namespace WizshBoneTwitchIntegration.Helpers
             string weather = weatherData.items[Random.Range(0, weatherData.items.Count)];
             Jotunn.Logger.LogWarning("Chosen weather: " + weather);
 
-            GameObject gameObject = UnityEngine.Object.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.WeatherZone, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
+            if (Player.m_localPlayer == null)
+            {
+                Jotunn.Logger.LogWarning("Could not find local player, cannot spawn weather zone.");
+                return;
+            }
+
+            GameObject gameObject = UnityEngine.Object.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.EnvZone, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
             _activeWeatherZone = gameObject;
 
             CapsuleCollider capsuleCollider = gameObject.GetComponent<CapsuleCollider>();
