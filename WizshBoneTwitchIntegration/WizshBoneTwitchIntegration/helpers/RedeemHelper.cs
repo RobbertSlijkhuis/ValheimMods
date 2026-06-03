@@ -20,6 +20,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return false;
             }
 
+            // Got an error saying it could not read redeems on line 25???
             ModData data = ExtraConfigHelper.ReadRedeemsConfig();
             redeems = data.redeems;
             creatureGroups = data.creatureGroups;

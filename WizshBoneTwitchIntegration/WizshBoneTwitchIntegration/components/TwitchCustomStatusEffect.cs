@@ -176,9 +176,11 @@ namespace WizshBoneTwitchIntegration.Components
         /// </summary>
         public void PlayerSizeReset()
         {
+            if (Player.m_localPlayer == null)
+                return;
+
             RedeemHelper.ResetPlayerSpeed(Player.m_localPlayer);
             Vector3 newScale = new Vector3(1f, 1f, 1f);
-
             StartCoroutine(LerpHelper.LerpScale(Player.m_localPlayer.transform, Player.m_localPlayer.transform.localScale, newScale, m_animDuration));
         }
     }

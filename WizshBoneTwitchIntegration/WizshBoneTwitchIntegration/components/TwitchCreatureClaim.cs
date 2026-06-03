@@ -111,7 +111,9 @@ namespace WizshBoneTwitchIntegration.Components
         {
             try
             {
-                m_chatting.onNewMessage.RemoveListener(CheckChatForMessage);
+                if (m_chatting != null)
+                    m_chatting.onNewMessage.RemoveListener(CheckChatForMessage);
+
                 Destroy(m_npcTalk);
 
                 if (m_creatureInteract != null)
@@ -121,7 +123,10 @@ namespace WizshBoneTwitchIntegration.Components
                     RecolorHelper.UnColorCreature(m_assignment.creature);
 
                 m_assignment.creature = null;
-                m_humanoid.m_name = m_originalName;
+
+                if (m_humanoid != null)
+                    m_humanoid.m_name = m_originalName;
+
                 m_lastMessageTime = DateTime.MinValue;
 
                 if (!m_isUnclaimDestroy)
@@ -241,6 +246,12 @@ namespace WizshBoneTwitchIntegration.Components
             if (m_assignment == null || m_assignment.userName == null)
             {
                 Jotunn.Logger.LogError("Can not remove creature assignment, either the assignment or userName is null");
+                return;
+            }
+
+            if (m_chatting == null)
+            {
+                Jotunn.Logger.LogError("Can not remove creature assignment, m_chatting is null");
                 return;
             }
 

@@ -54,6 +54,13 @@ namespace WizshBoneTwitchIntegration.Components
                 }
 
                 RedeemData redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
+
+                if (redeem == null)
+                {
+                    Jotunn.Logger.LogError($"Could not find redeem '{m_redeemTitle}' in TwitchCreaturePersistentData, skipping setup.");
+                    return;
+                }
+
                 List<CreatureData> resolvedList = RedeemHelper.GetResolvedCreatureList(redeem.creatureData);
                 CreatureData creatureData = resolvedList.Find(c => c.prefabName == m_savedPrefabName);
 

@@ -23,7 +23,7 @@ namespace WizshBoneTwitchIntegration.Helpers
         public static void ApplyStatusEffects(List<StatusEffectData> statusEffectData, CustomRewardEvent customRewardEvent, TwitchChat m_chat)
         {
             TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
-            List<string> availableStatusEffects = StatusEffectHelper.GetAvailableStatusEffects();
+            List<string> availableStatusEffects = GetAvailableStatusEffects();
 
             foreach (StatusEffectData statusEffect in statusEffectData)
             {

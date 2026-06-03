@@ -359,7 +359,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 if (creature.GetComponent<TwitchCreatureClaim>() == null)
                     continue;
 
-                if (maxRange > 0f && Vector3.Distance(Player.m_localPlayer.transform.position, creature.transform.position) > maxRange)
+                if (Player.m_localPlayer != null && maxRange > 0f && Vector3.Distance(Player.m_localPlayer.transform.position, creature.transform.position) > maxRange)
                     continue;
 
                 num++;
@@ -380,7 +380,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 if (creature.name != prefabName + "(Clone)")
                     continue;
 
-                if (maxRange > 0f && Vector3.Distance(Player.m_localPlayer.transform.position, creature.transform.position) > maxRange)
+                if (Player.m_localPlayer != null && maxRange > 0f && Vector3.Distance(Player.m_localPlayer.transform.position, creature.transform.position) > maxRange)
                     continue;
 
                 num++;

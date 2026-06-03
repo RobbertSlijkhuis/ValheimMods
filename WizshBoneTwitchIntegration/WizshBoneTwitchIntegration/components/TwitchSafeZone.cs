@@ -148,7 +148,14 @@ namespace WizshBoneTwitchIntegration.Components
                 if (m_playerInZone == null)
                     return;
 
+                // Player.m_localPlayer is null during the death/respawn window
+                if (Player.m_localPlayer == null)
+                    return;
+
                 Player player = m_playerInZone.GetComponent<Player>();
+
+                if (player == null)
+                    return;
 
                 if (player.GetPlayerID() == Player.m_localPlayer.GetPlayerID())
                 {

@@ -60,7 +60,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             {
                 TwitchCreatureClaim creatureClaim = assignment.creature.GetComponent<TwitchCreatureClaim>();
 
-                if (creatureClaim != null)
+                // Only destroy the claim component if the creature itself is still alive.
+                // If the creature is being destroyed, OnDestroy already called us — don't re-trigger it.
+                if (creatureClaim != null && assignment.creature.activeInHierarchy)
                     Destroy(creatureClaim);
             }
 
