@@ -178,13 +178,13 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             if (monsterAI == null)
             {
-                GameObject.Destroy(creature);
+                ZNetViewHelper.Destroy(creature);
                 throw new System.Exception("No monster AI available for creature spawn!");
             }
 
             if (humanoid == null)
             {
-                GameObject.Destroy(creature);
+                ZNetViewHelper.Destroy(creature);
                 throw new System.Exception("No humanoid available for creature spawn!");
             }
 

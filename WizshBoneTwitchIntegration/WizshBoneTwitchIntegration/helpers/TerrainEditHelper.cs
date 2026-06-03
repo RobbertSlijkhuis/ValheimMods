@@ -10,6 +10,7 @@ namespace WizshBoneTwitchIntegration.Helpers
     internal static class TerrainEditHelper
     {
         private const float ResetRadiusBuffer = 3f;
+        private static readonly int SafeZoneLayerMask = LayerMask.GetMask("piece", "character_trigger");
 
         public static void ApplyTerrainEdit(TerrainEditData data, CustomRewardEvent customRewardEvent)
         {
@@ -25,6 +26,12 @@ namespace WizshBoneTwitchIntegration.Helpers
                             + forward * offset.z
                             + right   * offset.x
                             + Vector3.up * offset.y;
+
+            if (OverlapsWithSafeZone(origin, data.raiseRadius))
+            {
+                Jotunn.Logger.LogWarning("TerrainEditHelper: Terrain edit origin overlaps with a safe zone, aborting.");
+                return;
+            }
 
             if (data.announceMessage != null)
                 Player.m_localPlayer.Message(
@@ -58,6 +65,19 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
 
             SpawnEffects(origin);
+        }
+
+        private static bool OverlapsWithSafeZone(Vector3 origin, float radius)
+        {
+            Collider[] colliders = Physics.OverlapSphere(origin, radius, SafeZoneLayerMask);
+
+            foreach (Collider collider in colliders)
+            {
+                if (collider.gameObject.GetComponentInChildren<TwitchSafeZone>() != null)
+                    return true;
+            }
+
+            return false;
         }
 
         private static void ApplyToHeightmaps(Vector3 pos, TerrainOp.Settings settings)

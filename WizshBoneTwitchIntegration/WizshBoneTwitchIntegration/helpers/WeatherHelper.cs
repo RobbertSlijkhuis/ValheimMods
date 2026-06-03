@@ -17,21 +17,31 @@ namespace WizshBoneTwitchIntegration.Helpers
                 Jotunn.Logger.LogWarning("Could not find any weather in the list, adding clear!");
             }
 
-            if (_activeWeatherZone != null)
-            {
-                Jotunn.Logger.LogInfo("Replacing active weather zone with new one.");
-                UnityEngine.Object.Destroy(_activeWeatherZone);
-                _activeWeatherZone = null;
-            }
-
-            string weather = weatherData.items[Random.Range(0, weatherData.items.Count)];
-            Jotunn.Logger.LogWarning("Chosen weather: " + weather);
-
             if (Player.m_localPlayer == null)
             {
                 Jotunn.Logger.LogWarning("Could not find local player, cannot spawn weather zone.");
                 return;
             }
+
+            if (_activeWeatherZone != null)
+            {
+                try
+                {
+                    Jotunn.Logger.LogInfo("Replacing active weather zone with new one.");
+                    ZNetScene.instance.Destroy(_activeWeatherZone);
+                }
+                catch (System.Exception e)
+                {
+                    Jotunn.Logger.LogWarning($"Failed to destroy previous weather zone, skipping removal: {e.Message}");
+                }
+                finally
+                {
+                    _activeWeatherZone = null;
+                }
+            }
+
+            string weather = weatherData.items[Random.Range(0, weatherData.items.Count)];
+            Jotunn.Logger.LogWarning("Chosen weather: " + weather);
 
             GameObject gameObject = UnityEngine.Object.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.EnvZone, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
             _activeWeatherZone = gameObject;

@@ -9,6 +9,7 @@ namespace WizshBoneTwitchIntegration.Components
         private ZNetView m_netView;
         private Transform projectorTransform;
         private Transform colliderTrans;
+        private Transform parentTrans;
         private bool isProjectorOn;
         private float radius;
         private readonly int radiusHash = "SafeZoneRadius_WBTI".GetStableHashCode();
@@ -24,6 +25,7 @@ namespace WizshBoneTwitchIntegration.Components
 
                 projectorTransform = transform.Find("projector");
                 colliderTrans = transform.parent.Find("safezone");
+                parentTrans = transform.parent;
                 isProjectorOn = false;
                 radius = m_netView.GetZDO().GetFloat(radiusHash, 30f);
 
@@ -97,13 +99,15 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void SetRadius(float value)
         {
-            if (colliderTrans == null || projectorTransform == null)
+            if (colliderTrans == null || projectorTransform == null || parentTrans == null)
                 throw new Exception("Transform is null");
 
             CircleProjector projectorComp = projectorTransform.gameObject.GetComponent<CircleProjector>();
             CapsuleCollider colliderComp = colliderTrans.gameObject.GetComponent<CapsuleCollider>();
+            ParticleSystemForceField forceFieldComp = parentTrans.gameObject.GetComponent<ParticleSystemForceField>();
             projectorComp.m_radius = value;
             colliderComp.radius = value;
+            forceFieldComp.endRange = value;
 
             m_netView.GetZDO().Set(radiusHash, value);
         }

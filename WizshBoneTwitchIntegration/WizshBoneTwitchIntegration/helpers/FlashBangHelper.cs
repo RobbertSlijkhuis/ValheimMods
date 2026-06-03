@@ -18,35 +18,85 @@ namespace WizshBoneTwitchIntegration.Helpers
         {
             yield return new WaitForSeconds(flashbangData.delay);
 
+            if (Game.instance == null)
+            {
+                Jotunn.Logger.LogWarning("FlashBangHelper: Game.instance is null, aborting.");
+                yield break;
+            }
+
             TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+
+            if (customRewards == null)
+            {
+                Jotunn.Logger.LogWarning("FlashBangHelper: Could not find TwitchCustomRewards, aborting.");
+                yield break;
+            }
+
+            if (Player.m_localPlayer == null)
+            {
+                Jotunn.Logger.LogWarning("FlashBangHelper: Local player is null, aborting.");
+                yield break;
+            }
 
             if (customRewards.m_playerIsInSafeZone == true || Player.m_localPlayer.IsTeleporting())
                 yield break;
 
-            // GameObject bombBlobFrost = PrefabManager.Instance.GetPrefab("BombBlob_Frost_projectile");
             Vector3 spawnPosition = TransformHelper.UpdateSpawnLocation(SpawnPositionType.InFrontOfPlayer, Player.m_localPlayer.transform, new PositionOffsetData() { y = 1f });
             Quaternion spawnRotation = TransformHelper.UpdateSpawnRotation(SpawnPositionType.InFrontOfPlayer, Player.m_localPlayer.transform.rotation);
             GameObject flashBang = GameObject.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.FlashbangVial, spawnPosition, spawnRotation);
 
-            //if (flashbangData.announceMessage != null)
-            //    Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, flashbangData.announceMessage), 3000);
-
             yield return new WaitForSeconds(0.5f);
             yield return new WaitForEndOfFrame();
+
+            if (GameCamera.instance == null)
+            {
+                Jotunn.Logger.LogWarning("FlashBangHelper: GameCamera.instance is null, aborting.");
+                ZNetViewHelper.Destroy(flashBang);
+                yield break;
+            }
 
             GameObject camera = GameCamera.instance.gameObject;
             GameObject flash = GameObject.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.Flashbang, camera.transform);
             Transform canvasAfterImageTransform = flash.transform.Find("Canvas_AfterImage");
             Transform canvasFlashTransform = flash.transform.Find("Canvas_Flash");
-            Transform afterImageTransform = canvasAfterImageTransform.transform.Find("AfterImage");
-            Transform flashTransform = canvasFlashTransform.transform.Find("Flash");
+
+            if (canvasAfterImageTransform == null || canvasFlashTransform == null)
+            {
+                Jotunn.Logger.LogWarning("FlashBangHelper: Could not find canvas transforms on Flashbang prefab, aborting.");
+                ZNetViewHelper.Destroy(flashBang);
+                ZNetViewHelper.Destroy(flash);
+                yield break;
+            }
+
+            Transform afterImageTransform = canvasAfterImageTransform.Find("AfterImage");
+            Transform flashTransform = canvasFlashTransform.Find("Flash");
             Transform soundTransform = flash.transform.Find("SFX");
+
+            if (afterImageTransform == null || flashTransform == null || soundTransform == null)
+            {
+                Jotunn.Logger.LogWarning("FlashBangHelper: Could not find child transforms on Flashbang prefab, aborting.");
+                ZNetViewHelper.Destroy(flashBang);
+                ZNetViewHelper.Destroy(flash);
+                yield break;
+            }
+
             CanvasGroup canvasAfterImageGroup = canvasAfterImageTransform.gameObject.GetComponent<CanvasGroup>();
             CanvasGroup canvasFlashGroup = canvasFlashTransform.gameObject.GetComponent<CanvasGroup>();
 
+            if (canvasAfterImageGroup == null || canvasFlashGroup == null)
+            {
+                Jotunn.Logger.LogWarning("FlashBangHelper: Could not find CanvasGroups on Flashbang prefab, aborting.");
+                ZNetViewHelper.Destroy(flashBang);
+                ZNetViewHelper.Destroy(flash);
+                yield break;
+            }
+
             ZSFX zsfx = soundTransform.gameObject.GetComponent<ZSFX>();
-            zsfx.m_maxVol = flashbangData.soundVolume;
-            zsfx.m_minVol = flashbangData.soundVolume;
+            if (zsfx != null)
+            {
+                zsfx.m_maxVol = flashbangData.soundVolume;
+                zsfx.m_minVol = flashbangData.soundVolume;
+            }
 
             Texture2D tex = new Texture2D(width, height, TextureFormat.RGB24, false);
             tex.ReadPixels(new Rect(0, 0, width, height), 0, 0);
@@ -56,11 +106,16 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             Image afterImage = afterImageTransform.gameObject.GetComponent<Image>();
             Image flashImage = flashTransform.gameObject.GetComponent<Image>();
-            afterImage.sprite = img;
 
-            Color color;
-            ColorUtility.TryParseHtmlString(flashbangData.flashColor, out color);
-            flashImage.color = color;
+            if (afterImage != null)
+                afterImage.sprite = img;
+
+            if (flashImage != null)
+            {
+                Color color;
+                ColorUtility.TryParseHtmlString(flashbangData.flashColor, out color);
+                flashImage.color = color;
+            }
 
             if (flashbangData.flashStartDuration == 0f)
             {
@@ -72,10 +127,10 @@ namespace WizshBoneTwitchIntegration.Helpers
                 yield return new WaitForSeconds(flashbangData.flashStartDuration);
             }
 
-            EnemyHud.instance.gameObject.SetActive(false);
-            MessageHud.instance.gameObject.SetActive(false);
-            Hud.instance.gameObject.SetActive(false);
-            GameObject.Destroy(flashBang);
+            if (EnemyHud.instance != null) EnemyHud.instance.gameObject.SetActive(false);
+            if (MessageHud.instance != null) MessageHud.instance.gameObject.SetActive(false);
+            if (Hud.instance != null) Hud.instance.gameObject.SetActive(false);
+            ZNetViewHelper.Destroy(flashBang);
 
             yield return new WaitForSeconds(flashbangData.flashDuration);
 
@@ -85,24 +140,30 @@ namespace WizshBoneTwitchIntegration.Helpers
             yield return new WaitForSeconds(1f);
 
             Player.m_localPlayer.StartCoroutine(LerpHelper.LerpCanvasGroup(canvasAfterImageGroup, 1f, 0f, flashbangData.flashEndDuration));
-            GameObject.Destroy(flash, flashbangData.flashEndDuration + 1f);
+            ZNetViewHelper.Destroy(flash, flashbangData.flashEndDuration + 1f);
 
             yield return new WaitForSeconds(flashbangData.flashEndDuration / 2);
 
-            EnemyHud.instance.gameObject.SetActive(true);
-            MessageHud.instance.gameObject.SetActive(true);
-            Hud.instance.gameObject.SetActive(true);
+            if (EnemyHud.instance != null) EnemyHud.instance.gameObject.SetActive(true);
+            if (MessageHud.instance != null) MessageHud.instance.gameObject.SetActive(true);
+            if (Hud.instance != null) Hud.instance.gameObject.SetActive(true);
         }
 
         public static bool ClearUI()
         {
+            if (GameCamera.instance == null)
+            {
+                Jotunn.Logger.LogWarning("FlashBangHelper: GameCamera.instance is null, cannot clear UI.");
+                return false;
+            }
+
             GameObject camera = GameCamera.instance.gameObject;
             Transform flashbangTrans = camera.transform.Find("Flashbang_WBTI");
 
             if (flashbangTrans == null)
                 return false;
 
-            GameObject.Destroy(flashbangTrans.gameObject);
+            ZNetViewHelper.Destroy(flashbangTrans.gameObject);
             return true;
         }
     }

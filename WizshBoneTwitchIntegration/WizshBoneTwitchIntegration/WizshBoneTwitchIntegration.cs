@@ -158,7 +158,6 @@ namespace WizshBoneTwitchIntegration
 
                 if (humanoid != null && monsterAI != null)
                 {
-                    // Jotunn.Logger.LogWarning($"Adding persistent data to {name}");
                     prefab.AddComponent<TwitchCreaturePersistentData>();
 
                     Transform visualTrans = prefab.transform.Find("Visual");
@@ -171,7 +170,6 @@ namespace WizshBoneTwitchIntegration
                     if (levelEffects == null)
                         continue;
 
-                    // Jotunn.Logger.LogWarning($"Adding levelsetups to {name}");
                     LevelEffects.LevelSetup levelSetup = levelEffects.m_levelSetups[1];
 
                     for (int index = 0; index < 8; index++)
@@ -182,21 +180,8 @@ namespace WizshBoneTwitchIntegration
                     continue;
                 }
 
-                if (piece != null)
-                {
-                    // Jotunn.Logger.LogWarning($"Adding persistent piece data to {name}");
-                    prefab.AddComponent<TwitchPiecePersistentData>();
-                }
-
-                if (impactEffect != null || mister != null || trap != null)
-                {
-                    //Jotunn.Logger.LogWarning($"Adding persistent destruction to {name}");
-                    prefab.AddComponent<TwitchPersistentDestruction>();
-                }
-
                 if (ship != null)
                 {
-                    //Jotunn.Logger.LogWarning($"Adding safezone to ship {name}");
                     Transform onboardTriggerTrans = prefab.transform.Find("OnboardTrigger");
                     BoxCollider boxCollider = onboardTriggerTrans.gameObject.GetComponent<BoxCollider>();
                     onboardTriggerTrans.gameObject.AddComponent<TwitchSafeZone>();
@@ -212,11 +197,22 @@ namespace WizshBoneTwitchIntegration
                         boxCollider.center = new Vector3(0, 1.2f, 0);
                         boxCollider.size = new Vector3(1, 3.5f, 1);
                     }
+
+                    continue;
+                }
+
+                if (piece != null)
+                {
+                    prefab.AddComponent<TwitchPiecePersistentData>();
+                }
+
+                if (impactEffect != null || mister != null || trap != null)
+                {
+                    prefab.AddComponent<TwitchPersistentDestruction>();
                 }
 
                 if (prefab.name == "fuling_trap" || prefab.name == "piece_trap_troll")
                 {
-                    //Jotunn.Logger.LogWarning("Found fuling_trap, applying persistent damage");
                     prefab.gameObject.AddComponent<TwitchPersistentDamage>();
                 }
             }
@@ -231,7 +227,6 @@ namespace WizshBoneTwitchIntegration
             foreach (string name in traders)
             {
                 GameObject prefab = PrefabManager.Instance.GetPrefab(name);
-                //Jotunn.Logger.LogWarning($"Adding safezone to Traders {name}");
                 Transform forceFieldTransform = prefab.transform.Find("ForceField");
 
                 if (forceFieldTransform == null)
@@ -247,8 +242,17 @@ namespace WizshBoneTwitchIntegration
                 capsuleCollider.isTrigger = true;
                 capsuleCollider.includeLayers = LayerMask.GetMask("piece");
 
+                Demister demister = forceFieldTransform.gameObject.AddComponent<Demister>();
+                ParticleSystemForceField forceField = forceFieldTransform.gameObject.AddComponent<ParticleSystemForceField>();
+                forceField.gravity = -0.08f;
+                forceField.endRange = 15f;
+                forceField.multiplyDragByParticleSize = false;
+                forceField.multiplyDragByParticleVelocity = false;
+                forceField.rotationAttraction = 1f;
+                forceField.vectorFieldAttraction = 1f;
+                forceField.vectorFieldSpeed = 1f;
+
                 TwitchSafeZone safezone = forceFieldTransform.gameObject.AddComponent<TwitchSafeZone>();
-                // safezone.m_burnCreatures = false;
             }
 
             PrefabManager.OnPrefabsRegistered -= AddPersistentComponents;

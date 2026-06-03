@@ -37,38 +37,6 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(TerrainOp), "Awake")]
-        public static bool TerrainOpAwake_Prefix(TerrainOp __instance)
-        {
-            try
-            {
-                if (__instance == null)
-                    return true;
-
-                if (!__instance.name.Contains("WBTI"))
-                    return true;
-
-                Collider[] objects = Physics.OverlapSphere(Player.m_localPlayer.transform.position, PluginConfig.configRaiseRadius.Value);
-
-                foreach (Collider collider in objects)
-                {
-                    if (collider.gameObject.GetComponentInChildren<TwitchSafeZone>())
-                    {
-                        UnityEngine.Object.Destroy(__instance.gameObject);
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Something went wrong in TerrainOpAwake_Prefix: " + e);
-                return true;
-            }
-        }
-
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Emote), "DoEmote")]
         public static void DoEmote_Postfix(Emotes emote)

@@ -94,8 +94,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                     }
                 }
 
-                netView.Destroy();
-                GameObject.Destroy(prefab);
+                ZNetViewHelper.Destroy(prefab);
             }
 
             prefabList.Clear();
