@@ -1,0 +1,9 @@
+{
+  "name": "Project_Seger",
+  "description": "Do not install this mod, it is not ready yet.",
+  "version_number": "0.0.1",
+  "website_url": "",
+  "dependencies": [
+    "ValheimModding-Jotunn-2.29.0"
+  ]
+}
