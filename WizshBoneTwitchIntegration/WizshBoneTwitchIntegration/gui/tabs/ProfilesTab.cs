@@ -24,6 +24,8 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float ButtonSpacing = 5f;
         private const float ButtonCenterX = -35f;
 
+        private const int   TabTitleFontSize = 16;
+
         private const float ListTopPadding   = 15f;
         private const float HeaderTopPadding = 30f;
         private const float ContentTopY      = -(108f + HeaderTopPadding);
@@ -157,7 +159,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMax: new Vector2(0.5f, 1f),
                 position: new Vector2(ScrollViewLeft + 300f, ContentTopY - 60f),
                 font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 13,
+                fontSize: FieldUIBuilder.LabelFontSize,
                 color: GUIManager.Instance.ValheimYellow,
                 outline: true,
                 outlineColor: Color.black,
@@ -422,7 +424,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMax: new Vector2(0.5f, 1f),
                 position: position,
                 font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 16,
+                fontSize: TabTitleFontSize,
                 color: GUIManager.Instance.ValheimOrange,
                 outline: true,
                 outlineColor: Color.black,

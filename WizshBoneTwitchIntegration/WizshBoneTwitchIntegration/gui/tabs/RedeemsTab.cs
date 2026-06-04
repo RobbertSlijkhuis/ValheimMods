@@ -69,6 +69,8 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float HeaderTopPadding    = 45f;
         private const float ActionButtonWidth   = 80f;
 
+        private const int   TabTitleFontSize    = 16;
+
         private const float ColTitleX  = -230f;
         private const float ColTitleW  = 200f;
         private const float ColTypeX   = -55f;
@@ -192,7 +194,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMax: new Vector2(0.5f, 1f),
                 position: new Vector2(50f, RedeemLabelY),
                 font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 12,
+                fontSize: FieldUIBuilder.FieldFontSize,
                 color: GUIManager.Instance.ValheimYellow,
                 outline: true,
                 outlineColor: Color.black,
@@ -229,7 +231,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     anchorMax: new Vector2(0.5f, 1f),
                     position: new Vector2(ColTitleX, yOffset),
                     font: GUIManager.Instance.AveriaSerifBold,
-                    fontSize: 13,
+                    fontSize: FieldUIBuilder.LabelFontSize,
                     color: labelColor,
                     outline: true,
                     outlineColor: Color.black,
@@ -246,7 +248,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     anchorMax: new Vector2(0.5f, 1f),
                     position: new Vector2(ColTypeX, yOffset),
                     font: GUIManager.Instance.AveriaSerifBold,
-                    fontSize: 13,
+                    fontSize: FieldUIBuilder.LabelFontSize,
                     color: labelColor,
                     outline: true,
                     outlineColor: Color.black,
@@ -263,7 +265,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     anchorMax: new Vector2(0.5f, 1f),
                     position: new Vector2(ColCostX, yOffset),
                     font: GUIManager.Instance.AveriaSerifBold,
-                    fontSize: 13,
+                    fontSize: FieldUIBuilder.LabelFontSize,
                     color: labelColor,
                     outline: true,
                     outlineColor: Color.black,
@@ -408,7 +410,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMax: new Vector2(0.5f, 1f),
                 position: new Vector2(-100f, -158f),
                 font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 12,
+                fontSize: FieldUIBuilder.FieldFontSize,
                 color: GUIManager.Instance.ValheimYellow,
                 outline: true,
                 outlineColor: Color.black,
@@ -457,7 +459,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMax: new Vector2(0.5f, 1f),
                 position: new Vector2(TypeLabelX, yPos),
                 font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 13,
+                fontSize: FieldUIBuilder.LabelFontSize,
                 color: GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
@@ -472,11 +474,12 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
                 position: new Vector2(TypeDropdownX, yPos),
-                fontSize: 12,
+                fontSize: FieldUIBuilder.FieldFontSize,
                 width: TypeDropdownW,
                 height: 36f
             );
             m_typeDropdown = dropdownObj.GetComponent<Dropdown>();
+            FieldUIBuilder.FixDropdownItemHeight(m_typeDropdown, FieldUIBuilder.InputHeight);
             m_typeDropdown.ClearOptions();
             m_typeDropdown.AddOptions(new List<string>(RedeemTypes));
             m_typeDropdown.value = 0;
@@ -701,7 +704,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMax: new Vector2(0.5f, 1f),
                 position: position,
                 font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 16,
+                fontSize: TabTitleFontSize,
                 color: GUIManager.Instance.ValheimOrange,
                 outline: true,
                 outlineColor: Color.black,

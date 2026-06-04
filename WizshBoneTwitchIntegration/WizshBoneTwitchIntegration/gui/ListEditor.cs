@@ -58,11 +58,12 @@ namespace WizshBoneTwitchIntegration.Gui
                     anchorMin: new Vector2(0.5f, 1f),
                     anchorMax: new Vector2(0.5f, 1f),
                     position: new Vector2(startPosition.x, yOffset),
-                    fontSize: 12,
+                    fontSize: FieldUIBuilder.FieldFontSize,
                     width: fieldWidth,
                     height: InputHeight
                 );
                 m_dropdown = dropdownObj.GetComponent<Dropdown>();
+                FieldUIBuilder.FixDropdownItemHeight(m_dropdown, FieldUIBuilder.InputHeight);
                 m_dropdown.ClearOptions();
                 m_dropdown.AddOptions(m_dropdownOptions);
                 if (m_dropdownOptions.Count > 0)
@@ -80,7 +81,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     position: new Vector2(startPosition.x, yOffset),
                     contentType: InputField.ContentType.Standard,
                     placeholderText: "Enter item...",
-                    fontSize: 12,
+                    fontSize: FieldUIBuilder.FieldFontSize,
                     width: fieldWidth,
                     height: InputHeight
                 );
@@ -162,7 +163,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     anchorMax: new Vector2(0.5f, 1f),
                     position: new Vector2(textCenterX, yOffset),
                     font: GUIManager.Instance.AveriaSerifBold,
-                    fontSize: 12,
+                    fontSize: FieldUIBuilder.FieldFontSize,
                     color: GUIManager.Instance.ValheimBeige,
                     outline: true,
                     outlineColor: Color.black,

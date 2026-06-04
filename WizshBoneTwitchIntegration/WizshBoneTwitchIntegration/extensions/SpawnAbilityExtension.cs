@@ -436,7 +436,7 @@ namespace WizshBoneTwitchIntegration.Extensions
 
             if (!spawnAbility.m_spawnOnAwake)
             {
-                UnityEngine.Object.Destroy(spawnAbility.gameObject);
+                ZNetViewHelper.Destroy(spawnAbility.gameObject);
             }
         }
     }

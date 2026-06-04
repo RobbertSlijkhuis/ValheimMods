@@ -11,12 +11,18 @@ namespace WizshBoneTwitchIntegration.Gui
 {
     internal static class FieldUIBuilder
     {
-        private const float LabelWidth    = 130f;
-        private const float LabelFieldGap = 10f;
-        private const float TooltipGap    = 12f;
-        private const float TooltipWidth  = 240f;
+        internal const float LabelWidth = 130f;
+        internal const float LabelFieldGap = 10f;
+        private const float TooltipGap = 12f;
+        private const float TooltipWidth = 240f;
         private const float TooltipHeight = 36f;
-        public  const float FieldHeight   = 36f;
+        public const float FieldHeight = 36f;
+        public const float InputHeight = 32f;
+
+        public const int LabelFontSize = 13;
+        public const int FieldFontSize = 12;
+        private const int SubLabelFontSize = 11;
+        private const int TooltipFontSize = 12;
 
         /// <summary>Height of one row (label + field side by side).</summary>
         public static float EntryHeight => FieldHeight;
@@ -27,18 +33,18 @@ namespace WizshBoneTwitchIntegration.Gui
         /// </summary>
         public static float GetEntryHeight(FieldInfo field)
         {
-            if (field.FieldType == typeof(List<string>))   return 210f;
+            if (field.FieldType == typeof(List<string>)) return 210f;
             if (field.FieldType == typeof(PositionOffsetData)) return FieldHeight;
             return FieldHeight;
         }
 
         public static bool Build(GameObject parent, object target, FieldInfo field, Vector2 rowPosition, float fieldWidth = 200f, List<string> listDropdownOptions = null)
         {
-            Type   fieldType    = field.FieldType;
+            Type fieldType = field.FieldType;
             object currentValue = field.GetValue(target);
 
             string labelText = field.GetCustomAttribute<EditorLabelAttribute>()?.Label ?? field.Name;
-            string tooltip   = field.GetCustomAttribute<EditorTooltipAttribute>()?.Tooltip;
+            string tooltip = field.GetCustomAttribute<EditorTooltipAttribute>()?.Tooltip;
 
             // Special case: List<string>
             if (fieldType == typeof(List<string>))
@@ -52,7 +58,15 @@ namespace WizshBoneTwitchIntegration.Gui
                 return BuildPositionOffsetField(parent, currentValue as PositionOffsetData, rowPosition, fieldWidth, labelText, tooltip);
             }
 
-            if (fieldType != typeof(string) && fieldType != typeof(int) && fieldType != typeof(float) && fieldType != typeof(bool))
+            bool isString = fieldType == typeof(string);
+            bool isInt = fieldType == typeof(int);
+            bool isFloat = fieldType == typeof(float);
+            bool isBool = fieldType == typeof(bool);
+            bool isNullableInt = fieldType == typeof(int?);
+            bool isNullableFloat = fieldType == typeof(float?);
+            bool isNullableBool = fieldType == typeof(bool?);
+
+            if (!isString && !isInt && !isFloat && !isBool && !isNullableInt && !isNullableFloat && !isNullableBool)
                 return false;
 
             // Label — left side of the row
@@ -63,7 +77,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMax: new Vector2(0.5f, 1f),
                 position: rowPosition,
                 font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 13,
+                fontSize: LabelFontSize,
                 color: GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
@@ -74,12 +88,12 @@ namespace WizshBoneTwitchIntegration.Gui
             labelComp.alignment = TextAnchor.MiddleLeft;
 
             // Field — immediately to the right of the label
-            float fieldX     = rowPosition.x + LabelWidth / 2f + LabelFieldGap + fieldWidth / 2f;
+            float fieldX = rowPosition.x + LabelWidth / 2f + LabelFieldGap + fieldWidth / 2f;
             Vector2 fieldPos = new Vector2(fieldX, rowPosition.y);
 
-            if (fieldType == typeof(string))
+            if (isString)
             {
-                var colorAttr    = field.GetCustomAttribute<ColorPickerAttribute>();
+                var colorAttr = field.GetCustomAttribute<ColorPickerAttribute>();
                 var dropdownAttr = field.GetCustomAttribute<DropdownOptionsAttribute>();
 
                 if (colorAttr != null)
@@ -89,12 +103,18 @@ namespace WizshBoneTwitchIntegration.Gui
                 else
                     BuildStringField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth);
             }
-            else if (fieldType == typeof(int))
+            else if (isInt)
                 BuildIntField(parent, target, field, currentValue is int i ? i : 0, fieldPos, fieldWidth);
-            else if (fieldType == typeof(float))
+            else if (isFloat)
                 BuildFloatField(parent, target, field, currentValue is float f ? f : 0f, fieldPos, fieldWidth);
-            else if (fieldType == typeof(bool))
+            else if (isBool)
                 BuildBoolField(parent, target, field, currentValue is bool b && b, fieldPos, fieldWidth);
+            else if (isNullableInt)
+                BuildNullableIntField(parent, target, field, currentValue as int?, fieldPos, fieldWidth);
+            else if (isNullableFloat)
+                BuildNullableFloatField(parent, target, field, currentValue as float?, fieldPos, fieldWidth);
+            else if (isNullableBool)
+                BuildBoolField(parent, target, field, currentValue is bool nb && nb, fieldPos, fieldWidth);
 
             // Tooltip — to the right of the input field, same vertical position
             if (tooltip != null)
@@ -115,7 +135,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMax: new Vector2(0.5f, 1f),
                 position: position,
                 font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 12,
+                fontSize: TooltipFontSize,
                 color: new Color(0.78f, 0.78f, 0.78f, 1f),
                 outline: false,
                 outlineColor: Color.black,
@@ -160,6 +180,34 @@ namespace WizshBoneTwitchIntegration.Gui
             });
         }
 
+        private static void BuildNullableFloatField(GameObject parent, object target, FieldInfo field, float? currentValue, Vector2 position, float width)
+        {
+            string initial = currentValue.HasValue ? currentValue.Value.ToString("G") : "";
+            InputField input = CreateInputField(parent, position, width, initial);
+            input.contentType = InputField.ContentType.DecimalNumber;
+            input.onValueChanged.AddListener(val =>
+            {
+                if (string.IsNullOrWhiteSpace(val))
+                    field.SetValue(target, (float?)null);
+                else if (float.TryParse(val, out float result))
+                    field.SetValue(target, (float?)result);
+            });
+        }
+
+        private static void BuildNullableIntField(GameObject parent, object target, FieldInfo field, int? currentValue, Vector2 position, float width)
+        {
+            string initial = currentValue.HasValue ? currentValue.Value.ToString() : "";
+            InputField input = CreateInputField(parent, position, width, initial);
+            input.contentType = InputField.ContentType.IntegerNumber;
+            input.onValueChanged.AddListener(val =>
+            {
+                if (string.IsNullOrWhiteSpace(val))
+                    field.SetValue(target, (int?)null);
+                else if (int.TryParse(val, out int result))
+                    field.SetValue(target, (int?)result);
+            });
+        }
+
         private static void BuildBoolField(GameObject parent, object target, FieldInfo field, bool currentValue, Vector2 position, float width)
         {
             GameObject toggleObj = GUIManager.Instance.CreateToggle(
@@ -172,9 +220,9 @@ namespace WizshBoneTwitchIntegration.Gui
             float leftAlignedX = position.x - width / 2f + FieldHeight / 2f + 5f;
 
             RectTransform toggleRt = toggleObj.GetComponent<RectTransform>();
-            toggleRt.anchorMin        = new Vector2(0.5f, 1f);
-            toggleRt.anchorMax        = new Vector2(0.5f, 1f);
-            toggleRt.pivot            = new Vector2(0.5f, 0.5f);
+            toggleRt.anchorMin = new Vector2(0.5f, 1f);
+            toggleRt.anchorMax = new Vector2(0.5f, 1f);
+            toggleRt.pivot = new Vector2(0.5f, 0.5f);
             toggleRt.anchoredPosition = new Vector2(leftAlignedX, position.y - FieldHeight / 4f);
 
             Toggle toggle = toggleObj.GetComponent<Toggle>();
@@ -192,7 +240,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMax: new Vector2(0.5f, 1f),
                 position: rowPosition,
                 font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 13,
+                fontSize: LabelFontSize,
                 color: GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
@@ -203,7 +251,7 @@ namespace WizshBoneTwitchIntegration.Gui
             listLabelComp.alignment = TextAnchor.MiddleLeft;
 
             // Input/dropdown center — identical to all other field types
-            float fieldX     = rowPosition.x + LabelWidth / 2f + LabelFieldGap + fieldWidth / 2f;
+            float fieldX = rowPosition.x + LabelWidth / 2f + LabelFieldGap + fieldWidth / 2f;
             Vector2 fieldPos = new Vector2(fieldX, rowPosition.y);
 
             ListEditor editor = dropdownOptions != null && dropdownOptions.Count > 0
@@ -232,7 +280,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMax: new Vector2(0.5f, 1f),
                 position: rowPosition,
                 font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 13,
+                fontSize: LabelFontSize,
                 color: GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
@@ -244,14 +292,13 @@ namespace WizshBoneTwitchIntegration.Gui
 
             // Three inputs — X, Y, Z — evenly split across fieldWidth
             float fieldStartX = rowPosition.x + LabelWidth / 2f + LabelFieldGap;
-            float subWidth    = (fieldWidth - 10f) / 3f; // 10f = 2 gaps of 5f
-            float subHeight   = FieldHeight;
+            float subWidth = (fieldWidth - 10f) / 3f; // 10f = 2 gaps of 5f
+            float subHeight = FieldHeight;
             const float subGap = 5f;
             const float subLabelW = 14f;
-            const float subInputW = 14f; // label inside the sub-area
 
             string[] labels = { "X", "Y", "Z" };
-            float[]  values = { currentValue.x, currentValue.y, currentValue.z };
+            float[] values = { currentValue.x, currentValue.y, currentValue.z };
 
             for (int i = 0; i < 3; i++)
             {
@@ -265,7 +312,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     anchorMax: new Vector2(0.5f, 1f),
                     position: new Vector2(centerX - subWidth / 2f + subLabelW / 2f, rowPosition.y),
                     font: GUIManager.Instance.AveriaSerifBold,
-                    fontSize: 11,
+                    fontSize: SubLabelFontSize,
                     color: GUIManager.Instance.ValheimBeige,
                     outline: false,
                     outlineColor: Color.black,
@@ -275,7 +322,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 ).GetComponent<Text>();
                 axisLabel.alignment = TextAnchor.MiddleCenter;
 
-                float inputW  = subWidth - subLabelW - 2f;
+                float inputW = subWidth - subLabelW - 2f;
                 float inputCX = centerX - subWidth / 2f + subLabelW + inputW / 2f + 2f;
 
                 int capturedIndex = i;
@@ -297,8 +344,8 @@ namespace WizshBoneTwitchIntegration.Gui
 
             if (tooltip != null)
             {
-                float fieldEndX  = fieldStartX + fieldWidth;
-                float tooltipX   = fieldEndX + TooltipGap + TooltipWidth / 2f;
+                float fieldEndX = fieldStartX + fieldWidth;
+                float tooltipX = fieldEndX + TooltipGap + TooltipWidth / 2f;
                 BuildTooltip(parent, tooltip, new Vector2(tooltipX, rowPosition.y));
             }
 
@@ -341,9 +388,9 @@ namespace WizshBoneTwitchIntegration.Gui
         }
 
         // Mirrors ListEditor's private constants — used to compute layout alignment
-        private const float ListEditorInputW  = 200f;
-        private const float ListEditorBtnW    = 60f;
-        private const float ListEditorGap     = 10f;
+        private const float ListEditorInputW = 200f;
+        private const float ListEditorBtnW = 60f;
+        private const float ListEditorGap = 10f;
         // startPosition.x offset from label right edge to ListEditor's internal anchor point
         private const float ListEditorAnchorOffset = ListEditorInputW / 2f + ListEditorGap / 2f;
 
@@ -356,12 +403,13 @@ namespace WizshBoneTwitchIntegration.Gui
                 position: position,
                 contentType: InputField.ContentType.Standard,
                 placeholderText: "",
-                fontSize: 12,
+                fontSize: FieldFontSize,
                 width: width,
                 height: FieldHeight
             );
 
             InputField inputField = inputObj.GetComponent<InputField>();
+            inputField.textComponent.alignment = TextAnchor.MiddleLeft;
             inputField.text = initialValue;
             return inputField;
         }
@@ -373,12 +421,13 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
                 position: position,
-                fontSize: 12,
+                fontSize: FieldFontSize,
                 width: width,
                 height: FieldHeight
             );
 
             Dropdown dropdown = dropdownObj.GetComponent<Dropdown>();
+            FixDropdownItemHeight(dropdown, FieldHeight);
             dropdown.ClearOptions();
             dropdown.AddOptions(options);
 
@@ -388,6 +437,53 @@ namespace WizshBoneTwitchIntegration.Gui
 
             // Write the selected string value back to the field
             dropdown.onValueChanged.AddListener(i => field.SetValue(target, options[i]));
+        }
+
+        /// <summary>
+        /// Patches the dropdown's template item <see cref="RectTransform"/> height so that
+        /// the click area matches the visible item height, preventing off-by-one selection
+        /// when clicking the lower half of an option.
+        /// </summary>
+        internal static void FixDropdownItemHeight(Dropdown dropdown, float itemHeight)
+        {
+            if (dropdown == null)
+                return;
+
+            // Unity's Dropdown template hierarchy: Template/Viewport/Content/Item
+            Transform template = dropdown.template;
+            if (template == null)
+                return;
+
+            Transform viewport = template.Find("Viewport");
+            Transform content  = viewport?.Find("Content");
+            Transform item     = content?.Find("Item");
+
+            if (item == null)
+                return;
+
+            // Fix hit area height
+            RectTransform itemRt = item.GetComponent<RectTransform>();
+            if (itemRt != null)
+                itemRt.sizeDelta = new Vector2(itemRt.sizeDelta.x, itemHeight);
+
+            // Fix text anchored to the bottom of the item rect — center it vertically
+            // so the visual text position matches the middle of the hit area.
+            Transform labelTransform = item.Find("Item Label");
+            if (labelTransform != null)
+            {
+                Text labelText = labelTransform.GetComponent<Text>();
+                if (labelText != null)
+                    labelText.alignment = TextAnchor.MiddleLeft;
+
+                RectTransform labelRt = labelTransform.GetComponent<RectTransform>();
+                if (labelRt != null)
+                {
+                    labelRt.anchorMin = new Vector2(labelRt.anchorMin.x, 0f);
+                    labelRt.anchorMax = new Vector2(labelRt.anchorMax.x, 1f);
+                    labelRt.offsetMin = new Vector2(labelRt.offsetMin.x, 0f);
+                    labelRt.offsetMax = new Vector2(labelRt.offsetMax.x, 0f);
+                }
+            }
         }
 
         private static void BuildColorField(GameObject parent, object target, FieldInfo field, string currentValue, Vector2 position, float width)
@@ -412,13 +508,13 @@ namespace WizshBoneTwitchIntegration.Gui
             swatchOverlay.transform.SetParent(swatchBtn.transform, false);
 
             RectTransform overlayRt = swatchOverlay.AddComponent<RectTransform>();
-            overlayRt.anchorMin        = new Vector2(0f, 0f);
-            overlayRt.anchorMax        = new Vector2(1f, 1f);
-            overlayRt.offsetMin        = new Vector2(inset, inset);
-            overlayRt.offsetMax        = new Vector2(-inset, -inset);
+            overlayRt.anchorMin = new Vector2(0f, 0f);
+            overlayRt.anchorMax = new Vector2(1f, 1f);
+            overlayRt.offsetMin = new Vector2(inset, inset);
+            overlayRt.offsetMax = new Vector2(-inset, -inset);
 
             Image overlayImage = swatchOverlay.AddComponent<Image>();
-            overlayImage.color        = initialColor;
+            overlayImage.color = initialColor;
             overlayImage.raycastTarget = false; // clicks pass through to the button
 
             swatchBtn.GetComponent<Button>().onClick.AddListener(() =>
@@ -426,12 +522,12 @@ namespace WizshBoneTwitchIntegration.Gui
                 Color currentColor = ParseHexColor(field.GetValue(target) as string ?? "");
 
                 GUIManager.Instance.CreateColorPicker(
-                    anchorMin:       new Vector2(0.5f, 0.5f),
-                    anchorMax:       new Vector2(0.5f, 0.5f),
-                    position:        Vector2.zero,
-                    original:        currentColor,
-                    message:         field.GetCustomAttribute<EditorLabelAttribute>()?.Label ?? field.Name,
-                    onColorChanged:  (Color c) =>
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: Vector2.zero,
+                    original: currentColor,
+                    message: field.GetCustomAttribute<EditorLabelAttribute>()?.Label ?? field.Name,
+                    onColorChanged: (Color c) =>
                     {
                         field.SetValue(target, "#" + ColorUtility.ToHtmlStringRGB(c));
                         overlayImage.color = c;

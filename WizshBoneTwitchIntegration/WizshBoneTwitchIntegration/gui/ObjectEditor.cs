@@ -1,3 +1,4 @@
+﻿using Jotunn.Managers;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -7,8 +8,9 @@ namespace WizshBoneTwitchIntegration.Gui
 {
     internal class ObjectEditor
     {
-        private const float EntrySpacing    = 8f;
-        private const float ListEntryHeight = 210f; // Label + input + list scroll area
+        private const float EntrySpacing     = 8f;
+        private const float SectionHeaderHeight = 28f;
+        private const float SectionHeaderSpacing = 4f;
 
         private readonly float m_startX;
         private readonly float m_startY;
@@ -26,8 +28,10 @@ namespace WizshBoneTwitchIntegration.Gui
 
         /// <summary>
         /// Iterates all public instance fields on <paramref name="target"/> and builds
-        /// a label + input row for each supported type (<see cref="string"/>, <see cref="int"/>,
+        /// a label + input row for each supported type (<see cref="string"/>, <see cref="int"/>, 
         /// <see cref="float"/>, <see cref="bool"/>, <see cref="List{T}"/> of <see cref="string"/>).
+        /// Fields whose type derives from <see cref="CloneableData"/> are rendered as an
+        /// indented sub-section with a header label.
         /// Unsupported types are silently skipped.
         /// </summary>
         /// <returns>
@@ -36,15 +40,46 @@ namespace WizshBoneTwitchIntegration.Gui
         /// </returns>
         public float Build(GameObject parent, object target)
         {
+            return BuildFields(parent, target, m_startY);
+        }
+
+        private float BuildFields(GameObject parent, object target, float startY)
+        {
             FieldInfo[] fields = target.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
 
-            float yOffset = m_startY;
+            float yOffset = startY;
 
             foreach (FieldInfo field in fields)
             {
                 if (field.GetCustomAttribute<EditorHiddenAttribute>() != null)
                     continue;
 
+                // Nested CloneableData — render a section header, recurse, then render a section ender
+                if (typeof(CloneableData).IsAssignableFrom(field.FieldType))
+                {
+                    if (field.FieldType == typeof(PositionOffsetData))
+                        goto handleField;
+
+                    object nestedValue = field.GetValue(target);
+                    if (nestedValue == null)
+                        continue;
+
+                    string sectionLabel = field.GetCustomAttribute<EditorLabelAttribute>()?.Label ?? field.Name;
+
+                    // Center X aligned with the input field column (mirrors FieldUIBuilder.Build's fieldX)
+                    float fieldCenterX = m_startX + FieldUIBuilder.LabelWidth / 2f + FieldUIBuilder.LabelFieldGap + m_fieldWidth / 2f;
+
+                    BuildSectionBoundary(parent, "— " + sectionLabel + " —", new Vector2(fieldCenterX, yOffset), m_fieldWidth);
+                    yOffset -= SectionHeaderHeight + SectionHeaderSpacing;
+
+                    yOffset -= BuildFields(parent, nestedValue, yOffset);
+
+                    BuildSectionBoundary(parent, "— end of " + sectionLabel + " —", new Vector2(fieldCenterX, yOffset), m_fieldWidth);
+                    yOffset -= SectionHeaderHeight + SectionHeaderSpacing;
+                    continue;
+                }
+
+                handleField:
                 List<string> dropdownOptions = GetDropdownOptionsForField(target, field);
 
                 bool built = FieldUIBuilder.Build(
@@ -60,7 +95,30 @@ namespace WizshBoneTwitchIntegration.Gui
                     yOffset -= FieldUIBuilder.GetEntryHeight(field) + EntrySpacing;
             }
 
-            return Mathf.Abs(yOffset - m_startY);
+            return Mathf.Abs(yOffset - startY);
+        }
+
+        private void BuildSectionBoundary(GameObject parent, string text, Vector2 position, float width)
+        {
+            var headerObj = GUIManager.Instance.CreateText(
+                text: text,
+                parent: parent.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: position,
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: FieldUIBuilder.LabelFontSize,
+                color: GUIManager.Instance.ValheimOrange,
+                outline: true,
+                outlineColor: Color.black,
+                width: width,
+                height: SectionHeaderHeight,
+                addContentSizeFitter: false
+            );
+
+            var textComp = headerObj.GetComponent<UnityEngine.UI.Text>();
+            textComp.alignment = TextAnchor.MiddleCenter;
+            textComp.fontStyle = FontStyle.Bold;
         }
 
         private static List<string> GetDropdownOptionsForField(object target, FieldInfo field)
