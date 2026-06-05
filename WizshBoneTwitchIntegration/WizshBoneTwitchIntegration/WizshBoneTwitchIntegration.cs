@@ -370,7 +370,6 @@ namespace WizshBoneTwitchIntegration
 
         private void InitCommands()
         {
-            CommandManager.Instance.AddConsoleCommand(new ClearCustomStatusEffectsCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveChestsCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveCreaturesCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveTwitchMistCommand());

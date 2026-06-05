@@ -512,13 +512,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.terrainEditData);
             else if (m_newRedeem.type == RedeemType.SpawnWeather)
                 editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.weatherData);
-            else if (m_newRedeem.type == RedeemType.StatusEffect || m_newRedeem.type == RedeemType.StatusEffectRandom)
-            {
-                if (m_newRedeem.statusEffectData == null || m_newRedeem.statusEffectData.Count == 0)
-                    m_newRedeem.statusEffectData.Add(new StatusEffectData());
-
-                editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.statusEffectData[0]);
-            }
+            else if (m_newRedeem.type == RedeemType.StatusEffect)
+                editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.statusEffectData);
 
             RectTransform editorRt = m_editorContainer.GetComponent<RectTransform>();
             editorRt.sizeDelta = new Vector2(editorRt.sizeDelta.x, editorHeight + 20f);

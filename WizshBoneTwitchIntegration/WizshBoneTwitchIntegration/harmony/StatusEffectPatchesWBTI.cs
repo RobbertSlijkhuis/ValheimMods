@@ -16,14 +16,7 @@ namespace WizshBoneTwitchIntegration.Harmony
         {
             try
             {
-                if (Player.m_localPlayer.GetPlayerID() != __instance.GetPlayerID())
-                {
-                    Jotunn.Logger.LogWarning($"Not local player! {Player.m_localPlayer.GetPlayerID()} - {__instance.GetPlayerID()}");
-                    return;
-                }
-
-                TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
-                customStatusEffect.ReApplyStatusEffects();
+                Jotunn.Logger.LogInfo("Player spawned, applying status effects...");
             }
             catch (Exception e)
             {
@@ -31,33 +24,17 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(StatusEffect), "Stop")]
-        public static void Stop_Postfix(StatusEffect __instance)
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Player), "OnDeath")]
+        public static void OnDeath_Postfix(StatusEffect __instance)
         {
             try
             {
-                int nameHash = __instance.NameHash();
-                TwitchCustomStatusEffect customStatusEffect = Game.instance.gameObject.GetComponent<TwitchCustomStatusEffect>();
-                StatusEffectData statusEffect = customStatusEffect.GetStatusEffects().Find(item => item.nameHash == nameHash);
-
-                if (statusEffect == null)
-                    return;
-
-                if (__instance.IsDone())
-                {
-                    //Jotunn.Logger.LogWarning("Removing StatusEffect: " + statusEffect.name);
-                    customStatusEffect.RemoveStatusEffect(statusEffect, false);
-                }
-                else if (statusEffect.persistsThroughDeath)
-                {
-                    //Jotunn.Logger.LogWarning("Setting StatusEffect remaining time: " + statusEffect.name + ", " + __instance.GetRemaningTime());
-                    statusEffect.durationRemaining = __instance.GetRemaningTime();
-                }
+                Jotunn.Logger.LogInfo("Player died, removing status effects...");
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Something went wrong in Stop_Postfix: " + e);
+                Jotunn.Logger.LogError("Something went wrong in OnDeath_Prefix: " + e);
             }
         }
     }

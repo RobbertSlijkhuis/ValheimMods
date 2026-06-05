@@ -20,7 +20,6 @@ namespace WizshBoneTwitchIntegration.Harmony
                 Game.instance.gameObject.AddComponent<TwitchCustomRewards>();
                 Game.instance.gameObject.AddComponent<TwitchAuth>();
                 Game.instance.gameObject.AddComponent<TwitchChatting>();
-                Game.instance.gameObject.AddComponent<TwitchCustomStatusEffect>();
                 Game.instance.gameObject.AddComponent<SafeZoneHUDPanel>();
             }
             catch (Exception e)

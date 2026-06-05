@@ -54,7 +54,7 @@ namespace WizshBoneTwitchIntegration.Models
         [EditorHidden] public MistData mistData = new MistData();
         [EditorHidden] public TerrainEditData terrainEditData = new TerrainEditData();
         [EditorHidden] public SpawnAbilityData spawnAbilityData = new SpawnAbilityData();
-        [EditorHidden] public List<StatusEffectData> statusEffectData = new List<StatusEffectData>();
+        [EditorHidden] public StatusEffectData statusEffectData = new StatusEffectData();
         [EditorHidden] public WeatherData weatherData = new WeatherData();
 
         // Maps each RedeemType to the one sub-data field that should be serialized for it.

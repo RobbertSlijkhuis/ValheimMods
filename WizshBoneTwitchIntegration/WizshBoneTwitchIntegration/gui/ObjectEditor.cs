@@ -1,4 +1,5 @@
 ﻿using Jotunn.Managers;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -43,7 +44,7 @@ namespace WizshBoneTwitchIntegration.Gui
             return BuildFields(parent, target, m_startY);
         }
 
-        private float BuildFields(GameObject parent, object target, float startY)
+        internal float BuildFields(GameObject parent, object target, float startY)
         {
             FieldInfo[] fields = target.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
 
@@ -75,6 +76,30 @@ namespace WizshBoneTwitchIntegration.Gui
                     yOffset -= BuildFields(parent, nestedValue, yOffset);
 
                     BuildSectionBoundary(parent, "— end of " + sectionLabel + " —", new Vector2(fieldCenterX, yOffset), m_fieldWidth);
+                    yOffset -= SectionHeaderHeight + SectionHeaderSpacing;
+                    continue;
+                }
+
+                // List<T> where T : CloneableData
+                if (field.FieldType.IsGenericType &&
+                    field.FieldType.GetGenericTypeDefinition() == typeof(List<>) &&
+                    typeof(CloneableData).IsAssignableFrom(field.FieldType.GetGenericArguments()[0]))
+                {
+                    string listLabel = field.GetCustomAttribute<EditorLabelAttribute>()?.Label ?? field.Name;
+                    float fieldCenterX = m_startX + FieldUIBuilder.LabelWidth / 2f + FieldUIBuilder.LabelFieldGap + m_fieldWidth / 2f;
+
+                    BuildSectionBoundary(parent, "— " + listLabel + " —", new Vector2(fieldCenterX, yOffset), m_fieldWidth);
+                    yOffset -= SectionHeaderHeight + SectionHeaderSpacing;
+
+                    var listEditor = new ObjectListEditor(
+                        field.GetValue(target) as IList,
+                        field.FieldType.GetGenericArguments()[0],
+                        m_startX,
+                        m_fieldWidth);
+                    float listHeight = listEditor.Build(parent, yOffset);
+                    yOffset -= listHeight + EntrySpacing;
+
+                    BuildSectionBoundary(parent, "— end of " + listLabel + " —", new Vector2(fieldCenterX, yOffset), m_fieldWidth);
                     yOffset -= SectionHeaderHeight + SectionHeaderSpacing;
                     continue;
                 }

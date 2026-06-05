@@ -197,18 +197,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (redeem.type == RedeemType.StatusEffect)
                 {
-                    if (redeem.statusEffectData == null || redeem.statusEffectData.Count == 0)
-                        throw new RedeemException("Could not find a status effect to apply", ExceptionType.Error);
-
-                    StatusEffectHelper.ApplyStatusEffects(redeem.statusEffectData, customRewardEvent, m_chat);
-                }
-
-                if (redeem.type == RedeemType.StatusEffectRandom)
-                {
-                    if (redeem.statusEffectData == null || redeem.statusEffectData.Count == 0)
-                        throw new RedeemException("Could not find a status effect to apply", ExceptionType.Error);
-
-                    StatusEffectHelper.ApplyRandomStatusEffects(redeem.statusEffectData, customRewardEvent, m_chat);
+                    Jotunn.Logger.LogWarning("StatusEffect redeem type is not yet implemented");
                 }
 
                 if (redeem.type == RedeemType.SurpriseChest)

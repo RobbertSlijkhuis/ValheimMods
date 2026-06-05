@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace WizshBoneTwitchIntegration.Types
+﻿namespace WizshBoneTwitchIntegration.Types
 {
     internal class StatusEffectType
     {
