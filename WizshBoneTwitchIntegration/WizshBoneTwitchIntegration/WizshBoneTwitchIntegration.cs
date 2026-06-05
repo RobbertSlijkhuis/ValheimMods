@@ -75,11 +75,25 @@ namespace WizshBoneTwitchIntegration
         {
             try
             {
-                if (ZInput.instance == null || wizshBoneWindowButton == null || !ZInput.GetButtonDown(wizshBoneWindowButton.Name) || !Player.m_localPlayer)
+                if (ZInput.instance == null || wizshBoneWindowButton == null || !Player.m_localPlayer)
                     return;
 
                 TwitchAuth authComp = Game.instance.gameObject.GetComponent<TwitchAuth>();
-                authComp.wizshBoneGUI.ShowGUI();
+                bool guiVisible = authComp.wizshBoneGUI.IsAnyGUIVisible;
+
+                // ZInput is blocked while the GUI is open, so fall back to raw Unity input
+                // via KeyboardShortcut.IsDown() which bypasses the ZInput block entirely.
+                bool togglePressed = guiVisible
+                    ? PluginConfig.configWizshBoneWindow.Value.IsDown()
+                    : ZInput.GetButtonDown(wizshBoneWindowButton.Name);
+
+                if (!togglePressed)
+                    return;
+
+                if (guiVisible)
+                    authComp.wizshBoneGUI.CloseGUI();
+                else
+                    authComp.wizshBoneGUI.ShowGUI();
             }
             catch (Exception e)
             {

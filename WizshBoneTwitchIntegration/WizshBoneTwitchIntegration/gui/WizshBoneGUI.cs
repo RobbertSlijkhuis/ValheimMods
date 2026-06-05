@@ -40,6 +40,13 @@ namespace WizshBoneTwitchIntegration.Gui
         private WizshBoneRedeemHistoryGUI m_redeemHistoryGUI;
         private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
 
+        private bool m_reopenSettings = false;
+
+        public void SignalReopenSettings()
+        {
+            m_reopenSettings = true;
+        }
+
         public void ShowGUI()
         {
             if (GUIManager.Instance == null)
@@ -81,12 +88,20 @@ namespace WizshBoneTwitchIntegration.Gui
 
             panel.SetActive(true);
             GUIManager.BlockInput(true);
+
+            if (m_reopenSettings)
+            {
+                m_reopenSettings = false;
+                m_settingsGUI.ShowSettings();
+            }
         }
 
         public void CloseGUI()
         {
             onClose.Invoke();
             panel.SetActive(false);
+            m_settingsGUI.CloseSettings();
+            m_redeemHistoryGUI.CloseGUI();
             GUIManager.BlockInput(false);
         }
 

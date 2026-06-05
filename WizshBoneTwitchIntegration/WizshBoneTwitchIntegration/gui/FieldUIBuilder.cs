@@ -93,11 +93,14 @@ namespace WizshBoneTwitchIntegration.Gui
 
             if (isString)
             {
-                var colorAttr = field.GetCustomAttribute<ColorPickerAttribute>();
+                var colorAttr    = field.GetCustomAttribute<ColorPickerAttribute>();
                 var dropdownAttr = field.GetCustomAttribute<DropdownOptionsAttribute>();
+                var seDropdown   = field.GetCustomAttribute<StatusEffectNameDropdownAttribute>();
 
                 if (colorAttr != null)
                     BuildColorField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth);
+                else if (seDropdown != null)
+                    BuildStringDropdownField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth, GetAvailableStatusEffectNames());
                 else if (dropdownAttr != null)
                     BuildStringDropdownField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth, dropdownAttr.Options);
                 else
@@ -546,6 +549,32 @@ namespace WizshBoneTwitchIntegration.Gui
             if (ColorUtility.TryParseHtmlString(hex, out Color color))
                 return color;
             return Color.white;
+        }
+
+        public static List<string> GetAvailableStatusEffectNames()
+        {
+            List<string> names = new List<string>();
+
+            foreach (PropertyInfo prop in typeof(Types.StatusEffectType)
+                .GetProperties(BindingFlags.Public | BindingFlags.Static))
+            {
+                if (prop.PropertyType != typeof(string))
+                    continue;
+
+                try
+                {
+                    string value = prop.GetValue(null) as string;
+                    if (!string.IsNullOrEmpty(value))
+                        names.Add(value);
+                }
+                catch
+                {
+                    // Skip properties whose backing assets aren't loaded yet
+                }
+            }
+
+            names.Sort();
+            return names;
         }
     }
 }

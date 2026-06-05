@@ -1,6 +1,6 @@
-using Jotunn.Managers;
 using System.Collections.Generic;
 using System.IO;
+using Jotunn.Managers;
 using TwitchSDK.Interop;
 using UnityEngine;
 using UnityEngine.UI;
@@ -68,8 +68,6 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float ListTopPadding      = 15f;
         private const float HeaderTopPadding    = 45f;
         private const float ActionButtonWidth   = 80f;
-
-        private const int   TabTitleFontSize    = 16;
 
         private const float ColTitleX  = -230f;
         private const float ColTitleW  = 200f;
@@ -180,8 +178,8 @@ namespace WizshBoneTwitchIntegration.Gui
             m_saveBtn = saveBtnObj.GetComponent<Button>();
             m_saveBtn.onClick.AddListener(OnSave);
 
-            m_redeemsLabel = CreateTabTitle(
-                $"Redeems — {ProfileManager.ActiveProfile}:",
+            m_redeemsLabel = TabUIHelper.CreateTabTitle(
+                $"Redeems - {ProfileManager.ActiveProfile}:",
                 m_listView,
                 new Vector2(-150f, RedeemLabelY),
                 width: 400f
@@ -208,7 +206,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void RefreshList()
         {
-            ClearContainer(m_redeemListContainer);
+            TabUIHelper.ClearContainer(m_redeemListContainer);
 
             bool isSynced = ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile);
             float yOffset = -(ListTopPadding + ItemHeight / 2f);
@@ -397,7 +395,7 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             m_createView = UIContainer.Create(m_root, "CreateView");
 
-            m_createViewTitle = CreateTabTitle(
+            m_createViewTitle = TabUIHelper.CreateTabTitle(
                 "New Redeem",
                 m_createView,
                 new Vector2(-200f, -153f)
@@ -449,7 +447,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             float yPos = -20f;
 
-            m_standardFieldsContainer = CreateStaticContainer("StandardFields", scrollContent, yPos);
+            m_standardFieldsContainer = TabUIHelper.CreateStaticContainer("StandardFields", scrollContent, yPos);
             yPos -= 460f;
 
             Text typeLabelComp = GUIManager.Instance.CreateText(
@@ -489,33 +487,18 @@ namespace WizshBoneTwitchIntegration.Gui
             yPos -= 70f;
             m_editorContainerYPos = yPos;
 
-            m_editorContainer = CreateStaticContainer("EditorContainer", scrollContent, yPos);
+            m_editorContainer = TabUIHelper.CreateStaticContainer("EditorContainer", scrollContent, yPos);
 
             // Initial scroll content height — editor is empty at start
-            UpdateScrollContentHeight(0f);
+            TabUIHelper.UpdateScrollContentHeight(m_createScrollContent, m_editorContainerYPos, 0f);
 
             m_createView.SetActive(false);
-        }
-
-        private static GameObject CreateStaticContainer(string name, GameObject parent, float yPos)
-        {
-            GameObject container = new GameObject(name);
-            container.transform.SetParent(parent.transform, false);
-
-            RectTransform rt = container.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 1f);
-            rt.anchorMax = new Vector2(0.5f, 1f);
-            rt.pivot = new Vector2(0.5f, 1f);
-            rt.anchoredPosition = new Vector2(0f, yPos);
-            rt.sizeDelta = new Vector2(700f, 400f);
-
-            return container;
         }
 
         private void OnTypeChanged()
         {
             m_newRedeem.type = RedeemTypes[m_typeDropdown.value];
-            ClearContainer(m_editorContainer);
+            TabUIHelper.ClearContainer(m_editorContainer);
 
             float editorHeight = 0f;
 
@@ -529,11 +512,18 @@ namespace WizshBoneTwitchIntegration.Gui
                 editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.terrainEditData);
             else if (m_newRedeem.type == RedeemType.SpawnWeather)
                 editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.weatherData);
+            else if (m_newRedeem.type == RedeemType.StatusEffect || m_newRedeem.type == RedeemType.StatusEffectRandom)
+            {
+                if (m_newRedeem.statusEffectData == null || m_newRedeem.statusEffectData.Count == 0)
+                    m_newRedeem.statusEffectData.Add(new StatusEffectData());
+
+                editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.statusEffectData[0]);
+            }
 
             RectTransform editorRt = m_editorContainer.GetComponent<RectTransform>();
             editorRt.sizeDelta = new Vector2(editorRt.sizeDelta.x, editorHeight + 20f);
 
-            UpdateScrollContentHeight(editorHeight);
+            TabUIHelper.UpdateScrollContentHeight(m_createScrollContent, m_editorContainerYPos, editorHeight);
 
             if (m_isReadOnly)
             {
@@ -579,7 +569,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void RebuildStandardFields()
         {
-            ClearContainer(m_standardFieldsContainer);
+            TabUIHelper.ClearContainer(m_standardFieldsContainer);
             float height = m_objectEditor.Build(m_standardFieldsContainer, m_newRedeem);
             m_standardFieldsContainer.GetComponent<RectTransform>().sizeDelta = new Vector2(700f, height + 40f);
         }
@@ -628,7 +618,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_confirmButton.GetComponentInChildren<Text>().text = "+ Add";
 
             RebuildStandardFields();
-            ClearContainer(m_editorContainer);
+            TabUIHelper.ClearContainer(m_editorContainer);
 
             m_listView.SetActive(false);
             m_createView.SetActive(true);
@@ -695,43 +685,10 @@ namespace WizshBoneTwitchIntegration.Gui
                 dropdown.interactable = interactable;
         }
 
-        private Text CreateTabTitle(string text, GameObject parent, Vector2 position, float width = 300f)
-        {
-            Text label = GUIManager.Instance.CreateText(
-                text: text,
-                parent: parent.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: position,
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: TabTitleFontSize,
-                color: GUIManager.Instance.ValheimOrange,
-                outline: true,
-                outlineColor: Color.black,
-                width: width,
-                height: 25f,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-            label.alignment = TextAnchor.MiddleLeft;
-            return label;
-        }
-
         private void OnSearchChanged(string value)
         {
             m_searchText = value;
             RefreshList();
-        }
-
-        private static void ClearContainer(GameObject container)
-        {
-            foreach (Transform child in container.transform)
-                GameObject.Destroy(child.gameObject);
-        }
-
-        private void UpdateScrollContentHeight(float editorHeight)
-        {
-            float totalHeight = Mathf.Abs(m_editorContainerYPos) + editorHeight + 40f;
-            ScrollableView.SetContentHeight(m_createScrollContent, totalHeight);
         }
     }
 }

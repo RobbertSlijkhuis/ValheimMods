@@ -16,13 +16,16 @@ namespace WizshBoneTwitchIntegration.Gui
         // Tab buttons
         private Button m_profilesTabButton;
         private Button m_redeemsTabButton;
+        private Button m_viewersTabButton;
 
         // Tabs
         private ProfilesTab m_profilesTab = new ProfilesTab();
         private RedeemsTab m_redeemsTab = new RedeemsTab();
+        private ViewersTab m_viewersTab = new ViewersTab();
 
         private GameObject m_profilesTabRoot;
         private GameObject m_redeemsTabRoot;
+        private GameObject m_viewersTabRoot;
 
         private static readonly Color TabActiveColor = new Color(0.9f, 0.9f, 0.9f, 1f);
         private Color m_tabDefaultColor;
@@ -92,9 +95,11 @@ namespace WizshBoneTwitchIntegration.Gui
             m_profilesTabRoot = m_profilesTab.Create(panel, CreateScrollableContainer);
             m_redeemsTabRoot = m_redeemsTab.Create(panel, CreateScrollableContainer, () =>
             {
+                m_auth?.wizshBoneGUI.SignalReopenSettings();
                 CloseSettings();
                 m_auth?.wizshBoneGUI.CloseGUI();
             });
+            m_viewersTabRoot = m_viewersTab.Create(panel, CreateScrollableContainer);
 
             ShowTab(m_profilesTabRoot, m_profilesTabButton);
 
@@ -139,18 +144,33 @@ namespace WizshBoneTwitchIntegration.Gui
             redeemsTabBtn.SetActive(true);
             m_redeemsTabButton = redeemsTabBtn.GetComponent<Button>();
             m_redeemsTabButton.onClick.AddListener(() => ShowTab(m_redeemsTabRoot, m_redeemsTabButton));
+
+            GameObject viewersTabBtn = GUIManager.Instance.CreateButton(
+                text: "Viewers",
+                parent: panel.transform,
+                anchorMin: new Vector2(0f, 1f),
+                anchorMax: new Vector2(0f, 1f),
+                position: new Vector2(510f, -90f),
+                width: 180f,
+                height: 40f
+            );
+            viewersTabBtn.SetActive(true);
+            m_viewersTabButton = viewersTabBtn.GetComponent<Button>();
+            m_viewersTabButton.onClick.AddListener(() => ShowTab(m_viewersTabRoot, m_viewersTabButton));
         }
 
         private void ShowTab(GameObject tabToShow, Button activeButton)
         {
             m_profilesTabRoot.SetActive(false);
             m_redeemsTabRoot.SetActive(false);
+            m_viewersTabRoot.SetActive(false);
 
             tabToShow.SetActive(true);
             RefreshActiveTab();
 
             SetTabButtonColor(m_profilesTabButton, m_profilesTabRoot.activeSelf);
             SetTabButtonColor(m_redeemsTabButton, m_redeemsTabRoot.activeSelf);
+            SetTabButtonColor(m_viewersTabButton, m_viewersTabRoot.activeSelf);
         }
 
         private void RefreshActiveTab()
@@ -160,6 +180,9 @@ namespace WizshBoneTwitchIntegration.Gui
 
             if (m_redeemsTabRoot != null && m_redeemsTabRoot.activeSelf)
                 m_redeemsTab.Refresh();
+
+            if (m_viewersTabRoot != null && m_viewersTabRoot.activeSelf)
+                m_viewersTab.Refresh();
         }
 
         private void SetTabButtonColor(Button button, bool isActive)

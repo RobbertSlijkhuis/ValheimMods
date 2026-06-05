@@ -1,7 +1,7 @@
-﻿using Jotunn.Managers;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.UI;
 using WizshBoneTwitchIntegration.Helpers;
@@ -18,32 +18,28 @@ namespace WizshBoneTwitchIntegration.Gui
         private Button m_syncButton;
         private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
 
-        private const float ButtonWidth = 330f;
-        private const float ButtonHeight = 40f;
+        private const float ButtonWidth       = 330f;
+        private const float ButtonHeight      = 40f;
         private const float ActiveButtonHeight = 56f;
-        private const float ButtonSpacing = 5f;
-        private const float ButtonCenterX = -35f;
-
-        private const int   TabTitleFontSize = 16;
+        private const float ButtonSpacing     = 5f;
+        private const float ButtonCenterX     = -35f;
 
         private const float ListTopPadding   = 15f;
         private const float HeaderTopPadding = 30f;
         private const float ContentTopY      = -(108f + HeaderTopPadding);
 
-        // Toolbar row — left edge aligned to scroll view left, input keeps its original width
-        private const float ScrollViewLeft    = ButtonCenterX - ButtonWidth / 2f;  // -200f
-        private const float InputFieldCenterX = ScrollViewLeft + ButtonWidth / 2f; // -35f
+        private const float ScrollViewLeft    = ButtonCenterX - ButtonWidth / 2f;
+        private const float InputFieldCenterX = ScrollViewLeft + ButtonWidth / 2f;
         private const float ActionBtnWidth    = 80f;
         private const float CreateBtnCenterX  = ScrollViewLeft + ButtonWidth + ButtonSpacing + ActionBtnWidth / 2f;
 
-        // Bottom row — right-aligned to scroll view right edge, matching the Close button row
-        private const float ScrollViewRight   = 350f;
-        private const float BottomBtnHeight   = 60f;
-        private const float BottomBtnY        = 50f;
-        private const float SyncBtnBottomX    = ScrollViewRight - ActionBtnWidth / 2f;
-        private const float ExportBtnBottomX  = SyncBtnBottomX - ActionBtnWidth - ButtonSpacing;
-        private const float ImportBtnBottomX  = ExportBtnBottomX - ActionBtnWidth - ButtonSpacing;
-        private const float CopyBtnBottomX    = ImportBtnBottomX - ActionBtnWidth - ButtonSpacing;
+        private const float ScrollViewRight  = 350f;
+        private const float BottomBtnHeight  = 60f;
+        private const float BottomBtnY       = 50f;
+        private const float SyncBtnBottomX   = ScrollViewRight - ActionBtnWidth / 2f;
+        private const float ExportBtnBottomX = SyncBtnBottomX - ActionBtnWidth - ButtonSpacing;
+        private const float ImportBtnBottomX = ExportBtnBottomX - ActionBtnWidth - ButtonSpacing;
+        private const float CopyBtnBottomX   = ImportBtnBottomX - ActionBtnWidth - ButtonSpacing;
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
         private struct OpenFileName
@@ -87,7 +83,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             m_confirmDialog.Init();
 
-            CreateTabTitle("New profile name:", m_root, new Vector2(InputFieldCenterX, ContentTopY), width: ButtonWidth);
+            TabUIHelper.CreateTabTitle("New profile name:", m_root, new Vector2(InputFieldCenterX, ContentTopY), width: ButtonWidth);
 
             m_profileNameInput = FieldUIBuilder.CreateInputField(m_root, new Vector2(InputFieldCenterX, ContentTopY - 30f), ButtonWidth);
 
@@ -168,7 +164,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 addContentSizeFitter: false
             ).GetComponent<Text>();
 
-            CreateTabTitle("Available profiles:", m_root, new Vector2(-110f, ContentTopY - 87f), width: 180f);
+            TabUIHelper.CreateTabTitle("Available profiles:", m_root, new Vector2(-110f, ContentTopY - 87f), width: 180f);
 
             m_profileListContainer = createScrollable("ProfileList", m_root, ContentTopY - 107f);
 
@@ -177,7 +173,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         public void Refresh()
         {
-            ClearContainer(m_profileListContainer);
+            TabUIHelper.ClearContainer(m_profileListContainer);
 
             if (m_syncButton != null)
                 m_syncButton.interactable = !ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile);
@@ -330,7 +326,6 @@ namespace WizshBoneTwitchIntegration.Gui
                 "Downloads"
             );
 
-            // Pre-fill the filename with the standard export name so the user can adjust it
             string defaultFileName = $"{ProfileManager.ActiveProfile}_redeems.yaml";
             string fileBuffer      = defaultFileName + new string('\0', 260 - defaultFileName.Length);
 
@@ -413,33 +408,6 @@ namespace WizshBoneTwitchIntegration.Gui
                     Refresh();
                 }
             );
-        }
-
-        private Text CreateTabTitle(string text, GameObject parent, Vector2 position, float width = 300f)
-        {
-            Text label = GUIManager.Instance.CreateText(
-                text: text,
-                parent: parent.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: position,
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: TabTitleFontSize,
-                color: GUIManager.Instance.ValheimOrange,
-                outline: true,
-                outlineColor: Color.black,
-                width: width,
-                height: 25f,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-            label.alignment = TextAnchor.MiddleLeft;
-            return label;
-        }
-
-        private static void ClearContainer(GameObject container)
-        {
-            foreach (Transform child in container.transform)
-                GameObject.Destroy(child.gameObject);
         }
     }
 }
