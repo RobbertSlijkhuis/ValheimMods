@@ -1,8 +1,10 @@
 ﻿using HarmonyLib;
+using Jotunn.Managers;
 using ModularMagic_BloodMagic.Components;
 using ModularMagic_BloodMagic.Configs;
 using ModularMagic_BloodMagic.Helpers;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using static ItemDrop;
 
@@ -11,7 +13,18 @@ namespace ModularMagic_BloodMagic.Harmony
     [HarmonyPatch]
     public class SoulReaperPatches
     {
-        private static SoulReaper? _soulReaper;
+        // One SoulReaper per weapon, keyed by item shared name
+        private static readonly Dictionary<string, SoulReaper> _reapers
+            = new Dictionary<string, SoulReaper>();
+
+        private static void RegisterReaper(string weaponName, string zdoKeyName, GameObject apparitionPrefab, Color emissionColor)
+        {
+            SoulReaper reaper = Game.instance.gameObject.AddComponent<SoulReaper>();
+            reaper.Init(zdoKeyName);
+            reaper.m_apparitionPrefab = apparitionPrefab;
+            reaper.m_emissionColor = emissionColor;
+            _reapers[weaponName] = reaper;
+        }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Game), "Awake")]
@@ -19,13 +32,33 @@ namespace ModularMagic_BloodMagic.Harmony
         {
             try
             {
-                _soulReaper                    = Game.instance.gameObject.AddComponent<SoulReaper>();
-                _soulReaper.m_apparitionPrefab = ModularMagic_BloodMagic.Instance.prefabs.ScytheSkeletonSpawn;
-                _soulReaper.m_apparitionName   = PluginConfig.scythe1.summonPrefab?.Value ?? "Apparition";
+                RegisterReaper(
+                    PluginConfig.scythe1Name,
+                    zdoKeyName:       "SoulReaperCharge_1",
+                    apparitionPrefab: ModularMagic_BloodMagic.Instance.prefabs.SpawnAbilityScythe1,
+                    emissionColor:    new Color(0f, 2.666667f, 2.996078f));
+
+                RegisterReaper(
+                    PluginConfig.scythe2Name,
+                    zdoKeyName:       "SoulReaperCharge_2",
+                    apparitionPrefab: ModularMagic_BloodMagic.Instance.prefabs.SpawnAbilityScythe2,
+                    emissionColor:    new Color(2.839216f, 0f, 4f));
+
+                RegisterReaper(
+                    PluginConfig.scythe3Name,
+                    zdoKeyName:       "SoulReaperCharge_3",
+                    apparitionPrefab: ModularMagic_BloodMagic.Instance.prefabs.SpawnAbilityScythe3,
+                    emissionColor:    new Color(4f, 0.03725543f, 0f));
+
+                RegisterReaper(
+                    PluginConfig.scythe4Name,
+                    zdoKeyName:       "SoulReaperCharge_4",
+                    apparitionPrefab: ModularMagic_BloodMagic.Instance.prefabs.SpawnAbilityScythe4,
+                    emissionColor:    new Color(0.43921569f, 4f, 0f));
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Could not add SoulReaper component in GameAwake_Postfix: " + e);
+                Jotunn.Logger.LogError("Could not register SoulReaper components in GameAwake_Postfix: " + e);
             }
         }
 
@@ -33,94 +66,34 @@ namespace ModularMagic_BloodMagic.Harmony
         [HarmonyPatch(typeof(Character), "Damage")]
         public static void CharacterDamage_Postfix(Character __instance, ref HitData hit)
         {
-            if (_soulReaper == null || Player.m_localPlayer == null)
+            if (Player.m_localPlayer == null)
                 return;
 
             Character attacker = hit.GetAttacker();
             if (attacker == null || attacker != Player.m_localPlayer)
                 return;
 
-            ItemData? scythe = Player.m_localPlayer.GetInventory()
-                .GetEquippedItems()
-                .Find(item => item.m_shared.m_name == PluginConfig.scythe1Name);
-
-            if (scythe == null)
+            SoulReaper? reaper = SoulReaperHelper.GetDrawnReaper(_reapers, out string? weaponName);
+            if (reaper == null || weaponName == null)
                 return;
 
-            if (_soulReaper.CanDischarge())
+            if (reaper.CanDischarge())
             {
-                _soulReaper.ResetCharge();
+                reaper.ResetCharge();
                 Jotunn.Logger.LogInfo("Soul Reaper discharged — spawning apparition");
-                SoulReaperHelper.SpawnApparition(__instance, _soulReaper.m_apparitionPrefab, _soulReaper.m_apparitionName);
+                SoulReaperHelper.SpawnApparition(__instance, reaper.m_apparitionPrefab, weaponName);
             }
             else if (Player.m_localPlayer.GetEitr() > 10f)
             {
                 Player.m_localPlayer.UseEitr(10f);
-                _soulReaper.Charge(0.1f);
-                Jotunn.Logger.LogInfo("Charging Soul Reaper: " + _soulReaper.m_charge);
-
-                if (ModularMagic_BloodMagic.Instance.prefabs.ScytheHitEffect != null)
-                {
-                    GameObject vfxInstance = UnityEngine.Object.Instantiate(
-                        ModularMagic_BloodMagic.Instance.prefabs.ScytheHitEffect,
-                        hit.m_point,
-                        Quaternion.LookRotation(-hit.m_dir));
-                    vfxInstance.transform.localScale = Vector3.one * 0.4f;
-                }
-                else
-                    Jotunn.Logger.LogWarning("Could not find scythe hit effect prefab.");
+                reaper.Charge(0.1f);
+                Jotunn.Logger.LogInfo("Charging Soul Reaper: " + reaper.m_charge);
+                SoulReaperHelper.SpawnChargeEffects(hit.m_point, hit.m_dir);
             }
             else
             {
                 Jotunn.Logger.LogInfo("Soul Reaper cannot charge — insufficient eitr.");
             }
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Player), "Dodge")]
-        public static void PlayerDodge_Postfix(Player __instance)
-        {
-            if (_soulReaper == null || Player.m_localPlayer == null)
-                return;
-
-            if (__instance != Player.m_localPlayer)
-                return;
-
-            if (!_soulReaper.CanDischarge())
-                return;
-
-            ItemData? scythe = Player.m_localPlayer.GetInventory()
-                .GetEquippedItems()
-                .Find(item => item.m_shared.m_name == PluginConfig.scythe1Name);
-
-            if (scythe == null)
-                return;
-
-            _soulReaper.ResetCharge();
-            Jotunn.Logger.LogInfo("Soul Reaper charge consumed on dodge — applying shield");
-
-            SoulReaperHelper.ApplyShield(__instance);
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Tameable), "Awake")]
-        public static void TameableAwake_Postfix(Tameable __instance)
-        {
-            if (_soulReaper == null || Player.m_localPlayer == null)
-                return;
-
-            if (__instance.GetText() != _soulReaper.m_apparitionName)
-                return;
-
-            if (__instance.m_monsterAI == null)
-                return;
-
-            CharacterDrop? characterDrop = __instance.GetComponent<CharacterDrop>();
-            if (characterDrop != null)
-                characterDrop.m_drops.Clear();
-
-            __instance.m_monsterAI.SetFollowTarget(Player.m_localPlayer.gameObject);
-            Jotunn.Logger.LogInfo($"Restored follow target for '{_soulReaper.m_apparitionName}' after reload.");
         }
 
         /// <summary>
@@ -134,21 +107,19 @@ namespace ModularMagic_BloodMagic.Harmony
             if (__instance == null || __instance.m_nview == null || !__instance.m_nview.IsValid())
                 return;
 
-            // For the local player use inventory check — for remote players rely on
-            // the attach cache since inventory fields are not reliable cross-client
-            if (__instance == Player.m_localPlayer)
+            foreach (KeyValuePair<string, SoulReaper> pair in _reapers)
             {
-                if (!SoulReaperHelper.IsWeaponEquipped(__instance, PluginConfig.scythe1Name))
-                    return;
-            }
-            else
-            {
-                if (!SoulReaperHelper.HasCachedAttach(__instance))
-                    return;
-            }
+                bool hasWeapon = __instance == Player.m_localPlayer
+                    ? SoulReaperHelper.IsWeaponEquipped(__instance, pair.Key)
+                    : SoulReaperHelper.HasCachedAttach(__instance);
 
-            float charge = __instance.m_nview.GetZDO().GetFloat(SoulReaper.ZDOKey, 0f);
-            SoulReaperHelper.ApplyChargeVisualsForPlayer(__instance, charge, _soulReaper?.m_maxCharge ?? 1f);
+                if (!hasWeapon)
+                    continue;
+
+                float charge = __instance.m_nview.GetZDO().GetFloat(pair.Value.ZDOKey, 0f);
+                SoulReaperHelper.ApplyChargeVisualsForPlayer(__instance, charge, pair.Value.m_maxCharge, pair.Value.m_emissionColor);
+                break; // Only one scythe can be equipped at a time
+            }
         }
 
         /// <summary>

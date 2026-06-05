@@ -45,6 +45,7 @@ namespace ModularMagic_BloodMagic.Configs
         public ConfigEntry<float> damageSpiritPerLevel;
 
         public ConfigEntry<int> attackEitr;
+        public ConfigEntry<int> attackStamina;
         public ConfigEntry<float> projectileVelocity;
         public ConfigEntry<float> projectileAccuracy;
         public ConfigEntry<float> projectileBurst;
@@ -54,7 +55,7 @@ namespace ModularMagic_BloodMagic.Configs
         public ConfigEntry<int> blockArmor;
         public ConfigEntry<int> deflectionForce;
         public ConfigEntry<int> attackForce;
-        public ConfigEntry<string> summonPrefab;
+        public ConfigEntry<float> backStab;
 
         private int entryCount = 100;
 
@@ -444,7 +445,8 @@ namespace ModularMagic_BloodMagic.Configs
                 };
             }
 
-            if (options.attackEitr != null) { 
+            if (options.attackEitr != null)
+            {
                 attackEitr = Config.Bind(new ConfigDefinition(options.sectionName, "Attack eitr cost"), (int)options.attackEitr,
                     new ConfigDescription("Normal attack eitr cost", null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
@@ -453,6 +455,20 @@ namespace ModularMagic_BloodMagic.Configs
                     ItemHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
                     {
                         attackEitr = attackEitr.Value,
+                    });
+                };
+            }
+
+            if (options.attackStamina != null)
+            {
+                attackStamina = Config.Bind(new ConfigDefinition(options.sectionName, "Attack stamina cost"), (int)options.attackStamina,
+                    new ConfigDescription("Normal attack stamina cost", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+                attackStamina.SettingChanged += (obj, attr) =>
+                {
+                    ItemHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
+                    {
+                        attackStamina = attackStamina.Value,
                     });
                 };
             }
@@ -565,12 +581,16 @@ namespace ModularMagic_BloodMagic.Configs
                 });
             };
 
-            if (options.summonPrefab != null)
+            backStab = Config.Bind(new ConfigDefinition(options.sectionName, "Backstab"), options.backStab,
+                new ConfigDescription("The backstab on the item", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+            backStab.SettingChanged += (obj, attr) =>
             {
-                summonPrefab = Config.Bind(new ConfigDefinition(options.sectionName, "Summon prefab name"), options.summonPrefab,
-                    new ConfigDescription("The prefab name of the monster summoned on a charged hit", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
-            }
+                ItemHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
+                {
+                    backstabBonus = backStab.Value,
+                });
+            };
         }
 
         private int HandleOrder()

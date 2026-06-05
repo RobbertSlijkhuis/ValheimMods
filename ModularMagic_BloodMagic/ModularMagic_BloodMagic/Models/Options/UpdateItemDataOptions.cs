@@ -46,6 +46,7 @@ namespace ModularMagic_BloodMagic.Models
 
         public ItemData? mainAttack;
         public float? attackEitr = null;
+        public float? attackStamina = null;
         public float? projectileVelocity = null;
         public float? projectileAccuracy = null;
         public float? projectileBurst = null;

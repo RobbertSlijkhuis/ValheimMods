@@ -55,6 +55,7 @@ namespace ModularMagic_BloodMagic.Helpers
                 attackForce      = config.attackForce.Value,
                 blockPower       = config.blockArmor.Value,
                 deflectionForce  = config.deflectionForce.Value,
+                backstabBonus    = config.backStab.Value,
 
                 maxDurability    = config.maxDurability.Value,
                 movementModifier = config.movementSpeed.Value,
@@ -117,7 +118,8 @@ namespace ModularMagic_BloodMagic.Helpers
             if (options.damageSpiritPerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_spirit = (float)options.damageSpiritPerLevel; }
 
             if (options.equipStatusEffect == null || options.equipStatusEffect.name != "empty_MMBM") { itemData.m_shared.m_equipStatusEffect = options.equipStatusEffect; }
-            if (options.attackEitr != null) { itemData.m_shared.m_attack.m_attackEitr = (float)options.attackEitr; }
+            if (options.attackEitr != null)    { itemData.m_shared.m_attack.m_attackEitr    = (float)options.attackEitr; }
+            if (options.attackStamina != null) { itemData.m_shared.m_attack.m_attackStamina = (float)options.attackStamina; }
             if (options.projectileVelocity != null) { itemData.m_shared.m_attack.m_projectileVel = (float)options.projectileVelocity; }
             if (options.projectileAccuracy != null) { itemData.m_shared.m_attack.m_projectileAccuracy = (float)options.projectileAccuracy; }
             if (options.projectileBurst != null) { itemData.m_shared.m_attack.m_burstInterval = (float)options.projectileBurst; }

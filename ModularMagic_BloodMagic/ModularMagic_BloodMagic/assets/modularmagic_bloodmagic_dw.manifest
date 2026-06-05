@@ -1,16 +1,16 @@
 ManifestFileVersion: 0
 UnityVersion: 6000.0.61f1
-CRC: 3849702751
+CRC: 3121073672
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 82392ec88b3e3ee86b2ef8c2388b4c95
+    Hash: 8942204f2b7fae5ef693346cc155e37d
   TypeTreeHash:
     serializedVersion: 2
-    Hash: de8013926d7135175b951224c0f9fd4a
+    Hash: 0b1b132de7ca341493ea15437f52f2f0
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 6fc733988c22a58d3d4bb387118bd950
+    Hash: db6ae6458f90e87b8bc25d711864f163
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -37,10 +37,6 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 114
   Script: {fileID: -179248876, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: -1044604064, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: -585565762, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -76,7 +72,16 @@ SerializeReferenceClassIdentifiers:
   ClassName: ItemStand/OrientationSettings
 Assets:
 - Assets/Custom/Scythe/MMBM_Scythe2.prefab
-- Assets/Custom/Scythe/spawn_skeleton_MMBM.prefab
+- Assets/Custom/Scythe/spawn_scythe4_MMBM.prefab
+- Assets/Custom/Scythe/MMBM_Scythe3.prefab
+- Assets/Custom/Scythe/fx_spikes_blood_MMBM.prefab
+- Assets/Custom/Scythe/fx_spikes_MMBM.prefab
+- Assets/Custom/Scythe/fx_spores_MMBM.prefab
+- Assets/Custom/Scythe/fx_spores_blood_MMBM.prefab
+- Assets/Custom/Scythe/spawn_scythe1_MMBM.prefab
 - Assets/Custom/Scythe/MMBM_Scythe1.prefab
-- Assets/Custom/Scythe/vfx_scythe_hit_MMBM.prefab
+- Assets/Custom/Scythe/Charred_Melee/Charred_mat_MMBM.mat
+- Assets/Custom/Scythe/MMBM_Scythe4.prefab
+- Assets/Custom/Scythe/spawn_scythe3_MMBM.prefab
+- Assets/Custom/Scythe/spawn_scythe2_MMBM.prefab
 Dependencies: []

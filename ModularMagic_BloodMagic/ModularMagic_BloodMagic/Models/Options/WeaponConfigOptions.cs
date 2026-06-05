@@ -45,20 +45,20 @@ namespace ModularMagic_BloodMagic.Models
         public int blockArmor = 0;
         public int deflectionForce = 20;
         public int attackForce = 20;
+        public float backStab = 3f;
 
         public float maxDurability = 200f;
         public int maxQuality = 4;
         public float movementSpeed = -0.05f;
         public float weight = 0.3f;
 
-        public int? attackEitr;
+        public float? attackEitr     = null;
+        public float? attackStamina  = null;
         public float? projectileVelocity;
         public float? projectileAccuracy;
         public float? projectileBurst;
 
         public string? selectedSecondaryAttack;
-
-        public string? summonPrefab;
 
         public WeaponConfigOptions(GameObject prefab, string name, string recipe, string upgradeRecipe)
         {

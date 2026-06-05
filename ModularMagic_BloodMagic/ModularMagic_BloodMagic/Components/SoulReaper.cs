@@ -4,15 +4,21 @@ namespace ModularMagic_BloodMagic.Components
 {
     internal class SoulReaper : MonoBehaviour
     {
-        // ZDO key used to sync charge across all clients
-        public static readonly int ZDOKey = "SoulReaperCharge".GetStableHashCode();
+        /// <summary>Per-instance ZDO key so each weapon tracks its own charge.</summary>
+        public int ZDOKey { get; private set; }
 
-        public float      m_maxCharge      = 1f;
-        public float      m_dischargeDelay = 0.5f;
-        public GameObject? m_apparitionPrefab = null;
-        public string     m_apparitionName = "Apparition";
+        public float      m_maxCharge        = 1f;
+        public float      m_dischargeDelay   = 0.5f;
+        public GameObject m_apparitionPrefab = null;
+        public string     m_apparitionName   = "Apparition";
+        public Color      m_emissionColor    = new Color(0f, 2.666667f, 2.996078f);
 
         private float _chargeFullTime = -1f;
+
+        public void Init(string zdoKeyName)
+        {
+            ZDOKey = zdoKeyName.GetStableHashCode();
+        }
 
         /// <summary>Current charge — read from the local player's ZDO.</summary>
         public float m_charge
@@ -31,8 +37,8 @@ namespace ModularMagic_BloodMagic.Components
 
         public void Charge(float amount)
         {
-            bool wasCharged = m_charge >= m_maxCharge;
-            float newCharge = Mathf.Min(m_charge + amount, m_maxCharge);
+            bool  wasCharged = m_charge >= m_maxCharge;
+            float newCharge  = Mathf.Min(m_charge + amount, m_maxCharge);
             m_charge = newCharge;
 
             if (!wasCharged && newCharge >= m_maxCharge)
