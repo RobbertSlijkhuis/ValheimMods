@@ -98,4 +98,4 @@ MonoBehaviour:
   m_jumpModifier: {x: 0, y: 0, z: 0}
   m_maxMaxFallSpeed: 0
   m_fallDamageModifier: 0
-  m_windMovementModifier: 1
+  m_windMovementModifier: 0.5
