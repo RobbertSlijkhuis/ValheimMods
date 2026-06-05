@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 3354400426
+CRC: 4220314245
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 4b1075e85b85efdb4e1945c2f9d760bb
+    Hash: 53da7224eb03bfbf72d7e2fd9292a521
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 2db4d050d7cb80284425d40d9ec7a0b6
+    Hash: aca99addaa7c2859a771c4890a80647e
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 4b1075e85b85efdb4e1945c2f9d760bb
+    Hash: 53da7224eb03bfbf72d7e2fd9292a521
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -39,6 +39,12 @@ ClassTypes:
 - Class: 108
   Script: {instanceID: 0}
 - Class: 114
+  Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: 2140874873, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: -1044604064, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
@@ -49,19 +55,13 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
   Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 69470131, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
   Script: {fileID: 313648218, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 115
   Script: {instanceID: 0}
 - Class: 198
@@ -92,10 +92,14 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: ItemDrop/ItemData/SharedData
 Assets:
-- Assets/Custom/PrefabInstance/Lightning/cinder_MMLS.prefab
+- Assets/Custom/PrefabInstance/Lightning/staff_lightning_nova_AOE_MMLS.prefab
+- Assets/Custom/PrefabInstance/Lightning/MMLS_staffLightning3_WITH_SECONDARY_ATTACK.prefab
+- Assets/Custom/PrefabInstance/Lightning/fx/cinder_MMLS.prefab
 - Assets/Custom/PrefabInstance/Lightning/MMLS_staffLightning3.prefab
 - Assets/Custom/PrefabInstance/Lightning/MMLS_staffLightning1.prefab
+- Assets/Custom/PrefabInstance/Lightning/MMLS_staffLightning2_WITH_SECONDARY_ATTACK.prefab
+- Assets/Custom/PrefabInstance/Lightning/fx/fx_staff_lightning_windup_MMLS.prefab
 - Assets/Custom/PrefabInstance/Lightning/staff_lightning_projectile_MMLS.prefab
-- Assets/Custom/PrefabInstance/Lightning/fx_staff_lightning_AOE_MMLS.prefab
+- Assets/Custom/PrefabInstance/Lightning/fx/fx_staff_lightning_AOE_MMLS.prefab
 - Assets/Custom/PrefabInstance/Lightning/MMLS_staffLightning2.prefab
 Dependencies: []

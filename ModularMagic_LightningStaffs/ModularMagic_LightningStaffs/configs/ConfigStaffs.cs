@@ -6,13 +6,13 @@ namespace ModularMagic_LightningStaffs.Configs
     internal static class ConfigStaffs
     {
         public static string staff1Name = "Staff of Lightning";
-        public static string staff1Recipe = "Bronze:10, BoneFragments:20, HardAntler:4, GreydwarfEye:20";
-        public static string staff1UpgradeRecipe = "Bronze:2, BoneFragments:4, HardAntler:1, GreydwarfEye:4";
+        public static string staff1Recipe = "Bronze:6, BoneFragments:20, HardAntler:4, GreydwarfEye:20";
+        public static string staff1UpgradeRecipe = "Bronze:1, BoneFragments:4, HardAntler:1, GreydwarfEye:4";
         public static StaffConfig staffLightning1 = new StaffConfig();
 
         public static string staff2Name = "Staff of Thunder";
-        public static string staff2Recipe = $"{ModularMagic_LightningStaffs.Instance.prefabs.staffLightning1Prefab.name}:1, FineWood:20, Thunderstone:4, Crystal:20";
-        public static string staff2UpgradeRecipe = "FineWood:5, Thunderstone:1, Crystal:8";
+        public static string staff2Recipe = $"{ModularMagic_LightningStaffs.Instance.prefabs.staffLightning1Prefab.name}:1, FineWood:20, Thunderstone:4, Crystal:10";
+        public static string staff2UpgradeRecipe = "FineWood:5, Thunderstone:1, Crystal:4";
         public static StaffConfig staffLightning2 = new StaffConfig();
 
         public static string staff3Name = "Staff of Storms";
@@ -36,16 +36,16 @@ namespace ModularMagic_LightningStaffs.Configs
                 StaffConfigOptions options = new StaffConfigOptions(ModularMagic_LightningStaffs.Instance.prefabs.staffLightning1Prefab, staff1Name, staff1Recipe, staff1UpgradeRecipe, sectionIndex)
                 {
                     description = "Staff lightning 1",
-                    craftingStation = "Workbench",
-                    minStationLevel = 3,
+                    craftingStation = "Forge",
+                    minStationLevel = 2,
                     recipeMultiplier = 1,
                     maxQuality = 4,
                     movementSpeed = -0.05f,
                     damageLightning = 40f,
                     damagePickaxe = 10,
-                    blockArmor = 48,
+                    blockArmor = 12,
                     deflectionForce = 20,
-                    attackForce = 35,
+                    attackForce = 25,
                     useEitr = 20,
                 };
                 staffLightning1.GenerateConfig(options);
@@ -63,16 +63,16 @@ namespace ModularMagic_LightningStaffs.Configs
                 StaffConfigOptions options = new StaffConfigOptions(ModularMagic_LightningStaffs.Instance.prefabs.staffLightning2Prefab, staff2Name, staff2Recipe, staff2UpgradeRecipe, sectionIndex)
                 {
                     description = "Staff lightning 2",
-                    craftingStation = "Workbench",
-                    minStationLevel = 5,
+                    craftingStation = "Forge",
+                    minStationLevel = 3,
                     recipeMultiplier = 1,
                     maxQuality = 4,
                     movementSpeed = -0.05f,
                     damageLightning = 80f,
                     damagePickaxe = 15,
-                    blockArmor = 48,
+                    blockArmor = 30,
                     deflectionForce = 20,
-                    attackForce = 35,
+                    attackForce = 30,
                     useEitr = 27,
                 };
                 staffLightning2.GenerateConfig(options);

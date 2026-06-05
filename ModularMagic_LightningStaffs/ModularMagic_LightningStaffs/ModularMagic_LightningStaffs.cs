@@ -69,8 +69,10 @@ namespace ModularMagic_LightningStaffs
             prefabs.staffLightning2Prefab = assetBundle.LoadAsset<GameObject>("MMLS_staffLightning2");
             prefabs.staffLightning3Prefab = assetBundle.LoadAsset<GameObject>("MMLS_staffLightning3");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("staff_lightning_projectile_MMLS"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("staff_lightning_nova_AOE_MMLS"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("cinder_MMLS"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_lightning_AOE_MMLS"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_lightning_windup_MMLS"), true));
         }
     }
 }
