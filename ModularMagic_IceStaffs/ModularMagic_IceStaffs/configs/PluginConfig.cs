@@ -7,16 +7,16 @@ namespace ModularMagic_IceStaffs.Configs
     internal static class PluginConfig
     {
         public static string staff1Name = "Staff of Frost";
-        public static string staff1Recipe = "Bronze:10, RoundLog:20, Blueberries:10, GreydwarfEye:20";
-        public static string staff1UpgradeRecipe = "Bronze:2, RoundLog:5, Blueberries:2, GreydwarfEye:4";
+        public static string staff1Recipe = "Bronze:6, RoundLog:20, Blueberries:10, GreydwarfEye:20";
+        public static string staff1UpgradeRecipe = "Bronze:1, RoundLog:5, Blueberries:2, GreydwarfEye:4";
         public static StaffConfig staffIce1 = new StaffConfig();
 
-        public static string staff2Name = "Staff of Ice";
-        public static string staff2Recipe = $"{ModularMagic_IceStaffs.Instance.prefabs.StaffIce1Prefab.name}:1, FineWood:20, FreezeGland:10, Crystal:20";
-        public static string staff2UpgradeRecipe = "FineWood:5, FreezeGland:4, Crystal:8";
+        public static string staff2Name = "Staff of Permafrost";
+        public static string staff2Recipe = $"{ModularMagic_IceStaffs.Instance.prefabs.StaffIce1Prefab.name}:1, FineWood:20, FreezeGland:10, Crystal:10";
+        public static string staff2UpgradeRecipe = "FineWood:5, FreezeGland:4, Crystal:4";
         public static StaffConfig staffIce2 = new StaffConfig();
 
-        public static string staff3Name = "Staff of Permafrost";
+        public static string staff3Name = "Hrímkald, touch of Niflheim";
         public static string staff3Recipe = $"{ModularMagic_IceStaffs.Instance.prefabs.StaffIce2Prefab.name}:1, YggdrasilWood:20, Sap:10, Eitr:16";
         public static string staff3UpgradeRecipe = "YggdrasilWood:10, Sap:2, Eitr:8";
         public static StaffConfig staffIce3 = new StaffConfig();
@@ -40,19 +40,19 @@ namespace ModularMagic_IceStaffs.Configs
         {
             try
             {
-                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_IceStaffs.Instance.prefabs.StaffIce1Prefab, staff1Name, staff1Recipe, staff1UpgradeRecipe, sectionIndex)
+                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_IceStaffs.Instance.prefabs.StaffIce1Prefab, staff1Name, staff1Recipe, staff1UpgradeRecipe)
                 {
                     description = "Ice staff 1",
-                    craftingStation = "Workbench",
-                    minStationLevel = 3,
+                    craftingStation = "Forge",
+                    minStationLevel = 2,
                     recipeMultiplier = 1,
                     maxQuality = 4,
                     movementSpeed = -0.05f,
-                    damageFrost = 11f,
-                    damagePierce = 5f,
-                    blockArmor = 48,
+                    damageFrost = 12f,
+                    damagePierce = 4f,
+                    blockArmor = 12,
                     deflectionForce = 20,
-                    attackForce = 35,
+                    attackForce = 10,
                     useEitr = 3,
                 };
                 staffIce1.GenerateConfig(options);
@@ -67,19 +67,19 @@ namespace ModularMagic_IceStaffs.Configs
         {
             try
             {
-                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_IceStaffs.Instance.prefabs.StaffIce2Prefab, staff2Name, staff2Recipe, staff2UpgradeRecipe, sectionIndex)
+                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_IceStaffs.Instance.prefabs.StaffIce2Prefab, staff2Name, staff2Recipe, staff2UpgradeRecipe)
                 {
                     description = "Ice staff 2",
-                    craftingStation = "Workbench",
-                    minStationLevel = 5,
+                    craftingStation = "Forge",
+                    minStationLevel = 3,
                     recipeMultiplier = 1,
                     maxQuality = 4,
                     movementSpeed = -0.05f,
-                    damageFrost = 16f,
-                    damagePierce = 7f,
-                    blockArmor = 48,
+                    damageFrost = 17f,
+                    damagePierce = 6f,
+                    blockArmor = 30,
                     deflectionForce = 20,
-                    attackForce = 35,
+                    attackForce = 10,
                     useEitr = 5,
                 };
                 staffIce2.GenerateConfig(options);
@@ -94,7 +94,7 @@ namespace ModularMagic_IceStaffs.Configs
         {
             try
             {
-                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_IceStaffs.Instance.prefabs.StaffIce3Prefab, staff3Name, staff3Recipe, staff3UpgradeRecipe, sectionIndex)
+                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_IceStaffs.Instance.prefabs.StaffIce3Prefab, staff3Name, staff3Recipe, staff3UpgradeRecipe)
                 {
                     description = "Ice staff 3",
                     craftingStation = "GaldrTable",
@@ -102,11 +102,11 @@ namespace ModularMagic_IceStaffs.Configs
                     recipeMultiplier = 1,
                     maxQuality = 4,
                     movementSpeed = -0.05f,
-                    damageFrost = 20f,
-                    damagePierce = 10f,
+                    damageFrost = 23f,
+                    damagePierce = 7f,
                     blockArmor = 48,
                     deflectionForce = 20,
-                    attackForce = 35,
+                    attackForce = 10,
                     useEitr = 7,
                 };
                 staffIce3.GenerateConfig(options);
@@ -122,7 +122,7 @@ namespace ModularMagic_IceStaffs.Configs
         {
             try
             {
-                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_IceStaffs.Instance.prefabs.StaffIceAOEPrefab, staff4Name, staff4Recipe, staff4UpgradeRecipe, sectionIndex)
+                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_IceStaffs.Instance.prefabs.StaffIceAOEPrefab, staff4Name, staff4Recipe, staff4UpgradeRecipe)
                 {
                     description = "Ice staff AOE",
                     craftingStation = "GaldrTable",

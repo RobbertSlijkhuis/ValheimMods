@@ -399,7 +399,7 @@ MonoBehaviour:
         m_launchAngle: -4
         m_projectiles: 1
         m_projectileBursts: 999
-        m_burstInterval: 0.3
+        m_burstInterval: 0.25
         m_destroyPreviousProjectile: 0
         m_perBurstResourceUsage: 1
         m_hitEffect:

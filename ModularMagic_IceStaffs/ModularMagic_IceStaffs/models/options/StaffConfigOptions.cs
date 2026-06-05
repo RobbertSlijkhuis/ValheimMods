@@ -36,11 +36,11 @@ namespace ModularMagic_IceStaffs.Models
         public int? useEitrSecondary;
         public float? secondaryCooldown;
 
-        public StaffConfigOptions(GameObject prefab, string name, string recipe, string upgradeRecipe, int sectionIndex)
+        public StaffConfigOptions(GameObject prefab, string name, string recipe, string upgradeRecipe)
         {
             this.prefab = prefab;
             this.name = name;
-            sectionName = $"{sectionIndex}. {name.Replace("'", "")}";
+            sectionName = $"{name.Replace("'", "")}";
             this.recipe = recipe;
             recipeName = $"Recipe_{prefab.name}";
             recipeUpgrade = upgradeRecipe;

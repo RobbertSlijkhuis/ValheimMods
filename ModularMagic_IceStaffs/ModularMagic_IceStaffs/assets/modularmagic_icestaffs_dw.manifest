@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 2618478651
+CRC: 3952329274
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 1c106e7d8fb24e9ade61fc2130babf22
+    Hash: 6286a6ec2b2d50e7225d57013487d5ae
   TypeTreeHash:
     serializedVersion: 2
     Hash: a0d122f8704af7bd5c7c272371fe0e1c
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 1c106e7d8fb24e9ade61fc2130babf22
+    Hash: 6286a6ec2b2d50e7225d57013487d5ae
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -104,14 +104,14 @@ Assets:
 - Assets/Custom/MonoBehaviour/FasterWalk_MMIS.asset
 - Assets/PrefabInstance/MMIS_StaffIceAOE.prefab
 - Assets/Custom/PrefabInstance/Frost/MMIS_staffIce1.prefab
-- Assets/Custom/PrefabInstance/Frost/fx_IceSheetSpawn_MMIS.prefab
+- Assets/Custom/PrefabInstance/Frost/fx/fx_IceSheetSpawn_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/staff_ice_projectile_MMIS.prefab
-- Assets/Custom/PrefabInstance/Frost/fx_staff_ice_nova_MMIS.prefab
+- Assets/Custom/PrefabInstance/Frost/fx/fx_staff_ice_nova_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/MMIS_staffIce2.prefab
 - Assets/Custom/PrefabInstance/Frost/IceSheet_MMIS.prefab
-- Assets/Custom/PrefabInstance/Frost/fx_staff_ice_spores_MMIS.prefab
+- Assets/Custom/PrefabInstance/Frost/fx/fx_staff_ice_spores_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/staff_ice_nova_AOE_MMIS.prefab
-- Assets/Custom/PrefabInstance/Frost/fx_iceshard_launch_smoke_MMIS.prefab
-- Assets/Custom/PrefabInstance/Frost/fx_staff_ice_spikes_MMIS.prefab
-- Assets/Custom/PrefabInstance/Frost/fx_iceshard_launch_MMIS.prefab
+- Assets/Custom/PrefabInstance/Frost/fx/fx_iceshard_launch_smoke_MMIS.prefab
+- Assets/Custom/PrefabInstance/Frost/fx/fx_staff_ice_spikes_MMIS.prefab
+- Assets/Custom/PrefabInstance/Frost/fx/fx_iceshard_launch_MMIS.prefab
 Dependencies: []
