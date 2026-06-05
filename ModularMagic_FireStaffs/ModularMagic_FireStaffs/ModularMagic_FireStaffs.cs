@@ -69,8 +69,10 @@ namespace ModularMagic_FireStaffs
             prefabs.staffFire2Prefab = assetBundle.LoadAsset<GameObject>("MMFS_StaffFire2");
             prefabs.staffFire3Prefab = assetBundle.LoadAsset<GameObject>("MMFS_StaffFire3");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("staff_fire_projectile_aoe_MMFS"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("staff_fire_projectile_aoe_small_MMFS"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("staff_fire_projectile_MMFS"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_fireball_staff_explosion_MMFS"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_fireball_staff_explosion_small_MMFS"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_fireball_staff_impact_MMFS"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("cinder_MMFS"), true));
             //PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_fire_windup_MMFS"), true));

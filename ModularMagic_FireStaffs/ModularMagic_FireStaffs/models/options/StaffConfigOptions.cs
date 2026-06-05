@@ -40,7 +40,7 @@ namespace ModularMagic_FireStaffs.Models
         {
             this.prefab = prefab;
             this.name = name;
-            this.sectionName = $"{sectionIndex}. {name.Replace("'", "")}";
+            this.sectionName = $"{name.Replace("'", "")}";
             this.recipe = recipe;
             this.recipeName = $"Recipe_{prefab.name}";
             this.recipeUpgrade = upgradeRecipe;

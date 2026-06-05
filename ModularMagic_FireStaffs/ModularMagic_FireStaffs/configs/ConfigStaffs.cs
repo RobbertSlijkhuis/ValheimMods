@@ -5,14 +5,14 @@ namespace ModularMagic_FireStaffs.Configs
 {
     internal static class ConfigStaffs
     {
-        public static string staff1Name = "Emberspire the Flamebinder";
-        public static string staff1Recipe = "Bronze:10, RoundLog:20, Coal:10, SurtlingCore:6";
-        public static string staff1UpgradeRecipe = "Bronze:2, RoundLog:5, Coal:2, SurtlingCore:2";
+        public static string staff1Name = "Staff of Sparks";
+        public static string staff1Recipe = "Bronze:6, RoundLog:20, Coal:10, SurtlingCore:6";
+        public static string staff1UpgradeRecipe = "Bronze:1, RoundLog:5, Coal:2, SurtlingCore:2";
         public static StaffConfig staffFire1 = new StaffConfig();
 
-        public static string staff2Name = "Wyrmflare of the Cindercoil";
-        public static string staff2Recipe = $"{ModularMagic_FireStaffs.Instance.prefabs.staffFire1Prefab.name}:1, FineWood:20, SurtlingCore:10, Crystal:20";
-        public static string staff2UpgradeRecipe = "FineWood:5, SurtlingCore:4, Crystal:8";
+        public static string staff2Name = "Staff of Fireballs";
+        public static string staff2Recipe = $"{ModularMagic_FireStaffs.Instance.prefabs.staffFire1Prefab.name}:1, FineWood:20, SurtlingCore:10, Crystal:10";
+        public static string staff2UpgradeRecipe = "FineWood:5, SurtlingCore:4, Crystal:4";
         public static StaffConfig staffFire2 = new StaffConfig();
 
         public static string staff3Name = "Ignivar, fang of Surtur";
@@ -35,17 +35,17 @@ namespace ModularMagic_FireStaffs.Configs
             {
                 StaffConfigOptions options = new StaffConfigOptions(ModularMagic_FireStaffs.Instance.prefabs.staffFire1Prefab, staff1Name, staff1Recipe, staff1UpgradeRecipe, sectionIndex)
                 {
-                    description = "Master the elemental forces of flame. Or just throw fireballs until things stop moving. Smells vaguely of burnt eyebrows.",
-                    craftingStation = "Workbench",
-                    minStationLevel = 3,
+                    description = "Master the elemental forces of the flame. Or just throw fireballs until things stop moving. Smells vaguely of burnt eyebrows.",
+                    craftingStation = "Forge",
+                    minStationLevel = 2,
                     recipeMultiplier = 1,
                     maxQuality = 4,
                     movementSpeed = -0.05f,
-                    damageBlunt = 40f,
-                    damageFire = 40f,
-                    blockArmor = 48,
+                    damageBlunt = 30f,
+                    damageFire = 30f,
+                    blockArmor = 12,
                     deflectionForce = 20,
-                    attackForce = 35,
+                    attackForce = 20,
                     useEitr = 20,
                 };
                 staffFire1.GenerateConfig(options);
@@ -62,17 +62,17 @@ namespace ModularMagic_FireStaffs.Configs
             {
                 StaffConfigOptions options = new StaffConfigOptions(ModularMagic_FireStaffs.Instance.prefabs.staffFire2Prefab, staff2Name, staff2Recipe, staff2UpgradeRecipe, sectionIndex)
                 {
-                    description = "This staff literally embodies the philosophy: burn first, ask questions never. In the hands of a true Viking, diplomacy starts with fireballs.",
-                    craftingStation = "Workbench",
-                    minStationLevel = 5,
+                    description = "This staff literally embodies the philosophy: burn first, ask questions... never. In the hands of a true Viking, diplomacy starts with fireballs!",
+                    craftingStation = "Forge",
+                    minStationLevel = 3,
                     recipeMultiplier = 1,
                     maxQuality = 4,
                     movementSpeed = -0.05f,
-                    damageBlunt = 80f,
-                    damageFire = 80f,
-                    blockArmor = 48,
+                    damageBlunt = 60f,
+                    damageFire = 60f,
+                    blockArmor = 30,
                     deflectionForce = 20,
-                    attackForce = 35,
+                    attackForce = 20,
                     useEitr = 27,
                 };
                 staffFire2.GenerateConfig(options);
