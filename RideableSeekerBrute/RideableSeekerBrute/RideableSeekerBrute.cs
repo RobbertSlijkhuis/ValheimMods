@@ -38,7 +38,6 @@ namespace RideableSeekerBrute
         GameObject wolf;
         GameObject boar;
         GameObject abomination;
-        GameObject warg;
         GameObject drake;
 
         private ConfigEntry<KeyboardShortcut> configAttackKey;
@@ -51,16 +50,12 @@ namespace RideableSeekerBrute
         private void Awake()
         {
             InitConfig();
-
-            
-            ModQuery.Enable();
             harmony.PatchAll();
 
             InitAssetBundle();
             InitInputs();
 
             PrefabManager.OnVanillaPrefabsAvailable += InitMountable;
-            PrefabManager.OnPrefabsRegistered += InitCustomMounts;
         }
 
         private void Update()
@@ -84,7 +79,19 @@ namespace RideableSeekerBrute
             if (ZInput.GetButton(AttackButton.Name) && !character.InAttack())
             {
                 Jotunn.Logger.LogWarning(AttackButton.BlockOtherInputs);
-                if (character.m_defaultItems.Length > 0 && character.m_defaultItems[0] != null)
+                Jotunn.Logger.LogWarning(character.name);
+
+                if (character.gameObject.name == "SeekerBrute(Clone)")
+                {
+                    if (character.m_defaultItems.Length > 0 && character.m_defaultItems[1] != null)
+                    {
+                        Jotunn.Logger.LogInfo("Attack!");
+                        character.m_rightItem = character.m_defaultItems[1].GetComponent<ItemDrop>().m_itemData;
+                        character.StartAttack(null, false);
+                    }
+                }
+
+                else if (character.m_defaultItems.Length > 0 && character.m_defaultItems[0] != null)
                 {
                     Jotunn.Logger.LogInfo("Attack!");
                     character.m_rightItem = character.m_defaultItems[0].GetComponent<ItemDrop>().m_itemData;
@@ -93,63 +100,24 @@ namespace RideableSeekerBrute
             }
             else if (ZInput.GetButton(AttackSecondaryButton.Name) && !character.InAttack())
             {
-                if (character.m_defaultItems.Length > 1 && character.m_defaultItems[1] != null)
+                Jotunn.Logger.LogWarning(character.name);
+                if (character.gameObject.name == "SeekerBrute(Clone)")
+                {
+                    if (character.m_defaultItems.Length > 1 && character.m_defaultItems[3] != null)
+                    {
+                        Jotunn.Logger.LogInfo("Secondary attack!");
+                        character.m_rightItem = character.m_defaultItems[3].GetComponent<ItemDrop>().m_itemData;
+                        character.StartAttack(null, false);
+                    }
+                }
+
+                else if (character.m_defaultItems.Length > 1 && character.m_defaultItems[1] != null)
                 {
                     Jotunn.Logger.LogInfo("Secondary attack!");
                     character.m_rightItem = character.m_defaultItems[1].GetComponent<ItemDrop>().m_itemData;
                     character.StartAttack(null, false);
                 }
             }
-        }
-
-        private void InitCustomMounts()
-        {
-            // Jotunn.Logger.LogInfo($"Modded prefabs:");
-            foreach (var moddedPrefab in ModQuery.GetPrefabs())
-            {
-                // Jotunn.Logger.LogInfo($"  {moddedPrefab.Prefab.name} added by {moddedPrefab.SourceMod.Name}");
-                if (moddedPrefab.Prefab.name == "AshenWarg_TW")
-                {
-                    warg = moddedPrefab.Prefab;
-                    Jotunn.Logger.LogInfo("Found Warg!");
-                    break;
-                }
-            }
-
-            if (warg != null)
-            {
-                TameableConfig tameableConfig = new TameableConfig();
-                tameableConfig.feedDuration = 15;
-                tameableConfig.tamingTime = 15;
-                tameableConfig.commandable = true;
-                tameableConfig.AddConsumeItem(PrefabManager.Instance.GetPrefab("RawMeat").GetComponent<ItemDrop>());
-                tameableConfig.AddConsumeItem(PrefabManager.Instance.GetPrefab("DeerMeat").GetComponent<ItemDrop>());
-
-                TameableManager tameable = new TameableManager();
-                tameable.MakeTameable(warg, tameableConfig);
-
-                // Mount stuff
-                GameObject mediumSaddle = PrefabManager.Instance.GetPrefab("SaddleMedium_DW");
-                Jotunn.Logger.LogWarning("Saddle prefab: "+ mediumSaddle?.name);
-
-                SaddleConfig saddleConfigMedium = new SaddleConfig(mediumSaddle, "Visual");
-                saddleConfigMedium.hoverText = "Medium Saddle";
-                saddleConfigMedium.maxStamina = 240;
-                saddleConfigMedium.attach.position = new Vector3(0, 1.6f, 0);
-                saddleConfigMedium.attach.scale = new Vector3(1, 1, 1);
-                saddleConfigMedium.sphereRadius = 0.6f;
-
-                MountableConfig wargAttachConfig = new MountableConfig("BARGHEST_ Spine");
-                wargAttachConfig.characterAttach.position = new Vector3(-0.6f, -0.4f, 0);
-                wargAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(0, 270, 180);
-                wargAttachConfig.characterAttach.scale = new Vector3(1, 1, 1);
-                wargAttachConfig.saddleAttach.position = new Vector3(0, -0.4f, -0.27f);
-                wargAttachConfig.saddleAttach.scale = new Vector3(0.7f, 0.7f, 0.7f);
-
-                MountableManager.Instance.MakeMountable(warg, saddleConfigMedium, wargAttachConfig);
-            }
-
-            PrefabManager.OnVanillaPrefabsAvailable -= InitCustomMounts;
         }
 
         private void InitMountable()
@@ -160,19 +128,19 @@ namespace RideableSeekerBrute
             deer = PrefabManager.Instance.GetPrefab("Deer");
             bunny = PrefabManager.Instance.GetPrefab("Hare");
             abomination = PrefabManager.Instance.GetPrefab("Abomination");
-            drake = PrefabManager.Instance.GetPrefab("Hatchling");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(drake, true));
+            //drake = PrefabManager.Instance.GetPrefab("Hatchling");
+            //PrefabManager.Instance.AddPrefab(new CustomPrefab(drake, true));
 
-            ItemConfig saddleConfig = new ItemConfig();
-            saddleConfig.Name = "Saddle";
-            saddleConfig.Description = "A saddle, used for mounts!";
-            saddleConfig.CraftingStation = "Workbench";
-            saddleConfig.AddRequirement(new RequirementConfig("LeatherScraps", 10));
-            saddleConfig.AddRequirement(new RequirementConfig("DeerHide", 10));
-            saddleConfig.AddRequirement(new RequirementConfig("Chain", 4));
-            saddleConfig.AddRequirement(new RequirementConfig("Wood", 10));
-            CustomItem saddle = new CustomItem(saddleNoCloth, true, saddleConfig);
-            ItemManager.Instance.AddItem(saddle);
+            //ItemConfig saddleConfig = new ItemConfig();
+            //saddleConfig.Name = "Saddle";
+            //saddleConfig.Description = "A saddle, used for mounts!";
+            //saddleConfig.CraftingStation = "Workbench";
+            //saddleConfig.AddRequirement(new RequirementConfig("LeatherScraps", 10));
+            //saddleConfig.AddRequirement(new RequirementConfig("DeerHide", 10));
+            //saddleConfig.AddRequirement(new RequirementConfig("Chain", 4));
+            //saddleConfig.AddRequirement(new RequirementConfig("Wood", 10));
+            //CustomItem saddle = new CustomItem(saddleNoCloth, true, saddleConfig);
+            //ItemManager.Instance.AddItem(saddle);
 
             ItemConfig simpleSaddleConfig = new ItemConfig();
             simpleSaddleConfig.Name = "Simple Saddle";
@@ -200,8 +168,8 @@ namespace RideableSeekerBrute
             heavySaddleConfig.Name = "Heavy Saddle";
             heavySaddleConfig.Description = "A huge saddle, used for big mounts!";
             heavySaddleConfig.CraftingStation = "Workbench";
-            heavySaddleConfig.AddRequirement(new RequirementConfig("LeatherScraps", 10));
-            heavySaddleConfig.AddRequirement(new RequirementConfig("DeerHide", 10));
+            heavySaddleConfig.AddRequirement(new RequirementConfig("ScaleHide", 10));
+            heavySaddleConfig.AddRequirement(new RequirementConfig("Carapace", 10));
             heavySaddleConfig.AddRequirement(new RequirementConfig("Chain", 4));
             heavySaddleConfig.AddRequirement(new RequirementConfig("FineWood", 10));
             CustomItem heavySaddle = new CustomItem(saddleHeavy, true, heavySaddleConfig);
@@ -209,11 +177,11 @@ namespace RideableSeekerBrute
 
             // Tame stuff
             TameableConfig tameableConfig = new TameableConfig();
-            tameableConfig.feedDuration = 15;
-            tameableConfig.tamingTime = 15;
+            tameableConfig.feedDuration = 600;
+            tameableConfig.tamingTime = 1800;
             tameableConfig.commandable = true;
-            tameableConfig.AddConsumeItem(PrefabManager.Instance.GetPrefab("RawMeat").GetComponent<ItemDrop>());
-            tameableConfig.AddConsumeItem(PrefabManager.Instance.GetPrefab("DeerMeat").GetComponent<ItemDrop>());
+            tameableConfig.AddConsumeItem(PrefabManager.Instance.GetPrefab("Softtissue").GetComponent<ItemDrop>());
+            tameableConfig.AddConsumeItem(PrefabManager.Instance.GetPrefab("RoyalJelly").GetComponent<ItemDrop>());
 
             TameableManager tameable = new TameableManager();
             tameable.MakeTameable(seekerBrute, tameableConfig);
@@ -222,7 +190,7 @@ namespace RideableSeekerBrute
             tameable.MakeTameable(bunny, tameableConfig);
             tameable.MakeTameable(deer, tameableConfig);
             tameable.MakeTameable(abomination, tameableConfig);
-            tameable.MakeTameable(drake, tameableConfig);
+            //tameable.MakeTameable(drake, tameableConfig);
 
             // Mount stuff
             SaddleConfig saddleConfigHeavy = new SaddleConfig(heavySaddle.ItemPrefab, "Visual");
@@ -288,18 +256,18 @@ namespace RideableSeekerBrute
             abomAttachConfig.saddleAttach.position = new Vector3(0, -0.0033f, -0.0025f);
             abomAttachConfig.saddleAttach.scale = new Vector3(0.006f, 0.006f, 0.006f);
 
-            MountableConfig drakeAttachConfig = new MountableConfig("Neck2");
-            drakeAttachConfig.characterAttach.position = new Vector3(0, -0.001f, -0.005f);
-            drakeAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(285, 0, 180);
-            drakeAttachConfig.characterAttach.scale = new Vector3(1, 1, 1);
-            drakeAttachConfig.saddleAttach.position = new Vector3(0, 0, 0);
-            //drakeAttachConfig.saddleAttach.scale = new Vector3(0.01f, 0.01f, 0.01f);
-            drakeAttachConfig.saddleAttach.scale = new Vector3(0, 0, 0);
-            //drakeAttachConfig.characterAttach.position = new Vector3(0, 0, 0);
-            //drakeAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(-90, 0, 0);
+            //MountableConfig drakeAttachConfig = new MountableConfig("Neck2");
+            //drakeAttachConfig.characterAttach.position = new Vector3(0, -0.001f, -0.005f);
+            //drakeAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(285, 0, 180);
             //drakeAttachConfig.characterAttach.scale = new Vector3(1, 1, 1);
             //drakeAttachConfig.saddleAttach.position = new Vector3(0, 0, 0);
-            //drakeAttachConfig.saddleAttach.scale = new Vector3(0.008f, 0.008f, 0.008f);
+            ////drakeAttachConfig.saddleAttach.scale = new Vector3(0.01f, 0.01f, 0.01f);
+            //drakeAttachConfig.saddleAttach.scale = new Vector3(0, 0, 0);
+            ////drakeAttachConfig.characterAttach.position = new Vector3(0, 0, 0);
+            ////drakeAttachConfig.characterAttach.rotation.eulerAngles = new Vector3(-90, 0, 0);
+            ////drakeAttachConfig.characterAttach.scale = new Vector3(1, 1, 1);
+            ////drakeAttachConfig.saddleAttach.position = new Vector3(0, 0, 0);
+            ////drakeAttachConfig.saddleAttach.scale = new Vector3(0.008f, 0.008f, 0.008f);
 
             MountableManager.Instance.MakeMountable(seekerBrute, saddleConfigHeavy, bruteAttachConfig);
 
@@ -328,11 +296,11 @@ namespace RideableSeekerBrute
             saddleConfigHeavy.attach.position = new Vector3(0, 2.5f, 1.5f);
             MountableManager.Instance.MakeMountable(abomination, saddleConfigHeavy, abomAttachConfig);
 
-            // saddleConfig.sphereRadius = 0.9f;
-            saddleConfigHeavy.maxUseRange = 20;
-            saddleConfigSimple.sphereRadius = 1;
-            saddleConfigSimple.attach.position = new Vector3(0, 2, 1);
-            MountableManager.Instance.MakeMountable(drake, saddleConfigSimple, drakeAttachConfig);
+            //// saddleConfig.sphereRadius = 0.9f;
+            //saddleConfigHeavy.maxUseRange = 20;
+            //saddleConfigSimple.sphereRadius = 1;
+            //saddleConfigSimple.attach.position = new Vector3(0, 2, 1);
+            //MountableManager.Instance.MakeMountable(drake, saddleConfigSimple, drakeAttachConfig);
 
             PrefabManager.OnVanillaPrefabsAvailable -= InitMountable;
         }
