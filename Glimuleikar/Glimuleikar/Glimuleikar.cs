@@ -1,21 +1,26 @@
 using BepInEx;
 using Glimuleikar.Configs;
+using Glimuleikar.Network;
 using Jotunn.Entities;
 using Jotunn.Managers;
+using Jotunn.Utils;
+using System.IO;
 using System.Reflection;
 
 namespace Glimuleikar
 {
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
-    //[NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
+    [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     internal class Glimuleikar : BaseUnityPlugin
     {
         public const string PluginGUID = "DeathWizsh.Glimuleikar";
         public const string PluginName = "Glimuleikar";
-        public const string PluginVersion = "0.0.1";
+        public const string PluginVersion = "0.0.3";
         public static Glimuleikar Instance;
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
+        public static string configFileName = PluginGUID + ".cfg";
+        public static string configFileFullPath = BepInEx.Paths.ConfigPath + Path.DirectorySeparatorChar.ToString() + configFileName;
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html

@@ -1,4 +1,8 @@
-﻿using BepInEx.Configuration;
+﻿using BepInEx;
+using BepInEx.Configuration;
+using Jotunn.Managers;
+using System;
+using System.IO;
 using WizshBoneTwitchIntegration.Harmony;
 
 namespace Glimuleikar.Configs
@@ -6,7 +10,6 @@ namespace Glimuleikar.Configs
     internal static class PluginConfig
     {
         public static string sectionDamage = "Damage";
-        public static string sectionHarpoon = "Harpoon";
 
         public static ConfigEntry<bool> configDamageStructuresEnable;
         public static ConfigEntry<bool> configDamagePlayersEnable;
@@ -22,7 +25,6 @@ namespace Glimuleikar.Configs
         public static void Init()
         {
             InitGeneralConfig();
-            InitSettingChangedHandlers();
         }
 
         public static void InitGeneralConfig()
@@ -30,36 +32,81 @@ namespace Glimuleikar.Configs
             configDamageStructuresEnable = Glimuleikar.Instance.Config.Bind(sectionDamage, "Enable damage to structures", true,
                 new ConfigDescription("Whether the damage to structures is enabled", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+            configDamageStructuresEnable.SettingChanged += (sender, e) =>
+            {
+                Jotunn.Logger.LogWarning("Structure damage setting changed to: " + configDamageStructuresEnable.Value);
+            };
 
             configDamagePlayersEnable = Glimuleikar.Instance.Config.Bind(sectionDamage, "Enable player damage", true,
                 new ConfigDescription("Whether the damage from players is enabled", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+            configDamagePlayersEnable.SettingChanged += (sender, e) =>
+            {
+                Jotunn.Logger.LogWarning("Player damage setting changed to: " + configDamagePlayersEnable.Value);
+            };
 
             configDamageFallEnable = Glimuleikar.Instance.Config.Bind(sectionDamage, "Enable fall damage", true,
                 new ConfigDescription("Whether fall damage is enabled", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+            configDamageFallEnable.SettingChanged += (sender, e) =>
+            {
+                Jotunn.Logger.LogWarning("Fall damage setting changed to: " + configDamageFallEnable.Value);
+            };
 
             configDamageMonstersEnable = Glimuleikar.Instance.Config.Bind(sectionDamage, "Enable monster damage", true,
                 new ConfigDescription("Whether the damage from monsters is enabled", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+            configDamageMonstersEnable.SettingChanged += (sender, e) =>
+                {
+                    Jotunn.Logger.LogWarning("Monster damage setting changed to: " + configDamageMonstersEnable.Value);
+                };
 
             configDamageTamedLoxEnable = Glimuleikar.Instance.Config.Bind(sectionDamage, "Enable tamed Lox damage to players", false,
                 new ConfigDescription("Whether tamed Lox can damage players by running into them", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+            configDamageTamedLoxEnable.SettingChanged += (sender, e) =>
+            {
+                Jotunn.Logger.LogWarning("Tamed Lox damage setting changed to: " + configDamageTamedLoxEnable.Value);
+                LoxPatchesWBTI.OnTamedLoxDamageSettingChanged();
+            };
 
-            configHarpoonMaxRopeLength = Glimuleikar.Instance.Config.Bind(sectionHarpoon, "Max rope length", 10f,
-                new ConfigDescription("Maximum harpoon rope length in units. Targets hit from further away will be pulled in to this distance.", new AcceptableValueRange<float>(1f, 50f),
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+            FileSystemWatcher configWatcher = new FileSystemWatcher(BepInEx.Paths.ConfigPath, Glimuleikar.configFileName);
+            configWatcher.Changed += new FileSystemEventHandler(OnConfigFileChange);
+            configWatcher.Created += new FileSystemEventHandler(OnConfigFileChange);
+            configWatcher.Renamed += new RenamedEventHandler(OnConfigFileChange);
+            configWatcher.IncludeSubdirectories = true;
+            configWatcher.SynchronizingObject = ThreadingHelper.SynchronizingObject;
+            configWatcher.EnableRaisingEvents = true;
 
-            configHarpoonPullDuration = Glimuleikar.Instance.Config.Bind(sectionHarpoon, "Pull duration", 0.5f,
-                new ConfigDescription("Time in seconds to pull the target to the max rope length.", new AcceptableValueRange<float>(0.1f, 5f),
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
-
+            SynchronizationManager.OnConfigurationSynchronized += (obj, attr) =>
+            {
+                if (attr.InitialSynchronization)
+                {
+                    Jotunn.Logger.LogWarning("Initial Config sync event received");
+                }
+                else
+                {
+                    Jotunn.Logger.LogWarning("Config sync event received");
+                }
+            };
         }
 
-        private static void InitSettingChangedHandlers()
+        /**
+         * Event handler for when the config file changes
+         */
+        private static void OnConfigFileChange(object sender, FileSystemEventArgs e)
         {
-            configDamageTamedLoxEnable.SettingChanged += (sender, e) => LoxPatchesWBTI.OnTamedLoxDamageSettingChanged();
+            try
+            {
+                if (!File.Exists(Glimuleikar.configFileFullPath))
+                    return;
+
+                Glimuleikar.Instance.Config.Reload();
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Something went wrong while reloading the config, please check if the file exists and the entries are valid! " + error);
+            }
         }
 
         private static int HandleOrder()
