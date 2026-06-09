@@ -62,14 +62,13 @@ namespace WizshBoneTwitchIntegration.Models
         {
             { RedeemType.Detonate,           nameof(detonateData)     },
             { RedeemType.Flashbang,          nameof(flashbangData)    },
-            { RedeemType.SpawnMist,          nameof(mistData)         },
-            { RedeemType.TerrainEdit,        nameof(terrainEditData)  },
-            { RedeemType.SpawnWeather,       nameof(weatherData)      },
+            { RedeemType.Mist,               nameof(mistData)         },
             { RedeemType.SpawnCreature,      nameof(creatureData)     },
             { RedeemType.SpawnAbility,       nameof(spawnAbilityData) },
             { RedeemType.SurpriseChest,      nameof(chestData)        },
             { RedeemType.StatusEffect,       nameof(statusEffectData) },
-            { RedeemType.StatusEffectRandom, nameof(statusEffectData) },
+            { RedeemType.TerrainEdit,        nameof(terrainEditData)  },
+            { RedeemType.Weather,            nameof(weatherData)      },
         };
 
         private static readonly HashSet<string> AllDataFields = new HashSet<string>

@@ -161,7 +161,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (Player.m_localPlayer.InInterior())
                 {
-                    if (redeem.type == RedeemType.TerrainEdit || redeem.type == RedeemType.SpawnHallucination || redeem.type == RedeemType.SpawnAbility)
+                    if (redeem.type == RedeemType.TerrainEdit || redeem.type == RedeemType.SpawnAbility)
                     {
                         m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! {(PluginConfig.configAutoResolveRedeems.Value ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
                         throw new RedeemException("Player is in dungeon and redeem is not allowed", ExceptionType.Warning);
@@ -179,25 +179,40 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     SpawnAbilityHelper.SpawnAbility(redeem.spawnAbilityData, customRewardEvent, m_chat);
                 }
 
-                if (redeem.type == RedeemType.SpawnMist)
+                if (redeem.type == RedeemType.Detonate)
+                {
+                    if (redeem.detonateData == null)
+                    {
+                        throw new RedeemException("Could not find data for detonate", ExceptionType.Error);
+                    }
+
+                    DetonateHelper.Detonate(redeem.detonateData, customRewardEvent);
+                }
+
+                if (redeem.type == RedeemType.Flashbang)
+                {
+                    if (redeem.flashbangData == null)
+                    {
+                        throw new RedeemException("Could not find data for flashbang", ExceptionType.Error);
+                    }
+
+                    StartCoroutine(FlashBangHelper.AttachFlashBang(redeem.flashbangData, customRewardEvent));
+                }
+
+                if (redeem.type == RedeemType.Mist)
                 {
                     if (redeem.mistData == null)
-                        throw new RedeemException("could not find data for SpawnMist", ExceptionType.Error);
+                        throw new RedeemException("could not find data for Mist", ExceptionType.Error);
 
                     MistHelper.SpawnMist(redeem.mistData, customRewardEvent);
                 }
 
-                if (redeem.type == RedeemType.SpawnWeather)
-                {
-                    if (redeem.weatherData == null)
-                        throw new RedeemException("could not find data for SpawnWeather", ExceptionType.Error);
-
-                    WeatherHelper.SpawnWeather(redeem.weatherData, customRewardEvent);
-                }
-
                 if (redeem.type == RedeemType.StatusEffect)
                 {
-                    Jotunn.Logger.LogWarning("StatusEffect redeem type is not yet implemented");
+                    if (redeem.statusEffectData == null)
+                        throw new RedeemException("Could not find data for StatusEffect", ExceptionType.Error);
+
+                    StatusEffectHelper.Apply(redeem.statusEffectData, customRewardEvent);
                 }
 
                 if (redeem.type == RedeemType.SurpriseChest)
@@ -228,24 +243,12 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     TerrainEditHelper.ApplyTerrainEdit(redeem.terrainEditData, customRewardEvent);
                 }
 
-                if (redeem.type == RedeemType.Flashbang)
+                if (redeem.type == RedeemType.Weather)
                 {
-                    if (redeem.flashbangData == null)
-                    {
-                        throw new RedeemException("Could not find data for flashbang", ExceptionType.Error);
-                    }
+                    if (redeem.weatherData == null)
+                        throw new RedeemException("could not find data for Weather", ExceptionType.Error);
 
-                    StartCoroutine(FlashBangHelper.AttachFlashBang(redeem.flashbangData, customRewardEvent));
-                }
-
-                if (redeem.type == RedeemType.Detonate)
-                {
-                    if (redeem.detonateData == null)
-                    {
-                        throw new RedeemException("Could not find data for detonate", ExceptionType.Error);
-                    }
-
-                    DetonateHelper.Detonate(redeem.detonateData, customRewardEvent);
+                    WeatherHelper.SpawnWeather(redeem.weatherData, customRewardEvent);
                 }
 
                 if (PluginConfig.configAutoResolveRedeems.Value)

@@ -96,28 +96,72 @@ namespace WizshBoneTwitchIntegration.Gui
                 var colorAttr    = field.GetCustomAttribute<ColorPickerAttribute>();
                 var dropdownAttr = field.GetCustomAttribute<DropdownOptionsAttribute>();
                 var seDropdown   = field.GetCustomAttribute<StatusEffectNameDropdownAttribute>();
+                var onChanged    = field.GetCustomAttribute<OnValueChangedAttribute>();
 
                 if (colorAttr != null)
+                {
                     BuildColorField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth);
+                }
                 else if (seDropdown != null)
-                    BuildStringDropdownField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth, GetAvailableStatusEffectNames());
+                {
+                    Dropdown dd = BuildStringDropdownField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth, GetAvailableStatusEffectNames());
+                    if (onChanged != null)
+                        dd.onValueChanged.AddListener(_ => InvokeOnValueChanged(parent, target, onChanged.MethodName));
+                }
                 else if (dropdownAttr != null)
-                    BuildStringDropdownField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth, dropdownAttr.Options);
+                {
+                    Dropdown dd = BuildStringDropdownField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth, dropdownAttr.Options);
+                    if (onChanged != null)
+                        dd.onValueChanged.AddListener(_ => InvokeOnValueChanged(parent, target, onChanged.MethodName));
+                }
                 else
-                    BuildStringField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth);
+                {
+                    InputField inp = BuildStringField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth);
+                    if (onChanged != null)
+                        inp.onValueChanged.AddListener(_ => InvokeOnValueChanged(parent, target, onChanged.MethodName));
+                }
             }
-            else if (isInt)
-                BuildIntField(parent, target, field, currentValue is int i ? i : 0, fieldPos, fieldWidth);
-            else if (isFloat)
-                BuildFloatField(parent, target, field, currentValue is float f ? f : 0f, fieldPos, fieldWidth);
-            else if (isBool)
-                BuildBoolField(parent, target, field, currentValue is bool b && b, fieldPos, fieldWidth);
-            else if (isNullableInt)
-                BuildNullableIntField(parent, target, field, currentValue as int?, fieldPos, fieldWidth);
-            else if (isNullableFloat)
-                BuildNullableFloatField(parent, target, field, currentValue as float?, fieldPos, fieldWidth);
-            else if (isNullableBool)
-                BuildBoolField(parent, target, field, currentValue is bool nb && nb, fieldPos, fieldWidth);
+            else
+            {
+                var onChanged = field.GetCustomAttribute<OnValueChangedAttribute>();
+
+                if (isInt)
+                {
+                    InputField inp = BuildIntField(parent, target, field, currentValue is int i ? i : 0, fieldPos, fieldWidth);
+                    if (onChanged != null)
+                        inp.onValueChanged.AddListener(_ => InvokeOnValueChanged(parent, target, onChanged.MethodName));
+                }
+                else if (isFloat)
+                {
+                    InputField inp = BuildFloatField(parent, target, field, currentValue is float f ? f : 0f, fieldPos, fieldWidth);
+                    if (onChanged != null)
+                        inp.onValueChanged.AddListener(_ => InvokeOnValueChanged(parent, target, onChanged.MethodName));
+                }
+                else if (isBool)
+                {
+                    Toggle tog = BuildBoolField(parent, target, field, currentValue is bool b && b, fieldPos, fieldWidth);
+                    if (onChanged != null)
+                        tog.onValueChanged.AddListener(_ => InvokeOnValueChanged(parent, target, onChanged.MethodName));
+                }
+                else if (isNullableInt)
+                {
+                    InputField inp = BuildNullableIntField(parent, target, field, currentValue as int?, fieldPos, fieldWidth);
+                    if (onChanged != null)
+                        inp.onValueChanged.AddListener(_ => InvokeOnValueChanged(parent, target, onChanged.MethodName));
+                }
+                else if (isNullableFloat)
+                {
+                    InputField inp = BuildNullableFloatField(parent, target, field, currentValue as float?, fieldPos, fieldWidth);
+                    if (onChanged != null)
+                        inp.onValueChanged.AddListener(_ => InvokeOnValueChanged(parent, target, onChanged.MethodName));
+                }
+                else if (isNullableBool)
+                {
+                    Toggle tog = BuildBoolField(parent, target, field, currentValue is bool nb && nb, fieldPos, fieldWidth);
+                    if (onChanged != null)
+                        tog.onValueChanged.AddListener(_ => InvokeOnValueChanged(parent, target, onChanged.MethodName));
+                }
+            }
 
             // Tooltip - to the right of the input field, same vertical position
             if (tooltip != null)
@@ -155,13 +199,14 @@ namespace WizshBoneTwitchIntegration.Gui
         // Field builders
         // =====================================================================
 
-        private static void BuildStringField(GameObject parent, object target, FieldInfo field, string currentValue, Vector2 position, float width)
+        private static InputField BuildStringField(GameObject parent, object target, FieldInfo field, string currentValue, Vector2 position, float width)
         {
             InputField input = CreateInputField(parent, position, width, currentValue);
             input.onValueChanged.AddListener(val => field.SetValue(target, val));
+            return input;
         }
 
-        private static void BuildIntField(GameObject parent, object target, FieldInfo field, int currentValue, Vector2 position, float width)
+        private static InputField BuildIntField(GameObject parent, object target, FieldInfo field, int currentValue, Vector2 position, float width)
         {
             InputField input = CreateInputField(parent, position, width, currentValue.ToString());
             input.contentType = InputField.ContentType.IntegerNumber;
@@ -170,9 +215,10 @@ namespace WizshBoneTwitchIntegration.Gui
                 if (int.TryParse(val, out int result))
                     field.SetValue(target, result);
             });
+            return input;
         }
 
-        private static void BuildFloatField(GameObject parent, object target, FieldInfo field, float currentValue, Vector2 position, float width)
+        private static InputField BuildFloatField(GameObject parent, object target, FieldInfo field, float currentValue, Vector2 position, float width)
         {
             InputField input = CreateInputField(parent, position, width, currentValue.ToString("G"));
             input.contentType = InputField.ContentType.DecimalNumber;
@@ -181,9 +227,10 @@ namespace WizshBoneTwitchIntegration.Gui
                 if (float.TryParse(val, out float result))
                     field.SetValue(target, result);
             });
+            return input;
         }
 
-        private static void BuildNullableFloatField(GameObject parent, object target, FieldInfo field, float? currentValue, Vector2 position, float width)
+        private static InputField BuildNullableFloatField(GameObject parent, object target, FieldInfo field, float? currentValue, Vector2 position, float width)
         {
             string initial = currentValue.HasValue ? currentValue.Value.ToString("G") : "";
             InputField input = CreateInputField(parent, position, width, initial);
@@ -195,9 +242,10 @@ namespace WizshBoneTwitchIntegration.Gui
                 else if (float.TryParse(val, out float result))
                     field.SetValue(target, (float?)result);
             });
+            return input;
         }
 
-        private static void BuildNullableIntField(GameObject parent, object target, FieldInfo field, int? currentValue, Vector2 position, float width)
+        private static InputField BuildNullableIntField(GameObject parent, object target, FieldInfo field, int? currentValue, Vector2 position, float width)
         {
             string initial = currentValue.HasValue ? currentValue.Value.ToString() : "";
             InputField input = CreateInputField(parent, position, width, initial);
@@ -209,9 +257,10 @@ namespace WizshBoneTwitchIntegration.Gui
                 else if (int.TryParse(val, out int result))
                     field.SetValue(target, (int?)result);
             });
+            return input;
         }
 
-        private static void BuildBoolField(GameObject parent, object target, FieldInfo field, bool currentValue, Vector2 position, float width)
+        private static Toggle BuildBoolField(GameObject parent, object target, FieldInfo field, bool currentValue, Vector2 position, float width)
         {
             GameObject toggleObj = GUIManager.Instance.CreateToggle(
                 parent: parent.transform,
@@ -231,6 +280,7 @@ namespace WizshBoneTwitchIntegration.Gui
             Toggle toggle = toggleObj.GetComponent<Toggle>();
             toggle.isOn = currentValue;
             toggle.onValueChanged.AddListener(val => field.SetValue(target, val));
+            return toggle;
         }
 
         private static bool BuildListField(GameObject parent, FieldInfo field, List<string> currentValue, Vector2 rowPosition, float fieldWidth, List<string> dropdownOptions, string labelText, string tooltip)
@@ -417,7 +467,7 @@ namespace WizshBoneTwitchIntegration.Gui
             return inputField;
         }
 
-        private static void BuildStringDropdownField(GameObject parent, object target, FieldInfo field, string currentValue, Vector2 position, float width, List<string> options)
+        private static Dropdown BuildStringDropdownField(GameObject parent, object target, FieldInfo field, string currentValue, Vector2 position, float width, List<string> options)
         {
             GameObject dropdownObj = GUIManager.Instance.CreateDropDown(
                 parent: parent.transform,
@@ -438,8 +488,8 @@ namespace WizshBoneTwitchIntegration.Gui
             dropdown.value = index >= 0 ? index : 0;
             dropdown.RefreshShownValue();
 
-            // Write the selected string value back to the field
             dropdown.onValueChanged.AddListener(i => field.SetValue(target, options[i]));
+            return dropdown;
         }
 
         /// <summary>
@@ -549,6 +599,44 @@ namespace WizshBoneTwitchIntegration.Gui
             if (ColorUtility.TryParseHtmlString(hex, out Color color))
                 return color;
             return Color.white;
+        }
+
+        public static float LookupStatusEffectTTL(string name)
+        {
+            if (ObjectDB.instance == null || string.IsNullOrEmpty(name))
+                return 10f;
+
+            foreach (StatusEffect se in ObjectDB.instance.m_StatusEffects)
+            {
+                if (se != null && se.name == name)
+                    return se.m_ttl > 0f ? se.m_ttl : 10f;
+            }
+
+            return 10f;
+        }
+
+        private static void InvokeOnValueChanged(GameObject parent, object target, string methodName)
+        {
+            var method = target.GetType().GetMethod(methodName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+            if (method == null) return;
+
+            method.Invoke(target, null);
+
+            // Sync any InputFields whose displayed value is out of sync with target's float fields
+            var floatFields = target.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+            foreach (InputField inputField in parent.GetComponentsInChildren<InputField>())
+            {
+                foreach (var f in floatFields)
+                {
+                    if (f.FieldType != typeof(float)) continue;
+                    string expected = ((float)f.GetValue(target)).ToString("G");
+                    if (inputField.text != expected && float.TryParse(inputField.text, out _))
+                    {
+                        inputField.text = expected;
+                        break;
+                    }
+                }
+            }
         }
 
         public static List<string> GetAvailableStatusEffectNames()

@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 using Jotunn.Managers;
 using TwitchSDK.Interop;
 using UnityEngine;
@@ -52,14 +54,13 @@ namespace WizshBoneTwitchIntegration.Gui
             RedeemType.Undefined,
             RedeemType.Detonate,
             RedeemType.Flashbang,
+            RedeemType.Mist,
             RedeemType.SpawnAbility,
             RedeemType.SpawnCreature,
-            RedeemType.SpawnMist,
-            RedeemType.SpawnWeather,
             RedeemType.StatusEffect,
-            RedeemType.StatusEffectRandom,
             RedeemType.SurpriseChest,
             RedeemType.TerrainEdit,
+            RedeemType.Weather,
         };
 
         private const float ButtonHeight        = 40f;
@@ -362,24 +363,53 @@ namespace WizshBoneTwitchIntegration.Gui
 
             ModData data = ExtraConfigHelper.ReadRedeemsConfig(path) ?? new ModData();
 
-            List<Dictionary<string, object>> redeems = new List<Dictionary<string, object>>();
-            foreach (RedeemData redeem in m_workingRedeems)
-                redeems.Add(redeem.ToDictionary());
-
-            Dictionary<string, object> output = new Dictionary<string, object>
-            {
-                { "redeems", redeems }
-            };
-
-            if (data.creatureGroups != null && data.creatureGroups.Count > 0)
-                output["creatureGroups"] = data.creatureGroups;
-
             ISerializer serializer = new SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
-            using (StreamWriter writer = new StreamWriter(path, append: false))
-                serializer.Serialize(writer, output);
+            var sb = new StringBuilder();
+
+            // Serialize creatureGroups preamble if present
+            if (data.creatureGroups != null && data.creatureGroups.Count > 0)
+            {
+                var preamble = new Dictionary<string, object> { { "creatureGroups", data.creatureGroups } };
+                sb.Append(serializer.Serialize(preamble));
+            }
+
+            // Sort redeems by type (alphabetical), then title within each type
+            var groups = m_workingRedeems
+                .OrderBy(r => r.type?.ToString() ?? "")
+                .ThenBy(r => r.title ?? "")
+                .GroupBy(r => r.type?.ToString() ?? "");
+
+            sb.AppendLine("redeems:");
+
+            foreach (var group in groups)
+            {
+                string typeName = string.IsNullOrEmpty(group.Key) ? "Unknown" : group.Key;
+
+                sb.AppendLine($"  #######################");
+                sb.AppendLine($"  # {typeName}");
+                sb.AppendLine($"  #######################");
+
+                foreach (RedeemData redeem in group)
+                {
+                    // Serialize a single-item list so YamlDotNet emits the "- key: value" block format,
+                    // then strip the leading "- " list wrapper we get from a root sequence.
+                    var single = new List<Dictionary<string, object>> { redeem.ToDictionary() };
+                    string itemYaml = serializer.Serialize(single);
+                    // itemYaml looks like "- key: value\n  key2: value2\n"
+                    // Indent every line by 2 spaces to sit under "redeems:"
+                    foreach (string line in itemYaml.Split('\n'))
+                    {
+                        if (line.Length == 0) continue;
+                        sb.Append("  ");
+                        sb.AppendLine(line.TrimEnd('\r'));
+                    }
+                }
+            }
+
+            File.WriteAllText(path, sb.ToString());
 
             RedeemHelper.Reload();
             m_unsavedTitles.Clear();
@@ -506,14 +536,14 @@ namespace WizshBoneTwitchIntegration.Gui
                 editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.detonateData);
             else if (m_newRedeem.type == RedeemType.Flashbang)
                 editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.flashbangData);
-            else if (m_newRedeem.type == RedeemType.SpawnMist)
+            else if (m_newRedeem.type == RedeemType.Mist)
                 editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.mistData);
             else if (m_newRedeem.type == RedeemType.TerrainEdit)
                 editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.terrainEditData);
-            else if (m_newRedeem.type == RedeemType.SpawnWeather)
-                editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.weatherData);
             else if (m_newRedeem.type == RedeemType.StatusEffect)
                 editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.statusEffectData);
+            else if (m_newRedeem.type == RedeemType.Weather)
+                editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.weatherData);
 
             RectTransform editorRt = m_editorContainer.GetComponent<RectTransform>();
             editorRt.sizeDelta = new Vector2(editorRt.sizeDelta.x, editorHeight + 20f);

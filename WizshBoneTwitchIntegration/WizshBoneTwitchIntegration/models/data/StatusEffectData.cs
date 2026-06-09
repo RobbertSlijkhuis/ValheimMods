@@ -21,6 +21,7 @@ namespace WizshBoneTwitchIntegration.Models
         [EditorLabel("Name")]
         [EditorTooltip("The name of the status effect.")]
         [StatusEffectNameDropdown]
+        [OnValueChanged("OnNameChanged")]
         public string name;
 
         [EditorLabel("Duration")]
@@ -36,5 +37,11 @@ namespace WizshBoneTwitchIntegration.Models
         public bool renew = false;
 
         public StatusEffectEntry() { }
+
+        public void OnNameChanged()
+        {
+            float ttl = FieldUIBuilder.LookupStatusEffectTTL(name);
+            duration = ttl;
+        }
     }
 }

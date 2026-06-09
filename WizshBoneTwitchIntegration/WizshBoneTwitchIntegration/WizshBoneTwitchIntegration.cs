@@ -331,6 +331,8 @@ namespace WizshBoneTwitchIntegration
             List<EffectList.EffectData> openingGlowList = new List<EffectList.EffectData>();
             openingGlowList.Add(openingGlowEffectData);
 
+            
+
             effectLists.ChestOpenEffect.m_effectPrefabs = openingGlowList.ToArray();
 
             PrefabManager.OnVanillaPrefabsAvailable -= AddEffectLists;

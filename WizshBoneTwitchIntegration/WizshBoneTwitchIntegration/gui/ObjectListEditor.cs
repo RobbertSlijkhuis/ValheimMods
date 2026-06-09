@@ -105,23 +105,36 @@ namespace WizshBoneTwitchIntegration.Gui
             foreach (Transform child in m_scrollContent.transform)
                 GameObject.Destroy(child.gameObject);
 
-            // Content stretches full viewport width; its center is at x=0 relative to anchor.
-            // Offset startX so label aligns to the left edge with a small padding.
-            float viewportWidth  = m_scrollWidth - 16f; // subtract scrollbar
-            float innerStartX    = -(viewportWidth / 2f) + ContentPadding + FieldUIBuilder.LabelWidth / 2f;
-            float yOffset        = 0f;
+            float viewportWidth = m_scrollWidth - 16f; // subtract scrollbar
+            float innerStartX   = -(viewportWidth / 2f) + ContentPadding + FieldUIBuilder.LabelWidth / 2f;
+            float yOffset       = 0f;
 
             for (int i = m_list.Count - 1; i >= 0; i--)
             {
                 object entry       = m_list[i];
                 int    capturedIdx = i;
 
+                // Measure fields height before creating the container so we know the container size.
+                // Build into a temp editor first (no parent) just to get height — actually we need
+                // a real parent, so we pre-calculate by building into the container after creating it.
+
+                // --- Per-entry scoped container ---
+                // All elements for this entry go here so GetComponentsInChildren is scoped per entry.
+                GameObject container = new GameObject("Entry_" + i, typeof(RectTransform));
+                container.transform.SetParent(m_scrollContent.transform, false);
+                RectTransform containerRt = container.GetComponent<RectTransform>();
+                containerRt.anchorMin = new Vector2(0.5f, 1f);
+                containerRt.anchorMax = new Vector2(0.5f, 1f);
+                containerRt.pivot     = new Vector2(0.5f, 1f);
+                containerRt.sizeDelta = new Vector2(viewportWidth, 0f); // height set after BuildFields
+                containerRt.anchoredPosition = new Vector2(0f, -yOffset);
+
                 // Entry header: "Entry N" (left) + red X button (right)
-                float headerCenterY = -(yOffset + EntryHeaderHeight / 2f);
+                float headerCenterY = -(EntryHeaderHeight / 2f);
 
                 GUIManager.Instance.CreateText(
                     text: "Entry " + (i + 1),
-                    parent: m_scrollContent.transform,
+                    parent: container.transform,
                     anchorMin: new Vector2(0.5f, 1f),
                     anchorMax: new Vector2(0.5f, 1f),
                     position: new Vector2(innerStartX, headerCenterY),
@@ -138,7 +151,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 float removeBtnCenterX = viewportWidth / 2f - ContentPadding - 25f;
                 GameObject removeBtn = GUIManager.Instance.CreateButton(
                     text: "X",
-                    parent: m_scrollContent.transform,
+                    parent: container.transform,
                     anchorMin: new Vector2(0.5f, 1f),
                     anchorMax: new Vector2(0.5f, 1f),
                     position: new Vector2(removeBtnCenterX, headerCenterY),
@@ -149,12 +162,16 @@ namespace WizshBoneTwitchIntegration.Gui
                 removeBtn.GetComponentInChildren<Text>().color = Color.red;
                 removeBtn.GetComponent<Button>().onClick.AddListener(() => OnRemoveEntry(capturedIdx));
 
-                yOffset += EntryHeaderHeight + EntryFieldSpacing;
+                float fieldsStartY = -(EntryHeaderHeight + EntryFieldSpacing);
 
-                // Entry fields — no tooltips (would be clipped by the scroll mask)
+                // Entry fields scoped to this container so [OnValueChanged] syncs only this entry.
                 var fieldEditor    = new ObjectEditor(innerStartX, 0f, m_fieldWidth);
-                float fieldsHeight = fieldEditor.BuildFields(m_scrollContent, entry, -yOffset);
-                yOffset += fieldsHeight + EntryBlockSpacing;
+                float fieldsHeight = fieldEditor.BuildFields(container, entry, fieldsStartY);
+
+                float entryHeight = EntryHeaderHeight + EntryFieldSpacing + fieldsHeight;
+                containerRt.sizeDelta = new Vector2(viewportWidth, entryHeight);
+
+                yOffset += entryHeight + EntryBlockSpacing;
             }
 
             RectTransform contentRt = m_scrollContent.GetComponent<RectTransform>();
