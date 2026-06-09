@@ -3,7 +3,10 @@
     internal class StatusEffectType
     {
         // Custom effects
-        public static string WindInBack => "WindInBack";
+        //public static int PlayerShrink => 1043640966;
+        public static string PlayerShrink => "PlayerShrink";
+        //public static int PlayerGrow => 822944700;
+        public static string PlayerGrow => "PlayerGrow";
 
         // Negative effects
         public static string Burning => WizshBoneTwitchIntegration.Instance.effects.Burning.name;
@@ -56,10 +59,5 @@
         public static string StaminaMinor => "Potion_stamina_minor";
         public static string StaminaMedium => "Potion_stamina_medium";
         public static string StaminaLingering => "Potion_stamina_lingering";
-
-        //public static int PlayerShrink => 1043640966;
-        public static string PlayerShrink => "PlayerShrink";
-        //public static int PlayerGrow => 822944700;
-        public static string PlayerGrow => "PlayerGrow";
     }
 }

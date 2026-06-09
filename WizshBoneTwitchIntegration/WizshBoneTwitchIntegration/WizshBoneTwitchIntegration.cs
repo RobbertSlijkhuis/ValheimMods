@@ -350,6 +350,13 @@ namespace WizshBoneTwitchIntegration
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.Freezing, fixReference: true));
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.Poison, fixReference: true));
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.NoFallDamage, fixReference: true));
+
+            effects.PlayerScale = ScriptableObject.CreateInstance<Components.SE_PlayerScale>();
+            effects.PlayerScale.name     = "PlayerScale";
+            effects.PlayerScale.m_name   = "PlayerScale";
+            effects.PlayerScale.m_icon   = sprites.MiniMeSprite;
+            effects.PlayerScale.m_ttl    = 180f;
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.PlayerScale, fixReference: false));
         }
 
         private void InitInputs()

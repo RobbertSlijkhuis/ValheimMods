@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using TwitchSDK.Interop;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Models;
+using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.Helpers
 {
@@ -50,6 +51,14 @@ namespace WizshBoneTwitchIntegration.Helpers
             {
                 Jotunn.Logger.LogWarning("StatusEffectHelper: no local player.");
                 return false;
+            }
+
+            // Custom effects handled outside ObjectDB
+            if (entry.name == StatusEffectType.PlayerShrink || entry.name == StatusEffectType.PlayerGrow)
+            {
+                float duration = entry.duration > 0f ? entry.duration : 30f;
+                PlayerScaleHelper.Apply(entry.name, duration);
+                return true;
             }
 
             StatusEffect source = ObjectDB.instance.GetStatusEffect(entry.name.GetStableHashCode());

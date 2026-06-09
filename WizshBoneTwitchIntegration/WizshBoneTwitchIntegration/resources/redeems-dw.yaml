@@ -1,0 +1,4481 @@
+creatureGroups:
+- group: Greydwarfs
+  list:
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 2
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Greydwarf
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Greydwarf_Shaman
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Greydwarf_Elite
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+- group: Skeletons
+  list:
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 2
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Skeleton
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Skeleton_Poison
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Ghost
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+- group: Draugr
+  list:
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Draugr
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Draugr_Elite
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Draugr_Ranged
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+- group: Goblins
+  list:
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Goblin
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: GoblinBrute
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: GoblinShaman
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+- group: Seekers
+  list:
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 2
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Seeker
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: SeekerBrute
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+- group: BlackForest
+  list:
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Greydwarf
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Greydwarf_Shaman
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Greydwarf_Elite
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Skeleton
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Skeleton_Poison
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Ghost
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Bjorn
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Troll
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+- group: Swamp
+  list:
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Leech
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Blob
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: BlobElite
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Surtling
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Draugr
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Draugr_Elite
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Draugr_Ranged
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Wraith
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Abomination
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+- group: Mountains
+  list:
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Bat
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Hatchling
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Fenring
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Fenring_Cultist
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: StoneGolem
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Ulv
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Wolf
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+- group: Plains
+  list:
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Goblin
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: GoblinBrute
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: GoblinShaman
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: BlobTar
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Deathsquito
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Lox
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+- group: Mistlands
+  list:
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Dverger
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: DvergerMage
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Tick
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Seeker
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: SeekerBrute
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Gjall
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+- group: Ashlands
+  list:
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Charred_Archer
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Charred_Melee
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Charred_Mage
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Charred_Twitcher
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: BlobLava
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Asksvin
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Volture
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: Morgen
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+  - announceMessage: 
+    aggravatable: false
+    allowDrops: false
+    allowDamageStructures: true
+    amount: 1
+    bossEvent: ''
+    commandable: false
+    color: 
+    damageScale: 0
+    friendly: false
+    globalKeyAdd: ''
+    globalKeyRemove: ''
+    group: 
+    healthScale: 0
+    index: 0
+    isHallucination: false
+    level: 1
+    maxHealth: 0
+    maxSpawned: 0
+    mistVision: true
+    name: 
+    prefabName: FallenValkyrie
+    position: Random
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    positionRadius: 10
+    random: false
+    rename: true
+    talkInteract: false
+    talkInterval: 0
+    talkMessage: 
+    talks: false
+    size: 1
+redeems:
+  #######################
+  # Detonate
+  #######################
+  - title: 'WBTI Detonate: Fizsh!'
+    description: Detonate fish around the streamer!
+    points: 300
+    backgroundColor: '#ff6f00'
+    type: Detonate
+    detonateData:
+      radius: 30
+      damageData:
+        blunt: 70
+        fire: 30
+        basedOnMaxHealthAndArmor: true
+  - title: 'WBTI: NUKE!'
+    points: 1000000
+    backgroundColor: '#ff6f00'
+    globalKeyAdd: defeated_fader
+    type: Detonate
+    detonateData:
+      radius: 100
+      type: CreatureSpawned
+      damageData:
+        blunt: 70
+        fire: 30
+        basedOnMaxHealthAndArmor: true
+  #######################
+  # Flashbang
+  #######################
+  - title: WBTI Flashbang!
+    description: Flash bang the streamer so he cannot see anything for a moment, not even his UI!
+    points: 265
+    backgroundColor: '#ffffff'
+    cooldown: 180
+    type: Flashbang
+  #######################
+  # Mist
+  #######################
+  - title: WBTI Mist
+    description: Spawn in Mistlands mist to cover the vision of the streamer... and for some creatures!
+    points: 300
+    backgroundColor: '#8f6bd6'
+    cooldown: 180
+    type: Mist
+    mistData:
+      announceMessage: '{{user}} made things slightly harder to see!'
+      duration: 90
+      radius: 65
+  #######################
+  # SpawnAbility
+  #######################
+  - title: 'WBTI Spawn: BOATPOCALYPSE'
+    description: Rain down Karves around the streamer!
+    points: 300
+    backgroundColor: '#c7915b'
+    cooldown: 300
+    type: SpawnAbility
+    spawnAbilityData:
+      accuracy: 1
+      allowDrops: false
+      announceMessage: 'Current weather forecast: 100% chance of BOATPOCALYPSE (sponsored by {{user}})'
+      damage:
+        blunt: 50
+        basedOnMaxHealthAndArmor: true
+        maxHealthPercentage: 0.4
+      duration: 60
+      groundOffset: 50
+      maxToSpawn: 50
+      minToSpawn: 50
+      spawnRadius: 15
+      spawns:
+      - Karve
+  - title: 'WBTI Spawn: Fizsh!'
+    description: Spawn random fish around the streamer, what could this possible be used for?
+    points: 300
+    backgroundColor: '#cfdbab'
+    cooldown: 180
+    type: SpawnAbility
+    spawnAbilityData:
+      announceMessage: '{{user}} believes something is smelling.... fizshy!'
+      duration: 1800
+      groundOffset: 0
+      maxToSpawn: 30
+      minToSpawn: 30
+      rescanForSafezones: false
+      snapToterrain: true
+      spawnDelay: 0
+      spawnRadius: 25
+  - title: 'WBTI Spawn: Log Rain'
+    description: Give the streamer "senpai" some well deserved hard wood!
+    points: 265
+    backgroundColor: '#734624'
+    cooldown: 300
+    type: SpawnAbility
+    spawnAbilityData:
+      accuracy: 1
+      announceMessage: '{{user}} is sending you some building materials: HARD WOOD!'
+      damage:
+        blunt: 50
+        basedOnMaxHealthAndArmor: true
+        maxHealthPercentage: 0.3
+      dropVelocity: -25
+      duration: 60
+      groundOffset: 50
+      isBiomeList: true
+      maxToSpawn: 75
+      minToSpawn: 75
+      spawnRadius: 15
+      spawns:
+      - beech_log_half
+      - PineTree_log_half
+      - SwampTree1_log
+      - FirTree_log_half
+      - Birch_log_half
+      - yggashoot_log_half
+      - AshlandsTreeLogHalf2
+      - Oak_log_half
+  - title: 'WBTI Spawn: Thou shall be smited!'
+    description: Bring pain to the streamer or make his screen shake violently!
+    points: 300
+    backgroundColor: '#b8d3e6'
+    cooldown: 300
+    type: SpawnAbility
+    spawnAbilityData:
+      accuracy: 1
+      announceMessage: '{{user}} has summoned the wrath of Thor!'
+      damage:
+        lightning: 50
+        basedOnMaxHealthAndArmor: true
+        maxHealthPercentage: 0.3
+      groundOffset: 0
+      maxToSpawn: 50
+      noSpawnEffect: true
+      minToSpawn: 50
+      snapToterrain: true
+      spawnRadius: 20
+      spawns:
+      - lightningAOE
+  - title: 'WBTI Spawn: Trap Field!'
+    description: Spawn traps around the streamer!
+    points: 300
+    backgroundColor: '#1a3813'
+    cooldown: 300
+    type: SpawnAbility
+    spawnAbilityData:
+      announceMessage: Minor inconveniences deployed by {{user}}!
+      damage:
+        blunt: 50
+        pierce: 50
+        basedOnMaxHealthAndArmor: true
+        maxHealthPercentage: 0.35
+      duration: 300
+      groundOffset: 0
+      maxToSpawn: 300
+      minToSpawn: 300
+      rescanForSafezones: false
+      snapToterrain: true
+      spawnDelay: 0.0001
+      spawnRadius: 25
+      spawns:
+      - fuling_trap
+  #######################
+  # SpawnCreature
+  #######################
+  - title: 'WBTI Creatures: HELP Fenrings!'
+    description: Spawn a group of Fenring friends that will help the streamer!
+    points: 255
+    backgroundColor: '#74bd66'
+    globalKeyAdd: defeated_bonemass
+    globalKeyRemove: defeated_dragon
+    type: SpawnCreature
+    creatureData:
+      list:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 3
+        bossEvent: ''
+        commandable: true
+        color: 
+        damageScale: 0
+        friendly: true
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 2
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Fenring
+        position: InFrontOfPlayer
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+  - title: 'WBTI Creatures: HELP Greydwarfs!'
+    description: Spawn a group of Greydwarf friends that will help the streamer!
+    points: 255
+    backgroundColor: '#74bd66'
+    globalKeyAdd: defeated_gdking
+    globalKeyRemove: defeated_dragon
+    type: SpawnCreature
+    creatureData:
+      list:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 2
+        bossEvent: ''
+        commandable: true
+        color: 
+        damageScale: 0
+        friendly: true
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 2
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Greydwarf
+        position: InFrontOfPlayer
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: true
+        color: 
+        damageScale: 0
+        friendly: true
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 2
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Greydwarf_Shaman
+        position: InFrontOfPlayer
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: true
+        color: 
+        damageScale: 0
+        friendly: true
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 2
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Greydwarf_Elite
+        position: InFrontOfPlayer
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+  - title: 'WBTI Random creature: Heavy'
+    description: Spawn a random heavy creature like a Bear, Troll, Abomination, StoneGolem, Lox etc.
+    points: 250
+    backgroundColor: '#ff2424'
+    type: SpawnCreature
+    creatureData:
+      random: true
+      list:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Bjorn
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Troll
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: BlobElite
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Draugr_Elite
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Wraith
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Abomination
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: StoneGolem
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: GoblinBrute
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Lox
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Unbjorn
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: SeekerBrute
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Gjall
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+  - title: 'WBTI Random creature: Light'
+    description: Spawn a random light creature like a Greydwarf, Skeleton, Blob, Drake etc.
+    points: 150
+    backgroundColor: '#ff9191'
+    type: SpawnCreature
+    creatureData:
+      random: true
+      list:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Skeleton
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Skeleton_Poison
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Ghost
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Leech
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Blob
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Surtling
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Bat
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+  - title: 'WBTI Random creature: Medium'
+    description: Spawn a random medium creature like a Greydwarf brute, Draugr, Wolf, Fuling etc.
+    points: 200
+    backgroundColor: '#ff5454'
+    type: SpawnCreature
+    creatureData:
+      random: true
+      list:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Greydwarf_Shaman
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Greydwarf_Elite
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Draugr
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Draugr_Ranged
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Fenring
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Fenring_Cultist
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Ulv
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Wolf
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Goblin
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: GoblinShaman
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: BlobTar
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Deathsquito
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Tick
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Seeker
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+  #######################
+  # StatusEffect
+  #######################
+  - title: 'WBTI Status: Eitrfy Streamer!'
+    description: Give the streamer the power to overcome his enemies!
+    points: 100
+    backgroundColor: '#d000ff'
+    cooldown: 30
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      list:
+      - name: Potion_eitr_minor
+        duration: 30
+        persistsThroughDeath: false
+        renew: false
+  - title: 'WBTI Status: Energize Streamer!'
+    description: Give the streamer the energy to keep going!
+    points: 100
+    backgroundColor: '#ffb300'
+    cooldown: 30
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      list:
+      - name: Potion_stamina_medium
+        duration: 30
+        persistsThroughDeath: false
+        renew: false
+  - title: 'WBTI Status: Gone with the wind!'
+    description: Give the streamer a 10 minute buff of Ratatosk and Lightfoot meads!
+    points: 120
+    backgroundColor: '#74bd66'
+    cooldown: 60
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      list:
+      - name: Potion_hasty
+        duration: -1
+        persistsThroughDeath: false
+        renew: false
+      - name: Potion_LightFoot
+        duration: -1
+        persistsThroughDeath: false
+        renew: false
+  - title: 'WBTI Status: Grow Streamer'
+    description: Shrinks the streamer, increasing his movement speed and jump height!
+    points: 115
+    backgroundColor: '#3480eb'
+    cooldown: 180
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      list:
+      - name: PlayerGrow
+        duration: 180
+        persistsThroughDeath: false
+        renew: false
+  - title: 'WBTI Status: Heal Streamer!'
+    description: Save that streamer from certain death!
+    points: 100
+    backgroundColor: '#ff0062'
+    cooldown: 30
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      list:
+      - name: Potion_health_medium
+        duration: 30
+        persistsThroughDeath: false
+        renew: false
+  - title: 'WBTI Status: Random Boss Power!'
+    description: Give a random boss power to the streamer!
+    points: 110
+    backgroundColor: '#ff6f00'
+    cooldown: 15
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      random: true
+      list:
+      - name: GP_Eikthyr
+        duration: -1
+        persistsThroughDeath: false
+        renew: false
+      - name: GP_TheElder
+        duration: -1
+        persistsThroughDeath: false
+        renew: false
+      - name: GP_Bonemass
+        duration: -1
+        persistsThroughDeath: false
+        renew: false
+      - name: GP_Moder
+        duration: -1
+        persistsThroughDeath: false
+        renew: false
+      - name: GP_Yagluth
+        duration: -1
+        persistsThroughDeath: false
+        renew: false
+      - name: GP_Queen
+        duration: -1
+        persistsThroughDeath: false
+        renew: false
+      - name: GP_Fader
+        duration: -1
+        persistsThroughDeath: false
+        renew: false
+  - title: 'WBTI Status: Random buff/debuff!'
+    description: Give a random buff or debuff to the streamer!
+    points: 110
+    backgroundColor: '#ff6f00'
+    cooldown: 15
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      random: true
+      list:
+      - name: Potion_barleywine
+        duration: -1
+        persistsThroughDeath: false
+        renew: true
+      - name: Burning_WBTI
+        duration: -1
+        persistsThroughDeath: false
+        renew: true
+      - name: Potion_frostresist
+        duration: -1
+        persistsThroughDeath: false
+        renew: true
+      - name: Freezing_WBTI
+        duration: -1
+        persistsThroughDeath: false
+        renew: true
+      - name: Potion_poisonresist
+        duration: -1
+        persistsThroughDeath: false
+        renew: true
+      - name: Poison_WBTI
+        duration: -1
+        persistsThroughDeath: false
+        renew: true
+      - name: Potion_hasty
+        duration: -1
+        persistsThroughDeath: false
+        renew: true
+      - name: Puke
+        duration: -1
+        persistsThroughDeath: false
+        renew: true
+      - name: Potion_bzerker
+        duration: -1
+        persistsThroughDeath: false
+        renew: true
+      - name: Wet
+        duration: -1
+        persistsThroughDeath: false
+        renew: true
+      - name: Potion_LightFoot
+        duration: -1
+        persistsThroughDeath: false
+        renew: true
+      - name: Tared
+        duration: -1
+        persistsThroughDeath: false
+        renew: true
+      - name: Rested
+        duration: -1
+        persistsThroughDeath: false
+        renew: true
+      - name: PlayerShrink
+        duration: 300
+        persistsThroughDeath: false
+        renew: true
+      - name: PlayerGrow
+        duration: 300
+        persistsThroughDeath: false
+        renew: true
+      - name: GP_Eikthyr
+        duration: -1
+        persistsThroughDeath: false
+        renew: false
+      - name: GP_TheElder
+        duration: -1
+        persistsThroughDeath: false
+        renew: false
+      - name: GP_Bonemass
+        duration: -1
+        persistsThroughDeath: false
+        renew: false
+      - name: GP_Moder
+        duration: -1
+        persistsThroughDeath: false
+        renew: false
+      - name: GP_Yagluth
+        duration: -1
+        persistsThroughDeath: false
+        renew: false
+      - name: GP_Queen
+        duration: -1
+        persistsThroughDeath: false
+        renew: false
+      - name: GP_Fader
+        duration: -1
+        persistsThroughDeath: false
+        renew: false
+  - title: 'WBTI Status: Rested!'
+    description: Give the streamer a short rested buff!
+    points: 120
+    backgroundColor: '#74bd66'
+    cooldown: 60
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      list:
+      - name: Rested
+        duration: 600
+        persistsThroughDeath: false
+        renew: false
+  - title: 'WBTI Status: Shield!'
+    description: Protect the streamer with a shield!
+    points: 120
+    backgroundColor: '#74bd66'
+    cooldown: 60
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      list:
+      - name: Staff_shield
+        duration: 600
+        persistsThroughDeath: false
+        renew: false
+  - title: 'WBTI Status: Shrink Streamer'
+    description: Shrinks the streamer, reducing his movement speed and jump height!
+    points: 115
+    backgroundColor: '#3480eb'
+    cooldown: 180
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      list:
+      - name: PlayerShrink
+        duration: 180
+        persistsThroughDeath: false
+        renew: false
+  #######################
+  # SurpriseChest
+  #######################
+  - title: 'WBTI: Black Forest Surprise Chest'
+    points: 350
+    backgroundColor: '#8c8c8c'
+    cooldown: 180
+    globalKeyAdd: defeated_eikthyr
+    globalKeyRemove: defeated_gdking
+    ignoreWard: true
+    type: SurpriseChest
+    chestData:
+      amount: 5
+      announceMessage: '{{user}} sent you a Black Forest surprise!'
+      items:
+      - creatureData: 
+        itemData:
+          prefabName: MinceMeatSauce
+          stackSize: 3
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: MinceMeatSauce
+          stackSize: 3
+          quality: 1
+      - creatureData:
+        - announceMessage: 
+          aggravatable: false
+          allowDrops: true
+          allowDamageStructures: true
+          amount: 1
+          bossEvent: ''
+          commandable: false
+          color:
+          damageScale: 0
+          friendly: false
+          globalKeyAdd: ''
+          globalKeyRemove: ''
+          group:
+          healthScale: 0
+          index: 0
+          isHallucination: false
+          level: 1
+          maxHealth: 0
+          maxSpawned: 0
+          mistVision: true
+          name:
+          prefabName: Greydwarf_Elite
+          position: Random
+          positionOffset:
+            x: 0
+            y: 0
+            z: 0
+          positionRadius: 10
+          random: false
+          rename: true
+          talkInteract: false
+          talkInterval: 0
+          talkMessage: 
+          talks: false
+          size: 1
+        itemData: 
+      - creatureData: 
+        itemData:
+          prefabName: QueensJam
+          stackSize: 3
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: QueensJam
+          stackSize: 3
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: CarrotSoup
+          stackSize: 3
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: CarrotSoup
+          stackSize: 3
+          quality: 1
+      - creatureData:
+        - announceMessage: 
+          aggravatable: false
+          allowDrops: true
+          allowDamageStructures: true
+          amount: 1
+          bossEvent: ''
+          commandable: false
+          color:
+          damageScale: 0
+          friendly: false
+          globalKeyAdd: ''
+          globalKeyRemove: ''
+          group:
+          healthScale: 0
+          index: 0
+          isHallucination: false
+          level: 1
+          maxHealth: 0
+          maxSpawned: 0
+          mistVision: true
+          name:
+          prefabName: Greydwarf_Shaman
+          position: Random
+          positionOffset:
+            x: 0
+            y: 0
+            z: 0
+          positionRadius: 10
+          random: false
+          rename: true
+          talkInteract: false
+          talkInterval: 0
+          talkMessage: 
+          talks: false
+          size: 1
+        itemData: 
+      - creatureData: 
+        itemData:
+          prefabName: DeerStew
+          stackSize: 3
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: DeerStew
+          stackSize: 3
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: BoarJerky
+          stackSize: 3
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: BoarJerky
+          stackSize: 3
+          quality: 1
+      - creatureData:
+        - announceMessage: 
+          aggravatable: false
+          allowDrops: true
+          allowDamageStructures: true
+          amount: 1
+          bossEvent: ''
+          commandable: false
+          color:
+          damageScale: 0
+          friendly: false
+          globalKeyAdd: ''
+          globalKeyRemove: ''
+          group:
+          healthScale: 0
+          index: 0
+          isHallucination: false
+          level: 1
+          maxHealth: 0
+          maxSpawned: 0
+          mistVision: true
+          name:
+          prefabName: Bjorn
+          position: Random
+          positionOffset:
+            x: 0
+            y: 0
+            z: 0
+          positionRadius: 10
+          random: false
+          rename: true
+          talkInteract: false
+          talkInterval: 0
+          talkMessage: 
+          talks: false
+          size: 1
+        itemData: 
+      - creatureData:
+        - announceMessage: 
+          aggravatable: false
+          allowDrops: true
+          allowDamageStructures: true
+          amount: 1
+          bossEvent: ''
+          commandable: false
+          color:
+          damageScale: 0
+          friendly: false
+          globalKeyAdd: ''
+          globalKeyRemove: ''
+          group:
+          healthScale: 0
+          index: 0
+          isHallucination: false
+          level: 1
+          maxHealth: 0
+          maxSpawned: 0
+          mistVision: true
+          name:
+          prefabName: Troll
+          position: Random
+          positionOffset:
+            x: 0
+            y: 0
+            z: 0
+          positionRadius: 10
+          random: false
+          rename: true
+          talkInteract: false
+          talkInterval: 0
+          talkMessage: 
+          talks: false
+          size: 1
+        itemData: 
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      yeetChance: 5
+  - title: 'WBTI Chest: Swamp Surprise!'
+    description: Give the streamer a random suprise, food, meads or... monsters!
+    points: 145
+    backgroundColor: '#8c8c8c'
+    globalKeyAdd: defeated_gdking
+    globalKeyRemove: defeated_dragon
+    type: SurpriseChest
+    chestData:
+      amount: 5
+      announceMessage: '{{user}} has sent you a surprise!'
+      items:
+      - creatureData: 
+        itemData:
+          prefabName: TurnipStew
+          stackSize: 3
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: TurnipStew
+          stackSize: 3
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: TurnipStew
+          stackSize: 3
+          quality: 1
+      - creatureData:
+        - announceMessage: 
+          aggravatable: false
+          allowDrops: true
+          allowDamageStructures: true
+          amount: 1
+          bossEvent: ''
+          commandable: false
+          color: 
+          damageScale: 0
+          friendly: false
+          globalKeyAdd: ''
+          globalKeyRemove: ''
+          group: 
+          healthScale: 0
+          index: 0
+          isHallucination: false
+          level: 1
+          maxHealth: 0
+          maxSpawned: 0
+          mistVision: true
+          name: 
+          prefabName: Draugr
+          position: Random
+          positionOffset:
+            x: 0
+            y: 0
+            z: 0
+          positionRadius: 10
+          random: false
+          rename: true
+          talkInteract: false
+          talkInterval: 0
+          talkMessage: 
+          talks: false
+          size: 1
+        itemData: 
+      - creatureData: 
+        itemData:
+          prefabName: Sausages
+          stackSize: 3
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: Sausages
+          stackSize: 3
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: Sausages
+          stackSize: 3
+          quality: 1
+      - creatureData:
+        - announceMessage: 
+          aggravatable: false
+          allowDrops: true
+          allowDamageStructures: true
+          amount: 1
+          bossEvent: ''
+          commandable: false
+          color: 
+          damageScale: 0
+          friendly: false
+          globalKeyAdd: ''
+          globalKeyRemove: ''
+          group: 
+          healthScale: 0
+          index: 0
+          isHallucination: false
+          level: 1
+          maxHealth: 0
+          maxSpawned: 0
+          mistVision: true
+          name: 
+          prefabName: Draugr_Ranged
+          position: Random
+          positionOffset:
+            x: 0
+            y: 0
+            z: 0
+          positionRadius: 10
+          random: false
+          rename: true
+          talkInteract: false
+          talkInterval: 0
+          talkMessage: 
+          talks: false
+          size: 1
+        itemData: 
+      - creatureData: 
+        itemData:
+          prefabName: MMF_BogMushroomSoup
+          stackSize: 10
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: MMF_BogMushroomSoup
+          stackSize: 10
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: MMF_BogMushroomSoup
+          stackSize: 10
+          quality: 1
+      - creatureData:
+        - announceMessage: 
+          aggravatable: false
+          allowDrops: true
+          allowDamageStructures: true
+          amount: 1
+          bossEvent: ''
+          commandable: false
+          color: 
+          damageScale: 0
+          friendly: false
+          globalKeyAdd: ''
+          globalKeyRemove: ''
+          group: 
+          healthScale: 0
+          index: 0
+          isHallucination: false
+          level: 1
+          maxHealth: 0
+          maxSpawned: 0
+          mistVision: true
+          name: 
+          prefabName: Draugr_Elite
+          position: Random
+          positionOffset:
+            x: 0
+            y: 0
+            z: 0
+          positionRadius: 10
+          random: false
+          rename: true
+          talkInteract: false
+          talkInterval: 0
+          talkMessage: 
+          talks: false
+          size: 1
+        itemData: 
+      - creatureData: 
+        itemData:
+          prefabName: MeadFrostResist
+          stackSize: 1
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: MeadHealthMinor
+          stackSize: 1
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: MeadHealthMinor
+          stackSize: 1
+          quality: 1
+      - creatureData:
+        - announceMessage: 
+          aggravatable: false
+          allowDrops: true
+          allowDamageStructures: true
+          amount: 1
+          bossEvent: ''
+          commandable: false
+          color: 
+          damageScale: 0
+          friendly: false
+          globalKeyAdd: ''
+          globalKeyRemove: ''
+          group: 
+          healthScale: 0
+          index: 0
+          isHallucination: false
+          level: 1
+          maxHealth: 0
+          maxSpawned: 0
+          mistVision: true
+          name: 
+          prefabName: Wraith
+          position: Random
+          positionOffset:
+            x: 0
+            y: 0
+            z: 0
+          positionRadius: 10
+          random: false
+          rename: true
+          talkInteract: false
+          talkInterval: 0
+          talkMessage: 
+          talks: false
+          size: 1
+        itemData: 
+      - creatureData: 
+        itemData:
+          prefabName: ShocklateSmoothie
+          stackSize: 3
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: ShocklateSmoothie
+          stackSize: 3
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: ShocklateSmoothie
+          stackSize: 3
+          quality: 1
+      - creatureData:
+        - announceMessage: 
+          aggravatable: false
+          allowDrops: true
+          allowDamageStructures: true
+          amount: 1
+          bossEvent: ''
+          commandable: false
+          color: 
+          damageScale: 0
+          friendly: false
+          globalKeyAdd: ''
+          globalKeyRemove: ''
+          group: 
+          healthScale: 0
+          index: 0
+          isHallucination: false
+          level: 1
+          maxHealth: 0
+          maxSpawned: 0
+          mistVision: true
+          name: 
+          prefabName: Blob
+          position: Random
+          positionOffset:
+            x: 0
+            y: 0
+            z: 0
+          positionRadius: 10
+          random: false
+          rename: true
+          talkInteract: false
+          talkInterval: 0
+          talkMessage: 
+          talks: false
+          size: 1
+        itemData: 
+      - creatureData: 
+        itemData:
+          prefabName: MeadFrostResist
+          stackSize: 1
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: MeadStaminaMinor
+          stackSize: 1
+          quality: 1
+      - creatureData: 
+        itemData:
+          prefabName: MeadStaminaMinor
+          stackSize: 1
+          quality: 1
+      - creatureData:
+        - announceMessage: 
+          aggravatable: false
+          allowDrops: true
+          allowDamageStructures: true
+          amount: 1
+          bossEvent: ''
+          commandable: false
+          color: 
+          damageScale: 0
+          friendly: false
+          globalKeyAdd: ''
+          globalKeyRemove: ''
+          group: 
+          healthScale: 0
+          index: 0
+          isHallucination: false
+          level: 1
+          maxHealth: 0
+          maxSpawned: 0
+          mistVision: true
+          name: 
+          prefabName: BlobElite
+          position: Random
+          positionOffset:
+            x: 0
+            y: 0
+            z: 0
+          positionRadius: 10
+          random: false
+          rename: true
+          talkInteract: false
+          talkInterval: 0
+          talkMessage: 
+          talks: false
+          size: 1
+        itemData: 
+      - creatureData:
+        itemData:
+          prefabName: BlackSoup
+          stackSize: 3
+          quality: 1
+      - creatureData:
+        itemData:
+          prefabName: BlackSoup
+          stackSize: 3
+          quality: 1
+      - creatureData:
+        itemData:
+          prefabName: BlackSoup
+          stackSize: 3
+          quality: 1
+      - creatureData:
+        - announceMessage: 
+          aggravatable: false
+          allowDrops: true
+          allowDamageStructures: true
+          amount: 1
+          bossEvent: ''
+          commandable: false
+          color: 
+          damageScale: 0
+          friendly: false
+          globalKeyAdd: ''
+          globalKeyRemove: ''
+          group: 
+          healthScale: 0
+          index: 0
+          isHallucination: false
+          level: 1
+          maxHealth: 0
+          maxSpawned: 0
+          mistVision: true
+          name: 
+          prefabName: Abomination
+          position: Random
+          positionOffset:
+            x: 0
+            y: 0
+            z: 0
+          positionRadius: 10
+          random: false
+          rename: true
+          talkInteract: false
+          talkInterval: 0
+          talkMessage: 
+          talks: false
+          size: 1
+        itemData: 
+      yeetChance: 5
+  #######################
+  # TerrainEdit
+  #######################
+  - title: 'WBTI Terrain: Remove the Country!'
+    description: Remove the ground under the streamer and watch him panic!
+    points: 300
+    backgroundColor: '#40240f'
+    cooldown: 180
+    type: TerrainEdit
+    terrainEditData:
+      announceMessage: 'Terrain data corrupted. Cause: {{user}}!'
+      raiseDelta: -10
+      raisePower: 0.2
+      raiseRadius: 10
+      paintClear: true
+      paintRadius: 10
+      duration: 300
+  #######################
+  # Weather
+  #######################
+  - title: WBTI Random Weather
+    description: Change the weather in my game! (no rain atm)
+    points: 130
+    backgroundColor: '#2bceff'
+    type: Weather
+    weatherData:
+      announceMessage: '{{user}} is changing the skybox!'
+      duration: 300
+      height: 100
+      radius: 300
+      items:
+      - Clear
+      - LightRain
+      - Rain
+      - Misty
+      - ThunderStorm
+      - nofogts
+      - SwampRain
+      - Mistlands_clear
+      - Mistlands_rain
+      - Mistlands_thunder
+      - Twilight_clear
+      - Heath_clear
+      - Eikthyr
+      - GDKing
+      - Bonemass
+      - GoblinKing
+      - Queen
+      - Fader
+      - Ghosts
