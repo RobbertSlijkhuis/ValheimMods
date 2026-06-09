@@ -5,7 +5,12 @@ namespace WizshBoneTwitchIntegration.Models
 {
     internal class StatusEffectData : CloneableData
     {
+        [EditorLabel("Random")]
+        [EditorTooltip("Whether a random status effect is picked from the list (if there is only 1 this has no effect)")]
         public bool random = false;
+
+        [EditorLabel("Status Effects")]
+        [EditorTooltip("The list of status effects to apply or to pick randomly from.")]
         public List<StatusEffectEntry> list = new List<StatusEffectEntry>();
 
         public StatusEffectData() { }
@@ -13,16 +18,16 @@ namespace WizshBoneTwitchIntegration.Models
 
     internal class StatusEffectEntry : CloneableData
     {
-        [EditorLabel("Duration")]
-        [EditorTooltip("The duration of the status effect in seconds. Set to 0 for infinite duration.")]
-        public float duration = -1f;
-
         [EditorLabel("Name")]
         [EditorTooltip("The name of the status effect.")]
         [StatusEffectNameDropdown]
         public string name;
 
-        [EditorLabel("Persists Through Death")]
+        [EditorLabel("Duration")]
+        [EditorTooltip("The duration of the status effect in seconds. Set to -1 for default duration, 0 for infinite duration.")]
+        public float duration = -1f;
+
+        [EditorLabel("Persists through death")]
         [EditorTooltip("Whether the status effect should persist through death. If true, the status effect will not be removed when the player dies.")]
         public bool persistsThroughDeath = false;
 

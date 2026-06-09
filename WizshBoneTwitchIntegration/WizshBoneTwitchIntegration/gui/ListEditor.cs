@@ -17,6 +17,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float ItemHeight    = 40f;
         private const float ItemSpacing   = 5f;
         private const float ListMaxHeight = 150f;
+        private const float LeftPadding   = 8f;
 
         private readonly List<string> m_targetList;
         private readonly List<string> m_dropdownOptions;
@@ -51,15 +52,19 @@ namespace WizshBoneTwitchIntegration.Gui
             m_fieldWidth  = fieldWidth;
             float yOffset = startPosition.y;
 
+            float inputWidth   = fieldWidth - ButtonWidth - 5f;
+            float inputCenterX = startPosition.x - fieldWidth / 2f + inputWidth / 2f;
+            float btnCenterX   = startPosition.x + fieldWidth / 2f - ButtonWidth / 2f;
+
             if (m_useDropdown)
             {
                 GameObject dropdownObj = GUIManager.Instance.CreateDropDown(
                     parent: parent.transform,
                     anchorMin: new Vector2(0.5f, 1f),
                     anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(startPosition.x, yOffset),
+                    position: new Vector2(inputCenterX, yOffset),
                     fontSize: FieldUIBuilder.FieldFontSize,
-                    width: fieldWidth,
+                    width: inputWidth,
                     height: InputHeight
                 );
                 m_dropdown = dropdownObj.GetComponent<Dropdown>();
@@ -78,34 +83,34 @@ namespace WizshBoneTwitchIntegration.Gui
                     parent: parent.transform,
                     anchorMin: new Vector2(0.5f, 1f),
                     anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(startPosition.x, yOffset),
+                    position: new Vector2(inputCenterX, yOffset),
                     contentType: InputField.ContentType.Standard,
                     placeholderText: "Enter item...",
                     fontSize: FieldUIBuilder.FieldFontSize,
-                    width: fieldWidth,
+                    width: inputWidth,
                     height: InputHeight
                 );
                 m_inputField = inputObj.GetComponent<InputField>();
             }
 
-            yOffset -= InputHeight + 10f;
-
-            // Scroll view — below the input, same center X and width
-            m_itemContainer = CreateScrollableList(parent, new Vector2(startPosition.x, yOffset), fieldWidth);
-            RefreshItemList();
-
-            // Add button — to the right of the scroll view, top-aligned
+            // Add button - inline with the input field, always visible
             GameObject addBtn = GUIManager.Instance.CreateButton(
                 text: "Add",
                 parent: parent.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(startPosition.x + fieldWidth / 2f + 5f + ButtonWidth / 2f, yOffset - ButtonHeight / 2f),
+                position: new Vector2(btnCenterX, yOffset),
                 width: ButtonWidth,
                 height: ButtonHeight
             );
             addBtn.SetActive(true);
             addBtn.GetComponent<Button>().onClick.AddListener(OnAddItem);
+
+            yOffset -= InputHeight + 10f;
+
+            // Scroll view - below the input row, full width
+            m_itemContainer = CreateScrollableList(parent, new Vector2(startPosition.x, yOffset), fieldWidth, ListMaxHeight, "ListScrollView");
+            RefreshItemList();
 
             return InputHeight + 10f + ListMaxHeight;
         }
@@ -143,20 +148,20 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             ClearContainer(m_itemContainer);
 
-            // Content width is the viewport width — scrollbar takes 16px off the right
+            // Content width is the viewport width - scrollbar takes 16px off the right
             float contentWidth  = m_fieldWidth - 16f;
-            float itemTextWidth = contentWidth - ButtonWidth - 10f;
-            float textCenterX   = -contentWidth / 2f + itemTextWidth / 2f;
+            float itemTextWidth = contentWidth - ButtonWidth - 10f - LeftPadding;
+            float textCenterX   = -contentWidth / 2f + LeftPadding + itemTextWidth / 2f;
             float btnCenterX    = contentWidth / 2f - ButtonWidth / 2f;
 
             float yOffset = -(ItemHeight / 2f);
 
-            for (int i = 0; i < m_targetList.Count; i++)
+            for (int i = m_targetList.Count - 1; i >= 0; i--)
             {
                 int capturedIndex = i;
                 string item = m_targetList[i];
 
-                GUIManager.Instance.CreateText(
+                Text itemText = GUIManager.Instance.CreateText(
                     text: item,
                     parent: m_itemContainer.transform,
                     anchorMin: new Vector2(0.5f, 1f),
@@ -170,7 +175,8 @@ namespace WizshBoneTwitchIntegration.Gui
                     width: itemTextWidth,
                     height: ItemHeight,
                     addContentSizeFitter: false
-                );
+                ).GetComponent<Text>();
+                itemText.alignment = TextAnchor.MiddleLeft;
 
                 GameObject removeBtn = GUIManager.Instance.CreateButton(
                     text: "X",
@@ -201,9 +207,11 @@ namespace WizshBoneTwitchIntegration.Gui
             }
         }
 
-        private GameObject CreateScrollableList(GameObject parent, Vector2 position, float fieldWidth)
+        internal static GameObject CreateScrollableList(GameObject parent, Vector2 position, float width, float height, string name = "ScrollView")
         {
-            GameObject scrollRoot = new GameObject("ListScrollView");
+            float fieldWidth = width;
+            float ListMaxHeight = height;
+            GameObject scrollRoot = new GameObject(name);
             scrollRoot.transform.SetParent(parent.transform, false);
 
             RectTransform scrollRt = scrollRoot.AddComponent<RectTransform>();

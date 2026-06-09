@@ -41,15 +41,15 @@ namespace WizshBoneTwitchIntegration.Models
         public float? spirit;
 
         [EditorLabel("Based on max health and armor")]
-        [EditorTooltip("If enabled, the damage will be calculated based on the player's max health and armor. Does require one of the damage to be set!")]
+        [EditorTooltip("If enabled, the damage will be calculated based on the player's max health and armor. Does require one of the damage(s) to be set!")]
         public bool basedOnMaxHealthAndArmor = false;
 
         [EditorLabel("Armor percentage")]
-        [EditorTooltip("The percentage of the player's armor to use for damage calculation. Only used if 'Based on max health and armor' is enabled.")]
+        [EditorTooltip("Percentage of the player's armor to use for damage calculation. Only if 'Based on max health and armor' is enabled.")]
         public float armorPercentage = 0.8f;
 
         [EditorLabel("Max health percentage")]
-        [EditorTooltip("The percentage of the player's max health to use for damage calculation. Only used if 'Based on max health and armor' is enabled.")]
+        [EditorTooltip("Percentage of the player's max health to use for damage calculation. Only if 'Based on max health and armor' is enabled.")]
         public float maxHealthPercentage = 0.45f;
 
         public DamageData() { }

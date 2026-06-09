@@ -36,14 +36,14 @@ namespace WizshBoneTwitchIntegration.Gui
         private RedeemData m_editingOriginal;
         private bool m_isReadOnly;
 
-        // Working redeem — sub-data objects are written into directly by ObjectEditor
+        // Working redeem ï¿½ sub-data objects are written into directly by ObjectEditor
         private RedeemData m_newRedeem = new RedeemData();
-        private readonly ObjectEditor m_objectEditor = new ObjectEditor(startX: -220f, startY: -20f, fieldWidth: 200f);
+        private readonly ObjectEditor m_objectEditor = new ObjectEditor(startX: -341f, startY: -20f, fieldWidth: 320f);
 
         // Stored so CreateCreateView can create a scrollable editor container
         private CreateScrollableContainerDelegate m_createScrollable;
 
-        // Working copy — only flushed to disk on Save
+        // Working copy ï¿½ only flushed to disk on Save
         private List<RedeemData> m_workingRedeems = new List<RedeemData>();
         private readonly HashSet<string> m_unsavedTitles = new HashSet<string>();
 
@@ -69,36 +69,36 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float HeaderTopPadding    = 45f;
         private const float ActionButtonWidth   = 80f;
 
-        private const float ColTitleX  = -230f;
-        private const float ColTitleW  = 200f;
-        private const float ColTypeX   = -55f;
-        private const float ColTypeW   = 140f;
-        private const float ColCostX   = 70f;
-        private const float ColCostW   = 100f;
+        private const float ColTitleX  = -350f;
+        private const float ColTitleW  = 260f;
+        private const float ColTypeX   = -80f;
+        private const float ColTypeW   = 160f;
+        private const float ColCostX   = 80f;
+        private const float ColCostW   = 120f;
 
-        private const float BtnTestX   = 165f;
-        private const float BtnEditX   = 250f;
-        private const float BtnDeleteX = 315f;
+        private const float BtnTestX   = 220f;
+        private const float BtnEditX   = 330f;
+        private const float BtnDeleteX = 410f;
 
-        private const float ListLeftEdgeX        = -350f;
+        private const float ListLeftEdgeX        = -480f;
         private const float ContentTopY          = -(110f + HeaderTopPadding);
         private const float RedeemLabelY         = ContentTopY - 53f;
         private const float ScrollTopOffset      = ContentTopY - 71f;
-        private const float SearchWidth          = 400f;
+        private const float SearchWidth          = 560f;
         private const float NewRedeemBtnWidth    = 160f;
         private const float SaveBtnWidth         = 80f;
         private const float SearchCenterX        = ListLeftEdgeX + SearchWidth / 2f;
         private const float NewRedeemBtnCenterX  = SearchCenterX + SearchWidth / 2f + ButtonSpacing + NewRedeemBtnWidth / 2f;
         private const float SaveBtnCenterX       = NewRedeemBtnCenterX + NewRedeemBtnWidth / 2f + ButtonSpacing + SaveBtnWidth / 2f;
 
-        private const float TypeLabelX    = -220f;
-        private const float TypeLabelW    = 130f;
-        private const float TypeDropdownW = 200f;
+        private const float TypeLabelX    = -341f;
+        private const float TypeLabelW    = 210f;
+        private const float TypeDropdownW = 320f;
         private const float TypeDropdownX = TypeLabelX + TypeLabelW / 2f + 10f + TypeDropdownW / 2f;
 
         private System.Action m_onCloseRequested;
 
-        // Create view title — stored to allow "New Redeem" / "Edit Redeem" / "View Redeem" switching
+        // Create view title ï¿½ stored to allow "New Redeem" / "Edit Redeem" / "View Redeem" switching
         private Text m_createViewTitle;
         private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
 
@@ -288,7 +288,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
                 if (isSynced)
                 {
-                    // Synced profile — show read-only view, no delete
+                    // Synced profile ï¿½ show read-only view, no delete
                     GameObject showBtn = GUIManager.Instance.CreateButton(
                         text: "Show",
                         parent: m_redeemListContainer.transform,
@@ -489,7 +489,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             m_editorContainer = TabUIHelper.CreateStaticContainer("EditorContainer", scrollContent, yPos);
 
-            // Initial scroll content height — editor is empty at start
+            // Initial scroll content height ï¿½ editor is empty at start
             TabUIHelper.UpdateScrollContentHeight(m_createScrollContent, m_editorContainerYPos, 0f);
 
             m_createView.SetActive(false);
@@ -566,7 +566,7 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             TabUIHelper.ClearContainer(m_standardFieldsContainer);
             float height = m_objectEditor.Build(m_standardFieldsContainer, m_newRedeem);
-            m_standardFieldsContainer.GetComponent<RectTransform>().sizeDelta = new Vector2(700f, height + 40f);
+            m_standardFieldsContainer.GetComponent<RectTransform>().sizeDelta = new Vector2(1050f, height + 40f);
         }
 
         private void OnTestRedeem(RedeemData redeem)
@@ -645,7 +645,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_isReadOnly                  = true;
             m_editingOriginal             = null;
             m_newRedeem                   = redeem.DeepClone<RedeemData>();
-            m_createFeedbackText.text     = "Read-only — this profile is synced.";
+            m_createFeedbackText.text     = "Read-only ï¿½ this profile is synced.";
             m_createViewTitle.text        = "View Redeem";
             m_typeDropdown.interactable   = false;
             m_confirmButton.gameObject.SetActive(false);

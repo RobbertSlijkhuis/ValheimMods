@@ -19,11 +19,11 @@ namespace WizshBoneTwitchIntegration.Models
 
         [EditorLabel("Height")] 
         [EditorTooltip("The height of the weather event in meters.")]
-        public float height = 200f;
+        public float height = 50;
 
         [EditorLabel("Radius")] 
         [EditorTooltip("The radius of the weather event in meters.")]
-        public float radius = 60f;
+        public float radius = 200f;
 
         [EditorLabel("Weathers")]
         [EditorTooltip("A list of weather types that can occur during this event.")]

@@ -30,7 +30,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private ViewerEntry m_editingOriginal;
 
         private ViewerEntry m_newViewer = new ViewerEntry();
-        private readonly ObjectEditor m_objectEditor = new ObjectEditor(startX: -220f, startY: -20f, fieldWidth: 200f);
+        private readonly ObjectEditor m_objectEditor = new ObjectEditor(startX: -341f, startY: -20f, fieldWidth: 320f);
 
         private CreateScrollableContainerDelegate m_createScrollable;
 
@@ -47,20 +47,20 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float HeaderTopPadding    = 45f;
         private const float ActionButtonWidth   = 80f;
 
-        private const float ColNameX    = -230f;
-        private const float ColNameW    = 220f;
-        private const float ColColor1X  = -30f;
-        private const float ColColor1W  = 120f;
-        private const float ColEffectsX = 130f;
-        private const float ColEffectsW = 250f;
-        private const float BtnEditX    = 250f;
-        private const float BtnDeleteX  = 315f;
+        private const float ColNameX    = -350f;
+        private const float ColNameW    = 280f;
+        private const float ColColor1X  = -60f;
+        private const float ColColor1W  = 140f;
+        private const float ColEffectsX = 180f;
+        private const float ColEffectsW = 300f;
+        private const float BtnEditX    = 380f;
+        private const float BtnDeleteX  = 460f;
 
-        private const float ListLeftEdgeX       = -350f;
+        private const float ListLeftEdgeX       = -480f;
         private const float ContentTopY         = -(110f + HeaderTopPadding);
         private const float ViewersLabelY       = ContentTopY - 53f;
         private const float ScrollTopOffset     = ContentTopY - 71f;
-        private const float SearchWidth         = 400f;
+        private const float SearchWidth         = 560f;
         private const float NewViewerBtnWidth   = 160f;
         private const float SaveBtnWidth        = 80f;
         private const float SearchCenterX       = ListLeftEdgeX + SearchWidth / 2f;
@@ -379,7 +379,7 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             TabUIHelper.ClearContainer(m_editorContainer);
             float height = m_objectEditor.Build(m_editorContainer, m_newViewer);
-            m_editorContainer.GetComponent<RectTransform>().sizeDelta = new Vector2(700f, height + 20f);
+            m_editorContainer.GetComponent<RectTransform>().sizeDelta = new Vector2(1050f, height + 20f);
             TabUIHelper.UpdateScrollContentHeight(m_createScrollContent, m_editorContainerYPos, height);
         }
 

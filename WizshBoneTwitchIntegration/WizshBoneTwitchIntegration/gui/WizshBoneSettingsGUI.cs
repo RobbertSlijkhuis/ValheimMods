@@ -53,8 +53,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMin: new Vector2(0.5f, 0.5f),
                 anchorMax: new Vector2(0.5f, 0.5f),
                 position: new Vector2(0f, 0f),
-                width: 800f,
-                height: 650f,
+                width: 1200f,
+                height: 720f,
                 draggable: false
             );
 

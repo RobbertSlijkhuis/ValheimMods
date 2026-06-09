@@ -20,7 +20,7 @@ namespace WizshBoneTwitchIntegration.Models
         public string type = DetonateType.Fish;
 
         [EditorLabel("Values")]
-        [EditorTooltip("The object to detonate must contain this value in its name (Fish1, Fish2, Fish13 contains the word \"Fish\".")]
+        [EditorTooltip("The object to detonate must contain this value in its name, if contains \"Fish\" then (Fish1, Fish2, Fish13) will detonate.")]
         public List<string> values = new List<string>() { "Fish" };
 
         [EditorLabel("Damage settings")]

@@ -1,4 +1,5 @@
 ﻿using Jotunn.Managers;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -44,7 +45,7 @@ namespace WizshBoneTwitchIntegration.Gui
             return BuildFields(parent, target, m_startY);
         }
 
-        internal float BuildFields(GameObject parent, object target, float startY)
+        internal float BuildFields(GameObject parent, object target, float startY, bool skipNullFields = false)
         {
             FieldInfo[] fields = target.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
 
@@ -53,6 +54,10 @@ namespace WizshBoneTwitchIntegration.Gui
             foreach (FieldInfo field in fields)
             {
                 if (field.GetCustomAttribute<EditorHiddenAttribute>() != null)
+                    continue;
+
+                // Skip null nullable fields when in skipNullFields mode
+                if (skipNullFields && IsNullableType(field.FieldType) && field.GetValue(target) == null)
                     continue;
 
                 // Nested CloneableData — render a section header, recurse, then render a section ender
@@ -73,7 +78,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     BuildSectionBoundary(parent, "— " + sectionLabel + " —", new Vector2(fieldCenterX, yOffset), m_fieldWidth);
                     yOffset -= SectionHeaderHeight + SectionHeaderSpacing;
 
-                    yOffset -= BuildFields(parent, nestedValue, yOffset);
+                    yOffset -= BuildFields(parent, nestedValue, yOffset, skipNullFields: true);
 
                     BuildSectionBoundary(parent, "— end of " + sectionLabel + " —", new Vector2(fieldCenterX, yOffset), m_fieldWidth);
                     yOffset -= SectionHeaderHeight + SectionHeaderSpacing;
@@ -85,22 +90,14 @@ namespace WizshBoneTwitchIntegration.Gui
                     field.FieldType.GetGenericTypeDefinition() == typeof(List<>) &&
                     typeof(CloneableData).IsAssignableFrom(field.FieldType.GetGenericArguments()[0]))
                 {
-                    string listLabel = field.GetCustomAttribute<EditorLabelAttribute>()?.Label ?? field.Name;
-                    float fieldCenterX = m_startX + FieldUIBuilder.LabelWidth / 2f + FieldUIBuilder.LabelFieldGap + m_fieldWidth / 2f;
-
-                    BuildSectionBoundary(parent, "— " + listLabel + " —", new Vector2(fieldCenterX, yOffset), m_fieldWidth);
-                    yOffset -= SectionHeaderHeight + SectionHeaderSpacing;
-
                     var listEditor = new ObjectListEditor(
                         field.GetValue(target) as IList,
                         field.FieldType.GetGenericArguments()[0],
+                        field.GetCustomAttribute<EditorLabelAttribute>()?.Label ?? field.Name,
                         m_startX,
                         m_fieldWidth);
-                    float listHeight = listEditor.Build(parent, yOffset);
-                    yOffset -= listHeight + EntrySpacing;
-
-                    BuildSectionBoundary(parent, "— end of " + listLabel + " —", new Vector2(fieldCenterX, yOffset), m_fieldWidth);
-                    yOffset -= SectionHeaderHeight + SectionHeaderSpacing;
+                    listEditor.Build(parent, new Vector2(m_startX, yOffset));
+                    yOffset -= ObjectListEditor.TotalHeight + EntrySpacing;
                     continue;
                 }
 
@@ -145,6 +142,9 @@ namespace WizshBoneTwitchIntegration.Gui
             textComp.alignment = TextAnchor.MiddleCenter;
             textComp.fontStyle = FontStyle.Bold;
         }
+
+        private static bool IsNullableType(Type t) =>
+            t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>);
 
         private static List<string> GetDropdownOptionsForField(object target, FieldInfo field)
         {

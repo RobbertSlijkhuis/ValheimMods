@@ -11,10 +11,10 @@ namespace WizshBoneTwitchIntegration.Gui
 {
     internal static class FieldUIBuilder
     {
-        internal const float LabelWidth = 130f;
+        internal const float LabelWidth = 210f;
         internal const float LabelFieldGap = 10f;
-        private const float TooltipGap = 12f;
-        private const float TooltipWidth = 240f;
+        internal const float TooltipGap = 12f;
+        internal const float TooltipWidth = 340f;
         private const float TooltipHeight = 36f;
         public const float FieldHeight = 36f;
         public const float InputHeight = 32f;
@@ -69,7 +69,7 @@ namespace WizshBoneTwitchIntegration.Gui
             if (!isString && !isInt && !isFloat && !isBool && !isNullableInt && !isNullableFloat && !isNullableBool)
                 return false;
 
-            // Label — left side of the row
+            // Label - left side of the row
             Text labelComp = GUIManager.Instance.CreateText(
                 text: labelText,
                 parent: parent.transform,
@@ -87,7 +87,7 @@ namespace WizshBoneTwitchIntegration.Gui
             ).GetComponent<Text>();
             labelComp.alignment = TextAnchor.MiddleLeft;
 
-            // Field — immediately to the right of the label
+            // Field - immediately to the right of the label
             float fieldX = rowPosition.x + LabelWidth / 2f + LabelFieldGap + fieldWidth / 2f;
             Vector2 fieldPos = new Vector2(fieldX, rowPosition.y);
 
@@ -119,7 +119,7 @@ namespace WizshBoneTwitchIntegration.Gui
             else if (isNullableBool)
                 BuildBoolField(parent, target, field, currentValue is bool nb && nb, fieldPos, fieldWidth);
 
-            // Tooltip — to the right of the input field, same vertical position
+            // Tooltip - to the right of the input field, same vertical position
             if (tooltip != null)
             {
                 float tooltipX = fieldX + fieldWidth / 2f + TooltipGap + TooltipWidth / 2f;
@@ -235,7 +235,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private static bool BuildListField(GameObject parent, FieldInfo field, List<string> currentValue, Vector2 rowPosition, float fieldWidth, List<string> dropdownOptions, string labelText, string tooltip)
         {
-            // Label — same as all other fields
+            // Label - same as all other fields
             Text listLabelComp = GUIManager.Instance.CreateText(
                 text: labelText,
                 parent: parent.transform,
@@ -253,7 +253,7 @@ namespace WizshBoneTwitchIntegration.Gui
             ).GetComponent<Text>();
             listLabelComp.alignment = TextAnchor.MiddleLeft;
 
-            // Input/dropdown center — identical to all other field types
+            // Input/dropdown center - identical to all other field types
             float fieldX = rowPosition.x + LabelWidth / 2f + LabelFieldGap + fieldWidth / 2f;
             Vector2 fieldPos = new Vector2(fieldX, rowPosition.y);
 
@@ -263,7 +263,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             editor.Build(parent, fieldPos, fieldWidth);
 
-            // Tooltip — to the right of the field, same as all other field types
+            // Tooltip - to the right of the field, same as all other field types
             if (tooltip != null)
             {
                 float tooltipX = fieldX + fieldWidth / 2f + TooltipGap + TooltipWidth / 2f;
@@ -293,7 +293,7 @@ namespace WizshBoneTwitchIntegration.Gui
             ).GetComponent<Text>();
             labelComp.alignment = TextAnchor.MiddleLeft;
 
-            // Three inputs — X, Y, Z — evenly split across fieldWidth
+            // Three inputs - X, Y, Z - evenly split across fieldWidth
             float fieldStartX = rowPosition.x + LabelWidth / 2f + LabelFieldGap;
             float subWidth = (fieldWidth - 10f) / 3f; // 10f = 2 gaps of 5f
             float subHeight = FieldHeight;
@@ -390,7 +390,7 @@ namespace WizshBoneTwitchIntegration.Gui
             };
         }
 
-        // Mirrors ListEditor's private constants — used to compute layout alignment
+        // Mirrors ListEditor's private constants - used to compute layout alignment
         private const float ListEditorInputW = 200f;
         private const float ListEditorBtnW = 60f;
         private const float ListEditorGap = 10f;
@@ -469,7 +469,7 @@ namespace WizshBoneTwitchIntegration.Gui
             if (itemRt != null)
                 itemRt.sizeDelta = new Vector2(itemRt.sizeDelta.x, itemHeight);
 
-            // Fix text anchored to the bottom of the item rect — center it vertically
+            // Fix text anchored to the bottom of the item rect - center it vertically
             // so the visual text position matches the middle of the hit area.
             Transform labelTransform = item.Find("Item Label");
             if (labelTransform != null)
@@ -493,7 +493,7 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             Color initialColor = ParseHexColor(currentValue);
 
-            // Button — keeps its default Valheim style so borders are visible
+            // Button - keeps its default Valheim style so borders are visible
             GameObject swatchBtn = GUIManager.Instance.CreateButton(
                 text: "",
                 parent: parent.transform,
@@ -505,7 +505,7 @@ namespace WizshBoneTwitchIntegration.Gui
             );
             swatchBtn.SetActive(true);
 
-            // Solid color overlay — slightly inset so button borders remain visible
+            // Solid color overlay - slightly inset so button borders remain visible
             const float inset = 4f;
             GameObject swatchOverlay = new GameObject("ColorOverlay");
             swatchOverlay.transform.SetParent(swatchBtn.transform, false);

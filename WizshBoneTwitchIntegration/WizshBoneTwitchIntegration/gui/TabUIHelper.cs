@@ -58,7 +58,7 @@ namespace WizshBoneTwitchIntegration.Gui
             rt.anchorMax        = new Vector2(0.5f, 1f);
             rt.pivot            = new Vector2(0.5f, 1f);
             rt.anchoredPosition = new Vector2(0f, yPos);
-            rt.sizeDelta        = new Vector2(700f, 400f);
+            rt.sizeDelta        = new Vector2(1050f, 400f);
 
             return container;
         }
