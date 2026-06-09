@@ -121,7 +121,7 @@ namespace WizshBoneTwitchIntegration.Models
             return result;
         }
 
-        private static Dictionary<string, object> MinimalDictionary(CloneableData data)
+        internal static Dictionary<string, object> MinimalDictionary(CloneableData data)
         {
             object defaults = Activator.CreateInstance(data.GetType());
             var result      = new Dictionary<string, object>();
@@ -138,6 +138,29 @@ namespace WizshBoneTwitchIntegration.Models
                     Dictionary<string, object> nestedDict = MinimalDictionary(nested);
                     if (nestedDict.Count > 0)
                         result[field.Name] = nestedDict;
+                }
+                else if (value is IList list)
+                {
+                    if (IsEqual(value, field.GetValue(defaults)))
+                        continue;
+
+                    bool hasCloneable = false;
+                    foreach (object item in list)
+                    {
+                        if (item is CloneableData) { hasCloneable = true; break; }
+                    }
+
+                    if (hasCloneable)
+                    {
+                        var minimalItems = new List<object>();
+                        foreach (object item in list)
+                            minimalItems.Add(item is CloneableData c ? (object)MinimalDictionary(c) : item);
+                        result[field.Name] = minimalItems;
+                    }
+                    else
+                    {
+                        result[field.Name] = value;
+                    }
                 }
                 else if (!IsEqual(value, field.GetValue(defaults)))
                 {

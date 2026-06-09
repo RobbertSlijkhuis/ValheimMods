@@ -372,7 +372,8 @@ namespace WizshBoneTwitchIntegration.Gui
             // Serialize creatureGroups preamble if present
             if (data.creatureGroups != null && data.creatureGroups.Count > 0)
             {
-                var preamble = new Dictionary<string, object> { { "creatureGroups", data.creatureGroups } };
+                var minimalGroups = data.creatureGroups.Select(g => RedeemData.MinimalDictionary(g)).ToList();
+                var preamble = new Dictionary<string, object> { { "creatureGroups", minimalGroups } };
                 sb.Append(serializer.Serialize(preamble));
             }
 

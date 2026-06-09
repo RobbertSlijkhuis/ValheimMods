@@ -7,8 +7,8 @@ namespace WizshBoneTwitchIntegration.Helpers
     internal class PlayerScaleHelper
     {
         public const float ScaleDelta   = 0.15f;
-        public const float ScaleMin     = 0.45f;
-        public const float ScaleMax     = 2f;
+        public const float ScaleMin     = 0.2f;
+        public const float ScaleMax     = 10f;
         public const float LerpDuration = 0.3f;
 
         private static float s_currentTargetScale = 1f;
