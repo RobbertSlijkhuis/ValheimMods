@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
+using WizshBoneTwitchIntegration.extensions;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
@@ -204,7 +205,11 @@ namespace WizshBoneTwitchIntegration.Extensions
                 if (spawnAbility.m_preSpawnDelay > 0f)
                     yield return new WaitForSeconds(spawnAbility.m_preSpawnDelay);
 
-                GameObject gameObject = UnityEngine.Object.Instantiate(prefab, spawnPoint, Quaternion.Euler(0f, UnityEngine.Random.value * (float)Math.PI * 2f, 0f));
+                Quaternion spawnRotation = spawnAbilityData.randomRotation
+                    ? Quaternion.Euler(0f, UnityEngine.Random.Range(0f, 360f), 0f)
+                    : Quaternion.identity;
+
+                GameObject gameObject = UnityEngine.Object.Instantiate(prefab, spawnPoint, spawnRotation);
 
                 // Remove any safe zones that may be on the spawned prefab (e.g. boat rain)
                 foreach (TwitchSafeZone safeZone in gameObject.GetComponentsInChildren<TwitchSafeZone>(true))
@@ -334,6 +339,22 @@ namespace WizshBoneTwitchIntegration.Extensions
                         piecePersistentData.SetData(customRewardEvent, spawnAbilityData);
                     else
                         Jotunn.Logger.LogWarning("TwitchPiecePersistentData missing on piece object.");
+
+                    if (spawnAbilityData.duration > 0)
+                    {
+                        TwitchPersistentDestruction persistentDestruction = gameObject.GetComponent<TwitchPersistentDestruction>();
+                        if (persistentDestruction != null)
+                            persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall);
+                        else
+                            Jotunn.Logger.LogWarning("TwitchPersistentDestruction missing on piece object.");
+                    }
+
+                    Door door = gameObject.GetComponent<Door>();
+                    if (door != null)
+                    {
+                        Jotunn.Logger.LogWarning("Door found, toggling continuously for " + spawnAbilityData.doorInterval + " seconds.");
+                        door.StartCoroutine(door.ToggleDoorContinuously(spawnAbilityData.doorInterval));
+                    }
                 }
 
                 if ((bool)component2)

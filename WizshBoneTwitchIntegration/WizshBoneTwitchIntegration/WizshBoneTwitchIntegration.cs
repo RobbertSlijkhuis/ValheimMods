@@ -218,6 +218,7 @@ namespace WizshBoneTwitchIntegration
                 if (piece != null)
                 {
                     prefab.AddComponent<TwitchPiecePersistentData>();
+                    prefab.AddComponent<TwitchPersistentDestruction>();
                 }
 
                 if (impactEffect != null || mister != null || trap != null)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -360,61 +361,86 @@ namespace WizshBoneTwitchIntegration.Gui
         private void OnSave()
         {
             string path = ProfileManager.GetActiveRedeemPath();
+            string backupPath = path + ".bak";
+            HashSet<string> unsavedTitlesBackup = new HashSet<string>(m_unsavedTitles);
 
-            ModData data = ExtraConfigHelper.ReadRedeemsConfig(path) ?? new ModData();
-
-            ISerializer serializer = new SerializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
-
-            var sb = new StringBuilder();
-
-            // Serialize creatureGroups preamble if present
-            if (data.creatureGroups != null && data.creatureGroups.Count > 0)
+            try
             {
-                var minimalGroups = data.creatureGroups.Select(g => RedeemData.MinimalDictionary(g)).ToList();
-                var preamble = new Dictionary<string, object> { { "creatureGroups", minimalGroups } };
-                sb.Append(serializer.Serialize(preamble));
-            }
+                if (File.Exists(path))
+                    File.Copy(path, backupPath, overwrite: true);
 
-            // Sort redeems by type (alphabetical), then title within each type
-            var groups = m_workingRedeems
-                .OrderBy(r => r.type?.ToString() ?? "")
-                .ThenBy(r => r.title ?? "")
-                .GroupBy(r => r.type?.ToString() ?? "");
+                ModData data = ExtraConfigHelper.ReadRedeemsConfig(path) ?? new ModData();
 
-            sb.AppendLine("redeems:");
+                ISerializer serializer = new SerializerBuilder()
+                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                    .Build();
 
-            foreach (var group in groups)
-            {
-                string typeName = string.IsNullOrEmpty(group.Key) ? "Unknown" : group.Key;
+                var sb = new StringBuilder();
 
-                sb.AppendLine($"  #######################");
-                sb.AppendLine($"  # {typeName}");
-                sb.AppendLine($"  #######################");
-
-                foreach (RedeemData redeem in group)
+                // Serialize creatureGroups preamble if present
+                if (data.creatureGroups != null && data.creatureGroups.Count > 0)
                 {
-                    // Serialize a single-item list so YamlDotNet emits the "- key: value" block format,
-                    // then strip the leading "- " list wrapper we get from a root sequence.
-                    var single = new List<Dictionary<string, object>> { redeem.ToDictionary() };
-                    string itemYaml = serializer.Serialize(single);
-                    // itemYaml looks like "- key: value\n  key2: value2\n"
-                    // Indent every line by 2 spaces to sit under "redeems:"
-                    foreach (string line in itemYaml.Split('\n'))
+                    var minimalGroups = data.creatureGroups.Select(g => RedeemData.MinimalDictionary(g)).ToList();
+                    var preamble = new Dictionary<string, object> { { "creatureGroups", minimalGroups } };
+                    sb.Append(serializer.Serialize(preamble));
+                }
+
+                // Sort redeems by type (alphabetical), then title within each type
+                var groups = m_workingRedeems
+                    .OrderBy(r => r.type?.ToString() ?? "")
+                    .ThenBy(r => r.title ?? "")
+                    .GroupBy(r => r.type?.ToString() ?? "");
+
+                sb.AppendLine("redeems:");
+
+                foreach (var group in groups)
+                {
+                    string typeName = string.IsNullOrEmpty(group.Key) ? "Unknown" : group.Key;
+
+                    sb.AppendLine($"  #######################");
+                    sb.AppendLine($"  # {typeName}");
+                    sb.AppendLine($"  #######################");
+
+                    foreach (RedeemData redeem in group)
                     {
-                        if (line.Length == 0) continue;
-                        sb.Append("  ");
-                        sb.AppendLine(line.TrimEnd('\r'));
+                        // Serialize a single-item list so YamlDotNet emits the "- key: value" block format,
+                        // then strip the leading "- " list wrapper we get from a root sequence.
+                        var single = new List<Dictionary<string, object>> { redeem.ToDictionary() };
+                        string itemYaml = serializer.Serialize(single);
+                        // itemYaml looks like "- key: value\n  key2: value2\n"
+                        // Indent every line by 2 spaces to sit under "redeems:"
+                        foreach (string line in itemYaml.Split('\n'))
+                        {
+                            if (line.Length == 0) continue;
+                            sb.Append("  ");
+                            sb.AppendLine(line.TrimEnd('\r'));
+                        }
                     }
                 }
+
+                File.WriteAllText(path, sb.ToString());
+
+                RedeemHelper.Reload();
+                m_unsavedTitles.Clear();
+                m_listFeedbackText.text = "Saved!";
+            }
+            catch (Exception ex)
+            {
+                Jotunn.Logger.LogError($"Failed to save redeems, restoring backup: {ex}");
+
+                if (File.Exists(backupPath))
+                {
+                    File.Copy(backupPath, path, overwrite: true);
+                    RedeemHelper.Reload();
+                }
+
+                m_unsavedTitles.Clear();
+                foreach (string title in unsavedTitlesBackup)
+                    m_unsavedTitles.Add(title);
+
+                m_listFeedbackText.text = "Save failed! Restored previous redeems file.";
             }
 
-            File.WriteAllText(path, sb.ToString());
-
-            RedeemHelper.Reload();
-            m_unsavedTitles.Clear();
-            m_listFeedbackText.text = "Saved!";
             RefreshList();
         }
 

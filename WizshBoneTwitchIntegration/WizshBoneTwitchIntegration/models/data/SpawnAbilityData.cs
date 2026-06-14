@@ -13,6 +13,7 @@ namespace WizshBoneTwitchIntegration.Models
         public bool damageStructures = true;
         public float? dropVelocity = 0f;
         public int duration = 0;
+        public float doorInterval = 0f;
         public float? groundOffset;
         public float? initialSpawnDelay;
         public bool isBiomeList = false;
@@ -23,6 +24,7 @@ namespace WizshBoneTwitchIntegration.Models
         public int? minToSpawn;
         public bool isOwner = true;
         public string prefabName;
+        public bool randomRotation = true;
         public bool? randomDirection;
         public float? randomAngleMax;
         public float? randomAngleMin;
