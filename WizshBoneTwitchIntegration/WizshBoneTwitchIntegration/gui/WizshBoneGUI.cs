@@ -1,9 +1,7 @@
 ﻿using Jotunn.Managers;
-using TwitchSDK.Interop;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Gui
@@ -337,7 +335,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void ToggleRedeems()
         {
-            if (customRewards.m_enabled && !PluginConfig.configAutoResolveRedeems.Value && customRewards.m_redeemHistory.FindAll(item => item.Status == CustomRewardRedemptionState.Unfulfilled).Count > 0)
+            if (customRewards.HasUnresolvedRedeems())
             {
                 m_confirmDialog.Show(
                     title:       "Disable Redeems",

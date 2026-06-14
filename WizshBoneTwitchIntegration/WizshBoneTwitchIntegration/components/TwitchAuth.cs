@@ -27,6 +27,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public WizshBoneGUI wizshBoneGUI;
         public WizshBoneHUD wizshBoneHUD;
+        public ConfirmDialog m_exitConfirmDialog = new ConfirmDialog();
 
         public void Awake()
         {
@@ -54,6 +55,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             try
             {
                 wizshBoneHUD.ShowHUD();
+                m_exitConfirmDialog.Init();
                 GUIManager.OnCustomGUIAvailable -= OnGUIAvailable;
             }
             catch (Exception e)

@@ -73,6 +73,13 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 ClearRewards();
         }
 
+        public bool HasUnresolvedRedeems()
+        {
+            return m_enabled
+                && !PluginConfig.configAutoResolveRedeems.Value
+                && m_redeemHistory.Exists(item => item.Status == CustomRewardRedemptionState.Unfulfilled);
+        }
+
         public void Update()
         {
             try

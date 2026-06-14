@@ -42,6 +42,22 @@ namespace WizshBoneTwitchIntegration.Harmony
 
                 if (auth.m_loggedIn)
                 {
+                    if (auth.m_customRewards.HasUnresolvedRedeems())
+                    {
+                        auth.m_exitConfirmDialog.Show(
+                            title:       "Log Out",
+                            description: "Auto-resolve is off. Pending redeems won't be refunded automatically. Log out anyway?",
+                            onConfirm:   () =>
+                            {
+                                ExtraConfigHelper.WriteBannedUsersToFile(auth.m_customRewards.m_bannedUsers);
+                                auth.LogoutBackToMainMenu();
+                            },
+                            confirmText: "Log Out",
+                            cancelText:  "Cancel"
+                        );
+                        return false;
+                    }
+
                     ExtraConfigHelper.WriteBannedUsersToFile(auth.m_customRewards.m_bannedUsers);
                     auth.LogoutBackToMainMenu();
                     return false;
@@ -72,6 +88,23 @@ namespace WizshBoneTwitchIntegration.Harmony
 
                 if (auth.m_loggedIn)
                 {
+                    if (auth.m_customRewards.HasUnresolvedRedeems())
+                    {
+                        auth.m_exitConfirmDialog.Show(
+                            title:       "Quit Game",
+                            description: "Auto-resolve is off. Pending redeems won't be refunded automatically. Quit anyway?",
+                            onConfirm:   () =>
+                            {
+                                ExtraConfigHelper.WriteBannedUsersToFile(auth.m_customRewards.m_bannedUsers);
+                                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Clearing redeems, please wait!", 1000);
+                                auth.LogoutQuitApplication();
+                            },
+                            confirmText: "Quit",
+                            cancelText:  "Cancel"
+                        );
+                        return false;
+                    }
+
                     ExtraConfigHelper.WriteBannedUsersToFile(auth.m_customRewards.m_bannedUsers);
                     Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Clearing redeems, please wait!", 1000);
                     auth.LogoutQuitApplication();

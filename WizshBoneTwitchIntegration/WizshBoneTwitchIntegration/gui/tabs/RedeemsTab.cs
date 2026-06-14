@@ -46,7 +46,7 @@ namespace WizshBoneTwitchIntegration.Gui
         // Stored so CreateCreateView can create a scrollable editor container
         private CreateScrollableContainerDelegate m_createScrollable;
 
-        // Working copy � only flushed to disk on Save
+        // Working copy only flushed to disk on Save
         private List<RedeemData> m_workingRedeems = new List<RedeemData>();
         private readonly HashSet<string> m_unsavedTitles = new HashSet<string>();
 
