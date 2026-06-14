@@ -12,6 +12,16 @@ namespace WizshBoneTwitchIntegration.Components
         private GameObject m_playerInZone;
         private readonly string playerIdentifier = "Player(Clone)";
 
+        // Tracks how many safe zones the local player is currently standing in,
+        // so overlapping zones don't toggle the HUD/flag off while still in another zone.
+        private static int s_localPlayerZoneCount = 0;
+
+        // Called from GameAwake_Postfix so a fresh world load doesn't inherit stale state.
+        public static void ResetLocalPlayerZoneCount()
+        {
+            s_localPlayerZoneCount = 0;
+        }
+
         public void Awake()
         {
             try
@@ -70,20 +80,39 @@ namespace WizshBoneTwitchIntegration.Components
 
             Player player = collider.gameObject.GetComponent<Player>();
 
-            if (player.GetPlayerID() == Player.m_localPlayer.GetPlayerID())
-                m_customRewards.m_playerIsInSafeZone = value;
-
             if (message != null && message != "")
                 Jotunn.Logger.LogWarning(message);
 
+            m_playerInZone = value ? collider.gameObject : null;
+
+            if (player.GetPlayerID() != Player.m_localPlayer.GetPlayerID())
+                return;
+
             if (value)
+                EnterLocalPlayerZone();
+            else
+                ExitLocalPlayerZone();
+        }
+
+        private void EnterLocalPlayerZone()
+        {
+            s_localPlayerZoneCount++;
+
+            if (s_localPlayerZoneCount == 1)
             {
-                m_playerInZone = collider.gameObject;
+                m_customRewards.m_playerIsInSafeZone = true;
                 Game.instance.gameObject.GetComponent<SafeZoneHUDPanel>()?.Show();
             }
-            else
+        }
+
+        private void ExitLocalPlayerZone()
+        {
+            if (s_localPlayerZoneCount > 0)
+                s_localPlayerZoneCount--;
+
+            if (s_localPlayerZoneCount == 0)
             {
-                m_playerInZone = null;
+                m_customRewards.m_playerIsInSafeZone = false;
                 Game.instance.gameObject.GetComponent<SafeZoneHUDPanel>()?.Hide();
             }
         }
@@ -159,8 +188,7 @@ namespace WizshBoneTwitchIntegration.Components
 
                 if (player.GetPlayerID() == Player.m_localPlayer.GetPlayerID())
                 {
-                    m_customRewards.m_playerIsInSafeZone = false;
-                    Game.instance.gameObject.GetComponent<SafeZoneHUDPanel>()?.Hide();
+                    ExitLocalPlayerZone();
                 }
             }
             catch (Exception e)

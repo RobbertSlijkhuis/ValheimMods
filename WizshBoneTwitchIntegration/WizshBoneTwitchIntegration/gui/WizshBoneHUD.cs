@@ -120,12 +120,12 @@ namespace WizshBoneTwitchIntegration.Gui
                     position = new Vector2(110f, 30f);
                     break;
                 case HudPosition.AboveMinimap:
-                    anchor = new Vector2(0.5f, 0.5f);
-                    position = new Vector2(820f, 520f);
+                    anchor = new Vector2(1f, 1f);
+                    position = new Vector2(-140f, -20f);
                     break;
                 case HudPosition.UnderMinimap:
-                    anchor = new Vector2(0.5f, 0.5f);
-                    position = new Vector2(820f, 280f);
+                    anchor = new Vector2(1f, 1f);
+                    position = new Vector2(-140f, -260f);
                     break;
                 case HudPosition.Custom:
                     anchor = new Vector2(0.5f, 0.5f);

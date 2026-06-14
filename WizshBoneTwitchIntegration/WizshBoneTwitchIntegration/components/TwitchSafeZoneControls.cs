@@ -102,10 +102,14 @@ namespace WizshBoneTwitchIntegration.Components
             if (colliderTrans == null || projectorTransform == null || parentTrans == null)
                 throw new Exception("Transform is null");
 
+            value = Mathf.Clamp(value, 3f, 1000f);
+
             CircleProjector projectorComp = projectorTransform.gameObject.GetComponent<CircleProjector>();
             CapsuleCollider colliderComp = colliderTrans.gameObject.GetComponent<CapsuleCollider>();
             ParticleSystemForceField forceFieldComp = parentTrans.gameObject.GetComponent<ParticleSystemForceField>();
             projectorComp.m_radius = value;
+            projectorComp.m_nrOfSegments = Mathf.RoundToInt(value * 4f);
+            projectorComp.m_speed = 3.2f / value;
             colliderComp.radius = value;
             forceFieldComp.endRange = value;
 

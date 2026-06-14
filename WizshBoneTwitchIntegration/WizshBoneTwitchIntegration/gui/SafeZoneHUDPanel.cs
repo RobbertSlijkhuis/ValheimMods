@@ -30,9 +30,9 @@ namespace WizshBoneTwitchIntegration.Gui
             m_text = GUIManager.Instance.CreateText(
                 text: MessageText,
                 parent: GUIManager.CustomGUIFront.transform,
-                anchorMin: new Vector2(0.5f, 0.5f),
-                anchorMax: new Vector2(0.5f, 0.5f),
-                position: new Vector2(0f, 200f),
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(0f, -300f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: fontSize,
                 color: GUIManager.Instance.ValheimOrange,

@@ -6,6 +6,13 @@ namespace WizshBoneTwitchIntegration.Helpers
 {
     internal class TransformHelper
     {
+        private const int MaxPositionTries = 5;
+        private const float GroundRaycastUp = 2f;
+        private const float GroundRaycastDistance = 8f;
+        private const float ObstructionCheckHeight = 1f;
+        private const float ObstructionCheckRadius = 0.5f;
+        private static readonly int GroundMask = LayerMask.GetMask("Default", "static_solid", "terrain", "Default_small");
+
         /// <summary>
         /// Instantiate a Quaternion with a Vector3 used for rotation euler angles
         /// </summary>
@@ -36,39 +43,51 @@ namespace WizshBoneTwitchIntegration.Helpers
             Vector3 up = transform.up;
             Vector3 newPos;
             Vector3 offset = positionOffset.ToVector();
-            float height = 0f;
 
             switch (type)
             {
                 case nameof(SpawnPositionType.InFrontOfPlayer):
                     newPos = new Vector3(offset.x, offset.y, 3f + offset.z);
-                    return GetRelativePosition(position, forward, right, up, newPos);
+                    newPos = GetRelativePosition(position, forward, right, up, newPos);
+                    return IsObstructed(newPos) ? position : newPos;
                 case nameof(SpawnPositionType.Flying):
                     newPos = new Vector3(offset.x, 7f + offset.y, 10f + offset.z);
-                    return GetRelativePosition(position, forward, right, up, newPos);
+                    newPos = GetRelativePosition(position, forward, right, up, newPos);
+                    return IsObstructed(newPos) ? position : newPos;
                 case nameof(SpawnPositionType.Random):
-                    float angle = Random.Range(0f, Mathf.PI * 2f);
-                    float distance = Random.Range(4f, positionRadius);
-                    Vector2 circle = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * distance;
-                    newPos = new Vector3(position.x + circle.x, position.y, position.z + circle.y);
+                    bool indoor = Player.m_localPlayer != null && Player.m_localPlayer.InInterior();
 
-                    if (ZoneSystem.instance.GetSolidHeight(newPos, out height))
-                        newPos.y = height;
+                    for (int i = 0; i < MaxPositionTries; i++)
+                    {
+                        float angle = Random.Range(0f, Mathf.PI * 2f);
+                        float distance = Random.Range(4f, positionRadius);
+                        Vector2 circle = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * distance;
+                        newPos = new Vector3(position.x + circle.x, position.y, position.z + circle.y);
 
-                    return newPos;
+                        if (TryPlaceOnGround(newPos, position.y, indoor, out Vector3 placed))
+                            return placed;
+                    }
+
+                    return position;
                 case nameof(SpawnPositionType.RandomBehind):
-                    float back = Random.Range(-50f, -30f);
-                    float side = Random.Range(-50f, 50f);
-                    Vector3 pos = new Vector3(side + offset.x, offset.y, back + offset.z);
-                    newPos = GetRelativePosition(position, forward, right, up, pos);
+                    indoor = Player.m_localPlayer != null && Player.m_localPlayer.InInterior();
 
-                    if (ZoneSystem.instance.GetSolidHeight(newPos, out height))
-                        newPos.y = height;
+                    for (int i = 0; i < MaxPositionTries; i++)
+                    {
+                        float back = Random.Range(-50f, -30f);
+                        float side = Random.Range(-50f, 50f);
+                        Vector3 pos = new Vector3(side + offset.x, offset.y, back + offset.z);
+                        newPos = GetRelativePosition(position, forward, right, up, pos);
 
-                    return newPos;
+                        if (TryPlaceOnGround(newPos, position.y, indoor, out Vector3 placed))
+                            return placed;
+                    }
+
+                    return position;
                 default:
                     newPos = new Vector3(offset.x, offset.y, offset.z);
-                    return GetRelativePosition(position, forward, right, up, newPos);
+                    newPos = GetRelativePosition(position, forward, right, up, newPos);
+                    return IsObstructed(newPos) ? position : newPos;
             }
         }
 
@@ -84,6 +103,46 @@ namespace WizshBoneTwitchIntegration.Helpers
         public static Vector3 GetRelativePosition(Vector3 origin, Vector3 forward, Vector3 right, Vector3 up, Vector3 offset)
         {
             return origin + forward * offset.z + right * offset.x + up * offset.y;
+        }
+
+        /// <summary>
+        /// Finds the ground height for a candidate XZ position and verifies the resulting
+        /// spot isn't obstructed by a wall/rock. Indoors, ground is found via a local
+        /// downward raycast from near the player's height (ZoneSystem.GetSolidHeight raycasts
+        /// from above the world and hits dungeon ceilings instead of the floor). Outdoors,
+        /// ZoneSystem.GetSolidHeight is used as before.
+        /// </summary>
+        private static bool TryPlaceOnGround(Vector3 candidate, float referenceHeight, bool indoor, out Vector3 result)
+        {
+            result = candidate;
+
+            if (indoor)
+            {
+                Vector3 rayOrigin = new Vector3(candidate.x, referenceHeight + GroundRaycastUp, candidate.z);
+
+                if (!Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, GroundRaycastUp + GroundRaycastDistance, GroundMask))
+                    return false;
+
+                result.y = hit.point.y;
+            }
+            else
+            {
+                if (!ZoneSystem.instance.GetSolidHeight(candidate, out float height))
+                    return false;
+
+                result.y = height;
+            }
+
+            return !IsObstructed(result);
+        }
+
+        /// <summary>
+        /// Checks whether a spot just above ground level overlaps a wall/rock, to avoid
+        /// spawning creatures inside solid geometry.
+        /// </summary>
+        private static bool IsObstructed(Vector3 position)
+        {
+            return Physics.CheckSphere(position + Vector3.up * ObstructionCheckHeight, ObstructionCheckRadius, GroundMask);
         }
 
         /// <summary>

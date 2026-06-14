@@ -164,12 +164,26 @@ namespace WizshBoneTwitchIntegration.Helpers
             Vector3 spawnPosition = transform.position;
             Quaternion spawnRotation = transform.rotation;
 
-            if (creatureData.position == SpawnPositionType.WorldPosition)
+            string positionType = creatureData.position;
+            float positionRadius = creatureData.positionRadius;
+
+            if (Player.m_localPlayer.InInterior())
+            {
+                // Dungeon ceilings/floors break the open-world ground snapping used by other
+                // position types, so force a (radius-limited) Random spawn near the player.
+                if (positionType != SpawnPositionType.OnPlayer && positionType != SpawnPositionType.Random)
+                    positionType = SpawnPositionType.Random;
+
+                if (positionType == SpawnPositionType.Random)
+                    positionRadius = Mathf.Min(positionRadius, 10f);
+            }
+
+            if (positionType == SpawnPositionType.WorldPosition)
                 spawnPosition = creatureData.positionOffset.ToVector();
             else
             {
-                spawnPosition = TransformHelper.UpdateSpawnLocation(creatureData.position, transform, creatureData.positionOffset, creatureData.positionRadius);
-                spawnRotation = TransformHelper.UpdateSpawnRotation(creatureData.position, spawnRotation);
+                spawnPosition = TransformHelper.UpdateSpawnLocation(positionType, transform, creatureData.positionOffset, positionRadius);
+                spawnRotation = TransformHelper.UpdateSpawnRotation(positionType, spawnRotation);
             }
 
             GameObject creature = UnityEngine.Object.Instantiate(prefab, spawnPosition, spawnRotation);
