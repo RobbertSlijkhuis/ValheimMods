@@ -53,7 +53,11 @@ namespace WizshBoneTwitchIntegration.Harmony
                                 auth.LogoutBackToMainMenu();
                             },
                             confirmText: "Log Out",
-                            cancelText:  "Cancel"
+                            cancelText:  "Open History",
+                            onCancel:    () =>
+                            {
+                                auth.wizshBoneGUI.OpenRedeemHistoryStandalone();
+                            }
                         );
                         return false;
                     }
@@ -100,7 +104,11 @@ namespace WizshBoneTwitchIntegration.Harmony
                                 auth.LogoutQuitApplication();
                             },
                             confirmText: "Quit",
-                            cancelText:  "Cancel"
+                            cancelText:  "Open History",
+                            onCancel:    () =>
+                            {
+                                auth.wizshBoneGUI.OpenRedeemHistoryStandalone();
+                            }
                         );
                         return false;
                     }

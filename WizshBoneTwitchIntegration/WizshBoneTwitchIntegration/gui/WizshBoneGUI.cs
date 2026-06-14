@@ -370,9 +370,32 @@ namespace WizshBoneTwitchIntegration.Gui
             m_settingsGUI.ShowSettings();
         }
 
-        private void OpenRedeemHistory()
+        public void OpenRedeemHistory()
         {
             m_redeemHistoryGUI.ShowGUI();
+        }
+
+        /// <summary>
+        /// Opens the redeem history on its own, without the main WizshBone panel.
+        /// Closing the history panel fully closes this and unblocks input.
+        /// </summary>
+        public void OpenRedeemHistoryStandalone()
+        {
+            if (GUIManager.Instance == null || !GUIManager.CustomGUIFront)
+            {
+                Jotunn.Logger.LogError("GUIManager CustomGUI is null");
+                return;
+            }
+
+            auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
+            customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+            chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
+
+            if (m_redeemHistoryGUI == null)
+                m_redeemHistoryGUI = new WizshBoneRedeemHistoryGUI(customRewards);
+
+            GUIManager.BlockInput(true);
+            m_redeemHistoryGUI.ShowGUI(onClose: () => GUIManager.BlockInput(false));
         }
 
         private string GetLoginButtonText()

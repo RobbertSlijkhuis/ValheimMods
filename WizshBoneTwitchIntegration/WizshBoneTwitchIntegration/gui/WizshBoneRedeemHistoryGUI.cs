@@ -24,16 +24,19 @@ namespace WizshBoneTwitchIntegration.Gui
         private bool m_hideTestRedeems = false;
         private Button m_filterButton;
         private string m_searchText = "";
+        private Action m_onClose;
 
         public WizshBoneRedeemHistoryGUI(TwitchCustomRewards customRewards)
         {
             m_customRewards = customRewards;
         }
 
-        public void ShowGUI()
+        public void ShowGUI(Action onClose = null)
         {
             if (GUIManager.Instance == null || !GUIManager.CustomGUIFront)
                 return;
+
+            m_onClose = onClose;
 
             if (m_panel != null)
             {
@@ -65,6 +68,9 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             if (m_panel != null)
                 m_panel.SetActive(false);
+
+            m_onClose?.Invoke();
+            m_onClose = null;
         }
 
         private void CreateGUI()
@@ -277,7 +283,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 : "white";
 
             GUIManager.Instance.CreateText(
-                text: $"<color={statusColor}><b>{entry.RedeemerName}</b>  —  {entry.CustomRewardTitle}  ({entry.CustomRewardCost} pts)</color>",
+                text: $"<color={statusColor}><b>{entry.RedeemerName}</b>  ï¿½  {entry.CustomRewardTitle}  ({entry.CustomRewardCost} pts)</color>",
                 parent: m_contentRoot.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
