@@ -19,8 +19,7 @@ namespace WizshBoneTwitchIntegration.Components
 
             if (IsDone())
             {
-                WizshBoneTwitchIntegration.Instance.StartCoroutine(
-                    LerpHelper.LerpScale(player.transform, player.transform.localScale, Vector3.one, PlayerScaleHelper.LerpDuration));
+                WizshBoneTwitchIntegration.Instance.StartCoroutine(PlayerScaleHelper.LerpVisualScale(player, player.transform.localScale.x, 1f, PlayerScaleHelper.LerpDuration));
                 PlayerScaleHelper.ResetScale();
             }
             else

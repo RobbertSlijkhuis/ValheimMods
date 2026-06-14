@@ -11,6 +11,40 @@ namespace WizshBoneTwitchIntegration.Harmony
     [HarmonyPatch]
     public class DamagePatchesWBTI
     {
+        private static readonly AccessTools.FieldRef<Character, bool> s_groundContactRef =
+            AccessTools.FieldRefAccess<Character, bool>("m_groundContact");
+
+        private static readonly AccessTools.FieldRef<Character, float> s_maxAirAltitudeRef =
+            AccessTools.FieldRefAccess<Character, float>("m_maxAirAltitude");
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Character), "UpdateGroundContact")]
+        public static void UpdateGroundContact_Prefix(Character __instance)
+        {
+            try
+            {
+                if (!__instance.IsPlayer() || !ReferenceEquals(__instance, Player.m_localPlayer))
+                    return;
+
+                if (!s_groundContactRef(__instance))
+                    return;
+
+                if (PlayerScaleHelper.CurrentScale <= 1f)
+                    return;
+
+                float speedMultiplier = PlayerScaleHelper.SpeedMultiplier;
+
+                // Fall damage normally starts at 4m. Shift the whole fall-damage curve (both the
+                // no-damage floor and the lethal ceiling) proportionally to the speed multiplier.
+                float shift = 4f * speedMultiplier - 4f;
+                s_maxAirAltitudeRef(__instance) -= shift;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in UpdateGroundContact_Prefix: " + e);
+            }
+        }
+
         [HarmonyPrefix]
         [HarmonyPatch(typeof(WearNTear), "Damage")]
         public static bool WearNTearDamage_Prefix(WearNTear __instance, HitData hit)

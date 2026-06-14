@@ -45,7 +45,7 @@ namespace WizshBoneTwitchIntegration.Gui
             return BuildFields(parent, target, m_startY);
         }
 
-        internal float BuildFields(GameObject parent, object target, float startY, bool skipNullFields = false)
+        internal float BuildFields(GameObject parent, object target, float startY, bool skipNullFields = false, Action onRebuild = null)
         {
             FieldInfo[] fields = target.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
 
@@ -55,6 +55,17 @@ namespace WizshBoneTwitchIntegration.Gui
             {
                 if (field.GetCustomAttribute<EditorHiddenAttribute>() != null)
                     continue;
+
+                // Skip fields whose visibility depends on a sibling field's current value
+                var visibleWhen = field.GetCustomAttribute<EditorVisibleWhenAttribute>();
+                if (visibleWhen != null)
+                {
+                    FieldInfo conditionField = target.GetType().GetField(visibleWhen.FieldName, BindingFlags.Public | BindingFlags.Instance);
+                    string conditionValue = conditionField?.GetValue(target) as string;
+
+                    if (conditionValue == null || Array.IndexOf(visibleWhen.Values, conditionValue) < 0)
+                        continue;
+                }
 
                 // Skip null nullable fields when in skipNullFields mode
                 if (skipNullFields && IsNullableType(field.FieldType) && field.GetValue(target) == null)
@@ -78,7 +89,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     BuildSectionBoundary(parent, "— " + sectionLabel + " —", new Vector2(fieldCenterX, yOffset), m_fieldWidth);
                     yOffset -= SectionHeaderHeight + SectionHeaderSpacing;
 
-                    yOffset -= BuildFields(parent, nestedValue, yOffset, skipNullFields: true);
+                    yOffset -= BuildFields(parent, nestedValue, yOffset, skipNullFields: true, onRebuild: onRebuild);
 
                     BuildSectionBoundary(parent, "— end of " + sectionLabel + " —", new Vector2(fieldCenterX, yOffset), m_fieldWidth);
                     yOffset -= SectionHeaderHeight + SectionHeaderSpacing;
@@ -110,7 +121,8 @@ namespace WizshBoneTwitchIntegration.Gui
                     field:               field,
                     rowPosition:         new Vector2(m_startX, yOffset),
                     fieldWidth:          m_fieldWidth,
-                    listDropdownOptions: dropdownOptions
+                    listDropdownOptions: dropdownOptions,
+                    onRebuild:           onRebuild
                 );
 
                 if (built)

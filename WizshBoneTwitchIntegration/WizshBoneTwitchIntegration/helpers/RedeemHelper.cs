@@ -59,29 +59,29 @@ namespace WizshBoneTwitchIntegration.Helpers
             return redeems.Find(item => item.title == value);
         }
 
-        public static void SetPlayerSpeed(float multiplier)
-        {
-            if (playerSnapshot == null)
-                playerSnapshot = new PlayerSnapshot(Player.m_localPlayer);
+        //public static void SetPlayerSpeed(float multiplier)
+        //{
+        //    if (playerSnapshot == null)
+        //        playerSnapshot = new PlayerSnapshot(Player.m_localPlayer);
 
-            Player.m_localPlayer.m_jumpForce = playerSnapshot.jumpForce * multiplier;
-            Player.m_localPlayer.m_jumpForceForward = playerSnapshot.jumpForceForward * multiplier;
+        //    Player.m_localPlayer.m_jumpForce = playerSnapshot.jumpForce * multiplier;
+        //    Player.m_localPlayer.m_jumpForceForward = playerSnapshot.jumpForceForward * multiplier;
 
-            Player.m_localPlayer.m_crouchSpeed = playerSnapshot.crouchSpeed * multiplier;
-            Player.m_localPlayer.m_runSpeed = playerSnapshot.runSpeed * multiplier;
-            Player.m_localPlayer.m_speed = playerSnapshot.speed * multiplier;
-            Player.m_localPlayer.m_walkSpeed = playerSnapshot.walkSpeed * multiplier;
+        //    Player.m_localPlayer.m_crouchSpeed = playerSnapshot.crouchSpeed * multiplier;
+        //    Player.m_localPlayer.m_runSpeed = playerSnapshot.runSpeed * multiplier;
+        //    Player.m_localPlayer.m_speed = playerSnapshot.speed * multiplier;
+        //    Player.m_localPlayer.m_walkSpeed = playerSnapshot.walkSpeed * multiplier;
 
-            Player.m_localPlayer.m_swimDepth = playerSnapshot.swimDepth * multiplier;
-            Player.m_localPlayer.m_swimSpeed = playerSnapshot.swimSpeed * multiplier;
+        //    Player.m_localPlayer.m_swimDepth = playerSnapshot.swimDepth * multiplier;
+        //    Player.m_localPlayer.m_swimSpeed = playerSnapshot.swimSpeed * multiplier;
 
-            // Player.m_localPlayer.m_maxCarryWeight = playerSnapshot.maxCarryWeight * multiplier;
-        }
+        //    // Player.m_localPlayer.m_maxCarryWeight = playerSnapshot.maxCarryWeight * multiplier;
+        //}
 
-        public static void ResetPlayerSpeed(Player player)
-        {
-            playerSnapshot.Apply(player);
-        }
+        //public static void ResetPlayerSpeed(Player player)
+        //{
+        //    playerSnapshot.Apply(player);
+        //}
 
         public static List<CreatureData> GetResolvedCreatureList(SpawnCreatureData spawnCreatureData)
         {

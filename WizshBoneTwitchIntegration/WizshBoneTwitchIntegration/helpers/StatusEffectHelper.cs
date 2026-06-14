@@ -57,7 +57,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (entry.name == StatusEffectType.PlayerShrink || entry.name == StatusEffectType.PlayerGrow)
             {
                 float duration = entry.duration > 0f ? entry.duration : 30f;
-                PlayerScaleHelper.Apply(entry.name, duration);
+                PlayerScaleHelper.Apply(entry.name, duration, entry.playerScale);
                 return true;
             }
 

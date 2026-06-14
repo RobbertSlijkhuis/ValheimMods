@@ -38,7 +38,7 @@ namespace WizshBoneTwitchIntegration.Gui
             return FieldHeight;
         }
 
-        public static bool Build(GameObject parent, object target, FieldInfo field, Vector2 rowPosition, float fieldWidth = 200f, List<string> listDropdownOptions = null)
+        public static bool Build(GameObject parent, object target, FieldInfo field, Vector2 rowPosition, float fieldWidth = 200f, List<string> listDropdownOptions = null, Action onRebuild = null)
         {
             Type fieldType = field.FieldType;
             object currentValue = field.GetValue(target);
@@ -106,7 +106,11 @@ namespace WizshBoneTwitchIntegration.Gui
                 {
                     Dropdown dd = BuildStringDropdownField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth, GetAvailableStatusEffectNames());
                     if (onChanged != null)
-                        dd.onValueChanged.AddListener(_ => InvokeOnValueChanged(parent, target, onChanged.MethodName));
+                        dd.onValueChanged.AddListener(_ =>
+                        {
+                            InvokeOnValueChanged(parent, target, onChanged.MethodName);
+                            onRebuild?.Invoke();
+                        });
                 }
                 else if (dropdownAttr != null)
                 {

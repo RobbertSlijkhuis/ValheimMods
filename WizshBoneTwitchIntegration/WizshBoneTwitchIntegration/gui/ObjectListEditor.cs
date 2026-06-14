@@ -166,7 +166,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
                 // Entry fields scoped to this container so [OnValueChanged] syncs only this entry.
                 var fieldEditor    = new ObjectEditor(innerStartX, 0f, m_fieldWidth);
-                float fieldsHeight = fieldEditor.BuildFields(container, entry, fieldsStartY);
+                float fieldsHeight = fieldEditor.BuildFields(container, entry, fieldsStartY, onRebuild: RefreshList);
 
                 float entryHeight = EntryHeaderHeight + EntryFieldSpacing + fieldsHeight;
                 containerRt.sizeDelta = new Vector2(viewportWidth, entryHeight);
