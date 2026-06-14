@@ -220,7 +220,7 @@ namespace WizshBoneTwitchIntegration.Extensions
 
                 MonsterAI monsterAI = gameObject.GetComponent<MonsterAI>();
                 Humanoid humanoid2 = gameObject.GetComponent<Humanoid>();
-                ImpactEffect impactEffect = gameObject.GetComponent<ImpactEffect>();
+                ImpactEffect impactEffect = gameObject.GetComponentInChildren<ImpactEffect>(true);
                 Aoe aoe = gameObject.GetComponentInChildren<Aoe>(true);
                 Aoe aoeRod = null;
                 Trap trap = gameObject.GetComponentInChildren<Trap>();
@@ -270,7 +270,7 @@ namespace WizshBoneTwitchIntegration.Extensions
                     {
                         TwitchPersistentDestruction persistentDestruction = gameObject.GetComponent<TwitchPersistentDestruction>();
                         if (persistentDestruction != null)
-                            persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium);
+                            persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium, spawnAbilityData.breakOnDestroy);
                         else
                             Jotunn.Logger.LogWarning("TwitchPersistentDestruction missing on impactEffect object.");
                     }
@@ -344,7 +344,7 @@ namespace WizshBoneTwitchIntegration.Extensions
                     {
                         TwitchPersistentDestruction persistentDestruction = gameObject.GetComponent<TwitchPersistentDestruction>();
                         if (persistentDestruction != null)
-                            persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall);
+                            persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall, spawnAbilityData.breakOnDestroy);
                         else
                             Jotunn.Logger.LogWarning("TwitchPersistentDestruction missing on piece object.");
                     }

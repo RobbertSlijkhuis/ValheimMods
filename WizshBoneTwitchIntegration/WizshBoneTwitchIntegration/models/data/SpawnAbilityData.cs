@@ -8,6 +8,7 @@ namespace WizshBoneTwitchIntegration.Models
         public float? accuracy;
         public bool allowDrops = true;
         public string announceMessage;
+        public bool breakOnDestroy = false;
         public DamageData damage;
         public bool damageShips = false;
         public bool damageStructures = true;

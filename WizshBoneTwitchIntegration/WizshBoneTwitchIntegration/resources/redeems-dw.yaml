@@ -2148,6 +2148,7 @@ redeems:
       accuracy: 1
       allowDrops: false
       announceMessage: 'Current weather forecast: 100% chance of BOATPOCALYPSE (sponsored by {{user}})'
+      breakOnDestroy: true
       damage:
         blunt: 50
         basedOnMaxHealthAndArmor: true

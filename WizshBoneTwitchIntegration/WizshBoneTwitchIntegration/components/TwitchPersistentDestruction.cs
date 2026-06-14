@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections;
 using UnityEngine;
 
 namespace WizshBoneTwitchIntegration.Components
@@ -10,6 +11,8 @@ namespace WizshBoneTwitchIntegration.Components
         public string m_durationHash = "PersistentDuration_WBTI";
         public string m_started;
         public string m_startedHash = "PersistentStarted_WBTI";
+        public string m_breakOnDestroyHash = "PersistentBreakOnDestroy_WBTI";
+        public bool m_breakOnDestroy;
         public EffectList m_onDestroyEffects;
 
         public delegate void onEndDelegate(GameObject prefab);
@@ -30,14 +33,13 @@ namespace WizshBoneTwitchIntegration.Components
                     return;
 
                 m_duration = m_netView.GetZDO().GetInt(m_durationHash, 60);
+                m_breakOnDestroy = m_netView.GetZDO().GetBool(m_breakOnDestroyHash, false);
 
                 DateTime startTime = DateTime.Parse(m_started);
                 TimeSpan timeSpan = DateTime.Now.Subtract(startTime);
                 float timePassed = (float)timeSpan.TotalSeconds;
 
-                TimedDestruction timedDestruction = gameObject.AddComponent<TimedDestruction>();
-                timedDestruction.m_timeout = timePassed > m_duration ? 0f : m_duration - timePassed;
-                timedDestruction.Trigger();
+                StartDestructionTimer(timePassed > m_duration ? 0f : m_duration - timePassed);
             }
             catch (Exception e)
             {
@@ -49,7 +51,7 @@ namespace WizshBoneTwitchIntegration.Components
         {
             try
             {
-                if (m_onDestroyEffects != null)
+                if (m_onDestroyEffects != null && !(m_breakOnDestroy && gameObject.GetComponent<WearNTear>() != null))
                     m_onDestroyEffects.Create(transform.position, transform.rotation);
 
                 onEnd?.Invoke(gameObject);
@@ -60,18 +62,45 @@ namespace WizshBoneTwitchIntegration.Components
             }
         }
 
-        public void SetStarted(int duration, EffectList onDestroyEfects = null)
+        public void SetStarted(int duration, EffectList onDestroyEfects = null, bool breakOnDestroy = false)
         {
-            TimedDestruction timedDestruction = gameObject.AddComponent<TimedDestruction>();
-            timedDestruction.m_timeout = duration;
-            timedDestruction.Trigger();
+            if (gameObject.GetComponent<TimedDestruction>() == null && m_breakRoutine == null)
+            {
+                m_breakOnDestroy = breakOnDestroy;
 
-            DateTime dateTime = DateTime.Now;
-            m_netView.GetZDO().Set(m_durationHash, duration);
-            m_netView.GetZDO().Set(m_startedHash, dateTime.ToString());
+                DateTime dateTime = DateTime.Now;
+                m_netView.GetZDO().Set(m_durationHash, duration);
+                m_netView.GetZDO().Set(m_startedHash, dateTime.ToString());
+                m_netView.GetZDO().Set(m_breakOnDestroyHash, breakOnDestroy);
+
+                StartDestructionTimer(duration);
+            }
 
             if (onDestroyEfects != null)
                 m_onDestroyEffects = onDestroyEfects;
+        }
+
+        private Coroutine m_breakRoutine;
+
+        private void StartDestructionTimer(float timeout)
+        {
+            if (m_breakOnDestroy && gameObject.GetComponent<WearNTear>() != null)
+            {
+                m_breakRoutine = StartCoroutine(BreakAfterDelay(timeout));
+                return;
+            }
+
+            TimedDestruction timedDestruction = gameObject.AddComponent<TimedDestruction>();
+            timedDestruction.m_timeout = timeout;
+            timedDestruction.Trigger();
+        }
+
+        private IEnumerator BreakAfterDelay(float delay)
+        {
+            if (delay > 0f)
+                yield return new WaitForSeconds(delay);
+
+            gameObject.GetComponent<WearNTear>()?.Destroy();
         }
     }
 }

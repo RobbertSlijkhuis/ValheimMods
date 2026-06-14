@@ -211,8 +211,6 @@ namespace WizshBoneTwitchIntegration
                         boxCollider.center = new Vector3(0, 1.2f, 0);
                         boxCollider.size = new Vector3(1, 3.5f, 1);
                     }
-
-                    continue;
                 }
 
                 if (piece != null)
@@ -221,7 +219,7 @@ namespace WizshBoneTwitchIntegration
                     prefab.AddComponent<TwitchPersistentDestruction>();
                 }
 
-                if (impactEffect != null || mister != null || trap != null)
+                if ((impactEffect != null || mister != null || trap != null) && prefab.GetComponent<TwitchPersistentDestruction>() == null)
                 {
                     prefab.AddComponent<TwitchPersistentDestruction>();
                 }
