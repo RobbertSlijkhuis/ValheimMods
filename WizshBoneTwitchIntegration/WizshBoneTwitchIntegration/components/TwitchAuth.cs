@@ -28,6 +28,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public WizshBoneGUI wizshBoneGUI;
         public WizshBoneHUD wizshBoneHUD;
         public ConfirmDialog m_exitConfirmDialog = new ConfirmDialog();
+        public LogoutProgressPanel m_logoutProgressPanel = new LogoutProgressPanel();
 
         public void Awake()
         {
@@ -56,6 +57,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             {
                 wizshBoneHUD.ShowHUD();
                 m_exitConfirmDialog.Init();
+                m_logoutProgressPanel.Init();
                 GUIManager.OnCustomGUIAvailable -= OnGUIAvailable;
             }
             catch (Exception e)
@@ -267,6 +269,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void LogoutBackToMainMenu()
         {
+            m_logoutProgressPanel.Show(this, "Removing redeems from Twitch, this could take a moment");
             TaskAwaiter awaiter = m_customRewards.ClearRewards();
             awaiter.OnCompleted(OnLogoutBackToMainMenu);
         }
@@ -277,22 +280,37 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             CancelInvoke(nameof(TrackAuthRepeating));
             GetAuthState();
             Jotunn.Logger.LogWarning("Logged out.., recalling: OnLogoutYes");
+            StartCoroutine(DelayedLogout());
+        }
+
+        private IEnumerator DelayedLogout()
+        {
+            m_logoutProgressPanel.UpdateMessage("Logging out...");
+            yield return new WaitForSecondsRealtime(1f);
+            m_logoutProgressPanel.Hide();
             Menu.instance.OnLogoutYes();
         }
 
         public void LogoutQuitApplication()
         {
+            m_logoutProgressPanel.Show(this, "Removing redeems from Twitch, this could take a moment");
             TaskAwaiter awaiter = m_customRewards.ClearRewards();
             awaiter.OnCompleted(ShowQuitMessage);
         }
 
         public void ShowQuitMessage()
         {
-            Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Quiting game now...", 10);
             Twitch.API.LogOut();
             CancelInvoke(nameof(TrackAuthRepeating));
             GetAuthState();
             Jotunn.Logger.LogWarning("Logged out.., recalling: OnQuitYes");
+            StartCoroutine(DelayedQuit());
+        }
+
+        private IEnumerator DelayedQuit()
+        {
+            m_logoutProgressPanel.UpdateMessage("Quitting game...");
+            yield return new WaitForSecondsRealtime(1f);
             Menu.instance.OnQuitYes();
         }
 

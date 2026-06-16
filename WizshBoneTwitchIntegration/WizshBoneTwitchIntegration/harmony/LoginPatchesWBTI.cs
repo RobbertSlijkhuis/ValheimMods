@@ -102,7 +102,6 @@ namespace WizshBoneTwitchIntegration.Harmony
                             onConfirm:   () =>
                             {
                                 ExtraConfigHelper.WriteBannedUsersToFile(auth.m_customRewards.m_bannedUsers);
-                                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Clearing redeems, please wait!", 1000);
                                 auth.LogoutQuitApplication();
                             },
                             confirmText: "Quit",
@@ -116,7 +115,6 @@ namespace WizshBoneTwitchIntegration.Harmony
                     }
 
                     ExtraConfigHelper.WriteBannedUsersToFile(auth.m_customRewards.m_bannedUsers);
-                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Clearing redeems, please wait!", 1000);
                     auth.LogoutQuitApplication();
                     return false;
                 }
