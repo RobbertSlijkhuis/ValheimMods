@@ -24,6 +24,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private int m_logOutTime = 225;
         // private int m_logOutTime = 1;
         public bool m_waitingForCode = false;
+        private DateTime m_waitingForCodeSince;
 
         public WizshBoneGUI wizshBoneGUI;
         public WizshBoneHUD wizshBoneHUD;
@@ -70,7 +71,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             CancelInvoke(nameof(InitLoginProcess));
             m_waitingForCode = false;
-            InvokeRepeating(nameof(InitLoginProcess), 0f, 0.3f);
+            InvokeRepeating(nameof(InitLoginProcess), 0f, 1f);
         }
 
         private void UpdateAllGUI()
@@ -207,7 +208,12 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (m_authState.MaybeResult.Status == AuthStatus.WaitingForCode)
                 {
                     if (m_waitingForCode)
+                    {
+                        if ((DateTime.Now - m_waitingForCodeSince).TotalSeconds > 60)
+                            ResetLoginProcess();
+
                         return;
+                    }
 
                     TwitchOAuthScope tscopes = new TwitchOAuthScope(m_scopes);
                     AuthenticationInfo authInfo = Twitch.API.GetAuthenticationInfo(tscopes).MaybeResult;
@@ -217,6 +223,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                     Application.OpenURL($"{authInfo.Uri}");
                     m_waitingForCode = true;
+                    m_waitingForCodeSince = DateTime.Now;
                     UpdateAllGUI();
                     return;
                 }
@@ -255,6 +262,16 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 TwitchOAuthScope tscopes = new TwitchOAuthScope(m_scopes);
                 m_authInfo = Twitch.API.GetAuthenticationInfo(tscopes);
             }
+        }
+
+        private void ResetLoginProcess()
+        {
+            Jotunn.Logger.LogWarning("[WBTI] TwitchAuth: Login timed out waiting for browser authorization, resetting.");
+            CancelInvoke(nameof(InitLoginProcess));
+            m_waitingForCode = false;
+            m_authInfo = null;
+            Twitch.API.LogOut();
+            UpdateAllGUI();
         }
 
         public void Logout()
