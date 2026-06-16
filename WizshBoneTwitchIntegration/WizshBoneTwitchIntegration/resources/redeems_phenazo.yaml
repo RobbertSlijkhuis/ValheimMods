@@ -1,0 +1,4831 @@
+redeems:
+- title: 'WBTI: Spawn Neck pack!'
+  points: 300
+  backgroundColor: '#74bd66'
+  globalKeyRemove: defeated_eikthyr
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 5
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Neck
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Boar pack!'
+  points: 300
+  backgroundColor: '#734624'
+  globalKeyRemove: defeated_eikthyr
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 3
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Boar
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Greyling pack!'
+  points: 300
+  backgroundColor: '#395c32'
+  globalKeyRemove: defeated_eikthyr
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 5
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Greyling
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Skeleton pack!'
+  points: 350
+  backgroundColor: '#8c8c8c'
+  globalKeyAdd: defeated_eikthyr
+  globalKeyRemove: defeated_gdking
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 3
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Skeleton
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Bjorn(bear)'
+  points: 600
+  backgroundColor: '#734624'
+  globalKeyAdd: defeated_eikthyr
+  globalKeyRemove: defeated_dragon
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Bjorn
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Greydwarf pack!'
+  points: 300
+  backgroundColor: '#395c32'
+  globalKeyAdd: defeated_eikthyr
+  globalKeyRemove: defeated_gdking
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 3
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Greydwarf
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Greydwarf_Shaman
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Greydwarf_Elite
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn 1* Greydwarf pack!'
+  points: 300
+  backgroundColor: '#395c32'
+  globalKeyAdd: defeated_gdking
+  globalKeyRemove: defeated_bonemass
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 3
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 2
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Greydwarf
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 2
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Greydwarf_Shaman
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 2
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Greydwarf_Elite
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn 1*+ Greydwarf pack!'
+  points: 300
+  backgroundColor: '#395c32'
+  globalKeyAdd: defeated_bonemass
+  globalKeyRemove: defeated_dragon
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 6
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 2
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Greydwarf
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 2
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Greydwarf_Shaman
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 2
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 2
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Greydwarf_Elite
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn 1*++ Greydwarf pack!'
+  points: 300
+  backgroundColor: '#395c32'
+  globalKeyAdd: defeated_dragon
+  globalKeyRemove: defeated_goblinking
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 6
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 2
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Greydwarf
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 2
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 2
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Greydwarf_Shaman
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 3
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 2
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Greydwarf_Elite
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn 2* Greydwarf pack!'
+  points: 300
+  backgroundColor: '#395c32'
+  globalKeyAdd: defeated_goblinking
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 6
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 3
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Greydwarf
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 2
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 3
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Greydwarf_Shaman
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 3
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 3
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Greydwarf_Elite
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Draugr'
+  points: 350
+  backgroundColor: '#395c32'
+  globalKeyAdd: defeated_gdking
+  globalKeyRemove: defeated_bonemass
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 3
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Draugr
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Wraith'
+  points: 500
+  backgroundColor: '#002261'
+  globalKeyAdd: defeated_gdking
+  globalKeyRemove: defeated_dragon
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Wraith
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Abomination'
+  points: 750
+  backgroundColor: '#734624'
+  globalKeyAdd: defeated_gdking
+  globalKeyRemove: defeated_dragon
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Abomination
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Bat pack!'
+  points: 350
+  backgroundColor: '#734624'
+  globalKeyAdd: defeated_bonemass
+  globalKeyRemove: defeated_dragon
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 10
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Bat
+      position: Flying
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn 1* Bat pack!'
+  points: 400
+  backgroundColor: '#734624'
+  globalKeyAdd: defeated_dragon
+  globalKeyRemove: defeated_goblinking
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 10
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 2
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Bat
+      position: Flying
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn 2* Bat pack!'
+  points: 500
+  backgroundColor: '#734624'
+  globalKeyAdd: defeated_goblinking
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 10
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 3
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Bat
+      position: Flying
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Wolf duo!'
+  points: 500
+  backgroundColor: '#b8d3e6'
+  globalKeyAdd: defeated_bonemass
+  globalKeyRemove: defeated_goblinking
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 2
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Wolf
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Ulv pack!'
+  points: 500
+  backgroundColor: '#8c8c8c'
+  globalKeyAdd: defeated_bonemass
+  globalKeyRemove: defeated_dragon
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 3
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Ulv
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn 1* Ulv pack!'
+  points: 500
+  backgroundColor: '#8c8c8c'
+  globalKeyAdd: defeated_dragon
+  globalKeyRemove: defeated_goblinking
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 3
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 2
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Ulv
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn 2* Ulv pack!'
+  points: 500
+  backgroundColor: '#8c8c8c'
+  globalKeyAdd: defeated_goblinking
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 3
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 3
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Ulv
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Troll + message!'
+  points: 500
+  backgroundColor: '#4e8ebf'
+  globalKeyAdd: killedtroll
+  globalKeyRemove: defeated_dragon
+  userInput: true
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Troll
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: true
+      size: 1
+- title: 'WBTI: Spawn 1* Troll + message!'
+  points: 500
+  backgroundColor: '#4e8ebf'
+  globalKeyAdd: defeated_dragon
+  globalKeyRemove: defeated_goblinking
+  userInput: true
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 2
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Troll
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: true
+      size: 1
+- title: 'WBTI: Spawn 2* Troll + message!'
+  points: 500
+  backgroundColor: '#4e8ebf'
+  globalKeyAdd: defeated_goblinking
+  userInput: true
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 3
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Troll
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: true
+      size: 1
+- title: 'WBTI: Spawn Sea Noodle!'
+  points: 400
+  backgroundColor: '#002261'
+  globalKeyAdd: defeated_bonemass
+  globalKeyRemove: defeated_dragon
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Serpent
+      position: Flying
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn 1* Sea Noodle!'
+  points: 450
+  backgroundColor: '#002261'
+  globalKeyAdd: defeated_dragon
+  globalKeyRemove: defeated_goblinking
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 2
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Serpent
+      position: Flying
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn 2* Sea Noodle!'
+  points: 500
+  backgroundColor: '#002261'
+  globalKeyAdd: defeated_goblinking
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 3
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Serpent
+      position: Flying
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn StoneGolem!'
+  points: 750
+  backgroundColor: '#b8d3e6'
+  globalKeyAdd: defeated_bonemass
+  globalKeyRemove: defeated_goblinking
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: StoneGolem
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn 1* StoneGolem!'
+  points: 750
+  backgroundColor: '#b8d3e6'
+  globalKeyAdd: defeated_goblinking
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 2
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: StoneGolem
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Deathsquito!'
+  points: 500
+  backgroundColor: '#ebc034'
+  globalKeyAdd: defeated_dragon
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Deathsquito
+      position: Flying
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Lox!'
+  points: 1000
+  backgroundColor: '#734624'
+  globalKeyAdd: defeated_dragon
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Lox
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn 2* Tick pack!'
+  points: 500
+  backgroundColor: '#451663'
+  globalKeyAdd: defeated_goblinking
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 5
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 3
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Tick
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Seeker!'
+  points: 500
+  backgroundColor: '#451663'
+  globalKeyAdd: defeated_goblinking
+  globalKeyRemove: defeated_queen
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Seeker
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn 1* Seeker!'
+  points: 500
+  backgroundColor: '#451663'
+  globalKeyAdd: defeated_queen
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 2
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Seeker
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Seeker Soldier!'
+  points: 1000
+  backgroundColor: '#451663'
+  globalKeyAdd: defeated_goblinking
+  globalKeyRemove: defeated_queen
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: SeekerBrute
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn 1* Seeker Soldier!'
+  points: 1000
+  backgroundColor: '#451663'
+  globalKeyAdd: defeated_queen
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 2
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: SeekerBrute
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Gjall!'
+  points: 1500
+  backgroundColor: '#451663'
+  globalKeyAdd: defeated_goblinking
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Gjall
+      position: Flying
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Asksvin!'
+  points: 500
+  backgroundColor: '#eb3434'
+  globalKeyAdd: defeated_queen
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Asksvin
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Bone Noodle!'
+  points: 500
+  backgroundColor: '#eb3434'
+  globalKeyAdd: defeated_queen
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: BonemawSerpent
+      position: Flying
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Voltures!'
+  points: 500
+  backgroundColor: '#eb3434'
+  globalKeyAdd: defeated_queen
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 2
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Volture
+      position: Flying
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn The Charred!'
+  points: 500
+  backgroundColor: '#eb3434'
+  globalKeyAdd: defeated_queen
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 2
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Charred_Melee
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 2
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Charred_Archer
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 2
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Charred_Twitcher
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Morgen!'
+  points: 750
+  backgroundColor: '#eb3434'
+  globalKeyAdd: defeated_queen
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Morgen
+      position: Random
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Valkyrie!'
+  points: 1250
+  backgroundColor: '#eb3434'
+  globalKeyAdd: defeated_queen
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: FallenValkyrie
+      position: Flying
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Lord Reto'
+  points: 25000
+  backgroundColor: '#1f1f1f'
+  globalKeyAdd: defeated_queen
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 1
+      bossEvent: ''
+      commandable: false
+      color: 
+      damageScale: 0
+      friendly: false
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Charred_Melee_Dyrnwyn
+      position: InFrontOfPlayer
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Help troops!'
+  points: 350
+  backgroundColor: '#395c32'
+  cooldown: 10
+  globalKeyAdd: defeated_gdking
+  globalKeyRemove: defeated_bonemass
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 3
+      bossEvent: ''
+      commandable: true
+      color: 
+      damageScale: 0
+      friendly: true
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Greydwarf_Elite
+      position: InFrontOfPlayer
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Help troops+!'
+  points: 350
+  backgroundColor: '#395c32'
+  cooldown: 10
+  globalKeyAdd: defeated_bonemass
+  globalKeyRemove: defeated_dragon
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 3
+      bossEvent: ''
+      commandable: true
+      color: 
+      damageScale: 0
+      friendly: true
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 2
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Greydwarf_Elite
+      position: InFrontOfPlayer
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Help troops++!'
+  points: 350
+  backgroundColor: '#395c32'
+  cooldown: 10
+  globalKeyAdd: defeated_dragon
+  globalKeyRemove: defeated_goblinking
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 3
+      bossEvent: ''
+      commandable: true
+      color: 
+      damageScale: 0
+      friendly: true
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: Fenring
+      position: InFrontOfPlayer
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Help troops+++!'
+  points: 400
+  backgroundColor: '#395c32'
+  cooldown: 10
+  globalKeyAdd: defeated_goblinking
+  type: SpawnCreature
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  creatureData:
+    list:
+    - announceMessage: 
+      aggravatable: false
+      allowDrops: false
+      allowDamageStructures: true
+      amount: 3
+      bossEvent: ''
+      commandable: true
+      color: 
+      damageScale: 0
+      friendly: true
+      globalKeyAdd: ''
+      globalKeyRemove: ''
+      group: 
+      healthScale: 0
+      index: 0
+      isHallucination: false
+      level: 1
+      maxHealth: 0
+      maxSpawned: 0
+      mistVision: true
+      name: 
+      prefabName: DvergerMage
+      position: InFrontOfPlayer
+      positionOffset:
+        x: 0
+        y: 0
+        z: 0
+      positionRadius: 10
+      random: false
+      rename: true
+      talkInteract: false
+      talkInterval: 0
+      talkMessage: 
+      talks: false
+      size: 1
+- title: 'WBTI: Spawn Burning Troll!'
+  points: 1500
+  backgroundColor: '#eb3434'
+  cooldown: 180
+  globalKeyAdd: defeated_queen
+  type: SpawnAbility
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  spawnAbilityData:
+    announceMessage: Something is... inbound!
+    initialSpawnDelay: 1
+    maxSpawned: 2
+    prefabName: staff_redtroll_spawn
+- title: 'WBTI Spawn: Fizsh!'
+  description: Spawn random fish around the streamer, what could this possible be used for?
+  points: 300
+  backgroundColor: '#cfdbab'
+  cooldown: 180
+  type: SpawnAbility
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  spawnAbilityData:
+    announceMessage: '{{user}} believes something is smelling.... fizshy!'
+    duration: 1800
+    groundOffset: 0
+    maxToSpawn: 30
+    minToSpawn: 30
+    rescanForSafezones: false
+    snapToterrain: true
+    spawnDelay: 0
+    spawnRadius: 25
+- title: 'WBTI Spawn: Thou shall be smited!'
+  description: Bring pain to the streamer or make his screen shake violently!
+  points: 300
+  backgroundColor: '#b8d3e6'
+  cooldown: 300
+  type: SpawnAbility
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  spawnAbilityData:
+    accuracy: 1
+    announceMessage: '{{user}} has summoned the wrath of Thor!'
+    damage:
+      lightning: 50
+      basedOnMaxHealthAndArmor: true
+      maxHealthPercentage: 0.3
+    groundOffset: 0
+    maxToSpawn: 50
+    noSpawnEffect: true
+    minToSpawn: 50
+    snapToterrain: true
+    spawnRadius: 20
+    spawns:
+    - lightningAOE
+- title: 'WBTI Spawn: Log Rain'
+  description: Give the streamer "senpai" some well deserved hard wood!
+  points: 265
+  backgroundColor: '#734624'
+  cooldown: 300
+  type: SpawnAbility
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  spawnAbilityData:
+    accuracy: 1
+    announceMessage: '{{user}} is sending you some building materials: HARD WOOD!'
+    damage:
+      blunt: 50
+      basedOnMaxHealthAndArmor: true
+      maxHealthPercentage: 0.3
+    dropVelocity: -25
+    duration: 60
+    groundOffset: 50
+    isBiomeList: true
+    maxToSpawn: 75
+    minToSpawn: 75
+    spawnRadius: 15
+    spawns:
+    - beech_log_half
+    - PineTree_log_half
+    - SwampTree1_log
+    - FirTree_log_half
+    - Birch_log_half
+    - yggashoot_log_half
+    - AshlandsTreeLogHalf2
+    - Oak_log_half
+- title: 'WBTI Spawn: BOATPOCALYPSE'
+  description: Rain down Karves around the streamer!
+  points: 300
+  backgroundColor: '#c7915b'
+  cooldown: 300
+  type: SpawnAbility
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  spawnAbilityData:
+    accuracy: 1
+    allowDrops: false
+    announceMessage: 'Current weather forecast: 100% chance of BOATPOCALYPSE (sponsored by {{user}})'
+    damage:
+      blunt: 50
+      basedOnMaxHealthAndArmor: true
+      maxHealthPercentage: 0.4
+    duration: 60
+    groundOffset: 50
+    maxToSpawn: 50
+    minToSpawn: 50
+    spawnRadius: 15
+    spawns:
+    - Karve
+- title: 'WBTI Spawn: Meteors'
+  description: Rain down Yagluth meteors around the streamer!
+  points: 265
+  backgroundColor: '#ff6f00'
+  cooldown: 300
+  type: SpawnAbility
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  spawnAbilityData:
+    accuracy: 15
+    announceMessage: '{{user}} wished on a falling star, extinction event initiated!'
+    damage:
+      blunt: 40
+      chop: 0
+      fire: 120
+      pickaxe: 0
+      basedOnMaxHealthAndArmor: true
+      maxHealthPercentage: 0.3
+    groundOffset: 50
+    maxToSpawn: 15
+    minToSpawn: 15
+    isOwner: false
+    prefabName: spawn_meteors
+    spawnRadius: 15
+    targetType: Position
+- title: 'WBTI Spawn: Fader Meteors'
+  description: Rain down Fader meteors around the streamer!
+  points: 300
+  backgroundColor: '#00644c'
+  cooldown: 300
+  type: SpawnAbility
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  spawnAbilityData:
+    accuracy: 15
+    announceMessage: Fader was called forth by {{user}} and is delivering a slightly crispy message!
+    damage:
+      blunt: 40
+      chop: 0
+      fire: 120
+      pickaxe: 0
+      basedOnMaxHealthAndArmor: true
+      maxHealthPercentage: 0.3
+    groundOffset: 50
+    maxToSpawn: 15
+    minToSpawn: 15
+    isOwner: false
+    prefabName: spawn_fader_meteors
+    spawnRadius: 15
+    targetType: Position
+- title: 'WBTI Spawn: Trap Field!'
+  description: Spawn traps around the streamer!
+  points: 300
+  backgroundColor: '#1a3813'
+  cooldown: 300
+  type: SpawnAbility
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  spawnAbilityData:
+    announceMessage: Minor inconveniences deployed by {{user}}!
+    damage:
+      blunt: 50
+      pierce: 50
+      basedOnMaxHealthAndArmor: true
+      maxHealthPercentage: 0.35
+    duration: 300
+    groundOffset: 0
+    maxToSpawn: 300
+    minToSpawn: 300
+    rescanForSafezones: false
+    snapToterrain: true
+    spawnDelay: 0.0001
+    spawnRadius: 25
+    spawns:
+    - fuling_trap
+- title: 'WBTI Spawn: Sausage Rain!'
+  description: Make it rain sausages!
+  points: 1000000
+  backgroundColor: '#b3612e'
+  globalKeyAdd: defeated_fader
+  type: SpawnAbility
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  spawnAbilityData:
+    accuracy: 1
+    announceMessage: BeardedFeo is a sausage lover!
+    groundOffset: 30
+    maxToSpawn: 500
+    minToSpawn: 500
+    spawnDelay: 0.1
+    spawnRadius: 20
+    spawns:
+    - Sausages
+- title: WBTI Mist
+  description: Spawn in Mistlands mist to cover the vision of the streamer... and for some creatures!
+  points: 300
+  backgroundColor: '#8f6bd6'
+  cooldown: 180
+  type: Mist
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  mistData:
+    announceMessage: '{{user}} made things slightly harder to see!'
+    duration: 90
+    radius: 65
+- title: 'WBTI Status: Shrink Streamer'
+  description: Shrinks the streamer, reducing his movement speed and jump height!
+  points: 115
+  backgroundColor: '#3480eb'
+  cooldown: 180
+  ignoreWard: true
+  type: StatusEffect
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  statusEffectData:
+    list:
+    - name: PlayerShrink
+      duration: 180
+      persistsThroughDeath: false
+      renew: false
+- title: 'WBTI Status: Grow Streamer'
+  description: Shrinks the streamer, increasing his movement speed and jump height!
+  points: 115
+  backgroundColor: '#3480eb'
+  cooldown: 180
+  ignoreWard: true
+  type: StatusEffect
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  statusEffectData:
+    list:
+    - name: PlayerGrow
+      duration: 180
+      persistsThroughDeath: false
+      renew: false
+- title: 'WBTI Status: Random Boss Power!'
+  description: Give a random boss power to the streamer!
+  points: 110
+  backgroundColor: '#ff6f00'
+  cooldown: 15
+  ignoreWard: true
+  type: StatusEffect
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  statusEffectData:
+    random: true
+    list:
+    - name: GP_Eikthyr
+      duration: -1
+      persistsThroughDeath: false
+      renew: false
+    - name: GP_TheElder
+      duration: -1
+      persistsThroughDeath: false
+      renew: false
+    - name: GP_Bonemass
+      duration: -1
+      persistsThroughDeath: false
+      renew: false
+    - name: GP_Moder
+      duration: -1
+      persistsThroughDeath: false
+      renew: false
+    - name: GP_Yagluth
+      duration: -1
+      persistsThroughDeath: false
+      renew: false
+    - name: GP_Queen
+      duration: -1
+      persistsThroughDeath: false
+      renew: false
+    - name: GP_Fader
+      duration: -1
+      persistsThroughDeath: false
+      renew: false
+- title: 'WBTI Status: Random buff/debuff!'
+  description: Give a random buff or debuff to the streamer!
+  points: 110
+  backgroundColor: '#ff6f00'
+  cooldown: 15
+  ignoreWard: true
+  type: StatusEffect
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  statusEffectData:
+    random: true
+    list:
+    - name: BarleyWine
+      duration: -1
+      persistsThroughDeath: false
+      renew: true
+    - name: Burning_WBTI
+      duration: -1
+      persistsThroughDeath: false
+      renew: true
+    - name: MeadFrostResist
+      duration: -1
+      persistsThroughDeath: false
+      renew: true
+    - name: Freezing_WBTI
+      duration: -1
+      persistsThroughDeath: false
+      renew: true
+    - name: MeadPoisonResist
+      duration: -1
+      persistsThroughDeath: false
+      renew: true
+    - name: Poison_WBTI
+      duration: -1
+      persistsThroughDeath: false
+      renew: true
+    - name: MeadHasty
+      duration: -1
+      persistsThroughDeath: false
+      renew: true
+    - name: Puke
+      duration: -1
+      persistsThroughDeath: false
+      renew: true
+    - name: MeadBzerker
+      duration: -1
+      persistsThroughDeath: false
+      renew: true
+    - name: Wet
+      duration: -1
+      persistsThroughDeath: false
+      renew: true
+    - name: MeadLightfoot
+      duration: -1
+      persistsThroughDeath: false
+      renew: true
+    - name: Tared
+      duration: -1
+      persistsThroughDeath: false
+      renew: true
+    - name: Rested
+      duration: -1
+      persistsThroughDeath: false
+      renew: true
+    - name: PlayerShrink
+      duration: 300
+      persistsThroughDeath: false
+      renew: true
+    - name: PlayerGrow
+      duration: 300
+      persistsThroughDeath: false
+      renew: true
+    - name: GP_Eikthyr
+      duration: -1
+      persistsThroughDeath: false
+      renew: false
+    - name: GP_TheElder
+      duration: -1
+      persistsThroughDeath: false
+      renew: false
+    - name: GP_Bonemass
+      duration: -1
+      persistsThroughDeath: false
+      renew: false
+    - name: GP_Moder
+      duration: -1
+      persistsThroughDeath: false
+      renew: false
+    - name: GP_Yagluth
+      duration: -1
+      persistsThroughDeath: false
+      renew: false
+    - name: GP_Queen
+      duration: -1
+      persistsThroughDeath: false
+      renew: false
+    - name: GP_Fader
+      duration: -1
+      persistsThroughDeath: false
+      renew: false
+- title: 'WBTI Status: Heal Streamer!'
+  description: Save that streamer from certain death!
+  points: 100
+  backgroundColor: '#ff0062'
+  cooldown: 30
+  ignoreWard: true
+  type: StatusEffect
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  statusEffectData:
+    list:
+    - name: Potion_health_medium
+      duration: 30
+      persistsThroughDeath: false
+      renew: false
+- title: 'WBTI Status: Energize Streamer!'
+  description: Give the streamer the energy to keep going!
+  points: 100
+  backgroundColor: '#ffb300'
+  cooldown: 30
+  ignoreWard: true
+  type: StatusEffect
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  statusEffectData:
+    list:
+    - name: Potion_stamina_medium
+      duration: 30
+      persistsThroughDeath: false
+      renew: false
+- title: 'WBTI Status: Eitrfy Streamer!'
+  description: Give the streamer the power to overcome his enemies!
+  points: 100
+  backgroundColor: '#d000ff'
+  cooldown: 30
+  ignoreWard: true
+  type: StatusEffect
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  statusEffectData:
+    list:
+    - name: Potion_eitr_minor
+      duration: 30
+      persistsThroughDeath: false
+      renew: false
+- title: 'WBTI Status: Gone with the wind!'
+  description: Give the streamer a 10 minute buff of Ratatosk and Lightfoot meads!
+  points: 120
+  backgroundColor: '#74bd66'
+  cooldown: 60
+  ignoreWard: true
+  type: StatusEffect
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  statusEffectData:
+    list:
+    - name: Potion_hasty
+      duration: -1
+      persistsThroughDeath: false
+      renew: false
+    - name: Potion_LightFoot
+      duration: -1
+      persistsThroughDeath: false
+      renew: false
+- title: 'WBTI Status: Rested!'
+  description: Give the streamer a short rested buff!
+  points: 120
+  backgroundColor: '#74bd66'
+  cooldown: 60
+  ignoreWard: true
+  type: StatusEffect
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  statusEffectData:
+    list:
+    - name: Rested
+      duration: 600
+      persistsThroughDeath: false
+      renew: false
+- title: 'WBTI Status: Shield!'
+  description: Protect the streamer with a shield!
+  points: 120
+  backgroundColor: '#74bd66'
+  cooldown: 60
+  ignoreWard: true
+  type: StatusEffect
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  statusEffectData:
+    list:
+    - name: Staff_shield
+      duration: 600
+      persistsThroughDeath: false
+      renew: false
+- title: 'WBTI Terrain: Remove the Country!'
+  description: Remove the ground under the streamer and watch him panic!
+  points: 500
+  backgroundColor: '#40240f'
+  cooldown: 600
+  type: TerrainEdit
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  terrainEditData:
+    announceMessage: 'Terrain data corrupted. Cause: {{user}}!'
+- title: WBTI Flashbang!
+  description: Flash bang the streamer so he cannot see anything for a moment, not even his UI!
+  points: 300
+  backgroundColor: '#ffffff'
+  cooldown: 180
+  type: Flashbang
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+- title: 'WBTI: Black Forest Surprise Chest'
+  points: 350
+  backgroundColor: '#8c8c8c'
+  cooldown: 180
+  globalKeyAdd: defeated_eikthyr
+  globalKeyRemove: defeated_gdking
+  ignoreWard: true
+  type: SurpriseChest
+  chestData:
+    amount: 5
+    items:
+    - creatureData: 
+      itemData:
+        prefabName: MinceMeatSauce
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: MinceMeatSauce
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Greydwarf_Elite
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: QueensJam
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: QueensJam
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: CarrotSoup
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: CarrotSoup
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Greydwarf_Shaman
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: DeerStew
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: DeerStew
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: BoarJerky
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: BoarJerky
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Bjorn
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Troll
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    yeetChance: 5
+- title: 'WBTI: Swamp Surprise Chest'
+  points: 350
+  backgroundColor: '#8c8c8c'
+  cooldown: 180
+  globalKeyAdd: defeated_gdking
+  globalKeyRemove: defeated_bonemass
+  ignoreWard: true
+  type: SurpriseChest
+  chestData:
+    amount: 5
+    items:
+    - creatureData: 
+      itemData:
+        prefabName: TurnipStew
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: TurnipStew
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Draugr
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: Sausages
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: Sausages
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Wraith
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: ShocklateSmoothie
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: ShocklateSmoothie
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: BlackSoup
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: BlackSoup
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Abomination
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    yeetChance: 5
+- title: 'WBTI: Mountain Surprise Chest'
+  points: 350
+  backgroundColor: '#8c8c8c'
+  cooldown: 180
+  globalKeyAdd: defeated_bonemass
+  globalKeyRemove: defeated_dragon
+  ignoreWard: true
+  type: SurpriseChest
+  chestData:
+    amount: 5
+    items:
+    - creatureData: 
+      itemData:
+        prefabName: Wolfjerky
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: Wolfjerky
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Hatchling
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: OnionSoup
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: OnionSoup
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Wolf
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: WolfMeatSkewer
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: WolfMeatSkewer
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: Eyescream
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: Eyescream
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: StoneGolem
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Fenring
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    yeetChance: 5
+- title: 'WBTI: Plains Surprise Chest'
+  points: 350
+  backgroundColor: '#ffb300'
+  cooldown: 180
+  globalKeyAdd: defeated_dragon
+  globalKeyRemove: defeated_goblinking
+  ignoreWard: true
+  type: SurpriseChest
+  chestData:
+    amount: 5
+    items:
+    - creatureData: 
+      itemData:
+        prefabName: BloodPudding
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: BloodPudding
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Goblin
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: LoxPie
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: LoxPie
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Deathsquito
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: FishWraps
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: FishWraps
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: Bread
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: Bread
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Lox
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Unbjorn
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    type: Gold
+    yeetChance: 5
+- title: 'WBTI: Mistlands Surprise Chest'
+  points: 350
+  backgroundColor: '#ffb300'
+  cooldown: 180
+  globalKeyAdd: defeated_goblinking
+  globalKeyRemove: defeated_queen
+  ignoreWard: true
+  type: SurpriseChest
+  chestData:
+    amount: 5
+    items:
+    - creatureData: 
+      itemData:
+        prefabName: Meatplatter
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Seeker
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: MushroomOmelette
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Seeker
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: YggdrasilPorridge
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Tick
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: MeadHealthLingering
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Tick
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: MeadStaminaLingering
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: SeekerBrute
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: MeadEitrLingering
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: SeekerBrute
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: Mistharesupreme
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: DvergerMage
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: FishAndBread
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Dverger
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: SeekerAspic
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Gjall
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    type: Gold
+    yeetChance: 5
+- title: 'WBTI: Ashlands Surprise Chest'
+  points: 350
+  backgroundColor: '#ffb300'
+  cooldown: 180
+  globalKeyAdd: defeated_queen
+  ignoreWard: true
+  type: SurpriseChest
+  chestData:
+    amount: 5
+    items:
+    - creatureData: 
+      itemData:
+        prefabName: MashedMeat
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Charred_Melee
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: FierySvinstew
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Charred_Archer
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: PiquantPie
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Charred_Twitcher
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: MeadHealthLingering
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: SparklingShroomshake
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Morgen
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: MeadStaminaLingering
+        stackSize: 1
+        quality: 1
+    - creatureData: 
+      itemData:
+        prefabName: MarinatedGreens
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Asksvin
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: MeadEitrLingering
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Charred_Mage
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: SpicyMarmalade
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Charred_Melee
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: ScorchingMedley
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Charred_Archer
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: RoastedCrustPie
+        stackSize: 1
+        quality: 1
+    - creatureData:
+      - announceMessage: 
+        aggravatable: false
+        allowDrops: false
+        allowDamageStructures: true
+        amount: 1
+        bossEvent: ''
+        commandable: false
+        color: 
+        damageScale: 0
+        friendly: false
+        globalKeyAdd: ''
+        globalKeyRemove: ''
+        group: 
+        healthScale: 0
+        index: 0
+        isHallucination: false
+        level: 1
+        maxHealth: 0
+        maxSpawned: 0
+        mistVision: true
+        name: 
+        prefabName: Charred_Twitcher
+        position: Random
+        positionOffset:
+          x: 0
+          y: 0
+          z: 0
+        positionRadius: 10
+        random: false
+        rename: true
+        talkInteract: false
+        talkInterval: 0
+        talkMessage: 
+        talks: false
+        size: 1
+      itemData: 
+    - creatureData: 
+      itemData:
+        prefabName: SizzlingBerryBroth
+        stackSize: 1
+        quality: 1
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+    type: Gold
+    yeetChance: 5
+- title: WBTI Detonate Fizsh!
+  description: Detonate fish around the streamer!
+  points: 300
+  backgroundColor: '#ff6f00'
+  cooldown: 300
+  type: Detonate
+  chestData:
+    positionOffset:
+      x: 0
+      y: 0
+      z: 0
+  detonateData:
+    radius: 30
+    values:
+    - Fish

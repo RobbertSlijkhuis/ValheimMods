@@ -80,6 +80,17 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 && m_redeemHistory.Exists(item => item.Status == CustomRewardRedemptionState.Unfulfilled);
         }
 
+        public bool IsLoggedIn => m_auth != null && m_auth.m_loggedIn;
+
+        public bool HasUnresolvedRedeemsFor(string redeemTitle)
+        {
+            return m_enabled
+                && !PluginConfig.configAutoResolveRedeems.Value
+                && m_redeemHistory.Exists(item =>
+                    item.CustomRewardTitle == redeemTitle
+                    && item.Status == CustomRewardRedemptionState.Unfulfilled);
+        }
+
         public void Update()
         {
             try
@@ -193,7 +204,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         throw new RedeemException("Could not find data for detonate", ExceptionType.Error);
                     }
 
-                    DetonateHelper.Detonate(redeem.detonateData, customRewardEvent);
+                    StartCoroutine(DetonateHelper.Detonate(redeem.detonateData, customRewardEvent));
                 }
 
                 if (redeem.type == RedeemType.Flashbang)
@@ -340,7 +351,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         Cost = redeem.points,
                         Prompt = redeem.description,
                         Title = redeem.title,
-                        IsEnabled = isEnabled,
+                        IsEnabled = redeem.enabled && isEnabled,
                     });
                 }
             }

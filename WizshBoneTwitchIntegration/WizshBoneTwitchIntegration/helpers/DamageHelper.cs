@@ -58,11 +58,19 @@ namespace WizshBoneTwitchIntegration.Helpers
             HitData.DamageTypes damages = ConvertToDamageTypes(damageData);
             float armor = Player.m_localPlayer.GetBodyArmor();
             float maxHealth = Player.m_localPlayer.GetMaxHealth();
-            float totalDamage = damages.GetTotalDamage();
             float maxDamage = maxHealth * damageData.maxHealthPercentage;
 
+            float originalChop = damages.m_chop;
+            float originalPickaxe = damages.m_pickaxe;
+            damages.m_chop = 0f;
+            damages.m_pickaxe = 0f;
+
+            float totalDamage = damages.GetTotalDamage();
             damages.Modify(maxDamage / totalDamage);
             damages.IncreaseEqually(armor * damageData.armorPercentage);
+
+            damages.m_chop = originalChop;
+            damages.m_pickaxe = originalPickaxe;
 
             return damages;
         }

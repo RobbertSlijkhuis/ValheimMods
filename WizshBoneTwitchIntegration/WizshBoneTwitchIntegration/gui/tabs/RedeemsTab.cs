@@ -71,8 +71,10 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float HeaderTopPadding    = 45f;
         private const float ActionButtonWidth   = 80f;
 
-        private const float ColTitleX  = -350f;
-        private const float ColTitleW  = 260f;
+        private const float ColToggleX = -455f;
+        private const float ColToggleW = 44f;
+        private const float ColTitleX  = -295f;
+        private const float ColTitleW  = 220f;
         private const float ColTypeX   = -80f;
         private const float ColTypeW   = 160f;
         private const float ColCostX   = 80f;
@@ -99,6 +101,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float TypeDropdownX = TypeLabelX + TypeLabelW / 2f + 10f + TypeDropdownW / 2f;
 
         private System.Action m_onCloseRequested;
+        private System.Action m_onOpenHistory;
 
         // Create view title � stored to allow "New Redeem" / "Edit Redeem" / "View Redeem" switching
         private Text m_createViewTitle;
@@ -108,9 +111,10 @@ namespace WizshBoneTwitchIntegration.Gui
         private GameObject m_createScrollContent;
         private float m_editorContainerYPos;
 
-        public GameObject Create(GameObject parent, CreateScrollableContainerDelegate createScrollable, System.Action onCloseRequested)
+        public GameObject Create(GameObject parent, CreateScrollableContainerDelegate createScrollable, System.Action onCloseRequested, System.Action onOpenHistory = null)
         {
             m_onCloseRequested = onCloseRequested;
+            m_onOpenHistory = onOpenHistory;
             m_createScrollable = createScrollable;
 
             m_root = UIContainer.Create(parent, "RedeemsTab");
@@ -223,6 +227,24 @@ namespace WizshBoneTwitchIntegration.Gui
                 RedeemData captured = redeem;
                 bool isUnsaved = m_unsavedTitles.Contains(redeem.title);
                 Color labelColor = isUnsaved ? GUIManager.Instance.ValheimOrange : GUIManager.Instance.ValheimBeige;
+
+                if (!isSynced)
+                {
+                    GameObject toggleBtn = GUIManager.Instance.CreateButton(
+                        text: captured.enabled ? "On" : "Off",
+                        parent: m_redeemListContainer.transform,
+                        anchorMin: new Vector2(0.5f, 1f),
+                        anchorMax: new Vector2(0.5f, 1f),
+                        position: new Vector2(ColToggleX, yOffset),
+                        width: ColToggleW,
+                        height: ButtonHeight
+                    );
+                    toggleBtn.SetActive(true);
+                    toggleBtn.GetComponentInChildren<Text>().color = captured.enabled
+                        ? new Color(0.2f, 0.8f, 0.2f)
+                        : new Color(0.8f, 0.2f, 0.2f);
+                    toggleBtn.GetComponent<Button>().onClick.AddListener(() => OnToggleRedeem(captured));
+                }
 
                 Text titleText = GUIManager.Instance.CreateText(
                     text: redeem.title,
@@ -735,6 +757,36 @@ namespace WizshBoneTwitchIntegration.Gui
 
             foreach (Dropdown dropdown in container.GetComponentsInChildren<Dropdown>(true))
                 dropdown.interactable = interactable;
+        }
+
+        private void OnToggleRedeem(RedeemData redeem)
+        {
+            TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+
+            bool willDisable = redeem.enabled;
+            if (willDisable && customRewards.HasUnresolvedRedeemsFor(redeem.title))
+            {
+                m_confirmDialog.Show(
+                    title:       "Disable Redeem",
+                    description: $"Auto-resolve is off. Pending '{redeem.title}' redeems won't be refunded automatically. Are you sure?",
+                    onConfirm:   () =>
+                    {
+                        redeem.enabled = false;
+                        OnSave();
+                        if (customRewards.IsLoggedIn && customRewards.m_enabled)
+                            customRewards.SetRewards();
+                    },
+                    confirmText: "Disable",
+                    cancelText:  "Open history",
+                    onCancel:    () => m_onOpenHistory?.Invoke()
+                );
+                return;
+            }
+
+            redeem.enabled = !redeem.enabled;
+            OnSave();
+            if (customRewards.IsLoggedIn && customRewards.m_enabled)
+                customRewards.SetRewards();
         }
 
         private void OnSearchChanged(string value)

@@ -46,7 +46,8 @@ namespace WizshBoneTwitchIntegration.Models
         [EditorTooltip("Whether this redeem requires input.")] 
         public bool userInput = false;
 
-        [EditorHidden] public string type = RedeemType.Undefined;
+        [EditorHidden] public string type    = RedeemType.Undefined;
+        [EditorHidden] public bool   enabled = true;
         [EditorHidden] public SurpriseChestData chestData = new SurpriseChestData();
         [EditorHidden] public SpawnCreatureData creatureData = new SpawnCreatureData();
         [EditorHidden] public DetonateData detonateData = new DetonateData();

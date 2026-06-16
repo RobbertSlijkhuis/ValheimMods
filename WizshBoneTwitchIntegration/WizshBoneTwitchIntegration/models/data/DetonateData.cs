@@ -25,7 +25,7 @@ namespace WizshBoneTwitchIntegration.Models
 
         [EditorLabel("Damage settings")]
         [EditorTooltip("Custom damage setting for the explosion.")]
-        public DamageData damageData = new DamageData() { basedOnMaxHealthAndArmor = true, blunt = 70f, fire = 30f };
+        public DamageData damageData = new DamageData() { basedOnMaxHealthAndArmor = true, blunt = 70f, chop = 160f, fire = 30f, pickaxe = 160f };
 
         public DetonateData() { }
     }

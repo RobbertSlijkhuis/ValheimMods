@@ -1,4 +1,5 @@
 ﻿using Jotunn.Managers;
+using System.Collections;
 using System.Collections.Generic;
 using TwitchSDK.Interop;
 using UnityEngine;
@@ -10,9 +11,9 @@ namespace WizshBoneTwitchIntegration.Helpers
 {
     internal class DetonateHelper
     {
-        public static List<GameObject> prefabList = new List<GameObject>();
+        private const float DelayBetweenDetonations = 0.05f;
 
-        public static void Detonate(DetonateData detonateData, CustomRewardEvent customRewardEvent)
+        public static IEnumerator Detonate(DetonateData detonateData, CustomRewardEvent customRewardEvent)
         {
             int layerMask = 0;
 
@@ -27,10 +28,11 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             Collider[] found = Physics.OverlapSphere(Player.m_localPlayer.transform.position, detonateData.radius, layerMask);
 
+            List<GameObject> prefabList = new List<GameObject>();
+
             foreach (var item in found)
             {
                 GameObject rootObject = item.transform.root.gameObject;
-                // Jotunn.Logger.LogWarning(rootObject.name);
 
                 if (detonateData.type == DetonateType.Creature || detonateData.type == DetonateType.CreatureSpawned)
                 {
@@ -63,13 +65,10 @@ namespace WizshBoneTwitchIntegration.Helpers
                     Piece piece = rootObject.GetComponent<Piece>();
 
                     if (piece != null && detonateData.values.Contains(rootObject.name.Replace("(Clone)", "")))
-                    {
                         prefabList.Add(rootObject);
-                    }
                 }
             }
 
-            // Jotunn.Logger.LogWarning("In list: " + prefabList.Count);
             GameObject explosionFX = PrefabManager.Instance.GetPrefab("BlobLava_explosion");
             GameObject explosionSFX = PrefabManager.Instance.GetPrefab("sfx_bloblava_death");
 
@@ -78,7 +77,12 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             foreach (GameObject prefab in prefabList)
             {
-                ZNetView netView = prefab.GetComponent<ZNetView>();
+                if (prefab == null)
+                {
+                    yield return new WaitForSeconds(DelayBetweenDetonations);
+                    continue;
+                }
+
                 GameObject explosionInstance = UnityEngine.Object.Instantiate(explosionFX, prefab.transform.position, prefab.transform.rotation);
                 UnityEngine.Object.Instantiate(explosionSFX, prefab.transform.position, prefab.transform.rotation);
 
@@ -95,9 +99,9 @@ namespace WizshBoneTwitchIntegration.Helpers
                 }
 
                 ZNetViewHelper.Destroy(prefab);
-            }
 
-            prefabList.Clear();
+                yield return new WaitForSeconds(DelayBetweenDetonations);
+            }
         }
     }
 }

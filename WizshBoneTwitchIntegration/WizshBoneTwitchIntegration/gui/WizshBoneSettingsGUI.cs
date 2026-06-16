@@ -93,12 +93,18 @@ namespace WizshBoneTwitchIntegration.Gui
             CreateTabButtons();
 
             m_profilesTabRoot = m_profilesTab.Create(panel, CreateScrollableContainer);
-            m_redeemsTabRoot = m_redeemsTab.Create(panel, CreateScrollableContainer, () =>
-            {
-                m_auth?.wizshBoneGUI.SignalReopenSettings();
-                CloseSettings();
-                m_auth?.wizshBoneGUI.CloseGUI();
-            });
+            m_redeemsTabRoot = m_redeemsTab.Create(panel, CreateScrollableContainer,
+                onCloseRequested: () =>
+                {
+                    m_auth?.wizshBoneGUI.SignalReopenSettings();
+                    CloseSettings();
+                    m_auth?.wizshBoneGUI.CloseGUI();
+                },
+                onOpenHistory: () =>
+                {
+                    CloseSettings();
+                    m_auth?.wizshBoneGUI.OpenRedeemHistory();
+                });
             m_viewersTabRoot = m_viewersTab.Create(panel, CreateScrollableContainer);
 
             ShowTab(m_profilesTabRoot, m_profilesTabButton);
