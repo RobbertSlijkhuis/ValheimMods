@@ -151,34 +151,18 @@ namespace WizshBoneTwitchIntegration.Configs
             configIndestructibleBoats = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionIndestructible, "Indestructible boats", false,
                 new ConfigDescription("Wether all boats are completely indestructible", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
-            configIndestructibleBoats.SettingChanged += (obj, attr) =>
-            {
-                IndestructibleHelper.SetBoats(configIndestructibleBoats.Value);
-            };
 
             configIndestructibleChests = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionIndestructible, "Indestructible chests", false,
                 new ConfigDescription("Wether all chests are completely indestructible", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
-            configIndestructibleChests.SettingChanged += (obj, attr) =>
-            {
-                IndestructibleHelper.SetChests(configIndestructibleChests.Value);
-            };
 
             configIndestructiblePortals = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionIndestructible, "Indestructible portals", false,
                 new ConfigDescription("Wether all portals are completely indestructible", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
-            configIndestructiblePortals.SettingChanged += (obj, attr) =>
-            {
-                IndestructibleHelper.SetPortals(configIndestructiblePortals.Value);
-            };
 
             configIndestructibleVegetables = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionIndestructible, "Indestructible vegetables", false,
                 new ConfigDescription("Wether all vegetables are completely indestructible", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
-            configIndestructibleVegetables.SettingChanged += (obj, attr) =>
-            {
-                IndestructibleHelper.SetVegetables(configIndestructibleVegetables.Value);
-            };
 
 
             configEnableRedeemsOnLogin = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionRedeems, "Enable redeems on login", true,

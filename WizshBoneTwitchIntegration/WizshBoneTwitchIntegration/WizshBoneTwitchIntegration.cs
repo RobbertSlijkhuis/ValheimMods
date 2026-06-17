@@ -234,11 +234,6 @@ namespace WizshBoneTwitchIntegration
                 }
             }
 
-            IndestructibleHelper.SetBoats(PluginConfig.configIndestructibleBoats.Value);
-            IndestructibleHelper.SetChests(PluginConfig.configIndestructibleChests.Value);
-            IndestructibleHelper.SetPortals(PluginConfig.configIndestructiblePortals.Value);
-            IndestructibleHelper.SetVegetables(PluginConfig.configIndestructibleVegetables.Value);
-
             string[] traders = new string[3] { "Vendor_BlackForest", "Hildir_camp", "BogWitch_Camp" };
 
             foreach (string name in traders)

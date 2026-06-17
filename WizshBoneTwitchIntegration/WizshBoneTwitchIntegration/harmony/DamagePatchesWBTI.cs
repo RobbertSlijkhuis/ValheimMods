@@ -45,35 +45,6 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Piece), nameof(Piece.SetCreator))]
-        public static void PieceSetCreator_Postfix(Piece __instance)
-        {
-            try
-            {
-                if (__instance == null)
-                    return;
-
-                ZNetView nview = __instance.GetComponent<ZNetView>();
-
-                if (nview == null || !nview.IsValid() || !nview.IsOwner())
-                    return;
-
-                bool indestructible =
-                    (PluginConfig.configIndestructibleBoats.Value && __instance.GetComponent<Ship>() != null) ||
-                    (PluginConfig.configIndestructibleChests.Value && __instance.GetComponent<Container>() != null && __instance.m_primaryTarget) ||
-                    (PluginConfig.configIndestructiblePortals.Value && __instance.GetComponent<TeleportWorld>() != null) ||
-                    (PluginConfig.configIndestructibleVegetables.Value && (__instance.GetComponent<Pickable>()?.m_harvestable == true || __instance.GetComponent<Plant>()?.m_needCultivatedGround == true));
-
-                if (indestructible)
-                    IndestructibleHelper.ApplyIndestructible(nview.GetZDO(), true);
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Something went wrong in PieceSetCreator_Postfix: " + e);
-            }
-        }
-
         [HarmonyPrefix]
         [HarmonyPatch(typeof(WearNTear), "Damage")]
         public static bool WearNTearDamage_Prefix(WearNTear __instance, HitData hit)
@@ -82,6 +53,9 @@ namespace WizshBoneTwitchIntegration.Harmony
             {
                 if (__instance == null || hit == null)
                     return true;
+
+                if (IndestructibleHelper.ShouldProtect(__instance.gameObject))
+                    return false;
 
                 Character character = hit.GetAttacker();
 
@@ -98,6 +72,24 @@ namespace WizshBoneTwitchIntegration.Harmony
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Something went wrong in WearNTearDamage_Prefix: " + e);
+                return true;
+            }
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Destructible), "Damage")]
+        public static bool DestructibleDamage_Prefix(Destructible __instance, HitData hit)
+        {
+            try
+            {
+                if (__instance == null || hit == null)
+                    return true;
+
+                return !IndestructibleHelper.ShouldProtect(__instance.gameObject);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in DestructibleDamage_Prefix: " + e);
                 return true;
             }
         }
