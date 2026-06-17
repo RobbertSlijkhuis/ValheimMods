@@ -16,7 +16,7 @@ namespace Glimuleikar
     {
         public const string PluginGUID = "DeathWizsh.Glimuleikar";
         public const string PluginName = "Glimuleikar";
-        public const string PluginVersion = "0.0.3";
+        public const string PluginVersion = "0.0.4";
         public static Glimuleikar Instance;
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
         public static string configFileName = PluginGUID + ".cfg";
@@ -31,10 +31,10 @@ namespace Glimuleikar
             Instance = this;
             //InitAssetBundle();
             PluginConfig.Init();
+            ConfigRPC.Init();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             //PrefabManager.OnVanillaPrefabsAvailable += InitExtraConfigFiles;
         }
     }
 }
-

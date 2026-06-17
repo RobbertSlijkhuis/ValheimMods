@@ -261,6 +261,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     TerrainEditHelper.ApplyTerrainEdit(redeem.terrainEditData, customRewardEvent);
                 }
 
+                if (redeem.type == RedeemType.TimeStop)
+                {
+                    if (redeem.timeStopData == null)
+                        throw new RedeemException("Could not find data for TimeStop", ExceptionType.Error);
+
+                    TimeStopHelper.Apply(redeem.timeStopData, customRewardEvent);
+                }
+
                 if (redeem.type == RedeemType.Weather)
                 {
                     if (redeem.weatherData == null)

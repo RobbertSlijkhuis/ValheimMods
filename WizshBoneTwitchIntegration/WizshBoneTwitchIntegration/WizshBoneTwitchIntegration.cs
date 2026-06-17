@@ -170,6 +170,8 @@ namespace WizshBoneTwitchIntegration
                 Trap trap = prefab.GetComponent<Trap>();
                 Ship ship = prefab.GetComponent<Ship>();
 
+                prefab.AddComponent<TwitchBasePersistentData>();
+
                 if (humanoid != null && monsterAI != null)
                 {
                     prefab.AddComponent<TwitchCreaturePersistentData>();
@@ -215,7 +217,6 @@ namespace WizshBoneTwitchIntegration
 
                 if (piece != null)
                 {
-                    prefab.AddComponent<TwitchPiecePersistentData>();
                     prefab.AddComponent<TwitchPersistentDestruction>();
                 }
 

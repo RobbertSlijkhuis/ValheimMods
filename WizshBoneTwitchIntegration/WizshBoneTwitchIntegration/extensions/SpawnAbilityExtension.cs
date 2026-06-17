@@ -287,9 +287,6 @@ namespace WizshBoneTwitchIntegration.Extensions
                 {
                     trap.RequestStateChange(TrapState.Unarmed);
 
-                    if (piece != null)
-                        piece.m_resources = new Piece.Requirement[0];
-
                     if (spawnAbilityData.duration > 0)
                     {
                         TwitchPersistentDestruction persistentDestruction = gameObject.GetComponent<TwitchPersistentDestruction>();
@@ -334,11 +331,7 @@ namespace WizshBoneTwitchIntegration.Extensions
 
                 if (piece != null)
                 {
-                    TwitchPiecePersistentData piecePersistentData = gameObject.GetComponent<TwitchPiecePersistentData>();
-                    if (piecePersistentData != null)
-                        piecePersistentData.SetData(customRewardEvent, spawnAbilityData);
-                    else
-                        Jotunn.Logger.LogWarning("TwitchPiecePersistentData missing on piece object.");
+                    gameObject.AddComponent<TwitchPiecePersistentData>().SetData(customRewardEvent, spawnAbilityData);
 
                     if (spawnAbilityData.duration > 0)
                     {
@@ -350,11 +343,8 @@ namespace WizshBoneTwitchIntegration.Extensions
                     }
 
                     Door door = gameObject.GetComponent<Door>();
-                    if (door != null)
-                    {
-                        Jotunn.Logger.LogWarning("Door found, toggling continuously for " + spawnAbilityData.doorInterval + " seconds.");
-                        door.StartCoroutine(door.ToggleDoorContinuously(spawnAbilityData.doorInterval));
-                    }
+                    if (door != null && spawnAbilityData.doorInterval > 0)
+                        gameObject.AddComponent<TwitchDoorPersistentData>().Initialize(spawnAbilityData.doorInterval);
                 }
 
                 if ((bool)component2)

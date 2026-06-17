@@ -58,6 +58,9 @@ namespace WizshBoneTwitchIntegration.Components
 
             m_netView.GetZDO().Set(pieceDataHash, $"{m_redeemerName}|{m_redeemTitle}");
 
+            TwitchBasePersistentData baseData = gameObject.GetComponent<TwitchBasePersistentData>();
+            baseData?.SetFlag(PersistentComponentFlags.Piece, true);
+
             ApplyAllowDrops(spawnAbilityData.allowDrops);
         }
 

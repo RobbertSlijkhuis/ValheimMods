@@ -61,6 +61,7 @@ namespace WizshBoneTwitchIntegration.Gui
             RedeemType.StatusEffect,
             RedeemType.SurpriseChest,
             RedeemType.TerrainEdit,
+            RedeemType.TimeStop,
             RedeemType.Weather,
         };
 
@@ -591,6 +592,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.terrainEditData);
             else if (m_newRedeem.type == RedeemType.StatusEffect)
                 editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.statusEffectData);
+            else if (m_newRedeem.type == RedeemType.TimeStop)
+                editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.timeStopData);
             else if (m_newRedeem.type == RedeemType.Weather)
                 editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.weatherData);
 

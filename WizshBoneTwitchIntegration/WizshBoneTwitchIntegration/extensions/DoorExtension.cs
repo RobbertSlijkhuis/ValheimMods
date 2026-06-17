@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -14,7 +15,14 @@ namespace WizshBoneTwitchIntegration.extensions
 
                 if (door != null && Player.m_localPlayer != null)
                 {
-                    door.Interact(Player.m_localPlayer, false, false);
+                    try
+                    {
+                        door?.Interact(Player.m_localPlayer, false, false);
+                    }
+                    catch (Exception e)
+                    {
+                        Jotunn.Logger.LogWarning($"Door Interact threw, likely despawned mid-frame: {e}");
+                    }
                 }
             }
         }

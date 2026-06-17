@@ -21,7 +21,8 @@ namespace WizshBoneTwitchIntegration.Harmony
                 if (!IsLox(__instance))
                     return;
 
-                ApplyHitFriendly(__instance);
+                ApplyMovementDamage(__instance);
+                ApplyOthers(__instance);
             }
             catch (Exception e)
             {
@@ -40,7 +41,8 @@ namespace WizshBoneTwitchIntegration.Harmony
                 if (character == null || !IsLox(character))
                     return;
 
-                ApplyHitFriendly(character);
+                ApplyMovementDamage(character);
+                ApplyOthers(character);
             }
             catch (Exception e)
             {
@@ -48,7 +50,7 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
         }
 
-        public static void OnTamedLoxDamageSettingChanged()
+        public static void OnTamedLoxChange()
         {
             try
             {
@@ -57,7 +59,10 @@ namespace WizshBoneTwitchIntegration.Harmony
                 foreach (Character character in allCharacters)
                 {
                     if (IsLox(character) && character.IsTamed())
-                        ApplyHitFriendly(character);
+                    {
+                        ApplyMovementDamage(character);
+                        ApplyOthers(character);
+                    }
                 }
             }
             catch (Exception e)
@@ -66,34 +71,76 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
         }
 
-        private static void ApplyHitFriendly(Character lox)
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Sadle), "RPC_RequestRespons")]
+        public static void Sadle_RPC_RequestRespons_Postfix(Sadle __instance)
+        {
+            try
+            {
+                Character lox = __instance.GetComponent<Character>();
+                if (lox == null || !IsLox(lox)) return;
+
+                ApplyMovementDamage(lox);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in Sadle_RPC_RequestRespons_Postfix: " + e);
+            }
+        }
+
+        private static void ApplyMovementDamage(Character lox)
         {
             if (!lox.IsTamed())
                 return;
 
-            Aoe aoe = GetRunHitDamagerAoe(lox);
+            Transform transform = lox.transform.Find("Visual/RunHitDamager");
+
+            if (transform == null)
+            {
+                Jotunn.Logger.LogWarning($"Could not find RunHitDamager child object on {lox?.name}.");
+                return;
+            }   
+
+            Aoe aoe = transform.gameObject.GetComponent<Aoe>();
+            BoxCollider boxCollider = transform.gameObject.GetComponent<BoxCollider>();
+            MovementDamage movementDamager = lox.GetComponent<MovementDamage>();
 
             if (aoe == null)
             {
-                Jotunn.Logger.LogWarning($"Could not find Aoe component on {RunHitDamagerName} of {lox.name}.");
+                Jotunn.Logger.LogWarning($"Could not find Aoe component on {RunHitDamagerName} of {lox?.name}.");
                 return;
             }
 
-            aoe.m_hitFriendly = PluginConfig.configDamageTamedLoxEnable.Value;
+            if (boxCollider == null)
+            {
+                Jotunn.Logger.LogWarning($"Could not find BoxCollider component on {RunHitDamagerName} of {lox?.name}.");
+                return;
+            }
+
+            if (movementDamager == null)
+            {
+                Jotunn.Logger.LogWarning($"Could not find MovementDamage component on {lox?.name}.");
+                return;
+            }
+
+            movementDamager.m_speedTreshold = PluginConfig.configTamedLoxSpeedThreshold.Value;
+            aoe.m_hitFriendly = PluginConfig.configTamedLoxDamageFriendliesEnable.Value;
+            boxCollider.center = PluginConfig.configTamedLoxDamageBoxPosition.Value;
+            boxCollider.size = PluginConfig.configTamedLoxDamageBoxScale.Value;
             Jotunn.Logger.LogWarning($"Set m_hitFriendly to {aoe.m_hitFriendly} on {lox.name}.");
         }
 
-        private static Aoe GetRunHitDamagerAoe(Character lox)
+        private static void ApplyOthers(Character lox)
         {
-            Aoe[] aoes = lox.GetComponentsInChildren<Aoe>(includeInactive: true);
+            Humanoid humanoid = lox.GetComponent<Humanoid>();
 
-            foreach (Aoe aoe in aoes)
+            if (humanoid == null)
             {
-                if (aoe.gameObject.name == RunHitDamagerName)
-                    return aoe;
+                Jotunn.Logger.LogWarning($"Could not find Humanoid component on {lox?.name}.");
+                return;
             }
 
-            return null;
+            humanoid.m_turnSpeed = PluginConfig.configTamedLoxTurningSpeed.Value;
         }
 
         private static bool IsLox(Character character)

@@ -56,6 +56,7 @@ namespace WizshBoneTwitchIntegration.Models
         [EditorHidden] public TerrainEditData terrainEditData = new TerrainEditData();
         [EditorHidden] public SpawnAbilityData spawnAbilityData = new SpawnAbilityData();
         [EditorHidden] public StatusEffectData statusEffectData = new StatusEffectData();
+        [EditorHidden] public TimeStopData timeStopData = new TimeStopData();
         [EditorHidden] public WeatherData weatherData = new WeatherData();
 
         // Maps each RedeemType to the one sub-data field that should be serialized for it.
@@ -69,6 +70,7 @@ namespace WizshBoneTwitchIntegration.Models
             { RedeemType.SurpriseChest,      nameof(chestData)        },
             { RedeemType.StatusEffect,       nameof(statusEffectData) },
             { RedeemType.TerrainEdit,        nameof(terrainEditData)  },
+            { RedeemType.TimeStop,           nameof(timeStopData)     },
             { RedeemType.Weather,            nameof(weatherData)      },
         };
 
@@ -82,6 +84,7 @@ namespace WizshBoneTwitchIntegration.Models
             nameof(terrainEditData),
             nameof(spawnAbilityData),
             nameof(statusEffectData),
+            nameof(timeStopData),
             nameof(weatherData),
         };
 

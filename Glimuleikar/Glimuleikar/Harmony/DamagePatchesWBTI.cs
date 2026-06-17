@@ -16,7 +16,11 @@ namespace WizshBoneTwitchIntegration.Harmony
                 if (__instance == null || hit == null)
                     return true;
 
-                Jotunn.Logger.LogWarning(PluginConfig.configDamageStructuresEnable.Value);
+                Character attacker = hit.GetAttacker();
+
+                if (attacker == null)
+                    return true;
+
                 return PluginConfig.configDamageStructuresEnable.Value;
             }
             catch (Exception e)
@@ -33,33 +37,21 @@ namespace WizshBoneTwitchIntegration.Harmony
             try
             {
                 if (hit.m_hitType == HitData.HitType.Fall)
-                {
-                    Jotunn.Logger.LogWarning("Fall damage: " + PluginConfig.configDamageFallEnable.Value);
                     return PluginConfig.configDamageFallEnable.Value;
-                }
 
                 Character attacker = hit.GetAttacker();
 
                 if (attacker == null)
                     return true;
 
-                Jotunn.Logger.LogWarning("Hit type: " + hit.m_hitType);
-                Jotunn.Logger.LogWarning("Ignore PVP: " + hit.m_ignorePVP);
-                Jotunn.Logger.LogWarning("Total damage: " + hit.GetTotalDamage());
-                Jotunn.Logger.LogWarning("Attacker name: " + attacker.name);
-                Jotunn.Logger.LogWarning("Attacker type: " + attacker.GetType());
-                Jotunn.Logger.LogWarning("Attacker faction: " + attacker.GetFaction());
-
                 if (hit.m_hitType == HitData.HitType.PlayerHit && !PluginConfig.configDamagePlayersEnable.Value)
                 {
-                    Jotunn.Logger.LogWarning("Player hit: " + PluginConfig.configDamagePlayersEnable.Value);
                     hit.m_damage = new HitData.DamageTypes();
                     return true;
                 }
 
                 if (hit.m_hitType == HitData.HitType.EnemyHit)
                 {
-                    Jotunn.Logger.LogWarning("Monster hit: " + PluginConfig.configDamageMonstersEnable.Value);
                     return PluginConfig.configDamageMonstersEnable.Value;
                 }
 

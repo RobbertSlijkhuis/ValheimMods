@@ -11,6 +11,7 @@
         public static string SurpriseChest => "SurpriseChest";
         public static string TerrainEdit => "TerrainEdit";
         public static string Undefined => "Undefined";
+        public static string TimeStop => "TimeStop";
         public static string Weather => "Weather";
     }
 }
