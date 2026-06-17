@@ -5,20 +5,20 @@ namespace WizshBoneTwitchIntegration.Models
     internal class TimeStopData : CloneableData
     {
         [EditorLabel("Duration")]
-        [EditorTooltip("How long the time stop lasts in seconds.")]
-        public float duration = 10f;
+        [EditorTooltip("How long the time stop zone stays active, in seconds.")]
+        public float duration = 30f;
 
         [EditorLabel("Freeze enemies")]
-        [EditorTooltip("Whether nearby enemies are frozen.")]
+        [EditorTooltip("Whether enemies that enter the zone are frozen.")]
         public bool freezeEnemies = true;
 
         [EditorLabel("Freeze player")]
-        [EditorTooltip("Whether the player is also frozen during the time stop.")]
+        [EditorTooltip("Whether the player is also frozen while inside the zone.")]
         public bool freezePlayer = false;
 
         [EditorLabel("Radius")]
-        [EditorTooltip("Max distance from the player to freeze enemies in meters. 0 = unlimited.")]
-        public float radius = 30f;
+        [EditorTooltip("Radius of the time stop zone in meters.")]
+        public float radius = 10f;
 
         [EditorLabel("Announce message")]
         [EditorTooltip("Message shown on screen when triggered. Use {{user}} for the redeemer's name.")]

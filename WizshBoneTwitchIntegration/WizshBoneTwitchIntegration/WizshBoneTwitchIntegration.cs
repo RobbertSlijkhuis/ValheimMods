@@ -125,6 +125,9 @@ namespace WizshBoneTwitchIntegration
 
             prefabs.EnvZone.AddComponent<TwitchPersistentDestruction>();
 
+            prefabs.TimeStopZone.AddComponent<TwitchPersistentDestruction>();
+            prefabs.TimeStopZone.AddComponent<TwitchTimeStopZone>();
+
             prefabs.TerrainEdit.AddComponent<TwitchTerrainReset>();
 
             prefabs.FlashbangVial = PrefabManager.Instance.CreateClonedPrefab("FlashbangVial_WBTI", "BombBlob_Frost_projectile");
@@ -417,6 +420,8 @@ namespace WizshBoneTwitchIntegration
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ChestGold, true));
             prefabs.EnvZone = assetBundle.LoadAsset<GameObject>("EnvZone_WBTI");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.EnvZone, true));
+            prefabs.TimeStopZone = assetBundle.LoadAsset<GameObject>("TimeStopZone_WBTI");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.TimeStopZone, true));
 
             effects.Burning = assetBundle.LoadAsset<SE_Stats>("Burning_WBTI");
             effects.Freezing = assetBundle.LoadAsset<StatusEffect>("Freezing_WBTI");

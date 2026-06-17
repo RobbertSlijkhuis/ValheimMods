@@ -13,7 +13,6 @@ namespace WizshBoneTwitchIntegration.Components
         private RigidbodyConstraints m_originalConstraints;
 
         private static readonly int s_startedHash   = "WBTI_Freeze_Started".GetStableHashCode();
-        private static readonly int s_durationHash  = "WBTI_Freeze_Duration".GetStableHashCode();
         private static readonly int s_animHashHash  = "WBTI_Freeze_AnimHash".GetStableHashCode();
         private static readonly int s_animTimeHash  = "WBTI_Freeze_AnimTime".GetStableHashCode();
 
@@ -33,18 +32,7 @@ namespace WizshBoneTwitchIntegration.Components
                 if (started == "")
                     return;
 
-                float duration   = m_netView.GetZDO().GetFloat(s_durationHash, 0f);
-                float timePassed = (float)DateTime.Now.Subtract(DateTime.Parse(started)).TotalSeconds;
-                float remaining  = duration - timePassed;
-
-                if (remaining <= 0f)
-                {
-                    ClearZDO();
-                    Destroy(this);
-                    return;
-                }
-
-                StartCoroutine(RestoreAnimAndFreeze(remaining));
+                StartCoroutine(RestoreAnimAndFreeze());
             }
             catch (Exception e)
             {
@@ -52,7 +40,7 @@ namespace WizshBoneTwitchIntegration.Components
             }
         }
 
-        public void Initialize(float duration)
+        public void Initialize()
         {
             try
             {
@@ -70,14 +58,12 @@ namespace WizshBoneTwitchIntegration.Components
                     zdo.Set(s_animTimeHash, info.normalizedTime);
                 }
 
-                zdo.Set(s_startedHash,  DateTime.Now.ToString());
-                zdo.Set(s_durationHash, duration);
+                zdo.Set(s_startedHash, DateTime.Now.ToString());
 
                 TwitchBasePersistentData baseData = gameObject.GetComponent<TwitchBasePersistentData>();
                 baseData?.SetFlag(PersistentComponentFlags.Freeze, true);
 
                 ApplyFreeze();
-                StartCoroutine(UnfreezeAfter(duration));
             }
             catch (Exception e)
             {
@@ -87,7 +73,7 @@ namespace WizshBoneTwitchIntegration.Components
 
         // Wait one frame so ZSyncAnimation finishes its initial restore, then re-apply our saved
         // animation snapshot and freeze on top of it.
-        private IEnumerator RestoreAnimAndFreeze(float remaining)
+        private IEnumerator RestoreAnimAndFreeze()
         {
             yield return null;
 
@@ -107,17 +93,7 @@ namespace WizshBoneTwitchIntegration.Components
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("TwitchFreezeData.RestoreAnimAndFreeze failed: " + e);
-                yield break;
             }
-
-            yield return new WaitForSeconds(remaining);
-            Unfreeze();
-        }
-
-        private IEnumerator UnfreezeAfter(float duration)
-        {
-            yield return new WaitForSeconds(duration);
-            Unfreeze();
         }
 
         private void ApplyFreeze()
@@ -140,7 +116,7 @@ namespace WizshBoneTwitchIntegration.Components
                 m_animator.enabled = false;
         }
 
-        private void Unfreeze()
+        public void Unfreeze()
         {
             try
             {
@@ -171,7 +147,6 @@ namespace WizshBoneTwitchIntegration.Components
 
                 ZDO zdo = m_netView.GetZDO();
                 zdo.Set(s_startedHash,  "");
-                zdo.Set(s_durationHash, 0f);
                 zdo.Set(s_animHashHash, 0);
                 zdo.Set(s_animTimeHash, 0f);
 

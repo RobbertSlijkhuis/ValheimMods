@@ -1,64 +1,40 @@
 using System;
-using System.Collections.Generic;
 using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
-using WizshBoneTwitchIntegration.Harmony;
 using WizshBoneTwitchIntegration.Models;
 
 namespace WizshBoneTwitchIntegration.Helpers
 {
     internal static class TimeStopHelper
     {
-        public const string RPC_Name = "WBTI_TimeStop";
+        private static bool s_playerFrozen = false;
+        private static Rigidbody s_playerRb;
+        private static Animator s_playerAnimator;
+        private static RigidbodyConstraints s_originalConstraints;
 
-        public static void RegisterRPCs()
-        {
-            if (ZRoutedRpc.instance == null)
-            {
-                Jotunn.Logger.LogWarning("[WBTI] TimeStopHelper: ZRoutedRpc.instance is null, cannot register RPCs.");
-                return;
-            }
-
-            ZRoutedRpc.instance.Register<ZPackage>(RPC_Name, RPC_OnTimeStop);
-        }
+        public static bool IsPlayerFrozen => s_playerFrozen;
 
         public static void Apply(TimeStopData data, CustomRewardEvent rewardEvent)
         {
             if (data == null || Player.m_localPlayer == null)
                 return;
 
-            var pkg = new ZPackage();
-            pkg.Write(data.duration);
-            pkg.Write(data.freezePlayer);
+            GameObject prefab = WizshBoneTwitchIntegration.Instance.prefabs.TimeStopZone;
 
-            var zdoids = new List<ZDOID>();
-
-            if (data.freezeEnemies)
+            if (prefab == null)
             {
-                Vector3 playerPos = Player.m_localPlayer.transform.position;
-
-                foreach (Character character in Character.GetAllCharacters())
-                {
-                    if (character.IsPlayer())
-                        continue;
-
-                    if (data.radius > 0f && Vector3.Distance(playerPos, character.transform.position) > data.radius)
-                        continue;
-
-                    ZNetView netView = character.GetComponent<ZNetView>();
-                    if (netView == null || !netView.IsValid())
-                        continue;
-
-                    zdoids.Add(netView.GetZDO().m_uid);
-                }
+                Jotunn.Logger.LogError("Could not find TimeStopZone prefab to spawn");
+                return;
             }
 
-            pkg.Write(zdoids.Count);
-            foreach (ZDOID id in zdoids)
-                pkg.Write(id);
+            GameObject zone = Object.Instantiate(prefab, Player.m_localPlayer.transform.position, Quaternion.identity);
 
-            ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.Everybody, RPC_Name, pkg);
+            TwitchPersistentDestruction persistentDestruction = zone.GetComponent<TwitchPersistentDestruction>();
+            persistentDestruction.SetStarted((int)data.duration);
+
+            TwitchTimeStopZone zoneScript = zone.GetComponent<TwitchTimeStopZone>();
+            zoneScript.Initialize(data.radius, data.freezeEnemies, data.freezePlayer, data.duration);
 
             if (!string.IsNullOrEmpty(data.announceMessage))
                 Player.m_localPlayer.Message(
@@ -66,35 +42,56 @@ namespace WizshBoneTwitchIntegration.Helpers
                     MessageHelper.ParseVariables("{{user}}", rewardEvent.RedeemerName, data.announceMessage));
         }
 
-        public static void RPC_OnTimeStop(long sender, ZPackage pkg)
+        public static void FreezePlayer()
         {
             try
             {
-                float duration    = pkg.ReadSingle();
-                bool freezePlayer = pkg.ReadBool();
-                int count         = pkg.ReadInt();
+                if (Player.m_localPlayer == null)
+                    return;
 
-                for (int i = 0; i < count; i++)
+                s_playerRb       = Player.m_localPlayer.GetComponent<Rigidbody>();
+                s_playerAnimator = Player.m_localPlayer.GetComponentInChildren<Animator>();
+
+                if (s_playerRb != null)
                 {
-                    ZDOID zdoid = pkg.ReadZDOID();
-
-                    GameObject go = ZNetScene.instance.FindInstance(zdoid);
-                    if (go == null)
-                        continue;
-
-                    if (go.GetComponent<TwitchFreezeData>() != null)
-                        continue;
-
-                    TwitchFreezeData freeze = go.AddComponent<TwitchFreezeData>();
-                    freeze.Initialize(duration);
+                    s_originalConstraints       = s_playerRb.constraints;
+                    s_playerRb.velocity         = Vector3.zero;
+                    s_playerRb.angularVelocity  = Vector3.zero;
+                    s_playerRb.constraints      = RigidbodyConstraints.FreezeAll;
                 }
 
-                if (freezePlayer)
-                    TimeStopPatchesWBTI.FreezePlayer(duration);
+                // Disabling the Animator (rather than just zeroing speed) is required: with speed = 0
+                // the state machine still evaluates zero-duration transitions on Update(), snapping
+                // the player to their Idle state pose instead of holding the current frame.
+                if (s_playerAnimator != null)
+                    s_playerAnimator.enabled = false;
+
+                s_playerFrozen = true;
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("TimeStopHelper.RPC_OnTimeStop failed: " + e);
+                Jotunn.Logger.LogError("TimeStopHelper.FreezePlayer failed: " + e);
+            }
+        }
+
+        public static void UnfreezePlayer()
+        {
+            try
+            {
+                s_playerFrozen = false;
+
+                if (s_playerRb != null)
+                    s_playerRb.constraints = s_originalConstraints;
+
+                if (s_playerAnimator != null)
+                    s_playerAnimator.enabled = true;
+
+                s_playerRb       = null;
+                s_playerAnimator = null;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TimeStopHelper.UnfreezePlayer failed: " + e);
             }
         }
     }

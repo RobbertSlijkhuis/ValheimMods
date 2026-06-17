@@ -16,5 +16,6 @@ namespace WizshBoneTwitchIntegration.Models
         public GameObject ChestGold;
 
         public GameObject EnvZone;
+        public GameObject TimeStopZone;
     }
 }
