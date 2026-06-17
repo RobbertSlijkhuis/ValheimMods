@@ -28,7 +28,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return;
             }
 
-            GameObject zone = Object.Instantiate(prefab, Player.m_localPlayer.transform.position, Quaternion.identity);
+            GameObject zone = UnityEngine.Object.Instantiate(prefab, Player.m_localPlayer.transform.position, Quaternion.identity);
 
             TwitchPersistentDestruction persistentDestruction = zone.GetComponent<TwitchPersistentDestruction>();
             persistentDestruction.SetStarted((int)data.duration);

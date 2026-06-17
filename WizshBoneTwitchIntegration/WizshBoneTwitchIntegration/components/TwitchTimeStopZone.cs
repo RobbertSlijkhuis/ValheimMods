@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Helpers;
@@ -11,7 +10,6 @@ namespace WizshBoneTwitchIntegration.Components
         private bool m_freezeEnemies;
         private bool m_freezePlayer;
         private bool m_localPlayerRegistered;
-        private ParticleSystem m_particles;
         private ZNetView m_netView;
         private readonly HashSet<ZDOID> m_registeredCreatures = new HashSet<ZDOID>();
         private readonly HashSet<Rigidbody> m_registeredRigidbodies = new HashSet<Rigidbody>();
@@ -86,31 +84,11 @@ namespace WizshBoneTwitchIntegration.Components
             if (sphereCollider != null)
                 sphereCollider.radius = radius;
 
-            m_particles = GetComponentInChildren<ParticleSystem>();
-            if (m_particles != null)
-            {
-                ParticleSystem.ShapeModule shape = m_particles.shape;
+            ParticleSystem particles = GetComponentInChildren<ParticleSystem>();
+            if (particles != null)
+                particles.gameObject.SetActive(false);
 
-                // The Shape module has its own Scale (independent of the GameObject's Transform)
-                // that multiplies radius - divide it out so "radius" here always means world meters
-                // regardless of whatever scale the shape happens to be authored with.
-                float shapeScale = Mathf.Max(shape.scale.x, 0.0001f);
-                shape.radius = radius / shapeScale;
-
-                // Stop emitting early enough that the longest-lived particles can fully die out
-                // before TwitchPersistentDestruction destroys the zone, instead of popping out instantly.
-                float lifetime = m_particles.main.startLifetime.constantMax;
-                float stopDelay = Mathf.Max(duration - lifetime, 0f);
-                StartCoroutine(StopEmittingAfterDelay(stopDelay));
-            }
-        }
-
-        private IEnumerator StopEmittingAfterDelay(float delay)
-        {
-            yield return new WaitForSeconds(delay);
-
-            if (m_particles != null)
-                m_particles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            ShieldDomeHelper.ShowDome(this, transform.position, radius, ShieldColors.TimeStop);
         }
 
         public void OnTriggerEnter(Collider collider)
@@ -262,6 +240,8 @@ namespace WizshBoneTwitchIntegration.Components
                 }
 
                 UnregisterLocalPlayer();
+
+                ShieldDomeHelper.HideDome(this);
             }
             catch (Exception e)
             {

@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Components
 {
@@ -113,7 +114,21 @@ namespace WizshBoneTwitchIntegration.Components
             colliderComp.radius = value;
             forceFieldComp.endRange = value;
 
+            ShieldDomeHelper.ShowDome(this, parentTrans.position, value, ShieldColors.Ward);
+
             m_netView.GetZDO().Set(radiusHash, value);
+        }
+
+        public void OnDestroy()
+        {
+            try
+            {
+                ShieldDomeHelper.HideDome(this);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchSafeZoneControls.OnDestroy failed: " + e);
+            }
         }
 
         private bool IsDigitsOnly(string value)
