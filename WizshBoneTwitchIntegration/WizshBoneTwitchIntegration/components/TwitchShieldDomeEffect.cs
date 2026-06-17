@@ -18,6 +18,8 @@ namespace WizshBoneTwitchIntegration.Components
             public float radius;
             public Color color;
             public float lastHitTime;
+            public float breakStartTime;
+            public float breakStartRadius;
         }
 
         private struct ShieldDomeData
@@ -51,6 +53,9 @@ namespace WizshBoneTwitchIntegration.Components
         // whole surface) - scale it with each dome's own radius, relative to vanilla's rough
         // midpoint, so the pattern keeps a consistent visual density regardless of absolute size.
         private const float ReferenceRadius = 20f;
+
+        // How long a dome takes to shrink to nothing after BreakDome() is called.
+        private const float BreakDuration = 0.6f;
 
         private static readonly int s_topLeft = Shader.PropertyToID("_TopLeft");
         private static readonly int s_topRight = Shader.PropertyToID("_TopRight");
@@ -126,7 +131,7 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void SetDome(object key, Vector3 position, float radius, Color color, float lastHitTime = -1000f)
         {
-            m_domes[key] = new DomeEntry { position = position, radius = radius, color = color, lastHitTime = lastHitTime };
+            m_domes[key] = new DomeEntry { position = position, radius = radius, color = color, lastHitTime = lastHitTime, breakStartTime = -1f };
             enabled = true;
         }
 
@@ -136,13 +141,29 @@ namespace WizshBoneTwitchIntegration.Components
                 enabled = m_domes.Count > 0;
         }
 
+        // Starts a shrink-and-flash break animation instead of removing the dome immediately;
+        // the entry is actually removed once the animation finishes in OnRenderImage.
+        public void BreakDome(object key)
+        {
+            if (!m_domes.TryGetValue(key, out DomeEntry entry))
+                return;
+
+            entry.breakStartTime = Time.time;
+            entry.breakStartRadius = entry.radius;
+            entry.lastHitTime = Time.time;
+            m_domes[key] = entry;
+        }
+
         private void OnRenderImage(RenderTexture src, RenderTexture dest)
         {
             try
             {
+                AdvanceBreakingDomes();
+
                 if (m_domes.Count == 0)
                 {
                     Graphics.Blit(src, dest);
+                    enabled = false;
                     return;
                 }
 
@@ -201,6 +222,47 @@ namespace WizshBoneTwitchIntegration.Components
             }
         }
 
+        // Shrinks breaking domes towards radius 0 and removes them once their break
+        // animation finishes. No-op for domes that aren't breaking (breakStartTime < 0).
+        private void AdvanceBreakingDomes()
+        {
+            List<object> finished = null;
+            List<KeyValuePair<object, DomeEntry>> updates = null;
+
+            // Only read m_domes while enumerating it - even an overwrite of an existing key's
+            // value bumps Dictionary's modification version on .NET Framework/Mono, which throws
+            // "Collection was modified" here and gets swallowed by OnRenderImage's catch-all,
+            // silently skipping rendering (every dome, not just the breaking one) for that frame.
+            foreach (KeyValuePair<object, DomeEntry> pair in m_domes)
+            {
+                DomeEntry entry = pair.Value;
+                if (entry.breakStartTime < 0f)
+                    continue;
+
+                float elapsed = Time.time - entry.breakStartTime;
+                if (elapsed >= BreakDuration)
+                {
+                    (finished ?? (finished = new List<object>())).Add(pair.Key);
+                    continue;
+                }
+
+                entry.radius = Mathf.Lerp(entry.breakStartRadius, 0f, elapsed / BreakDuration);
+                (updates ?? (updates = new List<KeyValuePair<object, DomeEntry>>())).Add(new KeyValuePair<object, DomeEntry>(pair.Key, entry));
+            }
+
+            if (updates != null)
+            {
+                foreach (KeyValuePair<object, DomeEntry> update in updates)
+                    m_domes[update.Key] = update.Value;
+            }
+
+            if (finished != null)
+            {
+                foreach (object key in finished)
+                    m_domes.Remove(key);
+            }
+        }
+
         private void UploadBuffer(DomeEntry[] group)
         {
             if (m_buffer == null || m_bufferCount != group.Length)
@@ -217,8 +279,9 @@ namespace WizshBoneTwitchIntegration.Components
                 {
                     position = group[i].position,
                     radius = group[i].radius,
-                    // Irrelevant to our solid-color 1x1 gradient texture lookup; ruled out as the
-                    // cause of the missing distortion (vanilla shields swirl at full fuel too).
+                    // Confirmed inert in this raymarch reimplementation: doesn't affect
+                    // distortion/swirl, and (tested) doesn't drive alpha/transparency either -
+                    // the compiled shader appears to never read it for compositing.
                     fuelFactor = 1f,
                     lastHitTime = group[i].lastHitTime
                 };

@@ -24,6 +24,12 @@ namespace WizshBoneTwitchIntegration.Helpers
             effect?.RemoveDome(key);
         }
 
+        public static void BreakDome(object key)
+        {
+            TwitchShieldDomeEffect effect = GetOrCreateEffect();
+            effect?.BreakDome(key);
+        }
+
         private static TwitchShieldDomeEffect GetOrCreateEffect()
         {
             try

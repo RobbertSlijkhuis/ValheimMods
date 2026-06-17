@@ -241,7 +241,7 @@ namespace WizshBoneTwitchIntegration.Components
 
                 UnregisterLocalPlayer();
 
-                ShieldDomeHelper.HideDome(this);
+                ShieldDomeHelper.BreakDome(this);
             }
             catch (Exception e)
             {
