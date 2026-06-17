@@ -33,6 +33,12 @@ WizshBoneTwitchIntegration/
 3. Helpers apply the in-game effect (spawn creature, modify terrain, deal damage, etc.).
 4. Adding a new redeem type requires both a handler in C# **and** a corresponding entry in the YAML schema (`resources/`).
 
+## Where logic belongs
+
+- `harmony/` classes should contain **only** Harmony patch methods (the `[HarmonyPrefix]`/`[HarmonyPostfix]`/`[HarmonyPatch]` methods themselves). No state, no standalone effect logic.
+- State and logic that a patch depends on (e.g. "is the player currently frozen") belongs in the corresponding `helpers/` class, exposed via a small public property/method the patch reads or calls.
+- Most game-effect logic belongs in `helpers/`; use a `components/` `MonoBehaviour` when the logic needs to live on a GameObject (e.g. Unity lifecycle callbacks, per-instance state on a spawned prefab).
+
 ## Debugging
 
 Use `Jotunn.Logger` (or BepInEx `Logger`) for debug output — prefer `LogWarning` so messages stand out in the BepInEx console/log without being noise-level info. Do not use `Debug.Log` directly.
