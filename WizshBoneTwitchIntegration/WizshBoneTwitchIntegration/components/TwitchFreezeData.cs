@@ -133,8 +133,11 @@ namespace WizshBoneTwitchIntegration.Components
                 m_rigidbody.constraints     = RigidbodyConstraints.FreezeAll;
             }
 
+            // Disabling the Animator (rather than just zeroing speed) is required: with speed = 0
+            // the state machine still evaluates zero-duration transitions on Update(), snapping
+            // creatures/player to their Idle state pose instead of holding the current frame.
             if (m_animator != null)
-                m_animator.speed = 0f;
+                m_animator.enabled = false;
         }
 
         private void Unfreeze()
@@ -148,7 +151,7 @@ namespace WizshBoneTwitchIntegration.Components
                     m_rigidbody.constraints = m_originalConstraints;
 
                 if (m_animator != null)
-                    m_animator.speed = 1f;
+                    m_animator.enabled = true;
 
                 ClearZDO();
                 Destroy(this);

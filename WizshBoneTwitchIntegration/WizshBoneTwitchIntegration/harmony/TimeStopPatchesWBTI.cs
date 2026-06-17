@@ -56,8 +56,11 @@ namespace WizshBoneTwitchIntegration.Harmony
                     s_playerRb.constraints      = RigidbodyConstraints.FreezeAll;
                 }
 
+                // Disabling the Animator (rather than just zeroing speed) is required: with speed = 0
+                // the state machine still evaluates zero-duration transitions on Update(), snapping
+                // the player to their Idle state pose instead of holding the current frame.
                 if (s_playerAnimator != null)
-                    s_playerAnimator.speed = 0f;
+                    s_playerAnimator.enabled = false;
 
                 s_playerFrozen = true;
 
@@ -85,7 +88,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                     s_playerRb.constraints = s_originalConstraints;
 
                 if (s_playerAnimator != null)
-                    s_playerAnimator.speed = 1f;
+                    s_playerAnimator.enabled = true;
 
                 s_playerRb       = null;
                 s_playerAnimator = null;
