@@ -9,6 +9,7 @@ namespace WizshBoneTwitchIntegration.Helpers
         private const int MaxPositionTries = 5;
         private const float GroundRaycastUp = 2f;
         private const float GroundRaycastDistance = 8f;
+        private const float CeilingRaycastDistance = 15f;
         private const float ObstructionCheckHeight = 1f;
         private const float ObstructionCheckRadius = 0.5f;
         private static readonly int GroundMask = LayerMask.GetMask("Default", "static_solid", "terrain", "Default_small");
@@ -124,6 +125,10 @@ namespace WizshBoneTwitchIntegration.Helpers
                     return false;
 
                 result.y = hit.point.y;
+
+                // Reject outdoor ledges near dungeon entrances: a valid indoor spot must have a ceiling overhead.
+                if (!Physics.Raycast(new Vector3(result.x, result.y + 0.1f, result.z), Vector3.up, CeilingRaycastDistance, GroundMask))
+                    return false;
             }
             else
             {
