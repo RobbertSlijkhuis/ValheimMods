@@ -175,9 +175,6 @@ namespace WizshBoneTwitchIntegration
 
                 prefab.AddComponent<TwitchBasePersistentData>();
 
-                if (prefab.name == "Fader_WallOfFire_AOE")
-                    Jotunn.Logger.LogWarning("Fader_WallOfFire_AOE prefab found!");
-
                 if (humanoid != null && monsterAI != null)
                 {
                     prefab.AddComponent<TwitchCreaturePersistentData>();

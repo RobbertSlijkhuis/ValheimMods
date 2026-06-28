@@ -324,6 +324,26 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             if (auth.m_loggedIn)
             {
+                if (customRewards.HasUnresolvedRedeems())
+                {
+                    m_confirmDialog.Show(
+                        title:       "Logout",
+                        description: "Auto-resolve is off. Pending redeems won't be refunded automatically. Log out anyway?",
+                        onConfirm:   () =>
+                        {
+                            auth.Logout();
+                            UpdateGUI();
+                        },
+                        confirmText: "Log Out",
+                        cancelText:  "Open History",
+                        onCancel:    () =>
+                        {
+                            OpenRedeemHistory();
+                        }
+                    );
+                    return;
+                }
+
                 auth.Logout();
                 UpdateGUI();
             }
