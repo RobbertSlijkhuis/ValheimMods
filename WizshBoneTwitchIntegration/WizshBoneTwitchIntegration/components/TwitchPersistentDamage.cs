@@ -1,4 +1,6 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
+using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
@@ -7,10 +9,40 @@ namespace WizshBoneTwitchIntegration.Components
 {
     internal class TwitchPersistentDamage : MonoBehaviour
     {
-        public ZNetView m_netView;
-        public DamageData m_damage;
-        public string m_damageString;
-        public string m_damageHash = "PersistentDamage_WBTI";
+        private ZNetView m_netView;
+        private string m_redeemerName;
+        private string m_redeemTitle;
+
+        public bool m_damageShips = false;
+        public bool m_damageStructures = true;
+        public bool m_damageBosses = false;
+
+        private readonly int damageDataHash = "PersistentDamage_WBTI".GetStableHashCode();
+
+        private struct HazardHit { public Vector3 pos; public bool protectBosses; public float time; }
+        private static readonly List<HazardHit> s_recentHits = new List<HazardHit>();
+
+        public void RegisterHitPosition(Vector3 pos)
+        {
+            float now = Time.time;
+            for (int i = s_recentHits.Count - 1; i >= 0; i--)
+            {
+                if (now - s_recentHits[i].time > 60f)
+                    s_recentHits.RemoveAt(i);
+            }
+            s_recentHits.Add(new HazardHit { pos = pos, protectBosses = !m_damageBosses, time = now });
+        }
+
+        public static bool IsNearRecentHit(Vector3 pos, float radius = 5f)
+        {
+            float now = Time.time;
+            foreach (HazardHit hit in s_recentHits)
+            {
+                if (now - hit.time <= 60f && hit.protectBosses && Vector3.Distance(hit.pos, pos) <= radius)
+                    return true;
+            }
+            return false;
+        }
 
         public void Awake()
         {
@@ -21,13 +53,32 @@ namespace WizshBoneTwitchIntegration.Components
                 if (m_netView == null || !m_netView.IsValid())
                     return;
 
-                m_damageString = m_netView.GetZDO().GetString(m_damageHash, "");
+                string damageDataString = m_netView.GetZDO().GetString(damageDataHash, "");
 
-                if (m_damageString == "")
+                if (damageDataString == "")
                     return;
 
-                m_damage = StringToDamageData(m_damageString);
-                ApplyDamageToAOE(m_damage);
+                string[] data = damageDataString.Split('|');
+                m_redeemerName = data[0];
+                m_redeemTitle = data[1];
+
+                RedeemData redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
+
+                if (redeem == null)
+                {
+                    Jotunn.Logger.LogError($"Could not find redeem '{m_redeemTitle}' in TwitchPersistentDamage, skipping setup.");
+                    return;
+                }
+
+                DamageData damageData = redeem.GetDamageData();
+
+                if (damageData == null)
+                {
+                    Jotunn.Logger.LogError($"Redeem '{m_redeemTitle}' has no DamageData, skipping setup.");
+                    return;
+                }
+
+                ApplyDamageData(damageData);
             }
             catch (Exception e)
             {
@@ -35,60 +86,59 @@ namespace WizshBoneTwitchIntegration.Components
             }
         }
 
-        public void ApplyDamageToAOE(DamageData damageData)
+        public void SetData(CustomRewardEvent customRewardEvent, DamageData damageData)
         {
-            Aoe aoe = gameObject.GetComponentInChildren<Aoe>(true);
+            m_redeemerName = customRewardEvent.RedeemerName;
+            m_redeemTitle = customRewardEvent.CustomRewardTitle;
 
-            if (aoe == null)
-            {
-                Jotunn.Logger.LogError("Could not find AOE to apply persistent damage to!");
+            m_netView.GetZDO().Set(damageDataHash, $"{m_redeemerName}|{m_redeemTitle}");
+
+            TwitchBasePersistentData baseData = gameObject.GetComponent<TwitchBasePersistentData>();
+            baseData?.SetFlag(PersistentComponentFlags.HazardDamage, true);
+
+            ApplyDamageData(damageData);
+        }
+
+        public void PropagateToFire(Fire fire)
+        {
+            if (fire.gameObject.GetComponent<TwitchPersistentDamage>() != null)
                 return;
-            }
-            
-            aoe.m_damage = DamageHelper.ConvertToDamageTypes(damageData);
+
+            ZNetView fireNetView = fire.gameObject.GetComponent<ZNetView>();
+
+            if (fireNetView == null || !fireNetView.IsValid())
+                return;
+
+            fireNetView.GetZDO().Set(damageDataHash, $"{m_redeemerName}|{m_redeemTitle}");
+
+            TwitchBasePersistentData baseData = fire.gameObject.GetComponent<TwitchBasePersistentData>();
+            baseData?.SetFlag(PersistentComponentFlags.HazardDamage, true);
+
+            fire.gameObject.AddComponent<TwitchPersistentDamage>();
         }
 
-        public void SetData(DamageData damageData)
+        public void ApplyDamageData(DamageData damageData)
         {
-            string damageDataString = DamageDataToString(damageData);
-            m_netView.GetZDO().Set(m_damageHash, damageDataString);
-            m_damageString = damageDataString;
+            m_damageShips = damageData.damageShips;
+            m_damageStructures = damageData.damageStructures;
+            m_damageBosses = damageData.damageBosses;
 
-            ApplyDamageToAOE(damageData);
-        }
+            HitData.DamageTypes damages = damageData.basedOnMaxHealthAndArmor
+                ? DamageHelper.CalculateDamageBasedOnMaxHealthAndArmor(damageData)
+                : DamageHelper.ConvertToDamageTypes(damageData);
 
-        public void SetData(HitData.DamageTypes damages)
-        {
-            DamageData damageData = new DamageData();
-            DamageHelper.SetFromDamageTypes(damageData, damages);
-            SetData(damageData);
-        }
+            foreach (Aoe aoe in gameObject.GetComponentsInChildren<Aoe>(true))
+                aoe.m_damage = damages;
 
-        public string DamageDataToString(DamageData damageData)
-        {
-            return $"{damageData.blunt}|{damageData.chop}|{damageData.damage}|{damageData.fire}|{damageData.frost}|{damageData.lightning}|{damageData.pickaxe}|{damageData.pierce}|{damageData.poison}|{damageData.slash}|{damageData.spirit}|{damageData.basedOnMaxHealthAndArmor}|{damageData.maxHealthPercentage}|{damageData.armorPercentage}";
-        }
+            ImpactEffect impactEffect = gameObject.GetComponentInChildren<ImpactEffect>(true);
 
-        public DamageData StringToDamageData(string value)
-        {
-            string[] data = value.Split('|');
-            DamageData damageData = new DamageData();
-            damageData.blunt = float.Parse(data[0]);
-            damageData.chop = float.Parse(data[1]);
-            damageData.damage = float.Parse(data[2]);
-            damageData.fire = float.Parse(data[3]);
-            damageData.frost = float.Parse(data[4]);
-            damageData.lightning = float.Parse(data[5]);
-            damageData.pickaxe = float.Parse(data[6]);
-            damageData.pierce = float.Parse(data[7]);
-            damageData.poison = float.Parse(data[8]);
-            damageData.slash = float.Parse(data[9]);
-            damageData.spirit = float.Parse(data[10]);
-            damageData.basedOnMaxHealthAndArmor = bool.Parse(data[11]);
-            damageData.maxHealthPercentage = float.Parse(data[12]);
-            damageData.armorPercentage = float.Parse(data[13]);
+            if (impactEffect != null)
+                impactEffect.m_damages = damages;
 
-            return damageData;
+            Projectile projectile = gameObject.GetComponent<Projectile>();
+
+            if (projectile != null)
+                projectile.m_damage = damages;
         }
     }
 }

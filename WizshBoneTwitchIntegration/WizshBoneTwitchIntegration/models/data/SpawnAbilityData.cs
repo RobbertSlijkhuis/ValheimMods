@@ -10,8 +10,6 @@ namespace WizshBoneTwitchIntegration.Models
         public string announceMessage;
         public bool breakOnDestroy = false;
         public DamageData damage;
-        public bool damageShips = false;
-        public bool damageStructures = true;
         public float? dropVelocity = 0f;
         public int duration = 0;
         public float doorInterval = 0f;

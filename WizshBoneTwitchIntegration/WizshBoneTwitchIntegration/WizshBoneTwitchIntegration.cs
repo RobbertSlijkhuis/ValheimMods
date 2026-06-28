@@ -175,6 +175,9 @@ namespace WizshBoneTwitchIntegration
 
                 prefab.AddComponent<TwitchBasePersistentData>();
 
+                if (prefab.name == "Fader_WallOfFire_AOE")
+                    Jotunn.Logger.LogWarning("Fader_WallOfFire_AOE prefab found!");
+
                 if (humanoid != null && monsterAI != null)
                 {
                     prefab.AddComponent<TwitchCreaturePersistentData>();
@@ -228,10 +231,6 @@ namespace WizshBoneTwitchIntegration
                     prefab.AddComponent<TwitchPersistentDestruction>();
                 }
 
-                if (prefab.name == "fuling_trap" || prefab.name == "piece_trap_troll")
-                {
-                    prefab.gameObject.AddComponent<TwitchPersistentDamage>();
-                }
             }
 
             string[] traders = new string[3] { "Vendor_BlackForest", "Hildir_camp", "BogWitch_Camp" };

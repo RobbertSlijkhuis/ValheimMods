@@ -153,6 +153,7 @@ namespace WizshBoneTwitchIntegration.Components
             }
 
             humanoid.SetLevel(creatureData.level);
+            humanoid.m_boss               = creatureData.isBoss;
             humanoid.m_bossEvent          = creatureData.bossEvent;
             humanoid.m_defeatSetGlobalKey = "";
 

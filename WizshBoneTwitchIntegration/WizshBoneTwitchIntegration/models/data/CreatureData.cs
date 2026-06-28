@@ -19,6 +19,7 @@ namespace WizshBoneTwitchIntegration.Models
         public string group = null;
         public float healthScale = 0;
         public int index;
+        public bool isBoss = false;
         public bool isHallucination = false;
         public int level = 1;
         public float maxHealth = 0;

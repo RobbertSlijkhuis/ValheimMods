@@ -191,6 +191,20 @@ namespace WizshBoneTwitchIntegration.Models
             return a.Equals(b);
         }
 
+        /// <summary>
+        /// Returns the DamageData relevant to this redeem's type, or null if its type has none.
+        /// </summary>
+        public DamageData GetDamageData()
+        {
+            if (type == RedeemType.SpawnAbility)
+                return spawnAbilityData?.damage;
+
+            if (type == RedeemType.Detonate)
+                return detonateData?.damageData;
+
+            return null;
+        }
+
         public RedeemData() { }
     }
 }

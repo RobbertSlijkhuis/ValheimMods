@@ -247,14 +247,6 @@ namespace WizshBoneTwitchIntegration.Extensions
                 {
                     Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
 
-                    if (spawnAbilityData.damage != null)
-                    {
-                        if (spawnAbilityData.damage.basedOnMaxHealthAndArmor)
-                            impactEffect.m_damages = DamageHelper.CalculateDamageBasedOnMaxHealthAndArmor(spawnAbilityData.damage);
-                        else
-                            impactEffect.m_damages = DamageHelper.ConvertToDamageTypes(spawnAbilityData.damage);
-                    }
-
                     if (spawnAbilityData.dropVelocity != 0f)
                     {
                         if (rigidbody != null)
@@ -262,9 +254,6 @@ namespace WizshBoneTwitchIntegration.Extensions
                         else
                             Jotunn.Logger.LogWarning("Rigidbody missing, cannot apply dropVelocity.");
                     }
-
-                    TwitchAllowDamage preventDamage = impactEffect.gameObject.AddComponent<TwitchAllowDamage>();
-                    preventDamage.Init(spawnAbilityData.damageShips, spawnAbilityData.damageStructures);
 
                     if (spawnAbilityData.duration > 0)
                     {
@@ -301,30 +290,12 @@ namespace WizshBoneTwitchIntegration.Extensions
 
                 if (monsterAI == null && aoe != null)
                 {
-                    if (spawnAbilityData.damage != null)
-                    {
-                        HitData.DamageTypes damages = spawnAbilityData.damage.basedOnMaxHealthAndArmor
-                            ? DamageHelper.CalculateDamageBasedOnMaxHealthAndArmor(spawnAbilityData.damage)
-                            : DamageHelper.ConvertToDamageTypes(spawnAbilityData.damage);
-                        aoe.m_damage = damages;
-
-                        TwitchPersistentDamage persistentDamage = gameObject.GetComponent<TwitchPersistentDamage>();
-
-                        if (persistentDamage != null)
-                            persistentDamage.SetData(damages);
-                    }
-
-                    TwitchAllowDamage preventDamage = aoe.gameObject.AddComponent<TwitchAllowDamage>();
-                    preventDamage.Init(spawnAbilityData.damageShips, spawnAbilityData.damageStructures);
-
                     if (aoeRod != null)
                     {
                         TimedDestruction timedDestruction = aoeRod.gameObject.AddComponent<TimedDestruction>();
                         timedDestruction.m_timeout = 0.5f;
                         timedDestruction.Trigger();
 
-                        TwitchAllowDamage preventDamageRod = aoeRod.gameObject.AddComponent<TwitchAllowDamage>();
-                        preventDamageRod.Init(spawnAbilityData.damageShips, spawnAbilityData.damageStructures);
                         aoeRod.m_useTriggers = true;
                     }
                 }
@@ -349,16 +320,11 @@ namespace WizshBoneTwitchIntegration.Extensions
 
                 if ((bool)component2)
                 {
-                    if (spawnAbilityData.damage != null)
-                    {
-                        if (spawnAbilityData.damage.basedOnMaxHealthAndArmor)
-                            component2.m_damage = DamageHelper.CalculateDamageBasedOnMaxHealthAndArmor(spawnAbilityData.damage);
-                        else
-                            component2.m_damage = DamageHelper.ConvertToDamageTypes(spawnAbilityData.damage);
-                    }
-
                     spawnAbility.SetupProjectile(component2, targetPosition);
                 }
+
+                if (spawnAbilityData.damage != null)
+                    gameObject.AddComponent<TwitchPersistentDamage>().SetData(customRewardEvent, spawnAbilityData.damage);
 
                 if (spawnAbility.m_randomYRotation)
                 {

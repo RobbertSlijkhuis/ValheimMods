@@ -52,6 +52,15 @@ namespace WizshBoneTwitchIntegration.Models
         [EditorTooltip("Percentage of the player's max health to use for damage calculation. Only if 'Based on max health and armor' is enabled.")]
         public float maxHealthPercentage = 0.45f;
 
+        [EditorLabel("Damage ships")]
+        public bool damageShips = false;
+
+        [EditorLabel("Damage structures")]
+        public bool damageStructures = true;
+
+        [EditorLabel("Damage bosses")]
+        public bool damageBosses = false;
+
         public DamageData() { }
     }
 }

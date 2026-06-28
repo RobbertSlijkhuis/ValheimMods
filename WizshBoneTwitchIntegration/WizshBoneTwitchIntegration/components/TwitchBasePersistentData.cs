@@ -6,10 +6,11 @@ namespace WizshBoneTwitchIntegration.Components
     [Flags]
     internal enum PersistentComponentFlags
     {
-        None       = 0,
-        Freeze     = 1 << 0,
-        ToggleDoor = 1 << 1,
-        Piece      = 1 << 2,
+        None         = 0,
+        Freeze       = 1 << 0,
+        ToggleDoor   = 1 << 1,
+        Piece        = 1 << 2,
+        HazardDamage = 1 << 3,
     }
 
     internal class TwitchBasePersistentData : MonoBehaviour
@@ -39,6 +40,9 @@ namespace WizshBoneTwitchIntegration.Components
 
                 if (flags.HasFlag(PersistentComponentFlags.Piece))
                     gameObject.AddComponent<TwitchPiecePersistentData>();
+
+                if (flags.HasFlag(PersistentComponentFlags.HazardDamage))
+                    gameObject.AddComponent<TwitchPersistentDamage>();
             }
             catch (Exception e)
             {

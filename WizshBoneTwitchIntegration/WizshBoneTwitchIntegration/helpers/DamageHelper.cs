@@ -1,9 +1,27 @@
-﻿using WizshBoneTwitchIntegration.Models;
+﻿using UnityEngine;
+using WizshBoneTwitchIntegration.Components;
+using WizshBoneTwitchIntegration.Models;
 
 namespace WizshBoneTwitchIntegration.Helpers
 {
     internal class DamageHelper
     {
+        /// <summary>
+        /// Whether a hit from the given source should be blocked because the target is a boss.
+        /// </summary>
+        public static bool IsProtectedBossHit(GameObject source, Character target)
+        {
+            if (source == null || target == null || !target.IsBoss())
+                return false;
+
+            TwitchPersistentDamage persistentDamage = source.GetComponentInParent<TwitchPersistentDamage>();
+
+            if (persistentDamage != null)
+                return !persistentDamage.m_damageBosses;
+
+            return TwitchPersistentDamage.IsNearRecentHit(source.transform.position);
+        }
+
         /// <summary>
         /// Convert DamageData to HitData.DamageTypes
         /// </summary>

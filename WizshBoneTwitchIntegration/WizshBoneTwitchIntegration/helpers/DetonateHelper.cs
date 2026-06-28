@@ -87,16 +87,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 UnityEngine.Object.Instantiate(explosionSFX, prefab.transform.position, prefab.transform.rotation);
 
                 if (detonateData.damageData != null)
-                {
-                    Aoe aoe = explosionInstance.GetComponentInChildren<Aoe>(true);
-
-                    if (aoe != null)
-                    {
-                        aoe.m_damage = detonateData.damageData.basedOnMaxHealthAndArmor
-                            ? DamageHelper.CalculateDamageBasedOnMaxHealthAndArmor(detonateData.damageData)
-                            : DamageHelper.ConvertToDamageTypes(detonateData.damageData);
-                    }
-                }
+                    explosionInstance.AddComponent<TwitchPersistentDamage>().SetData(customRewardEvent, detonateData.damageData);
 
                 ZNetViewHelper.Destroy(prefab);
 
