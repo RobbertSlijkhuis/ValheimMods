@@ -74,6 +74,10 @@ namespace WizshBoneTwitchIntegration.Helpers
         public static HitData.DamageTypes CalculateDamageBasedOnMaxHealthAndArmor(DamageData damageData)
         {
             HitData.DamageTypes damages = ConvertToDamageTypes(damageData);
+
+            if (Player.m_localPlayer == null)
+                return damages;
+
             float armor = Player.m_localPlayer.GetBodyArmor();
             float maxHealth = Player.m_localPlayer.GetMaxHealth();
             float maxDamage = maxHealth * damageData.maxHealthPercentage;

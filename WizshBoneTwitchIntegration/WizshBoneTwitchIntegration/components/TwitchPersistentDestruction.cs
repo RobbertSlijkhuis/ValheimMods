@@ -84,7 +84,7 @@ namespace WizshBoneTwitchIntegration.Components
 
         private void StartDestructionTimer(float timeout)
         {
-            if (m_breakOnDestroy && gameObject.GetComponent<WearNTear>() != null)
+            if (gameObject.GetComponent<WearNTear>() != null)
             {
                 m_breakRoutine = StartCoroutine(BreakAfterDelay(timeout));
                 return;

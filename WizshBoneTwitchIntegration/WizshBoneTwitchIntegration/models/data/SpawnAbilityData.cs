@@ -13,6 +13,7 @@ namespace WizshBoneTwitchIntegration.Models
         public float? dropVelocity = 0f;
         public int duration = 0;
         public float doorInterval = 0f;
+        public float windmillRotationSpeed = 0f;
         public float? groundOffset;
         public float? initialSpawnDelay;
         public bool isBiomeList = false;
@@ -30,6 +31,7 @@ namespace WizshBoneTwitchIntegration.Models
         public bool? randomYRotation;
         public bool rescanForSafezones = true;
         public bool snapToterrain = false;
+        public int batchSize = 1;
         public float? spawnDelay;
         public float? spawnRadius;
         public List<string> spawns = new List<string>();

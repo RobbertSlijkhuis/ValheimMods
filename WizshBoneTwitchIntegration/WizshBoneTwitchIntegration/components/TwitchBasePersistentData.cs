@@ -10,7 +10,8 @@ namespace WizshBoneTwitchIntegration.Components
         Freeze       = 1 << 0,
         ToggleDoor   = 1 << 1,
         Piece        = 1 << 2,
-        HazardDamage = 1 << 3,
+        HazardDamage      = 1 << 3,
+        WindmillOverride  = 1 << 4,
     }
 
     internal class TwitchBasePersistentData : MonoBehaviour
@@ -43,6 +44,9 @@ namespace WizshBoneTwitchIntegration.Components
 
                 if (flags.HasFlag(PersistentComponentFlags.HazardDamage))
                     gameObject.AddComponent<TwitchPersistentDamage>();
+
+                if (flags.HasFlag(PersistentComponentFlags.WindmillOverride))
+                    gameObject.AddComponent<TwitchWindmillPersistentData>();
             }
             catch (Exception e)
             {

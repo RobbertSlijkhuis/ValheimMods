@@ -300,8 +300,19 @@
                 },
                 "type": "object"
               },
+              "doorInterval": {
+                "description": "Interval in seconds at which spawned doors toggle open/closed (0 = disabled)",
+                "minimum": 0,
+                "type": "number"
+              },
               "dropVelocity": {
                 "description": "Velocity at which objects drop",
+                "type": "number"
+              },
+              "windmillRotationSpeed": {
+                "description": "Blade rotation speed for spawned windmills (0 = disabled, max 10). Disables wind-based rotation and makes the head spin chaotically.",
+                "maximum": 10,
+                "minimum": 0,
                 "type": "number"
               },
               "duration": {
@@ -364,6 +375,11 @@
               "randomYRotation": {
                 "description": "Whether to randomize Y rotation",
                 "type": "boolean"
+              },
+              "batchSize": {
+                "description": "Number of spawns per batch before applying spawnDelay (default 1 = delay after every spawn)",
+                "minimum": 1,
+                "type": "integer"
               },
               "spawnDelay": {
                 "description": "Delay between each spawn in seconds",

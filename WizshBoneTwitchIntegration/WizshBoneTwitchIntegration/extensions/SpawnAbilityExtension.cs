@@ -316,6 +316,10 @@ namespace WizshBoneTwitchIntegration.Extensions
                     Door door = gameObject.GetComponent<Door>();
                     if (door != null && spawnAbilityData.doorInterval > 0)
                         gameObject.AddComponent<TwitchDoorPersistentData>().Initialize(spawnAbilityData.doorInterval);
+
+                    Windmill windmill = gameObject.GetComponent<Windmill>();
+                    if (windmill != null && spawnAbilityData.windmillRotationSpeed > 0f)
+                        gameObject.AddComponent<TwitchWindmillPersistentData>().Initialize(spawnAbilityData.windmillRotationSpeed);
                 }
 
                 if ((bool)component2)
@@ -405,7 +409,7 @@ namespace WizshBoneTwitchIntegration.Extensions
                 if (!spawnAbilityData.noSpawnEffect)
                     spawnAbility.m_spawnEffects.Create(spawnPoint, Quaternion.identity);
 
-                if (spawnAbility.m_spawnDelay > 0f)
+                if (spawnAbility.m_spawnDelay > 0f && (i + 1) % spawnAbilityData.batchSize == 0)
                 {
                     yield return new WaitForSeconds(spawnAbility.m_spawnDelay);
                 }
