@@ -120,7 +120,7 @@ namespace WizshBoneTwitchIntegration.Components
         {
             try
             {
-                if (despawnEffect != null)
+                if (m_netView != null && m_netView.IsOwner() && despawnEffect != null)
                     despawnEffect.Create(transform.position, transform.rotation);
 
                 if (m_mapPin != null && Minimap.instance != null)

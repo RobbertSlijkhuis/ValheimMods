@@ -9,11 +9,12 @@ namespace WizshBoneTwitchIntegration.extensions
     {
         public static IEnumerator ToggleDoorContinuously(this Door door, float interval)
         {
+            ZNetView netView = door.GetComponent<ZNetView>();
             while (door != null)
             {
                 yield return new WaitForSeconds(interval);
 
-                if (door != null && Player.m_localPlayer != null)
+                if (door != null && Player.m_localPlayer != null && netView != null && netView.IsOwner())
                 {
                     try
                     {

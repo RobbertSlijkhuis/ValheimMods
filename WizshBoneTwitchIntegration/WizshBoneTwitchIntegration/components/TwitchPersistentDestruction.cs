@@ -18,6 +18,15 @@ namespace WizshBoneTwitchIntegration.Components
         public delegate void onEndDelegate(GameObject prefab);
         public onEndDelegate onEnd;
 
+        // Cached at Awake/SetStarted time: by the time OnDestroy runs (e.g. after
+        // WearNTear.Destroy(), which tears down the ZDO before Unity's deferred
+        // OnDestroy fires), m_netView's ZDO may already be gone and IsOwner() unreliable.
+        private bool m_isOwner;
+
+        // Set once the duration timer actually runs out, so OnDestroy can tell a
+        // natural expiry apart from an early destruction (e.g. player breaking it).
+        private bool m_timerElapsed;
+
         public void Awake()
         {
             try
@@ -26,6 +35,8 @@ namespace WizshBoneTwitchIntegration.Components
 
                 if (m_netView == null || !m_netView.IsValid())
                     return;
+
+                m_isOwner = m_netView.IsOwner();
 
                 m_started = m_netView.GetZDO().GetString(m_startedHash, "");
 
@@ -51,7 +62,7 @@ namespace WizshBoneTwitchIntegration.Components
         {
             try
             {
-                if (m_onDestroyEffects != null && !(m_breakOnDestroy && gameObject.GetComponent<WearNTear>() != null))
+                if (m_isOwner && m_timerElapsed && m_onDestroyEffects != null && !(m_breakOnDestroy && gameObject.GetComponent<WearNTear>() != null))
                     m_onDestroyEffects.Create(transform.position, transform.rotation);
 
                 onEnd?.Invoke(gameObject);
@@ -67,6 +78,7 @@ namespace WizshBoneTwitchIntegration.Components
             if (gameObject.GetComponent<TimedDestruction>() == null && m_breakRoutine == null)
             {
                 m_breakOnDestroy = breakOnDestroy;
+                m_isOwner = m_netView.IsOwner();
 
                 DateTime dateTime = DateTime.Now;
                 m_netView.GetZDO().Set(m_durationHash, duration);
@@ -84,7 +96,9 @@ namespace WizshBoneTwitchIntegration.Components
 
         private void StartDestructionTimer(float timeout)
         {
-            if (gameObject.GetComponent<WearNTear>() != null)
+            StartCoroutine(MarkTimerElapsed(timeout));
+
+            if (m_breakOnDestroy && gameObject.GetComponent<WearNTear>() != null)
             {
                 m_breakRoutine = StartCoroutine(BreakAfterDelay(timeout));
                 return;
@@ -95,10 +109,21 @@ namespace WizshBoneTwitchIntegration.Components
             timedDestruction.Trigger();
         }
 
+        private IEnumerator MarkTimerElapsed(float delay)
+        {
+            if (delay > 0f)
+                yield return new WaitForSeconds(delay);
+
+            m_timerElapsed = true;
+        }
+
         private IEnumerator BreakAfterDelay(float delay)
         {
             if (delay > 0f)
                 yield return new WaitForSeconds(delay);
+
+            if (m_netView == null || !m_netView.IsOwner())
+                yield break;
 
             gameObject.GetComponent<WearNTear>()?.Destroy();
         }

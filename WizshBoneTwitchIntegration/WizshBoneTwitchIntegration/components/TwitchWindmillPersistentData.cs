@@ -16,12 +16,17 @@ namespace WizshBoneTwitchIntegration.Components
         private float m_prefabPropSpeed;
         private float m_prefabGrindSpeed;
         private bool m_active;
+        private Aoe m_propellerAoe;
+        private float m_aoeResetTimer;
 
         private static readonly int s_speedHash = "WBTI_Windmill_Speed".GetStableHashCode();
         private static readonly int s_seedHash  = "WBTI_Windmill_Seed".GetStableHashCode();
 
         private static readonly FieldInfo s_coverField = typeof(Windmill)
             .GetField("m_cover", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        private static readonly FieldInfo s_aoeHitListField = typeof(Aoe)
+            .GetField("m_hitList", BindingFlags.NonPublic | BindingFlags.Instance);
 
         public void Awake()
         {
@@ -94,6 +99,16 @@ namespace WizshBoneTwitchIntegration.Components
             if (m_smelter != null)
                 m_smelter.enabled = false;
 
+            // Allow repeated blade hits: OnTriggerStay fires continuously; we clear the hit
+            // list ourselves every second because Aoe only clears it in the OverlapSphere path.
+            m_propellerAoe = m_windmill.m_propellerAOE?.GetComponent<Aoe>();
+            if (m_propellerAoe != null)
+            {
+                m_propellerAoe.m_triggerEnterOnly = false;
+                if (s_aoeHitListField == null)
+                    Jotunn.Logger.LogWarning("[WBTI] TwitchWindmillPersistentData: Aoe m_hitList field not found — repeated AOE hits won't work.");
+            }
+
             if (m_windmill.m_propeller == null)
                 Jotunn.Logger.LogWarning("[WBTI] TwitchWindmillPersistentData: m_propeller is null on this prefab.");
             if (m_windmill.m_grindstone == null)
@@ -107,6 +122,14 @@ namespace WizshBoneTwitchIntegration.Components
 
             float t  = (float)(ZNet.instance.GetTimeSeconds() % 10000.0);
             float dt = Time.deltaTime;
+
+            // Clear the Aoe hit list every second so OnTriggerStay can re-damage the player.
+            m_aoeResetTimer += dt;
+            if (m_aoeResetTimer >= 1f && m_propellerAoe != null)
+            {
+                m_aoeResetTimer = 0f;
+                (s_aoeHitListField?.GetValue(m_propellerAoe) as System.Collections.IList)?.Clear();
+            }
 
             // Chaotic head rotation: base continuous spin + two sine noise terms.
             // Derived from synced server time + per-windmill seed → same on all clients.
