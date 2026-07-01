@@ -167,8 +167,16 @@ namespace WizshBoneTwitchIntegration.Components
                     return;
                 }
 
+                List<SurpriseChestSpawnData> eligibleItems = GetEligibleItems();
+
+                if (eligibleItems.Count == 0)
+                {
+                    Jotunn.Logger.LogWarning("No eligible surprise chest items to spawn (all filtered out for this dungeon)");
+                    return;
+                }
+
                 if (!m_random)
-                    m_amount = m_items.Count;
+                    m_amount = eligibleItems.Count;
 
                 float timeOffset = 0f;
 
@@ -176,7 +184,7 @@ namespace WizshBoneTwitchIntegration.Components
                 {
                     float angleChange = ChangeAngleByIndex(index);
                     float force = m_yeetChance > 0 && Random.Range(0, 100) <= m_yeetChance ? 1000f : m_force;
-                    SurpriseChestSpawnData spawnData = m_random ? m_items[Random.Range(0, m_items.Count)] : m_items[index];
+                    SurpriseChestSpawnData spawnData = m_random ? eligibleItems[Random.Range(0, eligibleItems.Count)] : eligibleItems[index];
 
                     StartCoroutine(SpawnItem(spawnData, force, angleChange, timeOffset));
                     timeOffset += m_spawnDelay;
@@ -190,6 +198,47 @@ namespace WizshBoneTwitchIntegration.Components
             {
                 Jotunn.Logger.LogError("Something went wrong in spawning suprise chest items " + e);
             }
+        }
+
+        /// <summary>
+        /// Returns the chest's configured items, minus any dungeon-forbidden creatures, so a
+        /// dungeon-forbidden roll can never happen (rather than silently spawning nothing once
+        /// picked). Items are only cloned/modified when something actually needs stripping;
+        /// an item is dropped entirely only if that would leave it with nothing left to spawn.
+        /// </summary>
+        private List<SurpriseChestSpawnData> GetEligibleItems()
+        {
+            if (!Player.m_localPlayer.InInterior())
+                return m_items;
+
+            List<string> forbidden = CreatureHelper.GetDungeonForbiddenCreatures();
+            List<SurpriseChestSpawnData> eligible = new List<SurpriseChestSpawnData>();
+
+            foreach (SurpriseChestSpawnData item in m_items)
+            {
+                if (item.creatureData == null)
+                {
+                    eligible.Add(item);
+                    continue;
+                }
+
+                List<CreatureData> allowedCreatures = item.creatureData.FindAll(c => !forbidden.Contains(c.prefabName));
+
+                if (allowedCreatures.Count == item.creatureData.Count)
+                {
+                    eligible.Add(item);
+                    continue;
+                }
+
+                if (allowedCreatures.Count == 0 && item.itemData == null)
+                    continue;
+
+                SurpriseChestSpawnData filtered = item.Clone<SurpriseChestSpawnData>();
+                filtered.creatureData = allowedCreatures;
+                eligible.Add(filtered);
+            }
+
+            return eligible;
         }
 
         private IEnumerator SpawnItem(SurpriseChestSpawnData spawnData, float force, float deviation, float delay)

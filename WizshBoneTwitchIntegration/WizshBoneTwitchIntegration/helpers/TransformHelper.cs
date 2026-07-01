@@ -117,28 +117,37 @@ namespace WizshBoneTwitchIntegration.Helpers
         {
             result = candidate;
 
-            if (indoor)
-            {
-                Vector3 rayOrigin = new Vector3(candidate.x, referenceHeight + GroundRaycastUp, candidate.z);
+            if (!TryGetGroundHeight(candidate, referenceHeight, indoor, out float height))
+                return false;
 
-                if (!Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, GroundRaycastUp + GroundRaycastDistance, GroundMask))
-                    return false;
-
-                result.y = hit.point.y;
-
-                // Reject outdoor ledges near dungeon entrances: a valid indoor spot must have a ceiling overhead.
-                if (!Physics.Raycast(new Vector3(result.x, result.y + 0.1f, result.z), Vector3.up, CeilingRaycastDistance, GroundMask))
-                    return false;
-            }
-            else
-            {
-                if (!ZoneSystem.instance.GetSolidHeight(candidate, out float height))
-                    return false;
-
-                result.y = height;
-            }
-
+            result.y = height;
             return !IsObstructed(result);
+        }
+
+        /// <summary>
+        /// Finds solid ground height at a candidate XZ position. Indoors, ground is found via
+        /// a local downward raycast from near <paramref name="referenceHeight"/> (ZoneSystem.GetSolidHeight
+        /// raycasts from 1000 units above the world and hits dungeon ceilings/roofs instead of
+        /// the floor). Outdoors, ZoneSystem.GetSolidHeight is used as before. Returns false if
+        /// no valid ground could be found (e.g. indoors with nothing but an outdoor ledge overhead).
+        /// </summary>
+        public static bool TryGetGroundHeight(Vector3 candidate, float referenceHeight, bool indoor, out float height, int outdoorHeightMargin = 1000)
+        {
+            if (!indoor)
+                return ZoneSystem.instance.GetSolidHeight(candidate, out height, outdoorHeightMargin);
+
+            Vector3 rayOrigin = new Vector3(candidate.x, referenceHeight + GroundRaycastUp, candidate.z);
+
+            if (!Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, GroundRaycastUp + GroundRaycastDistance, GroundMask))
+            {
+                height = referenceHeight;
+                return false;
+            }
+
+            height = hit.point.y;
+
+            // Reject outdoor ledges near dungeon entrances: a valid indoor spot must have a ceiling overhead.
+            return Physics.Raycast(new Vector3(candidate.x, height + 0.1f, candidate.z), Vector3.up, CeilingRaycastDistance, GroundMask);
         }
 
         /// <summary>

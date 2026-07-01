@@ -91,7 +91,13 @@ namespace WizshBoneTwitchIntegration.Extensions
                     spawnPoint = vector + new Vector3(vector2.x, 0f, vector2.y);
                     if (spawnAbility.m_snapToTerrain)
                     {
-                        ZoneSystem.instance.GetSolidHeight(spawnPoint, out var height, spawnAbility.m_getSolidHeightMargin);
+                        bool indoor = Player.m_localPlayer != null && Player.m_localPlayer.InInterior();
+
+                        if (!TransformHelper.TryGetGroundHeight(spawnPoint, vector.y, indoor, out float height, spawnAbility.m_getSolidHeightMargin))
+                        {
+                            continue;
+                        }
+
                         spawnPoint.y = height;
                     }
 

@@ -38,9 +38,12 @@ namespace WizshBoneTwitchIntegration.Harmony
 
                 float speedMultiplier = PlayerScaleHelper.SpeedMultiplier;
 
-                // Fall damage normally starts at 4m. Shift the whole fall-damage curve (both the
-                // no-damage floor and the lethal ceiling) proportionally to the speed multiplier.
-                float shift = 4f * speedMultiplier - 4f;
+                // Fall damage normally starts at 4m. m_jumpForce (and therefore jump velocity)
+                // scales linearly with speedMultiplier, but jump height is v^2/2g, so a standing
+                // jump's height grows with speedMultiplier squared. Shift the whole fall-damage
+                // curve (both the no-damage floor and the lethal ceiling) by the same square so a
+                // plain jump never crosses the floor, no matter how big/fast the player is.
+                float shift = 4f * speedMultiplier * speedMultiplier - 4f;
                 s_maxAirAltitudeRef(__instance) -= shift;
             }
             catch (Exception e)
