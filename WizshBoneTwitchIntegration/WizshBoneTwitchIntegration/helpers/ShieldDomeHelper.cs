@@ -30,10 +30,19 @@ namespace WizshBoneTwitchIntegration.Helpers
             effect?.BreakDome(key);
         }
 
+        // Cached across calls so per-frame callers (e.g. a TimeStop zone following a boat/tame)
+        // don't pay for a Camera.main tag lookup + GetComponent every frame. Unity's overloaded
+        // == treats a destroyed camera/effect as null, so this naturally re-resolves if the main
+        // camera is ever swapped out.
+        private static TwitchShieldDomeEffect s_cachedEffect;
+
         private static TwitchShieldDomeEffect GetOrCreateEffect()
         {
             try
             {
+                if (s_cachedEffect != null)
+                    return s_cachedEffect;
+
                 Camera cam = Camera.main;
                 if (cam == null)
                 {
@@ -45,6 +54,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 if (effect == null)
                     effect = cam.gameObject.AddComponent<TwitchShieldDomeEffect>();
 
+                s_cachedEffect = effect;
                 return effect;
             }
             catch (Exception e)

@@ -28,13 +28,24 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return;
             }
 
-            GameObject zone = UnityEngine.Object.Instantiate(prefab, Player.m_localPlayer.transform.position, Quaternion.identity);
+            // If the redeemer is steering a boat or riding a tamed creature, anchor the zone to
+            // that vehicle instead of the player so it follows along rather than being left behind.
+            Ship controlledShip = Player.m_localPlayer.GetControlledShip();
+            Character riddenCharacter = Player.m_localPlayer.IsRiding()
+                ? (Player.m_localPlayer.GetDoodadController() as Sadle)?.GetCharacter()
+                : null;
+            GameObject attachTarget = controlledShip != null ? controlledShip.gameObject : riddenCharacter?.gameObject;
+
+            Vector3 spawnPosition = attachTarget != null ? attachTarget.transform.position : Player.m_localPlayer.transform.position;
+            ZDOID attachZdoid = attachTarget?.GetComponent<ZNetView>()?.GetZDO().m_uid ?? ZDOID.None;
+
+            GameObject zone = UnityEngine.Object.Instantiate(prefab, spawnPosition, Quaternion.identity);
 
             TwitchPersistentDestruction persistentDestruction = zone.GetComponent<TwitchPersistentDestruction>();
             persistentDestruction.SetStarted((int)data.duration);
 
             TwitchTimeStopZone zoneScript = zone.GetComponent<TwitchTimeStopZone>();
-            zoneScript.Initialize(data.radius, data.freezeEnemies, data.freezePlayer, data.duration);
+            zoneScript.Initialize(data.radius, data.freezeEnemies, data.freezePlayer, data.freezeProjectiles, data.duration, attachZdoid);
 
             if (!string.IsNullOrEmpty(data.announceMessage))
                 Player.m_localPlayer.Message(

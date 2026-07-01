@@ -120,6 +120,11 @@ namespace WizshBoneTwitchIntegration.Components
             if (!m_active || m_windmill == null)
                 return;
 
+            // Frozen by a TimeStop zone - hold rotation and stop refreshing the AOE hit list so
+            // the blades stop dealing repeat damage while stopped.
+            if (GetComponent<TwitchPhysicsFreezeData>() != null)
+                return;
+
             float t  = (float)(ZNet.instance.GetTimeSeconds() % 10000.0);
             float dt = Time.deltaTime;
 

@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Components;
 
 namespace WizshBoneTwitchIntegration.extensions
 {
@@ -13,6 +14,11 @@ namespace WizshBoneTwitchIntegration.extensions
             while (door != null)
             {
                 yield return new WaitForSeconds(interval);
+
+                // Frozen by a TimeStop zone - skip this cycle's toggle but keep the loop alive so
+                // it resumes on the same interval once unfrozen.
+                if (door != null && door.GetComponent<TwitchPhysicsFreezeData>() != null)
+                    continue;
 
                 if (door != null && Player.m_localPlayer != null && netView != null && netView.IsOwner())
                 {

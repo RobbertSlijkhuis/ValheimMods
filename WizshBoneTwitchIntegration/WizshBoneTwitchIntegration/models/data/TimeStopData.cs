@@ -16,6 +16,10 @@ namespace WizshBoneTwitchIntegration.Models
         [EditorTooltip("Whether the player is also frozen while inside the zone.")]
         public bool freezePlayer = false;
 
+        [EditorLabel("Freeze projectiles")]
+        [EditorTooltip("Whether projectiles and other physics props (logs, debris, etc.) entering the zone are frozen.")]
+        public bool freezeProjectiles = true;
+
         [EditorLabel("Radius")]
         [EditorTooltip("Radius of the time stop zone in meters.")]
         public float radius = 10f;

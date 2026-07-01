@@ -80,6 +80,27 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
         }
 
+        // WearNTear.UpdateWear() (structural support loss, unroofed rain-rot, Ashlands decay) calls
+        // ApplyDamage directly, bypassing Damage/RPC_Damage entirely - patch it too so indestructible
+        // objects can't collapse from lack of support even though combat damage is already blocked above.
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(WearNTear), "ApplyDamage")]
+        public static bool WearNTearApplyDamage_Prefix(WearNTear __instance)
+        {
+            try
+            {
+                if (__instance == null)
+                    return true;
+
+                return !IndestructibleHelper.ShouldProtect(__instance.gameObject);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in WearNTearApplyDamage_Prefix: " + e);
+                return true;
+            }
+        }
+
         [HarmonyPrefix]
         [HarmonyPatch(typeof(Destructible), "Damage")]
         public static bool DestructibleDamage_Prefix(Destructible __instance, HitData hit)
