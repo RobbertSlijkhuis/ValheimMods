@@ -127,7 +127,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             if (WizshBoneTwitchIntegration.useRedeemCommand && writer == null) return;
 
-            writer.WriteLine($"PRIVMSG #{m_channel} :{announce} WTBI: {message}");
+            writer.WriteLine($"PRIVMSG #{m_channel} :{announce} WBTI: {message}");
             writer.Flush();
         }
 
@@ -154,7 +154,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             if (!message.Contains("PRIVMSG"))
                 return;
 
-            if (message.Contains("WTBI:"))
+            if (message.Contains("WBTI:"))
                 return;
 
             // Example message: :deathwizsh!deathwizsh@deathwizsh.tmi.twitch.tv PRIVMSG #azeriath :Another test :P

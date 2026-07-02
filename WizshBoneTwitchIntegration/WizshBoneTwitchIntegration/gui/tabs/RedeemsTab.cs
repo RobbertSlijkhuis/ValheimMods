@@ -1,18 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using Jotunn.Managers;
 using TwitchSDK.Interop;
 using UnityEngine;
 using UnityEngine.UI;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
+using WizshBoneTwitchIntegration.Models.Views;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 using WizshBoneTwitchIntegration.Types;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace WizshBoneTwitchIntegration.Gui
 {
@@ -31,7 +28,11 @@ namespace WizshBoneTwitchIntegration.Gui
 
         // Create view
         private GameObject m_createView;
-        private Dropdown m_typeDropdown;
+        private SearchableDropdown m_typeDropdown;
+        private SearchableDropdown m_variantDropdown;
+        private GameObject m_variantRow;
+        private Button m_toggleRawViewBtn;
+        private bool m_showRawSpawnAbilityData;
         private Text m_createFeedbackText;
         private GameObject m_standardFieldsContainer;
         private GameObject m_editorContainer;
@@ -65,6 +66,20 @@ namespace WizshBoneTwitchIntegration.Gui
             RedeemType.Weather,
         };
 
+        // Only shown when type == RedeemType.SpawnAbility - picks which narrowed view
+        // (if any) ObjectEditor renders for the shared SpawnAbilityData sub-object.
+        private static readonly string[] RedeemVariants = new[]
+        {
+            RedeemVariant.None,
+            RedeemVariant.Door,
+            RedeemVariant.Windmill,
+            RedeemVariant.Smite,
+            RedeemVariant.Rain,
+            RedeemVariant.Meteor,
+            RedeemVariant.Trap,
+            RedeemVariant.Root,
+        };
+
         private const float ButtonHeight        = 40f;
         private const float ButtonSpacing       = 5f;
         private const float ItemHeight          = 40f;
@@ -82,8 +97,10 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float ColCostW   = 120f;
 
         private const float BtnTestX   = 220f;
-        private const float BtnEditX   = 330f;
-        private const float BtnDeleteX = 410f;
+        private const float BtnEditX   = BtnTestX + ActionButtonWidth / 2f + ButtonSpacing + ActionButtonWidth / 2f;
+        private const float CopyBtnWidth = 70f;
+        private const float BtnCopyX   = BtnEditX + ActionButtonWidth / 2f + ButtonSpacing + CopyBtnWidth / 2f;
+        private const float BtnDeleteX = BtnCopyX + CopyBtnWidth / 2f + ButtonSpacing + ButtonHeight / 2f;
 
         private const float ListLeftEdgeX        = -480f;
         private const float ContentTopY          = -(110f + HeaderTopPadding);
@@ -100,6 +117,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float TypeLabelW    = 210f;
         private const float TypeDropdownW = 320f;
         private const float TypeDropdownX = TypeLabelX + TypeLabelW / 2f + 10f + TypeDropdownW / 2f;
+        private const float ToggleRawViewBtnWidth = 170f;
 
         private System.Action m_onCloseRequested;
         private System.Action m_onOpenHistory;
@@ -107,6 +125,7 @@ namespace WizshBoneTwitchIntegration.Gui
         // Create view title � stored to allow "New Redeem" / "Edit Redeem" / "View Redeem" switching
         private Text m_createViewTitle;
         private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
+        private readonly CopyRedeemDialog m_copyRedeemDialog = new CopyRedeemDialog();
 
         // Stored to allow scroll content resize on type change
         private GameObject m_createScrollContent;
@@ -121,6 +140,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_root = UIContainer.Create(parent, "RedeemsTab");
 
             m_confirmDialog.Init();
+            m_copyRedeemDialog.Init();
 
             CreateListView(createScrollable);
             CreateCreateView();
@@ -341,7 +361,23 @@ namespace WizshBoneTwitchIntegration.Gui
                     editBtn.SetActive(true);
                     editBtn.GetComponentInChildren<Text>().color = Color.cyan;
                     editBtn.GetComponent<Button>().onClick.AddListener(() => ShowEditView(captured));
+                }
 
+                GameObject copyBtn = GUIManager.Instance.CreateButton(
+                    text: "Copy",
+                    parent: m_redeemListContainer.transform,
+                    anchorMin: new Vector2(0.5f, 1f),
+                    anchorMax: new Vector2(0.5f, 1f),
+                    position: new Vector2(BtnCopyX, yOffset),
+                    width: CopyBtnWidth,
+                    height: ButtonHeight
+                );
+                copyBtn.SetActive(true);
+                copyBtn.GetComponentInChildren<Text>().color = GUIManager.Instance.ValheimBeige;
+                copyBtn.GetComponent<Button>().onClick.AddListener(() => OnCopyRedeem(captured));
+
+                if (!isSynced)
+                {
                     GameObject deleteBtn = GUIManager.Instance.CreateButton(
                         text: "X",
                         parent: m_redeemListContainer.transform,
@@ -381,6 +417,48 @@ namespace WizshBoneTwitchIntegration.Gui
             );
         }
 
+        private void OnCopyRedeem(RedeemData redeem)
+        {
+            m_copyRedeemDialog.Show(
+                redeemTitle:   redeem.title,
+                profiles:      ProfileManager.GetProfiles(),
+                defaultProfile: ProfileManager.ActiveProfile,
+                suggestedName: $"{redeem.title} - copy",
+                onConfirm:     (targetProfile, newTitle) => HandleCopyRedeemConfirm(redeem, targetProfile, newTitle)
+            );
+        }
+
+        private string HandleCopyRedeemConfirm(RedeemData redeem, string targetProfile, string newTitle)
+        {
+            if (string.IsNullOrWhiteSpace(newTitle))
+                return "Please enter a name.";
+
+            if (ProfileManager.IsSyncedProfile(targetProfile))
+                return $"Cannot copy into '{targetProfile}' - it is a synced (read-only) profile.";
+
+            if (targetProfile == ProfileManager.ActiveProfile)
+            {
+                if (m_workingRedeems.Exists(r => r.title == newTitle))
+                    return $"A redeem named '{newTitle}' already exists in '{targetProfile}'.";
+
+                RedeemData copy = redeem.DeepClone<RedeemData>();
+                copy.title = newTitle;
+
+                m_workingRedeems.Add(copy);
+                m_unsavedTitles.Add(newTitle);
+                RedeemHelper.redeems = new List<RedeemData>(m_workingRedeems);
+                RefreshList();
+                m_listFeedbackText.text = $"Copied '{redeem.title}' to '{newTitle}' (unsaved). Press Save to persist.";
+                return null;
+            }
+
+            bool copied = ProfileManager.CopyRedeemToOtherProfile(redeem, targetProfile, newTitle, out string error);
+            if (copied)
+                m_listFeedbackText.text = $"Copied '{redeem.title}' to '{targetProfile}' as '{newTitle}'.";
+
+            return copied ? null : error;
+        }
+
         private void OnSave()
         {
             string path = ProfileManager.GetActiveRedeemPath();
@@ -394,54 +472,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
                 ModData data = ExtraConfigHelper.ReadRedeemsConfig(path) ?? new ModData();
 
-                ISerializer serializer = new SerializerBuilder()
-                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                    .Build();
-
-                var sb = new StringBuilder();
-
-                // Serialize creatureGroups preamble if present
-                if (data.creatureGroups != null && data.creatureGroups.Count > 0)
-                {
-                    var minimalGroups = data.creatureGroups.Select(g => RedeemData.MinimalDictionary(g)).ToList();
-                    var preamble = new Dictionary<string, object> { { "creatureGroups", minimalGroups } };
-                    sb.Append(serializer.Serialize(preamble));
-                }
-
-                // Sort redeems by type (alphabetical), then title within each type
-                var groups = m_workingRedeems
-                    .OrderBy(r => r.type?.ToString() ?? "")
-                    .ThenBy(r => r.title ?? "")
-                    .GroupBy(r => r.type?.ToString() ?? "");
-
-                sb.AppendLine("redeems:");
-
-                foreach (var group in groups)
-                {
-                    string typeName = string.IsNullOrEmpty(group.Key) ? "Unknown" : group.Key;
-
-                    sb.AppendLine($"  #######################");
-                    sb.AppendLine($"  # {typeName}");
-                    sb.AppendLine($"  #######################");
-
-                    foreach (RedeemData redeem in group)
-                    {
-                        // Serialize a single-item list so YamlDotNet emits the "- key: value" block format,
-                        // then strip the leading "- " list wrapper we get from a root sequence.
-                        var single = new List<Dictionary<string, object>> { redeem.ToDictionary() };
-                        string itemYaml = serializer.Serialize(single);
-                        // itemYaml looks like "- key: value\n  key2: value2\n"
-                        // Indent every line by 2 spaces to sit under "redeems:"
-                        foreach (string line in itemYaml.Split('\n'))
-                        {
-                            if (line.Length == 0) continue;
-                            sb.Append("  ");
-                            sb.AppendLine(line.TrimEnd('\r'));
-                        }
-                    }
-                }
-
-                File.WriteAllText(path, sb.ToString());
+                ExtraConfigHelper.WriteRedeemsConfig(path, data.creatureGroups, m_workingRedeems);
 
                 RedeemHelper.Reload();
                 m_unsavedTitles.Clear();
@@ -547,22 +578,54 @@ namespace WizshBoneTwitchIntegration.Gui
             ).GetComponent<Text>();
             typeLabelComp.alignment = TextAnchor.MiddleLeft;
 
-            GameObject dropdownObj = GUIManager.Instance.CreateDropDown(
-                parent: scrollContent.transform,
+            m_typeDropdown = new SearchableDropdown();
+            m_typeDropdown.Build(scrollContent, new Vector2(TypeDropdownX, yPos), TypeDropdownW, 36f, new List<string>(RedeemTypes), RedeemTypes[0]);
+            m_typeDropdown.OnValueChanged += _ => OnTypeChanged();
+
+            yPos -= 70f;
+
+            m_variantRow = TabUIHelper.CreateStaticContainer("VariantRow", scrollContent, yPos);
+
+            Text variantLabelComp = GUIManager.Instance.CreateText(
+                text: "Variant",
+                parent: m_variantRow.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(TypeDropdownX, yPos),
-                fontSize: FieldUIBuilder.FieldFontSize,
-                width: TypeDropdownW,
+                position: new Vector2(TypeLabelX, 0f),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: FieldUIBuilder.LabelFontSize,
+                color: GUIManager.Instance.ValheimBeige,
+                outline: true,
+                outlineColor: Color.black,
+                width: TypeLabelW,
+                height: 36f,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+            variantLabelComp.alignment = TextAnchor.MiddleLeft;
+
+            m_variantDropdown = new SearchableDropdown();
+            m_variantDropdown.Build(m_variantRow, new Vector2(TypeDropdownX, 0f), TypeDropdownW, 36f, new List<string>(RedeemVariants), RedeemVariants[0]);
+            m_variantDropdown.OnValueChanged += _ =>
+            {
+                m_newRedeem.variant = m_variantDropdown.Value;
+                OnTypeChanged();
+            };
+
+            GameObject toggleRawViewBtnObj = GUIManager.Instance.CreateButton(
+                text: "Show full data",
+                parent: m_variantRow.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(TypeDropdownX + TypeDropdownW / 2f + ButtonSpacing + ToggleRawViewBtnWidth / 2f, 0f),
+                width: ToggleRawViewBtnWidth,
                 height: 36f
             );
-            m_typeDropdown = dropdownObj.GetComponent<Dropdown>();
-            FieldUIBuilder.FixDropdownItemHeight(m_typeDropdown, FieldUIBuilder.InputHeight);
-            m_typeDropdown.ClearOptions();
-            m_typeDropdown.AddOptions(new List<string>(RedeemTypes));
-            m_typeDropdown.value = 0;
-            m_typeDropdown.RefreshShownValue();
-            m_typeDropdown.onValueChanged.AddListener(_ => OnTypeChanged());
+            toggleRawViewBtnObj.SetActive(true);
+            m_toggleRawViewBtn = toggleRawViewBtnObj.GetComponent<Button>();
+            m_toggleRawViewBtn.onClick.AddListener(OnToggleRawView);
+
+            m_variantRow.GetComponent<RectTransform>().sizeDelta = new Vector2(1050f, 36f);
+            m_variantRow.SetActive(false);
 
             yPos -= 70f;
             m_editorContainerYPos = yPos;
@@ -577,8 +640,18 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void OnTypeChanged()
         {
-            m_newRedeem.type = RedeemTypes[m_typeDropdown.value];
+            m_newRedeem.type = m_typeDropdown.Value;
             TabUIHelper.ClearContainer(m_editorContainer);
+
+            bool isSpawnAbility = m_newRedeem.type == RedeemType.SpawnAbility;
+            m_variantRow.SetActive(isSpawnAbility);
+            if (!isSpawnAbility)
+                m_newRedeem.variant = RedeemVariant.None;
+
+            bool hasVariant = isSpawnAbility && m_newRedeem.variant != RedeemVariant.None;
+            m_toggleRawViewBtn.gameObject.SetActive(hasVariant);
+            if (!hasVariant)
+                m_showRawSpawnAbilityData = false;
 
             float editorHeight = 0f;
 
@@ -596,6 +669,30 @@ namespace WizshBoneTwitchIntegration.Gui
                 editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.timeStopData);
             else if (m_newRedeem.type == RedeemType.Weather)
                 editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.weatherData);
+            else if (isSpawnAbility)
+            {
+                object spawnAbilityView;
+                if (!hasVariant || m_showRawSpawnAbilityData)
+                    spawnAbilityView = m_newRedeem.spawnAbilityData;
+                else if (m_newRedeem.variant == RedeemVariant.Door)
+                    spawnAbilityView = new DoorView(m_newRedeem.spawnAbilityData);
+                else if (m_newRedeem.variant == RedeemVariant.Windmill)
+                    spawnAbilityView = new WindmillView(m_newRedeem.spawnAbilityData);
+                else if (m_newRedeem.variant == RedeemVariant.Smite)
+                    spawnAbilityView = new SmiteView(m_newRedeem.spawnAbilityData);
+                else if (m_newRedeem.variant == RedeemVariant.Rain)
+                    spawnAbilityView = new RainView(m_newRedeem.spawnAbilityData);
+                else if (m_newRedeem.variant == RedeemVariant.Meteor)
+                    spawnAbilityView = new MeteorView(m_newRedeem.spawnAbilityData);
+                else if (m_newRedeem.variant == RedeemVariant.Trap)
+                    spawnAbilityView = new TrapView(m_newRedeem.spawnAbilityData);
+                else if (m_newRedeem.variant == RedeemVariant.Root)
+                    spawnAbilityView = new RootView(m_newRedeem.spawnAbilityData);
+                else
+                    spawnAbilityView = m_newRedeem.spawnAbilityData;
+
+                editorHeight = m_objectEditor.Build(m_editorContainer, spawnAbilityView);
+            }
 
             RectTransform editorRt = m_editorContainer.GetComponent<RectTransform>();
             editorRt.sizeDelta = new Vector2(editorRt.sizeDelta.x, editorHeight + 20f);
@@ -607,6 +704,15 @@ namespace WizshBoneTwitchIntegration.Gui
                 SetContainerInteractable(m_editorContainer, false);
                 SetContainerInteractable(m_standardFieldsContainer, false);
             }
+        }
+
+        private void OnToggleRawView()
+        {
+            m_showRawSpawnAbilityData = !m_showRawSpawnAbilityData;
+            m_toggleRawViewBtn.GetComponentInChildren<Text>().text = m_showRawSpawnAbilityData
+                ? "Show variant fields"
+                : "Show full data";
+            OnTypeChanged();
         }
 
         private void OnConfirm()
@@ -653,6 +759,13 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void OnTestRedeem(RedeemData redeem)
         {
+            // A background row's Test button is still clickable while these dialogs are open
+            // (they have no full-screen blocker), so make sure "close everything to watch the
+            // test" really closes everything - otherwise the dialog is left orphaned on screen
+            // and its outstanding InputBlockGate.Push() keeps input blocked after Test runs.
+            m_confirmDialog.Hide();
+            m_copyRedeemDialog.Hide();
+
             m_onCloseRequested?.Invoke();
 
             TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
@@ -689,8 +802,13 @@ namespace WizshBoneTwitchIntegration.Gui
             m_newRedeem                   = new RedeemData();
             m_createFeedbackText.text     = "";
             m_createViewTitle.text        = "New Redeem";
-            m_typeDropdown.value          = 0;
-            m_typeDropdown.interactable   = true;
+            m_typeDropdown.Value          = RedeemTypes[0];
+            m_typeDropdown.Interactable   = true;
+            m_variantDropdown.Value       = RedeemVariants[0];
+            m_variantDropdown.Interactable = true;
+            m_variantRow.SetActive(false);
+            m_showRawSpawnAbilityData     = false;
+            m_toggleRawViewBtn.GetComponentInChildren<Text>().text = "Show full data";
             m_confirmButton.gameObject.SetActive(true);
             m_confirmButton.GetComponentInChildren<Text>().text = "+ Add";
 
@@ -708,12 +826,15 @@ namespace WizshBoneTwitchIntegration.Gui
             m_newRedeem                   = redeem.DeepClone<RedeemData>();
             m_createFeedbackText.text     = "";
             m_createViewTitle.text        = "Edit Redeem";
-            m_typeDropdown.interactable   = false;
+            m_typeDropdown.Interactable   = false;
+            m_variantDropdown.Interactable = false;
+            m_showRawSpawnAbilityData     = false;
+            m_toggleRawViewBtn.GetComponentInChildren<Text>().text = "Show full data";
             m_confirmButton.gameObject.SetActive(true);
             m_confirmButton.GetComponentInChildren<Text>().text = "Save";
 
-            int typeIndex = System.Array.IndexOf(RedeemTypes, redeem.type);
-            m_typeDropdown.value = typeIndex >= 0 ? typeIndex : 0;
+            m_typeDropdown.Value = redeem.type;
+            m_variantDropdown.Value = redeem.variant;
 
             RebuildStandardFields();
             OnTypeChanged();
@@ -729,11 +850,14 @@ namespace WizshBoneTwitchIntegration.Gui
             m_newRedeem                   = redeem.DeepClone<RedeemData>();
             m_createFeedbackText.text     = "Read-only � this profile is synced.";
             m_createViewTitle.text        = "View Redeem";
-            m_typeDropdown.interactable   = false;
+            m_typeDropdown.Interactable   = false;
+            m_variantDropdown.Interactable = false;
+            m_showRawSpawnAbilityData     = false;
+            m_toggleRawViewBtn.GetComponentInChildren<Text>().text = "Show full data";
             m_confirmButton.gameObject.SetActive(false);
 
-            int typeIndex = System.Array.IndexOf(RedeemTypes, redeem.type);
-            m_typeDropdown.value = typeIndex >= 0 ? typeIndex : 0;
+            m_typeDropdown.Value = redeem.type;
+            m_variantDropdown.Value = redeem.variant;
 
             RebuildStandardFields();
             OnTypeChanged();
@@ -758,8 +882,8 @@ namespace WizshBoneTwitchIntegration.Gui
             foreach (Toggle toggle in container.GetComponentsInChildren<Toggle>(true))
                 toggle.interactable = interactable;
 
-            foreach (Dropdown dropdown in container.GetComponentsInChildren<Dropdown>(true))
-                dropdown.interactable = interactable;
+            foreach (SearchableDropdownHandle dropdown in container.GetComponentsInChildren<SearchableDropdownHandle>(true))
+                dropdown.SetInteractable(interactable);
         }
 
         private void OnToggleRedeem(RedeemData redeem)

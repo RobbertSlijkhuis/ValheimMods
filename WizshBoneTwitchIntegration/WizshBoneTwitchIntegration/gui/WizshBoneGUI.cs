@@ -39,6 +39,8 @@ namespace WizshBoneTwitchIntegration.Gui
         private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
 
         private bool m_reopenSettings = false;
+        private bool m_blockingInput = false;
+        private bool m_standaloneBlockingInput = false;
 
         public void SignalReopenSettings()
         {
@@ -85,7 +87,12 @@ namespace WizshBoneTwitchIntegration.Gui
             CreateGUI();
 
             panel.SetActive(true);
-            GUIManager.BlockInput(true);
+
+            if (!m_blockingInput)
+            {
+                m_blockingInput = true;
+                InputBlockGate.Push();
+            }
 
             if (m_reopenSettings)
             {
@@ -100,7 +107,12 @@ namespace WizshBoneTwitchIntegration.Gui
             panel.SetActive(false);
             m_settingsGUI.CloseSettings();
             m_redeemHistoryGUI.CloseGUI();
-            GUIManager.BlockInput(false);
+
+            if (m_blockingInput)
+            {
+                m_blockingInput = false;
+                InputBlockGate.Pop();
+            }
         }
 
         public void UpdateGUI()
@@ -414,8 +426,20 @@ namespace WizshBoneTwitchIntegration.Gui
             if (m_redeemHistoryGUI == null)
                 m_redeemHistoryGUI = new WizshBoneRedeemHistoryGUI(customRewards);
 
-            GUIManager.BlockInput(true);
-            m_redeemHistoryGUI.ShowGUI(onClose: () => GUIManager.BlockInput(false));
+            if (!m_standaloneBlockingInput)
+            {
+                m_standaloneBlockingInput = true;
+                InputBlockGate.Push();
+            }
+
+            m_redeemHistoryGUI.ShowGUI(onClose: () =>
+            {
+                if (!m_standaloneBlockingInput)
+                    return;
+
+                m_standaloneBlockingInput = false;
+                InputBlockGate.Pop();
+            });
         }
 
         private string GetLoginButtonText()

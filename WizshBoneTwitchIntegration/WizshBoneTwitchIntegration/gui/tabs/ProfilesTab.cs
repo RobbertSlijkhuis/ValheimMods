@@ -17,6 +17,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private Text m_profileFeedbackText;
         private Button m_syncButton;
         private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
+        private readonly ProfileNameDialog m_profileNameDialog = new ProfileNameDialog();
 
         private const float ButtonWidth       = 330f;
         private const float ButtonHeight      = 40f;
@@ -32,6 +33,10 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float InputFieldCenterX = ScrollViewLeft + ButtonWidth / 2f;
         private const float ActionBtnWidth    = 80f;
         private const float CreateBtnCenterX  = ScrollViewLeft + ButtonWidth + ButtonSpacing + ActionBtnWidth / 2f;
+
+        private const float RenameButtonWidth = 60f;
+        private const float RenameButtonX     = ButtonCenterX + ButtonWidth / 2f + ButtonSpacing + RenameButtonWidth / 2f;
+        private const float SecondaryButtonX  = RenameButtonX + RenameButtonWidth / 2f + ButtonSpacing + ButtonHeight / 2f;
 
         private const float ScrollViewRight  = 350f;
         private const float BottomBtnHeight  = 60f;
@@ -82,6 +87,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_root = UIContainer.Create(parent, "ProfilesTab");
 
             m_confirmDialog.Init();
+            m_profileNameDialog.Init();
 
             TabUIHelper.CreateTabTitle("New profile name:", m_root, new Vector2(InputFieldCenterX, ContentTopY), width: ButtonWidth);
 
@@ -210,7 +216,7 @@ namespace WizshBoneTwitchIntegration.Gui
                         parent: m_profileListContainer.transform,
                         anchorMin: new Vector2(0.5f, 1f),
                         anchorMax: new Vector2(0.5f, 1f),
-                        position: new Vector2(ButtonCenterX + ButtonWidth / 2f + ButtonHeight / 2f + ButtonSpacing, yOffset),
+                        position: new Vector2(SecondaryButtonX, yOffset),
                         width: ButtonHeight,
                         height: btnHeight
                     );
@@ -227,7 +233,7 @@ namespace WizshBoneTwitchIntegration.Gui
                         parent: m_profileListContainer.transform,
                         anchorMin: new Vector2(0.5f, 1f),
                         anchorMax: new Vector2(0.5f, 1f),
-                        position: new Vector2(ButtonCenterX + ButtonWidth / 2f + ButtonHeight / 2f + ButtonSpacing, yOffset),
+                        position: new Vector2(SecondaryButtonX, yOffset),
                         width: ButtonHeight,
                         height: ButtonHeight
                     );
@@ -235,6 +241,20 @@ namespace WizshBoneTwitchIntegration.Gui
                     deleteBtn.GetComponentInChildren<Text>().color = Color.red;
                     deleteBtn.GetComponent<Button>().onClick.AddListener(() => OnDeleteProfile(profileName));
                 }
+
+                GameObject renameBtn = GUIManager.Instance.CreateButton(
+                    text: "Edit",
+                    parent: m_profileListContainer.transform,
+                    anchorMin: new Vector2(0.5f, 1f),
+                    anchorMax: new Vector2(0.5f, 1f),
+                    position: new Vector2(RenameButtonX, yOffset),
+                    width: RenameButtonWidth,
+                    height: btnHeight
+                );
+                renameBtn.SetActive(true);
+                renameBtn.GetComponentInChildren<Text>().color = GUIManager.Instance.ValheimBeige;
+                renameBtn.GetComponent<Button>().interactable = !ProfileManager.IsSyncedProfile(profileName);
+                renameBtn.GetComponent<Button>().onClick.AddListener(() => OnRenameProfile(profileName));
 
                 yOffset -= btnHeight + ButtonSpacing;
                 if (isActive) yOffset += (ActiveButtonHeight - ButtonHeight) / 2f;
@@ -268,12 +288,24 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void OnCopyProfile()
         {
-            bool copied = ProfileManager.CopyProfile(out string newName);
-            m_profileFeedbackText.text = copied
-                ? $"Copied '{ProfileManager.ActiveProfile}' to '{newName}'."
-                : "Copy failed: profile file not found.";
+            string suggestedName = ProfileManager.GetUniqueProfileName(ProfileManager.ActiveProfile);
 
+            m_profileNameDialog.Show(
+                mode:          ProfileNameDialogMode.Copy,
+                suggestedName: suggestedName,
+                onConfirm:     HandleCopyConfirm
+            );
+        }
+
+        private string HandleCopyConfirm(string newName)
+        {
+            bool copied = ProfileManager.CopyProfileTo(newName, out string error);
+            if (!copied)
+                return error;
+
+            m_profileFeedbackText.text = $"Copied '{ProfileManager.ActiveProfile}' to '{newName}'.";
             Refresh();
+            return null;
         }
 
         private void OnImportProfile()
@@ -298,24 +330,39 @@ namespace WizshBoneTwitchIntegration.Gui
             try
             {
                 string selectedFile = ofn.lpstrFile.TrimEnd('\0');
-                bool imported = ProfileManager.ImportProfile(selectedFile, out string targetProfile, out bool profileCreated);
+                string suggestedName = ProfileManager.ResolveImportProfileName(selectedFile);
 
-                if (!imported)
-                {
-                    m_profileFeedbackText.text = "Import failed: selected file not found.";
-                    return;
-                }
-
-                m_profileFeedbackText.text = profileCreated
-                    ? $"Created and imported profile '{targetProfile}'."
-                    : $"Updated profile '{targetProfile}' with imported file.";
-
-                Refresh();
+                m_profileNameDialog.Show(
+                    mode:          ProfileNameDialogMode.Import,
+                    suggestedName: suggestedName,
+                    onConfirm:     newName => HandleImportConfirm(selectedFile, newName)
+                );
             }
             catch (System.Exception e)
             {
                 m_profileFeedbackText.text = "Import failed: " + e.Message;
                 Jotunn.Logger.LogError("Profile import failed: " + e);
+            }
+        }
+
+        private string HandleImportConfirm(string selectedFile, string targetName)
+        {
+            try
+            {
+                bool imported = ProfileManager.ImportProfileTo(selectedFile, targetName, out bool profileCreated, out string error);
+                if (!imported)
+                    return error;
+
+                m_profileFeedbackText.text = profileCreated
+                    ? $"Created and imported profile '{targetName}'."
+                    : $"Updated profile '{targetName}' with imported file.";
+                Refresh();
+                return null;
+            }
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogError("Profile import failed: " + e);
+                return "Import failed: " + e.Message;
             }
         }
 
@@ -392,6 +439,37 @@ namespace WizshBoneTwitchIntegration.Gui
             m_profileFeedbackText.text = reloaded
                 ? $"Profile '{name}' reloaded."
                 : $"Failed to reload profile '{name}'.";
+        }
+
+        private void OnRenameProfile(string name)
+        {
+            m_profileNameDialog.Show(
+                mode:          ProfileNameDialogMode.Rename,
+                suggestedName: name,
+                onConfirm:     newName => HandleRenameConfirm(name, newName)
+            );
+        }
+
+        private string HandleRenameConfirm(string oldName, string newName)
+        {
+            if (newName == oldName)
+                return "Name unchanged.";
+
+            try
+            {
+                bool renamed = ProfileManager.RenameProfile(oldName, newName, out string error);
+                if (!renamed)
+                    return error;
+
+                m_profileFeedbackText.text = $"Renamed '{oldName}' to '{newName}'.";
+                Refresh();
+                return null;
+            }
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogError("Profile rename failed: " + e);
+                return "Rename failed: " + e.Message;
+            }
         }
 
         private void OnDeleteProfile(string name)

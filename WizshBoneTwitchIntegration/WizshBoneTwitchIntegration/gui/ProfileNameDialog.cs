@@ -5,25 +5,38 @@ using UnityEngine.UI;
 
 namespace WizshBoneTwitchIntegration.Gui
 {
+    internal enum ProfileNameDialogMode
+    {
+        Import,
+        Copy,
+        Rename
+    }
+
     /// <summary>
-    /// A reusable modal confirmation panel built on top of a Valheim wood panel.
-    /// Shown via <see cref="Show"/> and dismissed automatically when either button is pressed.
+    /// A reusable modal panel prompting for a profile name, backing the Import/Copy/Rename
+    /// profile actions. Shown via <see cref="Show"/>; Cancel always dismisses it, Confirm
+    /// dismisses it only if the caller's validation succeeds - otherwise the panel stays open
+    /// and shows the error inline.
     /// </summary>
-    internal class ConfirmDialog
+    internal class ProfileNameDialog
     {
         private GameObject m_panel;
         private Text       m_titleText;
         private Text       m_descriptionText;
+        private InputField m_nameInput;
+        private Text       m_feedbackText;
         private Button     m_confirmButton;
         private Button     m_cancelButton;
         private Text       m_confirmButtonText;
-        private Text       m_cancelButtonText;
         private bool       m_blockingInput;
 
-        private const float PanelWidth   = 420f;
-        private const float PanelHeight  = 200f;
+        private const float PanelWidth   = 460f;
+        private const float PanelHeight  = 300f;
         private const float TitleY       = -40f;
-        private const float DescriptionY = -90f;
+        private const float DescriptionY = -85f;
+        private const float InputY       = -150f;
+        private const float FeedbackY    = -195f;
+        private const float InputWidth   = 360f;
         private const float ConfirmBtnX  = -110f;
         private const float CancelBtnX   =  110f;
         private const float BtnY         =  40f;
@@ -84,56 +97,71 @@ namespace WizshBoneTwitchIntegration.Gui
             ).GetComponent<Text>();
             m_descriptionText.alignment = TextAnchor.MiddleCenter;
 
+            m_nameInput = FieldUIBuilder.CreateInputField(m_panel, new Vector2(0f, InputY), InputWidth);
+
+            m_feedbackText = GUIManager.Instance.CreateText(
+                text:                "",
+                parent:              m_panel.transform,
+                anchorMin:           new Vector2(0.5f, 1f),
+                anchorMax:           new Vector2(0.5f, 1f),
+                position:            new Vector2(0f, FeedbackY),
+                font:                GUIManager.Instance.AveriaSerifBold,
+                fontSize:            FieldUIBuilder.LabelFontSize,
+                color:               GUIManager.Instance.ValheimYellow,
+                outline:             true,
+                outlineColor:        Color.black,
+                width:               PanelWidth - 40f,
+                height:              30f,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+            m_feedbackText.alignment = TextAnchor.MiddleCenter;
+
             m_confirmButton     = CreateButton(ConfirmBtnX, GUIManager.Instance.ValheimOrange);
             m_confirmButtonText = m_confirmButton.GetComponentInChildren<Text>();
 
-            m_cancelButton     = CreateButton(CancelBtnX, GUIManager.Instance.ValheimBeige);
-            m_cancelButtonText = m_cancelButton.GetComponentInChildren<Text>();
+            m_cancelButton = CreateButton(CancelBtnX, GUIManager.Instance.ValheimBeige);
+            m_cancelButton.GetComponentInChildren<Text>().text = "Cancel";
 
             m_panel.SetActive(false);
         }
 
         /// <summary>
-        /// Displays the dialog with the given content. Both callbacks automatically close the panel.
+        /// Displays the dialog prefilled with <paramref name="suggestedName"/>. Cancel always
+        /// closes the panel. Confirm invokes <paramref name="onConfirm"/> with the trimmed
+        /// contents of the name field: a null return closes the panel, a non-null return is
+        /// treated as a validation error and shown inline, leaving the panel open.
         /// </summary>
-        /// <param name="title">Bold orange title line.</param>
-        /// <param name="description">Body text describing the action.</param>
-        /// <param name="onConfirm">Invoked when the user clicks the confirm button.</param>
-        /// <param name="onCancel">Invoked when the user clicks the cancel button. May be <c>null</c>.</param>
-        /// <param name="confirmText">Label for the confirm button. Defaults to "Confirm".</param>
-        /// <param name="cancelText">Label for the cancel button. Defaults to "Cancel".</param>
-        public void Show(
-            string title,
-            string description,
-            Action onConfirm,
-            Action onCancel      = null,
-            string confirmText   = "Confirm",
-            string cancelText    = "Cancel")
+        public void Show(ProfileNameDialogMode mode, string suggestedName, Func<string, string> onConfirm)
         {
             if (m_panel == null)
             {
-                Jotunn.Logger.LogError("ConfirmDialog.Show called before Init().");
+                Jotunn.Logger.LogError("ProfileNameDialog.Show called before Init().");
                 return;
             }
 
-            m_titleText.text       = title;
-            m_descriptionText.text = description;
-            m_confirmButtonText.text = confirmText;
-            m_cancelButtonText.text  = cancelText;
+            m_titleText.text         = GetTitle(mode);
+            m_descriptionText.text   = GetDescription(mode);
+            m_confirmButtonText.text = GetConfirmText(mode);
+            m_nameInput.text         = suggestedName;
+            m_feedbackText.text      = "";
 
             m_confirmButton.onClick.RemoveAllListeners();
             m_confirmButton.onClick.AddListener(() =>
             {
+                string name = m_nameInput.text.Trim();
+                string error = onConfirm?.Invoke(name);
+
+                if (error != null)
+                {
+                    m_feedbackText.text = error;
+                    return;
+                }
+
                 Hide();
-                onConfirm?.Invoke();
             });
 
             m_cancelButton.onClick.RemoveAllListeners();
-            m_cancelButton.onClick.AddListener(() =>
-            {
-                Hide();
-                onCancel?.Invoke();
-            });
+            m_cancelButton.onClick.AddListener(Hide);
 
             m_panel.transform.SetAsLastSibling();
             m_panel.SetActive(true);
@@ -173,6 +201,39 @@ namespace WizshBoneTwitchIntegration.Gui
             btnObj.SetActive(true);
             btnObj.GetComponentInChildren<Text>().color = textColor;
             return btnObj.GetComponent<Button>();
+        }
+
+        private static string GetTitle(ProfileNameDialogMode mode)
+        {
+            switch (mode)
+            {
+                case ProfileNameDialogMode.Import: return "Import Profile";
+                case ProfileNameDialogMode.Copy:   return "Copy Profile";
+                case ProfileNameDialogMode.Rename: return "Rename Profile";
+                default:                           return "";
+            }
+        }
+
+        private static string GetDescription(ProfileNameDialogMode mode)
+        {
+            switch (mode)
+            {
+                case ProfileNameDialogMode.Import: return "Leave the name unchanged to update the existing profile.\nChange it to import as a new profile.";
+                case ProfileNameDialogMode.Copy:   return "Enter a name for the new profile copy.";
+                case ProfileNameDialogMode.Rename: return "Enter a new name for this profile.";
+                default:                           return "";
+            }
+        }
+
+        private static string GetConfirmText(ProfileNameDialogMode mode)
+        {
+            switch (mode)
+            {
+                case ProfileNameDialogMode.Import: return "Import";
+                case ProfileNameDialogMode.Copy:   return "Copy";
+                case ProfileNameDialogMode.Rename: return "Rename";
+                default:                           return "Confirm";
+            }
         }
     }
 }

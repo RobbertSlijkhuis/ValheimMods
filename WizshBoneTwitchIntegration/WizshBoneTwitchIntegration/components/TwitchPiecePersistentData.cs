@@ -13,7 +13,7 @@ namespace WizshBoneTwitchIntegration.Components
         private string m_redeemerName;
         private bool m_allowDrops;
 
-        private readonly int pieceDataHash = "WTBIPersistentPieceData".GetStableHashCode();
+        private readonly int pieceDataHash = "WBTIPersistentPieceData".GetStableHashCode();
 
         public void Awake()
         {

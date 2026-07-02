@@ -46,6 +46,14 @@ namespace WizshBoneTwitchIntegration.Gui
             string labelText = field.GetCustomAttribute<EditorLabelAttribute>()?.Label ?? field.Name;
             string tooltip = field.GetCustomAttribute<EditorTooltipAttribute>()?.Tooltip;
 
+            // A view class field that proxies reads/writes to a real field elsewhere -
+            // render using the wrapped type's primitive builder, writing through the
+            // bound field instead of field.SetValue(target, ...).
+            if (currentValue is IBoundField boundField)
+            {
+                return BuildBoundField(parent, boundField, rowPosition, fieldWidth, labelText, tooltip);
+            }
+
             // Special case: List<string>
             if (fieldType == typeof(List<string>))
             {
@@ -97,6 +105,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 var dropdownAttr = field.GetCustomAttribute<DropdownOptionsAttribute>();
                 var seDropdown   = field.GetCustomAttribute<StatusEffectNameDropdownAttribute>();
                 var onChanged    = field.GetCustomAttribute<OnValueChangedAttribute>();
+                var prefixAttr   = field.GetCustomAttribute<InputPrefixAttribute>();
 
                 if (colorAttr != null)
                 {
@@ -104,19 +113,25 @@ namespace WizshBoneTwitchIntegration.Gui
                 }
                 else if (seDropdown != null)
                 {
-                    Dropdown dd = BuildStringDropdownField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth, GetAvailableStatusEffectNames());
+                    SearchableDropdown dd = BuildStringDropdownField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth, GetAvailableStatusEffectNames());
                     if (onChanged != null)
-                        dd.onValueChanged.AddListener(_ =>
+                        dd.OnValueChanged += _ =>
                         {
                             InvokeOnValueChanged(parent, target, onChanged.MethodName);
                             onRebuild?.Invoke();
-                        });
+                        };
                 }
                 else if (dropdownAttr != null)
                 {
-                    Dropdown dd = BuildStringDropdownField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth, dropdownAttr.Options);
+                    SearchableDropdown dd = BuildStringDropdownField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth, dropdownAttr.Options);
                     if (onChanged != null)
-                        dd.onValueChanged.AddListener(_ => InvokeOnValueChanged(parent, target, onChanged.MethodName));
+                        dd.OnValueChanged += _ => InvokeOnValueChanged(parent, target, onChanged.MethodName);
+                }
+                else if (prefixAttr != null)
+                {
+                    InputField inp = BuildStringFieldWithPrefix(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth, prefixAttr.Prefix);
+                    if (onChanged != null)
+                        inp.onValueChanged.AddListener(_ => InvokeOnValueChanged(parent, target, onChanged.MethodName));
                 }
                 else
                 {
@@ -177,6 +192,146 @@ namespace WizshBoneTwitchIntegration.Gui
             return true;
         }
 
+        /// <summary>
+        /// Renders a label + input row for an <see cref="IBoundField"/>, dispatching by its
+        /// wrapped type to the same primitive input styles as a direct field, but reading/
+        /// writing through the bound field's delegates instead of a target object's field.
+        /// </summary>
+        private static bool BuildBoundField(GameObject parent, IBoundField boundField, Vector2 rowPosition, float fieldWidth, string labelText, string tooltip)
+        {
+            Type wrapped = boundField.WrappedType;
+
+            bool isString = wrapped == typeof(string);
+            bool isInt = wrapped == typeof(int);
+            bool isFloat = wrapped == typeof(float);
+            bool isBool = wrapped == typeof(bool);
+            bool isNullableInt = wrapped == typeof(int?);
+            bool isNullableFloat = wrapped == typeof(float?);
+            bool isNullableBool = wrapped == typeof(bool?);
+
+            if (!isString && !isInt && !isFloat && !isBool && !isNullableInt && !isNullableFloat && !isNullableBool)
+                return false;
+
+            Text labelComp = GUIManager.Instance.CreateText(
+                text: labelText,
+                parent: parent.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: rowPosition,
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: LabelFontSize,
+                color: GUIManager.Instance.ValheimBeige,
+                outline: true,
+                outlineColor: Color.black,
+                width: LabelWidth,
+                height: FieldHeight,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+            labelComp.alignment = TextAnchor.MiddleLeft;
+
+            float fieldX = rowPosition.x + LabelWidth / 2f + LabelFieldGap + fieldWidth / 2f;
+            Vector2 fieldPos = new Vector2(fieldX, rowPosition.y);
+
+            object currentValue = boundField.GetValue();
+
+            if (isString)
+            {
+                InputField inp = CreateInputField(parent, fieldPos, fieldWidth, currentValue as string ?? "");
+                inp.onValueChanged.AddListener(val => boundField.SetValue(val));
+            }
+            else if (isInt)
+            {
+                int value = currentValue is int i ? i : 0;
+                InputField inp = CreateInputField(parent, fieldPos, fieldWidth, value.ToString());
+                inp.contentType = InputField.ContentType.IntegerNumber;
+                inp.onValueChanged.AddListener(val =>
+                {
+                    if (int.TryParse(val, out int result))
+                        boundField.SetValue(result);
+                });
+            }
+            else if (isFloat)
+            {
+                float value = currentValue is float f ? f : 0f;
+                InputField inp = CreateInputField(parent, fieldPos, fieldWidth, value.ToString("G"));
+                inp.contentType = InputField.ContentType.DecimalNumber;
+                inp.onValueChanged.AddListener(val =>
+                {
+                    if (float.TryParse(val, out float result))
+                        boundField.SetValue(result);
+                });
+            }
+            else if (isBool)
+            {
+                bool value = currentValue is bool b && b;
+                Toggle tog = BuildBoundBoolField(parent, value, fieldPos, fieldWidth);
+                tog.onValueChanged.AddListener(val => boundField.SetValue(val));
+            }
+            else if (isNullableInt)
+            {
+                int? value = currentValue as int?;
+                string initial = value.HasValue ? value.Value.ToString() : "";
+                InputField inp = CreateInputField(parent, fieldPos, fieldWidth, initial);
+                inp.contentType = InputField.ContentType.IntegerNumber;
+                inp.onValueChanged.AddListener(val =>
+                {
+                    if (string.IsNullOrWhiteSpace(val))
+                        boundField.SetValue((int?)null);
+                    else if (int.TryParse(val, out int result))
+                        boundField.SetValue((int?)result);
+                });
+            }
+            else if (isNullableFloat)
+            {
+                float? value = currentValue as float?;
+                string initial = value.HasValue ? value.Value.ToString("G") : "";
+                InputField inp = CreateInputField(parent, fieldPos, fieldWidth, initial);
+                inp.contentType = InputField.ContentType.DecimalNumber;
+                inp.onValueChanged.AddListener(val =>
+                {
+                    if (string.IsNullOrWhiteSpace(val))
+                        boundField.SetValue((float?)null);
+                    else if (float.TryParse(val, out float result))
+                        boundField.SetValue((float?)result);
+                });
+            }
+            else if (isNullableBool)
+            {
+                bool value = currentValue is bool nb && nb;
+                Toggle tog = BuildBoundBoolField(parent, value, fieldPos, fieldWidth);
+                tog.onValueChanged.AddListener(val => boundField.SetValue((bool?)val));
+            }
+
+            if (tooltip != null)
+            {
+                float tooltipX = fieldX + fieldWidth / 2f + TooltipGap + TooltipWidth / 2f;
+                BuildTooltip(parent, tooltip, new Vector2(tooltipX, rowPosition.y));
+            }
+
+            return true;
+        }
+
+        private static Toggle BuildBoundBoolField(GameObject parent, bool currentValue, Vector2 position, float width)
+        {
+            GameObject toggleObj = GUIManager.Instance.CreateToggle(
+                parent: parent.transform,
+                width: FieldHeight,
+                height: FieldHeight
+            );
+
+            float leftAlignedX = position.x - width / 2f + FieldHeight / 2f + 5f;
+
+            RectTransform toggleRt = toggleObj.GetComponent<RectTransform>();
+            toggleRt.anchorMin = new Vector2(0.5f, 1f);
+            toggleRt.anchorMax = new Vector2(0.5f, 1f);
+            toggleRt.pivot = new Vector2(0.5f, 0.5f);
+            toggleRt.anchoredPosition = new Vector2(leftAlignedX, position.y - FieldHeight / 4f);
+
+            Toggle toggle = toggleObj.GetComponent<Toggle>();
+            toggle.isOn = currentValue;
+            return toggle;
+        }
+
         private static void BuildTooltip(GameObject parent, string tooltip, Vector2 position)
         {
             Text t = GUIManager.Instance.CreateText(
@@ -194,7 +349,6 @@ namespace WizshBoneTwitchIntegration.Gui
                 height: TooltipHeight,
                 addContentSizeFitter: false
             ).GetComponent<Text>();
-            t.fontStyle = FontStyle.Italic;
             t.alignment = TextAnchor.MiddleLeft;
             t.transform.SetAsLastSibling();
         }
@@ -207,6 +361,39 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             InputField input = CreateInputField(parent, position, width, currentValue);
             input.onValueChanged.AddListener(val => field.SetValue(target, val));
+            return input;
+        }
+
+        private const float PrefixBoxWidth = 60f;
+        private const float PrefixBoxGap = 6f;
+
+        /// <summary>
+        /// Renders a disabled prefix box (e.g. "WBTI") to the left of the actual input, both
+        /// sharing the row's normal field width. The box only ever displays the prefix; the
+        /// input shows the value with the prefix stripped, but the underlying field is saved
+        /// with the prefix prepended (e.g. "WBTI Spawn Troll").
+        /// </summary>
+        private static InputField BuildStringFieldWithPrefix(GameObject parent, object target, FieldInfo field, string currentValue, Vector2 position, float width, string prefix)
+        {
+            float prefixX = position.x - width / 2f + PrefixBoxWidth / 2f;
+            InputField prefixField = CreateInputField(parent, new Vector2(prefixX, position.y), PrefixBoxWidth, prefix);
+            prefixField.textComponent.alignment = TextAnchor.MiddleCenter;
+            prefixField.interactable = false;
+
+            // interactable = false normally tints the field with Selectable's disabledColor
+            // (dimmed grey) - this box should stay non-interactable but still look enabled.
+            ColorBlock cb = prefixField.colors;
+            cb.disabledColor = cb.normalColor;
+            prefixField.colors = cb;
+
+            float inputWidth = width - PrefixBoxWidth - PrefixBoxGap;
+            float inputX = prefixX + PrefixBoxWidth / 2f + PrefixBoxGap + inputWidth / 2f;
+
+            string prefixWithSpace = prefix + " ";
+            string displayValue = currentValue.StartsWith(prefixWithSpace) ? currentValue.Substring(prefixWithSpace.Length) : currentValue;
+
+            InputField input = CreateInputField(parent, new Vector2(inputX, position.y), inputWidth, displayValue);
+            input.onValueChanged.AddListener(val => field.SetValue(target, string.IsNullOrEmpty(val) ? "" : prefixWithSpace + val));
             return input;
         }
 
@@ -471,76 +658,12 @@ namespace WizshBoneTwitchIntegration.Gui
             return inputField;
         }
 
-        private static Dropdown BuildStringDropdownField(GameObject parent, object target, FieldInfo field, string currentValue, Vector2 position, float width, List<string> options)
+        private static SearchableDropdown BuildStringDropdownField(GameObject parent, object target, FieldInfo field, string currentValue, Vector2 position, float width, List<string> options)
         {
-            GameObject dropdownObj = GUIManager.Instance.CreateDropDown(
-                parent: parent.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: position,
-                fontSize: FieldFontSize,
-                width: width,
-                height: FieldHeight
-            );
-
-            Dropdown dropdown = dropdownObj.GetComponent<Dropdown>();
-            FixDropdownItemHeight(dropdown, FieldHeight);
-            dropdown.ClearOptions();
-            dropdown.AddOptions(options);
-
-            int index = options.IndexOf(currentValue);
-            dropdown.value = index >= 0 ? index : 0;
-            dropdown.RefreshShownValue();
-
-            dropdown.onValueChanged.AddListener(i => field.SetValue(target, options[i]));
+            SearchableDropdown dropdown = new SearchableDropdown();
+            dropdown.Build(parent, position, width, FieldHeight, options, currentValue);
+            dropdown.OnValueChanged += val => field.SetValue(target, val);
             return dropdown;
-        }
-
-        /// <summary>
-        /// Patches the dropdown's template item <see cref="RectTransform"/> height so that
-        /// the click area matches the visible item height, preventing off-by-one selection
-        /// when clicking the lower half of an option.
-        /// </summary>
-        internal static void FixDropdownItemHeight(Dropdown dropdown, float itemHeight)
-        {
-            if (dropdown == null)
-                return;
-
-            // Unity's Dropdown template hierarchy: Template/Viewport/Content/Item
-            Transform template = dropdown.template;
-            if (template == null)
-                return;
-
-            Transform viewport = template.Find("Viewport");
-            Transform content  = viewport?.Find("Content");
-            Transform item     = content?.Find("Item");
-
-            if (item == null)
-                return;
-
-            // Fix hit area height
-            RectTransform itemRt = item.GetComponent<RectTransform>();
-            if (itemRt != null)
-                itemRt.sizeDelta = new Vector2(itemRt.sizeDelta.x, itemHeight);
-
-            // Fix text anchored to the bottom of the item rect - center it vertically
-            // so the visual text position matches the middle of the hit area.
-            Transform labelTransform = item.Find("Item Label");
-            if (labelTransform != null)
-            {
-                Text labelText = labelTransform.GetComponent<Text>();
-                if (labelText != null)
-                    labelText.alignment = TextAnchor.MiddleLeft;
-
-                RectTransform labelRt = labelTransform.GetComponent<RectTransform>();
-                if (labelRt != null)
-                {
-                    labelRt.anchorMin = new Vector2(labelRt.anchorMin.x, 0f);
-                    labelRt.anchorMax = new Vector2(labelRt.anchorMax.x, 1f);
-                    labelRt.offsetMin = new Vector2(labelRt.offsetMin.x, 0f);
-                    labelRt.offsetMax = new Vector2(labelRt.offsetMax.x, 0f);
-                }
-            }
         }
 
         private static void BuildColorField(GameObject parent, object target, FieldInfo field, string currentValue, Vector2 position, float width)

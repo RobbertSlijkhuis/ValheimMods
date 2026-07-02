@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 using YamlDotNet.Serialization;
@@ -84,6 +85,61 @@ namespace WizshBoneTwitchIntegration.Helpers
         public static void WriteDefaultRedeemsTo(string path)
         {
             WriteFromEmbeddedResourceTo("WizshBoneTwitchIntegration.resources.redeems.yaml", path);
+        }
+
+        /// <summary>
+        /// Serializes a profile's creatureGroups + redeems to its redeems.yaml, matching the
+        /// hand-formatted layout (creatureGroups preamble, type banners, sorted groups) that
+        /// the in-game editor produces. Shared by RedeemsTab.OnSave and cross-profile redeem copy.
+        /// </summary>
+        public static void WriteRedeemsConfig(string path, List<CreatureGroupData> creatureGroups, List<RedeemData> redeems)
+        {
+            ISerializer serializer = new SerializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+
+            var sb = new StringBuilder();
+
+            if (creatureGroups != null && creatureGroups.Count > 0)
+            {
+                var minimalGroups = creatureGroups.Select(g => RedeemData.MinimalDictionary(g)).ToList();
+                var preamble = new Dictionary<string, object> { { "creatureGroups", minimalGroups } };
+                sb.Append(serializer.Serialize(preamble));
+            }
+
+            var groups = redeems
+                .OrderBy(r => r.type?.ToString() ?? "")
+                .ThenBy(r => r.title ?? "")
+                .GroupBy(r => r.type?.ToString() ?? "");
+
+            sb.AppendLine("redeems:");
+
+            foreach (var group in groups)
+            {
+                string typeName = string.IsNullOrEmpty(group.Key) ? "Unknown" : group.Key;
+
+                sb.AppendLine($"  #######################");
+                sb.AppendLine($"  # {typeName}");
+                sb.AppendLine($"  #######################");
+
+                foreach (RedeemData redeem in group)
+                {
+                    // Serialize a single-item list so YamlDotNet emits the "- key: value" block format,
+                    // then strip the leading "- " list wrapper we get from a root sequence.
+                    var single = new List<Dictionary<string, object>> { redeem.ToDictionary() };
+                    string itemYaml = serializer.Serialize(single);
+                    // itemYaml looks like "- key: value\n  key2: value2\n"
+                    // Indent every line by 2 spaces to sit under "redeems:"
+                    foreach (string line in itemYaml.Split('\n'))
+                    {
+                        if (line.Length == 0) continue;
+                        sb.Append("  ");
+                        sb.AppendLine(line.TrimEnd('\r'));
+                    }
+                }
+            }
+
+            File.WriteAllText(path, sb.ToString());
         }
 
         private static T DeserializeYaml<T>(string path) where T : class

@@ -23,7 +23,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private readonly List<string> m_dropdownOptions;
         private GameObject m_itemContainer;
         private InputField m_inputField;
-        private Dropdown m_dropdown;
+        private SearchableDropdown m_dropdown;
         private bool m_useDropdown;
         private float m_fieldWidth;
 
@@ -58,24 +58,8 @@ namespace WizshBoneTwitchIntegration.Gui
 
             if (m_useDropdown)
             {
-                GameObject dropdownObj = GUIManager.Instance.CreateDropDown(
-                    parent: parent.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(inputCenterX, yOffset),
-                    fontSize: FieldUIBuilder.FieldFontSize,
-                    width: inputWidth,
-                    height: InputHeight
-                );
-                m_dropdown = dropdownObj.GetComponent<Dropdown>();
-                FieldUIBuilder.FixDropdownItemHeight(m_dropdown, FieldUIBuilder.InputHeight);
-                m_dropdown.ClearOptions();
-                m_dropdown.AddOptions(m_dropdownOptions);
-                if (m_dropdownOptions.Count > 0)
-                {
-                    m_dropdown.value = 0;
-                    m_dropdown.RefreshShownValue();
-                }
+                m_dropdown = new SearchableDropdown();
+                m_dropdown.Build(parent, new Vector2(inputCenterX, yOffset), inputWidth, InputHeight, m_dropdownOptions, null);
             }
             else
             {
@@ -121,9 +105,9 @@ namespace WizshBoneTwitchIntegration.Gui
 
             if (m_useDropdown)
             {
-                if (m_dropdown.value < 0 || m_dropdown.value >= m_dropdownOptions.Count)
+                text = m_dropdown.Value;
+                if (string.IsNullOrEmpty(text))
                     return;
-                text = m_dropdownOptions[m_dropdown.value];
             }
             else
             {

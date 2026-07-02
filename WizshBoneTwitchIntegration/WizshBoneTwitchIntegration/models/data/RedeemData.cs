@@ -11,6 +11,7 @@ namespace WizshBoneTwitchIntegration.Models
     {
         [EditorLabel("Title")]
         [EditorTooltip("The title of the redeem shown in Twitch.")]
+        [InputPrefix("WBTI")]
         public string title = "";
 
         [EditorLabel("Description")]
@@ -47,6 +48,7 @@ namespace WizshBoneTwitchIntegration.Models
         public bool userInput = false;
 
         [EditorHidden] public string type    = RedeemType.Undefined;
+        [EditorHidden] public string variant = RedeemVariant.None;
         [EditorHidden] public bool   enabled = true;
         [EditorHidden] public SurpriseChestData chestData = new SurpriseChestData();
         [EditorHidden] public SpawnCreatureData creatureData = new SpawnCreatureData();
