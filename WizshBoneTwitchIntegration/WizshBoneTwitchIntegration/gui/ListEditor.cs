@@ -210,7 +210,7 @@ namespace WizshBoneTwitchIntegration.Gui
             ScrollRect scrollRect = scrollRoot.AddComponent<ScrollRect>();
             scrollRect.horizontal        = false;
             scrollRect.vertical          = true;
-            scrollRect.scrollSensitivity = 30f;
+            scrollRect.scrollSensitivity = ScrollableView.ScrollSensitivity;
             scrollRect.movementType      = ScrollRect.MovementType.Clamped;
 
             GameObject viewport = new GameObject("Viewport");

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Models;
+using WizshBoneTwitchIntegration.Models.Views;
 
 namespace WizshBoneTwitchIntegration.Gui
 {
@@ -13,6 +14,10 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float EntrySpacing     = 8f;
         private const float SectionHeaderHeight = 28f;
         private const float SectionHeaderSpacing = 4f;
+
+        // ObjectListEditor's sidebar eats into the panel's fixed (non-scrolling-horizontally)
+        // width budget, so list-entry detail fields use a narrower column than top-level fields.
+        private const float ListEntryFieldWidth = 160f;
 
         private readonly float m_startX;
         private readonly float m_startY;
@@ -40,12 +45,17 @@ namespace WizshBoneTwitchIntegration.Gui
         /// Total height consumed (in pixels), suitable for setting on the content
         /// <see cref="RectTransform"/> of a <see cref="UnityEngine.UI.ScrollRect"/>.
         /// </returns>
-        public float Build(GameObject parent, object target)
+        /// <param name="simpleMode">
+        /// When true, <see cref="List{T}"/> fields whose element type has a registered narrowed
+        /// "simple view" (currently only <see cref="CreatureData"/>) render entries through that
+        /// view instead of every raw field.
+        /// </param>
+        public float Build(GameObject parent, object target, bool simpleMode = false)
         {
-            return BuildFields(parent, target, m_startY);
+            return BuildFields(parent, target, m_startY, simpleMode: simpleMode);
         }
 
-        internal float BuildFields(GameObject parent, object target, float startY, bool skipNullFields = false, Action onRebuild = null)
+        internal float BuildFields(GameObject parent, object target, float startY, bool skipNullFields = false, Action onRebuild = null, bool simpleMode = false)
         {
             FieldInfo[] fields = target.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
 
@@ -89,7 +99,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     BuildSectionBoundary(parent, "— " + sectionLabel + " —", new Vector2(fieldCenterX, yOffset), m_fieldWidth);
                     yOffset -= SectionHeaderHeight + SectionHeaderSpacing;
 
-                    yOffset -= BuildFields(parent, nestedValue, yOffset, skipNullFields: true, onRebuild: onRebuild);
+                    yOffset -= BuildFields(parent, nestedValue, yOffset, skipNullFields: true, onRebuild: onRebuild, simpleMode: simpleMode);
 
                     BuildSectionBoundary(parent, "— end of " + sectionLabel + " —", new Vector2(fieldCenterX, yOffset), m_fieldWidth);
                     yOffset -= SectionHeaderHeight + SectionHeaderSpacing;
@@ -101,12 +111,26 @@ namespace WizshBoneTwitchIntegration.Gui
                     field.FieldType.GetGenericTypeDefinition() == typeof(List<>) &&
                     typeof(CloneableData).IsAssignableFrom(field.FieldType.GetGenericArguments()[0]))
                 {
+                    Type elementType = field.FieldType.GetGenericArguments()[0];
+
+                    Func<object, object> entryViewFactory = null;
+                    if (simpleMode && elementType == typeof(CreatureData))
+                        entryViewFactory = entry => new CreatureSimpleView((CreatureData)entry);
+
+                    Func<object, string> entryLabelFactory = null;
+                    if (elementType == typeof(CreatureData))
+                        entryLabelFactory = entry => FieldUIBuilder.GetCreatureDisplayName(((CreatureData)entry).prefabName);
+                    else if (elementType == typeof(StatusEffectEntry))
+                        entryLabelFactory = entry => ((StatusEffectEntry)entry).name;
+
                     var listEditor = new ObjectListEditor(
                         field.GetValue(target) as IList,
-                        field.FieldType.GetGenericArguments()[0],
+                        elementType,
                         field.GetCustomAttribute<EditorLabelAttribute>()?.Label ?? field.Name,
                         m_startX,
-                        m_fieldWidth);
+                        ListEntryFieldWidth,
+                        entryViewFactory,
+                        entryLabelFactory);
                     listEditor.Build(parent, new Vector2(m_startX, yOffset));
                     yOffset -= ObjectListEditor.TotalHeight + EntrySpacing;
                     continue;

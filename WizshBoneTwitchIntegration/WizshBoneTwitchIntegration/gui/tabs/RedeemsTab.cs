@@ -33,6 +33,9 @@ namespace WizshBoneTwitchIntegration.Gui
         private GameObject m_variantRow;
         private Button m_toggleRawViewBtn;
         private bool m_showRawSpawnAbilityData;
+        private GameObject m_creatureViewRow;
+        private Button m_toggleCreatureViewBtn;
+        private bool m_showRawCreatureData;
         private Text m_createFeedbackText;
         private GameObject m_standardFieldsContainer;
         private GameObject m_editorContainer;
@@ -627,6 +630,43 @@ namespace WizshBoneTwitchIntegration.Gui
             m_variantRow.GetComponent<RectTransform>().sizeDelta = new Vector2(1050f, 36f);
             m_variantRow.SetActive(false);
 
+            // Only shown when type == RedeemType.SpawnCreature - toggles between a curated
+            // subset of CreatureData fields per list entry (CreatureSimpleView) and every field.
+            m_creatureViewRow = TabUIHelper.CreateStaticContainer("CreatureViewRow", scrollContent, yPos);
+
+            Text creatureViewLabelComp = GUIManager.Instance.CreateText(
+                text: "Creature fields",
+                parent: m_creatureViewRow.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(TypeLabelX, 0f),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: FieldUIBuilder.LabelFontSize,
+                color: GUIManager.Instance.ValheimBeige,
+                outline: true,
+                outlineColor: Color.black,
+                width: TypeLabelW,
+                height: 36f,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+            creatureViewLabelComp.alignment = TextAnchor.MiddleLeft;
+
+            GameObject toggleCreatureViewBtnObj = GUIManager.Instance.CreateButton(
+                text: "Show full data",
+                parent: m_creatureViewRow.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(TypeDropdownX, 0f),
+                width: ToggleRawViewBtnWidth,
+                height: 36f
+            );
+            toggleCreatureViewBtnObj.SetActive(true);
+            m_toggleCreatureViewBtn = toggleCreatureViewBtnObj.GetComponent<Button>();
+            m_toggleCreatureViewBtn.onClick.AddListener(OnToggleCreatureView);
+
+            m_creatureViewRow.GetComponent<RectTransform>().sizeDelta = new Vector2(1050f, 36f);
+            m_creatureViewRow.SetActive(false);
+
             yPos -= 70f;
             m_editorContainerYPos = yPos;
 
@@ -653,6 +693,11 @@ namespace WizshBoneTwitchIntegration.Gui
             if (!hasVariant)
                 m_showRawSpawnAbilityData = false;
 
+            bool isSpawnCreature = m_newRedeem.type == RedeemType.SpawnCreature;
+            m_creatureViewRow.SetActive(isSpawnCreature);
+            if (!isSpawnCreature)
+                m_showRawCreatureData = false;
+
             float editorHeight = 0f;
 
             if (m_newRedeem.type == RedeemType.Detonate)
@@ -669,6 +714,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.timeStopData);
             else if (m_newRedeem.type == RedeemType.Weather)
                 editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.weatherData);
+            else if (isSpawnCreature)
+                editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.creatureData, simpleMode: !m_showRawCreatureData);
             else if (isSpawnAbility)
             {
                 object spawnAbilityView;
@@ -711,6 +758,15 @@ namespace WizshBoneTwitchIntegration.Gui
             m_showRawSpawnAbilityData = !m_showRawSpawnAbilityData;
             m_toggleRawViewBtn.GetComponentInChildren<Text>().text = m_showRawSpawnAbilityData
                 ? "Show variant fields"
+                : "Show full data";
+            OnTypeChanged();
+        }
+
+        private void OnToggleCreatureView()
+        {
+            m_showRawCreatureData = !m_showRawCreatureData;
+            m_toggleCreatureViewBtn.GetComponentInChildren<Text>().text = m_showRawCreatureData
+                ? "Show simple fields"
                 : "Show full data";
             OnTypeChanged();
         }
@@ -809,6 +865,9 @@ namespace WizshBoneTwitchIntegration.Gui
             m_variantRow.SetActive(false);
             m_showRawSpawnAbilityData     = false;
             m_toggleRawViewBtn.GetComponentInChildren<Text>().text = "Show full data";
+            m_creatureViewRow.SetActive(false);
+            m_showRawCreatureData         = false;
+            m_toggleCreatureViewBtn.GetComponentInChildren<Text>().text = "Show full data";
             m_confirmButton.gameObject.SetActive(true);
             m_confirmButton.GetComponentInChildren<Text>().text = "+ Add";
 
@@ -830,6 +889,8 @@ namespace WizshBoneTwitchIntegration.Gui
             m_variantDropdown.Interactable = false;
             m_showRawSpawnAbilityData     = false;
             m_toggleRawViewBtn.GetComponentInChildren<Text>().text = "Show full data";
+            m_showRawCreatureData         = false;
+            m_toggleCreatureViewBtn.GetComponentInChildren<Text>().text = "Show full data";
             m_confirmButton.gameObject.SetActive(true);
             m_confirmButton.GetComponentInChildren<Text>().text = "Save";
 
@@ -854,6 +915,8 @@ namespace WizshBoneTwitchIntegration.Gui
             m_variantDropdown.Interactable = false;
             m_showRawSpawnAbilityData     = false;
             m_toggleRawViewBtn.GetComponentInChildren<Text>().text = "Show full data";
+            m_showRawCreatureData         = false;
+            m_toggleCreatureViewBtn.GetComponentInChildren<Text>().text = "Show full data";
             m_confirmButton.gameObject.SetActive(false);
 
             m_typeDropdown.Value = redeem.type;

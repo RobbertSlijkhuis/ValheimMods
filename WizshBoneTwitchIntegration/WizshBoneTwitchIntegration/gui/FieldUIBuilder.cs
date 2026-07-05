@@ -51,7 +51,11 @@ namespace WizshBoneTwitchIntegration.Gui
             // bound field instead of field.SetValue(target, ...).
             if (currentValue is IBoundField boundField)
             {
-                return BuildBoundField(parent, boundField, rowPosition, fieldWidth, labelText, tooltip);
+                List<DropdownOption> boundDropdownOptions = null;
+                if (field.GetCustomAttribute<CreaturePrefabNameDropdownAttribute>() != null)
+                    boundDropdownOptions = EnsureIncludesCurrentValue(GetAvailableCreaturePrefabOptions(), boundField.GetValue() as string ?? "");
+
+                return BuildBoundField(parent, boundField, rowPosition, fieldWidth, labelText, tooltip, boundDropdownOptions);
             }
 
             // Special case: List<string>
@@ -104,6 +108,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 var colorAttr    = field.GetCustomAttribute<ColorPickerAttribute>();
                 var dropdownAttr = field.GetCustomAttribute<DropdownOptionsAttribute>();
                 var seDropdown   = field.GetCustomAttribute<StatusEffectNameDropdownAttribute>();
+                var creatureDropdown = field.GetCustomAttribute<CreaturePrefabNameDropdownAttribute>();
                 var onChanged    = field.GetCustomAttribute<OnValueChangedAttribute>();
                 var prefixAttr   = field.GetCustomAttribute<InputPrefixAttribute>();
 
@@ -113,13 +118,21 @@ namespace WizshBoneTwitchIntegration.Gui
                 }
                 else if (seDropdown != null)
                 {
-                    SearchableDropdown dd = BuildStringDropdownField(parent, target, field, currentValue as string ?? "", fieldPos, fieldWidth, GetAvailableStatusEffectNames());
+                    string current = currentValue as string ?? "";
+                    List<DropdownOption> options = EnsureIncludesCurrentValue(GetAvailableStatusEffectOptions(), current);
+                    SearchableDropdown dd = BuildStringDropdownField(parent, target, field, current, fieldPos, fieldWidth, options);
                     if (onChanged != null)
                         dd.OnValueChanged += _ =>
                         {
                             InvokeOnValueChanged(parent, target, onChanged.MethodName);
                             onRebuild?.Invoke();
                         };
+                }
+                else if (creatureDropdown != null)
+                {
+                    string current = currentValue as string ?? "";
+                    List<DropdownOption> options = EnsureIncludesCurrentValue(GetAvailableCreaturePrefabOptions(), current);
+                    BuildStringDropdownField(parent, target, field, current, fieldPos, fieldWidth, options);
                 }
                 else if (dropdownAttr != null)
                 {
@@ -197,7 +210,7 @@ namespace WizshBoneTwitchIntegration.Gui
         /// wrapped type to the same primitive input styles as a direct field, but reading/
         /// writing through the bound field's delegates instead of a target object's field.
         /// </summary>
-        private static bool BuildBoundField(GameObject parent, IBoundField boundField, Vector2 rowPosition, float fieldWidth, string labelText, string tooltip)
+        private static bool BuildBoundField(GameObject parent, IBoundField boundField, Vector2 rowPosition, float fieldWidth, string labelText, string tooltip, List<DropdownOption> dropdownOptions = null)
         {
             Type wrapped = boundField.WrappedType;
 
@@ -236,8 +249,18 @@ namespace WizshBoneTwitchIntegration.Gui
 
             if (isString)
             {
-                InputField inp = CreateInputField(parent, fieldPos, fieldWidth, currentValue as string ?? "");
-                inp.onValueChanged.AddListener(val => boundField.SetValue(val));
+                string current = currentValue as string ?? "";
+                if (dropdownOptions != null)
+                {
+                    SearchableDropdown dd = new SearchableDropdown();
+                    dd.Build(parent, fieldPos, fieldWidth, FieldHeight, dropdownOptions, current);
+                    dd.OnValueChanged += val => boundField.SetValue(val);
+                }
+                else
+                {
+                    InputField inp = CreateInputField(parent, fieldPos, fieldWidth, current);
+                    inp.onValueChanged.AddListener(val => boundField.SetValue(val));
+                }
             }
             else if (isInt)
             {
@@ -631,6 +654,82 @@ namespace WizshBoneTwitchIntegration.Gui
             };
         }
 
+        // Prefab registration doesn't change mid-session, so this scan (every registered
+        // prefab, two GetComponent calls each) only needs to run once and is cached here.
+        private static List<DropdownOption> s_cachedCreaturePrefabOptions;
+
+        /// <summary>
+        /// Value = prefab name (what gets stored), Label = the creature's localized display
+        /// name where available, matching how <c>WizshBoneTwitchIntegration.cs</c> already
+        /// identifies spawnable creatures (Humanoid + MonsterAI).
+        /// </summary>
+        public static List<DropdownOption> GetAvailableCreaturePrefabOptions()
+        {
+            if (s_cachedCreaturePrefabOptions != null)
+                return s_cachedCreaturePrefabOptions;
+
+            if (ZNetScene.instance == null)
+                return new List<DropdownOption>();
+
+            var options = new List<DropdownOption>();
+            foreach (string name in ZNetScene.instance.GetPrefabNames())
+            {
+                GameObject prefab = PrefabManager.Instance.GetPrefab(name);
+                if (prefab == null)
+                    continue;
+
+                Humanoid humanoid = prefab.GetComponent<Humanoid>();
+                MonsterAI monsterAI = prefab.GetComponent<MonsterAI>();
+                if (humanoid == null || monsterAI == null)
+                    continue;
+
+                string label = !string.IsNullOrEmpty(humanoid.m_name)
+                    ? Localization.instance.Localize(humanoid.m_name)
+                    : name;
+                options.Add(new DropdownOption(name, label));
+            }
+
+            options.Sort((a, b) => string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase));
+            s_cachedCreaturePrefabOptions = options;
+            return options;
+        }
+
+        /// <summary>
+        /// Resolves the same localized label <see cref="GetAvailableCreaturePrefabOptions"/> shows
+        /// in the dropdown, for use anywhere else a creature's prefab name is displayed (e.g. an
+        /// entry list). Falls back to <paramref name="prefabName"/> itself if it's not a known
+        /// Humanoid+MonsterAI creature.
+        /// </summary>
+        public static string GetCreatureDisplayName(string prefabName)
+        {
+            if (string.IsNullOrEmpty(prefabName))
+                return prefabName;
+
+            foreach (DropdownOption option in GetAvailableCreaturePrefabOptions())
+            {
+                if (option.Value == prefabName)
+                    return option.Label;
+            }
+
+            return prefabName;
+        }
+
+        /// <summary>
+        /// Returns <paramref name="options"/> with <paramref name="currentValue"/> added in
+        /// (sorted) if it's missing - so a saved value that no longer matches a dropdown's
+        /// live filter (e.g. a creature without the required components) still displays
+        /// correctly instead of being silently swapped for the first option.
+        /// </summary>
+        private static List<DropdownOption> EnsureIncludesCurrentValue(List<DropdownOption> options, string currentValue)
+        {
+            if (string.IsNullOrEmpty(currentValue) || options.Any(o => o.Value == currentValue))
+                return options;
+
+            var withCurrent = new List<DropdownOption>(options) { new DropdownOption(currentValue, currentValue) };
+            withCurrent.Sort((a, b) => string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase));
+            return withCurrent;
+        }
+
         // Mirrors ListEditor's private constants - used to compute layout alignment
         private const float ListEditorInputW = 200f;
         private const float ListEditorBtnW = 60f;
@@ -659,6 +758,14 @@ namespace WizshBoneTwitchIntegration.Gui
         }
 
         private static SearchableDropdown BuildStringDropdownField(GameObject parent, object target, FieldInfo field, string currentValue, Vector2 position, float width, List<string> options)
+        {
+            SearchableDropdown dropdown = new SearchableDropdown();
+            dropdown.Build(parent, position, width, FieldHeight, options, currentValue);
+            dropdown.OnValueChanged += val => field.SetValue(target, val);
+            return dropdown;
+        }
+
+        private static SearchableDropdown BuildStringDropdownField(GameObject parent, object target, FieldInfo field, string currentValue, Vector2 position, float width, List<DropdownOption> options)
         {
             SearchableDropdown dropdown = new SearchableDropdown();
             dropdown.Build(parent, position, width, FieldHeight, options, currentValue);
@@ -766,7 +873,7 @@ namespace WizshBoneTwitchIntegration.Gui
             }
         }
 
-        public static List<string> GetAvailableStatusEffectNames()
+        private static List<string> GetAvailableStatusEffectNames()
         {
             List<string> names = new List<string>();
 
@@ -790,6 +897,43 @@ namespace WizshBoneTwitchIntegration.Gui
 
             names.Sort();
             return names;
+        }
+
+        // Status effect names don't change mid-session, so this lookup (reflection over
+        // StatusEffectType plus an ObjectDB scan for display names) only needs to run once
+        // and is cached here, mirroring GetAvailableCreaturePrefabOptions.
+        private static List<DropdownOption> s_cachedStatusEffectOptions;
+
+        /// <summary>
+        /// Value = the status effect's internal name (matching <see cref="Types.StatusEffectType"/>
+        /// and what gets stored), Label = its localized display name where a matching loaded
+        /// <see cref="StatusEffect"/> asset is found, else the value itself.
+        /// </summary>
+        public static List<DropdownOption> GetAvailableStatusEffectOptions()
+        {
+            if (s_cachedStatusEffectOptions != null)
+                return s_cachedStatusEffectOptions;
+
+            if (ObjectDB.instance == null)
+                return new List<DropdownOption>();
+
+            Dictionary<string, string> displayNames = new Dictionary<string, string>();
+            foreach (StatusEffect se in ObjectDB.instance.m_StatusEffects)
+            {
+                if (se != null && !string.IsNullOrEmpty(se.m_name))
+                    displayNames[se.name] = Localization.instance.Localize(se.m_name);
+            }
+
+            var options = new List<DropdownOption>();
+            foreach (string name in GetAvailableStatusEffectNames())
+            {
+                string label = displayNames.TryGetValue(name, out string localized) ? localized : name;
+                options.Add(new DropdownOption(name, label));
+            }
+
+            options.Sort((a, b) => string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase));
+            s_cachedStatusEffectOptions = options;
+            return options;
         }
     }
 }

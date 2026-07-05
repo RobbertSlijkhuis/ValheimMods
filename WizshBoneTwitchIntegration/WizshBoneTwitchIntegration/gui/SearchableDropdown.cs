@@ -8,6 +8,24 @@ using UnityEngine.UI;
 namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
+    /// One selectable entry in a <see cref="SearchableDropdown"/>: <see cref="Value"/> is what
+    /// gets stored/returned (e.g. a prefab name), <see cref="Label"/> is what's displayed and
+    /// searched (e.g. a localized display name). A plain <c>List&lt;string&gt;</c> option list
+    /// is equivalent to using the same string for both.
+    /// </summary>
+    internal readonly struct DropdownOption
+    {
+        public readonly string Value;
+        public readonly string Label;
+
+        public DropdownOption(string value, string label)
+        {
+            Value = value;
+            Label = label;
+        }
+    }
+
+    /// <summary>
     /// A dropdown-style field builder: a toggle button that, when clicked, opens a floating
     /// panel containing a search box and a scrollable, live-filtered list of options. Selecting
     /// a row sets <see cref="Value"/>, fires <see cref="OnValueChanged"/>, and closes the panel.
@@ -28,7 +46,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         public event Action<string> OnValueChanged;
 
-        private List<string> m_options = new List<string>();
+        private List<DropdownOption> m_options = new List<DropdownOption>();
         private string m_value = "";
         private float m_width;
 
@@ -41,7 +59,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private GameObject m_blockerObj;
         private InputField m_searchInput;
         private GameObject m_listContent;
-        private List<string> m_filteredOptions = new List<string>();
+        private List<DropdownOption> m_filteredOptions = new List<DropdownOption>();
         private bool m_isOpen;
 
         public string Value
@@ -50,7 +68,7 @@ namespace WizshBoneTwitchIntegration.Gui
             set
             {
                 string desired = value ?? "";
-                m_value = (m_options.Count == 0 || m_options.Contains(desired)) ? desired : m_options[0];
+                m_value = (m_options.Count == 0 || m_options.Any(o => o.Value == desired)) ? desired : m_options[0].Value;
                 UpdateToggleLabel();
             }
         }
@@ -64,11 +82,17 @@ namespace WizshBoneTwitchIntegration.Gui
         /// <summary>Builds the toggle button at <paramref name="position"/>. Returns the toggle GameObject.</summary>
         public GameObject Build(GameObject parent, Vector2 position, float width, float height, List<string> options, string currentValue)
         {
-            m_options = options ?? new List<string>();
+            return Build(parent, position, width, height, ToOptions(options), currentValue);
+        }
+
+        /// <summary>Builds the toggle button at <paramref name="position"/>. Returns the toggle GameObject.</summary>
+        public GameObject Build(GameObject parent, Vector2 position, float width, float height, List<DropdownOption> options, string currentValue)
+        {
+            m_options = options ?? new List<DropdownOption>();
             m_width   = width;
-            m_value   = (!string.IsNullOrEmpty(currentValue) && m_options.Contains(currentValue))
+            m_value   = (!string.IsNullOrEmpty(currentValue) && m_options.Any(o => o.Value == currentValue))
                 ? currentValue
-                : (m_options.Count > 0 ? m_options[0] : "");
+                : (m_options.Count > 0 ? m_options[0].Value : "");
 
             m_toggleObj = GUIManager.Instance.CreateButton(
                 text: "",
@@ -154,17 +178,31 @@ namespace WizshBoneTwitchIntegration.Gui
         /// <summary>Replaces the option list and current value, closing the panel if it's open.</summary>
         public void SetOptions(List<string> options, string selectedValue = null)
         {
-            m_options = options ?? new List<string>();
-            Value = (selectedValue != null && m_options.Contains(selectedValue))
+            SetOptions(ToOptions(options), selectedValue);
+        }
+
+        /// <summary>Replaces the option list and current value, closing the panel if it's open.</summary>
+        public void SetOptions(List<DropdownOption> options, string selectedValue = null)
+        {
+            m_options = options ?? new List<DropdownOption>();
+            Value = (selectedValue != null && m_options.Any(o => o.Value == selectedValue))
                 ? selectedValue
-                : (m_options.Count > 0 ? m_options[0] : "");
+                : (m_options.Count > 0 ? m_options[0].Value : "");
             Close();
+        }
+
+        private static List<DropdownOption> ToOptions(List<string> values)
+        {
+            return (values ?? new List<string>()).Select(v => new DropdownOption(v, v)).ToList();
         }
 
         private void UpdateToggleLabel()
         {
-            if (m_toggleText != null)
-                m_toggleText.text = m_value ?? "";
+            if (m_toggleText == null)
+                return;
+
+            DropdownOption match = m_options.FirstOrDefault(o => o.Value == m_value);
+            m_toggleText.text = match.Value == m_value ? match.Label : (m_value ?? "");
         }
 
         private void Open()
@@ -239,7 +277,7 @@ namespace WizshBoneTwitchIntegration.Gui
             float listY = -(SearchInputHeight + PanelPadding * 2f);
             m_listContent = ListEditor.CreateScrollableList(m_panelObj, new Vector2(0f, listY), innerWidth, listHeight, "SearchableDropdownScroll");
 
-            m_filteredOptions = new List<string>(m_options);
+            m_filteredOptions = new List<DropdownOption>(m_options);
             RefreshOptionRows();
 
             m_searchInput.ActivateInputField();
@@ -260,8 +298,8 @@ namespace WizshBoneTwitchIntegration.Gui
         private void OnFilterChanged(string text)
         {
             m_filteredOptions = string.IsNullOrEmpty(text)
-                ? new List<string>(m_options)
-                : m_options.Where(o => o.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+                ? new List<DropdownOption>(m_options)
+                : m_options.Where(o => o.Label.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
 
             RefreshOptionRows();
         }
@@ -299,9 +337,9 @@ namespace WizshBoneTwitchIntegration.Gui
                 return;
             }
 
-            foreach (string option in m_filteredOptions)
+            foreach (DropdownOption option in m_filteredOptions)
             {
-                string captured = option;
+                string capturedValue = option.Value;
 
                 GameObject rowObj = new GameObject("Option", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
                 rowObj.transform.SetParent(m_listContent.transform, false);
@@ -325,10 +363,10 @@ namespace WizshBoneTwitchIntegration.Gui
                 cb.pressedColor     = new Color(1f, 1f, 1f, 0.3f);
                 cb.selectedColor    = cb.highlightedColor;
                 rowBtn.colors = cb;
-                rowBtn.onClick.AddListener(() => Select(captured));
+                rowBtn.onClick.AddListener(() => Select(capturedValue));
 
                 Text rowText = GUIManager.Instance.CreateText(
-                    text: option,
+                    text: option.Label,
                     parent: rowObj.transform,
                     anchorMin: new Vector2(0.5f, 0.5f),
                     anchorMax: new Vector2(0.5f, 0.5f),
