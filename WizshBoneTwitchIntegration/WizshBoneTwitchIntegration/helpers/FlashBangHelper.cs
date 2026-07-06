@@ -1,5 +1,6 @@
 ﻿using Jotunn.Managers;
 using System.Collections;
+using System.Collections.Generic;
 using TwitchSDK.Interop;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,6 +14,41 @@ namespace WizshBoneTwitchIntegration.Helpers
     {
         public static int width = Screen.width;
         public static int height = Screen.height;
+
+        private struct QueuedFlashbang
+        {
+            public FlashBangData data;
+            public CustomRewardEvent customRewardEvent;
+        }
+
+        private static readonly Queue<QueuedFlashbang> s_queue = new Queue<QueuedFlashbang>();
+        private static bool s_isRunning;
+
+        public static void Enqueue(MonoBehaviour host, FlashBangData flashbangData, CustomRewardEvent customRewardEvent)
+        {
+            s_queue.Enqueue(new QueuedFlashbang { data = flashbangData, customRewardEvent = customRewardEvent });
+
+            if (!s_isRunning)
+                host.StartCoroutine(ProcessQueue(host));
+        }
+
+        private static IEnumerator ProcessQueue(MonoBehaviour host)
+        {
+            s_isRunning = true;
+            try
+            {
+                while (s_queue.Count > 0)
+                {
+                    QueuedFlashbang next = s_queue.Dequeue();
+                    yield return host.StartCoroutine(AttachFlashBang(next.data, next.customRewardEvent));
+                }
+            }
+            finally
+            {
+                s_queue.Clear();
+                s_isRunning = false;
+            }
+        }
 
         public static IEnumerator AttachFlashBang(FlashBangData flashbangData, CustomRewardEvent customRewardEvent)
         {

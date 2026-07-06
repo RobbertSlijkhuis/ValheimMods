@@ -13,6 +13,41 @@ namespace WizshBoneTwitchIntegration.Helpers
     {
         private const float DelayBetweenDetonations = 0.05f;
 
+        private struct QueuedDetonation
+        {
+            public DetonateData data;
+            public CustomRewardEvent customRewardEvent;
+        }
+
+        private static readonly Queue<QueuedDetonation> s_queue = new Queue<QueuedDetonation>();
+        private static bool s_isRunning;
+
+        public static void Enqueue(MonoBehaviour host, DetonateData detonateData, CustomRewardEvent customRewardEvent)
+        {
+            s_queue.Enqueue(new QueuedDetonation { data = detonateData, customRewardEvent = customRewardEvent });
+
+            if (!s_isRunning)
+                host.StartCoroutine(ProcessQueue(host));
+        }
+
+        private static IEnumerator ProcessQueue(MonoBehaviour host)
+        {
+            s_isRunning = true;
+            try
+            {
+                while (s_queue.Count > 0)
+                {
+                    QueuedDetonation next = s_queue.Dequeue();
+                    yield return host.StartCoroutine(Detonate(next.data, next.customRewardEvent));
+                }
+            }
+            finally
+            {
+                s_queue.Clear();
+                s_isRunning = false;
+            }
+        }
+
         public static IEnumerator Detonate(DetonateData detonateData, CustomRewardEvent customRewardEvent)
         {
             int layerMask = 0;
@@ -29,10 +64,14 @@ namespace WizshBoneTwitchIntegration.Helpers
             Collider[] found = Physics.OverlapSphere(Player.m_localPlayer.transform.position, detonateData.radius, layerMask);
 
             List<GameObject> prefabList = new List<GameObject>();
+            HashSet<GameObject> seenRoots = new HashSet<GameObject>();
 
             foreach (var item in found)
             {
                 GameObject rootObject = item.transform.root.gameObject;
+
+                if (!seenRoots.Add(rootObject))
+                    continue;
 
                 if (detonateData.type == DetonateType.Creature || detonateData.type == DetonateType.CreatureSpawned)
                 {
@@ -85,6 +124,12 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 GameObject explosionInstance = UnityEngine.Object.Instantiate(explosionFX, prefab.transform.position, prefab.transform.rotation);
                 UnityEngine.Object.Instantiate(explosionSFX, prefab.transform.position, prefab.transform.rotation);
+
+                if (!detonateData.damageTerrain)
+                {
+                    foreach (Aoe aoe in explosionInstance.GetComponentsInChildren<Aoe>(true))
+                        aoe.m_spawnOnHitTerrain = null;
+                }
 
                 if (detonateData.damageData != null)
                     explosionInstance.AddComponent<TwitchPersistentDamage>().SetData(customRewardEvent, detonateData.damageData);

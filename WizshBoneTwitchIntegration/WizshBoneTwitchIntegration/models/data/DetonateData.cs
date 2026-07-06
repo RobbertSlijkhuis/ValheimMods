@@ -27,6 +27,10 @@ namespace WizshBoneTwitchIntegration.Models
         [EditorTooltip("Custom damage setting for the explosion.")]
         public DamageData damageData = new DamageData() { basedOnMaxHealthAndArmor = true, blunt = 70f, chop = 160f, fire = 30f, pickaxe = 160f };
 
+        [EditorLabel("Damage terrain")]
+        [EditorTooltip("Whether the explosion is allowed to dig/scorch terrain. Disabling this avoids the heightmap edit, which helps performance on large detonations.")]
+        public bool damageTerrain = true;
+
         public DetonateData() { }
     }
 }

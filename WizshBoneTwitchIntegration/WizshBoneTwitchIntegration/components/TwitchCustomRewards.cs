@@ -204,7 +204,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         throw new RedeemException("Could not find data for detonate", ExceptionType.Error);
                     }
 
-                    StartCoroutine(DetonateHelper.Detonate(redeem.detonateData, customRewardEvent));
+                    DetonateHelper.Enqueue(this, redeem.detonateData, customRewardEvent);
                 }
 
                 if (redeem.type == RedeemType.Flashbang)
@@ -214,7 +214,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         throw new RedeemException("Could not find data for flashbang", ExceptionType.Error);
                     }
 
-                    StartCoroutine(FlashBangHelper.AttachFlashBang(redeem.flashbangData, customRewardEvent));
+                    FlashBangHelper.Enqueue(this, redeem.flashbangData, customRewardEvent);
                 }
 
                 if (redeem.type == RedeemType.Mist)
