@@ -85,6 +85,9 @@ namespace WizshBoneTwitchIntegration.Components
                 m_netView.GetZDO().Set(m_startedHash, dateTime.ToString());
                 m_netView.GetZDO().Set(m_breakOnDestroyHash, breakOnDestroy);
 
+                TwitchBasePersistentData baseData = gameObject.GetComponent<TwitchBasePersistentData>();
+                baseData?.SetFlag(PersistentComponentFlags.Destruction, true);
+
                 StartDestructionTimer(duration);
             }
 

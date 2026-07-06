@@ -1,6 +1,7 @@
 ﻿using Jotunn.Entities;
 using Jotunn.Managers;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Helpers;
@@ -14,6 +15,7 @@ namespace WizshBoneTwitchIntegration.Commands
 
         private static Coroutine m_testCoroutine;
         private static int m_redeemIndex;
+        private static List<string> m_enabledRedeemTitles;
 
         public override void Run(string[] args)
         {
@@ -38,6 +40,14 @@ namespace WizshBoneTwitchIntegration.Commands
                 return;
             }
 
+            m_enabledRedeemTitles = RedeemHelper.redeems.Where(item => item.enabled).Select(item => item.title).ToList();
+
+            if (m_enabledRedeemTitles.Count == 0)
+            {
+                Jotunn.Logger.LogError("No enabled redeems are loaded, cannot start test!");
+                return;
+            }
+
             if (m_testCoroutine != null)
             {
                 Jotunn.Logger.LogWarning("Test already running, restarting...");
@@ -45,7 +55,7 @@ namespace WizshBoneTwitchIntegration.Commands
             }
 
             m_redeemIndex = 0;
-            Jotunn.Logger.LogWarning($"Starting redeem stress test every {interval}s with {RedeemHelper.redeems.Count} loaded redeems. Run 'testWBTI' with no args to stop.");
+            Jotunn.Logger.LogWarning($"Starting redeem stress test every {interval}s with {m_enabledRedeemTitles.Count} enabled redeems. Run 'testWBTI' with no args to stop.");
             m_testCoroutine = WizshBoneTwitchIntegration.Instance.StartCoroutine(TestLoop(interval));
         }
 
@@ -75,11 +85,11 @@ namespace WizshBoneTwitchIntegration.Commands
 
             while (true)
             {
-                string redeem = RedeemHelper.redeems[m_redeemIndex].title;
-                Jotunn.Logger.LogWarning($"[TestWBTI] Firing redeem ({m_redeemIndex + 1}/{RedeemHelper.redeems.Count}): {redeem}");
+                string redeem = m_enabledRedeemTitles[m_redeemIndex];
+                Jotunn.Logger.LogWarning($"[TestWBTI] Firing redeem ({m_redeemIndex + 1}/{m_enabledRedeemTitles.Count}): {redeem}");
                 command.Run(new string[] { redeem });
 
-                m_redeemIndex = (m_redeemIndex + 1) % RedeemHelper.redeems.Count;
+                m_redeemIndex = (m_redeemIndex + 1) % m_enabledRedeemTitles.Count;
                 yield return new WaitForSeconds(interval);
             }
         }

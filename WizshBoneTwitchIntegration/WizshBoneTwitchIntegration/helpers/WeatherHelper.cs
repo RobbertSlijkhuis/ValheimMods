@@ -43,7 +43,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             string weather = weatherData.items[Random.Range(0, weatherData.items.Count)];
             Jotunn.Logger.LogWarning("Chosen weather: " + weather);
 
-            GameObject gameObject = UnityEngine.Object.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.EnvZone, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
+            GameObject gameObject = ZNetViewHelper.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.EnvZone, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
             _activeWeatherZone = gameObject;
 
             CapsuleCollider capsuleCollider = gameObject.GetComponent<CapsuleCollider>();
@@ -58,7 +58,12 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (weatherData.announceMessage != null)
                 Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, weatherData.announceMessage) + $" \n{weather}", 3000);
 
-            persistentDestruction.SetStarted(weatherData.duration);
+            // duration == 0 means indefinite/never auto-cleanup - don't start the destruction timer,
+            // since SetStarted(0) would trigger TimedDestruction with a 0s timeout and destroy the
+            // zone almost immediately instead of leaving it in place.
+            if (weatherData.duration > 0)
+                persistentDestruction.SetStarted(weatherData.duration);
+
             persistentDestruction.onEnd = OnDestroy;
         }
 

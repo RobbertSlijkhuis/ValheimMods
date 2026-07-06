@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TwitchSDK.Interop;
+using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Commands
@@ -16,7 +17,7 @@ namespace WizshBoneTwitchIntegration.Commands
         public override List<string> CommandOptionList()
         {
             TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
-            List<string> result = customRewards.GetRedeemList().Select(item => item.title).ToList();
+            List<string> result = customRewards.GetRedeemList().Where(item => item.enabled).Select(item => item.title).ToList();
             return result;
         }
 
@@ -38,11 +39,20 @@ namespace WizshBoneTwitchIntegration.Commands
                     title += arg + " ";
                 }
 
+                title = title.TrimEnd();
+
+                RedeemData redeem = customRewards.GetRedeemList().Find(item => item.title == title);
+                if (redeem != null && !redeem.enabled)
+                {
+                    Jotunn.Logger.LogWarning($"[WBTI] Redeem \"{title}\" is disabled, skipping test invocation.");
+                    return;
+                }
+
                 CustomRewardEvent currentRewardEvent = new CustomRewardEvent();
                 currentRewardEvent.RedemptionId = Guid.Empty.ToString();
                 currentRewardEvent.RedeemerName = "WizshBone";
                 currentRewardEvent.RedeemedAt = DateTime.Now.ToShortDateString();
-                currentRewardEvent.CustomRewardTitle = title.TrimEnd();
+                currentRewardEvent.CustomRewardTitle = title;
                 currentRewardEvent.CustomRewardCost = 100;
                 currentRewardEvent.Status = CustomRewardRedemptionState.Unfulfilled;
                 WizshBoneTwitchIntegration.useRedeemCommand = true;

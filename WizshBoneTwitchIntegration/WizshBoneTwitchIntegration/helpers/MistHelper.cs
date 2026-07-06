@@ -18,10 +18,17 @@ namespace WizshBoneTwitchIntegration.Helpers
                 throw new System.Exception("Could not find mist prefab to spawn");
             }
 
-            GameObject mist = UnityEngine.Object.Instantiate(prefab, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
+            GameObject mist = ZNetViewHelper.Instantiate(prefab, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
             Mister mister = mist.GetComponent<Mister>();
-            TwitchPersistentDestruction persistentDestruction = mist.GetComponent<TwitchPersistentDestruction>();
-            persistentDestruction.SetStarted(mistData.duration);
+
+            // duration == 0 means indefinite/never auto-cleanup - don't start the destruction timer,
+            // since SetStarted(0) would trigger TimedDestruction with a 0s timeout and destroy the
+            // mist almost immediately instead of leaving it in place.
+            if (mistData.duration > 0)
+            {
+                TwitchPersistentDestruction persistentDestruction = mist.GetComponent<TwitchPersistentDestruction>() ?? mist.AddComponent<TwitchPersistentDestruction>();
+                persistentDestruction.SetStarted(mistData.duration);
+            }
 
             mister.m_height = mistData.height;
             mister.m_radius = mistData.radius;

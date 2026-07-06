@@ -9,7 +9,7 @@ namespace WizshBoneTwitchIntegration.Models
         public string announceMessage;
 
         [EditorLabel("Duration")]
-        [EditorTooltip("The duration of the mist in seconds.")]
+        [EditorTooltip("The duration of the mist in seconds (0 = indefinite).")]
         public int duration = 60;
 
         [EditorLabel("Height")]

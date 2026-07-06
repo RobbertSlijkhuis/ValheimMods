@@ -17,7 +17,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return;
             }
 
-            GameObject spawned = UnityEngine.Object.Instantiate(prefab, transform.position, transform.rotation);
+            GameObject spawned = ZNetViewHelper.Instantiate(prefab, transform.position, transform.rotation);
             ItemDrop itemDrop = spawned.GetComponent<ItemDrop>();
             Rigidbody rigidBody = spawned.GetComponent<Rigidbody>();
 

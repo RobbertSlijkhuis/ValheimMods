@@ -61,6 +61,14 @@ namespace WizshBoneTwitchIntegration.Components
                     return;
                 }
 
+                if (m_savedPrefabName == "")
+                {
+                    // SpawnAbility redeems (e.g. biome-prefab showers like "Roots on the line!") use a
+                    // placeholder CreatureData with no prefabName, so there's nothing to look up or reapply.
+                    creatureClaim.ReInit(m_redeemerName);
+                    return;
+                }
+
                 List<CreatureData> resolvedList = RedeemHelper.GetResolvedCreatureList(redeem.creatureData);
                 CreatureData creatureData = resolvedList.Find(c => c.prefabName == m_savedPrefabName);
 
@@ -111,6 +119,9 @@ namespace WizshBoneTwitchIntegration.Components
             m_isFollowing = creatureData?.commandable ?? false;
 
             WriteZDO();
+
+            TwitchBasePersistentData baseData = gameObject.GetComponent<TwitchBasePersistentData>();
+            baseData?.SetFlag(PersistentComponentFlags.Creature, true);
 
             if (creatureData == null)
                 return;

@@ -176,6 +176,17 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 return;
             }
 
+            // The offer was validated as unclaimed back at scan time, but time passes between the offer
+            // and this accept - re-check here so we can never end up adding a second TwitchCreatureClaim
+            // on top of one that already exists (which would silently steal/corrupt an existing claim).
+            if (m_chosenPrefab.GetComponent<TwitchCreatureClaim>() != null)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] AcceptClaim: {m_chosenUser} tried to claim a creature that's already claimed, ignoring.");
+                m_chosenUser = null;
+                m_chosenPrefab = null;
+                return;
+            }
+
             Humanoid humanoid = m_chosenPrefab.GetComponent<Humanoid>();
             m_chat.Send($"Creature {Localization.instance.Localize(humanoid.m_name)} is now claimed by {m_chosenUser}!");
 

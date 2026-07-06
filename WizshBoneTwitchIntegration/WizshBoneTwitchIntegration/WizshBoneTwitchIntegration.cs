@@ -167,18 +167,12 @@ namespace WizshBoneTwitchIntegration
                 GameObject prefab = PrefabManager.Instance.GetPrefab(name);
                 Humanoid humanoid = prefab.GetComponent<Humanoid>();
                 MonsterAI monsterAI = prefab.GetComponent<MonsterAI>();
-                Piece piece = prefab.GetComponent<Piece>();
-                ImpactEffect impactEffect = prefab.GetComponent<ImpactEffect>();
-                Mister mister = prefab.GetComponent<Mister>();
-                Trap trap = prefab.GetComponent<Trap>();
                 Ship ship = prefab.GetComponent<Ship>();
 
                 prefab.AddComponent<TwitchBasePersistentData>();
 
                 if (humanoid != null && monsterAI != null)
                 {
-                    prefab.AddComponent<TwitchCreaturePersistentData>();
-
                     Transform visualTrans = prefab.transform.Find("Visual");
 
                     if (visualTrans == null)
@@ -216,16 +210,6 @@ namespace WizshBoneTwitchIntegration
                         boxCollider.center = new Vector3(0, 1.2f, 0);
                         boxCollider.size = new Vector3(1, 3.5f, 1);
                     }
-                }
-
-                if (piece != null)
-                {
-                    prefab.AddComponent<TwitchPersistentDestruction>();
-                }
-
-                if ((impactEffect != null || mister != null || trap != null) && prefab.GetComponent<TwitchPersistentDestruction>() == null)
-                {
-                    prefab.AddComponent<TwitchPersistentDestruction>();
                 }
 
             }
@@ -375,8 +359,12 @@ namespace WizshBoneTwitchIntegration
         {
             CommandManager.Instance.AddConsoleCommand(new RemoveChestsCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveCreaturesCommand());
-            CommandManager.Instance.AddConsoleCommand(new RemoveTwitchMistCommand());
+            CommandManager.Instance.AddConsoleCommand(new RemoveMistCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveTrapsCommand());
+            CommandManager.Instance.AddConsoleCommand(new RemoveDoorsCommand());
+            CommandManager.Instance.AddConsoleCommand(new RemoveWindmillsCommand());
+            CommandManager.Instance.AddConsoleCommand(new RemoveLogsCommand());
+            CommandManager.Instance.AddConsoleCommand(new RemoveBoatsCommand());
 
             CommandManager.Instance.AddConsoleCommand(new UsersBanList());
             CommandManager.Instance.AddConsoleCommand(new UserBanCommand());

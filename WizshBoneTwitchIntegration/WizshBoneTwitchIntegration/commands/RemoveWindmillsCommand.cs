@@ -1,4 +1,4 @@
-﻿using Jotunn.Entities;
+using Jotunn.Entities;
 using System;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
@@ -6,11 +6,11 @@ using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
-    internal class RemoveChestsCommand : ConsoleCommand
+    internal class RemoveWindmillsCommand : ConsoleCommand
     {
-        public override string Name => "WBTIRemoveChests";
+        public override string Name => "WBTIRemoveWindmills";
 
-        public override string Help => "Remove nearby surprise chests";
+        public override string Help => "Remove nearby windmills spawned in by Twitch integration";
 
         public override void Run(string[] args)
         {
@@ -26,17 +26,13 @@ namespace WizshBoneTwitchIntegration.Commands
                 if (Player.m_localPlayer == null)
                     throw new Exception("Player is null");
 
-                // TwitchSurpriseChest is baked onto the ChestIron/ChestGold prefabs themselves at
-                // startup, so it's present on every iron/gold chest in the world - including ordinary
-                // ones never touched by a redeem. Require TwitchBasePersistentData.IsRedeemSpawn too,
-                // so this only matches chests actually spawned by a redeem.
-                Collider[] objects = Physics.OverlapSphere(Player.m_localPlayer.transform.position, scanRadius, LayerMask.GetMask("Default"));
+                Collider[] objects = Physics.OverlapSphere(Player.m_localPlayer.transform.position, scanRadius, LayerMask.GetMask("piece"));
 
                 foreach (Collider obj in objects)
                 {
                     GameObject gameObject = obj.transform.root.gameObject;
 
-                    if (gameObject.GetComponent<TwitchSurpriseChest>() != null && gameObject.GetComponent<TwitchBasePersistentData>()?.IsRedeemSpawn == true)
+                    if (gameObject.GetComponent<Windmill>() != null && gameObject.GetComponent<TwitchPiecePersistentData>() != null)
                     {
                         ZNetViewHelper.Destroy(gameObject);
                     }

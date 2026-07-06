@@ -2,6 +2,7 @@
 using System;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
+using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
@@ -25,21 +26,19 @@ namespace WizshBoneTwitchIntegration.Commands
                 if (Player.m_localPlayer == null)
                     throw new Exception("Player is null");
 
+                // TwitchPersistentDestruction is only attached when the redeem's duration > 0
+                // (0 = indefinite/never auto-cleanup), so it can't be used to identify these -
+                // use the always-set TwitchBasePersistentData.IsRedeemSpawn tag instead, narrowed
+                // down by Trap to make sure it's a trap and not some other redeem-spawned object.
                 Collider[] objects = Physics.OverlapSphere(Player.m_localPlayer.transform.position, scanRadius, LayerMask.GetMask("piece"));
 
                 foreach (Collider obj in objects)
                 {
                     GameObject gameObject = obj.transform.root.gameObject;
 
-                    if (gameObject.GetComponent<Trap>() != null && gameObject.GetComponent<TwitchPersistentDestruction>() != null)
+                    if (gameObject.GetComponent<Trap>() != null && gameObject.GetComponent<TwitchBasePersistentData>()?.IsRedeemSpawn == true)
                     {
-                        ZNetView netView = gameObject.GetComponent<ZNetView>();
-
-                        if (netView == null || !netView.IsValid())
-                            continue;
-
-                        netView.Destroy();
-                        GameObject.Destroy(gameObject);
+                        ZNetViewHelper.Destroy(gameObject);
                     }
                 }
             }

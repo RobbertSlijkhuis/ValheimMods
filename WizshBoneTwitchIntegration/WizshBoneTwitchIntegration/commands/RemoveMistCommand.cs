@@ -2,10 +2,11 @@
 using System;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
+using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
-    internal class RemoveTwitchMistCommand : ConsoleCommand
+    internal class RemoveMistCommand : ConsoleCommand
     {
         public override string Name => "WBTIRemoveMist";
 
@@ -25,21 +26,19 @@ namespace WizshBoneTwitchIntegration.Commands
                 if (Player.m_localPlayer == null)
                     throw new Exception("Player is null");
 
+                // TwitchPersistentDestruction is only attached when the redeem's duration > 0
+                // (0 = indefinite/never auto-cleanup), so it can't be used to identify these -
+                // use the always-set TwitchBasePersistentData.IsRedeemSpawn tag instead, narrowed
+                // down by Mister to make sure it's mist and not some other redeem-spawned object.
                 Collider[] objects = Physics.OverlapSphere(Player.m_localPlayer.transform.position, scanRadius, LayerMask.GetMask("Default"));
 
                 foreach (Collider obj in objects)
                 {
                     GameObject gameObject = obj.transform.root.gameObject;
 
-                    if (gameObject.GetComponent<Mister>() && gameObject.GetComponent<TwitchPersistentDestruction>())
+                    if (gameObject.GetComponent<Mister>() != null && gameObject.GetComponent<TwitchBasePersistentData>()?.IsRedeemSpawn == true)
                     {
-                        ZNetView netView = gameObject.GetComponent<ZNetView>();
-
-                        if (netView == null || !netView.IsValid())
-                            continue;
-
-                        netView.Destroy();
-                        GameObject.Destroy(gameObject);
+                        ZNetViewHelper.Destroy(gameObject);
                     }
                 }
             }

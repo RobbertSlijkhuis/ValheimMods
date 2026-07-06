@@ -186,7 +186,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 spawnRotation = TransformHelper.UpdateSpawnRotation(positionType, spawnRotation);
             }
 
-            GameObject creature = UnityEngine.Object.Instantiate(prefab, spawnPosition, spawnRotation);
+            GameObject creature = ZNetViewHelper.Instantiate(prefab, spawnPosition, spawnRotation);
             MonsterAI monsterAI = creature.GetComponent<MonsterAI>();
             Humanoid humanoid = creature.GetComponent<Humanoid>();
 
@@ -202,8 +202,11 @@ namespace WizshBoneTwitchIntegration.Helpers
                 throw new System.Exception("No humanoid available for creature spawn!");
             }
 
+            TwitchCreaturePersistentData persistentData = creature.AddComponent<TwitchCreaturePersistentData>();
+            persistentData.SetData(customRewardEvent.RedeemerName, creatureData, customRewardEvent.CustomRewardTitle, ignoreWard);
+
             TwitchCreatureClaim creatureClaim = creature.AddComponent<TwitchCreatureClaim>();
-            creatureClaim.Init(creatureData, customRewardEvent, ignoreWard);
+            creatureClaim.Init(creatureData, customRewardEvent);
 
             if (force > 0f)
             {

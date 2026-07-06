@@ -23,7 +23,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (TransformHelper.TryGetGroundHeight(spawnPosition, transform.position.y, indoor, out float height))
                 spawnPosition.y = height + chestData.positionOffset.y;
 
-            GameObject chest = UnityEngine.Object.Instantiate(prefab, spawnPosition, spawnRotation);
+            GameObject chest = ZNetViewHelper.Instantiate(prefab, spawnPosition, spawnRotation);
             TwitchSurpriseChest surpriseChest = chest.GetComponent<TwitchSurpriseChest>();
             surpriseChest.Init(chestData, customRewardEvent);
         }

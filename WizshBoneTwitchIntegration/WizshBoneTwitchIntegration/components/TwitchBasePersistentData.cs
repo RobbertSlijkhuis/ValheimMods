@@ -12,12 +12,31 @@ namespace WizshBoneTwitchIntegration.Components
         Piece        = 1 << 2,
         HazardDamage      = 1 << 3,
         WindmillOverride  = 1 << 4,
+        Creature          = 1 << 5,
+        Destruction       = 1 << 6,
+
+        // Marker only, no component to rehydrate - see TwitchBasePersistentData.IsRedeemSpawn.
+        RedeemSpawn       = 1 << 7,
     }
 
     internal class TwitchBasePersistentData : MonoBehaviour
     {
         private ZNetView m_netView;
         private static readonly int s_activeComponentsHash = "WBTI_ActiveComponents".GetStableHashCode();
+
+        // General marker for "this instance was spawned by a Twitch redeem". Unlike the other
+        // PersistentComponentFlags, it isn't gated by redeem config (e.g. duration == 0 / indefinite
+        // means no other persistent component ever gets attached) - it's set unconditionally on every
+        // redeem spawn so remove commands can still identify Twitch-spawned objects. Pair with a
+        // type-specific component (Door, Ship, ImpactEffect, etc.) to narrow down what kind of object it is.
+        private bool m_isRedeemSpawn;
+        public bool IsRedeemSpawn => m_isRedeemSpawn;
+
+        public void MarkRedeemSpawn()
+        {
+            m_isRedeemSpawn = true;
+            SetFlag(PersistentComponentFlags.RedeemSpawn, true);
+        }
 
         public void Awake()
         {
@@ -29,6 +48,8 @@ namespace WizshBoneTwitchIntegration.Components
                     return;
 
                 var flags = (PersistentComponentFlags)m_netView.GetZDO().GetInt(s_activeComponentsHash, 0);
+
+                m_isRedeemSpawn = flags.HasFlag(PersistentComponentFlags.RedeemSpawn);
 
                 if (flags == PersistentComponentFlags.None)
                     return;
@@ -47,6 +68,12 @@ namespace WizshBoneTwitchIntegration.Components
 
                 if (flags.HasFlag(PersistentComponentFlags.WindmillOverride))
                     gameObject.AddComponent<TwitchWindmillPersistentData>();
+
+                if (flags.HasFlag(PersistentComponentFlags.Creature))
+                    gameObject.AddComponent<TwitchCreaturePersistentData>();
+
+                if (flags.HasFlag(PersistentComponentFlags.Destruction))
+                    gameObject.AddComponent<TwitchPersistentDestruction>();
             }
             catch (Exception e)
             {

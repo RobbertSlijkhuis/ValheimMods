@@ -39,13 +39,18 @@ namespace WizshBoneTwitchIntegration.Helpers
             Vector3 spawnPosition = attachTarget != null ? attachTarget.transform.position : Player.m_localPlayer.transform.position;
             ZDOID attachZdoid = attachTarget?.GetComponent<ZNetView>()?.GetZDO().m_uid ?? ZDOID.None;
 
-            GameObject zone = UnityEngine.Object.Instantiate(prefab, spawnPosition, Quaternion.identity);
+            GameObject zone = ZNetViewHelper.Instantiate(prefab, spawnPosition, Quaternion.identity);
+
+            // Unlike mist/weather, a time stop zone can freeze the player - it must never be allowed
+            // to run indefinitely, so a duration <= 0 falls back to the default instead of being
+            // treated as "forever".
+            float duration = data.duration > 0f ? data.duration : 10f;
 
             TwitchPersistentDestruction persistentDestruction = zone.GetComponent<TwitchPersistentDestruction>();
-            persistentDestruction.SetStarted((int)data.duration);
+            persistentDestruction.SetStarted((int)duration);
 
             TwitchTimeStopZone zoneScript = zone.GetComponent<TwitchTimeStopZone>();
-            zoneScript.Initialize(data.radius, data.freezeEnemies, data.freezePlayer, data.freezeProjectiles, data.duration, attachZdoid);
+            zoneScript.Initialize(data.radius, data.freezeEnemies, data.freezePlayer, data.freezeProjectiles, duration, attachZdoid);
 
             if (!string.IsNullOrEmpty(data.announceMessage))
                 Player.m_localPlayer.Message(

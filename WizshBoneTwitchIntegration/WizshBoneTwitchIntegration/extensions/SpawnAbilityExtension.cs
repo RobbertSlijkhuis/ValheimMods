@@ -215,7 +215,7 @@ namespace WizshBoneTwitchIntegration.Extensions
                     ? Quaternion.Euler(0f, UnityEngine.Random.Range(0f, 360f), 0f)
                     : Quaternion.identity;
 
-                GameObject gameObject = UnityEngine.Object.Instantiate(prefab, spawnPoint, spawnRotation);
+                GameObject gameObject = ZNetViewHelper.Instantiate(prefab, spawnPoint, spawnRotation);
 
                 // Remove any safe zones that may be on the spawned prefab (e.g. boat rain)
                 foreach (TwitchSafeZone safeZone in gameObject.GetComponentsInChildren<TwitchSafeZone>(true))
@@ -241,12 +241,11 @@ namespace WizshBoneTwitchIntegration.Extensions
 
                 if (monsterAI != null && humanoid2 != null)
                 {
-                    TwitchCreaturePersistentData creaturePersistentData = gameObject.GetComponent<TwitchCreaturePersistentData>();
+                    TwitchCreaturePersistentData creaturePersistentData = gameObject.GetComponent<TwitchCreaturePersistentData>() ?? gameObject.AddComponent<TwitchCreaturePersistentData>();
+                    creaturePersistentData.SetData(customRewardEvent.RedeemerName, creatureData, customRewardEvent.CustomRewardTitle, false);
 
-                    if (creaturePersistentData != null)
-                        creaturePersistentData.SetData(customRewardEvent.RedeemerName, creatureData, customRewardEvent.CustomRewardTitle, false);
-                    else
-                        Jotunn.Logger.LogWarning("Creature does not have persistent data somehow!");
+                    TwitchCreatureClaim creatureClaim = gameObject.GetComponent<TwitchCreatureClaim>() ?? gameObject.AddComponent<TwitchCreatureClaim>();
+                    creatureClaim.ReInit(customRewardEvent.RedeemerName, creatureData);
                 }
 
                 if (monsterAI == null && impactEffect != null)
@@ -263,11 +262,8 @@ namespace WizshBoneTwitchIntegration.Extensions
 
                     if (spawnAbilityData.duration > 0)
                     {
-                        TwitchPersistentDestruction persistentDestruction = gameObject.GetComponent<TwitchPersistentDestruction>();
-                        if (persistentDestruction != null)
-                            persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium, spawnAbilityData.breakOnDestroy);
-                        else
-                            Jotunn.Logger.LogWarning("TwitchPersistentDestruction missing on impactEffect object.");
+                        TwitchPersistentDestruction persistentDestruction = gameObject.GetComponent<TwitchPersistentDestruction>() ?? gameObject.AddComponent<TwitchPersistentDestruction>();
+                        persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectMedium, spawnAbilityData.breakOnDestroy);
                     }
 
                     impactEffect.m_damagePlayers = true;
@@ -284,11 +280,8 @@ namespace WizshBoneTwitchIntegration.Extensions
 
                     if (spawnAbilityData.duration > 0)
                     {
-                        TwitchPersistentDestruction persistentDestruction = gameObject.GetComponent<TwitchPersistentDestruction>();
-                        if (persistentDestruction != null)
-                            persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall);
-                        else
-                            Jotunn.Logger.LogWarning("TwitchPersistentDestruction missing on trap object.");
+                        TwitchPersistentDestruction persistentDestruction = gameObject.GetComponent<TwitchPersistentDestruction>() ?? gameObject.AddComponent<TwitchPersistentDestruction>();
+                        persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall);
                     }
 
                     trap.StartCoroutine(trap.ArmTrapAfterDelay(1f));
@@ -312,11 +305,8 @@ namespace WizshBoneTwitchIntegration.Extensions
 
                     if (spawnAbilityData.duration > 0)
                     {
-                        TwitchPersistentDestruction persistentDestruction = gameObject.GetComponent<TwitchPersistentDestruction>();
-                        if (persistentDestruction != null)
-                            persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall, spawnAbilityData.breakOnDestroy);
-                        else
-                            Jotunn.Logger.LogWarning("TwitchPersistentDestruction missing on piece object.");
+                        TwitchPersistentDestruction persistentDestruction = gameObject.GetComponent<TwitchPersistentDestruction>() ?? gameObject.AddComponent<TwitchPersistentDestruction>();
+                        persistentDestruction.SetStarted(spawnAbilityData.duration, spawnAbilityData.noSpawnEffect ? null : WizshBoneTwitchIntegration.Instance.effectLists.SpawnEffectSmall, spawnAbilityData.breakOnDestroy);
                     }
 
                     Door door = gameObject.GetComponent<Door>();

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using TwitchSDK.Interop;
 using UnityEngine;
@@ -44,7 +44,7 @@ namespace WizshBoneTwitchIntegration.Components
             }
         }
 
-        public void Init(CreatureData creatureData, CustomRewardEvent customRewardEvent, bool ignoreWard)
+        public void Init(CreatureData creatureData, CustomRewardEvent customRewardEvent)
         {
             if (creatureData == null || customRewardEvent == null)
             {
@@ -55,9 +55,6 @@ namespace WizshBoneTwitchIntegration.Components
             m_isSpawn = true;
             m_assignment = new TwitchCreatureAssignment(customRewardEvent.RedeemerName, gameObject, PluginConfig.configChattingClaimDuration.Value);
             m_originalName = m_humanoid.m_name;
-
-            TwitchCreaturePersistentData persistentData = gameObject.GetComponent<TwitchCreaturePersistentData>();
-            persistentData.SetData(m_assignment.userName, creatureData, customRewardEvent.CustomRewardTitle, ignoreWard);
 
             m_chatting.AddCreatureAssignment(m_assignment);
             SetupNpcTalk(creatureData);
@@ -76,10 +73,13 @@ namespace WizshBoneTwitchIntegration.Components
             m_originalName = m_humanoid.m_name;
             m_humanoid.m_name = userName;
 
-            if (PluginConfig.configChattingClaimDuration.Value == 0)
+            if (PluginConfig.configChattingClaimDuration.Value == 0 && gameObject.GetComponent<TwitchCreaturePersistentData>() == null)
             {
-                TwitchCreaturePersistentData persistentData = gameObject.GetComponent<TwitchCreaturePersistentData>();
-                persistentData.SetData(m_assignment.userName);
+                // Only create fresh persistent data for a genuinely wild creature. If one already exists,
+                // this creature was twitch-spawned earlier (e.g. claimed, then !unclaim'd, then re-claimed
+                // here as if wild) - overwriting it would wipe its real redeem title/prefab/color, silently
+                // corrupting its identity on the next reload.
+                gameObject.AddComponent<TwitchCreaturePersistentData>().SetData(m_assignment.userName);
             }
 
             if (RecolorHelper.CanRecolorCreature(m_assignment.userName, m_assignment.creature.name))
@@ -122,7 +122,8 @@ namespace WizshBoneTwitchIntegration.Components
                 if (m_assignment?.creature != null && RecolorHelper.CanRecolorCreature(m_assignment.userName, m_assignment.creature.name))
                     RecolorHelper.UnColorCreature(m_assignment.creature);
 
-                m_assignment.creature = null;
+                if (m_assignment != null)
+                    m_assignment.creature = null;
 
                 if (m_humanoid != null)
                     m_humanoid.m_name = m_originalName;

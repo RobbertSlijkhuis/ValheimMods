@@ -10,7 +10,7 @@ namespace WizshBoneTwitchIntegration.Models
         public string announceMessage;
 
         [EditorLabel("Duration")]
-        [EditorTooltip("The duration of the weather event in seconds.")]
+        [EditorTooltip("The duration of the weather event in seconds (0 = indefinite).")]
         public int duration = 60;
 
         [EditorLabel("Force")] 
