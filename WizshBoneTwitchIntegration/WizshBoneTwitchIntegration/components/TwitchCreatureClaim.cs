@@ -228,18 +228,30 @@ namespace WizshBoneTwitchIntegration.Components
                     return;
                 }
 
-                m_npcTalk.SayForce("Alright... healing!", "Aggravated");
+                if (m_chatting.CanCreatureTalk(gameObject))
+                    m_npcTalk.SayForce("Alright... healing!", "Aggravated");
+
                 m_humanoid.EquipBestWeapon(m_humanoid, null, m_humanoid, null);
                 monsterAI.DoAttack(m_humanoid, true);
                 return;
             }
 
-            m_npcTalk.SayForce(message.message, "Aggravated");
+            if (m_chatting.CanCreatureTalk(gameObject))
+                m_npcTalk.SayForce(message.message, "Aggravated");
         }
 
         public void SayAMessage()
         {
-            m_npcTalk.OnBecameAggravated(BaseAI.AggravatedReason.Damage);
+            // Deliberately bypass NpcTalk.OnBecameAggravated here: it only queues the message,
+            // and vanilla's actual display is gated by a *static* cooldown shared by every NpcTalk
+            // in the scene. That decouples display timing from the CanCreatureTalk distance check
+            // done above, letting a farther queued creature win the shared cooldown race over a
+            // nearer one. SayForce writes the bubble immediately, keeping display in sync with the check.
+            if (!m_chatting.CanCreatureTalk(gameObject) || m_npcTalk.m_aggravated == null || m_npcTalk.m_aggravated.Count == 0)
+                return;
+
+            string text = m_npcTalk.m_aggravated[UnityEngine.Random.Range(0, m_npcTalk.m_aggravated.Count)];
+            m_npcTalk.SayForce(text, "Aggravated");
         }
 
         private void Unassign()

@@ -24,7 +24,8 @@ namespace WizshBoneTwitchIntegration.Configs
         public static ConfigEntry<int> configChattingClaimDuration;
         public static ConfigEntry<float> configChattingCullingRange;
         public static ConfigEntry<float> configChattingInterval;
-        public static ConfigEntry<float> configChattingRadius;      
+        public static ConfigEntry<float> configChattingRadius;
+        public static ConfigEntry<int> configChattingMaxTalkers;
 
         public static ConfigEntry<bool> configCreaturesSameFaction;
         public static ConfigEntry<float> configCreaturesMaxAmount;
@@ -117,6 +118,10 @@ namespace WizshBoneTwitchIntegration.Configs
                 TwitchChatting chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
                 chatting.m_scanRadius = configChattingRadius.Value;
             };
+
+            configChattingMaxTalkers = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionChatting, "Chatting max talkers", 5,
+                new ConfigDescription("Maximum amount of claimed creatures that can talk (show a speech bubble) at the same time, limited to the ones nearest to the player. Set to 0 to disable the limit.", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
 
 
             configCreaturesSameFaction = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionCreatures, "Creatures same faction", true,

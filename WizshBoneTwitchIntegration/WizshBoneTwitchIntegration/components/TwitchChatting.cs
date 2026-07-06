@@ -95,6 +95,22 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             return m_creatureAssignments.Find(item => item.userName == userName);
         }
 
+        public bool CanCreatureTalk(GameObject creature)
+        {
+            int maxTalkers = PluginConfig.configChattingMaxTalkers.Value;
+
+            if (maxTalkers <= 0 || Player.m_localPlayer == null)
+                return true;
+
+            Vector3 playerPos = Player.m_localPlayer.transform.position;
+
+            return m_creatureAssignments
+                .Where(item => item.creature != null)
+                .OrderBy(item => Vector3.Distance(playerPos, item.creature.transform.position))
+                .Take(maxTalkers)
+                .Any(item => item.creature == creature);
+        }
+
         public void InvokeRepeatingScan()
         {
             CancelInvoke(nameof(ChattingScan));
