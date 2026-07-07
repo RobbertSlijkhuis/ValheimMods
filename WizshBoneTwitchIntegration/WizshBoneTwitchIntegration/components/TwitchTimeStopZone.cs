@@ -19,6 +19,12 @@ namespace WizshBoneTwitchIntegration.Components
         private readonly HashSet<ZDOID> m_registeredCreatures = new HashSet<ZDOID>();
         private readonly HashSet<GameObject> m_registeredPhysicsObjects = new HashSet<GameObject>();
         private readonly List<GameObject> m_departedPhysicsObjects = new List<GameObject>();
+        private readonly Dictionary<GameObject, float> m_pendingAoeFreezeTimers = new Dictionary<GameObject, float>();
+
+        // Gives the Smite lightning rod time to visually strike the ground before it gets frozen -
+        // without this, the zone's poll can catch (and pause) it mid-air on the very first tick
+        // after it spawns, which looks wrong.
+        private const float AoeFreezeGraceDelay = 0.3f;
 
         // Unity only raises OnTriggerEnter/Exit for a collider pair if at least one side has a
         // Rigidbody. Projectiles (arrows, spears) move by manually integrating a velocity field
@@ -31,6 +37,11 @@ namespace WizshBoneTwitchIntegration.Components
         // Tracks how many active zones currently have the local player frozen, so overlapping
         // zones don't unfreeze the player while still standing in another one.
         private static int s_localPlayerFreezeCount = 0;
+
+        // Lets code outside any particular zone instance (e.g. a redeem spawning a new hazard)
+        // check synchronously whether a position is already covered by an active zone, rather
+        // than waiting for a zone's own poll to discover it later - see IsPositionFrozen.
+        private static readonly List<TwitchTimeStopZone> s_activeZones = new List<TwitchTimeStopZone>();
 
         private static readonly int s_configuredHash        = "WBTI_TimeStopZone_Configured".GetStableHashCode();
         private static readonly int s_radiusHash             = "WBTI_TimeStopZone_Radius".GetStableHashCode();
@@ -117,8 +128,26 @@ namespace WizshBoneTwitchIntegration.Components
 
             ShieldDomeHelper.ShowDome(this, transform.position, radius, ShieldColors.TimeStop);
 
+            if (!s_activeZones.Contains(this))
+                s_activeZones.Add(this);
+
             if (m_freezeProjectiles)
                 RefreshPhysicsObjectFreezes();
+        }
+
+        // Lets a hazard freeze its own damage the instant it spawns (see TwitchPhysicsFreezeData.
+        // FreezeDamage and its call site in SpawnAbilityExtension.cs) instead of waiting for this
+        // zone's own poll to notice it - Aoe's trigger-based hits can fire within the same physics
+        // step the hazard is created, faster than any poll interval could react.
+        public static bool IsPositionFrozen(Vector3 position)
+        {
+            foreach (TwitchTimeStopZone zone in s_activeZones)
+            {
+                if (zone.m_freezeProjectiles && Vector3.Distance(zone.transform.position, position) <= zone.m_radius)
+                    return true;
+            }
+
+            return false;
         }
 
         public void FixedUpdate()
@@ -203,6 +232,47 @@ namespace WizshBoneTwitchIntegration.Components
                     RegisterPhysicsObject(projectile.gameObject, stillPresent);
                 }
 
+                // Any Twitch-spawned Aoe-based hazard (Smite's lightning rod, or any future redeem
+                // built the same way) carries no physics Collider of its own on the root, so -
+                // like Projectile above - it's invisible to the OverlapSphere pass. Damage is
+                // already blocked synchronously at spawn time if it landed inside an already-active
+                // zone (see IsPositionFrozen/FreezeDamage in SpawnAbilityExtension.cs) - this poll's
+                // job is just to (eventually) pause its particle effect too, and to catch the case
+                // where the zone appears only after the hazard has already spawned. Resolve to the
+                // TwitchPersistentDamage root rather than transform.root, since that's the same
+                // marker FreezeDamage's caller already gates on - anything without it is a vanilla
+                // Aoe (player/mob attack, etc.) we have no business touching.
+                foreach (Aoe aoe in FindObjectsByType<Aoe>(FindObjectsSortMode.None))
+                {
+                    TwitchPersistentDamage marker = aoe.GetComponentInParent<TwitchPersistentDamage>();
+                    if (marker == null)
+                        continue;
+
+                    GameObject aoeRoot = marker.gameObject;
+
+                    if (Vector3.Distance(aoeRoot.transform.position, transform.position) > m_radius)
+                        continue;
+
+                    // Only the Smite lightning rod needs a moment to visually strike the ground
+                    // before being frozen (see AoeFreezeGraceDelay) - other Aoe hazards have no
+                    // equivalent "developing" animation and can be frozen the instant they're seen.
+                    if (aoeRoot.name == "lightningAOE(Clone)" && !m_registeredPhysicsObjects.Contains(aoeRoot))
+                    {
+                        if (!m_pendingAoeFreezeTimers.TryGetValue(aoeRoot, out float firstSeen))
+                        {
+                            m_pendingAoeFreezeTimers[aoeRoot] = Time.time;
+                            continue;
+                        }
+
+                        if (Time.time - firstSeen < AoeFreezeGraceDelay)
+                            continue;
+
+                        m_pendingAoeFreezeTimers.Remove(aoeRoot);
+                    }
+
+                    RegisterPhysicsObject(aoeRoot, stillPresent);
+                }
+
                 m_departedPhysicsObjects.Clear();
                 foreach (GameObject registered in m_registeredPhysicsObjects)
                 {
@@ -233,8 +303,24 @@ namespace WizshBoneTwitchIntegration.Components
         {
             stillPresent.Add(target);
 
-            if (target.GetComponent<TwitchPhysicsFreezeData>() == null && m_registeredPhysicsObjects.Add(target))
-                target.AddComponent<TwitchPhysicsFreezeData>().Initialize();
+            TwitchPhysicsFreezeData freezeData = target.GetComponent<TwitchPhysicsFreezeData>();
+
+            // Already fully frozen (by us on an earlier poll, or by another overlapping zone) -
+            // nothing left to do.
+            if (freezeData != null && freezeData.VisualFrozen)
+                return;
+
+            if (!m_registeredPhysicsObjects.Add(target))
+                return;
+
+            // A component may already exist here without being fully frozen yet - a hazard like
+            // the Smite lightning strike gets its damage blocked synchronously at spawn (see
+            // TwitchPhysicsFreezeData.FreezeDamage), before this zone's poll ever runs. Finish
+            // freezing it (particles/rigidbody/etc.) rather than creating a second wrapper.
+            if (freezeData == null)
+                freezeData = target.AddComponent<TwitchPhysicsFreezeData>();
+
+            freezeData.Initialize();
         }
 
         // Windmill/door pieces are checked first since they're placed structures with no moving
@@ -398,6 +484,8 @@ namespace WizshBoneTwitchIntegration.Components
                 }
 
                 UnregisterLocalPlayer();
+
+                s_activeZones.Remove(this);
 
                 ShieldDomeHelper.BreakDome(this);
             }
