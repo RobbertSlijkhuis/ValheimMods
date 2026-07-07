@@ -190,16 +190,19 @@ namespace WizshBoneTwitchIntegration.Helpers
             MonsterAI monsterAI = creature.GetComponent<MonsterAI>();
             Humanoid humanoid = creature.GetComponent<Humanoid>();
 
-            if (monsterAI == null)
+            if (creatureData.requireMonsterComponents)
             {
-                ZNetViewHelper.Destroy(creature);
-                throw new System.Exception("No monster AI available for creature spawn!");
-            }
+                if (monsterAI == null)
+                {
+                    ZNetViewHelper.Destroy(creature);
+                    throw new System.Exception("No monster AI available for creature spawn!");
+                }
 
-            if (humanoid == null)
-            {
-                ZNetViewHelper.Destroy(creature);
-                throw new System.Exception("No humanoid available for creature spawn!");
+                if (humanoid == null)
+                {
+                    ZNetViewHelper.Destroy(creature);
+                    throw new System.Exception("No humanoid available for creature spawn!");
+                }
             }
 
             TwitchCreaturePersistentData persistentData = creature.AddComponent<TwitchCreaturePersistentData>();
@@ -214,8 +217,14 @@ namespace WizshBoneTwitchIntegration.Helpers
                 rigidBody.AddForce((transform.forward * force) + (transform.up * force), ForceMode.Acceleration);
             }
 
-            monsterAI.StartCoroutine(monsterAI.WakeUpAfterDelay(1f));
-            monsterAI.LookAt(transform.position);
+            if (monsterAI != null)
+            {
+                monsterAI.StartCoroutine(monsterAI.WakeUpAfterDelay(1f));
+                monsterAI.LookAt(transform.position);
+            }
+
+            if (creatureData.smelterFuelAmount > 0f)
+                FillSmelterFuel(creature, creatureData.smelterFuelAmount);
 
             if (creatureData.announceMessage != null)
                 Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, creatureData.announceMessage), 3000);
@@ -229,6 +238,28 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
 
             valheimCreature.spawnEffects.Create(creature.transform.position, creature.transform.rotation);
+        }
+
+        // Temporary hack: fills a spawned Smelter-based prefab's (e.g. the hot tub's) fuel tank.
+        // Smelter.GetFuel/SetFuel are private, but they just read/write the vanilla ZDOVars.s_fuel
+        // ZDO field - written once here on the spawning/owning client, same pattern as
+        // TwitchCreaturePersistentData's one-time persistent-data write right after spawn.
+        private static void FillSmelterFuel(GameObject creature, float fuelAmount)
+        {
+            Smelter smelter = creature.GetComponent<Smelter>();
+
+            if (smelter == null)
+            {
+                Jotunn.Logger.LogWarning("[WBTI] CreatureHelper: no Smelter component found to fill fuel on");
+                return;
+            }
+
+            ZNetView netView = creature.GetComponent<ZNetView>();
+
+            if (netView == null || !netView.IsValid())
+                return;
+
+            netView.GetZDO().Set(ZDOVars.s_fuel, Mathf.Min(fuelAmount, smelter.m_maxFuel));
         }
 
         public static void SpawnCreatures(CreatureData creatureData, Transform transform, CustomRewardEvent customRewardEvent, bool ignoreWard = false, float force = 0f)

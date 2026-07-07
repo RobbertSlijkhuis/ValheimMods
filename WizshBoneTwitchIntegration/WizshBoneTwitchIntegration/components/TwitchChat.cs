@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 
 namespace WizshBoneTwitchIntegration.TwitchIntegration
@@ -12,6 +13,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
     {
         private TwitchAuth m_auth;
         private TwitchChatting m_chatting;
+        private TwitchCustomRewards m_customRewards;
         private TcpClient tcpClient;
         private StreamReader reader;
         private StreamWriter writer;
@@ -178,6 +180,11 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 m_chatting.AcceptClaim();
                 return;
             }
+
+            if (m_customRewards == null)
+                m_customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+
+            SpecialRedeemHelper.TryHandleChatWord(m_customRewards, userName, chatMessage);
 
             m_chatHistory.Add(new TwitchChatMessage(userName, chatMessage));
 

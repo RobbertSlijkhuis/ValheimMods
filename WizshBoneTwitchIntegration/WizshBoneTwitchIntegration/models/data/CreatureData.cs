@@ -42,6 +42,14 @@ namespace WizshBoneTwitchIntegration.Models
         [EditorHidden] public int index;
         [EditorHidden] public bool talkInteract = false;
 
+        // Temporary hack: lets SpawnCreature spawn non-creature prefabs (e.g. a hot tub) that
+        // have no MonsterAI/Humanoid components. See CreatureHelper.SpawnCreature.
+        [EditorHidden] public bool requireMonsterComponents = true;
+
+        // Temporary hack: if > 0, fills the spawned prefab's Smelter (e.g. the hot tub's fuel
+        // tank) up to this amount (clamped to Smelter.m_maxFuel) right after spawn.
+        [EditorHidden] public float smelterFuelAmount = 0f;
+
         public CreatureData() { }
     }
 }

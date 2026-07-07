@@ -137,7 +137,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 m_refundAutoResolveOn = $"Your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points has been refunded!";
                 m_refundAutoResolveOff = $"Please notify the streamer to refund your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points!";
 
-                RedeemData redeem = GetRedeemList().Find(item => item.title == customRewardEvent.CustomRewardTitle);
+                RedeemData redeem = GetRedeemList().Find(item => item.title == customRewardEvent.CustomRewardTitle)
+                    ?? SpecialRedeemHelper.TryGetRedeem(customRewardEvent.CustomRewardTitle);
                 if (redeem == null)
                 {
                     //m_chat.Send($"Could not find redeem! Your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points has been refunded!");

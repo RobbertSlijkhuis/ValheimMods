@@ -25,6 +25,11 @@ namespace WizshBoneTwitchIntegration.Components
         private DateTime m_lastMessageTime;
         private bool m_isUnclaimDestroy = false;
 
+        // Fallback talk used for non-creature prefabs (e.g. the hot tub) that have no MonsterAI -
+        // NpcTalk.SayForce() calls m_animator.SetTrigger(), which NREs without one.
+        private List<string> m_simpleTalkMessages;
+        private int m_simpleTalkIndex;
+
         public void Awake()
         {
             try
@@ -54,7 +59,7 @@ namespace WizshBoneTwitchIntegration.Components
 
             m_isSpawn = true;
             m_assignment = new TwitchCreatureAssignment(customRewardEvent.RedeemerName, gameObject, PluginConfig.configChattingClaimDuration.Value);
-            m_originalName = m_humanoid.m_name;
+            m_originalName = m_humanoid?.m_name;
 
             m_chatting.AddCreatureAssignment(m_assignment);
             SetupNpcTalk(creatureData);
@@ -141,6 +146,12 @@ namespace WizshBoneTwitchIntegration.Components
 
         private void SetupNpcTalk(CreatureData creatureData = null)
         {
+            if (gameObject.GetComponent<MonsterAI>() == null)
+            {
+                SetupSimpleTalk(creatureData);
+                return;
+            }
+
             NpcTalk npcTalk = gameObject.GetComponent<NpcTalk>();
 
             if (npcTalk == null)
@@ -182,6 +193,41 @@ namespace WizshBoneTwitchIntegration.Components
                 SayAMessage();
         }
 
+        private void SetupSimpleTalk(CreatureData creatureData)
+        {
+            if (creatureData == null || !creatureData.talks || creatureData.talkMessage == null)
+                return;
+
+            m_simpleTalkMessages = creatureData.talkMessage.Contains(";")
+                ? new List<string>(creatureData.talkMessage.Split(';'))
+                : new List<string> { creatureData.talkMessage };
+
+            for (int i = 0; i < m_simpleTalkMessages.Count; i++)
+                m_simpleTalkMessages[i] = m_simpleTalkMessages[i].Replace("{{userName}}", m_assignment.userName);
+
+            if (creatureData.talkInterval >= 3f)
+                InvokeRepeating(nameof(SaySimpleMessage), 0f, creatureData.talkInterval);
+            else
+                SaySimpleMessage();
+        }
+
+        public void SaySimpleMessage()
+        {
+            if (m_simpleTalkMessages == null || m_simpleTalkMessages.Count == 0 || Chat.instance == null)
+                return;
+
+            if (!m_chatting.CanCreatureTalk(gameObject))
+                return;
+
+            string text = m_simpleTalkMessages[m_simpleTalkIndex % m_simpleTalkMessages.Count];
+            m_simpleTalkIndex++;
+
+            // Same call NpcTalk.Say() makes internally for its speech bubble - only needs a
+            // GameObject to anchor to, no Character/MonsterAI/Animator involved (trigger is
+            // left empty so NpcTalk's own m_animator.SetTrigger(trigger) call is skipped there).
+            Chat.instance.SetNpcText(gameObject, Vector3.up * 2f, PluginConfig.configChattingCullingRange.Value, 10f, "", text, large: false);
+        }
+
         private void CheckChatForMessage(TwitchChatMessage message)
         {
             if (m_assignment.userName.ToLower() != message.userName)
@@ -209,7 +255,7 @@ namespace WizshBoneTwitchIntegration.Components
                 return;
             }
 
-            if (message.message.Equals("!heal", StringComparison.OrdinalIgnoreCase) && m_originalName.Contains("shaman"))
+            if (message.message.Equals("!heal", StringComparison.OrdinalIgnoreCase) && (m_originalName?.Contains("shaman") ?? false))
             {
                 if (m_humanoid == null)
                 {
@@ -236,7 +282,7 @@ namespace WizshBoneTwitchIntegration.Components
                 return;
             }
 
-            if (m_chatting.CanCreatureTalk(gameObject))
+            if (m_npcTalk != null && m_chatting.CanCreatureTalk(gameObject))
                 m_npcTalk.SayForce(message.message, "Aggravated");
         }
 
