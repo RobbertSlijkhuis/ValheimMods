@@ -6,7 +6,6 @@ namespace WizshBoneTwitchIntegration.Components
     {
         public TwitchSurpriseChest m_surpriseChest;
         public Animator m_animator;
-        private bool m_isOpening = false;
 
         public void Awake()
         {
@@ -29,7 +28,7 @@ namespace WizshBoneTwitchIntegration.Components
 
         public string GetHoverText()
         {
-            if (!m_surpriseChest.m_interact || m_isOpening)
+            if (!m_surpriseChest.m_interact || m_surpriseChest.IsOpened)
                 return "";
 
             string inputString = Localization.instance.Localize("[<color=yellow>$KEY_Use</color>]");
@@ -48,17 +47,14 @@ namespace WizshBoneTwitchIntegration.Components
                 if (hold || alt)
                     return false;
 
-                if (!m_surpriseChest.m_interact || m_isOpening)
+                if (!m_surpriseChest.m_interact || m_surpriseChest.IsOpened)
                     return false;
 
-                m_isOpening = true;
-                m_surpriseChest.Open();
-                return true;
+                return m_surpriseChest.TryTriggerOpen();
             }
             catch (System.Exception e)
             {
                 Jotunn.Logger.LogError("Something went wrong while interacting with a surprise chest: " + e);
-                m_isOpening = false;
                 return false;
             }
         }

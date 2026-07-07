@@ -239,7 +239,9 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         // Purely visual/sound - the ring is spectacle for the flashbang, not damage, so any Aoe
         // damage the explosion prefab carries by default is stripped before it can hurt the
-        // player standing at the center of the ring.
+        // player standing at the center of the ring. Both prefabs carry their own ZNetView, so
+        // ZNetView.Awake() registers and replicates them to every other client regardless of
+        // which Instantiate call spawned them - no custom sync needed here.
         private static void SpawnGroundExplosions(Vector3 center, float soundVolume)
         {
             GameObject explosionFX = PrefabManager.Instance.GetPrefab("vfx_BombBlob_explode_frost");

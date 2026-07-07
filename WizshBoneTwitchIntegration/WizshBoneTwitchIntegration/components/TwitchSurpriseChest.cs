@@ -11,6 +11,11 @@ namespace WizshBoneTwitchIntegration.Components
     {
         ZNetView m_netView;
         private readonly int chestDataHash = "SurpriseChestData_WBTI".GetStableHashCode();
+        private readonly int openedHash = "WBTI_SurpriseChest_Opened".GetStableHashCode();
+
+        // Dedupes this client's own reaction to the ZDO "opened" flag (see Update()) so the open
+        // animation/effect fires exactly once locally, no matter which client actually set the flag.
+        private bool m_openHandledLocally;
 
         private string m_redeemerName;
         private string m_redeemTitle;
@@ -29,6 +34,8 @@ namespace WizshBoneTwitchIntegration.Components
         public bool m_interact;
         public TwitchSurpriseChestInteract m_surpriseChestInteract;
         public string m_type;
+
+        public bool IsOpened => m_netView != null && m_netView.IsValid() && m_netView.GetZDO().GetBool(openedHash, false);
 
         EffectList chestOpeningEffects = new EffectList();
         EffectList despawnEffect = new EffectList();
@@ -109,11 +116,33 @@ namespace WizshBoneTwitchIntegration.Components
             m_yeetChance = chestData.yeetChance;
         }
 
-        public void Open()
+        // Claims the one-time right to actually open this chest: whichever client (owner or not -
+        // any player can walk up and interact) gets its ZDO write in first wins, closing most of
+        // the window where two players interacting near-simultaneously would otherwise each spawn
+        // their own copy of the loot. The open animation/effect itself is NOT played from here -
+        // every client (including this one) picks that up uniformly from Update() reading the same
+        // ZDO flag back, so a late-joining/late-rendering client sees the same thing everyone else
+        // does instead of a chest that silently already spawned its items.
+        public bool TryTriggerOpen()
+        {
+            if (m_netView == null || !m_netView.IsValid())
+                return false;
+
+            if (m_netView.GetZDO().GetBool(openedHash, false))
+                return false;
+
+            if (!m_netView.IsOwner())
+                m_netView.ClaimOwnership();
+
+            m_netView.GetZDO().Set(openedHash, true);
+            StartCoroutine(SpawnItemsDelay());
+            return true;
+        }
+
+        private void PlayOpenEffects()
         {
             m_surpriseChestInteract.m_animator.SetTrigger("Open");
             TriggerChestOpeningEffect();
-            StartCoroutine(SpawnItemsDelay());
         }
 
         public void OnDestroy()
@@ -138,6 +167,16 @@ namespace WizshBoneTwitchIntegration.Components
             {
                 if (m_mapPin != null)
                     m_mapPin.m_pos = transform.position;
+
+                // Every replicated instance of this chest (owner, the interacting client, and
+                // anyone else who has it loaded) reacts identically to the shared "opened" ZDO
+                // flag instead of only the client that happened to call TryTriggerOpen() - see the
+                // no-RPC ZDO pattern in CLAUDE.md.
+                if (!m_openHandledLocally && m_netView != null && m_netView.IsValid() && m_netView.GetZDO().GetBool(openedHash, false))
+                {
+                    m_openHandledLocally = true;
+                    PlayOpenEffects();
+                }
             }
             catch (System.Exception e)
             {
@@ -148,7 +187,7 @@ namespace WizshBoneTwitchIntegration.Components
         public IEnumerator OpenDelay()
         {
             yield return new WaitForSeconds(m_openDelay);
-            Open();
+            TryTriggerOpen();
         }
 
         private IEnumerator SpawnItemsDelay()
