@@ -50,6 +50,16 @@ namespace WizshBoneTwitchIntegration.Components
                 m_animator  = gameObject.GetComponentInChildren<Animator>();
                 m_rigidbody = gameObject.GetComponent<Rigidbody>();
 
+                // Claim ownership before freezing, so this client (the one that actually detected
+                // the freeze) becomes authoritative for the creature's ZDO going forward - the same
+                // built-in mechanic ZNetViewHelper.Destroy() already uses. Without this, a creature
+                // whose real owner isn't standing in the same zone (so their client never applies
+                // this freeze locally) would keep having its position/state pushed over the network
+                // by that owner the whole time, fighting the local freeze rather than just
+                // desyncing once on unfreeze the way a Rigidbody prop would.
+                if (m_netView != null && m_netView.IsValid() && !m_netView.IsOwner())
+                    m_netView.ClaimOwnership();
+
                 ZDO zdo = m_netView.GetZDO();
 
                 if (m_animator != null)

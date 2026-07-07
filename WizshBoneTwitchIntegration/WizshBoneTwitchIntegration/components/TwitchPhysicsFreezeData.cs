@@ -59,6 +59,20 @@ namespace WizshBoneTwitchIntegration.Components
 
                 m_damageFrozen = true;
 
+                // Claim ownership before anything else, so this client becomes authoritative for
+                // the object going forward - the same built-in mechanic ZNetViewHelper.Destroy()
+                // already uses for the same reason. Aoe.CustomFixedUpdate() (which decides whether
+                // to actually fire Initiate()/deal damage) only ever runs on the owning client, so
+                // if a different client owns this ZDO and hasn't yet seen the zone locally (e.g.
+                // their own copy of the zone's ZDO hasn't replicated to them yet), their un-frozen
+                // Aoe would deal damage normally regardless of what every other client displays.
+                // This also protects Rigidbody-based props handled in Initialize() below (which
+                // calls this method first) from desyncing/snapping on unfreeze if their owner
+                // isn't standing in the same zone and so never applies this freeze locally either.
+                ZNetView netView = GetComponent<ZNetView>();
+                if (netView != null && netView.IsValid() && !netView.IsOwner())
+                    netView.ClaimOwnership();
+
                 m_aoes = GetComponentsInChildren<Aoe>(true);
                 m_aoeInitRun = new bool[m_aoes.Length];
                 m_aoeHitCharacters = new bool[m_aoes.Length];

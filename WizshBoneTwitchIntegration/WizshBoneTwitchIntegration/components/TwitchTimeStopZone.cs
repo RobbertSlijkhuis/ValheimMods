@@ -139,7 +139,7 @@ namespace WizshBoneTwitchIntegration.Components
             if (!s_activeZones.Contains(this))
                 s_activeZones.Add(this);
 
-            if (m_freezeProjectiles)
+            if (m_freezeProjectiles || m_freezeEnemies || m_freezePlayer)
                 RefreshPhysicsObjectFreezes();
         }
 
@@ -160,7 +160,7 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void FixedUpdate()
         {
-            if (!m_freezeProjectiles)
+            if (!m_freezeProjectiles && !m_freezeEnemies && !m_freezePlayer)
                 return;
 
             m_physicsPollTimer -= Time.fixedDeltaTime;
@@ -204,9 +204,10 @@ namespace WizshBoneTwitchIntegration.Components
                 m_netView.GetZDO().SetPosition(transform.position);
         }
 
-        // Polls for physics props (logs, debris, arrows, spears, etc.) currently inside the zone
-        // and freezes/unfreezes them as they enter/leave, since we can't rely on OnTriggerEnter/Exit
-        // for these (see the PhysicsPollInterval comment above).
+        // Polls for physics props (logs, debris, arrows, spears, etc.) and characters currently
+        // inside the zone and freezes/unfreezes them as they enter/leave, since we can't rely on
+        // OnTriggerEnter/Exit alone for these (see the PhysicsPollInterval comment above, and the
+        // character-catching block below).
         private void RefreshPhysicsObjectFreezes()
         {
             try
@@ -218,7 +219,25 @@ namespace WizshBoneTwitchIntegration.Components
                 // Collider.
                 foreach (Collider collider in Physics.OverlapSphere(transform.position, m_radius))
                 {
-                    if (collider.GetComponentInParent<Character>() != null)
+                    Character character = collider.GetComponentInParent<Character>();
+
+                    if (character != null)
+                    {
+                        // OnTriggerEnter only fires for a collider pair's first transition into
+                        // overlap - a character already standing inside the zone's radius the
+                        // moment it (or the character) first loads on this client (a newly-joined
+                        // player, or someone just walking into render range of an already-active
+                        // zone with a creature already inside it) never raises that event at all,
+                        // since there's no "not touching -> touching" transition to detect.
+                        // HandleCharacterEnter already dedupes (m_registeredCreatures /
+                        // m_localPlayerRegistered), so calling it every poll tick is safe.
+                        if (m_freezeEnemies || m_freezePlayer)
+                            HandleCharacterEnter(character);
+
+                        continue;
+                    }
+
+                    if (!m_freezeProjectiles)
                         continue;
 
                     GameObject target = ResolvePhysicsTarget(collider);
@@ -227,6 +246,9 @@ namespace WizshBoneTwitchIntegration.Components
 
                     RegisterPhysicsObject(target, stillPresent);
                 }
+
+                if (!m_freezeProjectiles)
+                    return;
 
                 // Projectile (arrows, spears, thrown weapons, meteors while in flight) uses
                 // raycasts for hit detection (see m_rayRadius) rather than a Collider, so it can
