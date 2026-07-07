@@ -12,6 +12,7 @@ namespace WizshBoneTwitchIntegration.Helpers
     internal class DetonateHelper
     {
         private const float DelayBetweenDetonations = 0.05f;
+        private const int MaxTargets = 100;
 
         private struct QueuedDetonation
         {
@@ -50,6 +51,12 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static IEnumerator Detonate(DetonateData detonateData, CustomRewardEvent customRewardEvent)
         {
+            if (detonateData.values.Count == 0)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] DetonateHelper: '{customRewardEvent.CustomRewardTitle}' has no values configured, skipping detonation.");
+                yield break;
+            }
+
             int layerMask = 0;
 
             if (detonateData.type == DetonateType.Creature || detonateData.type == DetonateType.CreatureSpawned || detonateData.type == DetonateType.Fish)
@@ -68,6 +75,9 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             foreach (var item in found)
             {
+                if (prefabList.Count >= MaxTargets)
+                    break;
+
                 GameObject rootObject = item.transform.root.gameObject;
 
                 if (!seenRoots.Add(rootObject))
@@ -84,10 +94,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                     if (detonateData.type == DetonateType.CreatureSpawned && rootObject.GetComponent<TwitchCreatureClaim>() == null)
                         continue;
 
-                    if (detonateData.values.Count == 0)
-                        prefabList.Add(rootObject);
-
-                    else if (detonateData.values.Contains(rootObject.name.Replace("(Clone)", "")))
+                    if (detonateData.values.Contains(rootObject.name.Replace("(Clone)", "")))
                         prefabList.Add(rootObject);
                 }
 

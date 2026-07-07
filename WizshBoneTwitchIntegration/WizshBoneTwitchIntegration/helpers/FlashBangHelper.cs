@@ -15,6 +15,21 @@ namespace WizshBoneTwitchIntegration.Helpers
         public static int width = Screen.width;
         public static int height = Screen.height;
 
+        // Hard backstop for the white-screen-sticks-forever bug: if the effect never reaches its
+        // own cleanup (host coroutine killed by a scene change, an exception mid-effect, etc.),
+        // this guarantees the overlay and HUD get cleared regardless of what went wrong.
+        private const float SafetyTimeoutSeconds = 60f;
+
+        // Ground explosions are placed on a fixed world-space ring around the player (not relative
+        // to facing direction), so the effect reads the same no matter which way they're looking.
+        private const int GroundExplosionCount = 6;
+        private const float GroundExplosionRadius = 3f;
+
+        // flashStartDuration defaults to 0, which snaps the screen to solid white the same frame
+        // the ring explosions spawn - before their particle systems ever render a frame. Give the
+        // explosions a brief window on screen before the flash takes over.
+        private const float GroundExplosionLeadTime = 0.3f;
+
         private struct QueuedFlashbang
         {
             public FlashBangData data;
@@ -23,6 +38,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         private static readonly Queue<QueuedFlashbang> s_queue = new Queue<QueuedFlashbang>();
         private static bool s_isRunning;
+        private static GameObject s_activeFlash;
 
         public static void Enqueue(MonoBehaviour host, FlashBangData flashbangData, CustomRewardEvent customRewardEvent)
         {
@@ -77,30 +93,31 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (customRewards.m_playerIsInSafeZone == true || Player.m_localPlayer.IsTeleporting())
                 yield break;
 
-            Vector3 spawnPosition = TransformHelper.UpdateSpawnLocation(SpawnPositionType.InFrontOfPlayer, Player.m_localPlayer.transform, new PositionOffsetData() { y = 1f });
-            Quaternion spawnRotation = TransformHelper.UpdateSpawnRotation(SpawnPositionType.InFrontOfPlayer, Player.m_localPlayer.transform.rotation);
-            GameObject flashBang = GameObject.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.FlashbangVial, spawnPosition, spawnRotation);
-
-            yield return new WaitForSeconds(0.5f);
-            yield return new WaitForEndOfFrame();
-
             if (GameCamera.instance == null)
             {
                 Jotunn.Logger.LogWarning("FlashBangHelper: GameCamera.instance is null, aborting.");
-                ZNetViewHelper.Destroy(flashBang);
                 yield break;
             }
 
+            SpawnGroundExplosions(Player.m_localPlayer.transform.position, flashbangData.soundVolume);
+
+            yield return new WaitForSeconds(GroundExplosionLeadTime);
+
+            yield return new WaitForEndOfFrame();
+
             GameObject camera = GameCamera.instance.gameObject;
             GameObject flash = GameObject.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.Flashbang, camera.transform);
+            s_activeFlash = flash;
+            Game.instance.StartCoroutine(SafetyTimeoutWatchdog(flash));
+
             Transform canvasAfterImageTransform = flash.transform.Find("Canvas_AfterImage");
             Transform canvasFlashTransform = flash.transform.Find("Canvas_Flash");
 
             if (canvasAfterImageTransform == null || canvasFlashTransform == null)
             {
                 Jotunn.Logger.LogWarning("FlashBangHelper: Could not find canvas transforms on Flashbang prefab, aborting.");
-                ZNetViewHelper.Destroy(flashBang);
                 ZNetViewHelper.Destroy(flash);
+                s_activeFlash = null;
                 yield break;
             }
 
@@ -111,8 +128,8 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (afterImageTransform == null || flashTransform == null || soundTransform == null)
             {
                 Jotunn.Logger.LogWarning("FlashBangHelper: Could not find child transforms on Flashbang prefab, aborting.");
-                ZNetViewHelper.Destroy(flashBang);
                 ZNetViewHelper.Destroy(flash);
+                s_activeFlash = null;
                 yield break;
             }
 
@@ -122,8 +139,8 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (canvasAfterImageGroup == null || canvasFlashGroup == null)
             {
                 Jotunn.Logger.LogWarning("FlashBangHelper: Could not find CanvasGroups on Flashbang prefab, aborting.");
-                ZNetViewHelper.Destroy(flashBang);
                 ZNetViewHelper.Destroy(flash);
+                s_activeFlash = null;
                 yield break;
             }
 
@@ -153,33 +170,131 @@ namespace WizshBoneTwitchIntegration.Helpers
                 flashImage.color = color;
             }
 
-            if (flashbangData.flashStartDuration == 0f)
+            // From here on, Hud is hidden and/or the overlay is visible - a C# try/finally (yield
+            // return is not allowed inside a try with a catch clause) guarantees that whatever
+            // interrupts this coroutine (an exception, the host being torn down mid-yield, etc.)
+            // still restores the Hud and clears the overlay instead of leaving the screen stuck.
+            bool finishedNormally = false;
+            try
             {
-                canvasFlashGroup.alpha = 1f;
+                if (flashbangData.flashStartDuration == 0f)
+                {
+                    canvasFlashGroup.alpha = 1f;
+                }
+                else
+                {
+                    Player.m_localPlayer.StartCoroutine(LerpHelper.LerpCanvasGroup(canvasFlashGroup, 0f, 1f, flashbangData.flashStartDuration));
+                    yield return new WaitForSeconds(flashbangData.flashStartDuration);
+                }
+
+                if (EnemyHud.instance != null) EnemyHud.instance.gameObject.SetActive(false);
+                if (MessageHud.instance != null) MessageHud.instance.gameObject.SetActive(false);
+                if (Hud.instance != null) Hud.instance.gameObject.SetActive(false);
+
+                yield return new WaitForSeconds(flashbangData.flashDuration);
+
+                canvasAfterImageGroup.alpha = 1f;
+                Player.m_localPlayer.StartCoroutine(LerpHelper.LerpCanvasGroup(canvasFlashGroup, 1f, 0f, flashbangData.flashEndDuration));
+
+                yield return new WaitForSeconds(1f);
+
+                Player.m_localPlayer.StartCoroutine(LerpHelper.LerpCanvasGroup(canvasAfterImageGroup, 1f, 0f, flashbangData.flashEndDuration));
+                ZNetViewHelper.Destroy(flash, flashbangData.flashEndDuration + 1f);
+
+                yield return new WaitForSeconds(flashbangData.flashEndDuration / 2);
+
+                if (EnemyHud.instance != null) EnemyHud.instance.gameObject.SetActive(true);
+                if (MessageHud.instance != null) MessageHud.instance.gameObject.SetActive(true);
+                if (Hud.instance != null) Hud.instance.gameObject.SetActive(true);
+
+                finishedNormally = true;
             }
-            else
+            finally
             {
-                Player.m_localPlayer.StartCoroutine(LerpHelper.LerpCanvasGroup(canvasFlashGroup, 0f, 1f, flashbangData.flashStartDuration));
-                yield return new WaitForSeconds(flashbangData.flashStartDuration);
+                if (!finishedNormally)
+                {
+                    // Interrupted before the delayed destroy above got scheduled/completed - force
+                    // an immediate cleanup instead of leaving the overlay/Hud stuck.
+                    Jotunn.Logger.LogWarning("FlashBangHelper: Effect ended abnormally, forcing cleanup.");
+                    ZNetViewHelper.Destroy(flash);
+                    RestoreHud();
+                }
+
+                s_activeFlash = null;
+            }
+        }
+
+        private static IEnumerator SafetyTimeoutWatchdog(GameObject flash)
+        {
+            yield return new WaitForSeconds(SafetyTimeoutSeconds);
+
+            if (flash == null)
+                yield break;
+
+            Jotunn.Logger.LogWarning("FlashBangHelper: Flashbang UI did not clear within the safety timeout, forcing cleanup.");
+            ZNetViewHelper.Destroy(flash);
+            RestoreHud();
+            s_activeFlash = null;
+        }
+
+        // Purely visual/sound - the ring is spectacle for the flashbang, not damage, so any Aoe
+        // damage the explosion prefab carries by default is stripped before it can hurt the
+        // player standing at the center of the ring.
+        private static void SpawnGroundExplosions(Vector3 center, float soundVolume)
+        {
+            GameObject explosionFX = PrefabManager.Instance.GetPrefab("vfx_BombBlob_explode_frost");
+            GameObject explosionSFX = PrefabManager.Instance.GetPrefab("sfx_oozebomb_explode");
+
+            if (explosionFX == null || explosionSFX == null)
+            {
+                Jotunn.Logger.LogWarning("FlashBangHelper: Could not find explosion prefabs, skipping ground explosions.");
+                return;
             }
 
-            if (EnemyHud.instance != null) EnemyHud.instance.gameObject.SetActive(false);
-            if (MessageHud.instance != null) MessageHud.instance.gameObject.SetActive(false);
-            if (Hud.instance != null) Hud.instance.gameObject.SetActive(false);
-            ZNetViewHelper.Destroy(flashBang);
+            bool indoor = Player.m_localPlayer != null && Player.m_localPlayer.InInterior();
 
-            yield return new WaitForSeconds(flashbangData.flashDuration);
+            for (int i = 0; i < GroundExplosionCount; i++)
+            {
+                float angle = i * Mathf.PI * 2f / GroundExplosionCount;
+                Vector3 candidate = center + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * GroundExplosionRadius;
 
-            canvasAfterImageGroup.alpha = 1f;
-            Player.m_localPlayer.StartCoroutine(LerpHelper.LerpCanvasGroup(canvasFlashGroup, 1f, 0f, flashbangData.flashEndDuration));
+                bool foundGround = TransformHelper.TryGetGroundHeight(candidate, center.y, indoor, out float height);
+                if (!foundGround)
+                    height = center.y;
 
-            yield return new WaitForSeconds(1f);
+                candidate.y = height;
 
-            Player.m_localPlayer.StartCoroutine(LerpHelper.LerpCanvasGroup(canvasAfterImageGroup, 1f, 0f, flashbangData.flashEndDuration));
-            ZNetViewHelper.Destroy(flash, flashbangData.flashEndDuration + 1f);
+                Jotunn.Logger.LogWarning($"[WBTI] FlashBangHelper: spawning ring explosion {i} at {candidate} (foundGround={foundGround}, indoor={indoor})");
 
-            yield return new WaitForSeconds(flashbangData.flashEndDuration / 2);
+                GameObject explosionInstance = UnityEngine.Object.Instantiate(explosionFX, candidate, Quaternion.identity);
+                GameObject soundInstance = UnityEngine.Object.Instantiate(explosionSFX, candidate, Quaternion.identity);
 
+                Aoe[] aoes = explosionInstance.GetComponentsInChildren<Aoe>(true);
+                foreach (Aoe aoe in aoes)
+                {
+                    aoe.m_damage = new HitData.DamageTypes();
+                    aoe.m_spawnOnHitTerrain = null;
+                }
+
+                ZSFX zsfx = soundInstance.GetComponentInChildren<ZSFX>(true);
+                if (zsfx != null)
+                {
+                    zsfx.m_maxVol = soundVolume;
+                    zsfx.m_minVol = soundVolume;
+                }
+
+                if (i == 0)
+                {
+                    Component[] fxComponents = explosionInstance.GetComponentsInChildren<Component>(true);
+                    Component[] sfxComponents = soundInstance.GetComponentsInChildren<Component>(true);
+                    Jotunn.Logger.LogWarning($"[WBTI] FlashBangHelper: explosionFX components: {string.Join(", ", System.Array.ConvertAll(fxComponents, c => c.GetType().Name))}");
+                    Jotunn.Logger.LogWarning($"[WBTI] FlashBangHelper: explosionSFX components: {string.Join(", ", System.Array.ConvertAll(sfxComponents, c => c.GetType().Name))} (aoeCount={aoes.Length}, zsfxFound={zsfx != null})");
+                }
+            }
+        }
+
+        private static void RestoreHud()
+        {
             if (EnemyHud.instance != null) EnemyHud.instance.gameObject.SetActive(true);
             if (MessageHud.instance != null) MessageHud.instance.gameObject.SetActive(true);
             if (Hud.instance != null) Hud.instance.gameObject.SetActive(true);
@@ -187,20 +302,16 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static bool ClearUI()
         {
-            if (GameCamera.instance == null)
+            bool hadActiveFlash = s_activeFlash != null;
+
+            if (hadActiveFlash)
             {
-                Jotunn.Logger.LogWarning("FlashBangHelper: GameCamera.instance is null, cannot clear UI.");
-                return false;
+                ZNetViewHelper.Destroy(s_activeFlash);
+                s_activeFlash = null;
             }
 
-            GameObject camera = GameCamera.instance.gameObject;
-            Transform flashbangTrans = camera.transform.Find("Flashbang_WBTI");
-
-            if (flashbangTrans == null)
-                return false;
-
-            ZNetViewHelper.Destroy(flashbangTrans.gameObject);
-            return true;
+            RestoreHud();
+            return hadActiveFlash;
         }
     }
 }
