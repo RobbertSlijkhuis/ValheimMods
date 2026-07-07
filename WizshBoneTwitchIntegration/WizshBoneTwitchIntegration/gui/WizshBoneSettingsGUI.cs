@@ -6,25 +6,37 @@ using WizshBoneTwitchIntegration.TwitchIntegration;
 namespace WizshBoneTwitchIntegration.Gui
 {
     // Delegate for creating scrollable containers
-    internal delegate GameObject CreateScrollableContainerDelegate(string name, GameObject parent, float topOffset);
+    internal delegate GameObject CreateScrollableContainerDelegate(string name, GameObject parent, float topOffset, float leftInset = 0f);
 
     internal class WizshBoneSettingsGUI
     {
+        // Referenced by tabs (e.g. RedeemsTab's sidebar) that need to independently reproduce the
+        // main scrollable container's vertical extent - single source of truth instead of
+        // duplicated magic numbers that can drift out of sync.
+        internal const float PanelHeight = 720f;
+        internal const float ContentBottomMargin = 90f;
+
         private GameObject panel;
         private readonly TwitchAuth m_auth;
 
         // Tab buttons
         private Button m_profilesTabButton;
         private Button m_redeemsTabButton;
+        private Button m_rulesTabButton;
+        private Button m_creatureGroupsTabButton;
         private Button m_viewersTabButton;
 
         // Tabs
         private ProfilesTab m_profilesTab = new ProfilesTab();
         private RedeemsTab m_redeemsTab = new RedeemsTab();
+        private RulesTab m_rulesTab = new RulesTab();
+        private CreatureGroupsTab m_creatureGroupsTab = new CreatureGroupsTab();
         private ViewersTab m_viewersTab = new ViewersTab();
 
         private GameObject m_profilesTabRoot;
         private GameObject m_redeemsTabRoot;
+        private GameObject m_rulesTabRoot;
+        private GameObject m_creatureGroupsTabRoot;
         private GameObject m_viewersTabRoot;
 
         private static readonly Color TabActiveColor = new Color(0.9f, 0.9f, 0.9f, 1f);
@@ -54,7 +66,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMax: new Vector2(0.5f, 0.5f),
                 position: new Vector2(0f, 0f),
                 width: 1200f,
-                height: 720f,
+                height: PanelHeight,
                 draggable: false
             );
 
@@ -105,6 +117,8 @@ namespace WizshBoneTwitchIntegration.Gui
                     CloseSettings();
                     m_auth?.wizshBoneGUI.OpenRedeemHistory();
                 });
+            m_rulesTabRoot = m_rulesTab.Create(panel, CreateScrollableContainer);
+            m_creatureGroupsTabRoot = m_creatureGroupsTab.Create(panel, CreateScrollableContainer);
             m_viewersTabRoot = m_viewersTab.Create(panel, CreateScrollableContainer);
 
             ShowTab(m_profilesTabRoot, m_profilesTabButton);
@@ -151,12 +165,38 @@ namespace WizshBoneTwitchIntegration.Gui
             m_redeemsTabButton = redeemsTabBtn.GetComponent<Button>();
             m_redeemsTabButton.onClick.AddListener(() => ShowTab(m_redeemsTabRoot, m_redeemsTabButton));
 
+            GameObject rulesTabBtn = GUIManager.Instance.CreateButton(
+                text: "Rules",
+                parent: panel.transform,
+                anchorMin: new Vector2(0f, 1f),
+                anchorMax: new Vector2(0f, 1f),
+                position: new Vector2(510f, -90f),
+                width: 180f,
+                height: 40f
+            );
+            rulesTabBtn.SetActive(true);
+            m_rulesTabButton = rulesTabBtn.GetComponent<Button>();
+            m_rulesTabButton.onClick.AddListener(() => ShowTab(m_rulesTabRoot, m_rulesTabButton));
+
+            GameObject creatureGroupsTabBtn = GUIManager.Instance.CreateButton(
+                text: "Creature groups",
+                parent: panel.transform,
+                anchorMin: new Vector2(0f, 1f),
+                anchorMax: new Vector2(0f, 1f),
+                position: new Vector2(695f, -90f),
+                width: 180f,
+                height: 40f
+            );
+            creatureGroupsTabBtn.SetActive(true);
+            m_creatureGroupsTabButton = creatureGroupsTabBtn.GetComponent<Button>();
+            m_creatureGroupsTabButton.onClick.AddListener(() => ShowTab(m_creatureGroupsTabRoot, m_creatureGroupsTabButton));
+
             GameObject viewersTabBtn = GUIManager.Instance.CreateButton(
                 text: "Viewers",
                 parent: panel.transform,
                 anchorMin: new Vector2(0f, 1f),
                 anchorMax: new Vector2(0f, 1f),
-                position: new Vector2(510f, -90f),
+                position: new Vector2(880f, -90f),
                 width: 180f,
                 height: 40f
             );
@@ -169,6 +209,8 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             m_profilesTabRoot.SetActive(false);
             m_redeemsTabRoot.SetActive(false);
+            m_rulesTabRoot.SetActive(false);
+            m_creatureGroupsTabRoot.SetActive(false);
             m_viewersTabRoot.SetActive(false);
 
             tabToShow.SetActive(true);
@@ -176,6 +218,8 @@ namespace WizshBoneTwitchIntegration.Gui
 
             SetTabButtonColor(m_profilesTabButton, m_profilesTabRoot.activeSelf);
             SetTabButtonColor(m_redeemsTabButton, m_redeemsTabRoot.activeSelf);
+            SetTabButtonColor(m_rulesTabButton, m_rulesTabRoot.activeSelf);
+            SetTabButtonColor(m_creatureGroupsTabButton, m_creatureGroupsTabRoot.activeSelf);
             SetTabButtonColor(m_viewersTabButton, m_viewersTabRoot.activeSelf);
         }
 
@@ -186,6 +230,12 @@ namespace WizshBoneTwitchIntegration.Gui
 
             if (m_redeemsTabRoot != null && m_redeemsTabRoot.activeSelf)
                 m_redeemsTab.Refresh();
+
+            if (m_rulesTabRoot != null && m_rulesTabRoot.activeSelf)
+                m_rulesTab.Refresh();
+
+            if (m_creatureGroupsTabRoot != null && m_creatureGroupsTabRoot.activeSelf)
+                m_creatureGroupsTab.Refresh();
 
             if (m_viewersTabRoot != null && m_viewersTabRoot.activeSelf)
                 m_viewersTab.Refresh();
@@ -198,14 +248,14 @@ namespace WizshBoneTwitchIntegration.Gui
                 btnImage.color = isActive ? TabActiveColor : m_tabDefaultColor;
         }
 
-        private GameObject CreateScrollableContainer(string name, GameObject parent, float topOffset)
+        private GameObject CreateScrollableContainer(string name, GameObject parent, float topOffset, float leftInset = 0f)
         {
             return ScrollableView.CreateStretched(
                 parent: parent,
                 name: name,
-                offsetMin: new Vector2(50f, 90f),
+                offsetMin: new Vector2(50f + leftInset, ContentBottomMargin),
                 offsetMax: new Vector2(-50f, topOffset),
-                backgroundColor: new Color(0f, 0f, 0f, 0.5f),
+                backgroundColor: ScrollableView.DarkBackground,
                 autoHideScrollbar: true
             );
         }

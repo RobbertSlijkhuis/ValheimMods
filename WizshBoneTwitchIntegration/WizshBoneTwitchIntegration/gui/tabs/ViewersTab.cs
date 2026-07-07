@@ -178,12 +178,25 @@ namespace WizshBoneTwitchIntegration.Gui
                 bool isUnsaved = m_unsavedNames.Contains(viewer.name);
                 Color labelColor = isUnsaved ? GUIManager.Instance.ValheimOrange : GUIManager.Instance.ValheimBeige;
 
+                GameObject row = new GameObject("ViewerRow");
+                row.transform.SetParent(m_viewerListContainer.transform, false);
+
+                RectTransform rowRt = row.AddComponent<RectTransform>();
+                rowRt.anchorMin        = new Vector2(0f, 1f);
+                rowRt.anchorMax        = new Vector2(1f, 1f);
+                rowRt.pivot            = new Vector2(0.5f, 0.5f);
+                rowRt.anchoredPosition = new Vector2(0f, yOffset);
+                rowRt.sizeDelta        = new Vector2(0f, ItemHeight);
+
+                Image rowBackground = row.AddComponent<Image>();
+                var revealOnHover = new List<GameObject>();
+
                 Text nameText = GUIManager.Instance.CreateText(
                     text: viewer.name,
-                    parent: m_viewerListContainer.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(ColNameX, yOffset),
+                    parent: row.transform,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: new Vector2(ColNameX, 0f),
                     font: GUIManager.Instance.AveriaSerifBold,
                     fontSize: FieldUIBuilder.LabelFontSize,
                     color: labelColor,
@@ -201,10 +214,10 @@ namespace WizshBoneTwitchIntegration.Gui
 
                 Text color1Text = GUIManager.Instance.CreateText(
                     text: string.IsNullOrEmpty(viewer.color1) ? "-" : viewer.color1,
-                    parent: m_viewerListContainer.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(ColColor1X, yOffset),
+                    parent: row.transform,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: new Vector2(ColColor1X, 0f),
                     font: GUIManager.Instance.AveriaSerifBold,
                     fontSize: FieldUIBuilder.LabelFontSize,
                     color: swatchColor,
@@ -222,10 +235,10 @@ namespace WizshBoneTwitchIntegration.Gui
 
                 Text effectsText = GUIManager.Instance.CreateText(
                     text: effectsLabel,
-                    parent: m_viewerListContainer.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(ColEffectsX, yOffset),
+                    parent: row.transform,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: new Vector2(ColEffectsX, 0f),
                     font: GUIManager.Instance.AveriaSerifBold,
                     fontSize: FieldUIBuilder.LabelFontSize,
                     color: labelColor,
@@ -239,29 +252,31 @@ namespace WizshBoneTwitchIntegration.Gui
 
                 GameObject editBtn = GUIManager.Instance.CreateButton(
                     text: "Edit",
-                    parent: m_viewerListContainer.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(BtnEditX, yOffset),
+                    parent: row.transform,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: new Vector2(BtnEditX, 0f),
                     width: ActionButtonWidth,
                     height: ItemHeight
                 );
-                editBtn.SetActive(true);
                 editBtn.GetComponentInChildren<Text>().color = Color.cyan;
                 editBtn.GetComponent<Button>().onClick.AddListener(() => ShowEditView(captured));
+                revealOnHover.Add(editBtn);
 
                 GameObject deleteBtn = GUIManager.Instance.CreateButton(
                     text: "X",
-                    parent: m_viewerListContainer.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(BtnDeleteX, yOffset),
+                    parent: row.transform,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: new Vector2(BtnDeleteX, 0f),
                     width: ItemHeight,
                     height: ItemHeight
                 );
                 deleteBtn.SetActive(true);
                 deleteBtn.GetComponentInChildren<Text>().color = Color.red;
                 deleteBtn.GetComponent<Button>().onClick.AddListener(() => OnDeleteViewer(captured));
+
+                row.AddComponent<RowHoverReveal>().Init(rowBackground, revealOnHover);
 
                 yOffset -= ItemHeight + ItemSpacing;
             }

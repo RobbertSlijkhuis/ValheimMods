@@ -75,6 +75,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     height: InputHeight
                 );
                 m_inputField = inputObj.GetComponent<InputField>();
+                FieldUIBuilder.StylePlaceholder(m_inputField);
             }
 
             // Add button - inline with the input field, always visible
@@ -191,7 +192,7 @@ namespace WizshBoneTwitchIntegration.Gui
             }
         }
 
-        internal static GameObject CreateScrollableList(GameObject parent, Vector2 position, float width, float height, string name = "ScrollView")
+        internal static GameObject CreateScrollableList(GameObject parent, Vector2 position, float width, float height, string name = "ScrollView", Color? backgroundColor = null)
         {
             float fieldWidth = width;
             float ListMaxHeight = height;
@@ -205,7 +206,7 @@ namespace WizshBoneTwitchIntegration.Gui
             scrollRt.sizeDelta        = new Vector2(fieldWidth, ListMaxHeight);
             scrollRt.anchoredPosition = position;
 
-            scrollRoot.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.1f, 0.5f);
+            scrollRoot.AddComponent<Image>().color = backgroundColor ?? ScrollableView.DarkBackground;
 
             ScrollRect scrollRect = scrollRoot.AddComponent<ScrollRect>();
             scrollRect.horizontal        = false;

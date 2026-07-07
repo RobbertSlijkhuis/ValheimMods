@@ -65,6 +65,18 @@ Jotunn.Logger.LogWarning($"[WBTI] SomeThing: {value}");
 - `publish.ps1` copies the built DLL to the BepInEx plugins folder or packages for ThunderStore.
 - No build step needed from Claude — the user builds and tests in-game.
 
+## Live redeem profiles (on disk, outside the repo)
+
+Redeem profiles created/edited in-game via the Redeems tab are **not** stored in this repo. `WizshBoneTwitchIntegration.customConfigPath` (`WizshBoneTwitchIntegration.cs`) is a hardcoded relative path (`"BepInEx/config/WizshBoneTwitchIntegration"`), resolved against `Environment.CurrentDirectory` at runtime — for a Steam-launched game that's the actual Valheim install directory (see `Environment.props` for the path), **not** whichever Thunderstore Mod Manager/r2modman profile folder is "active". This is intentional (confirmed with the user) — it means redeem config is independent of which mod-manager profile launched the game, rather than being duplicated per mod-manager profile.
+
+Each saved redeem profile lives at:
+```
+<Valheim install>/BepInEx/config/WizshBoneTwitchIntegration/profiles/<profile name>/redeems.yaml
+```
+There's also a legacy `<Valheim install>/BepInEx/config/WizshBoneTwitchIntegration/redeems.yaml` (no `profiles/` subfolder) — this one is only read once, to seed a brand-new profile via `ProfileManager.CreateProfile(migrate: true)`, and isn't touched afterward.
+
+When asked to inspect or edit a specific real redeem profile (as opposed to `resources/redeems.yaml`, the repo's embedded default-profile seed), look here rather than under the Thunderstore Mod Manager `DataFolder`.
+
 ## Testing
 
 No automated tests. All testing is manual/in-game. Console commands in `commands/` are the primary debug tool.

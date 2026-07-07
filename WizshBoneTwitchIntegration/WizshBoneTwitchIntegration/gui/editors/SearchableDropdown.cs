@@ -271,6 +271,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 height: SearchInputHeight
             );
             m_searchInput = inputObj.GetComponent<InputField>();
+            FieldUIBuilder.StylePlaceholder(m_searchInput);
             m_searchInput.text = "";
             m_searchInput.onValueChanged.AddListener(OnFilterChanged);
 

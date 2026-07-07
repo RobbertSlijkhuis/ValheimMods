@@ -21,8 +21,12 @@ namespace WizshBoneTwitchIntegration.Gui
 
         public const int LabelFontSize = 13;
         public const int FieldFontSize = 12;
+        public const int PlaceholderFontSize = 14;
         private const int SubLabelFontSize = 11;
         private const int TooltipFontSize = 12;
+
+        // Jotunn's default placeholder color (Color.grey) is low-contrast against the input field background.
+        public static readonly Color PlaceholderColor = new Color(0.75f, 0.75f, 0.75f, 1f);
 
         /// <summary>Height of one row (label + field side by side).</summary>
         public static float EntryHeight => FieldHeight;
@@ -753,8 +757,24 @@ namespace WizshBoneTwitchIntegration.Gui
 
             InputField inputField = inputObj.GetComponent<InputField>();
             inputField.textComponent.alignment = TextAnchor.MiddleLeft;
+            StylePlaceholder(inputField);
             inputField.text = initialValue;
             return inputField;
+        }
+
+        /// <summary>
+        /// Jotunn leaves the placeholder Text at Unity's default alignment (upper-left) and a low-contrast
+        /// grey, while the real input text is styled separately (see <see cref="CreateInputField"/>). This
+        /// brings the placeholder in line: center-left aligned, larger, and lighter for readability.
+        /// </summary>
+        internal static void StylePlaceholder(InputField field)
+        {
+            if (field.placeholder is Text placeholder)
+            {
+                placeholder.alignment = TextAnchor.MiddleLeft;
+                placeholder.fontSize = PlaceholderFontSize;
+                placeholder.color = PlaceholderColor;
+            }
         }
 
         private static SearchableDropdown BuildStringDropdownField(GameObject parent, object target, FieldInfo field, string currentValue, Vector2 position, float width, List<string> options)

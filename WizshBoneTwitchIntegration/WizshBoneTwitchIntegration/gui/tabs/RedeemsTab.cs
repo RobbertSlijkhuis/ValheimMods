@@ -25,6 +25,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private string m_searchText = "";
         private Button m_addNewBtn;
         private Button m_saveBtn;
+        private readonly ProfileSidebar m_profileSidebar = new ProfileSidebar();
 
         // Create view
         private GameObject m_createView;
@@ -79,29 +80,52 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float HeaderTopPadding    = 45f;
         private const float ActionButtonWidth   = 80f;
 
-        private const float ColToggleX = -455f;
+        // Row columns are relative to the redeem list container's own center, which - now that the
+        // container is inset on the left to make room for the sidebar - is narrower than before.
+        // Kept compact enough to fit inside that narrower container (including the scrollbar eating
+        // into its right edge), instead of the old values that assumed the container's full old width.
+        private const float ColToggleX = -426f;
         private const float ColToggleW = 44f;
-        private const float ColTitleX  = -295f;
+        private const float ColTitleX  = -284f;
         private const float ColTitleW  = 220f;
-        private const float ColTypeX   = -80f;
+        private const float ColTypeX   = -84f;
         private const float ColTypeW   = 160f;
-        private const float ColCostX   = 80f;
+        private const float ColCostX   = 66f;
         private const float ColCostW   = 120f;
 
-        private const float BtnTestX   = 220f;
+        private const float BtnTestX   = 181f;
         private const float BtnEditX   = BtnTestX + ActionButtonWidth / 2f + ButtonSpacing + ActionButtonWidth / 2f;
         private const float CopyBtnWidth = 70f;
         private const float BtnCopyX   = BtnEditX + ActionButtonWidth / 2f + ButtonSpacing + CopyBtnWidth / 2f;
         private const float BtnDeleteX = BtnCopyX + CopyBtnWidth / 2f + ButtonSpacing + ButtonHeight / 2f;
 
-        private const float ListLeftEdgeX        = -480f;
+        // Panel is 1200 wide (WizshBoneSettingsGUI's CreateWoodpanel), so its true left edge is at
+        // -600 in this point-anchored coordinate space. Every tab's main scrollable container is
+        // inset 50px from that edge (WizshBoneSettingsGUI.CreateScrollableContainer's default
+        // offsetMin.x) - the search bar and sidebar both align to that same true content margin.
+        private const float ListLeftEdgeX        = -600f + 50f;
         private const float ContentTopY          = -(110f + HeaderTopPadding);
         private const float RedeemLabelY         = ContentTopY - 53f;
         private const float ScrollTopOffset      = ContentTopY - 71f;
-        private const float SearchWidth          = 560f;
+        private const float SidebarGutter        = 20f;
+
+        // Exactly matches the redeem list container's own visible height (top edge at ScrollTopOffset,
+        // bottom edge at ContentBottomMargin above the panel's bottom), so the two boxes end at the
+        // same Y instead of an approximated constant drifting out of sync with WizshBoneSettingsGUI.
+        private const float SidebarListHeight    = ScrollTopOffset + WizshBoneSettingsGUI.PanelHeight - WizshBoneSettingsGUI.ContentBottomMargin;
+        private const float RedeemListLeftEdgeX  = ListLeftEdgeX + ProfileSidebar.Width + SidebarGutter;
+
+        // Fills the gutter vacated by moving the search bar to RedeemListLeftEdgeX below, matching
+        // the Profiles tab's "↺" reload button pattern but bigger, since it stands alone here.
+        // Same width as the sidebar below it (ProfileSidebar.Width) so both edges line up.
+        private const float ReloadBtnWidth       = ProfileSidebar.Width;
+        private const float ReloadBtnHeight      = 50f;
+        private const float ReloadBtnCenterX     = ListLeftEdgeX + ReloadBtnWidth / 2f;
+
+        private const float SearchWidth          = 380f;
         private const float NewRedeemBtnWidth    = 160f;
         private const float SaveBtnWidth         = 80f;
-        private const float SearchCenterX        = ListLeftEdgeX + SearchWidth / 2f;
+        private const float SearchCenterX        = RedeemListLeftEdgeX + SearchWidth / 2f;
         private const float NewRedeemBtnCenterX  = SearchCenterX + SearchWidth / 2f + ButtonSpacing + NewRedeemBtnWidth / 2f;
         private const float SaveBtnCenterX       = NewRedeemBtnCenterX + NewRedeemBtnWidth / 2f + ButtonSpacing + SaveBtnWidth / 2f;
 
@@ -145,12 +169,13 @@ namespace WizshBoneTwitchIntegration.Gui
         public void Refresh()
         {
             m_workingRedeems = new List<RedeemData>(RedeemHelper.redeems);
-            m_redeemsLabel.text = $"Redeems - {ProfileManager.ActiveProfile}:";
+            m_redeemsLabel.text = $"Redeems - {ProfileManager.ActiveProfile}: {m_workingRedeems.Count}";
 
             bool isSynced = ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile);
             if (m_addNewBtn != null) m_addNewBtn.interactable = !isSynced;
             if (m_saveBtn != null)   m_saveBtn.interactable   = !isSynced;
 
+            m_profileSidebar.Refresh();
             RefreshList();
         }
 
@@ -161,6 +186,19 @@ namespace WizshBoneTwitchIntegration.Gui
         private void CreateListView(CreateScrollableContainerDelegate createScrollable)
         {
             m_listView = UIContainer.Create(m_root, "ListView");
+
+            GameObject reloadBtnObj = GUIManager.Instance.CreateButton(
+                text: "↺ Reload",
+                parent: m_listView.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(ReloadBtnCenterX, ContentTopY),
+                width: ReloadBtnWidth,
+                height: ReloadBtnHeight
+            );
+            reloadBtnObj.SetActive(true);
+            reloadBtnObj.GetComponentInChildren<Text>().color = GUIManager.Instance.ValheimOrange;
+            reloadBtnObj.GetComponent<Button>().onClick.AddListener(OnReloadRedeems);
 
             InputField searchField = FieldUIBuilder.CreateInputField(
                 parent: m_listView,
@@ -200,7 +238,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_redeemsLabel = TabUIHelper.CreateTabTitle(
                 $"Redeems - {ProfileManager.ActiveProfile}:",
                 m_listView,
-                new Vector2(-150f, RedeemLabelY),
+                new Vector2(RedeemListLeftEdgeX + 200f, RedeemLabelY), // +half-width: CreateTabTitle's position is the box's center, not its left edge
                 width: 400f
             );
 
@@ -209,18 +247,21 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: m_listView.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(50f, RedeemLabelY),
+                position: new Vector2(0f, RedeemLabelY),
                 font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: FieldUIBuilder.FieldFontSize,
+                fontSize: TabUIHelper.TitleFontSize,
                 color: GUIManager.Instance.ValheimYellow,
                 outline: true,
                 outlineColor: Color.black,
                 width: 400f,
-                height: 20f,
+                height: 25f,
                 addContentSizeFitter: false
             ).GetComponent<Text>();
+            m_listFeedbackText.alignment = TextAnchor.MiddleCenter;
 
-            m_redeemListContainer = createScrollable("RedeemList", m_listView, ScrollTopOffset);
+            m_profileSidebar.Create(m_listView, new Vector2(ListLeftEdgeX, RedeemLabelY), ScrollTopOffset, SidebarListHeight, Refresh);
+
+            m_redeemListContainer = createScrollable("RedeemList", m_listView, ScrollTopOffset, leftInset: ProfileSidebar.Width + SidebarGutter);
         }
 
         private void RefreshList()
@@ -241,14 +282,27 @@ namespace WizshBoneTwitchIntegration.Gui
                 bool isUnsaved = m_unsavedTitles.Contains(redeem.title);
                 Color labelColor = isUnsaved ? GUIManager.Instance.ValheimOrange : GUIManager.Instance.ValheimBeige;
 
+                GameObject row = new GameObject("RedeemRow");
+                row.transform.SetParent(m_redeemListContainer.transform, false);
+
+                RectTransform rowRt = row.AddComponent<RectTransform>();
+                rowRt.anchorMin        = new Vector2(0f, 1f);
+                rowRt.anchorMax        = new Vector2(1f, 1f);
+                rowRt.pivot            = new Vector2(0.5f, 0.5f);
+                rowRt.anchoredPosition = new Vector2(0f, yOffset);
+                rowRt.sizeDelta        = new Vector2(0f, ItemHeight);
+
+                Image rowBackground = row.AddComponent<Image>();
+                var revealOnHover = new List<GameObject>();
+
                 if (!isSynced)
                 {
                     GameObject toggleBtn = GUIManager.Instance.CreateButton(
                         text: captured.enabled ? "On" : "Off",
-                        parent: m_redeemListContainer.transform,
-                        anchorMin: new Vector2(0.5f, 1f),
-                        anchorMax: new Vector2(0.5f, 1f),
-                        position: new Vector2(ColToggleX, yOffset),
+                        parent: row.transform,
+                        anchorMin: new Vector2(0.5f, 0.5f),
+                        anchorMax: new Vector2(0.5f, 0.5f),
+                        position: new Vector2(ColToggleX, 0f),
                         width: ColToggleW,
                         height: ButtonHeight
                     );
@@ -261,10 +315,10 @@ namespace WizshBoneTwitchIntegration.Gui
 
                 Text titleText = GUIManager.Instance.CreateText(
                     text: redeem.title,
-                    parent: m_redeemListContainer.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(ColTitleX, yOffset),
+                    parent: row.transform,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: new Vector2(ColTitleX, 0f),
                     font: GUIManager.Instance.AveriaSerifBold,
                     fontSize: FieldUIBuilder.LabelFontSize,
                     color: labelColor,
@@ -278,10 +332,10 @@ namespace WizshBoneTwitchIntegration.Gui
 
                 Text typeText = GUIManager.Instance.CreateText(
                     text: $"[{redeem.type}]",
-                    parent: m_redeemListContainer.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(ColTypeX, yOffset),
+                    parent: row.transform,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: new Vector2(ColTypeX, 0f),
                     font: GUIManager.Instance.AveriaSerifBold,
                     fontSize: FieldUIBuilder.LabelFontSize,
                     color: labelColor,
@@ -295,10 +349,10 @@ namespace WizshBoneTwitchIntegration.Gui
 
                 Text costText = GUIManager.Instance.CreateText(
                     text: $"{redeem.points} pts",
-                    parent: m_redeemListContainer.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(ColCostX, yOffset),
+                    parent: row.transform,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: new Vector2(ColCostX, 0f),
                     font: GUIManager.Instance.AveriaSerifBold,
                     fontSize: FieldUIBuilder.LabelFontSize,
                     color: labelColor,
@@ -312,70 +366,71 @@ namespace WizshBoneTwitchIntegration.Gui
 
                 GameObject testBtn = GUIManager.Instance.CreateButton(
                     text: "Test",
-                    parent: m_redeemListContainer.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(BtnTestX, yOffset),
+                    parent: row.transform,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: new Vector2(BtnTestX, 0f),
                     width: ActionButtonWidth,
                     height: ButtonHeight
                 );
-                testBtn.SetActive(true);
                 testBtn.GetComponentInChildren<Text>().color = Color.yellow;
                 testBtn.GetComponent<Button>().onClick.AddListener(() => OnTestRedeem(captured));
+                testBtn.AddComponent<TooltipTrigger>().Init("Executes the redeem so you can see how it works in-game.");
+                revealOnHover.Add(testBtn);
 
                 if (isSynced)
                 {
                     // Synced profile � show read-only view, no delete
                     GameObject showBtn = GUIManager.Instance.CreateButton(
                         text: "Show",
-                        parent: m_redeemListContainer.transform,
-                        anchorMin: new Vector2(0.5f, 1f),
-                        anchorMax: new Vector2(0.5f, 1f),
-                        position: new Vector2(BtnEditX, yOffset),
+                        parent: row.transform,
+                        anchorMin: new Vector2(0.5f, 0.5f),
+                        anchorMax: new Vector2(0.5f, 0.5f),
+                        position: new Vector2(BtnEditX, 0f),
                         width: ActionButtonWidth,
                         height: ButtonHeight
                     );
-                    showBtn.SetActive(true);
                     showBtn.GetComponentInChildren<Text>().color = GUIManager.Instance.ValheimBeige;
                     showBtn.GetComponent<Button>().onClick.AddListener(() => ShowViewOnlyView(captured));
+                    revealOnHover.Add(showBtn);
                 }
                 else
                 {
                     GameObject editBtn = GUIManager.Instance.CreateButton(
                         text: "Edit",
-                        parent: m_redeemListContainer.transform,
-                        anchorMin: new Vector2(0.5f, 1f),
-                        anchorMax: new Vector2(0.5f, 1f),
-                        position: new Vector2(BtnEditX, yOffset),
+                        parent: row.transform,
+                        anchorMin: new Vector2(0.5f, 0.5f),
+                        anchorMax: new Vector2(0.5f, 0.5f),
+                        position: new Vector2(BtnEditX, 0f),
                         width: ActionButtonWidth,
                         height: ButtonHeight
                     );
-                    editBtn.SetActive(true);
                     editBtn.GetComponentInChildren<Text>().color = Color.cyan;
                     editBtn.GetComponent<Button>().onClick.AddListener(() => ShowEditView(captured));
+                    revealOnHover.Add(editBtn);
                 }
 
                 GameObject copyBtn = GUIManager.Instance.CreateButton(
                     text: "Copy",
-                    parent: m_redeemListContainer.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(BtnCopyX, yOffset),
+                    parent: row.transform,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: new Vector2(BtnCopyX, 0f),
                     width: CopyBtnWidth,
                     height: ButtonHeight
                 );
-                copyBtn.SetActive(true);
                 copyBtn.GetComponentInChildren<Text>().color = GUIManager.Instance.ValheimBeige;
                 copyBtn.GetComponent<Button>().onClick.AddListener(() => OnCopyRedeem(captured));
+                revealOnHover.Add(copyBtn);
 
                 if (!isSynced)
                 {
                     GameObject deleteBtn = GUIManager.Instance.CreateButton(
                         text: "X",
-                        parent: m_redeemListContainer.transform,
-                        anchorMin: new Vector2(0.5f, 1f),
-                        anchorMax: new Vector2(0.5f, 1f),
-                        position: new Vector2(BtnDeleteX, yOffset),
+                        parent: row.transform,
+                        anchorMin: new Vector2(0.5f, 0.5f),
+                        anchorMax: new Vector2(0.5f, 0.5f),
+                        position: new Vector2(BtnDeleteX, 0f),
                         width: ButtonHeight,
                         height: ButtonHeight
                     );
@@ -383,6 +438,8 @@ namespace WizshBoneTwitchIntegration.Gui
                     deleteBtn.GetComponentInChildren<Text>().color = Color.red;
                     deleteBtn.GetComponent<Button>().onClick.AddListener(() => OnDeleteRedeem(captured));
                 }
+
+                row.AddComponent<RowHoverReveal>().Init(rowBackground, revealOnHover);
 
                 yOffset -= ItemHeight + ButtonSpacing;
             }
@@ -488,6 +545,15 @@ namespace WizshBoneTwitchIntegration.Gui
             }
 
             RefreshList();
+        }
+
+        private void OnReloadRedeems()
+        {
+            TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+            bool reloaded = customRewards != null ? customRewards.ReloadRewards() : RedeemHelper.Reload();
+
+            Refresh();
+            m_listFeedbackText.text = reloaded ? "Reloaded!" : "Failed to reload redeems.";
         }
 
         // =====================================================================

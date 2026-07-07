@@ -17,6 +17,13 @@ namespace WizshBoneTwitchIntegration.Gui
         private static readonly Color HandleColor = new Color(0.6f, 0.6f, 0.6f, 1f);
 
         /// <summary>
+        /// The dark content-panel background used by every tab's main scrollable container
+        /// (redeem list, viewer list, profile list, profile sidebar, etc). Use this instead of
+        /// redeclaring the color inline so all of them stay in sync.
+        /// </summary>
+        internal static readonly Color DarkBackground = new Color(0f, 0f, 0f, 0.5f);
+
+        /// <summary>
         /// Creates a scroll view that stretches to fill its parent, inset by the given offsets.
         /// </summary>
         /// <param name="parent">The parent <see cref="GameObject"/>.</param>
@@ -79,7 +86,7 @@ namespace WizshBoneTwitchIntegration.Gui
             Vector2 piv  = pivot    ?? new Vector2(0.5f, 1f);
 
             GameObject scrollRoot = CreateScrollRoot(parent, name, aMin, aMax);
-            scrollRoot.GetComponent<Image>().color = backgroundColor ?? new Color(0.1f, 0.1f, 0.1f, 0.5f);
+            scrollRoot.GetComponent<Image>().color = backgroundColor ?? DarkBackground;
 
             RectTransform rt = scrollRoot.GetComponent<RectTransform>();
             rt.pivot            = piv;
