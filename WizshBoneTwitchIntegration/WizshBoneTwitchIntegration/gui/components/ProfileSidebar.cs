@@ -22,25 +22,15 @@ namespace WizshBoneTwitchIntegration.Gui
         private GameObject m_listContainer;
         private Action m_onProfileChanged;
 
-        /// <param name="titlePosition">Top-left position of the "Profiles" title.</param>
-        /// <param name="listTopY">
-        /// Top edge Y for the list box, in the same coordinate space as <paramref name="titlePosition"/>.
-        /// Pass the caller's own list-top constant directly (e.g. the redeem list's own top offset)
-        /// so the two boxes align exactly, rather than deriving it from a guessed title height/gap.
-        /// </param>
-        public void Create(GameObject parent, Vector2 titlePosition, float listTopY, float listHeight, Action onProfileChanged)
+        /// <summary>
+        /// Populates profile buttons into a content container already built by
+        /// <see cref="TabListLayout"/> (title and scrollable box are its responsibility, so both
+        /// share the same scrollbar styling as the tab's main list).
+        /// </summary>
+        public void Create(GameObject contentContainer, Action onProfileChanged)
         {
+            m_listContainer = contentContainer;
             m_onProfileChanged = onProfileChanged;
-
-            // CreateTabTitle's position is the box's center, not its left edge - offset by half-width
-            // so the title actually starts flush with titlePosition.x.
-            TabUIHelper.CreateTabTitle("Profiles", parent, new Vector2(titlePosition.x + Width / 2f, titlePosition.y), width: Width);
-
-            Vector2 listPosition = new Vector2(titlePosition.x + Width / 2f, listTopY);
-
-            // Matches the redeem list's own background instead of ListEditor.CreateScrollableList's
-            // slightly lighter default.
-            m_listContainer = ListEditor.CreateScrollableList(parent, listPosition, Width, listHeight, "ProfileSidebarList", backgroundColor: ScrollableView.DarkBackground);
 
             Refresh();
         }
@@ -66,7 +56,10 @@ namespace WizshBoneTwitchIntegration.Gui
                     anchorMin: new Vector2(0.5f, 1f),
                     anchorMax: new Vector2(0.5f, 1f),
                     position: new Vector2(0f, yOffset),
-                    width: Width - 10f,
+                    // Width is the total column width including the scrollbar's own track
+                    // (ScrollableView.ScrollbarWidth) - subtract that first so the button actually
+                    // fits inside the content area instead of overflowing into the scrollbar.
+                    width: Width - ScrollableView.ScrollbarWidth - 10f,
                     height: ButtonHeight
                 );
                 btn.SetActive(true);

@@ -44,7 +44,6 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float ItemHeight          = 40f;
         private const float ItemSpacing         = 5f;
         private const float ListTopPadding      = 15f;
-        private const float HeaderTopPadding    = 45f;
         private const float ActionButtonWidth   = 80f;
 
         private const float ColNameX    = -350f;
@@ -56,16 +55,8 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float BtnEditX    = 380f;
         private const float BtnDeleteX  = 460f;
 
-        private const float ListLeftEdgeX       = -480f;
-        private const float ContentTopY         = -(110f + HeaderTopPadding);
-        private const float ViewersLabelY       = ContentTopY - 53f;
-        private const float ScrollTopOffset     = ContentTopY - 71f;
-        private const float SearchWidth         = 560f;
-        private const float NewViewerBtnWidth   = 160f;
-        private const float SaveBtnWidth        = 80f;
-        private const float SearchCenterX       = ListLeftEdgeX + SearchWidth / 2f;
-        private const float NewViewerBtnCenterX = SearchCenterX + SearchWidth / 2f + ItemSpacing + NewViewerBtnWidth / 2f;
-        private const float SaveBtnCenterX      = NewViewerBtnCenterX + NewViewerBtnWidth / 2f + ItemSpacing + SaveBtnWidth / 2f;
+        private const float NewViewerBtnWidth = 160f;
+        private const float SaveBtnWidth      = 80f;
 
         public GameObject Create(GameObject parent, CreateScrollableContainerDelegate createScrollable)
         {
@@ -96,60 +87,28 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void CreateListView(CreateScrollableContainerDelegate createScrollable)
         {
-            m_listView = UIContainer.Create(m_root, "ListView");
+            var options = new TabListLayoutOptions
+            {
+                TitleText = "Viewers:",
 
-            InputField searchField = FieldUIBuilder.CreateInputField(
-                parent: m_listView,
-                position: new Vector2(SearchCenterX, ContentTopY),
-                width: SearchWidth
-            );
-            searchField.placeholder.GetComponent<Text>().text = "Search viewers...";
-            searchField.onValueChanged.AddListener(OnSearchChanged);
+                ShowSearchBar   = true,
+                OnSearchChanged = OnSearchChanged,
 
-            GameObject addNewBtnObj = GUIManager.Instance.CreateButton(
-                text: "+ New Viewer",
-                parent: m_listView.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(NewViewerBtnCenterX, ContentTopY),
-                width: NewViewerBtnWidth,
-                height: 36f
-            );
-            addNewBtnObj.SetActive(true);
-            addNewBtnObj.GetComponent<Button>().onClick.AddListener(ShowCreateView);
+                HeaderButtons = new List<HeaderButtonSpec>
+                {
+                    new HeaderButtonSpec("+ New Viewer", NewViewerBtnWidth, ShowCreateView),
+                    new HeaderButtonSpec("Save", SaveBtnWidth, OnSave, textColor: new Color(0.2f, 0.8f, 0.2f)),
+                },
 
-            GameObject saveBtnObj = GUIManager.Instance.CreateButton(
-                text: "Save",
-                parent: m_listView.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(SaveBtnCenterX, ContentTopY),
-                width: SaveBtnWidth,
-                height: 36f
-            );
-            saveBtnObj.SetActive(true);
-            saveBtnObj.GetComponentInChildren<Text>().color = new Color(0.2f, 0.8f, 0.2f);
-            saveBtnObj.GetComponent<Button>().onClick.AddListener(OnSave);
+                MainContainerName = "ViewerList",
+            };
 
-            m_viewersLabel = TabUIHelper.CreateTabTitle("Viewers:", m_listView, new Vector2(-150f, ViewersLabelY), width: 400f);
+            TabListLayoutResult result = TabListLayout.Create(m_root, "ListView", createScrollable, options);
 
-            m_listFeedbackText = GUIManager.Instance.CreateText(
-                text: "",
-                parent: m_listView.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(50f, ViewersLabelY),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: FieldUIBuilder.FieldFontSize,
-                color: GUIManager.Instance.ValheimYellow,
-                outline: true,
-                outlineColor: Color.black,
-                width: 400f,
-                height: 20f,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-
-            m_viewerListContainer = createScrollable("ViewerList", m_listView, ScrollTopOffset);
+            m_listView            = result.ListView;
+            m_viewersLabel        = result.TitleLabel;
+            m_listFeedbackText    = result.FeedbackText;
+            m_viewerListContainer = result.MainContainer;
         }
 
         private void RefreshList()

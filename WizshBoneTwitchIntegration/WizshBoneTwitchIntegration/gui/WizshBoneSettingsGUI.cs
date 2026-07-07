@@ -10,11 +10,15 @@ namespace WizshBoneTwitchIntegration.Gui
 
     internal class WizshBoneSettingsGUI
     {
-        // Referenced by tabs (e.g. RedeemsTab's sidebar) that need to independently reproduce the
-        // main scrollable container's vertical extent - single source of truth instead of
-        // duplicated magic numbers that can drift out of sync.
+        // Referenced by tabs (e.g. RedeemsTab's sidebar) and TabListLayout, which need to
+        // independently reproduce the main scrollable container's extent - single source of
+        // truth instead of duplicated magic numbers that can drift out of sync.
         internal const float PanelHeight = 720f;
         internal const float ContentBottomMargin = 90f;
+
+        internal const float PanelWidth = 1200f;
+        internal const float ContentSideMargin = 50f;
+        internal const float ContentLeftEdgeX = -PanelWidth / 2f + ContentSideMargin;
 
         private GameObject panel;
         private readonly TwitchAuth m_auth;
@@ -65,7 +69,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMin: new Vector2(0.5f, 0.5f),
                 anchorMax: new Vector2(0.5f, 0.5f),
                 position: new Vector2(0f, 0f),
-                width: 1200f,
+                width: PanelWidth,
                 height: PanelHeight,
                 draggable: false
             );
@@ -253,8 +257,8 @@ namespace WizshBoneTwitchIntegration.Gui
             return ScrollableView.CreateStretched(
                 parent: parent,
                 name: name,
-                offsetMin: new Vector2(50f + leftInset, ContentBottomMargin),
-                offsetMax: new Vector2(-50f, topOffset),
+                offsetMin: new Vector2(ContentSideMargin + leftInset, ContentBottomMargin),
+                offsetMax: new Vector2(-ContentSideMargin, topOffset),
                 backgroundColor: ScrollableView.DarkBackground,
                 autoHideScrollbar: true
             );

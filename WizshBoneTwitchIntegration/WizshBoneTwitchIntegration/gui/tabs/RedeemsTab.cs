@@ -77,7 +77,6 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float ButtonSpacing       = 5f;
         private const float ItemHeight          = 40f;
         private const float ListTopPadding      = 15f;
-        private const float HeaderTopPadding    = 45f;
         private const float ActionButtonWidth   = 80f;
 
         // Row columns are relative to the redeem list container's own center, which - now that the
@@ -99,35 +98,8 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float BtnCopyX   = BtnEditX + ActionButtonWidth / 2f + ButtonSpacing + CopyBtnWidth / 2f;
         private const float BtnDeleteX = BtnCopyX + CopyBtnWidth / 2f + ButtonSpacing + ButtonHeight / 2f;
 
-        // Panel is 1200 wide (WizshBoneSettingsGUI's CreateWoodpanel), so its true left edge is at
-        // -600 in this point-anchored coordinate space. Every tab's main scrollable container is
-        // inset 50px from that edge (WizshBoneSettingsGUI.CreateScrollableContainer's default
-        // offsetMin.x) - the search bar and sidebar both align to that same true content margin.
-        private const float ListLeftEdgeX        = -600f + 50f;
-        private const float ContentTopY          = -(110f + HeaderTopPadding);
-        private const float RedeemLabelY         = ContentTopY - 53f;
-        private const float ScrollTopOffset      = ContentTopY - 71f;
-        private const float SidebarGutter        = 20f;
-
-        // Exactly matches the redeem list container's own visible height (top edge at ScrollTopOffset,
-        // bottom edge at ContentBottomMargin above the panel's bottom), so the two boxes end at the
-        // same Y instead of an approximated constant drifting out of sync with WizshBoneSettingsGUI.
-        private const float SidebarListHeight    = ScrollTopOffset + WizshBoneSettingsGUI.PanelHeight - WizshBoneSettingsGUI.ContentBottomMargin;
-        private const float RedeemListLeftEdgeX  = ListLeftEdgeX + ProfileSidebar.Width + SidebarGutter;
-
-        // Fills the gutter vacated by moving the search bar to RedeemListLeftEdgeX below, matching
-        // the Profiles tab's "↺" reload button pattern but bigger, since it stands alone here.
-        // Same width as the sidebar below it (ProfileSidebar.Width) so both edges line up.
-        private const float ReloadBtnWidth       = ProfileSidebar.Width;
-        private const float ReloadBtnHeight      = 50f;
-        private const float ReloadBtnCenterX     = ListLeftEdgeX + ReloadBtnWidth / 2f;
-
-        private const float SearchWidth          = 380f;
-        private const float NewRedeemBtnWidth    = 160f;
-        private const float SaveBtnWidth         = 80f;
-        private const float SearchCenterX        = RedeemListLeftEdgeX + SearchWidth / 2f;
-        private const float NewRedeemBtnCenterX  = SearchCenterX + SearchWidth / 2f + ButtonSpacing + NewRedeemBtnWidth / 2f;
-        private const float SaveBtnCenterX       = NewRedeemBtnCenterX + NewRedeemBtnWidth / 2f + ButtonSpacing + SaveBtnWidth / 2f;
+        private const float NewRedeemBtnWidth = 160f;
+        private const float SaveBtnWidth      = 80f;
 
         private const float TypeLabelX    = -341f;
         private const float TypeLabelW    = 210f;
@@ -185,83 +157,39 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void CreateListView(CreateScrollableContainerDelegate createScrollable)
         {
-            m_listView = UIContainer.Create(m_root, "ListView");
+            var options = new TabListLayoutOptions
+            {
+                TitleText = $"Redeems - {ProfileManager.ActiveProfile}:",
 
-            GameObject reloadBtnObj = GUIManager.Instance.CreateButton(
-                text: "↺ Reload",
-                parent: m_listView.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(ReloadBtnCenterX, ContentTopY),
-                width: ReloadBtnWidth,
-                height: ReloadBtnHeight
-            );
-            reloadBtnObj.SetActive(true);
-            reloadBtnObj.GetComponentInChildren<Text>().color = GUIManager.Instance.ValheimOrange;
-            reloadBtnObj.GetComponent<Button>().onClick.AddListener(OnReloadRedeems);
+                ShowSearchBar   = true,
+                OnSearchChanged = OnSearchChanged,
 
-            InputField searchField = FieldUIBuilder.CreateInputField(
-                parent: m_listView,
-                position: new Vector2(SearchCenterX, ContentTopY),
-                width: SearchWidth
-            );
-            searchField.placeholder.GetComponent<Text>().text = "Search redeems...";
-            searchField.onValueChanged.AddListener(OnSearchChanged);
+                HeaderButtons = new List<HeaderButtonSpec>
+                {
+                    new HeaderButtonSpec("+ New Redeem", NewRedeemBtnWidth, ShowCreateView,
+                        onCreated: obj => m_addNewBtn = obj.GetComponent<Button>()),
+                    new HeaderButtonSpec("Save", SaveBtnWidth, OnSave,
+                        textColor: new Color(0.2f, 0.8f, 0.2f),
+                        onCreated: obj => m_saveBtn = obj.GetComponent<Button>()),
+                },
 
-            GameObject addNewBtnObj = GUIManager.Instance.CreateButton(
-                text: "+ New Redeem",
-                parent: m_listView.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(NewRedeemBtnCenterX, ContentTopY),
-                width: NewRedeemBtnWidth,
-                height: 36f
-            );
-            addNewBtnObj.SetActive(true);
-            m_addNewBtn = addNewBtnObj.GetComponent<Button>();
-            m_addNewBtn.onClick.AddListener(ShowCreateView);
+                SidebarAccessoryButton = new SidebarAccessoryButtonSpec("↺ Reload", OnReloadRedeems,
+                    textColor: GUIManager.Instance.ValheimOrange),
 
-            GameObject saveBtnObj = GUIManager.Instance.CreateButton(
-                text: "Save",
-                parent: m_listView.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(SaveBtnCenterX, ContentTopY),
-                width: SaveBtnWidth,
-                height: 36f
-            );
-            saveBtnObj.SetActive(true);
-            saveBtnObj.GetComponentInChildren<Text>().color = new Color(0.2f, 0.8f, 0.2f);
-            m_saveBtn = saveBtnObj.GetComponent<Button>();
-            m_saveBtn.onClick.AddListener(OnSave);
+                ShowSidebar      = true,
+                SidebarWidth     = ProfileSidebar.Width,
+                SidebarTitleText = "Profiles",
+                PopulateSidebar  = container => m_profileSidebar.Create(container, Refresh),
 
-            m_redeemsLabel = TabUIHelper.CreateTabTitle(
-                $"Redeems - {ProfileManager.ActiveProfile}:",
-                m_listView,
-                new Vector2(RedeemListLeftEdgeX + 200f, RedeemLabelY), // +half-width: CreateTabTitle's position is the box's center, not its left edge
-                width: 400f
-            );
+                MainContainerName = "RedeemList",
+            };
 
-            m_listFeedbackText = GUIManager.Instance.CreateText(
-                text: "",
-                parent: m_listView.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(0f, RedeemLabelY),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: TabUIHelper.TitleFontSize,
-                color: GUIManager.Instance.ValheimYellow,
-                outline: true,
-                outlineColor: Color.black,
-                width: 400f,
-                height: 25f,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-            m_listFeedbackText.alignment = TextAnchor.MiddleCenter;
+            TabListLayoutResult result = TabListLayout.Create(m_root, "ListView", createScrollable, options);
 
-            m_profileSidebar.Create(m_listView, new Vector2(ListLeftEdgeX, RedeemLabelY), ScrollTopOffset, SidebarListHeight, Refresh);
-
-            m_redeemListContainer = createScrollable("RedeemList", m_listView, ScrollTopOffset, leftInset: ProfileSidebar.Width + SidebarGutter);
+            m_listView            = result.ListView;
+            m_redeemsLabel        = result.TitleLabel;
+            m_listFeedbackText    = result.FeedbackText;
+            m_redeemListContainer = result.MainContainer;
         }
 
         private void RefreshList()
