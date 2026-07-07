@@ -33,8 +33,6 @@
     <None Remove="assets\wbti_dw" />
     <None Remove="assets\wbti_dw.manifest" />
     <None Remove="resources\banned.txt" />
-    <None Remove="resources\redeems-schema.json" />
-    <None Remove="resources\redeems.yaml" />
     <None Remove="resources\viewers.yaml" />
   </ItemGroup>
 
@@ -42,7 +40,6 @@
     <EmbeddedResource Include="assets\wbti_dw" />
     <EmbeddedResource Include="assets\wbti_dw.manifest" />
     <EmbeddedResource Include="resources\banned.txt" />
-    <EmbeddedResource Include="resources\redeems-schema.json" />
     <EmbeddedResource Include="resources\redeems.yaml" />
     <EmbeddedResource Include="resources\viewers.yaml" />
   </ItemGroup>

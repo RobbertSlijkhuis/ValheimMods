@@ -29,10 +29,6 @@ namespace WizshBoneTwitchIntegration.Gui
         // Create view
         private GameObject m_createView;
         private SearchableDropdown m_typeDropdown;
-        private SearchableDropdown m_variantDropdown;
-        private GameObject m_variantRow;
-        private Button m_toggleRawViewBtn;
-        private bool m_showRawSpawnAbilityData;
         private GameObject m_creatureViewRow;
         private Button m_toggleCreatureViewBtn;
         private bool m_showRawCreatureData;
@@ -61,26 +57,19 @@ namespace WizshBoneTwitchIntegration.Gui
             RedeemType.Flashbang,
             RedeemType.Mist,
             RedeemType.SpawnAbility,
+            RedeemType.Door,
+            RedeemType.Windmill,
+            RedeemType.Smite,
+            RedeemType.Rain,
+            RedeemType.Meteor,
+            RedeemType.Trap,
+            RedeemType.Root,
             RedeemType.SpawnCreature,
             RedeemType.StatusEffect,
             RedeemType.SurpriseChest,
             RedeemType.TerrainEdit,
             RedeemType.TimeStop,
             RedeemType.Weather,
-        };
-
-        // Only shown when type == RedeemType.SpawnAbility - picks which narrowed view
-        // (if any) ObjectEditor renders for the shared SpawnAbilityData sub-object.
-        private static readonly string[] RedeemVariants = new[]
-        {
-            RedeemVariant.None,
-            RedeemVariant.Door,
-            RedeemVariant.Windmill,
-            RedeemVariant.Smite,
-            RedeemVariant.Rain,
-            RedeemVariant.Meteor,
-            RedeemVariant.Trap,
-            RedeemVariant.Root,
         };
 
         private const float ButtonHeight        = 40f;
@@ -587,49 +576,6 @@ namespace WizshBoneTwitchIntegration.Gui
 
             yPos -= 70f;
 
-            m_variantRow = TabUIHelper.CreateStaticContainer("VariantRow", scrollContent, yPos);
-
-            Text variantLabelComp = GUIManager.Instance.CreateText(
-                text: "Variant",
-                parent: m_variantRow.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(TypeLabelX, 0f),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: FieldUIBuilder.LabelFontSize,
-                color: GUIManager.Instance.ValheimBeige,
-                outline: true,
-                outlineColor: Color.black,
-                width: TypeLabelW,
-                height: 36f,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-            variantLabelComp.alignment = TextAnchor.MiddleLeft;
-
-            m_variantDropdown = new SearchableDropdown();
-            m_variantDropdown.Build(m_variantRow, new Vector2(TypeDropdownX, 0f), TypeDropdownW, 36f, new List<string>(RedeemVariants), RedeemVariants[0]);
-            m_variantDropdown.OnValueChanged += _ =>
-            {
-                m_newRedeem.variant = m_variantDropdown.Value;
-                OnTypeChanged();
-            };
-
-            GameObject toggleRawViewBtnObj = GUIManager.Instance.CreateButton(
-                text: "Show full data",
-                parent: m_variantRow.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(TypeDropdownX + TypeDropdownW / 2f + ButtonSpacing + ToggleRawViewBtnWidth / 2f, 0f),
-                width: ToggleRawViewBtnWidth,
-                height: 36f
-            );
-            toggleRawViewBtnObj.SetActive(true);
-            m_toggleRawViewBtn = toggleRawViewBtnObj.GetComponent<Button>();
-            m_toggleRawViewBtn.onClick.AddListener(OnToggleRawView);
-
-            m_variantRow.GetComponent<RectTransform>().sizeDelta = new Vector2(1050f, 36f);
-            m_variantRow.SetActive(false);
-
             // Only shown when type == RedeemType.SpawnCreature - toggles between a curated
             // subset of CreatureData fields per list entry (CreatureSimpleView) and every field.
             m_creatureViewRow = TabUIHelper.CreateStaticContainer("CreatureViewRow", scrollContent, yPos);
@@ -683,16 +629,6 @@ namespace WizshBoneTwitchIntegration.Gui
             m_newRedeem.type = m_typeDropdown.Value;
             TabUIHelper.ClearContainer(m_editorContainer);
 
-            bool isSpawnAbility = m_newRedeem.type == RedeemType.SpawnAbility;
-            m_variantRow.SetActive(isSpawnAbility);
-            if (!isSpawnAbility)
-                m_newRedeem.variant = RedeemVariant.None;
-
-            bool hasVariant = isSpawnAbility && m_newRedeem.variant != RedeemVariant.None;
-            m_toggleRawViewBtn.gameObject.SetActive(hasVariant);
-            if (!hasVariant)
-                m_showRawSpawnAbilityData = false;
-
             bool isSpawnCreature = m_newRedeem.type == RedeemType.SpawnCreature;
             m_creatureViewRow.SetActive(isSpawnCreature);
             if (!isSpawnCreature)
@@ -716,30 +652,22 @@ namespace WizshBoneTwitchIntegration.Gui
                 editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.weatherData);
             else if (isSpawnCreature)
                 editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.creatureData, simpleMode: !m_showRawCreatureData);
-            else if (isSpawnAbility)
-            {
-                object spawnAbilityView;
-                if (!hasVariant || m_showRawSpawnAbilityData)
-                    spawnAbilityView = m_newRedeem.spawnAbilityData;
-                else if (m_newRedeem.variant == RedeemVariant.Door)
-                    spawnAbilityView = new DoorView(m_newRedeem.spawnAbilityData);
-                else if (m_newRedeem.variant == RedeemVariant.Windmill)
-                    spawnAbilityView = new WindmillView(m_newRedeem.spawnAbilityData);
-                else if (m_newRedeem.variant == RedeemVariant.Smite)
-                    spawnAbilityView = new SmiteView(m_newRedeem.spawnAbilityData);
-                else if (m_newRedeem.variant == RedeemVariant.Rain)
-                    spawnAbilityView = new RainView(m_newRedeem.spawnAbilityData);
-                else if (m_newRedeem.variant == RedeemVariant.Meteor)
-                    spawnAbilityView = new MeteorView(m_newRedeem.spawnAbilityData);
-                else if (m_newRedeem.variant == RedeemVariant.Trap)
-                    spawnAbilityView = new TrapView(m_newRedeem.spawnAbilityData);
-                else if (m_newRedeem.variant == RedeemVariant.Root)
-                    spawnAbilityView = new RootView(m_newRedeem.spawnAbilityData);
-                else
-                    spawnAbilityView = m_newRedeem.spawnAbilityData;
-
-                editorHeight = m_objectEditor.Build(m_editorContainer, spawnAbilityView);
-            }
+            else if (m_newRedeem.type == RedeemType.SpawnAbility)
+                editorHeight = m_objectEditor.Build(m_editorContainer, m_newRedeem.spawnAbilityData);
+            else if (m_newRedeem.type == RedeemType.Door)
+                editorHeight = m_objectEditor.Build(m_editorContainer, new DoorView(m_newRedeem.spawnAbilityData));
+            else if (m_newRedeem.type == RedeemType.Windmill)
+                editorHeight = m_objectEditor.Build(m_editorContainer, new WindmillView(m_newRedeem.spawnAbilityData));
+            else if (m_newRedeem.type == RedeemType.Smite)
+                editorHeight = m_objectEditor.Build(m_editorContainer, new SmiteView(m_newRedeem.spawnAbilityData));
+            else if (m_newRedeem.type == RedeemType.Rain)
+                editorHeight = m_objectEditor.Build(m_editorContainer, new RainView(m_newRedeem.spawnAbilityData));
+            else if (m_newRedeem.type == RedeemType.Meteor)
+                editorHeight = m_objectEditor.Build(m_editorContainer, new MeteorView(m_newRedeem.spawnAbilityData));
+            else if (m_newRedeem.type == RedeemType.Trap)
+                editorHeight = m_objectEditor.Build(m_editorContainer, new TrapView(m_newRedeem.spawnAbilityData));
+            else if (m_newRedeem.type == RedeemType.Root)
+                editorHeight = m_objectEditor.Build(m_editorContainer, new RootView(m_newRedeem.spawnAbilityData));
 
             RectTransform editorRt = m_editorContainer.GetComponent<RectTransform>();
             editorRt.sizeDelta = new Vector2(editorRt.sizeDelta.x, editorHeight + 20f);
@@ -751,15 +679,6 @@ namespace WizshBoneTwitchIntegration.Gui
                 SetContainerInteractable(m_editorContainer, false);
                 SetContainerInteractable(m_standardFieldsContainer, false);
             }
-        }
-
-        private void OnToggleRawView()
-        {
-            m_showRawSpawnAbilityData = !m_showRawSpawnAbilityData;
-            m_toggleRawViewBtn.GetComponentInChildren<Text>().text = m_showRawSpawnAbilityData
-                ? "Show variant fields"
-                : "Show full data";
-            OnTypeChanged();
         }
 
         private void OnToggleCreatureView()
@@ -860,11 +779,6 @@ namespace WizshBoneTwitchIntegration.Gui
             m_createViewTitle.text        = "New Redeem";
             m_typeDropdown.Value          = RedeemTypes[0];
             m_typeDropdown.Interactable   = true;
-            m_variantDropdown.Value       = RedeemVariants[0];
-            m_variantDropdown.Interactable = true;
-            m_variantRow.SetActive(false);
-            m_showRawSpawnAbilityData     = false;
-            m_toggleRawViewBtn.GetComponentInChildren<Text>().text = "Show full data";
             m_creatureViewRow.SetActive(false);
             m_showRawCreatureData         = false;
             m_toggleCreatureViewBtn.GetComponentInChildren<Text>().text = "Show full data";
@@ -886,16 +800,12 @@ namespace WizshBoneTwitchIntegration.Gui
             m_createFeedbackText.text     = "";
             m_createViewTitle.text        = "Edit Redeem";
             m_typeDropdown.Interactable   = false;
-            m_variantDropdown.Interactable = false;
-            m_showRawSpawnAbilityData     = false;
-            m_toggleRawViewBtn.GetComponentInChildren<Text>().text = "Show full data";
             m_showRawCreatureData         = false;
             m_toggleCreatureViewBtn.GetComponentInChildren<Text>().text = "Show full data";
             m_confirmButton.gameObject.SetActive(true);
             m_confirmButton.GetComponentInChildren<Text>().text = "Save";
 
             m_typeDropdown.Value = redeem.type;
-            m_variantDropdown.Value = redeem.variant;
 
             RebuildStandardFields();
             OnTypeChanged();
@@ -912,15 +822,11 @@ namespace WizshBoneTwitchIntegration.Gui
             m_createFeedbackText.text     = "Read-only � this profile is synced.";
             m_createViewTitle.text        = "View Redeem";
             m_typeDropdown.Interactable   = false;
-            m_variantDropdown.Interactable = false;
-            m_showRawSpawnAbilityData     = false;
-            m_toggleRawViewBtn.GetComponentInChildren<Text>().text = "Show full data";
             m_showRawCreatureData         = false;
             m_toggleCreatureViewBtn.GetComponentInChildren<Text>().text = "Show full data";
             m_confirmButton.gameObject.SetActive(false);
 
             m_typeDropdown.Value = redeem.type;
-            m_variantDropdown.Value = redeem.variant;
 
             RebuildStandardFields();
             OnTypeChanged();

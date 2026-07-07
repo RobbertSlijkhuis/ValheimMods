@@ -181,7 +181,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (Player.m_localPlayer.InInterior())
                 {
-                    if (redeem.type == RedeemType.TerrainEdit || redeem.type == RedeemType.SpawnAbility)
+                    if (redeem.type == RedeemType.TerrainEdit || RedeemType.SpawnAbilityFamily.Contains(redeem.type))
                     {
                         m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! {(PluginConfig.configAutoResolveRedeems.Value ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
                         throw new RedeemException("Player is in dungeon and redeem is not allowed", ExceptionType.Warning);
@@ -191,7 +191,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (redeem.type == RedeemType.SpawnCreature)
                     CreatureHelper.HandleSpawnCreatureRedeem(redeem, customRewardEvent, m_chat);
 
-                if (redeem.type == RedeemType.SpawnAbility)
+                if (RedeemType.SpawnAbilityFamily.Contains(redeem.type))
                 {
                     if (redeem.spawnAbilityData == null)
                         throw new RedeemException("Could not find data for SpawnAbility", ExceptionType.Error);

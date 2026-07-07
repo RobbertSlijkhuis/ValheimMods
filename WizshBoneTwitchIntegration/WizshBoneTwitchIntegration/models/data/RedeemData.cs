@@ -48,7 +48,6 @@ namespace WizshBoneTwitchIntegration.Models
         public bool userInput = false;
 
         [EditorHidden] public string type    = RedeemType.Undefined;
-        [EditorHidden] public string variant = RedeemVariant.None;
         [EditorHidden] public bool   enabled = true;
         [EditorHidden] public SurpriseChestData chestData = new SurpriseChestData();
         [EditorHidden] public SpawnCreatureData creatureData = new SpawnCreatureData();
@@ -69,6 +68,13 @@ namespace WizshBoneTwitchIntegration.Models
             { RedeemType.Mist,               nameof(mistData)         },
             { RedeemType.SpawnCreature,      nameof(creatureData)     },
             { RedeemType.SpawnAbility,       nameof(spawnAbilityData) },
+            { RedeemType.Door,               nameof(spawnAbilityData) },
+            { RedeemType.Windmill,           nameof(spawnAbilityData) },
+            { RedeemType.Smite,              nameof(spawnAbilityData) },
+            { RedeemType.Rain,               nameof(spawnAbilityData) },
+            { RedeemType.Meteor,             nameof(spawnAbilityData) },
+            { RedeemType.Trap,               nameof(spawnAbilityData) },
+            { RedeemType.Root,               nameof(spawnAbilityData) },
             { RedeemType.SurpriseChest,      nameof(chestData)        },
             { RedeemType.StatusEffect,       nameof(statusEffectData) },
             { RedeemType.TerrainEdit,        nameof(terrainEditData)  },
@@ -198,7 +204,7 @@ namespace WizshBoneTwitchIntegration.Models
         /// </summary>
         public DamageData GetDamageData()
         {
-            if (type == RedeemType.SpawnAbility)
+            if (RedeemType.SpawnAbilityFamily.Contains(type))
                 return spawnAbilityData?.damage;
 
             if (type == RedeemType.Detonate)
