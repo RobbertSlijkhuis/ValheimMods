@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
@@ -326,26 +325,6 @@ namespace WizshBoneTwitchIntegration.Extensions
 
                 if (spawnAbilityData.damage != null)
                     gameObject.AddComponent<TwitchPersistentDamage>().SetData(customRewardEvent, spawnAbilityData.damage);
-
-                // Any Twitch-spawned Aoe-based hazard (not just Smite's lightningAOE) can deal
-                // damage within the same physics step it spawns (trigger-based hits aren't gated
-                // by any spawn delay), which is faster than a Time Stop zone's own poll (every
-                // ~0.1s) could ever react. If it lands inside an already-active zone, block its
-                // damage right here, synchronously, before returning control to Unity's update
-                // loop. The zone's poll still handles pausing the particle effect itself once it
-                // notices this object (see TwitchTimeStopZone.RefreshPhysicsObjectFreezes).
-                if (aoe != null && spawnAbilityData.damage != null)
-                {
-                    bool frozen = TwitchTimeStopZone.IsPositionFrozen(spawnPoint);
-                    Jotunn.Logger.LogWarning($"[WBTI] {gameObject.name} spawn at {spawnPoint}: IsPositionFrozen={frozen}");
-
-                    if (frozen)
-                    {
-                        TwitchPhysicsFreezeData freezeData = gameObject.AddComponent<TwitchPhysicsFreezeData>();
-                        freezeData.FreezeDamage();
-                        Jotunn.Logger.LogWarning($"[WBTI] {gameObject.name} FreezeDamage applied, aoeCount={gameObject.GetComponentsInChildren<Aoe>(true).Length}, allDisabled={gameObject.GetComponentsInChildren<Aoe>(true).All(a => !a.enabled)}");
-                    }
-                }
 
                 if (spawnAbility.m_randomYRotation)
                 {

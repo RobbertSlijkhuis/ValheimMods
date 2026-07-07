@@ -23,23 +23,33 @@ namespace WizshBoneTwitchIntegration.Commands
 
         public override void Run(string[] args)
         {
+            if (args.Length == 0)
+            {
+                return;
+            }
+
+            string title = "";
+
+            foreach (string arg in args)
+            {
+                title += arg + " ";
+            }
+
+            title = title.TrimEnd();
+
+            FireRedeem(title);
+        }
+
+        public static void FireRedeem(string title)
+        {
             try
             {
-                if (args.Length == 0)
+                if (string.IsNullOrEmpty(title))
                 {
                     return;
                 }
 
                 TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
-
-                string title = "";
-
-                foreach (string arg in args)
-                {
-                    title += arg + " ";
-                }
-
-                title = title.TrimEnd();
 
                 RedeemData redeem = customRewards.GetRedeemList().Find(item => item.title == title);
                 if (redeem != null && !redeem.enabled)

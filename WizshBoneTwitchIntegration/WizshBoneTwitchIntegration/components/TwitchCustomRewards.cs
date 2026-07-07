@@ -23,6 +23,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public bool m_playerIsInSafeZone = false;
         public bool m_enabled = false;
         public string m_alias;
+        public string m_quickTestRedeem = "WBTI Timestop";
         public static string m_refundAutoResolveOn;
         public static string m_refundAutoResolveOff;
 

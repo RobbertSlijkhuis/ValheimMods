@@ -18,6 +18,7 @@ namespace WizshBoneTwitchIntegration.Configs
         public static string sectionHUD = "HUD";
 
         public static ConfigEntry<KeyboardShortcut> configWizshBoneWindow;
+        public static ConfigEntry<KeyboardShortcut> configQuickTestRedeemKey;
 
         public static ConfigEntry<string> configChattingBlackList;
         public static ConfigEntry<bool> configChattingEnabled;
@@ -71,6 +72,10 @@ namespace WizshBoneTwitchIntegration.Configs
         {
             configWizshBoneWindow = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionGeneral, "Open WizshBone window", new KeyboardShortcut(KeyCode.F3),
                 new ConfigDescription("Settings of the WizshBone Twitch Integration", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+
+            configQuickTestRedeemKey = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionGeneral, "Quick test redeem key", new KeyboardShortcut(KeyCode.Y),
+                new ConfigDescription("Fires the redeem set via WBTISetQuickRedeem, for quick in-game testing", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
 
 

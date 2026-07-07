@@ -11,6 +11,7 @@ namespace WizshBoneTwitchIntegration.Components
         private Animator m_animator;
         private Rigidbody m_rigidbody;
         private RigidbodyConstraints m_originalConstraints;
+        private ParticleSystem[] m_particleSystems;
 
         private static readonly int s_startedHash   = "WBTI_Freeze_Started".GetStableHashCode();
         private static readonly int s_animHashHash  = "WBTI_Freeze_AnimHash".GetStableHashCode();
@@ -114,6 +115,13 @@ namespace WizshBoneTwitchIntegration.Components
             // creatures/player to their Idle state pose instead of holding the current frame.
             if (m_animator != null)
                 m_animator.enabled = false;
+
+            // Pauses any ongoing particle effects on the creature itself (status effects, weapon
+            // trails, auras) so a frozen enemy looks fully frozen, not just AI/physics-wise.
+            m_particleSystems = gameObject.GetComponentsInChildren<ParticleSystem>(true);
+
+            foreach (ParticleSystem particles in m_particleSystems)
+                particles.Pause(false);
         }
 
         public void Unfreeze()
@@ -128,6 +136,15 @@ namespace WizshBoneTwitchIntegration.Components
 
                 if (m_animator != null)
                     m_animator.enabled = true;
+
+                if (m_particleSystems != null)
+                {
+                    foreach (ParticleSystem particles in m_particleSystems)
+                    {
+                        if (particles != null)
+                            particles.Play(false);
+                    }
+                }
 
                 ClearZDO();
                 Destroy(this);

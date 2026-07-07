@@ -1,4 +1,5 @@
 using HarmonyLib;
+using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Helpers;
 
@@ -7,6 +8,28 @@ namespace WizshBoneTwitchIntegration.Harmony
     [HarmonyPatch]
     internal class TimeStopPatchesWBTI
     {
+        // Freezes ANY Aoe (not just Twitch-spawned hazards - monster attacks, thorns, any vanilla
+        // area effect) the instant it spawns inside an already-active Time Stop zone. Aoe.Awake()
+        // (private - patched by string name) is the earliest point m_activationTimer etc. are
+        // initialized, running synchronously during Instantiate() before any physics step could
+        // process a trigger/collision on it. See TwitchPhysicsFreezeData.FreezeDamage for why a
+        // later poll-only approach isn't fast enough on its own. Resolves to transform.root so
+        // multi-Aoe hazards (e.g. Smite's rod + area) share one wrapper rather than getting a
+        // separate one each.
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Aoe), "Awake")]
+        public static void Aoe_Awake_Postfix(Aoe __instance)
+        {
+            if (!TwitchTimeStopZone.IsPositionFrozen(__instance.transform.position))
+                return;
+
+            GameObject root = __instance.transform.root.gameObject;
+            TwitchPhysicsFreezeData freezeData = root.GetComponent<TwitchPhysicsFreezeData>() ?? root.AddComponent<TwitchPhysicsFreezeData>();
+            freezeData.FreezeDamage();
+
+            Jotunn.Logger.LogWarning($"[WBTI] Aoe.Awake froze damage on {root.name} at {__instance.transform.position}");
+        }
+
         // Block player input while frozen so the movement system can't fight the frozen rigidbody.
         [HarmonyPrefix]
         [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.FixedUpdate))]

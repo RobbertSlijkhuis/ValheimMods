@@ -21,10 +21,18 @@ namespace WizshBoneTwitchIntegration.Components
         private readonly List<GameObject> m_departedPhysicsObjects = new List<GameObject>();
         private readonly Dictionary<GameObject, float> m_pendingAoeFreezeTimers = new Dictionary<GameObject, float>();
 
-        // Gives the Smite lightning rod time to visually strike the ground before it gets frozen -
-        // without this, the zone's poll can catch (and pause) it mid-air on the very first tick
-        // after it spawns, which looks wrong.
-        private const float AoeFreezeGraceDelay = 0.3f;
+        // Gives a hazard's particle effect time to actually play before it gets paused - without
+        // this, the zone's poll can catch (and pause) it on the very first tick after it appears,
+        // before anything is visible, which looks wrong. Applies both to effects already present
+        // on the prefab from spawn (Smite's rod) and ones TwitchPhysicsFreezeData.FreezeDamage
+        // creates and reparents under the root itself (Detonate's explosion, via m_initiateEffect).
+        // Tuned per hazard since a slow-developing effect (a rod descending) and a near-instant
+        // one (an explosion burst) don't need the same amount of time to "show" before pausing.
+        private static readonly Dictionary<string, float> s_aoeGraceDelayByRootName = new Dictionary<string, float>
+        {
+            { "lightningAOE(Clone)", 0.3f },       // Smite - lightning rod striking the ground
+            { "BlobLava_explosion(Clone)", 0.2f }, // Detonate - vanilla Blob death explosion burst
+        };
 
         // Unity only raises OnTriggerEnter/Exit for a collider pair if at least one side has a
         // Rigidbody. Projectiles (arrows, spears) move by manually integrating a velocity field
@@ -232,31 +240,24 @@ namespace WizshBoneTwitchIntegration.Components
                     RegisterPhysicsObject(projectile.gameObject, stillPresent);
                 }
 
-                // Any Twitch-spawned Aoe-based hazard (Smite's lightning rod, or any future redeem
-                // built the same way) carries no physics Collider of its own on the root, so -
-                // like Projectile above - it's invisible to the OverlapSphere pass. Damage is
-                // already blocked synchronously at spawn time if it landed inside an already-active
-                // zone (see IsPositionFrozen/FreezeDamage in SpawnAbilityExtension.cs) - this poll's
-                // job is just to (eventually) pause its particle effect too, and to catch the case
-                // where the zone appears only after the hazard has already spawned. Resolve to the
-                // TwitchPersistentDamage root rather than transform.root, since that's the same
-                // marker FreezeDamage's caller already gates on - anything without it is a vanilla
-                // Aoe (player/mob attack, etc.) we have no business touching.
+                // Any Aoe (Twitch-spawned hazard or vanilla attack - monster claws, thorns, etc.)
+                // carries no physics Collider of its own on the root, so - like Projectile above -
+                // it's invisible to the OverlapSphere pass. Damage is already blocked synchronously
+                // the instant an Aoe spawns inside an already-active zone (see the Aoe.Awake()
+                // postfix in harmony/TimeStopPatchesWBTI.cs, and TwitchPhysicsFreezeData.
+                // FreezeDamage) - this poll's job is to (eventually) pause the particle effect too,
+                // and to catch the case where the zone appears only after the Aoe already spawned.
                 foreach (Aoe aoe in FindObjectsByType<Aoe>(FindObjectsSortMode.None))
                 {
-                    TwitchPersistentDamage marker = aoe.GetComponentInParent<TwitchPersistentDamage>();
-                    if (marker == null)
-                        continue;
-
-                    GameObject aoeRoot = marker.gameObject;
+                    GameObject aoeRoot = aoe.transform.root.gameObject;
 
                     if (Vector3.Distance(aoeRoot.transform.position, transform.position) > m_radius)
                         continue;
 
-                    // Only the Smite lightning rod needs a moment to visually strike the ground
-                    // before being frozen (see AoeFreezeGraceDelay) - other Aoe hazards have no
-                    // equivalent "developing" animation and can be frozen the instant they're seen.
-                    if (aoeRoot.name == "lightningAOE(Clone)" && !m_registeredPhysicsObjects.Contains(aoeRoot))
+                    // Only hazards in s_aoeGraceDelayByRootName need a moment to visually develop
+                    // before being frozen - other Aoe hazards have no such animation and can be
+                    // frozen the instant they're seen instead.
+                    if (s_aoeGraceDelayByRootName.TryGetValue(aoeRoot.name, out float graceDelay) && !m_registeredPhysicsObjects.Contains(aoeRoot))
                     {
                         if (!m_pendingAoeFreezeTimers.TryGetValue(aoeRoot, out float firstSeen))
                         {
@@ -264,7 +265,7 @@ namespace WizshBoneTwitchIntegration.Components
                             continue;
                         }
 
-                        if (Time.time - firstSeen < AoeFreezeGraceDelay)
+                        if (Time.time - firstSeen < graceDelay)
                             continue;
 
                         m_pendingAoeFreezeTimers.Remove(aoeRoot);
