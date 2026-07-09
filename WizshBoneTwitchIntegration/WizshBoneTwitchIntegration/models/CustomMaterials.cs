@@ -14,10 +14,13 @@ namespace WizshBoneTwitchIntegration.Models
         public Material RecolorBoarTusk;
         public Material RecolorCultist;
         public Material RecolorCultistCape;
+        public Material RecolorDeathsquito;
         public Material RecolorDraugr;
         public Material RecolorDraugrFem;
         public Material RecolorDraugrElite;
         public Material RecolorFenring;
+        public Material RecolorFuling;
+        public Material RecolorFulingArmor;
         public Material RecolorGhost;
         public Material RecolorGreydwarf;
         public Material RecolorGreydwarfShaman;

@@ -51,6 +51,9 @@ namespace WizshBoneTwitchIntegration.Helpers
                 new RecolorCreatureData("Visual/Fangs 005") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorBoarTusk, emissive = true },
                 new RecolorCreatureData("Visual/Fangs 006") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorBoarTusk, emissive = true },
             }},
+            { "Deathsquito", new List<RecolorCreatureData>() {
+                new RecolorCreatureData("Visual/Cube") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorDeathsquito, emissive = true },
+            }},
             { "Draugr", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/_draugr_base/Cube.001") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorDraugr, emissive = true },
             }},
@@ -74,6 +77,9 @@ namespace WizshBoneTwitchIntegration.Helpers
                 new RecolorCreatureData("Visual/black_smoke") { isParticle = true },
                 new RecolorCreatureData("Visual/black_smoke/SmallerSmoke") { isParticle = true },
                 new RecolorCreatureData("Visual/Armature/Root/Hips/Spine1/Spine2/flare") { isParticle = true },
+            }},
+            { "Goblin", new List<RecolorCreatureData>() {
+                new RecolorCreatureData("Visual/goblin") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorFuling, emissive = true },
             }},
             { "Greyling", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/Cube") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorGreydwarf, emissive = true },
@@ -161,20 +167,24 @@ namespace WizshBoneTwitchIntegration.Helpers
             RecolorCreature(redeemerName, creature);
         }
 
-        public static void RecolorCreature(string redeemerName, GameObject creature, string colorOverride = null)
+        public static void RecolorCreature(string redeemerName, GameObject creature, string colorOverride = null, bool forceColor = false)
         {
             ViewerEntry viewerEntry = GetViewer(redeemerName);
 
             Color resolvedColor;
 
-            if (colorOverride != null && ColorUtility.TryParseHtmlString(colorOverride, out Color parsedOverride))
+            if (forceColor && colorOverride != null && ColorUtility.TryParseHtmlString(colorOverride, out Color parsedForceOverride))
             {
-                resolvedColor = parsedOverride;
+                resolvedColor = parsedForceOverride;
             }
             else if (viewerEntry != null)
             {
                 viewerEntry.Init();
                 resolvedColor = viewerEntry.parsedColor1;
+            }
+            else if (colorOverride != null && ColorUtility.TryParseHtmlString(colorOverride, out Color parsedOverride))
+            {
+                resolvedColor = parsedOverride;
             }
             else
             {
@@ -208,7 +218,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 {
                     //Jotunn.Logger.LogWarning("Changing light...");
                     Light light = transform.gameObject.GetComponent<Light>();
-                    light.color = viewerEntry.parsedColor1;
+                    light.color = resolvedColor;
                     continue;
                 }
 
@@ -222,14 +232,14 @@ namespace WizshBoneTwitchIntegration.Helpers
                         ParticleSystemRenderer particleRenderder = particleSystem.gameObject.GetComponent<ParticleSystemRenderer>();
                         recolorCreatureData.material.FixReferences();
                         particleRenderder.materials = new Material[1] { recolorCreatureData.material };
-                        Recolor(recolorCreatureData, viewerEntry.parsedColor1, particleRenderder.materials[0], recolorCreatureData.emissiveMultiplier);
+                        Recolor(recolorCreatureData, resolvedColor, particleRenderder.materials[0], recolorCreatureData.emissiveMultiplier);
                     }
                     else
                     {
                         ParticleSystem.MainModule main = particleSystem.main;
                         float h, s, v;
 
-                        Color.RGBToHSV(viewerEntry.parsedColor1, out h, out s, out v);
+                        Color.RGBToHSV(resolvedColor, out h, out s, out v);
                         Color newColor = Color.HSVToRGB(h, s, recolorCreatureData.particleAlpha);
                         main.startColor = newColor;
                     }
@@ -246,14 +256,14 @@ namespace WizshBoneTwitchIntegration.Helpers
                         for (int i = 0; i < keys1.Length; i++)
                         {
                             float decrease = 1f - (0.15f * i);
-                            keys1[i].color = viewerEntry.parsedColor1 * decrease;
+                            keys1[i].color = resolvedColor * decrease;
                         }
 
                         GradientColorKey[] keys2 = gradient2.gradient.colorKeys;
                         for (int i = 0; i < keys2.Length; i++)
                         {
                             float decrease = 1f - (0.15f * i);
-                            keys2[i].color = viewerEntry.parsedColor1 * decrease;
+                            keys2[i].color = resolvedColor * decrease;
                         }
 
                         gradient1.gradient.colorKeys = keys1;
@@ -453,9 +463,9 @@ namespace WizshBoneTwitchIntegration.Helpers
             m_viewers = ExtraConfigHelper.ReadViewersConfig();
         }
 
-        public static bool CanRecolorCreature(string name, string creature)
+        public static bool CanRecolorCreature(string name, string creature, string colorOverride = null)
         {
-            return IsRedeemerSpecialViewer(name) && IsCreatureInList(creature);
+            return IsCreatureInList(creature) && (IsRedeemerSpecialViewer(name) || colorOverride != null);
         }
 
         public static bool IsRedeemerSpecialViewer(string name)

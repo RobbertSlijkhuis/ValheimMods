@@ -42,7 +42,10 @@ namespace WizshBoneTwitchIntegration.Models.Views
         //public BoundField<bool> isBoss;
         //public BoundField<bool> MistVis;
 
-        //public BoundField<string> color;
+        [EditorLabel("Creature color")]
+        [EditorTooltip("Overrides the creature's color in hex format (e.g. #ffffff for white). Leave blank for default.")]
+        [ColorPicker]
+        public BoundField<string> color;
 
         //public BoundField<string> name;
         //public BoundField<string> globalKeyAdd;
@@ -81,6 +84,10 @@ namespace WizshBoneTwitchIntegration.Models.Views
             rename = new BoundField<bool>(
                 () => real.rename,
                 v => real.rename = v);
+
+            color = new BoundField<string>(
+                () => real.color,
+                v => real.color = v);
 
             announceMessage = new BoundField<string>(
                 () => real.announceMessage,

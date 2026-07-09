@@ -458,10 +458,13 @@ namespace WizshBoneTwitchIntegration
             materials.RecolorBoarTusk = assetBundle.LoadAsset<Material>("BoarTusk_recolor_WBTI");
             materials.RecolorCultist = assetBundle.LoadAsset<Material>("Cultist_recolor_WBTI");
             materials.RecolorCultistCape = assetBundle.LoadAsset<Material>("CultistCape_recolor_WBTI");
+            materials.RecolorDeathsquito = assetBundle.LoadAsset<Material>("Deathsquito_recolor_WBTI");
             materials.RecolorDraugr = assetBundle.LoadAsset<Material>("Draugr_recolor_WBTI");
             materials.RecolorDraugrFem = assetBundle.LoadAsset<Material>("Draugr_Ranged_recolor_WBTI");
             materials.RecolorDraugrElite = assetBundle.LoadAsset<Material>("Draugr_Elite_recolor_WBTI");
             materials.RecolorFenring = assetBundle.LoadAsset<Material>("Fenring_recolor_WBTI");
+            materials.RecolorFuling = assetBundle.LoadAsset<Material>("Fuling_recolor_WBTI");
+            materials.RecolorFulingArmor = assetBundle.LoadAsset<Material>("Fuling_armor_recolor_WBTI");
             materials.RecolorGhost = assetBundle.LoadAsset<Material>("Ghost_recolor_WBTI");
             materials.RecolorGreydwarf = assetBundle.LoadAsset<Material>("Greydwarf_recolor_WBTI");
             materials.RecolorGreydwarfShaman = assetBundle.LoadAsset<Material>("Greydwarf_Shaman_recolor_WBTI");

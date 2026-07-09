@@ -10,6 +10,10 @@ namespace WizshBoneTwitchIntegration.Models
         public bool allowDrops = false;
         public int amount = 1;
         public bool commandable = false;
+
+        [EditorLabel("Creature color")]
+        [EditorTooltip("Overrides the creature's color in hex format (e.g. #ffffff for white). Leave blank for default.")]
+        [ColorPicker]
         public string color = null;
         public float damageScale = 0;
         public bool friendly = false;
@@ -41,6 +45,12 @@ namespace WizshBoneTwitchIntegration.Models
         [EditorHidden] public bool isHallucination = false;
         [EditorHidden] public int index;
         [EditorHidden] public bool talkInteract = false;
+
+        // Scripted/hardcoded redeems (see SpecialRedeemHelper) set this to force their color
+        // choice to win even when the redeemer is also a registered special viewer with their
+        // own personal color - normal GUI-authored redeems leave this false, so a special
+        // viewer's own color still takes priority over an incidental color set there.
+        [EditorHidden] public bool forceColor = false;
 
         // Temporary hack: lets SpawnCreature spawn non-creature prefabs (e.g. a hot tub) that
         // have no MonsterAI/Humanoid components. See CreatureHelper.SpawnCreature.

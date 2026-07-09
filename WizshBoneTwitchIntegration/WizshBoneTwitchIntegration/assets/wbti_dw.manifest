@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 2470862066
+CRC: 3477145720
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 07b561586ecd3155ca34f927cc7ca07b
+    Hash: 436b4461722a3b9cb87710ca17fe38d6
   TypeTreeHash:
     serializedVersion: 2
     Hash: 3ac90f470324935ea2e2d620fee1a7ff
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 07b561586ecd3155ca34f927cc7ca07b
+    Hash: 436b4461722a3b9cb87710ca17fe38d6
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -157,6 +157,7 @@ Assets:
 - Assets/Custom/Monobehaviour/NoFallDamage_WBTI.asset
 - Assets/Custom/Creatures/Leech/Leech_recolor_WBTI.mat
 - Assets/Custom/Creatures/Skeleton/Skeleton_recolor_WBTI.mat
+- Assets/Custom/Creatures/Fuling/Fuling_armor_recolor_WBTI.mat
 - Assets/Custom/Creatures/Cultist/CultistCape_recolor_WBTI.mat
 - Assets/Custom/Monobehaviour/Burning_WBTI.asset
 - Assets/Custom/PrefabInstance/Redeems/Flashbang_WBTI.prefab
@@ -169,6 +170,7 @@ Assets:
 - Assets/Custom/Creatures/Neck/Neck_recolor_WBTI.mat
 - Assets/Custom/Creatures/Greydwarf/Greydwarf_Shaman_recolor_WBTI.mat
 - Assets/Custom/Creatures/Wraith/Wraith_recolor_zebra_WBTI.mat
+- Assets/Custom/Creatures/Fuling/Fuling_recolor_WBTI.mat
 - Assets/Custom/Creatures/Surtling/Surtling_recolor_WBTI.mat
 - Assets/Custom/Creatures/Draugr/Draugr_Ranged_recolor_WBTI.mat
 - Assets/Custom/Creatures/StoneGolem/StoneGolemClubs_recolor_WBTI.mat
@@ -183,6 +185,7 @@ Assets:
 - Assets/Custom/Monobehaviour/Poison_WBTI.asset
 - Assets/Custom/Creatures/Bat/Bat_recolor_WBTI.mat
 - Assets/Custom/Creatures/Boar/BoarTusk_recolor_WBTI.mat
+- Assets/Custom/Creatures/Deathsquito/Deathsquito_recolor_WBTI.mat
 - Assets/Custom/Sprite/BigMeSprite_WBTI.png
 - Assets/Custom/Creatures/Fenring/Fenring_recolor_WBTI.mat
 - Assets/Custom/Creatures/Serpent/Serpent_recolor_WBTI.mat
