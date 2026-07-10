@@ -1,5 +1,6 @@
 ﻿using Jotunn.Entities;
 using System;
+using System.Linq;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Helpers;
@@ -26,17 +27,20 @@ namespace WizshBoneTwitchIntegration.Commands
                 if (Player.m_localPlayer == null)
                     throw new Exception("Player is null");
 
-                // TwitchPersistentDestruction is only attached when the redeem's duration > 0
-                // (0 = indefinite/never auto-cleanup), so it can't be used to identify these -
-                // use the always-set TwitchBasePersistentData.IsRedeemSpawn tag instead, narrowed
-                // down by Mister to make sure it's mist and not some other redeem-spawned object.
-                Collider[] objects = Physics.OverlapSphere(Player.m_localPlayer.transform.position, scanRadius, LayerMask.GetMask("Default"));
-
-                foreach (Collider obj in objects)
+                // Mister has no Collider, so unlike the other Remove*Command targets (chests, doors,
+                // creatures, etc.) it can't be found via Physics.OverlapSphere - it's tracked in its
+                // own static instance list and looked up by distance instead. TwitchPersistentDestruction
+                // is only attached when the redeem's duration > 0 (0 = indefinite/never auto-cleanup),
+                // so it can't be used to identify these - use the always-set
+                // TwitchBasePersistentData.IsRedeemSpawn tag instead.
+                foreach (Mister mister in Mister.GetMisters().ToList())
                 {
-                    GameObject gameObject = obj.transform.root.gameObject;
+                    GameObject gameObject = mister.gameObject;
 
-                    if (gameObject.GetComponent<Mister>() != null && gameObject.GetComponent<TwitchBasePersistentData>()?.IsRedeemSpawn == true)
+                    if (Vector3.Distance(gameObject.transform.position, Player.m_localPlayer.transform.position) > scanRadius)
+                        continue;
+
+                    if (gameObject.GetComponent<TwitchBasePersistentData>()?.IsRedeemSpawn == true)
                     {
                         ZNetViewHelper.Destroy(gameObject);
                     }

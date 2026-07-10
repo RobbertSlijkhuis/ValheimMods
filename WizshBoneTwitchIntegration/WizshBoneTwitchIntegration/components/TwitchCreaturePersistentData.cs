@@ -220,6 +220,18 @@ namespace WizshBoneTwitchIntegration.Components
 
             monsterAI.m_aggravatable = creatureData.aggravatable;
             monsterAI.m_mistVision   = creatureData.mistVision;
+
+            if (creatureData.idleSoundInterval > 0)
+            {
+                monsterAI.m_idleSoundChance = 1f;
+                monsterAI.m_idleSoundInterval = creatureData.idleSoundInterval;
+
+                // BaseAI.Awake() already scheduled DoIdleSound via InvokeRepeating using its prefab
+                // default interval before we get here - just changing m_idleSoundInterval wouldn't
+                // affect that already-running timer, so re-arm it to actually apply the override.
+                monsterAI.CancelInvoke("DoIdleSound");
+                monsterAI.InvokeRepeating("DoIdleSound", creatureData.idleSoundInterval, creatureData.idleSoundInterval);
+            }
         }
 
         private void ApplyAllowDrops(CreatureData creatureData)

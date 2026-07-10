@@ -35,10 +35,14 @@ namespace WizshBoneTwitchIntegration.Models
         public float positionRadius = 10f;
         public bool random = false;
         public bool rename = true;
-        public int talkInterval = 0;
+        public float talkInterval = 0;
         public string talkMessage;
         public bool talks = false;
         public float size = 1f;
+
+        [EditorLabel("Idle sound interval")]
+        [EditorTooltip("Overrides the interval (seconds) between the creature's idle sound effect (e.g. a Fuling's laugh), and makes it always play instead of the default ~50% chance. Leave at 0 to use the creature's default behavior.")]
+        public float idleSoundInterval = 0;
 
         [EditorHidden] public bool allowDamageStructures = true;
         [EditorHidden] public string bossEvent = "";

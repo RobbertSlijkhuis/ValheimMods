@@ -80,6 +80,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             }},
             { "Goblin", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/goblin") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorFuling, emissive = true },
+                new RecolorCreatureData() { isGear = true, material = WizshBoneTwitchIntegration.Instance.materials.RecolorFulingArmor, emissive = true },
             }},
             { "Greyling", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/Cube") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorGreydwarf, emissive = true },
@@ -160,6 +161,12 @@ namespace WizshBoneTwitchIntegration.Helpers
             }},
         };
 
+        // Gear (helmet/chest/legs/shoulder) is instantiated at runtime by VisEquipment and has no
+        // counterpart on the static prefab for UnColorGear to read an "original" material from -
+        // cache each renderer's pre-swap materials here (keyed by instance ID rather than the
+        // Renderer itself, to avoid UnityEngine.Object's overridden equality as a dictionary key).
+        private static readonly Dictionary<int, Material[]> m_originalGearMaterials = new Dictionary<int, Material[]>();
+
         public static IEnumerator RecolorCreatureAfterDelay(string redeemerName, GameObject creature, float delay)
         {
             yield return new WaitForSeconds(delay);
@@ -195,6 +202,12 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             foreach (RecolorCreatureData recolorCreatureData in list)
             {
+                if (recolorCreatureData.isGear)
+                {
+                    RecolorGear(creature, recolorCreatureData, resolvedColor);
+                    continue;
+                }
+
                 Transform transform = creature.transform.Find(recolorCreatureData.transformPath);
 
                 if (transform == null)
@@ -331,6 +344,12 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             foreach (RecolorCreatureData recolorCreatureData in list)
             {
+                if (recolorCreatureData.isGear)
+                {
+                    UnColorGear(creature);
+                    continue;
+                }
+
                 Transform transform = creature.transform.Find(recolorCreatureData.transformPath);
                 Transform transformOriginal = original.transform.Find(recolorCreatureData.transformPath);
 
@@ -419,6 +438,78 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                     if (levelEffectsOriginal != null)
                         levelEffects.m_levelSetups = levelEffectsOriginal.m_levelSetups;
+                }
+            }
+        }
+
+        private static List<GameObject> GetArmorGearInstances(VisEquipment visEquipment)
+        {
+            List<GameObject> instances = new List<GameObject>();
+
+            if (visEquipment.m_helmetItemInstance != null)
+                instances.Add(visEquipment.m_helmetItemInstance);
+            if (visEquipment.m_chestItemInstances != null)
+                instances.AddRange(visEquipment.m_chestItemInstances);
+            if (visEquipment.m_legItemInstances != null)
+                instances.AddRange(visEquipment.m_legItemInstances);
+            if (visEquipment.m_shoulderItemInstances != null)
+                instances.AddRange(visEquipment.m_shoulderItemInstances);
+
+            return instances;
+        }
+
+        private static void RecolorGear(GameObject creature, RecolorCreatureData recolorCreatureData, Color color)
+        {
+            VisEquipment visEquipment = creature.GetComponent<VisEquipment>();
+
+            if (visEquipment == null)
+                return;
+
+            foreach (GameObject gearInstance in GetArmorGearInstances(visEquipment))
+            {
+                foreach (Renderer renderer in gearInstance.GetComponentsInChildren<Renderer>())
+                {
+                    SkinnedMeshRenderer skinnedMeshRenderer = renderer as SkinnedMeshRenderer;
+                    MeshRenderer meshRenderer = renderer as MeshRenderer;
+
+                    if (skinnedMeshRenderer == null && meshRenderer == null)
+                        continue;
+
+                    int instanceId = renderer.GetInstanceID();
+
+                    if (!m_originalGearMaterials.ContainsKey(instanceId))
+                        m_originalGearMaterials[instanceId] = renderer.materials; // renderer.materials getter already returns a fresh copy
+
+                    int materialCount = m_originalGearMaterials[instanceId].Length;
+
+                    for (int i = 0; i < materialCount; i++)
+                    {
+                        SetupMaterials(skinnedMeshRenderer, meshRenderer, recolorCreatureData.material, i);
+                        Material mat = skinnedMeshRenderer != null ? skinnedMeshRenderer.materials[i] : meshRenderer.materials[i];
+                        Recolor(recolorCreatureData, color, mat, recolorCreatureData.emissiveMultiplier);
+                    }
+                }
+            }
+        }
+
+        private static void UnColorGear(GameObject creature)
+        {
+            VisEquipment visEquipment = creature.GetComponent<VisEquipment>();
+
+            if (visEquipment == null)
+                return;
+
+            foreach (GameObject gearInstance in GetArmorGearInstances(visEquipment))
+            {
+                foreach (Renderer renderer in gearInstance.GetComponentsInChildren<Renderer>())
+                {
+                    int instanceId = renderer.GetInstanceID();
+
+                    if (m_originalGearMaterials.TryGetValue(instanceId, out Material[] originalMaterials))
+                    {
+                        renderer.materials = originalMaterials;
+                        m_originalGearMaterials.Remove(instanceId);
+                    }
                 }
             }
         }

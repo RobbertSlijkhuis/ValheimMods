@@ -12,6 +12,7 @@ namespace WizshBoneTwitchIntegration.Models
         public float emissiveMultiplier = 2f;
         public bool isLight = false;
         public bool isParticle = false;
+        public bool isGear = false;
         public Material material;
         public int materialIndex = 0;
         public float particleAlpha = 0.2f;

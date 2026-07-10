@@ -117,6 +117,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                             talkMessage = "Dont die Nik, DONT DIE!;HAHAHAHAHA;I'm coming for you Nik!;I'll gut you like a fizsh!;Me crazy? NO NO NOOOO... who plays with this mod! HAHAHAHA",
                             talkInterval = 5,
                             talks = true,
+                            idleSoundInterval = 5,
                         }
                     }
                 }
