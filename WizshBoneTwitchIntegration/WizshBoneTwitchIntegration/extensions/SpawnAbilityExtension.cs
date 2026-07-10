@@ -313,9 +313,12 @@ namespace WizshBoneTwitchIntegration.Extensions
                     if (door != null && spawnAbilityData.doorInterval > 0)
                         gameObject.AddComponent<TwitchDoorPersistentData>().Initialize(spawnAbilityData.doorInterval);
 
-                    Windmill windmill = gameObject.GetComponent<Windmill>();
-                    if (windmill != null && spawnAbilityData.windmillRotationSpeed > 0f)
-                        gameObject.AddComponent<TwitchWindmillPersistentData>().Initialize(spawnAbilityData.windmillRotationSpeed);
+                    // TwitchWindmillPersistentData is baked onto the "Windmill_WBTI" prefab itself
+                    // (see WizshBoneTwitchIntegration.SetupPieces) rather than added here, since the
+                    // vanilla Windmill component it used to key off of no longer exists on that clone.
+                    TwitchWindmillPersistentData windmillData = gameObject.GetComponent<TwitchWindmillPersistentData>();
+                    if (windmillData != null && spawnAbilityData.windmillRotationSpeed > 0f)
+                        windmillData.Initialize(spawnAbilityData.windmillRotationSpeed);
                 }
 
                 if ((bool)component2)

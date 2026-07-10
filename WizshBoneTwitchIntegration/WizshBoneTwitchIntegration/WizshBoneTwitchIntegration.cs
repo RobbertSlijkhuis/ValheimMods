@@ -165,6 +165,24 @@ namespace WizshBoneTwitchIntegration
             projectile.m_spawnOnHit = null;
             prefabs.FlashbangVial.transform.localScale = new Vector3(2f, 2f, 2f);
 
+            // Lean windmill clone: strips the vanilla Windmill/Smelter components (whose Update()
+            // and InvokeRepeating("UpdateSmelter", ...) run every frame/second on every spawned
+            // instance regardless of enabled state) in favor of TwitchWindmillPersistentData owning
+            // rotation/AOE/audio directly. ConfigurePrefab() must run before the vanilla components
+            // are destroyed since it copies its transform/audio references from them. Piece/
+            // WearNTear are kept - their own per-instance cost is negligible (no per-frame method;
+            // WearNTear's checks are already batched/throttled by the engine's own WearNTearUpdater).
+            // Source prefab name is lowercase "windmill" - "Windmill" (capital) is a different,
+            // near-empty prefab (no Windmill/ZNetView component) that happens to share the name
+            // case-insensitively; prefab name lookups are case-sensitive.
+            prefabs.Windmill = PrefabManager.Instance.CreateClonedPrefab("Windmill_WBTI", "windmill");
+            Windmill vanillaWindmill = prefabs.Windmill.GetComponent<Windmill>();
+            Smelter vanillaSmelter = prefabs.Windmill.GetComponent<Smelter>();
+            prefabs.Windmill.AddComponent<TwitchWindmillPersistentData>().ConfigurePrefab(vanillaWindmill);
+            GameObject.DestroyImmediate(vanillaWindmill);
+            if (vanillaSmelter != null)
+                GameObject.DestroyImmediate(vanillaSmelter);
+
             PieceConfig pieceConfig = new PieceConfig();
             pieceConfig.Enabled = true;
             pieceConfig.Name = "Twitchy Ward";

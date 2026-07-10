@@ -16,7 +16,7 @@ namespace WizshBoneTwitchIntegration.Helpers
     {
         public static bool debug;
 
-        public static void SpawnAbility(SpawnAbilityData spawnAbilityData, CustomRewardEvent customRewardEvent, TwitchChat m_chat)
+        public static void SpawnAbility(string type, SpawnAbilityData spawnAbilityData, CustomRewardEvent customRewardEvent, TwitchChat m_chat)
         {
             GameObject showerPrefab;
 
@@ -87,7 +87,19 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (spawnAbilityData.velocityMax != null)
                 spawnAbility.m_projectileVelocityMax = (float)spawnAbilityData.velocityMax;
 
-            if (spawnAbilityData.spawns != null && spawnAbilityData.spawns.Count > 0)
+            if (type == RedeemType.Windmill)
+            {
+                // Windmill is its own dedicated redeem type (RedeemType.Windmill / WindmillView),
+                // not a name configured through the generic spawns list below - always spawn the
+                // lean "Windmill_WBTI" clone (see WizshBoneTwitchIntegration.SetupPieces) directly.
+                GameObject windmillPrefab = PrefabManager.Instance.GetPrefab("Windmill_WBTI");
+
+                if (windmillPrefab == null)
+                    Jotunn.Logger.LogWarning("Could not find prefab Windmill_WBTI for windmill SpawnAbility, skipping...");
+                else
+                    spawnAbility.m_spawnPrefab = new GameObject[] { windmillPrefab };
+            }
+            else if (spawnAbilityData.spawns != null && spawnAbilityData.spawns.Count > 0)
             {
                 List<GameObject> spawns = new List<GameObject>();
 

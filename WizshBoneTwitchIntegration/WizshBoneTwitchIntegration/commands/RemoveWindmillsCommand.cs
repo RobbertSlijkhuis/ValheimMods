@@ -32,7 +32,7 @@ namespace WizshBoneTwitchIntegration.Commands
                 {
                     GameObject gameObject = obj.transform.root.gameObject;
 
-                    if (gameObject.GetComponent<Windmill>() != null && gameObject.GetComponent<TwitchPiecePersistentData>() != null)
+                    if (gameObject.GetComponent<TwitchWindmillPersistentData>() != null && gameObject.GetComponent<TwitchPiecePersistentData>() != null)
                     {
                         ZNetViewHelper.Destroy(gameObject);
                     }

@@ -244,6 +244,15 @@ namespace WizshBoneTwitchIntegration.Components
                     if (target == null)
                         continue;
 
+                    // Physics.OverlapSphere only guarantees the collider that matched touches the
+                    // sphere - not that the resolved target's own root position does. For a large
+                    // structure like a windmill (whose propeller/blades extend well past its base),
+                    // that collider can reach into the zone from well beyond m_radius. Re-check
+                    // against the root position explicitly, same as the Projectile/Aoe scans below,
+                    // so "in range" means the same thing across every detection path.
+                    if (Vector3.Distance(target.transform.position, transform.position) > m_radius)
+                        continue;
+
                     RegisterPhysicsObject(target, stillPresent);
                 }
 

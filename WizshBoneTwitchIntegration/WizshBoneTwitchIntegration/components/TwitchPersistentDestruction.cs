@@ -27,6 +27,15 @@ namespace WizshBoneTwitchIntegration.Components
         // natural expiry apart from an early destruction (e.g. player breaking it).
         private bool m_timerElapsed;
 
+        // Lets Pause()/Resume() (called by TwitchPhysicsFreezeData while a TimeStop zone holds
+        // this object) stop the countdown and later continue from wherever it left off, instead
+        // of losing the elapsed time or restarting the full configured duration.
+        private float m_remainingTime;
+        private float m_segmentStartTime;
+        private bool m_paused;
+        private bool m_timerStarted;
+        private Coroutine m_timerElapsedRoutine;
+
         public void Awake()
         {
             try
@@ -99,17 +108,66 @@ namespace WizshBoneTwitchIntegration.Components
 
         private void StartDestructionTimer(float timeout)
         {
-            StartCoroutine(MarkTimerElapsed(timeout));
+            m_timerStarted = true;
+            m_remainingTime = timeout;
+            m_segmentStartTime = Time.time;
+            StartSegment();
+        }
+
+        // Shared by the initial start and Resume() - both just differ in what m_remainingTime
+        // already holds by the time this runs.
+        private void StartSegment()
+        {
+            m_timerElapsedRoutine = StartCoroutine(MarkTimerElapsed(m_remainingTime));
 
             if (m_breakOnDestroy && gameObject.GetComponent<WearNTear>() != null)
             {
-                m_breakRoutine = StartCoroutine(BreakAfterDelay(timeout));
+                m_breakRoutine = StartCoroutine(BreakAfterDelay(m_remainingTime));
                 return;
             }
 
-            TimedDestruction timedDestruction = gameObject.AddComponent<TimedDestruction>();
-            timedDestruction.m_timeout = timeout;
-            timedDestruction.Trigger();
+            TimedDestruction timedDestruction = gameObject.GetComponent<TimedDestruction>() ?? gameObject.AddComponent<TimedDestruction>();
+            timedDestruction.m_timeout = m_remainingTime;
+            timedDestruction.Trigger(m_remainingTime);
+        }
+
+        // Called by TwitchPhysicsFreezeData when a TimeStop zone freezes this object - stops
+        // whichever destruction path is active (TimedDestruction's InvokeRepeating ignores
+        // component.enabled, and coroutines keep running regardless of it too, so both need to be
+        // explicitly stopped) and remembers how much time was left.
+        public void Pause()
+        {
+            if (!m_timerStarted || m_paused)
+                return;
+
+            m_paused = true;
+            m_remainingTime = Mathf.Max(0f, m_remainingTime - (Time.time - m_segmentStartTime));
+
+            gameObject.GetComponent<TimedDestruction>()?.CancelInvoke();
+
+            if (m_breakRoutine != null)
+            {
+                StopCoroutine(m_breakRoutine);
+                m_breakRoutine = null;
+            }
+
+            if (m_timerElapsedRoutine != null)
+            {
+                StopCoroutine(m_timerElapsedRoutine);
+                m_timerElapsedRoutine = null;
+            }
+        }
+
+        // Called by TwitchPhysicsFreezeData on unfreeze - continues the countdown from the
+        // remaining time captured by Pause(), rather than restarting the full duration.
+        public void Resume()
+        {
+            if (!m_timerStarted || !m_paused)
+                return;
+
+            m_paused = false;
+            m_segmentStartTime = Time.time;
+            StartSegment();
         }
 
         private IEnumerator MarkTimerElapsed(float delay)

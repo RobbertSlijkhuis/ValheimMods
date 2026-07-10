@@ -196,7 +196,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     if (redeem.spawnAbilityData == null)
                         throw new RedeemException("Could not find data for SpawnAbility", ExceptionType.Error);
 
-                    SpawnAbilityHelper.SpawnAbility(redeem.spawnAbilityData, customRewardEvent, m_chat);
+                    SpawnAbilityHelper.SpawnAbility(redeem.type, redeem.spawnAbilityData, customRewardEvent, m_chat);
                 }
 
                 if (redeem.type == RedeemType.Detonate)

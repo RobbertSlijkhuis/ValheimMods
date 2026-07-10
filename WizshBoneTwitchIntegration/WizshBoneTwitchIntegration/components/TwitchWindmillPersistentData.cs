@@ -6,43 +6,68 @@ namespace WizshBoneTwitchIntegration.Components
 {
     internal class TwitchWindmillPersistentData : MonoBehaviour
     {
-        private ZNetView m_netView;
-        private Windmill m_windmill;
-        private Smelter m_smelter;
+        // Captured once from the vanilla Windmill component by ConfigurePrefab(), called from
+        // WizshBoneTwitchIntegration.SetupPieces() right before that vanilla component is removed
+        // from the "Windmill_WBTI" clone. [SerializeField] is required here even though nothing
+        // ever edits these in the Inspector - Unity's Instantiate() clones a MonoBehaviour's fields
+        // through its serialization system, so a plain private field (no [SerializeField]) resets
+        // to default/null on every actual spawn instead of inheriting the template's configured
+        // value, even though ConfigurePrefab() only ever runs once on the template itself.
+        [SerializeField] private Transform m_propeller;
+        [SerializeField] private Transform m_grindstone;
+        [SerializeField] private Transform m_bom;
+        [SerializeField] private AudioSource[] m_sfxLoops;
+        [SerializeField] private GameObject m_propellerAOE;
+        [SerializeField] private Aoe m_propellerAoe;
+        [SerializeField] private float m_prefabPropSpeed;
+        [SerializeField] private float m_prefabGrindSpeed;
+        [SerializeField] private float m_maxPitch;
+        [SerializeField] private float m_maxVol;
+        [SerializeField] private float m_audioChangeSpeed;
+
         private float m_rotationSpeed;
         private float m_seed;
         private float m_propAngle;
         private float m_grindAngle;
-        private float m_prefabPropSpeed;
-        private float m_prefabGrindSpeed;
         private bool m_active;
-        private Aoe m_propellerAoe;
         private float m_aoeResetTimer;
+        private bool m_audioRamped;
 
         private static readonly int s_speedHash = "WBTI_Windmill_Speed".GetStableHashCode();
         private static readonly int s_seedHash  = "WBTI_Windmill_Seed".GetStableHashCode();
 
-        private static readonly FieldInfo s_coverField = typeof(Windmill)
-            .GetField("m_cover", BindingFlags.NonPublic | BindingFlags.Instance);
-
         private static readonly FieldInfo s_aoeHitListField = typeof(Aoe)
             .GetField("m_hitList", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        public void ConfigurePrefab(Windmill vanillaWindmill)
+        {
+            m_propeller        = vanillaWindmill.m_propeller;
+            m_grindstone       = vanillaWindmill.m_grindstone;
+            m_bom              = vanillaWindmill.m_bom;
+            m_sfxLoops         = vanillaWindmill.m_sfxLoops;
+            m_propellerAOE     = vanillaWindmill.m_propellerAOE;
+            m_prefabPropSpeed  = vanillaWindmill.m_propellerRotationSpeed;
+            m_prefabGrindSpeed = vanillaWindmill.m_grindstoneRotationSpeed;
+            m_maxPitch         = vanillaWindmill.m_maxPitch;
+            m_maxVol           = vanillaWindmill.m_maxVol;
+            m_audioChangeSpeed = vanillaWindmill.m_audioChangeSpeed;
+            m_propellerAoe     = m_propellerAOE != null ? m_propellerAOE.GetComponent<Aoe>() : null;
+        }
 
         public void Awake()
         {
             try
             {
-                m_netView  = gameObject.GetComponent<ZNetView>();
-                m_windmill = gameObject.GetComponent<Windmill>();
+                ZNetView netView = gameObject.GetComponent<ZNetView>();
 
-                if (m_netView == null || !m_netView.IsValid() || m_windmill == null)
+                if (netView == null || !netView.IsValid())
                     return;
 
-                float speed = m_netView.GetZDO().GetFloat(s_speedHash, 0f);
+                float speed = netView.GetZDO().GetFloat(s_speedHash, 0f);
                 if (speed <= 0f)
                     return;
 
-                StartBehavior(speed, m_netView.GetZDO().GetFloat(s_seedHash, 0f));
+                StartBehavior(speed, netView.GetZDO().GetFloat(s_seedHash, 0f));
             }
             catch (Exception e)
             {
@@ -54,20 +79,16 @@ namespace WizshBoneTwitchIntegration.Components
         {
             try
             {
-                m_netView  = gameObject.GetComponent<ZNetView>();
-                m_windmill = gameObject.GetComponent<Windmill>();
+                ZNetView netView = gameObject.GetComponent<ZNetView>();
 
-                if (m_netView == null || !m_netView.IsValid() || m_windmill == null)
+                if (netView == null || !netView.IsValid())
                     return;
 
                 float clampedSpeed = Mathf.Clamp(speed, 0f, 10f);
                 float seed = UnityEngine.Random.Range(0f, 1000f);
 
-                m_netView.GetZDO().Set(s_speedHash, clampedSpeed);
-                m_netView.GetZDO().Set(s_seedHash, seed);
-
-                TwitchBasePersistentData baseData = gameObject.GetComponent<TwitchBasePersistentData>();
-                baseData?.SetFlag(PersistentComponentFlags.WindmillOverride, true);
+                netView.GetZDO().Set(s_speedHash, clampedSpeed);
+                netView.GetZDO().Set(s_seedHash, seed);
 
                 StartBehavior(clampedSpeed, seed);
             }
@@ -79,29 +100,12 @@ namespace WizshBoneTwitchIntegration.Components
 
         private void StartBehavior(float speed, float seed)
         {
-            m_rotationSpeed    = speed;
-            m_seed             = seed;
-            m_active           = true;
-            m_smelter          = gameObject.GetComponent<Smelter>();
-            m_prefabPropSpeed  = m_windmill.m_propellerRotationSpeed;
-            m_prefabGrindSpeed = m_windmill.m_grindstoneRotationSpeed;
-
-            // Zero cover and stop the periodic cover recalculation so GetPowerOutput()
-            // returns actual wind intensity — needed for Windmill.UpdateAudio() to play at full volume.
-            m_windmill.CancelInvoke("CheckCover");
-            s_coverField?.SetValue(m_windmill, 0f);
-
-            // Collapse audio ramp thresholds so any wind gives full volume/pitch.
-            m_windmill.m_maxVolVel   = 0.01f;
-            m_windmill.m_maxPitchVel = 0.01f;
-
-            // Disable the Smelter so it never processes barley into flour.
-            if (m_smelter != null)
-                m_smelter.enabled = false;
+            m_rotationSpeed = speed;
+            m_seed          = seed;
+            m_active        = true;
 
             // Allow repeated blade hits: OnTriggerStay fires continuously; we clear the hit
             // list ourselves every second because Aoe only clears it in the OverlapSphere path.
-            m_propellerAoe = m_windmill.m_propellerAOE?.GetComponent<Aoe>();
             if (m_propellerAoe != null)
             {
                 m_propellerAoe.m_triggerEnterOnly = false;
@@ -109,20 +113,20 @@ namespace WizshBoneTwitchIntegration.Components
                     Jotunn.Logger.LogWarning("[WBTI] TwitchWindmillPersistentData: Aoe m_hitList field not found — repeated AOE hits won't work.");
             }
 
-            if (m_windmill.m_propeller == null)
+            if (m_propeller == null)
                 Jotunn.Logger.LogWarning("[WBTI] TwitchWindmillPersistentData: m_propeller is null on this prefab.");
-            if (m_windmill.m_grindstone == null)
+            if (m_grindstone == null)
                 Jotunn.Logger.LogWarning("[WBTI] TwitchWindmillPersistentData: m_grindstone is null on this prefab.");
+
+            // AOE damage always active, regardless of wind speed - set once here rather than every
+            // frame in LateUpdate(), since nothing ever turns it back off afterward.
+            if (m_propellerAOE != null)
+                m_propellerAOE.SetActive(true);
         }
 
         private void LateUpdate()
         {
-            if (!m_active || m_windmill == null)
-                return;
-
-            // Frozen by a TimeStop zone - hold rotation and stop refreshing the AOE hit list so
-            // the blades stop dealing repeat damage while stopped.
-            if (GetComponent<TwitchPhysicsFreezeData>() != null)
+            if (!m_active)
                 return;
 
             float t  = (float)(ZNet.instance.GetTimeSeconds() % 10000.0);
@@ -142,24 +146,40 @@ namespace WizshBoneTwitchIntegration.Components
             float headAngle = t * spinRate
                 + Mathf.Sin(t * 0.53f + m_seed) * 80f
                 + Mathf.Sin(t * 1.17f + m_seed * 1.7f) * 40f;
-            m_windmill.m_bom.rotation = Quaternion.Euler(0f, headAngle, 0f);
+            if (m_bom != null)
+                m_bom.rotation = Quaternion.Euler(0f, headAngle, 0f);
 
-            // Drive propeller ourselves — bypasses wind/cover zeroing powerOutput.
-            if (m_windmill.m_propeller != null)
+            if (m_propeller != null)
             {
                 m_propAngle += m_prefabPropSpeed * (m_rotationSpeed / 10f) * dt;
-                m_windmill.m_propeller.localRotation = Quaternion.Euler(0f, 0f, m_propAngle);
+                m_propeller.localRotation = Quaternion.Euler(0f, 0f, m_propAngle);
             }
 
-            // Drive grindstone — always spinning to match the unconditional grinding sound.
-            if (m_windmill.m_grindstone != null)
+            if (m_grindstone != null)
             {
                 m_grindAngle += m_prefabGrindSpeed * (m_rotationSpeed / 10f) * dt;
-                m_windmill.m_grindstone.localRotation = Quaternion.Euler(0f, m_grindAngle, 0f);
+                m_grindstone.localRotation = Quaternion.Euler(0f, m_grindAngle, 0f);
             }
 
-            // AOE damage always active, regardless of wind speed.
-            m_windmill.m_propellerAOE.SetActive(true);
+            // Ramp audio toward max volume/pitch - same MoveTowards smoothing vanilla
+            // Windmill.UpdateAudio() used, just always targeting max instead of wind-scaled.
+            // Stops touching AudioSource.volume/pitch once every source has reached target,
+            // rather than writing the same already-reached value every frame forever.
+            if (!m_audioRamped && m_sfxLoops != null)
+            {
+                bool allRamped = true;
+
+                foreach (AudioSource source in m_sfxLoops)
+                {
+                    source.volume = Mathf.MoveTowards(source.volume, m_maxVol, m_audioChangeSpeed * dt);
+                    source.pitch  = Mathf.MoveTowards(source.pitch, m_maxPitch, m_audioChangeSpeed * dt);
+
+                    if (source.volume != m_maxVol || source.pitch != m_maxPitch)
+                        allRamped = false;
+                }
+
+                m_audioRamped = allRamped;
+            }
         }
     }
 }

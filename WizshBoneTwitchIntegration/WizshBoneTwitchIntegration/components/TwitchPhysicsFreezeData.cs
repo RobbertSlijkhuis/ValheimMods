@@ -8,7 +8,7 @@ namespace WizshBoneTwitchIntegration.Components
     {
         private Rigidbody m_rigidbody;
         private Projectile m_projectile;
-        private Windmill m_windmill;
+        private TwitchWindmillPersistentData m_windmillData;
         private ParticleSystem[] m_particleSystems;
         private Aoe[] m_aoes;
         private bool[] m_aoeInitRun;
@@ -100,6 +100,13 @@ namespace WizshBoneTwitchIntegration.Components
                     m_aoes[i].m_initiateEffect.m_effectPrefabs = Array.Empty<EffectList.EffectData>();
                 }
 
+                // A redeem's own duration-based expiry (TwitchPersistentDestruction) is paused via
+                // Pause()/Resume() instead of the blanket TimedDestruction handling below, since it
+                // needs to remember and resume from the remaining time rather than just stopping/
+                // restarting - see TwitchPersistentDestruction.Pause() for why both its possible
+                // destruction paths (TimedDestruction and the BreakAfterDelay coroutine) need this.
+                gameObject.GetComponent<TwitchPersistentDestruction>()?.Pause();
+
                 // TimedDestruction schedules its destroy call via InvokeRepeating, which keeps
                 // firing on schedule regardless of the component's enabled state - it has to be
                 // explicitly cancelled to stop the object from being destroyed while frozen.
@@ -108,8 +115,14 @@ namespace WizshBoneTwitchIntegration.Components
                 // spawning - the very first FreezeDamage() call (from the Aoe.Awake() postfix) can
                 // run before that component even exists. TwitchTimeStopZone's poll calls this again
                 // shortly after, by which point any such component has been added and gets caught.
+                // Skips any TimedDestruction owned by TwitchPersistentDestruction - Pause() above
+                // already handles those precisely; this only covers other, unrelated uses (e.g. the
+                // Smite rod's own short-lived TimedDestruction).
                 foreach (TimedDestruction timedDestruction in GetComponentsInChildren<TimedDestruction>(true))
-                    timedDestruction.CancelInvoke();
+                {
+                    if (timedDestruction.GetComponent<TwitchPersistentDestruction>() == null)
+                        timedDestruction.CancelInvoke();
+                }
             }
             catch (Exception e)
             {
@@ -146,7 +159,7 @@ namespace WizshBoneTwitchIntegration.Components
 
                 m_rigidbody = GetComponent<Rigidbody>();
                 m_projectile = GetComponent<Projectile>();
-                m_windmill = GetComponent<Windmill>();
+                m_windmillData = GetComponent<TwitchWindmillPersistentData>();
 
                 // Projectiles (arrows, spears, thrown weapons) move by manually integrating
                 // velocity into the transform every frame rather than via the physics engine,
@@ -155,11 +168,10 @@ namespace WizshBoneTwitchIntegration.Components
                 if (m_projectile != null)
                     m_projectile.enabled = false;
 
-                // The vanilla Windmill component has its own Update() driving wind-based rotation
-                // and audio, independent of TwitchWindmillPersistentData's LateUpdate override -
-                // disabling it stops that residual rotation from showing through while frozen.
-                if (m_windmill != null)
-                    m_windmill.enabled = false;
+                // TwitchWindmillPersistentData owns the windmill's rotation/AOE/audio directly via
+                // its own LateUpdate() - disabling it stops that while frozen.
+                if (m_windmillData != null)
+                    m_windmillData.enabled = false;
 
                 if (m_rigidbody != null && !m_rigidbody.isKinematic)
                 {
@@ -184,8 +196,8 @@ namespace WizshBoneTwitchIntegration.Components
                 if (m_projectile != null)
                     m_projectile.enabled = true;
 
-                if (m_windmill != null)
-                    m_windmill.enabled = true;
+                if (m_windmillData != null)
+                    m_windmillData.enabled = true;
 
                 if (m_particleSystems != null)
                 {
@@ -209,8 +221,15 @@ namespace WizshBoneTwitchIntegration.Components
                     }
                 }
 
+                // Same split as FreezeDamage(): TwitchPersistentDestruction resumes itself from the
+                // remaining time Pause() captured, other TimedDestruction uses just restart as-is.
                 foreach (TimedDestruction timedDestruction in GetComponentsInChildren<TimedDestruction>(true))
-                    timedDestruction.Trigger();
+                {
+                    if (timedDestruction.GetComponent<TwitchPersistentDestruction>() == null)
+                        timedDestruction.Trigger();
+                }
+
+                gameObject.GetComponent<TwitchPersistentDestruction>()?.Resume();
 
                 if (m_frozeRigidbody && m_rigidbody != null)
                     m_rigidbody.isKinematic = false;
