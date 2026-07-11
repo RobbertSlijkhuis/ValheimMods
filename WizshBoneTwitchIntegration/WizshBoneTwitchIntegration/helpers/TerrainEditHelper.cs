@@ -10,7 +10,6 @@ namespace WizshBoneTwitchIntegration.Helpers
     internal static class TerrainEditHelper
     {
         private const float ResetRadiusBuffer = 3f;
-        private static readonly int SafeZoneLayerMask = LayerMask.GetMask("piece", "character_trigger");
 
         public static void ApplyTerrainEdit(TerrainEditData data, CustomRewardEvent customRewardEvent)
         {
@@ -69,15 +68,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         private static bool OverlapsWithSafeZone(Vector3 origin, float radius)
         {
-            Collider[] colliders = Physics.OverlapSphere(origin, radius, SafeZoneLayerMask);
-
-            foreach (Collider collider in colliders)
-            {
-                if (collider.gameObject.GetComponentInChildren<TwitchSafeZone>() != null)
-                    return true;
-            }
-
-            return false;
+            return TwitchSafeZone.OverlapsSafeZone(origin, radius);
         }
 
         private static void ApplyToHeightmaps(Vector3 pos, TerrainOp.Settings settings)
@@ -97,7 +88,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         private static void ApplyRectangleWall(Vector3 origin, Vector3 forward, TerrainOp.Settings settings, float width, float stepSize)
         {
-            // origin is the center — spread symmetrically left and right
+            // origin is the center ï¿½ spread symmetrically left and right
             Vector3 right = Vector3.Cross(Vector3.up, forward).normalized;
             int steps = Mathf.RoundToInt(width / stepSize);
 
@@ -112,7 +103,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             Vector3 rightDir = (forward + Quaternion.Euler(0,  armAngleDegrees, 0) * right).normalized;
 
             // Shift tip back by half the arm length so the midpoint of both arms
-            // sits at origin — making origin the geometric center of the chevron
+            // sits at origin ï¿½ making origin the geometric center of the chevron
             Vector3 tip   = origin - forward * (armLength / 2f);
             int     steps = Mathf.RoundToInt(armLength / stepSize);
 

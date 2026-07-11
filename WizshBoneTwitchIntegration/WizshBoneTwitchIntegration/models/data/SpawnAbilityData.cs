@@ -26,7 +26,6 @@ namespace WizshBoneTwitchIntegration.Models
         public bool isOwner = true;
         public string prefabName;
         public bool randomRotation = true;
-        public bool rescanForSafezones = true;
         public bool snapToterrain = false;
         public int batchSize = 1;
         public float? spawnDelay;

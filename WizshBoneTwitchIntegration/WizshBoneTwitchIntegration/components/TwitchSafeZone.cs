@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Gui;
@@ -10,11 +11,17 @@ namespace WizshBoneTwitchIntegration.Components
     {
         private TwitchCustomRewards m_customRewards;
         private GameObject m_playerInZone;
+        private Collider m_collider;
         private readonly string playerIdentifier = "Player(Clone)";
 
         // Tracks how many safe zones the local player is currently standing in,
         // so overlapping zones don't toggle the HUD/flag off while still in another zone.
         private static int s_localPlayerZoneCount = 0;
+
+        // Every live TwitchSafeZone self-registers here, so spawn-point containment checks
+        // (see IsPointInSafeZone) can test against the mod's own known safe zones directly
+        // instead of running a Physics.OverlapSphere against the whole "character_trigger" layer.
+        private static readonly List<TwitchSafeZone> s_activeSafeZones = new List<TwitchSafeZone>();
 
         // Called from GameAwake_Postfix so a fresh world load doesn't inherit stale state.
         public static void ResetLocalPlayerZoneCount()
@@ -22,11 +29,40 @@ namespace WizshBoneTwitchIntegration.Components
             s_localPlayerZoneCount = 0;
         }
 
+        // Called from GameAwake_Postfix alongside ResetLocalPlayerZoneCount, as a safety net in
+        // case OnDestroy doesn't get to run for every zone before a fresh world load (e.g. a crash).
+        public static void ResetActiveSafeZones()
+        {
+            s_activeSafeZones.Clear();
+        }
+
+        public static bool IsPointInSafeZone(Vector3 point)
+        {
+            return OverlapsSafeZone(point, 0f);
+        }
+
+        // General case of IsPointInSafeZone: true if a sphere of the given radius centered at
+        // origin overlaps any safe zone's collider (radius 0 = point containment).
+        public static bool OverlapsSafeZone(Vector3 origin, float radius)
+        {
+            foreach (TwitchSafeZone safeZone in s_activeSafeZones)
+            {
+                if (safeZone.m_collider != null && Vector3.Distance(origin, safeZone.m_collider.ClosestPoint(origin)) <= radius)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public void Awake()
         {
             try
             {
                 m_customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+                m_collider = GetComponent<Collider>();
+                s_activeSafeZones.Add(this);
             }
             catch (Exception e)
             {
@@ -174,6 +210,8 @@ namespace WizshBoneTwitchIntegration.Components
         {
             try
             {
+                s_activeSafeZones.Remove(this);
+
                 if (m_playerInZone == null)
                     return;
 

@@ -24,23 +24,13 @@ namespace WizshBoneTwitchIntegration.Extensions
 
             TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
 
-            Collider[] objects = Array.Empty<Collider>();
-            List<Collider> safezoneColliders = new List<Collider>();
-
-            if (!spawnAbilityData.rescanForSafezones)
-            {
-                objects = Physics.OverlapSphere(spawnAbility.transform.position, spawnAbility.m_spawnRadius, LayerMask.GetMask("character_trigger"));
-                foreach (Collider collider in objects)
-                {
-                    if (collider.gameObject.GetComponentInChildren<TwitchSafeZone>())
-                    {
-                        safezoneColliders.Add(collider);
-                    }
-                }
-            }
-
             int toSpawn = UnityEngine.Random.Range(spawnAbility.m_minToSpawn, spawnAbility.m_maxToSpawn);
             Skills skills = (spawnAbility.m_owner ? spawnAbility.m_owner.GetSkills() : null);
+
+            // SpawnSystem.GetNrOfInstances falls back to GameObject.FindGameObjectsWithTag("spawned")
+            // for non-BaseAI prefabs (e.g. traps) - a full scene-wide scan. Track counts locally per
+            // prefab instead of re-scanning the scene on every single spawn iteration.
+            Dictionary<GameObject, int> instanceCounts = new Dictionary<GameObject, int>();
             int num3;
             for (int i = 0; i < toSpawn; num3 = i + 1, i = num3)
             {
@@ -108,41 +98,10 @@ namespace WizshBoneTwitchIntegration.Extensions
                     }
                 }
 
-                if (spawnAbilityData.rescanForSafezones)
+                if (TwitchSafeZone.IsPointInSafeZone(spawnPoint))
                 {
-                    objects = Physics.OverlapSphere(spawnAbility.transform.position, spawnAbility.m_spawnRadius, LayerMask.GetMask("character_trigger"));
-                    safezoneColliders = new List<Collider>();
-
-                    foreach (Collider collider in objects)
-                    {
-                        if (collider.gameObject.GetComponentInChildren<TwitchSafeZone>())
-                        {
-                            safezoneColliders.Add(collider);
-                        }
-                    }
-                }
-
-                if (safezoneColliders.Count > 0)
-                {
-                    bool skip = false;
-                    Vector3 closest;
-
-                    foreach (var collider in safezoneColliders)
-                    {
-                        closest = collider.ClosestPoint(spawnPoint);
-
-                        if (closest == spawnPoint)
-                        {
-                            skip = true;
-                            break;
-                        }
-                    }
-
-                    if (skip)
-                    {
-                        //Jotunn.Logger.LogWarning("Spawnpoint in safezone, skipping...");
-                        continue;
-                    }
+                    //Jotunn.Logger.LogWarning("Spawnpoint in safezone, skipping...");
+                    continue;
                 }
 
                 GameObject prefab;
@@ -194,14 +153,23 @@ namespace WizshBoneTwitchIntegration.Extensions
                 else
                     prefab = spawnAbility.m_spawnPrefab[UnityEngine.Random.Range(0, spawnAbility.m_spawnPrefab.Length)];
 
-                if (spawnAbility.m_maxSpawned > 0 && SpawnSystem.GetNrOfInstances(prefab) >= spawnAbility.m_maxSpawned)
+                if (spawnAbility.m_maxSpawned > 0)
                 {
-                    if (spawnAbility.m_owner is Player player)
+                    if (!instanceCounts.TryGetValue(prefab, out int existingCount))
                     {
-                        player.Message(MessageHud.MessageType.Center, spawnAbility.m_maxSummonReached);
+                        existingCount = SpawnSystem.GetNrOfInstances(prefab);
+                        instanceCounts[prefab] = existingCount;
                     }
 
-                    continue;
+                    if (existingCount >= spawnAbility.m_maxSpawned)
+                    {
+                        if (spawnAbility.m_owner is Player player)
+                        {
+                            player.Message(MessageHud.MessageType.Center, spawnAbility.m_maxSummonReached);
+                        }
+
+                        continue;
+                    }
                 }
 
                 if (customRewards.m_playerIsInSafeZone)
@@ -216,6 +184,9 @@ namespace WizshBoneTwitchIntegration.Extensions
                     : Quaternion.identity;
 
                 GameObject gameObject = ZNetViewHelper.Instantiate(prefab, spawnPoint, spawnRotation);
+
+                if (spawnAbility.m_maxSpawned > 0)
+                    instanceCounts[prefab] = instanceCounts[prefab] + 1;
 
                 // Remove any safe zones that may be on the spawned prefab (e.g. boat rain)
                 foreach (TwitchSafeZone safeZone in gameObject.GetComponentsInChildren<TwitchSafeZone>(true))
