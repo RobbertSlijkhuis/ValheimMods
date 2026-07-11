@@ -1,4 +1,5 @@
 using Jotunn.Managers;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,6 +22,8 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private readonly List<string> m_targetList;
         private readonly List<string> m_dropdownOptions;
+        private readonly string m_sentinelValue;
+        private readonly Action m_onSentinelSelected;
         private GameObject m_itemContainer;
         private InputField m_inputField;
         private SearchableDropdown m_dropdown;
@@ -34,11 +37,13 @@ namespace WizshBoneTwitchIntegration.Gui
             m_useDropdown     = false;
         }
 
-        public ListEditor(List<string> targetList, List<string> dropdownOptions)
+        public ListEditor(List<string> targetList, List<string> dropdownOptions, string sentinelValue = null, Action onSentinelSelected = null)
         {
-            m_targetList      = targetList;
-            m_dropdownOptions = dropdownOptions;
-            m_useDropdown     = dropdownOptions != null && dropdownOptions.Count > 0;
+            m_targetList         = targetList;
+            m_dropdownOptions    = dropdownOptions;
+            m_useDropdown        = dropdownOptions != null && dropdownOptions.Count > 0;
+            m_sentinelValue      = sentinelValue;
+            m_onSentinelSelected = onSentinelSelected;
         }
 
         /// <summary>
@@ -115,6 +120,13 @@ namespace WizshBoneTwitchIntegration.Gui
                 text = m_inputField?.text.Trim();
                 if (string.IsNullOrEmpty(text))
                     return;
+            }
+
+            if (m_useDropdown && m_sentinelValue != null && text == m_sentinelValue)
+            {
+                m_onSentinelSelected?.Invoke();
+                RefreshItemList();
+                return;
             }
 
             // Avoid adding duplicates

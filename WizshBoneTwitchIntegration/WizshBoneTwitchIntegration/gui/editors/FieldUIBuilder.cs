@@ -67,7 +67,7 @@ namespace WizshBoneTwitchIntegration.Gui
             // Special case: List<string>
             if (fieldType == typeof(List<string>))
             {
-                return BuildListField(parent, field, currentValue as List<string>, rowPosition, fieldWidth, listDropdownOptions, labelText, tooltip);
+                return BuildListField(parent, target, field, currentValue as List<string>, rowPosition, fieldWidth, listDropdownOptions, labelText, tooltip);
             }
 
             // Special case: PositionOffsetData
@@ -510,7 +510,7 @@ namespace WizshBoneTwitchIntegration.Gui
             return toggle;
         }
 
-        private static bool BuildListField(GameObject parent, FieldInfo field, List<string> currentValue, Vector2 rowPosition, float fieldWidth, List<string> dropdownOptions, string labelText, string tooltip)
+        private static bool BuildListField(GameObject parent, object target, FieldInfo field, List<string> currentValue, Vector2 rowPosition, float fieldWidth, List<string> dropdownOptions, string labelText, string tooltip)
         {
             // Label - same as all other fields
             Text listLabelComp = GUIManager.Instance.CreateText(
@@ -534,8 +534,21 @@ namespace WizshBoneTwitchIntegration.Gui
             float fieldX = rowPosition.x + LabelWidth / 2f + LabelFieldGap + fieldWidth / 2f;
             Vector2 fieldPos = new Vector2(fieldX, rowPosition.y);
 
+            string sentinelValue = null;
+            Action onSentinelSelected = null;
+
+            if (field.GetCustomAttribute<LogPrefabNameDropdownAttribute>() != null)
+            {
+                dropdownOptions = new List<string>(GetAvailableLogPrefabOptions()) { BiomeSpecificSentinel };
+                sentinelValue = BiomeSpecificSentinel;
+
+                var onChanged = field.GetCustomAttribute<OnValueChangedAttribute>();
+                if (onChanged != null)
+                    onSentinelSelected = () => InvokeOnValueChanged(parent, target, onChanged.MethodName);
+            }
+
             ListEditor editor = dropdownOptions != null && dropdownOptions.Count > 0
-                ? new ListEditor(currentValue ?? new List<string>(), dropdownOptions)
+                ? new ListEditor(currentValue ?? new List<string>(), dropdownOptions, sentinelValue, onSentinelSelected)
                 : new ListEditor(currentValue ?? new List<string>());
 
             editor.Build(parent, fieldPos, fieldWidth);
@@ -808,6 +821,35 @@ namespace WizshBoneTwitchIntegration.Gui
 
             options.Sort((a, b) => string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase));
             s_cachedDoorPrefabOptions = options;
+            return options;
+        }
+
+        // Selected value in a LogPrefabNameDropdown list that means "replace this list with the
+        // 8 default per-biome logs and switch to biome-based selection" instead of being added
+        // as a literal (invalid) prefab name - handled by the field's OnValueChanged method.
+        public const string BiomeSpecificSentinel = "Biome specific (sets 8 default per-biome logs)";
+
+        // Log prefabs have no shared identifying component to scan for (unlike Door/Humanoid+MonsterAI),
+        // so this is a curated candidate list seeded from every live "Log Rain" redeem config, filtered
+        // to prefabs that actually resolve so a renamed/missing prefab doesn't appear as an option.
+        private static readonly string[] LogPrefabCandidates =
+        {
+            "beech_log_half", "PineTree_log_half", "SwampTree1_log", "FirTree_log_half",
+            "Birch_log_half", "yggashoot_log_half", "AshlandsTreeLogHalf2", "Oak_log_half"
+        };
+
+        private static List<string> s_cachedLogPrefabOptions;
+
+        public static List<string> GetAvailableLogPrefabOptions()
+        {
+            if (s_cachedLogPrefabOptions != null)
+                return s_cachedLogPrefabOptions;
+
+            if (ZNetScene.instance == null)
+                return new List<string>(LogPrefabCandidates);
+
+            var options = LogPrefabCandidates.Where(name => PrefabManager.Instance.GetPrefab(name) != null).ToList();
+            s_cachedLogPrefabOptions = options;
             return options;
         }
 

@@ -22,12 +22,13 @@ namespace WizshBoneTwitchIntegration.Types
         public static string Meteor => "Meteor";
         public static string Trap => "Trap";
         public static string Root => "Root";
+        public static string LogRain => "LogRain";
 
         // SpawnAbility plus the simplified per-effect types - all of these share the
         // same underlying SpawnAbilityData and SpawnAbilityHelper runtime handler.
         public static readonly HashSet<string> SpawnAbilityFamily = new HashSet<string>
         {
-            SpawnAbility, Door, Windmill, Smite, Rain, Meteor, Trap, Root,
+            SpawnAbility, Door, Windmill, Smite, Rain, Meteor, Trap, Root, LogRain,
         };
     }
 }

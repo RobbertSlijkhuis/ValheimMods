@@ -62,6 +62,7 @@ namespace WizshBoneTwitchIntegration.Gui
             RedeemType.Windmill,
             RedeemType.Smite,
             RedeemType.Rain,
+            RedeemType.LogRain,
             RedeemType.Meteor,
             RedeemType.Trap,
             RedeemType.Root,
@@ -656,6 +657,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 editorHeight = m_objectEditor.Build(m_editorContainer, new SmiteView(m_newRedeem.spawnAbilityData));
             else if (m_newRedeem.type == RedeemType.Rain)
                 editorHeight = m_objectEditor.Build(m_editorContainer, new RainView(m_newRedeem.spawnAbilityData));
+            else if (m_newRedeem.type == RedeemType.LogRain)
+                editorHeight = m_objectEditor.Build(m_editorContainer, new LogRainView(m_newRedeem.spawnAbilityData));
             else if (m_newRedeem.type == RedeemType.Meteor)
                 editorHeight = m_objectEditor.Build(m_editorContainer, new MeteorView(m_newRedeem.spawnAbilityData));
             else if (m_newRedeem.type == RedeemType.Trap)
