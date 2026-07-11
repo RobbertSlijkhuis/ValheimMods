@@ -58,6 +58,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 List<DropdownOption> boundDropdownOptions = null;
                 if (field.GetCustomAttribute<CreaturePrefabNameDropdownAttribute>() != null)
                     boundDropdownOptions = EnsureIncludesCurrentValue(GetAvailableCreaturePrefabOptions(), boundField.GetValue() as string ?? "");
+                else if (field.GetCustomAttribute<DoorPrefabNameDropdownAttribute>() != null)
+                    boundDropdownOptions = EnsureIncludesCurrentValue(GetAvailableDoorPrefabOptions(), boundField.GetValue() as string ?? "");
 
                 return BuildBoundField(parent, boundField, rowPosition, fieldWidth, labelText, tooltip, boundDropdownOptions);
             }
@@ -113,6 +115,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 var dropdownAttr = field.GetCustomAttribute<DropdownOptionsAttribute>();
                 var seDropdown   = field.GetCustomAttribute<StatusEffectNameDropdownAttribute>();
                 var creatureDropdown = field.GetCustomAttribute<CreaturePrefabNameDropdownAttribute>();
+                var doorDropdown = field.GetCustomAttribute<DoorPrefabNameDropdownAttribute>();
                 var onChanged    = field.GetCustomAttribute<OnValueChangedAttribute>();
                 var prefixAttr   = field.GetCustomAttribute<InputPrefixAttribute>();
 
@@ -136,6 +139,12 @@ namespace WizshBoneTwitchIntegration.Gui
                 {
                     string current = currentValue as string ?? "";
                     List<DropdownOption> options = EnsureIncludesCurrentValue(GetAvailableCreaturePrefabOptions(), current);
+                    BuildStringDropdownField(parent, target, field, current, fieldPos, fieldWidth, options);
+                }
+                else if (doorDropdown != null)
+                {
+                    string current = currentValue as string ?? "";
+                    List<DropdownOption> options = EnsureIncludesCurrentValue(GetAvailableDoorPrefabOptions(), current);
                     BuildStringDropdownField(parent, target, field, current, fieldPos, fieldWidth, options);
                 }
                 else if (dropdownAttr != null)
@@ -716,6 +725,90 @@ namespace WizshBoneTwitchIntegration.Gui
             }
 
             return prefabName;
+        }
+
+        // Prefab registration doesn't change mid-session, so this scan only needs to run once
+        // and is cached here, mirroring s_cachedCreaturePrefabOptions.
+        private static List<DropdownOption> s_cachedDoorPrefabOptions;
+        private static HashSet<string> s_cachedPlaceablePrefabNames;
+
+        /// <summary>
+        /// Every prefab reachable from a build tool's piece list (Hammer, Cultivator, Hoe,
+        /// artisan tables, ...) - i.e. everything a player can actually place, as opposed to
+        /// dungeon/world-only variants that share a component (e.g. <c>Door</c>) but were never
+        /// meant to be built and can end up in a broken state (some can't be closed again once
+        /// opened). Found by scanning every registered prefab's <see cref="ItemDrop"/> for a
+        /// <see cref="PieceTable"/> (<c>ItemData.SharedData.m_buildPieces</c>) and collecting the
+        /// union of every table's <see cref="PieceTable.m_pieces"/>.
+        /// </summary>
+        private static HashSet<string> GetPlaceablePrefabNames()
+        {
+            if (s_cachedPlaceablePrefabNames != null)
+                return s_cachedPlaceablePrefabNames;
+
+            if (ZNetScene.instance == null)
+                return new HashSet<string>();
+
+            var names = new HashSet<string>();
+            foreach (string name in ZNetScene.instance.GetPrefabNames())
+            {
+                GameObject prefab = PrefabManager.Instance.GetPrefab(name);
+                PieceTable pieceTable = prefab?.GetComponent<ItemDrop>()?.m_itemData?.m_shared?.m_buildPieces;
+                if (pieceTable == null)
+                    continue;
+
+                foreach (GameObject piece in pieceTable.m_pieces)
+                {
+                    if (piece != null)
+                        names.Add(piece.name);
+                }
+            }
+
+            s_cachedPlaceablePrefabNames = names;
+            return names;
+        }
+
+        /// <summary>
+        /// Value = prefab name (what gets stored), Label = the door's localized piece name
+        /// where available. Matches how <see cref="Extensions.SpawnAbilityExtension"/> identifies
+        /// a spawned piece as a toggleable door (a <c>Door</c> component on the prefab), further
+        /// restricted to prefabs a player can actually place (see <see cref="GetPlaceablePrefabNames"/>)
+        /// since some non-placeable doors can't be closed again once opened.
+        /// </summary>
+        public static List<DropdownOption> GetAvailableDoorPrefabOptions()
+        {
+            if (s_cachedDoorPrefabOptions != null)
+                return s_cachedDoorPrefabOptions;
+
+            if (ZNetScene.instance == null)
+                return new List<DropdownOption>();
+
+            HashSet<string> placeableNames = GetPlaceablePrefabNames();
+
+            var options = new List<DropdownOption>();
+            foreach (string name in ZNetScene.instance.GetPrefabNames())
+            {
+                if (!placeableNames.Contains(name))
+                    continue;
+
+                GameObject prefab = PrefabManager.Instance.GetPrefab(name);
+                if (prefab == null)
+                    continue;
+
+                Door door = prefab.GetComponent<Door>();
+                if (door == null)
+                    continue;
+
+                Piece piece = prefab.GetComponent<Piece>();
+                string label = piece != null && !string.IsNullOrEmpty(piece.m_name)
+                    ? Localization.instance.Localize(piece.m_name)
+                    : name;
+                options.Add(new DropdownOption(name, label));
+            }
+
+            options.Sort((a, b) => string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase));
+            s_cachedDoorPrefabOptions = options;
+            return options;
         }
 
         /// <summary>

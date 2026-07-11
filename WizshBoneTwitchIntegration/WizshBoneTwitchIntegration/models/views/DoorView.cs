@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using WizshBoneTwitchIntegration.Gui;
 using WizshBoneTwitchIntegration.Models;
 
@@ -10,6 +11,11 @@ namespace WizshBoneTwitchIntegration.Models.Views
     /// </summary>
     internal sealed class DoorView
     {
+        [EditorLabel("Door prefab")]
+        [EditorTooltip("Which door prefab gets spawned.")]
+        [DoorPrefabNameDropdown]
+        public BoundField<string> doorPrefab;
+
         [EditorLabel("Door interval")]
         [EditorTooltip("Interval in seconds at which spawned doors toggle open/closed (0 = disabled).")]
         public BoundField<float> doorInterval;
@@ -45,6 +51,10 @@ namespace WizshBoneTwitchIntegration.Models.Views
 
         public DoorView(SpawnAbilityData real)
         {
+            doorPrefab = new BoundField<string>(
+                () => real.spawns != null && real.spawns.Count > 0 ? real.spawns[0] : null,
+                v => real.spawns = string.IsNullOrEmpty(v) ? new List<string>() : new List<string> { v });
+
             doorInterval = new BoundField<float>(
                 () => real.doorInterval,
                 v => real.doorInterval = v);
