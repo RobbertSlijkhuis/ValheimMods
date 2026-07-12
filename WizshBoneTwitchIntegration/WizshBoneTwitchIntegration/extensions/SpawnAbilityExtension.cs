@@ -186,10 +186,6 @@ namespace WizshBoneTwitchIntegration.Extensions
                 if (spawnAbility.m_maxSpawned > 0)
                     instanceCounts[prefab] = instanceCounts[prefab] + 1;
 
-                // Remove any safe zones that may be on the spawned prefab (e.g. boat rain)
-                foreach (TwitchSafeZone safeZone in gameObject.GetComponentsInChildren<TwitchSafeZone>(true))
-                    UnityEngine.Object.Destroy(safeZone);
-
                 ZNetView component = gameObject.GetComponent<ZNetView>();
                 Projectile component2 = gameObject.GetComponent<Projectile>();
 

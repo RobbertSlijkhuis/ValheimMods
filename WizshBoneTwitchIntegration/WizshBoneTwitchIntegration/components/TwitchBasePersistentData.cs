@@ -11,12 +11,7 @@ namespace WizshBoneTwitchIntegration.Components
         ToggleDoor   = 1 << 1,
         Piece        = 1 << 2,
         HazardDamage      = 1 << 3,
-
-        // Unused - TwitchWindmillPersistentData is now baked onto the "Windmill_WBTI" prefab
-        // itself rather than conditionally re-added here. Bit reserved, not reused, so any already-
-        // persisted ZDO with it set (from before this change) doesn't get reinterpreted.
-        // WindmillOverride = 1 << 4,
-
+        ShipSafeZone      = 1 << 4,
         Creature          = 1 << 5,
         Destruction       = 1 << 6,
 
@@ -71,10 +66,8 @@ namespace WizshBoneTwitchIntegration.Components
                 if (flags.HasFlag(PersistentComponentFlags.HazardDamage))
                     gameObject.AddComponent<TwitchPersistentDamage>();
 
-                // WindmillOverride is intentionally not handled here: TwitchWindmillPersistentData
-                // is baked onto the "Windmill_WBTI" prefab itself (see
-                // WizshBoneTwitchIntegration.SetupPieces), so every instance already has it and its
-                // own Awake() rehydrates from ZDO - re-adding it here would create a duplicate.
+                if (flags.HasFlag(PersistentComponentFlags.ShipSafeZone))
+                    TwitchSafeZone.AttachToShip(gameObject);
 
                 if (flags.HasFlag(PersistentComponentFlags.Creature))
                     gameObject.AddComponent<TwitchCreaturePersistentData>();

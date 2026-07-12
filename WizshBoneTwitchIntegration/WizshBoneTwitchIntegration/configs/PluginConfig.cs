@@ -1,6 +1,7 @@
 ﻿using BepInEx.Configuration;
 using Jotunn.Managers;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Extensions;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.TwitchIntegration;
@@ -16,6 +17,7 @@ namespace WizshBoneTwitchIntegration.Configs
         public static string sectionRedeems = "Redeems";
         public static string sectionWard = "Twitchy Ward";
         public static string sectionHUD = "HUD";
+        public static string sectionDebug = "Debug";
 
         public static ConfigEntry<KeyboardShortcut> configWizshBoneWindow;
         public static ConfigEntry<KeyboardShortcut> configQuickTestRedeemKey;
@@ -59,6 +61,9 @@ namespace WizshBoneTwitchIntegration.Configs
         public static ConfigEntry<HudPosition> configHudPosition;
         public static ConfigEntry<float> configHudOffsetX;
         public static ConfigEntry<float> configHudOffsetY;
+
+        // Debug
+        public static ConfigEntry<bool> configShowSafeZoneDebug;
 
         // Other
         private static int entryCount = 1000;
@@ -240,6 +245,15 @@ namespace WizshBoneTwitchIntegration.Configs
             {
                 TwitchAuth auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
                 auth.wizshBoneHUD.RepositionHUD();
+            };
+
+
+            configShowSafeZoneDebug = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionDebug, "Show safezone bounds", false,
+                new ConfigDescription("Shows the bounds of active safezones (ships, wards, traders) in-game as a wireframe outline", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+            configShowSafeZoneDebug.SettingChanged += (obj, attr) =>
+            {
+                TwitchSafeZone.RefreshDebugVisuals(configShowSafeZoneDebug.Value);
             };
         }
 

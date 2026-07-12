@@ -6,14 +6,29 @@ namespace WizshBoneTwitchIntegration.Components
 {
     internal class TwitchSafeZoneControls : MonoBehaviour, Hoverable, Interactable, TextReceiver
     {
-        
+        // Shared across every client via ZDO (see the no-RPC pattern in CLAUDE.md) - any player
+        // can be the one to cycle it via alt+use, not just the owner, so the shield dome and
+        // projector stay in sync for everyone looking at the same ward.
+        private enum VisualMode
+        {
+            Shield,
+            Projector,
+            None
+        }
+
         private ZNetView m_netView;
         private Transform projectorTransform;
         private Transform colliderTrans;
         private Transform parentTrans;
-        private bool isProjectorOn;
+        private VisualMode visualMode;
+
+        // Caches the last VisualMode this instance actually applied, so Update() can detect a
+        // change made by any client (including this one) and react exactly once - mirrors
+        // TwitchSurpriseChest's m_openHandledLocally pattern.
+        private VisualMode m_appliedVisualMode;
         private float radius;
         private readonly int radiusHash = "SafeZoneRadius_WBTI".GetStableHashCode();
+        private readonly int visualModeHash = "SafeZoneVisualMode_WBTI".GetStableHashCode();
 
         public void Awake()
         {
@@ -27,14 +42,42 @@ namespace WizshBoneTwitchIntegration.Components
                 projectorTransform = transform.Find("projector");
                 colliderTrans = transform.parent.Find("safezone");
                 parentTrans = transform.parent;
-                isProjectorOn = false;
                 radius = m_netView.GetZDO().GetFloat(radiusHash, 30f);
+                visualMode = (VisualMode)m_netView.GetZDO().GetInt(visualModeHash, (int)VisualMode.Shield);
+                m_appliedVisualMode = visualMode;
 
                 SetRadius(radius);
+                ApplyVisualMode();
+
+                // The mode only ever changes from a player interacting (see Interact()), so a
+                // twice-a-second check is plenty responsive without paying a per-frame Update() cost.
+                InvokeRepeating(nameof(CheckVisualMode), 0.5f, 0.5f);
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not finish TwitchSafeZoneControls Awake: " + e);
+            }
+        }
+
+        private void CheckVisualMode()
+        {
+            try
+            {
+                if (m_netView == null || !m_netView.IsValid())
+                    return;
+
+                VisualMode zdoVisualMode = (VisualMode)m_netView.GetZDO().GetInt(visualModeHash, (int)VisualMode.Shield);
+
+                if (zdoVisualMode == m_appliedVisualMode)
+                    return;
+
+                visualMode = zdoVisualMode;
+                m_appliedVisualMode = zdoVisualMode;
+                ApplyVisualMode();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchSafeZoneControls.CheckVisualMode failed: " + e);
             }
         }
 
@@ -43,7 +86,7 @@ namespace WizshBoneTwitchIntegration.Components
             string title = "Twitchy Ward (Active)\n";
             string inputString = Localization.instance.Localize("[<color=yellow>$KEY_Use</color>]");
             string inputAltString = Localization.instance.Localize("[<color=yellow>$KEY_AltPlace + $KEY_Use</color>]");
-            string text = $"{inputString} Change radius\n{inputAltString} Show radius projector";
+            string text = $"{inputString} Change radius\n{inputAltString} Cycle shield/projector/hidden";
             return title + text;
         }
 
@@ -64,8 +107,21 @@ namespace WizshBoneTwitchIntegration.Components
                     if (projectorTransform == null)
                         throw new Exception("Could not find projector gameObject");
 
-                    isProjectorOn = !isProjectorOn;
-                    projectorTransform.gameObject.SetActive(isProjectorOn);
+                    VisualMode nextMode = visualMode switch
+                    {
+                        VisualMode.Shield => VisualMode.Projector,
+                        VisualMode.Projector => VisualMode.None,
+                        _ => VisualMode.Shield,
+                    };
+
+                    // Any player can interact with this ward, not just its owner - claim
+                    // ownership first so the write actually propagates (see CLAUDE.md/
+                    // TwitchSurpriseChest.TryTriggerOpen). Update() then applies the change
+                    // uniformly on every client, including this one.
+                    if (!m_netView.IsOwner())
+                        m_netView.ClaimOwnership();
+
+                    m_netView.GetZDO().Set(visualModeHash, (int)nextMode);
                     return true;
                 }
 
@@ -114,9 +170,24 @@ namespace WizshBoneTwitchIntegration.Components
             colliderComp.radius = value;
             forceFieldComp.endRange = value;
 
-            ShieldDomeHelper.ShowDome(this, parentTrans.position, value, ShieldColors.Ward);
+            colliderTrans.gameObject.GetComponent<TwitchSafeZoneDebugVisual>()?.Refresh();
+
+            if (visualMode == VisualMode.Shield)
+                ShieldDomeHelper.ShowDome(this, parentTrans.position, value, ShieldColors.Ward);
 
             m_netView.GetZDO().Set(radiusHash, value);
+        }
+
+        // Applies the current visualMode to both the projector and the shield dome, showing at
+        // most one of them at a time (or neither, for VisualMode.None).
+        private void ApplyVisualMode()
+        {
+            projectorTransform.gameObject.SetActive(visualMode == VisualMode.Projector);
+
+            if (visualMode == VisualMode.Shield)
+                ShieldDomeHelper.ShowDome(this, parentTrans.position, m_netView.GetZDO().GetFloat(radiusHash, radius), ShieldColors.Ward);
+            else
+                ShieldDomeHelper.HideDome(this);
         }
 
         public void OnDestroy()

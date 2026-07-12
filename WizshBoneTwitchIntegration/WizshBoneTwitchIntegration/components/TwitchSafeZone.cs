@@ -41,6 +41,128 @@ namespace WizshBoneTwitchIntegration.Components
             return OverlapsSafeZone(point, 0f);
         }
 
+        // Adds a TwitchSafeZone to a ship's OnboardTrigger, sized to fit the ship's own
+        // non-trigger colliders (i.e. its hull/deck) rather than a per-prefab hardcoded box, so
+        // any current or future boat prefab gets a correctly sized zone with no magic numbers.
+        // Only called for ships actually placed by a player - see WearNTear_OnPlaced_Postfix in
+        // ShipPatchesWBTI and the ShipSafeZone flag in TwitchBasePersistentData.
+        public static void AttachToShip(GameObject shipRoot)
+        {
+            try
+            {
+                Transform onboardTriggerTrans = shipRoot.transform.Find("OnboardTrigger");
+
+                if (onboardTriggerTrans == null)
+                {
+                    Jotunn.Logger.LogWarning($"[WBTI] TwitchSafeZone.AttachToShip: '{shipRoot.name}' has no OnboardTrigger, skipping");
+                    return;
+                }
+
+                BoxCollider boxCollider = onboardTriggerTrans.gameObject.GetComponent<BoxCollider>();
+                boxCollider.includeLayers = LayerMask.GetMask("piece");
+
+                Bounds? hullBounds = null;
+
+                foreach (Collider collider in shipRoot.GetComponentsInChildren<Collider>(true))
+                {
+                    if (collider.isTrigger)
+                        continue;
+
+                    // Each corner is taken in the collider's own local space, then carried through
+                    // that collider's transform into world space and back into the OnboardTrigger's
+                    // local space - never through a world-space AABB (Collider.bounds), which is
+                    // axis-aligned to the *world* and therefore a different, wrong shape/size
+                    // depending on whatever heading the ship happens to be facing when this runs.
+                    foreach (Vector3 localCorner in GetLocalCorners(collider))
+                    {
+                        Vector3 pointInOnboardSpace = onboardTriggerTrans.InverseTransformPoint(collider.transform.TransformPoint(localCorner));
+
+                        if (hullBounds == null)
+                        {
+                            hullBounds = new Bounds(pointInOnboardSpace, Vector3.zero);
+                        }
+                        else
+                        {
+                            Bounds encapsulated = hullBounds.Value;
+                            encapsulated.Encapsulate(pointInOnboardSpace);
+                            hullBounds = encapsulated;
+                        }
+                    }
+                }
+
+                if (hullBounds != null)
+                {
+                    boxCollider.center = hullBounds.Value.center;
+                    boxCollider.size = hullBounds.Value.size + new Vector3(0, 2f, 0);
+                }
+
+                // Added last, after the collider has its final size/center - TwitchSafeZone.Awake()
+                // runs synchronously inside AddComponent, and (if the debug toggle is on) reads this
+                // same collider's current bounds right then for the wireframe visual. Adding before
+                // the resize above would capture the OnboardTrigger's original vanilla dimensions
+                // instead of the computed hull bounds.
+                onboardTriggerTrans.gameObject.AddComponent<TwitchSafeZone>();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchSafeZone.AttachToShip failed: " + e);
+            }
+        }
+
+        // The 8 corners of a collider's own local-space bounding box, in the collider's own local
+        // space (not world space) - callers transform these through the collider's own transform to
+        // get world positions, keeping the result invariant to whatever the collider's current world
+        // rotation happens to be. MeshCollider falls back to its shared mesh's local bounds; any
+        // other/exotic collider type falls back to its (world-space) Collider.bounds transformed back
+        // into that collider's own local space, which is only an approximation for a rotated shape.
+        private static Vector3[] GetLocalCorners(Collider collider)
+        {
+            Vector3 center;
+            Vector3 half;
+
+            switch (collider)
+            {
+                case BoxCollider box:
+                    center = box.center;
+                    half = box.size / 2f;
+                    break;
+                case SphereCollider sphere:
+                    center = sphere.center;
+                    half = Vector3.one * sphere.radius;
+                    break;
+                case CapsuleCollider capsule:
+                    float halfHeight = Mathf.Max(capsule.height, capsule.radius * 2f) / 2f;
+                    half = capsule.direction switch
+                    {
+                        0 => new Vector3(halfHeight, capsule.radius, capsule.radius),
+                        2 => new Vector3(capsule.radius, capsule.radius, halfHeight),
+                        _ => new Vector3(capsule.radius, halfHeight, capsule.radius),
+                    };
+                    center = capsule.center;
+                    break;
+                case MeshCollider mesh when mesh.sharedMesh != null:
+                    center = mesh.sharedMesh.bounds.center;
+                    half = mesh.sharedMesh.bounds.extents;
+                    break;
+                default:
+                    center = collider.transform.InverseTransformPoint(collider.bounds.center);
+                    half = collider.bounds.extents;
+                    break;
+            }
+
+            Vector3[] corners = new Vector3[8];
+
+            for (int i = 0; i < 8; i++)
+            {
+                corners[i] = center + new Vector3(
+                    (i & 1) == 0 ? -half.x : half.x,
+                    (i & 2) == 0 ? -half.y : half.y,
+                    (i & 4) == 0 ? -half.z : half.z);
+            }
+
+            return corners;
+        }
+
         // General case of IsPointInSafeZone: true if a sphere of the given radius centered at
         // origin overlaps any safe zone's collider (radius 0 = point containment).
         public static bool OverlapsSafeZone(Vector3 origin, float radius)
@@ -63,10 +185,30 @@ namespace WizshBoneTwitchIntegration.Components
                 m_customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
                 m_collider = GetComponent<Collider>();
                 s_activeSafeZones.Add(this);
+
+                if (PluginConfig.configShowSafeZoneDebug.Value)
+                    gameObject.AddComponent<TwitchSafeZoneDebugVisual>();
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("TwitchSafeZone.Awake failed: " + e);
+            }
+        }
+
+        // Called from PluginConfig.configShowSafeZoneDebug.SettingChanged so toggling the debug
+        // option live immediately shows/hides bounds on every currently active zone, not just
+        // ones created after the toggle. Newly created zones pick up the current value themselves
+        // in Awake() above.
+        public static void RefreshDebugVisuals(bool show)
+        {
+            foreach (TwitchSafeZone safeZone in s_activeSafeZones)
+            {
+                TwitchSafeZoneDebugVisual visual = safeZone.GetComponent<TwitchSafeZoneDebugVisual>();
+
+                if (show && visual == null)
+                    safeZone.gameObject.AddComponent<TwitchSafeZoneDebugVisual>();
+                else if (!show && visual != null)
+                    Destroy(visual);
             }
         }
 

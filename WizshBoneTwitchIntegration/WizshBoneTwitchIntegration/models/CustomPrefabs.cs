@@ -7,7 +7,6 @@ namespace WizshBoneTwitchIntegration.Models
         public GameObject DetectFish;
         public GameObject FishRainScript;
         public GameObject Flashbang;
-        public GameObject FlashbangVial;
         public GameObject Windmill;
         public GameObject GuardStone;
         public GameObject TerrainEdit;

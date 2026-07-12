@@ -160,21 +160,6 @@ namespace WizshBoneTwitchIntegration
 
             prefabs.TerrainEdit.AddComponent<TwitchTerrainReset>();
 
-            prefabs.FlashbangVial = PrefabManager.Instance.CreateClonedPrefab("FlashbangVial_WBTI", "BombBlob_Frost_projectile");
-            Projectile projectile = prefabs.FlashbangVial.GetComponent<Projectile>();
-            projectile.m_spawnOnHit = null;
-            prefabs.FlashbangVial.transform.localScale = new Vector3(2f, 2f, 2f);
-
-            // Lean windmill clone: strips the vanilla Windmill/Smelter components (whose Update()
-            // and InvokeRepeating("UpdateSmelter", ...) run every frame/second on every spawned
-            // instance regardless of enabled state) in favor of TwitchWindmillPersistentData owning
-            // rotation/AOE/audio directly. ConfigurePrefab() must run before the vanilla components
-            // are destroyed since it copies its transform/audio references from them. Piece/
-            // WearNTear are kept - their own per-instance cost is negligible (no per-frame method;
-            // WearNTear's checks are already batched/throttled by the engine's own WearNTearUpdater).
-            // Source prefab name is lowercase "windmill" - "Windmill" (capital) is a different,
-            // near-empty prefab (no Windmill/ZNetView component) that happens to share the name
-            // case-insensitively; prefab name lookups are case-sensitive.
             prefabs.Windmill = PrefabManager.Instance.CreateClonedPrefab("Windmill_WBTI", "windmill");
             Windmill vanillaWindmill = prefabs.Windmill.GetComponent<Windmill>();
             Smelter vanillaSmelter = prefabs.Windmill.GetComponent<Smelter>();
@@ -209,13 +194,11 @@ namespace WizshBoneTwitchIntegration
 
         private void AddPersistentComponents()
         {
-            //Jotunn.Logger.LogWarning("AddPersistentComponents()");
             foreach (string name in ZNetScene.instance.GetPrefabNames())
             {
                 GameObject prefab = PrefabManager.Instance.GetPrefab(name);
                 Humanoid humanoid = prefab.GetComponent<Humanoid>();
                 MonsterAI monsterAI = prefab.GetComponent<MonsterAI>();
-                Ship ship = prefab.GetComponent<Ship>();
 
                 prefab.AddComponent<TwitchBasePersistentData>();
 
@@ -240,26 +223,6 @@ namespace WizshBoneTwitchIntegration
 
                     continue;
                 }
-
-                if (ship != null)
-                {
-                    Transform onboardTriggerTrans = prefab.transform.Find("OnboardTrigger");
-                    BoxCollider boxCollider = onboardTriggerTrans.gameObject.GetComponent<BoxCollider>();
-                    onboardTriggerTrans.gameObject.AddComponent<TwitchSafeZone>();
-                    boxCollider.includeLayers = LayerMask.GetMask("piece");
-
-                    if (prefab.name == "VikingShip_Ashlands")
-                    {
-                        boxCollider.center = new Vector3(0.01260833f, 4.1f, 0.0135176f);
-                        boxCollider.size = new Vector3(4.536945f, 10f, 3.080277f);
-                    }
-                    else
-                    {
-                        boxCollider.center = new Vector3(0, 1.2f, 0);
-                        boxCollider.size = new Vector3(1, 3.5f, 1);
-                    }
-                }
-
             }
 
             string[] traders = new string[3] { "Vendor_BlackForest", "Hildir_camp", "BogWitch_Camp" };
