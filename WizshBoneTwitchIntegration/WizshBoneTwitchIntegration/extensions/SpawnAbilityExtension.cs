@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
-using WizshBoneTwitchIntegration.extensions;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
@@ -15,7 +14,7 @@ namespace WizshBoneTwitchIntegration.Extensions
 {
     internal static class SpawnAbilityExtension
     {
-        public static IEnumerator Spawn2(this SpawnAbility spawnAbility, CustomRewardEvent customRewardEvent, SpawnAbilityData spawnAbilityData, CreatureData creatureData)
+        public static IEnumerator Spawn2(this SpawnAbility spawnAbility, int toSpawn, CustomRewardEvent customRewardEvent, SpawnAbilityData spawnAbilityData, CreatureData creatureData)
         {
             if (spawnAbility.m_initialSpawnDelay > 0f)
             {
@@ -24,7 +23,6 @@ namespace WizshBoneTwitchIntegration.Extensions
 
             TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
 
-            int toSpawn = UnityEngine.Random.Range(spawnAbility.m_minToSpawn, spawnAbility.m_maxToSpawn);
             Skills skills = (spawnAbility.m_owner ? spawnAbility.m_owner.GetSkills() : null);
 
             // SpawnSystem.GetNrOfInstances falls back to GameObject.FindGameObjectsWithTag("spawned")
@@ -198,16 +196,24 @@ namespace WizshBoneTwitchIntegration.Extensions
                 MonsterAI monsterAI = gameObject.GetComponent<MonsterAI>();
                 Humanoid humanoid2 = gameObject.GetComponent<Humanoid>();
                 ImpactEffect impactEffect = gameObject.GetComponentInChildren<ImpactEffect>(true);
-                Aoe aoe = gameObject.GetComponentInChildren<Aoe>(true);
-                Aoe aoeRod = null;
                 Trap trap = gameObject.GetComponentInChildren<Trap>();
                 Piece piece = gameObject.GetComponentInChildren<Piece>();
+
+                // lightningAOE needs both the rod and the AOE trigger, found via one
+                // GetComponentsInChildren search - only fall back to the single-result lookup
+                // for every other prefab, instead of always doing both searches.
+                Aoe aoe;
+                Aoe aoeRod = null;
 
                 if (gameObject.name == "lightningAOE(Clone)")
                 {
                     Aoe[] aoes = gameObject.GetComponentsInChildren<Aoe>();
                     aoeRod = aoes[0];
                     aoe = aoes[1];
+                }
+                else
+                {
+                    aoe = gameObject.GetComponentInChildren<Aoe>(true);
                 }
 
                 if (monsterAI != null && humanoid2 != null)

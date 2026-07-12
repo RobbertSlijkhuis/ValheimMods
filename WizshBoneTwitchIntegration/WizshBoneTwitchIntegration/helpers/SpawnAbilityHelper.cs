@@ -1,4 +1,5 @@
 ﻿using Jotunn.Managers;
+using System;
 using System.Collections.Generic;
 using TwitchSDK.Interop;
 using UnityEngine;
@@ -6,6 +7,7 @@ using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Exceptions;
 using WizshBoneTwitchIntegration.Extensions;
 using WizshBoneTwitchIntegration.Models;
+using WizshBoneTwitchIntegration.Models.Views;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 using WizshBoneTwitchIntegration.Types;
 using static SpawnAbility;
@@ -16,8 +18,27 @@ namespace WizshBoneTwitchIntegration.Helpers
     {
         public static bool debug;
 
+        // Each narrowed View is the single source of truth for its redeem type's hardcoded
+        // prefab/forced defaults - constructing (and discarding) one here applies that
+        // normalization at redemption time too, not just when the in-game editor is open.
+        // RedeemType.SpawnAbility (the raw/generic type) has no narrowed View, so no entry.
+        private static readonly Dictionary<string, Action<SpawnAbilityData>> Normalizers = new Dictionary<string, Action<SpawnAbilityData>>
+        {
+            { RedeemType.Door,     data => new DoorView(data) },
+            { RedeemType.Windmill, data => new WindmillView(data) },
+            { RedeemType.Smite,    data => new SmiteView(data) },
+            { RedeemType.Rain,     data => new RainView(data) },
+            { RedeemType.LogRain,  data => new LogRainView(data) },
+            { RedeemType.Meteor,   data => new MeteorView(data) },
+            { RedeemType.Trap,     data => new TrapView(data) },
+            { RedeemType.Root,     data => new RootView(data) },
+        };
+
         public static void SpawnAbility(string type, SpawnAbilityData spawnAbilityData, CustomRewardEvent customRewardEvent, TwitchChat m_chat)
         {
+            if (Normalizers.TryGetValue(type, out Action<SpawnAbilityData> normalize))
+                normalize(spawnAbilityData);
+
             GameObject showerPrefab;
 
             if (spawnAbilityData.prefabName == null)
@@ -87,19 +108,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (spawnAbilityData.velocityMax != null)
                 spawnAbility.m_projectileVelocityMax = (float)spawnAbilityData.velocityMax;
 
-            if (type == RedeemType.Windmill)
-            {
-                // Windmill is its own dedicated redeem type (RedeemType.Windmill / WindmillView),
-                // not a name configured through the generic spawns list below - always spawn the
-                // lean "Windmill_WBTI" clone (see WizshBoneTwitchIntegration.SetupPieces) directly.
-                GameObject windmillPrefab = PrefabManager.Instance.GetPrefab("Windmill_WBTI");
-
-                if (windmillPrefab == null)
-                    Jotunn.Logger.LogWarning("Could not find prefab Windmill_WBTI for windmill SpawnAbility, skipping...");
-                else
-                    spawnAbility.m_spawnPrefab = new GameObject[] { windmillPrefab };
-            }
-            else if (spawnAbilityData.spawns != null && spawnAbilityData.spawns.Count > 0)
+            if (spawnAbilityData.spawns != null && spawnAbilityData.spawns.Count > 0)
             {
                 List<GameObject> spawns = new List<GameObject>();
 
@@ -126,14 +135,19 @@ namespace WizshBoneTwitchIntegration.Helpers
             else
                 Jotunn.Logger.LogWarning("SpawnAbility target type is null");
 
+            // Rolled here (rather than inside Spawn2) so the maxSpawned check below can cancel
+            // the whole redeem up front if there isn't room for the full amount, instead of
+            // letting it start and silently skip spawns once the cap is hit partway through.
+            int toSpawn = UnityEngine.Random.Range(spawnAbility.m_minToSpawn, spawnAbility.m_maxToSpawn);
+
             if (spawnAbilityData.maxSpawned != null && spawnAbilityData.maxSpawned > 0)
             {
                 foreach (GameObject prefab in spawnAbility.m_spawnPrefab)
                 {
-                    if (SpawnSystem.GetNrOfInstances(prefab) >= spawnAbilityData.maxSpawned)
+                    if (SpawnSystem.GetNrOfInstances(prefab) + toSpawn > spawnAbilityData.maxSpawned)
                     {
-                        m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, there is already a maximum number of spawns! {(PluginConfig.configAutoResolveRedeems.Value ? TwitchCustomRewards.m_refundAutoResolveOn : TwitchCustomRewards.m_refundAutoResolveOff)}");
-                        throw new RedeemException("Already on max spawned for this redeeem", ExceptionType.Warning);
+                        m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, there isn't enough room left for the full spawn amount! {(PluginConfig.configAutoResolveRedeems.Value ? TwitchCustomRewards.m_refundAutoResolveOn : TwitchCustomRewards.m_refundAutoResolveOff)}");
+                        throw new RedeemException("Not enough space left for this redeem", ExceptionType.Warning);
                     }
                 }
             }
@@ -142,7 +156,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, spawnAbilityData.announceMessage), 3000);
 
             CreatureData creatureData = new CreatureData();
-            m_chat.StartCoroutine(spawnAbility.Spawn2(customRewardEvent, spawnAbilityData, creatureData));
+            m_chat.StartCoroutine(spawnAbility.Spawn2(toSpawn, customRewardEvent, spawnAbilityData, creatureData));
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using WizshBoneTwitchIntegration.Gui;
 
 namespace WizshBoneTwitchIntegration.Models.Views
@@ -59,6 +60,11 @@ namespace WizshBoneTwitchIntegration.Models.Views
                 v => real.announceMessage = v);
 
             damage = real.damage ?? (real.damage = new DamageData());
+
+            // No other vanilla prefab fits "trap field" - hardcode fuling_trap rather than
+            // trusting the generic spawns list, so editing the YAML by hand can't point this
+            // redeem at an arbitrary/broken prefab.
+            real.spawns = new List<string> { "fuling_trap" };
         }
     }
 }

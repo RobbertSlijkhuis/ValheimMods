@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using WizshBoneTwitchIntegration.Gui;
 using WizshBoneTwitchIntegration.Models;
 
@@ -69,6 +70,11 @@ namespace WizshBoneTwitchIntegration.Models.Views
                 v => real.announceMessage = v);
 
             damage = real.damage ?? (real.damage = new DamageData());
+
+            // Windmill is its own dedicated redeem type, not a name configured through the
+            // generic spawns list - always spawn the lean "Windmill_WBTI" clone (see
+            // WizshBoneTwitchIntegration.SetupPieces).
+            real.spawns = new List<string> { "Windmill_WBTI" };
         }
     }
 }

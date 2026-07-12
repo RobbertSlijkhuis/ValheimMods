@@ -12,9 +12,17 @@ namespace WizshBoneTwitchIntegration.Models.Views
     /// </summary>
     internal sealed class LogRainView
     {
+        [EditorLabel("Announce message")]
+        [EditorTooltip("Optional chat message announced when this redeem triggers.")]
+        public BoundField<string> announceMessage;
+
         [EditorLabel("Duration")]
         [EditorTooltip("How long the effect lasts, in seconds (0 = indefinite).")]
         public BoundField<int> duration;
+
+        [EditorLabel("Ground offset")]
+        [EditorTooltip("Vertical offset from the ground at which the prefab spawn.")]
+        public BoundField<float?> groundOffset;
 
         [EditorLabel("Min to spawn")]
         public BoundField<int?> minToSpawn;
@@ -33,17 +41,12 @@ namespace WizshBoneTwitchIntegration.Models.Views
         [EditorTooltip("Accuracy of the spawned prefabs.")]
         public BoundField<float?> accuracy;
 
-        [EditorLabel("Ground offset")]
-        [EditorTooltip("Vertical offset from the ground at which the prefab spawn.")]
-        public BoundField<float?> groundOffset;
-
         [EditorLabel("Allow drops")]
         [EditorTooltip("Whether the spawned prefabs can drop items when destroyed.")]
         public BoundField<bool> allowDrops;
 
-        [EditorLabel("Announce message")]
-        [EditorTooltip("Optional chat message announced when this redeem triggers.")]
-        public BoundField<string> announceMessage;
+
+
 
         [EditorLabel("Logs")]
         [EditorTooltip("Log prefabs this redeem rains. Pick 'Biome specific' to replace this list with the 8 default per-biome logs and switch to biome-based selection.")]
