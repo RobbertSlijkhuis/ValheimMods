@@ -292,6 +292,15 @@ namespace WizshBoneTwitchIntegration.Extensions
                     TwitchWindmillPersistentData windmillData = gameObject.GetComponent<TwitchWindmillPersistentData>();
                     if (windmillData != null && spawnAbilityData.windmillRotationSpeed > 0f)
                         windmillData.Initialize(spawnAbilityData.windmillRotationSpeed);
+
+                    // Redeem-spawned boats get an idle-physics throttle unconditionally (unlike
+                    // Door/Windmill, there's no per-redeem YAML gate for this) - see
+                    // TwitchShipIdlePhysicsData / ShipPatchesWBTI.Ship_CustomFixedUpdate_Prefix.
+                    if (gameObject.GetComponent<Ship>() != null)
+                    {
+                        gameObject.AddComponent<TwitchShipIdlePhysicsData>();
+                        gameObject.GetComponent<TwitchBasePersistentData>()?.SetFlag(PersistentComponentFlags.ShipIdlePhysics, true);
+                    }
                 }
 
                 if ((bool)component2)

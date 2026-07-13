@@ -18,6 +18,7 @@ namespace WizshBoneTwitchIntegration.Configs
         public static string sectionWard = "Twitchy Ward";
         public static string sectionHUD = "HUD";
         public static string sectionDebug = "Debug";
+        public static string sectionPerformance = "Performance";
 
         public static ConfigEntry<KeyboardShortcut> configWizshBoneWindow;
         public static ConfigEntry<KeyboardShortcut> configQuickTestRedeemKey;
@@ -64,6 +65,9 @@ namespace WizshBoneTwitchIntegration.Configs
 
         // Debug
         public static ConfigEntry<bool> configShowSafeZoneDebug;
+
+        // Performance
+        public static ConfigEntry<int> configShipIdlePhysicsThrottle;
 
         // Other
         private static int entryCount = 1000;
@@ -255,6 +259,11 @@ namespace WizshBoneTwitchIntegration.Configs
             {
                 TwitchSafeZone.RefreshDebugVisuals(configShowSafeZoneDebug.Value);
             };
+
+
+            configShipIdlePhysicsThrottle = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionPerformance, "Idle boat physics throttle", 4,
+                new ConfigDescription("Redeem-spawned boats with nobody at the helm only run their full buoyancy physics every Nth physics tick instead of every tick (e.g. 4 = ~12.5Hz instead of 50Hz). Reduces the performance cost of large boat piles (e.g. Boatpocalypse). Set to 1 to disable throttling. Boats being actively steered always run at full rate regardless of this setting.", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
         }
 
         private static int HandleOrder()

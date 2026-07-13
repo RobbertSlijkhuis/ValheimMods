@@ -17,6 +17,10 @@ namespace WizshBoneTwitchIntegration.Components
 
         // Marker only, no component to rehydrate - see TwitchBasePersistentData.IsRedeemSpawn.
         RedeemSpawn       = 1 << 7,
+
+        // Appended after RedeemSpawn rather than renumbered - existing bits are already saved in
+        // ZDOs on live worlds, and renumbering would corrupt that saved flag data.
+        ShipIdlePhysics   = 1 << 8,
     }
 
     internal class TwitchBasePersistentData : MonoBehaviour
@@ -74,6 +78,9 @@ namespace WizshBoneTwitchIntegration.Components
 
                 if (flags.HasFlag(PersistentComponentFlags.Destruction))
                     gameObject.AddComponent<TwitchPersistentDestruction>();
+
+                if (flags.HasFlag(PersistentComponentFlags.ShipIdlePhysics))
+                    gameObject.AddComponent<TwitchShipIdlePhysicsData>();
             }
             catch (Exception e)
             {
