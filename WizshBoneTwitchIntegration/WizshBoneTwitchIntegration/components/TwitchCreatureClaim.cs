@@ -74,6 +74,13 @@ namespace WizshBoneTwitchIntegration.Components
                 return;
             }
 
+            // This creature already existed before being claimed (wild tame renamed, or an
+            // auto-scanned offer accepted via !claim) so the local client isn't guaranteed to
+            // already own its ZDO - claim it so the persistent-data write below actually takes
+            // effect, regardless of who owned it up to this point.
+            if (m_netView != null && m_netView.IsValid() && !m_netView.IsOwner())
+                m_netView.ClaimOwnership();
+
             m_assignment = new TwitchCreatureAssignment(userName, gameObject, PluginConfig.configChattingClaimDuration.Value);
             m_originalName = m_humanoid.m_name;
             m_humanoid.m_name = userName;

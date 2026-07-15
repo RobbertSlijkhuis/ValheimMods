@@ -144,6 +144,9 @@ namespace WizshBoneTwitchIntegration.Components
 
         private void WriteZDO()
         {
+            if (!m_netView.IsOwner())
+                return;
+
             m_netView.GetZDO().Set(creatureDataHash, $"{m_redeemerName}|{m_redeemTitle}|{m_savedPrefabName}|{m_ignoreWard}|{m_isFollowing}");
         }
 

@@ -92,7 +92,7 @@ namespace WizshBoneTwitchIntegration.Components
         {
             try
             {
-                if (m_netView == null || !m_netView.IsValid())
+                if (m_netView == null || !m_netView.IsValid() || !m_netView.IsOwner())
                     return;
 
                 var current = (PersistentComponentFlags)m_netView.GetZDO().GetInt(s_activeComponentsHash, 0);

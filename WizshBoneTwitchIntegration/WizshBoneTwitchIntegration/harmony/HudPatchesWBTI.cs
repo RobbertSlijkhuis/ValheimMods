@@ -43,13 +43,18 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
         }
 
+        // Patches SetText (the plain local call the rename UI makes) rather than the RPC_SetName
+        // handler it triggers - RPC_SetName only runs on whichever peer currently owns the tame's
+        // ZDO (Tameable.SetText uses the single-target InvokeRPC overload, routed to m_zdo.GetOwner()),
+        // which isn't guaranteed to be the renaming player. SetText runs synchronously on the
+        // renaming player's own client instead, before the RPC is even sent.
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(Tameable), "RPC_SetName")]
-        public static void RPC_SetName_Prefix(ref Tameable __instance, long sender, ref string name, string authorId)
+        [HarmonyPatch(typeof(Tameable), "SetText")]
+        public static void SetText_Prefix(ref Tameable __instance, ref string text)
         {
             try
             {
-                if (!name.Contains("claim:"))
+                if (!text.Contains("claim:"))
                     return;
 
                 TwitchCreatureClaim creatureClaim = __instance.gameObject.GetComponent<TwitchCreatureClaim>();
@@ -57,12 +62,12 @@ namespace WizshBoneTwitchIntegration.Harmony
                 if (creatureClaim == null)
                     creatureClaim = __instance.gameObject.AddComponent<TwitchCreatureClaim>();
 
-                name = name.Replace("claim:", "");
-                creatureClaim.Init(name);
+                text = text.Replace("claim:", "");
+                creatureClaim.Init(text);
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Something went wrong in RPC_SetName_Prefix: " + e);
+                Jotunn.Logger.LogError("Something went wrong in SetText_Prefix: " + e);
             }
         }
 
