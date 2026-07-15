@@ -10,7 +10,9 @@ namespace WizshBoneTwitchIntegration.Helpers
         private static readonly string ProfilesPath = WizshBoneTwitchIntegration.customConfigPath + "/profiles";
         private static readonly string ActiveProfileFile = ProfilesPath + "/active.txt";
         private const string DefaultProfileName = "default";
-        private const string RedeemsSuffix = "_redeems.yaml";
+        private const string RedeemsStem = "_redeems";
+        private static readonly System.Text.RegularExpressions.Regex TrailingDuplicateNumberRegex =
+            new System.Text.RegularExpressions.Regex(@" ?\(\d+\)$");
 
         public static string ActiveProfile { get; private set; } = DefaultProfileName;
 
@@ -181,16 +183,21 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         /// <summary>
         /// Resolves the profile name a given import file would target, without touching disk.
-        /// - If the filename matches "{name}_redeems.yaml" → "{name}".
-        /// - Otherwise → the filename without its extension.
+        /// Strips the file extension, then a trailing " (N)" - the suffix browsers/Discord add
+        /// when a same-named file is downloaded more than once - and then a trailing "_redeems"
+        /// stem, so re-downloaded copies of the same export still resolve to the original
+        /// profile name instead of suggesting a new one each time.
         /// </summary>
         public static string ResolveImportProfileName(string sourceFilePath)
         {
-            string fileName = Path.GetFileName(sourceFilePath);
+            string name = Path.GetFileNameWithoutExtension(sourceFilePath);
 
-            return fileName.EndsWith(RedeemsSuffix, System.StringComparison.OrdinalIgnoreCase)
-                ? fileName.Substring(0, fileName.Length - RedeemsSuffix.Length)
-                : Path.GetFileNameWithoutExtension(fileName);
+            name = TrailingDuplicateNumberRegex.Replace(name, "");
+
+            if (name.EndsWith(RedeemsStem, System.StringComparison.OrdinalIgnoreCase))
+                name = name.Substring(0, name.Length - RedeemsStem.Length);
+
+            return name;
         }
 
         public static bool ProfileExists(string profileName)
