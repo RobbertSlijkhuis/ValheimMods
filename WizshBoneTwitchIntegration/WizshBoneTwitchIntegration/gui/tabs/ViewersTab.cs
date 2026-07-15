@@ -280,6 +280,8 @@ namespace WizshBoneTwitchIntegration.Gui
             using (StreamWriter writer = new StreamWriter(WizshBoneTwitchIntegration.viewersPath, append: false))
                 serializer.Serialize(writer, output);
 
+            RecolorHelper.ReloadViewersConfig();
+
             m_unsavedNames.Clear();
             m_listFeedbackText.text = "Saved!";
             RefreshList();
