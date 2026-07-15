@@ -23,6 +23,18 @@ namespace WizshBoneTwitchIntegration.Helpers
         private static readonly Queue<QueuedDetonation> s_queue = new Queue<QueuedDetonation>();
         private static bool s_isRunning;
 
+        // Called from GameAwake_Postfix so a fresh world load/relog doesn't inherit a queue stuck
+        // forever by an abandoned coroutine: ProcessQueue/Detonate run on the TwitchCustomRewards
+        // host attached to Game.instance.gameObject, and if that GameObject is destroyed mid-effect
+        // (logout, world change), Unity silently kills the coroutine without ever reaching its
+        // finally block - leaving s_isRunning stuck true and every future Enqueue() call
+        // permanently skipping StartCoroutine. See FlashBangHelper.ResetQueue for the same pattern.
+        public static void ResetQueue()
+        {
+            s_queue.Clear();
+            s_isRunning = false;
+        }
+
         public static void Enqueue(MonoBehaviour host, DetonateData detonateData, CustomRewardEvent customRewardEvent)
         {
             s_queue.Enqueue(new QueuedDetonation { data = detonateData, customRewardEvent = customRewardEvent });

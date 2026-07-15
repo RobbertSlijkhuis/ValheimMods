@@ -187,16 +187,31 @@ namespace WizshBoneTwitchIntegration.Helpers
                     yield return new WaitForSeconds(flashbangData.flashStartDuration);
                 }
 
+                // flash (and its canvasFlashGroup/canvasAfterImageGroup children) can be destroyed
+                // out from under this coroutine while it's suspended - e.g. OnDeath_Postfix/
+                // OnSpawned_Postfix call ClearUI() on player death/respawn mid-effect. Touching a
+                // destroyed component below throws an uncaught MissingReferenceException (no catch
+                // here, only finally), which unwinds through ProcessQueue's finally and silently
+                // drops every other flashbang still waiting in s_queue. Bail out cleanly instead.
+                if (flash == null)
+                    yield break;
+
                 if (EnemyHud.instance != null) EnemyHud.instance.gameObject.SetActive(false);
                 if (MessageHud.instance != null) MessageHud.instance.gameObject.SetActive(false);
                 if (Hud.instance != null) Hud.instance.gameObject.SetActive(false);
 
                 yield return new WaitForSeconds(flashbangData.flashDuration);
 
+                if (flash == null)
+                    yield break;
+
                 canvasAfterImageGroup.alpha = 1f;
                 Player.m_localPlayer.StartCoroutine(LerpHelper.LerpCanvasGroup(canvasFlashGroup, 1f, 0f, flashbangData.flashEndDuration));
 
                 yield return new WaitForSeconds(1f);
+
+                if (flash == null)
+                    yield break;
 
                 Player.m_localPlayer.StartCoroutine(LerpHelper.LerpCanvasGroup(canvasAfterImageGroup, 1f, 0f, flashbangData.flashEndDuration));
                 ZNetViewHelper.Destroy(flash, flashbangData.flashEndDuration + 1f);
@@ -314,6 +329,19 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             RestoreHud();
             return hadActiveFlash;
+        }
+
+        // Called from GameAwake_Postfix so a fresh world load/relog doesn't inherit a queue stuck
+        // forever by an abandoned coroutine: AttachFlashBang/ProcessQueue run on the
+        // TwitchCustomRewards host attached to Game.instance.gameObject, and if that GameObject is
+        // destroyed mid-effect (logout, world change), Unity silently kills the coroutine without
+        // ever reaching its finally block - leaving s_isRunning stuck true and every future
+        // Enqueue() call permanently skipping StartCoroutine.
+        public static void ResetQueue()
+        {
+            s_queue.Clear();
+            s_isRunning = false;
+            ClearUI();
         }
     }
 }
