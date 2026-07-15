@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using UnityEngine;
-using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 
 namespace WizshBoneTwitchIntegration.TwitchIntegration
@@ -183,8 +182,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
             if (m_customRewards == null)
                 m_customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
-
-            SpecialRedeemHelper.TryHandleChatWord(m_customRewards, userName, chatMessage);
 
             m_chatHistory.Add(new TwitchChatMessage(userName, chatMessage));
 

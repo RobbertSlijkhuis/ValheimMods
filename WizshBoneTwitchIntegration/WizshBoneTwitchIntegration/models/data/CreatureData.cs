@@ -50,10 +50,10 @@ namespace WizshBoneTwitchIntegration.Models
         [EditorHidden] public int index;
         [EditorHidden] public bool talkInteract = false;
 
-        // Scripted/hardcoded redeems (see SpecialRedeemHelper) set this to force their color
-        // choice to win even when the redeemer is also a registered special viewer with their
-        // own personal color - normal GUI-authored redeems leave this false, so a special
-        // viewer's own color still takes priority over an incidental color set there.
+        // When set, forces the color override above to win even when the redeemer is also a
+        // registered viewer with their own personal color - normal GUI-authored redeems leave
+        // this false, so a viewer's own color still takes priority over an incidental color set
+        // there.
         [EditorHidden] public bool forceColor = false;
 
         // Temporary hack: lets SpawnCreature spawn non-creature prefabs (e.g. a hot tub) that
