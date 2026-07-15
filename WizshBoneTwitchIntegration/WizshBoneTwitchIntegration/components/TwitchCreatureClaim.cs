@@ -22,6 +22,7 @@ namespace WizshBoneTwitchIntegration.Components
 
         public bool m_isSpawn = false;
         private string m_originalName;
+        private string m_originalTamedName;
         private DateTime m_lastMessageTime;
         private bool m_isUnclaimDestroy = false;
 
@@ -82,24 +83,60 @@ namespace WizshBoneTwitchIntegration.Components
                 m_netView.ClaimOwnership();
 
             m_assignment = new TwitchCreatureAssignment(userName, gameObject, PluginConfig.configChattingClaimDuration.Value);
-            m_originalName = m_humanoid.m_name;
-            m_humanoid.m_name = userName;
 
-            if (PluginConfig.configChattingClaimDuration.Value == 0 && gameObject.GetComponent<TwitchCreaturePersistentData>() == null)
+            // Only captured on the very first claim (re-claim:-renaming an already-claimed creature
+            // calls Init again on this same component) - otherwise re-claiming would only ever restore
+            // the *previous* claimant's name instead of the true original once unclaimed/expired.
+            if (m_originalName == null)
             {
-                // Only create fresh persistent data for a genuinely wild creature. If one already exists,
-                // this creature was twitch-spawned earlier (e.g. claimed, then !unclaim'd, then re-claimed
-                // here as if wild) - overwriting it would wipe its real redeem title/prefab/color, silently
-                // corrupting its identity on the next reload.
-                gameObject.AddComponent<TwitchCreaturePersistentData>().SetData(m_assignment.userName);
+                m_originalName = m_humanoid.m_name;
+
+                // Tameable.GetHoverName() prefers this ZDO field over Humanoid.m_name whenever it's
+                // non-empty, so resetting only m_humanoid.m_name isn't enough to actually change what
+                // the player sees once a creature has ever been claim:-renamed - captured here, before
+                // any pending claim:-rename gets persisted, so the true original can be restored later.
+                if (m_netView != null && m_netView.IsValid())
+                    m_originalTamedName = m_netView.GetZDO().GetString(ZDOVars.s_tamedName, "");
             }
 
+            m_humanoid.m_name = userName;
+
+            if (PluginConfig.configChattingClaimDuration.Value == 0 && !(gameObject.GetComponent<TwitchBasePersistentData>()?.IsRedeemSpawn ?? false))
+            {
+                // Refresh persistent data on every manual claim, not just the first - otherwise
+                // re-claim:-renaming an already-claimed creature leaves the previous claimant's name
+                // (and color, on reload) stuck in the ZDO forever, since SetData() would never run again.
+                // Only skip this for a genuinely redeem-spawned creature (IsRedeemSpawn) - one that already
+                // has real persistent data (title/prefab/color) which this claim:-rename must not wipe.
+                TwitchCreaturePersistentData persistentData = gameObject.GetComponent<TwitchCreaturePersistentData>() ?? gameObject.AddComponent<TwitchCreaturePersistentData>();
+                persistentData.SetData(m_assignment.userName);
+            }
+
+            // Re-claiming an already-claimed creature (claim:-renaming it again) reuses this same
+            // component instead of tearing it down first, so a previous claim's color would otherwise
+            // stick around if the new name isn't a special viewer - reset to original in that case.
+            // RecolorCreature always replaces the material outright, so no reset is needed when the
+            // new name does recolor.
             if (RecolorHelper.CanRecolorCreature(m_assignment.userName, m_assignment.creature.name))
                 RecolorHelper.RecolorCreature(m_assignment.userName, gameObject);
+            else if (RecolorHelper.IsCreatureInList(m_assignment.creature.name))
+                RecolorHelper.UnColorCreature(gameObject);
 
             m_chatting.AddCreatureAssignment(m_assignment);
             SetupNpcTalk();
             m_chatting.onNewMessage.AddListener(CheckChatForMessage);
+
+            // Duration == 0 means permanent (see the persistent-data check above) - only
+            // self-expire timed claims. Runs on its own schedule instead of only re-checking when
+            // the claimed user happens to chat again, so a claim still expires even if they never do.
+            m_lastMessageTime = DateTime.Now;
+
+            // Re-claiming (claim:-renaming an already-claimed creature) reuses this same component
+            // and calls Init again - cancel any previous timer first so they don't stack.
+            CancelInvoke(nameof(CheckExpiry));
+
+            if (m_assignment.duration > 0)
+                InvokeRepeating(nameof(CheckExpiry), PluginConfig.configChattingInterval.Value, PluginConfig.configChattingInterval.Value);
         }
 
         public void ReInit(string userName, CreatureData creatureData = null)
@@ -140,7 +177,16 @@ namespace WizshBoneTwitchIntegration.Components
                 if (m_humanoid != null)
                     m_humanoid.m_name = m_originalName;
 
+                // Restores the vanilla Tameable rename field alongside Humanoid.m_name above - only
+                // set for claims made via Init(string) (see the capture there for why). Goes through
+                // Tameable.SetText() (which our own SetText_Prefix harmlessly no-ops for, since this
+                // won't contain "claim:") rather than writing the ZDO directly, so it stays routed
+                // through the normal owner-checked RPC instead of us hand-rolling that ourselves.
+                if (m_originalTamedName != null)
+                    gameObject.GetComponent<Tameable>()?.SetText(m_originalTamedName);
+
                 m_lastMessageTime = DateTime.MinValue;
+                CancelInvoke(nameof(CheckExpiry));
 
                 if (!m_isUnclaimDestroy)
                     Unassign();
@@ -240,17 +286,9 @@ namespace WizshBoneTwitchIntegration.Components
             if (m_assignment.userName.ToLower() != message.userName)
                 return;
 
-            if (m_lastMessageTime != DateTime.MinValue)
-            {
-                TimeSpan timeSpan = DateTime.Now.Subtract(m_lastMessageTime);
-
-                if (!m_isSpawn && timeSpan.TotalSeconds > m_assignment.duration)
-                {
-                    m_isUnclaimDestroy = true;
-                    Unassign();
-                    return;
-                }
-            }
+            // Chatting again keeps a timed claim alive - CheckExpiry is what actually decides
+            // whether too much time has passed since this was last refreshed.
+            m_lastMessageTime = DateTime.Now;
 
             if (message == null)
                 return;
@@ -305,6 +343,15 @@ namespace WizshBoneTwitchIntegration.Components
 
             string text = m_npcTalk.m_aggravated[UnityEngine.Random.Range(0, m_npcTalk.m_aggravated.Count)];
             m_npcTalk.SayForce(text, "Aggravated");
+        }
+
+        public void CheckExpiry()
+        {
+            if (DateTime.Now.Subtract(m_lastMessageTime).TotalSeconds <= m_assignment.duration)
+                return;
+
+            m_isUnclaimDestroy = true;
+            Unassign();
         }
 
         private void Unassign()
