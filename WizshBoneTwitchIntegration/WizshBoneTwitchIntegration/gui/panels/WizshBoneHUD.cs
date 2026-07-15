@@ -2,6 +2,7 @@ using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.UI;
 using WizshBoneTwitchIntegration.Configs;
+using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Gui
@@ -113,7 +114,7 @@ namespace WizshBoneTwitchIntegration.Gui
             Vector2 anchor;
             Vector2 position;
 
-            switch (PluginConfig.configHudPosition.Value)
+            switch (ProfileSettingsHelper.Current.hudPosition)
             {
                 case HudPosition.BottomLeft:
                     anchor = new Vector2(0f, 0f);
@@ -129,7 +130,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     break;
                 case HudPosition.Custom:
                     anchor = new Vector2(0.5f, 0.5f);
-                    position = new Vector2(PluginConfig.configHudOffsetX.Value, PluginConfig.configHudOffsetY.Value);
+                    position = new Vector2(ProfileSettingsHelper.Current.hudOffsetX, ProfileSettingsHelper.Current.hudOffsetY);
                     break;
                 default: // BottomRight
                     anchor = new Vector2(1f, 0f);

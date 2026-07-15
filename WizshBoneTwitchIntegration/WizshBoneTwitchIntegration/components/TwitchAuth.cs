@@ -5,8 +5,8 @@ using System.Runtime.CompilerServices;
 using TwitchSDK;
 using TwitchSDK.Interop;
 using UnityEngine;
-using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Gui;
+using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 
 namespace WizshBoneTwitchIntegration.TwitchIntegration
@@ -90,7 +90,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             TwitchChatting chatting = gameObject.GetComponent<TwitchChatting>();
             chatting.m_enabled = !chatting.m_enabled;
-            PluginConfig.configChattingEnabled.Value = chatting.m_enabled;
+            ProfileSettingsHelper.Current.chattingEnabled = chatting.m_enabled;
+            ProfileSettingsHelper.Save();
         }
 
         public void InitLoginProcess()
@@ -117,7 +118,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 m_chat.Connect();
                 m_customRewards.SubscribeToRedeemEvents();
 
-                if (PluginConfig.configEnableRedeemsOnLogin.Value)
+                if (ProfileSettingsHelper.Current.enableRedeemsOnLogin)
                     m_customRewards.SetEnableRedeems(true);
 
                 UpdateAllGUI();

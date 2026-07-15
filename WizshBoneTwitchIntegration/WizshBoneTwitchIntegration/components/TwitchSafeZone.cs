@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Gui;
+using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Components
@@ -250,7 +251,7 @@ namespace WizshBoneTwitchIntegration.Components
 
         private void HandlePlayer(Collider collider, bool value, string message = null)
         {
-            if (transform.parent.gameObject.GetComponent<Ship>() != null && PluginConfig.configAllowRedeemsOnBoats.Value)
+            if (transform.parent.gameObject.GetComponent<Ship>() != null && ProfileSettingsHelper.Current.allowRedeemsOnBoats)
                 return;
 
             if (collider.gameObject.name != playerIdentifier)
@@ -299,10 +300,10 @@ namespace WizshBoneTwitchIntegration.Components
         {
             if (collider.gameObject.name != playerIdentifier)
             {
-                if (!PluginConfig.configWardBurnCreatures.Value && !PluginConfig.configWardPushCreatures.Value)
+                if (!ProfileSettingsHelper.Current.wardBurnCreatures && !ProfileSettingsHelper.Current.wardPushCreatures)
                     return;
 
-                if (transform.parent.gameObject.GetComponent<Ship>() != null && PluginConfig.configAllowRedeemsOnBoats.Value)
+                if (transform.parent.gameObject.GetComponent<Ship>() != null && ProfileSettingsHelper.Current.allowRedeemsOnBoats)
                     return;
 
                 TwitchCreaturePersistentData persistentData = collider.gameObject.GetComponent<TwitchCreaturePersistentData>();
@@ -323,7 +324,7 @@ namespace WizshBoneTwitchIntegration.Components
                 if (!creatureClaim.m_isSpawn)
                     return;
 
-                if (humanoid != null && PluginConfig.configWardBurnCreatures.Value && !humanoid.GetSEMan().HaveStatusEffect(WizshBoneTwitchIntegration.Instance.effects.Burning.m_nameHash))
+                if (humanoid != null && ProfileSettingsHelper.Current.wardBurnCreatures && !humanoid.GetSEMan().HaveStatusEffect(WizshBoneTwitchIntegration.Instance.effects.Burning.m_nameHash))
                 {
                     float duration = 10f;
                     SE_Stats burning = Instantiate(WizshBoneTwitchIntegration.Instance.effects.Burning);
@@ -334,7 +335,7 @@ namespace WizshBoneTwitchIntegration.Components
 
                 if (humanoid != null)
                 {
-                    float force = PluginConfig.configWardPushForce.Value;
+                    float force = ProfileSettingsHelper.Current.wardPushForce;
                     Vector3 pushDir = (collider.transform.position - transform.position).normalized;
                     pushDir.y = 0;
                     Rigidbody rb = collider.GetComponent<Rigidbody>();

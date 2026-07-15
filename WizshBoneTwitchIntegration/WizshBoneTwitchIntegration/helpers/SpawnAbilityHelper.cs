@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using TwitchSDK.Interop;
 using UnityEngine;
-using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Exceptions;
 using WizshBoneTwitchIntegration.Extensions;
 using WizshBoneTwitchIntegration.Models;
@@ -146,7 +145,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 {
                     if (SpawnSystem.GetNrOfInstances(prefab) + toSpawn > spawnAbilityData.maxSpawned)
                     {
-                        m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, there isn't enough room left for the full spawn amount! {(PluginConfig.configAutoResolveRedeems.Value ? TwitchCustomRewards.m_refundAutoResolveOn : TwitchCustomRewards.m_refundAutoResolveOff)}");
+                        m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, there isn't enough room left for the full spawn amount! {(ProfileSettingsHelper.Current.autoResolveRedeems ? TwitchCustomRewards.m_refundAutoResolveOn : TwitchCustomRewards.m_refundAutoResolveOff)}");
                         throw new RedeemException("Not enough space left for this redeem", ExceptionType.Warning);
                     }
                 }

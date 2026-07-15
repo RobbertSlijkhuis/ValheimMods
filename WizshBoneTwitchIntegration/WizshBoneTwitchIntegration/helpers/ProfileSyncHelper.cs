@@ -31,8 +31,9 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return;
             }
 
-            string profileName = ProfileManager.ActiveProfile;
-            string yamlPath    = ProfileManager.GetRedeemPath(profileName);
+            string profileName   = ProfileManager.ActiveProfile;
+            string yamlPath      = ProfileManager.GetRedeemPath(profileName);
+            string settingsPath  = ProfileManager.GetSettingsPath(profileName);
 
             if (!File.Exists(yamlPath))
             {
@@ -40,11 +41,19 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return;
             }
 
-            string yamlContent = File.ReadAllText(yamlPath);
+            if (!File.Exists(settingsPath))
+            {
+                Jotunn.Logger.LogError("ProfileSyncHelper: Cannot sync, settings.yaml not found.");
+                return;
+            }
+
+            string yamlContent     = File.ReadAllText(yamlPath);
+            string settingsContent = File.ReadAllText(settingsPath);
 
             ZPackage pkg = new ZPackage();
             pkg.Write(profileName);
             pkg.Write(yamlContent);
+            pkg.Write(settingsContent);
 
             List<ZNetPeer> peers = ZNet.instance.GetPeers();
 
@@ -60,8 +69,9 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         private static IEnumerator RPC_ReceiveProfile(long sender, ZPackage pkg)
         {
-            string profileName = pkg.ReadString();
-            string yamlContent = pkg.ReadString();
+            string profileName     = pkg.ReadString();
+            string yamlContent     = pkg.ReadString();
+            string settingsContent = pkg.ReadString();
 
             try
             {
@@ -71,11 +81,17 @@ namespace WizshBoneTwitchIntegration.Helpers
                 string destPath = ProfileManager.GetRedeemPath(profileName);
                 File.WriteAllText(destPath, yamlContent);
 
+                string settingsDestPath = ProfileManager.GetSettingsPath(profileName);
+                File.WriteAllText(settingsDestPath, settingsContent);
+
                 ProfileManager.MarkAsSynced(profileName);
 
                 // Hot-reload if this is the currently active profile
                 if (profileName == ProfileManager.ActiveProfile)
+                {
                     RedeemHelper.Reload();
+                    ProfileSettingsHelper.Reload();
+                }
 
                 Jotunn.Logger.LogInfo($"ProfileSyncHelper: Received and saved synced profile '{profileName}' from peer {sender}.");
 
@@ -93,6 +109,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                         ZPackage relayPkg = new ZPackage();
                         relayPkg.Write(profileName);
                         relayPkg.Write(yamlContent);
+                        relayPkg.Write(settingsContent);
                         m_rpc.SendPackage(otherPeers, relayPkg);
                         Jotunn.Logger.LogInfo($"ProfileSyncHelper: Relayed profile '{profileName}' to {otherPeers.Count} other peer(s).");
                     }

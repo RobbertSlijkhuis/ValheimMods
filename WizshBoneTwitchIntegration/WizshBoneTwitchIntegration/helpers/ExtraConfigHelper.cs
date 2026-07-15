@@ -42,6 +42,34 @@ namespace WizshBoneTwitchIntegration.Helpers
             return DeserializeYaml<ModData>(path);
         }
 
+        public static ProfileSettingsData ReadSettingsConfig(string path = null)
+        {
+            path = path ?? ProfileManager.GetActiveSettingsPath();
+
+            // Any profile folder created before settings.yaml existed (every profile on an
+            // install upgrading from an earlier version) has no settings.yaml of its own yet -
+            // reset it to defaults here rather than at every profile-creation call site, so every
+            // read is guaranteed a file to open regardless of how the profile came to exist.
+            if (!File.Exists(path))
+                WriteDefaultSettingsTo(path);
+
+            return DeserializeYaml<ProfileSettingsData>(path);
+        }
+
+        public static void WriteSettingsConfig(string path, ProfileSettingsData settings)
+        {
+            ISerializer serializer = new SerializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+
+            File.WriteAllText(path, serializer.Serialize(settings));
+        }
+
+        public static void WriteDefaultSettingsTo(string path)
+        {
+            WriteSettingsConfig(path, new ProfileSettingsData());
+        }
+
         public static List<ViewerEntry> ReadViewersConfig()
         {
             ViewerData data = DeserializeYaml<ViewerData>(WizshBoneTwitchIntegration.viewersPath);

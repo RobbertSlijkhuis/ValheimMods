@@ -24,6 +24,16 @@ namespace WizshBoneTwitchIntegration.Helpers
             return $"{ProfilesPath}/{profileName}/redeems.yaml";
         }
 
+        public static string GetActiveSettingsPath()
+        {
+            return $"{ProfilesPath}/{ActiveProfile}/settings.yaml";
+        }
+
+        public static string GetSettingsPath(string profileName)
+        {
+            return $"{ProfilesPath}/{profileName}/settings.yaml";
+        }
+
         public static List<string> GetProfiles()
         {
             if (!Directory.Exists(ProfilesPath))
@@ -48,8 +58,9 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static bool CreateProfile(string name, bool migrate = false)
         {
-            string profilePath = $"{ProfilesPath}/{name}";
-            string redeemPath  = $"{profilePath}/redeems.yaml";
+            string profilePath  = $"{ProfilesPath}/{name}";
+            string redeemPath   = $"{profilePath}/redeems.yaml";
+            string settingsPath = $"{profilePath}/settings.yaml";
 
             if (Directory.Exists(profilePath))
                 return false;
@@ -60,6 +71,8 @@ namespace WizshBoneTwitchIntegration.Helpers
                 File.Copy(WizshBoneTwitchIntegration.redeemsConfigPath, redeemPath);
             else
                 ExtraConfigHelper.WriteDefaultRedeemsTo(redeemPath);
+
+            ExtraConfigHelper.WriteDefaultSettingsTo(settingsPath);
 
             return true;
         }
@@ -91,6 +104,10 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             Directory.CreateDirectory($"{ProfilesPath}/{newProfileName}");
             File.Copy(sourcePath, GetRedeemPath(newProfileName));
+
+            string settingsSourcePath = GetActiveSettingsPath();
+            if (File.Exists(settingsSourcePath))
+                File.Copy(settingsSourcePath, GetSettingsPath(newProfileName));
 
             return true;
         }
@@ -131,6 +148,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             ActiveProfile = name;
             File.WriteAllText(ActiveProfileFile, name);
             RedeemHelper.Reload();
+            ProfileSettingsHelper.Reload();
             return true;
         }
 
@@ -214,8 +232,18 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             File.Copy(sourceFilePath, GetRedeemPath(targetProfileName), overwrite: true);
 
+            // Import only ever carries a redeems.yaml (see ProfileManager's known limitation on
+            // full-profile import/export) - a brand-new profile still needs a settings.yaml so it
+            // isn't left without one.
+            string settingsPath = GetSettingsPath(targetProfileName);
+            if (!File.Exists(settingsPath))
+                ExtraConfigHelper.WriteDefaultSettingsTo(settingsPath);
+
             if (targetProfileName == ActiveProfile)
+            {
                 RedeemHelper.Reload();
+                ProfileSettingsHelper.Reload();
+            }
 
             return true;
         }
@@ -259,6 +287,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 ActiveProfile = newName;
                 File.WriteAllText(ActiveProfileFile, newName);
                 RedeemHelper.Reload();
+                ProfileSettingsHelper.Reload();
             }
 
             return true;

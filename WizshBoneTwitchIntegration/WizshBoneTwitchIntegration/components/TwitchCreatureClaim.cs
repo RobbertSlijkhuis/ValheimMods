@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using TwitchSDK.Interop;
 using UnityEngine;
-using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Extensions;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
@@ -59,7 +58,7 @@ namespace WizshBoneTwitchIntegration.Components
             }
 
             m_isSpawn = true;
-            m_assignment = new TwitchCreatureAssignment(customRewardEvent.RedeemerName, gameObject, PluginConfig.configChattingClaimDuration.Value);
+            m_assignment = new TwitchCreatureAssignment(customRewardEvent.RedeemerName, gameObject, ProfileSettingsHelper.Current.chattingClaimDuration);
             m_originalName = m_humanoid?.m_name;
 
             m_chatting.AddCreatureAssignment(m_assignment);
@@ -82,7 +81,7 @@ namespace WizshBoneTwitchIntegration.Components
             if (m_netView != null && m_netView.IsValid() && !m_netView.IsOwner())
                 m_netView.ClaimOwnership();
 
-            m_assignment = new TwitchCreatureAssignment(userName, gameObject, PluginConfig.configChattingClaimDuration.Value);
+            m_assignment = new TwitchCreatureAssignment(userName, gameObject, ProfileSettingsHelper.Current.chattingClaimDuration);
 
             // Only captured on the very first claim (re-claim:-renaming an already-claimed creature
             // calls Init again on this same component) - otherwise re-claiming would only ever restore
@@ -101,7 +100,7 @@ namespace WizshBoneTwitchIntegration.Components
 
             m_humanoid.m_name = userName;
 
-            if (PluginConfig.configChattingClaimDuration.Value == 0 && !(gameObject.GetComponent<TwitchBasePersistentData>()?.IsRedeemSpawn ?? false))
+            if (ProfileSettingsHelper.Current.chattingClaimDuration == 0 && !(gameObject.GetComponent<TwitchBasePersistentData>()?.IsRedeemSpawn ?? false))
             {
                 // Refresh persistent data on every manual claim, not just the first - otherwise
                 // re-claim:-renaming an already-claimed creature leaves the previous claimant's name
@@ -136,7 +135,7 @@ namespace WizshBoneTwitchIntegration.Components
             CancelInvoke(nameof(CheckExpiry));
 
             if (m_assignment.duration > 0)
-                InvokeRepeating(nameof(CheckExpiry), PluginConfig.configChattingInterval.Value, PluginConfig.configChattingInterval.Value);
+                InvokeRepeating(nameof(CheckExpiry), ProfileSettingsHelper.Current.chattingInterval, ProfileSettingsHelper.Current.chattingInterval);
         }
 
         public void ReInit(string userName, CreatureData creatureData = null)
@@ -148,7 +147,7 @@ namespace WizshBoneTwitchIntegration.Components
             }
 
             m_isSpawn = true;
-            m_assignment = new TwitchCreatureAssignment(userName, gameObject, PluginConfig.configChattingClaimDuration.Value);
+            m_assignment = new TwitchCreatureAssignment(userName, gameObject, ProfileSettingsHelper.Current.chattingClaimDuration);
             m_originalName = m_humanoid.m_name;
 
             m_chatting.AddCreatureAssignment(m_assignment);
@@ -278,7 +277,7 @@ namespace WizshBoneTwitchIntegration.Components
             // Same call NpcTalk.Say() makes internally for its speech bubble - only needs a
             // GameObject to anchor to, no Character/MonsterAI/Animator involved (trigger is
             // left empty so NpcTalk's own m_animator.SetTrigger(trigger) call is skipped there).
-            Chat.instance.SetNpcText(gameObject, Vector3.up * 2f, PluginConfig.configChattingCullingRange.Value, 10f, "", text, large: false);
+            Chat.instance.SetNpcText(gameObject, Vector3.up * 2f, ProfileSettingsHelper.Current.chattingCullingRange, 10f, "", text, large: false);
         }
 
         private void CheckChatForMessage(TwitchChatMessage message)

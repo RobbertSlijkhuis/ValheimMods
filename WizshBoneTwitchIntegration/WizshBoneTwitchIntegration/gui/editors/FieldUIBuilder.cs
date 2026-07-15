@@ -234,8 +234,9 @@ namespace WizshBoneTwitchIntegration.Gui
             bool isNullableInt = wrapped == typeof(int?);
             bool isNullableFloat = wrapped == typeof(float?);
             bool isNullableBool = wrapped == typeof(bool?);
+            bool isEnum = wrapped.IsEnum;
 
-            if (!isString && !isInt && !isFloat && !isBool && !isNullableInt && !isNullableFloat && !isNullableBool)
+            if (!isString && !isInt && !isFloat && !isBool && !isNullableInt && !isNullableFloat && !isNullableBool && !isEnum)
                 return false;
 
             Text labelComp = GUIManager.Instance.CreateText(
@@ -336,6 +337,14 @@ namespace WizshBoneTwitchIntegration.Gui
                 bool value = currentValue is bool nb && nb;
                 Toggle tog = BuildBoundBoolField(parent, value, fieldPos, fieldWidth);
                 tog.onValueChanged.AddListener(val => boundField.SetValue((bool?)val));
+            }
+            else if (isEnum)
+            {
+                string current = currentValue?.ToString() ?? Enum.GetNames(wrapped)[0];
+                List<string> names = new List<string>(Enum.GetNames(wrapped));
+                SearchableDropdown dd = new SearchableDropdown();
+                dd.Build(parent, fieldPos, fieldWidth, FieldHeight, names, current);
+                dd.OnValueChanged += val => boundField.SetValue(Enum.Parse(wrapped, val));
             }
 
             if (tooltip != null)

@@ -175,7 +175,7 @@ namespace WizshBoneTwitchIntegration
             pieceConfig.Description = "A ward against mysterious and twitchy forces!";
             pieceConfig.PieceTable = PieceTables.Hammer;
             pieceConfig.Category = PieceCategories.Misc;
-            pieceConfig.Requirements = RecipeHelper.GetAsRequirementConfigArray(PluginConfig.configWardRecipe.Value, null, null);
+            pieceConfig.Requirements = RecipeHelper.GetAsRequirementConfigArray(ProfileSettingsHelper.Current.wardRecipe, null, null);
             PieceManager.Instance.AddPiece(new CustomPiece(prefabs.GuardStone, true, pieceConfig));
 
             // Temp
@@ -332,6 +332,7 @@ namespace WizshBoneTwitchIntegration
         {
             ExtraConfigHelper.InitExtraConfigs();
             ExtraConfigHelper.ReadRedeemsConfig();
+            ProfileSettingsHelper.Reload();
         }
 
         private void InitStatusEffects()

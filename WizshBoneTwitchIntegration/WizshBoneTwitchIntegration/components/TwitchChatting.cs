@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using WizshBoneTwitchIntegration.Components;
-using WizshBoneTwitchIntegration.Configs;
+using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 
 namespace WizshBoneTwitchIntegration.TwitchIntegration
@@ -17,8 +17,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public bool m_enabled;
         public UnityEvent<TwitchChatMessage> onNewMessage = new UnityEvent<TwitchChatMessage>();
 
-        public float m_scanRadius = PluginConfig.configChattingRadius.Value;
-        public float m_scanInterval = PluginConfig.configChattingInterval.Value;
+        public float m_scanRadius = ProfileSettingsHelper.Current.chattingRadius;
+        public float m_scanInterval = ProfileSettingsHelper.Current.chattingInterval;
         private string m_chosenUser;
         private GameObject m_chosenPrefab;
 
@@ -28,9 +28,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             {
                 m_auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
                 m_chat = Game.instance.gameObject.GetComponent<TwitchChat>();
-                m_enabled = PluginConfig.configChattingEnabled.Value;
+                m_enabled = ProfileSettingsHelper.Current.chattingEnabled;
 
-                DeserializeUserBlackList(PluginConfig.configChattingBlackList.Value);
+                DeserializeUserBlackList(ProfileSettingsHelper.Current.chattingBlackList);
 
                 foreach (string entry in m_userBlacklist)
                     Jotunn.Logger.LogWarning(entry);
@@ -97,7 +97,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public bool CanCreatureTalk(GameObject creature)
         {
-            int maxTalkers = PluginConfig.configChattingMaxTalkers.Value;
+            int maxTalkers = ProfileSettingsHelper.Current.chattingMaxTalkers;
 
             if (maxTalkers <= 0 || Player.m_localPlayer == null)
                 return true;

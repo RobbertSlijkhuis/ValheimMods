@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 
@@ -174,7 +173,7 @@ namespace WizshBoneTwitchIntegration.Components
             humanoid.m_bossEvent          = creatureData.bossEvent;
             humanoid.m_defeatSetGlobalKey = "";
 
-            if (PluginConfig.configCreaturesSameFaction.Value)
+            if (ProfileSettingsHelper.Current.creaturesSameFaction)
                 humanoid.m_faction = Character.Faction.Boss;
 
             if (creatureData.friendly)
@@ -192,7 +191,7 @@ namespace WizshBoneTwitchIntegration.Components
             if (creatureData.rename)
                 humanoid.m_name = creatureData.name ?? redeemerName;
 
-            if (PluginConfig.configCreaturesScaling.Value)
+            if (ProfileSettingsHelper.Current.creaturesScaling)
             {
                 ValheimCreature valheimCreature = CreatureHelper.GetValheimCreature(gameObject.name);
 
@@ -203,7 +202,7 @@ namespace WizshBoneTwitchIntegration.Components
                 }
 
                 float playerTier  = ProgressionHelper.GetPlayerTier();
-                float healthScale = m_healthScale != 0 ? m_healthScale : PluginConfig.configCreaturesHealthScale.Value;
+                float healthScale = m_healthScale != 0 ? m_healthScale : ProfileSettingsHelper.Current.creaturesHealthScale;
                 float scale       = CreatureHelper.CalculateScale(playerTier, valheimCreature.tier, healthScale);
 
                 humanoid.SetMaxHealth(humanoid.GetMaxHealth() * scale);

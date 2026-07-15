@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
-using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 
@@ -149,7 +148,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                     return;
 
                 float playerTier = ProgressionHelper.GetPlayerTier();
-                float damageScale = persistentData.m_damageScale != 0 ? persistentData.m_damageScale : PluginConfig.configCreaturesdamageScale.Value;
+                float damageScale = persistentData.m_damageScale != 0 ? persistentData.m_damageScale : ProfileSettingsHelper.Current.creaturesDamageScale;
                 float scale = CreatureHelper.CalculateScale(playerTier, creature.tier, damageScale);
                 CreatureHelper.ScaleHitDamage(ref hit, scale);
             }

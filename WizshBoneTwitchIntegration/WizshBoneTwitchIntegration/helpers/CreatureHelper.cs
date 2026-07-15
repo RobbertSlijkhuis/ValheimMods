@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
-using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Exceptions;
 using WizshBoneTwitchIntegration.Extensions;
 using WizshBoneTwitchIntegration.Models;
@@ -118,9 +117,9 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (redeem.creatureData == null)
                 throw new RedeemException("Could not find creature data for SpawnCreature", ExceptionType.Error);
 
-            if (GetNrOfTwitchInstances(PluginConfig.configCreaturesMaxRadius.Value) >= PluginConfig.configCreaturesMaxAmount.Value)
+            if (GetNrOfTwitchInstances(ProfileSettingsHelper.Current.creaturesMaxRadius) >= ProfileSettingsHelper.Current.creaturesMaxAmount)
             {
-                chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the maximum spawned creature limit has been reached! {(PluginConfig.configAutoResolveRedeems.Value ? TwitchCustomRewards.m_refundAutoResolveOn : TwitchCustomRewards.m_refundAutoResolveOff)}");
+                chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the maximum spawned creature limit has been reached! {(ProfileSettingsHelper.Current.autoResolveRedeems ? TwitchCustomRewards.m_refundAutoResolveOn : TwitchCustomRewards.m_refundAutoResolveOff)}");
                 throw new RedeemException("To many spawned creatures", ExceptionType.Warning);
             }
 
@@ -128,7 +127,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             if (Player.m_localPlayer.InInterior() && CancelRedeemCauseOfDungeon(spawnList))
             {
-                chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! {(PluginConfig.configAutoResolveRedeems.Value ? TwitchCustomRewards.m_refundAutoResolveOn : TwitchCustomRewards.m_refundAutoResolveOff)}");
+                chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! {(ProfileSettingsHelper.Current.autoResolveRedeems ? TwitchCustomRewards.m_refundAutoResolveOn : TwitchCustomRewards.m_refundAutoResolveOff)}");
                 throw new RedeemException("Player is in dungeon and redeem is not allowed", ExceptionType.Warning);
             }
 
@@ -139,7 +138,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 if (creature.maxSpawned > 0 && GetNrOfSpecificTwitchInstances(creature.prefabName) >= creature.maxSpawned)
                 {
-                    chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the maximum spawned limit of {creature.prefabName} has been reached! {(PluginConfig.configAutoResolveRedeems.Value ? TwitchCustomRewards.m_refundAutoResolveOn : TwitchCustomRewards.m_refundAutoResolveOff)}");
+                    chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the maximum spawned limit of {creature.prefabName} has been reached! {(ProfileSettingsHelper.Current.autoResolveRedeems ? TwitchCustomRewards.m_refundAutoResolveOn : TwitchCustomRewards.m_refundAutoResolveOff)}");
                     throw new RedeemException("To many of the same spawned creatures", ExceptionType.Warning);
                 }
 
@@ -317,7 +316,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static void SetFollowInRadius(bool value)
         {
-            Collider[] found = Physics.OverlapSphere(Player.m_localPlayer.transform.position, PluginConfig.configCreaturesFollowRadius.Value, LayerMask.GetMask("character"));
+            Collider[] found = Physics.OverlapSphere(Player.m_localPlayer.transform.position, ProfileSettingsHelper.Current.creaturesFollowRadius, LayerMask.GetMask("character"));
 
             foreach (var item in found)
             {

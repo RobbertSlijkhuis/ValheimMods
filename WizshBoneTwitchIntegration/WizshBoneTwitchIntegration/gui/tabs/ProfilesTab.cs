@@ -436,6 +436,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 ? customRewards.ReloadRewards()
                 : RedeemHelper.Reload();
 
+            reloaded &= ProfileSettingsHelper.Reload();
+
             m_profileFeedbackText.text = reloaded
                 ? $"Profile '{name}' reloaded."
                 : $"Failed to reload profile '{name}'.";
