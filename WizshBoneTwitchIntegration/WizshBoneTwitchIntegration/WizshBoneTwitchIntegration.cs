@@ -167,6 +167,7 @@ namespace WizshBoneTwitchIntegration
             GameObject.DestroyImmediate(vanillaWindmill);
             if (vanillaSmelter != null)
                 GameObject.DestroyImmediate(vanillaSmelter);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.Windmill, true));
 
             PieceConfig pieceConfig = new PieceConfig();
             pieceConfig.Enabled = true;

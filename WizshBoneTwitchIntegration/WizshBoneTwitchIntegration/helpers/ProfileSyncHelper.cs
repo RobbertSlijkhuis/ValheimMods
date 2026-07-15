@@ -18,7 +18,7 @@ namespace WizshBoneTwitchIntegration.Helpers
         {
             m_rpc = NetworkManager.Instance.AddRPC(
                 name: RpcName,
-                serverReceive: null,
+                serverReceive: RPC_ReceiveProfile,
                 clientReceive: RPC_ReceiveProfile
             );
         }
@@ -78,6 +78,25 @@ namespace WizshBoneTwitchIntegration.Helpers
                     RedeemHelper.Reload();
 
                 Jotunn.Logger.LogInfo($"ProfileSyncHelper: Received and saved synced profile '{profileName}' from peer {sender}.");
+
+                // A client only ever has one peer connection (the server), so a client-originated
+                // sync can only ever reach the server directly. The server is the only side with a
+                // direct connection to every other client, so it relays the sync onward to them -
+                // whether it's a dedicated server or a player-hosted one, so the profile still ends
+                // up on every connected client either way.
+                if (ZNet.instance.IsServer())
+                {
+                    List<ZNetPeer> otherPeers = ZNet.instance.GetPeers().FindAll(peer => peer.m_uid != sender);
+
+                    if (otherPeers.Count > 0)
+                    {
+                        ZPackage relayPkg = new ZPackage();
+                        relayPkg.Write(profileName);
+                        relayPkg.Write(yamlContent);
+                        m_rpc.SendPackage(otherPeers, relayPkg);
+                        Jotunn.Logger.LogInfo($"ProfileSyncHelper: Relayed profile '{profileName}' to {otherPeers.Count} other peer(s).");
+                    }
+                }
             }
             catch (System.Exception e)
             {
