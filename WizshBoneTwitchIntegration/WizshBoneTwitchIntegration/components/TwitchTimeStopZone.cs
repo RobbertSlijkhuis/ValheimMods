@@ -421,15 +421,23 @@ namespace WizshBoneTwitchIntegration.Components
             }
         }
 
+        // True only on the one client that actually owns/controls this specific character - the
+        // local player. Every other Player instance seen here (including other real players) is
+        // just a networked puppet on this client, same as any creature.
+        private bool IsLocalPlayer(Character character)
+        {
+            return character.IsPlayer()
+                && Player.m_localPlayer != null
+                && (character as Player)?.GetPlayerID() == Player.m_localPlayer.GetPlayerID();
+        }
+
         private void HandleCharacterEnter(Character character)
         {
-            if (character.IsPlayer())
+            if (IsLocalPlayer(character))
             {
+                // Local-only input/physics freeze (see TimeStopHelper.FreezePlayer) - only
+                // meaningful on the client that actually owns and simulates this player.
                 if (!m_freezePlayer || m_localPlayerRegistered)
-                    return;
-
-                Player player = character as Player;
-                if (player == null || Player.m_localPlayer == null || player.GetPlayerID() != Player.m_localPlayer.GetPlayerID())
                     return;
 
                 m_localPlayerRegistered = true;
@@ -437,56 +445,59 @@ namespace WizshBoneTwitchIntegration.Components
 
                 if (s_localPlayerFreezeCount == 1)
                     TimeStopHelper.FreezePlayer();
+
+                return;
             }
-            else
-            {
-                if (!m_freezeEnemies)
-                    return;
 
-                // The tame the zone is anchored to (if any) is exempt from freezing - it's
-                // always sitting at distance 0 from the zone center and would otherwise get
-                // frozen like any other creature.
-                if (m_attachTarget != null && character.gameObject == m_attachTarget.gameObject)
-                    return;
+            // Covers both enemies and other (non-local) players. TwitchTimeStopZone itself is
+            // networked, so every client independently detects this same character entering the
+            // zone and independently freezes its own local copy via TwitchFreezeData - that's what
+            // makes Animator.enabled (per-client Unity state, never synced by the ZDO position
+            // update) actually take effect for everyone watching, not just whichever client
+            // triggered the redeem. Without this, a frozen remote player stops moving (position IS
+            // synced) but every other client keeps playing their idle/look animations forever.
+            bool shouldFreeze = character.IsPlayer() ? m_freezePlayer : m_freezeEnemies;
+            if (!shouldFreeze)
+                return;
 
-                if (character.GetComponent<TwitchFreezeData>() != null)
-                    return;
+            // The tame the zone is anchored to (if any) is exempt from freezing - it's
+            // always sitting at distance 0 from the zone center and would otherwise get
+            // frozen like any other creature.
+            if (m_attachTarget != null && character.gameObject == m_attachTarget.gameObject)
+                return;
 
-                ZNetView netView = character.GetComponent<ZNetView>();
-                if (netView == null || !netView.IsValid())
-                    return;
+            if (character.GetComponent<TwitchFreezeData>() != null)
+                return;
 
-                ZDOID zdoid = netView.GetZDO().m_uid;
-                if (!m_registeredCreatures.Add(zdoid))
-                    return;
+            ZNetView netView = character.GetComponent<ZNetView>();
+            if (netView == null || !netView.IsValid())
+                return;
 
-                TwitchFreezeData freeze = character.gameObject.AddComponent<TwitchFreezeData>();
-                freeze.Initialize();
-            }
+            ZDOID zdoid = netView.GetZDO().m_uid;
+            if (!m_registeredCreatures.Add(zdoid))
+                return;
+
+            TwitchFreezeData freeze = character.gameObject.AddComponent<TwitchFreezeData>();
+            freeze.Initialize();
         }
 
         private void HandleCharacterExit(Character character)
         {
-            if (character.IsPlayer())
+            if (IsLocalPlayer(character))
             {
-                Player player = character as Player;
-                if (player == null || Player.m_localPlayer == null || player.GetPlayerID() != Player.m_localPlayer.GetPlayerID())
-                    return;
-
                 UnregisterLocalPlayer();
+                return;
             }
-            else
-            {
-                ZNetView netView = character.GetComponent<ZNetView>();
-                if (netView == null || !netView.IsValid())
-                    return;
 
-                ZDOID zdoid = netView.GetZDO().m_uid;
-                if (!m_registeredCreatures.Remove(zdoid))
-                    return;
+            ZNetView netView = character.GetComponent<ZNetView>();
+            if (netView == null || !netView.IsValid())
+                return;
 
-                character.GetComponent<TwitchFreezeData>()?.Unfreeze();
-            }
+            ZDOID zdoid = netView.GetZDO().m_uid;
+            if (!m_registeredCreatures.Remove(zdoid))
+                return;
+
+            character.GetComponent<TwitchFreezeData>()?.Unfreeze();
         }
 
         public void OnDestroy()

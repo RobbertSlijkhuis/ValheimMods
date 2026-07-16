@@ -30,17 +30,39 @@ namespace WizshBoneTwitchIntegration.Models
 
                 if (value is CloneableData nested)
                 {
-                    object deepCloned = typeof(CloneableData)
-                        .GetMethod(nameof(DeepClone))
-                        .MakeGenericMethod(field.FieldType)
-                        .Invoke(nested, null);
-
-                    field.SetValue(clone, deepCloned);
+                    field.SetValue(clone, DeepCloneValue(nested, field.FieldType));
+                }
+                else if (value is IList list)
+                {
+                    field.SetValue(clone, DeepCloneList(list, field.FieldType));
                 }
                 else
                 {
                     field.SetValue(clone, value);
                 }
+            }
+
+            return clone;
+        }
+
+        private static object DeepCloneValue(CloneableData nested, Type type)
+        {
+            return typeof(CloneableData)
+                .GetMethod(nameof(DeepClone))
+                .MakeGenericMethod(type)
+                .Invoke(nested, null);
+        }
+
+        private static IList DeepCloneList(IList list, Type listType)
+        {
+            IList clone = (IList)Activator.CreateInstance(listType);
+
+            foreach (object item in list)
+            {
+                if (item is CloneableData nested)
+                    clone.Add(DeepCloneValue(nested, item.GetType()));
+                else
+                    clone.Add(item);
             }
 
             return clone;

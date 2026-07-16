@@ -48,6 +48,55 @@ namespace WizshBoneTwitchIntegration.Harmony
             return !(TimeStopHelper.IsPlayerFrozen && __instance == Player.m_localPlayer);
         }
 
+        // Player.Interact() (private - patched by string name) is the single choke point for
+        // every player-initiated interaction (doors, portals, levers, signs, chests, etc.) -
+        // regardless of target it ends up calling Interactable.Interact(this, hold, alt).
+        // Blocking it here covers all of them at once instead of patching each Interactable
+        // implementation separately.
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Player), "Interact")]
+        public static bool Player_Interact_Prefix(Player __instance)
+        {
+            return !(TimeStopHelper.IsPlayerFrozen && __instance == Player.m_localPlayer);
+        }
+
+        // InventoryGui calls Humanoid.EquipItem/UnequipItem/DropItem/UseItem directly off UI
+        // clicks - none of that goes through Player.Interact(), so a frozen player could still
+        // swap weapons, throw items out, or drink a mead/eat food. EquipItem itself calls
+        // UnequipItem internally for weapon-swap cleanup, so blocking all four at their own
+        // entry point covers equip, manual unequip, drop, and consume together.
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.EquipItem))]
+        public static bool Humanoid_EquipItem_Prefix(Humanoid __instance)
+        {
+            return !(TimeStopHelper.IsPlayerFrozen && __instance == Player.m_localPlayer);
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.UnequipItem))]
+        public static bool Humanoid_UnequipItem_Prefix(Humanoid __instance)
+        {
+            return !(TimeStopHelper.IsPlayerFrozen && __instance == Player.m_localPlayer);
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.DropItem))]
+        public static bool Humanoid_DropItem_Prefix(Humanoid __instance, ref bool __result)
+        {
+            if (!(TimeStopHelper.IsPlayerFrozen && __instance == Player.m_localPlayer))
+                return true;
+
+            __result = false;
+            return false;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.UseItem))]
+        public static bool Humanoid_UseItem_Prefix(Humanoid __instance)
+        {
+            return !(TimeStopHelper.IsPlayerFrozen && __instance == Player.m_localPlayer);
+        }
+
         // Character.UpdateRotation() (private - patched by string name) directly overwrites
         // transform.rotation to face the camera/look direction whenever AlwaysRotateCamera() is
         // true (mid-attack, drawing a bow, blocking, etc.), completely independent of
