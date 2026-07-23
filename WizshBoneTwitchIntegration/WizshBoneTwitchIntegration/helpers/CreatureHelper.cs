@@ -99,6 +99,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 { ValheimCreatureType.Charred_Melee, new ValheimCreature(7.2f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Charred_Mage, new ValheimCreature(7.4f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Charred_Twitcher, new ValheimCreature(7.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Charred_Twitcher_Summoned, new ValheimCreature(7.2f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Fader, new ValheimCreature(7.6f, e.SpawnEffectMedium) },
                 { ValheimCreatureType.LordReto, new ValheimCreature(7.6f, e.SpawnEffectMedium) },
                 { ValheimCreatureType.Morgen, new ValheimCreature(7.6f, e.SpawnEffectMedium) },
@@ -312,6 +313,71 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             // Never reduce below 10% or scale past 500% to avoid absurd edge cases
             return Mathf.Clamp(scale, 0.1f, 5f);
+        }
+
+        // Creatures summoned by another creature's own vanilla SpawnAbility (a Warlock/Oozer/Gjall's
+        // reinforcements) bypass CreatureHelper.SpawnCreature entirely - SpawnAbility.Spawn() calls
+        // UnityEngine.Object.Instantiate directly, so the child never gets TwitchCreaturePersistentData/
+        // TwitchCreatureClaim and is invisible to both health scaling and CharacterDamage_Prefix's
+        // damage scaling. TryResolveParentCreatureData + ApplyInheritedScaling (called from
+        // SpawnAbilityExtension.Spawn2, via SpawnAbilityPatchesWBTI which only redirects there when
+        // the summoning creature is itself a Twitch spawn) make the child an actual tracked spawn
+        // too, inheriting everything the parent's own redeem configured (color, rename, health/damage
+        // scale, etc.) under the child's own real prefab identity.
+
+        /// <summary>
+        /// Resolves the CreatureData the summoning creature's own redeem configured for it, so its
+        /// children can inherit the same settings. Returns false (nothing to inherit) when the
+        /// summoner isn't itself resolvable to a real redeem entry - e.g. a wild creature only
+        /// claim:-renamed via chat, or one spawned via a redeem type this doesn't cover.
+        /// </summary>
+        public static bool TryResolveParentCreatureData(Character owner, out CreatureData parentCreatureData, out string redeemerName, out string redeemTitle, out string lookupPrefabName)
+        {
+            parentCreatureData = null;
+            redeemerName = null;
+            redeemTitle = null;
+            lookupPrefabName = null;
+
+            TwitchCreaturePersistentData ownerData = owner?.gameObject.GetComponent<TwitchCreaturePersistentData>();
+
+            if (ownerData == null || string.IsNullOrEmpty(ownerData.RedeemTitle))
+                return false;
+
+            RedeemData redeem = RedeemHelper.GetRedeemByTitle(ownerData.RedeemTitle);
+
+            if (redeem == null)
+                return false;
+
+            List<CreatureData> resolvedList = RedeemHelper.GetResolvedCreatureList(redeem.creatureData);
+            CreatureData found = resolvedList.Find(c => c.prefabName == ownerData.SavedPrefabName);
+
+            if (found == null)
+                return false;
+
+            parentCreatureData = found;
+            redeemerName = ownerData.RedeemerName;
+            redeemTitle = ownerData.RedeemTitle;
+            lookupPrefabName = ownerData.SavedPrefabName;
+            return true;
+        }
+
+        /// <summary>
+        /// Makes <paramref name="child"/> (a creature just spawned by <paramref name="owner"/>'s own
+        /// SpawnAbility) inherit <paramref name="parentCreatureData"/> - clones it, swaps in the
+        /// child's own real prefab identity, and applies it the same way a direct redeem spawn would.
+        /// </summary>
+        public static void ApplyInheritedScaling(GameObject child, GameObject prefab, CreatureData parentCreatureData, string redeemerName, string redeemTitle, string lookupPrefabName)
+        {
+            // SpawnAbility isn't creature-exclusive (e.g. an AOE puddle or projectile) - only
+            // inherit onto actual creatures, same gate the redeem-shower Spawn2 overload uses.
+            if (child.GetComponent<MonsterAI>() == null || child.GetComponent<Humanoid>() == null)
+                return;
+
+            CreatureData childCreatureData = parentCreatureData.Clone<CreatureData>();
+            childCreatureData.prefabName = prefab.name;
+
+            TwitchCreaturePersistentData childData = child.GetComponent<TwitchCreaturePersistentData>() ?? child.AddComponent<TwitchCreaturePersistentData>();
+            childData.SetInherited(redeemerName, redeemTitle, lookupPrefabName, childCreatureData);
         }
 
         public static void SetFollowInRadius(bool value)

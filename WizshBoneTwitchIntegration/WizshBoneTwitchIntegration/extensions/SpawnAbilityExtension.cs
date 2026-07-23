@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TwitchSDK.Interop;
@@ -16,179 +16,49 @@ namespace WizshBoneTwitchIntegration.Extensions
     {
         public static IEnumerator Spawn2(this SpawnAbility spawnAbility, int toSpawn, CustomRewardEvent customRewardEvent, SpawnAbilityData spawnAbilityData, CreatureData creatureData)
         {
-            if (spawnAbility.m_initialSpawnDelay > 0f)
-            {
-                yield return new WaitForSeconds(spawnAbility.m_initialSpawnDelay);
-            }
-
             TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
 
-            Skills skills = (spawnAbility.m_owner ? spawnAbility.m_owner.GetSkills() : null);
-
-            // SpawnSystem.GetNrOfInstances falls back to GameObject.FindGameObjectsWithTag("spawned")
-            // for non-BaseAI prefabs (e.g. traps) - a full scene-wide scan. Track counts locally per
-            // prefab instead of re-scanning the scene on every single spawn iteration.
-            Dictionary<GameObject, int> instanceCounts = new Dictionary<GameObject, int>();
-            int num3;
-            for (int i = 0; i < toSpawn; num3 = i + 1, i = num3)
+            Func<int, int, GameObject> selectPrefab = (i, spawnCount) =>
             {
-                Vector3 targetPosition = spawnAbility.transform.position;
-                bool foundSpawnPoint = false;
-                int tries = ((spawnAbility.m_targetType != TargetType.RandomPathfindablePosition) ? 1 : 5);
-                for (int j = 0; j < tries; j++)
-                {
-                    bool flag;
-                    foundSpawnPoint = (flag = spawnAbility.FindTarget(out targetPosition, i, toSpawn));
-                    if (flag)
-                    {
-                        break;
-                    }
+                if (!spawnAbilityData.isBiomeList)
+                    return spawnAbility.m_spawnPrefab[UnityEngine.Random.Range(0, spawnAbility.m_spawnPrefab.Length)];
 
-                    if (spawnAbility.m_targetType == TargetType.RandomPathfindablePosition)
+                Heightmap.Biome biome = Player.m_localPlayer.GetCurrentBiome();
+
+                try
+                {
+                    switch (biome)
                     {
-                        if (j == tries - 1)
-                        {
-                            Terminal.LogWarning($"SpawnAbility failed to pathfindable target after {tries} tries, defaulting to transform position.");
-                            targetPosition = spawnAbility.transform.position;
-                            foundSpawnPoint = true;
-                        }
-                        else
-                        {
-                            Terminal.Log("SpawnAbility failed to pathfindable target, waiting before retry.");
-                            yield return new WaitForSeconds(0.2f);
-                        }
+                        case Heightmap.Biome.Meadows:
+                            return spawnAbility.m_spawnPrefab[0];
+                        case Heightmap.Biome.BlackForest:
+                            return spawnAbility.m_spawnPrefab[1];
+                        case Heightmap.Biome.Swamp:
+                            return spawnAbility.m_spawnPrefab[2];
+                        case Heightmap.Biome.Mountain:
+                        case Heightmap.Biome.DeepNorth:
+                            return spawnAbility.m_spawnPrefab[3];
+                        case Heightmap.Biome.Plains:
+                            return spawnAbility.m_spawnPrefab[4];
+                        case Heightmap.Biome.Mistlands:
+                            return spawnAbility.m_spawnPrefab[5];
+                        case Heightmap.Biome.AshLands:
+                            return spawnAbility.m_spawnPrefab[6];
+                        case Heightmap.Biome.Ocean:
+                            return spawnAbility.m_spawnPrefab[7];
+                        default:
+                            return spawnAbility.m_spawnPrefab[0];
                     }
                 }
-
-                if (!foundSpawnPoint)
+                catch (Exception e)
                 {
-                    Terminal.LogWarning("SpawnAbility failed to find spawn point, aborting spawn.");
-                    continue;
+                    Jotunn.Logger.LogError("Could not pick biome spefific prefab: " + e);
+                    return spawnAbility.m_spawnPrefab[0];
                 }
+            };
 
-                Vector3 spawnPoint = targetPosition;
-                if (spawnAbility.m_targetType != TargetType.RandomPathfindablePosition)
-                {
-                    Vector3 vector = (spawnAbility.m_spawnAtTarget ? targetPosition : spawnAbility.transform.position);
-                    Vector2 vector2 = UnityEngine.Random.insideUnitCircle * spawnAbility.m_spawnRadius;
-                    if (spawnAbility.m_circleSpawn)
-                    {
-                        vector2 = spawnAbility.GetCirclePoint(i, toSpawn) * spawnAbility.m_spawnRadius;
-                    }
-
-                    spawnPoint = vector + new Vector3(vector2.x, 0f, vector2.y);
-                    if (spawnAbility.m_snapToTerrain)
-                    {
-                        bool indoor = Player.m_localPlayer != null && Player.m_localPlayer.InInterior();
-
-                        if (!TransformHelper.TryGetGroundHeight(spawnPoint, vector.y, indoor, out float height, spawnAbility.m_getSolidHeightMargin))
-                        {
-                            continue;
-                        }
-
-                        spawnPoint.y = height;
-                    }
-
-                    spawnPoint.y += spawnAbility.m_spawnGroundOffset;
-                    if (Mathf.Abs(spawnPoint.y - vector.y) > 100f)
-                    {
-                        continue;
-                    }
-                }
-
-                if (TwitchSafeZone.IsPointInSafeZone(spawnPoint))
-                {
-                    //Jotunn.Logger.LogWarning("Spawnpoint in safezone, skipping...");
-                    continue;
-                }
-
-                GameObject prefab;
-
-                if (spawnAbilityData.isBiomeList)
-                {
-                    Heightmap.Biome biome = Player.m_localPlayer.GetCurrentBiome();
-
-                    try
-                    {
-                        switch (biome)
-                        {
-                            case Heightmap.Biome.Meadows:
-                                prefab = spawnAbility.m_spawnPrefab[0];
-                                break;
-                            case Heightmap.Biome.BlackForest:
-                                prefab = spawnAbility.m_spawnPrefab[1];
-                                break;
-                            case Heightmap.Biome.Swamp:
-                                prefab = spawnAbility.m_spawnPrefab[2];
-                                break;
-                            case Heightmap.Biome.Mountain:
-                            case Heightmap.Biome.DeepNorth:
-                                prefab = spawnAbility.m_spawnPrefab[3];
-                                break;
-                            case Heightmap.Biome.Plains:
-                                prefab = spawnAbility.m_spawnPrefab[4];
-                                break;
-                            case Heightmap.Biome.Mistlands:
-                                prefab = spawnAbility.m_spawnPrefab[5];
-                                break;
-                            case Heightmap.Biome.AshLands:
-                                prefab = spawnAbility.m_spawnPrefab[6];
-                                break;
-                            case Heightmap.Biome.Ocean:
-                                prefab = spawnAbility.m_spawnPrefab[7];
-                                break;
-                            default:
-                                prefab = spawnAbility.m_spawnPrefab[0];
-                                break;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Jotunn.Logger.LogError("Could not pick biome spefific prefab: " + e);
-                        prefab = spawnAbility.m_spawnPrefab[0];
-                    }
-                }
-                else
-                    prefab = spawnAbility.m_spawnPrefab[UnityEngine.Random.Range(0, spawnAbility.m_spawnPrefab.Length)];
-
-                if (spawnAbility.m_maxSpawned > 0)
-                {
-                    if (!instanceCounts.TryGetValue(prefab, out int existingCount))
-                    {
-                        existingCount = SpawnSystem.GetNrOfInstances(prefab);
-                        instanceCounts[prefab] = existingCount;
-                    }
-
-                    if (existingCount >= spawnAbility.m_maxSpawned)
-                    {
-                        if (spawnAbility.m_owner is Player player)
-                        {
-                            player.Message(MessageHud.MessageType.Center, spawnAbility.m_maxSummonReached);
-                        }
-
-                        continue;
-                    }
-                }
-
-                if (customRewards.m_playerIsInSafeZone)
-                    yield break;
-
-                spawnAbility.m_preSpawnEffects.Create(spawnPoint, Quaternion.identity);
-                if (spawnAbility.m_preSpawnDelay > 0f)
-                    yield return new WaitForSeconds(spawnAbility.m_preSpawnDelay);
-
-                Quaternion spawnRotation = spawnAbilityData.randomRotation
-                    ? Quaternion.Euler(0f, UnityEngine.Random.Range(0f, 360f), 0f)
-                    : Quaternion.identity;
-
-                GameObject gameObject = ZNetViewHelper.Instantiate(prefab, spawnPoint, spawnRotation);
-
-                if (spawnAbility.m_maxSpawned > 0)
-                    instanceCounts[prefab] = instanceCounts[prefab] + 1;
-
-                ZNetView component = gameObject.GetComponent<ZNetView>();
-                Projectile component2 = gameObject.GetComponent<Projectile>();
-
+            Action<GameObject, GameObject> onInstantiated = (gameObject, prefab) =>
+            {
                 MonsterAI monsterAI = gameObject.GetComponent<MonsterAI>();
                 Humanoid humanoid2 = gameObject.GetComponent<Humanoid>();
                 ImpactEffect impactEffect = gameObject.GetComponentInChildren<ImpactEffect>(true);
@@ -303,42 +173,183 @@ namespace WizshBoneTwitchIntegration.Extensions
                     }
                 }
 
-                if ((bool)component2)
-                {
-                    spawnAbility.SetupProjectile(component2, targetPosition);
-                }
-
                 if (spawnAbilityData.damage != null)
                     gameObject.AddComponent<TwitchPersistentDamage>().SetData(customRewardEvent, spawnAbilityData.damage);
+            };
 
-                if (spawnAbility.m_randomYRotation)
+            return SpawnLoop(spawnAbility, toSpawn, selectPrefab, () => customRewards.m_playerIsInSafeZone, onInstantiated, spawnAbilityData.randomRotation, !spawnAbilityData.noSpawnEffect, spawnAbilityData.batchSize, checkSafeZone: true);
+        }
+
+        // Creatures summoned by another creature's own vanilla SpawnAbility (a Warlock/Oozer/Gjall's
+        // reinforcements - see CreatureHelper.ApplyInheritedScaling) don't come from a redeem shower
+        // at all, just plain random selection from m_spawnPrefab and no redeem-specific component
+        // wiring - only the shared spawn mechanics (targeting, terrain-snap, instantiate, skills,
+        // alert/aggro, etc, see SpawnLoop) plus inheriting the summoning creature's own redeem data.
+        public static IEnumerator Spawn2(this SpawnAbility spawnAbility, Character owner)
+        {
+            int toSpawn = UnityEngine.Random.Range(spawnAbility.m_minToSpawn, spawnAbility.m_maxToSpawn);
+
+            bool hasParentData = CreatureHelper.TryResolveParentCreatureData(owner, out CreatureData parentCreatureData, out string redeemerName, out string redeemTitle, out string lookupPrefabName);
+
+            Func<int, int, GameObject> selectPrefab = (i, spawnCount) => spawnAbility.m_spawnPrefab[UnityEngine.Random.Range(0, spawnAbility.m_spawnPrefab.Length)];
+
+            Action<GameObject, GameObject> onInstantiated = (gameObject, prefab) =>
+            {
+                if (!hasParentData)
+                    return;
+
+                CreatureHelper.ApplyInheritedScaling(gameObject, prefab, parentCreatureData, redeemerName, redeemTitle, lookupPrefabName);
+            };
+
+            return SpawnLoop(spawnAbility, toSpawn, selectPrefab, null, onInstantiated, randomRotation: true, createSpawnEffect: true, batchSize: 1, checkSafeZone: false);
+        }
+
+        // Shared core of vanilla SpawnAbility.Spawn(): target-finding, spawn-point computation/
+        // terrain-snap, instantiate, skills-copy/m_levelUpSettings, m_commandOnSpawn,
+        // m_wakeUpAnimation, alert/aggro propagation, SetupAoe, spawn effects/delay, self-destroy.
+        // selectPrefab and onInstantiated are the two seams where the redeem-shower overload above
+        // and the creature-summon-inheritance overload diverge - everything else here is identical
+        // vanilla-parity logic shared by both, so a future terrain-snap/targeting fix only needs to
+        // land once.
+        private static IEnumerator SpawnLoop(SpawnAbility spawnAbility, int toSpawn, Func<int, int, GameObject> selectPrefab, Func<bool> shouldAbortAll, Action<GameObject, GameObject> onInstantiated, bool randomRotation, bool createSpawnEffect, int batchSize, bool checkSafeZone)
+        {
+            if (spawnAbility.m_initialSpawnDelay > 0f)
+                yield return new WaitForSeconds(spawnAbility.m_initialSpawnDelay);
+
+            Skills skills = spawnAbility.m_owner ? spawnAbility.m_owner.GetSkills() : null;
+
+            // SpawnSystem.GetNrOfInstances falls back to GameObject.FindGameObjectsWithTag("spawned")
+            // for non-BaseAI prefabs (e.g. traps) - a full scene-wide scan. Track counts locally per
+            // prefab instead of re-scanning the scene on every single spawn iteration.
+            Dictionary<GameObject, int> instanceCounts = new Dictionary<GameObject, int>();
+            int num3;
+            for (int i = 0; i < toSpawn; num3 = i + 1, i = num3)
+            {
+                Vector3 targetPosition = spawnAbility.transform.position;
+                bool foundSpawnPoint = false;
+                int tries = (spawnAbility.m_targetType != TargetType.RandomPathfindablePosition) ? 1 : 5;
+
+                for (int j = 0; j < tries; j++)
                 {
-                    gameObject.transform.Rotate(Vector3.up, UnityEngine.Random.Range(-180, 180));
+                    bool flag;
+                    foundSpawnPoint = (flag = spawnAbility.FindTarget(out targetPosition, i, toSpawn));
+                    if (flag)
+                        break;
+
+                    if (spawnAbility.m_targetType == TargetType.RandomPathfindablePosition)
+                    {
+                        if (j == tries - 1)
+                        {
+                            Terminal.LogWarning($"SpawnAbility failed to pathfindable target after {tries} tries, defaulting to transform position.");
+                            targetPosition = spawnAbility.transform.position;
+                            foundSpawnPoint = true;
+                        }
+                        else
+                        {
+                            Terminal.Log("SpawnAbility failed to pathfindable target, waiting before retry.");
+                            yield return new WaitForSeconds(0.2f);
+                        }
+                    }
                 }
 
-                if ((bool)skills)
+                if (!foundSpawnPoint)
                 {
-                    if (spawnAbility.m_copySkill != 0 && spawnAbility.m_copySkillToRandomFactor > 0f)
+                    Terminal.LogWarning("SpawnAbility failed to find spawn point, aborting spawn.");
+                    continue;
+                }
+
+                Vector3 spawnPoint = targetPosition;
+                if (spawnAbility.m_targetType != TargetType.RandomPathfindablePosition)
+                {
+                    Vector3 vector = (spawnAbility.m_spawnAtTarget ? targetPosition : spawnAbility.transform.position);
+                    Vector2 vector2 = UnityEngine.Random.insideUnitCircle * spawnAbility.m_spawnRadius;
+                    if (spawnAbility.m_circleSpawn)
+                        vector2 = spawnAbility.GetCirclePoint(i, toSpawn) * spawnAbility.m_spawnRadius;
+
+                    spawnPoint = vector + new Vector3(vector2.x, 0f, vector2.y);
+                    if (spawnAbility.m_snapToTerrain)
                     {
-                        component.GetZDO().Set(ZDOVars.s_randomSkillFactor, 1f + skills.GetSkillLevel(spawnAbility.m_copySkill) * spawnAbility.m_copySkillToRandomFactor);
+                        bool indoor = Player.m_localPlayer != null && Player.m_localPlayer.InInterior();
+
+                        if (!TransformHelper.TryGetGroundHeight(spawnPoint, vector.y, indoor, out float height, spawnAbility.m_getSolidHeightMargin))
+                            continue;
+
+                        spawnPoint.y = height;
                     }
+
+                    spawnPoint.y += spawnAbility.m_spawnGroundOffset;
+                    if (Mathf.Abs(spawnPoint.y - vector.y) > 100f)
+                        continue;
+                }
+
+                if (checkSafeZone && TwitchSafeZone.IsPointInSafeZone(spawnPoint))
+                    continue;
+
+                GameObject prefab = selectPrefab(i, toSpawn);
+
+                if (spawnAbility.m_maxSpawned > 0)
+                {
+                    if (!instanceCounts.TryGetValue(prefab, out int existingCount))
+                    {
+                        existingCount = SpawnSystem.GetNrOfInstances(prefab);
+                        instanceCounts[prefab] = existingCount;
+                    }
+
+                    if (existingCount >= spawnAbility.m_maxSpawned)
+                    {
+                        if (spawnAbility.m_owner is Player player)
+                            player.Message(MessageHud.MessageType.Center, spawnAbility.m_maxSummonReached);
+
+                        continue;
+                    }
+                }
+
+                if (shouldAbortAll != null && shouldAbortAll())
+                    yield break;
+
+                spawnAbility.m_preSpawnEffects.Create(spawnPoint, Quaternion.identity);
+                if (spawnAbility.m_preSpawnDelay > 0f)
+                    yield return new WaitForSeconds(spawnAbility.m_preSpawnDelay);
+
+                Quaternion spawnRotation = randomRotation
+                    ? Quaternion.Euler(0f, UnityEngine.Random.Range(0f, 360f), 0f)
+                    : Quaternion.identity;
+
+                GameObject gameObject = ZNetViewHelper.Instantiate(prefab, spawnPoint, spawnRotation);
+
+                if (spawnAbility.m_maxSpawned > 0)
+                    instanceCounts[prefab] = instanceCounts[prefab] + 1;
+
+                onInstantiated(gameObject, prefab);
+
+                Projectile projectile = gameObject.GetComponent<Projectile>();
+                if (projectile != null)
+                    spawnAbility.SetupProjectile(projectile, targetPosition);
+
+                if (spawnAbility.m_randomYRotation)
+                    gameObject.transform.Rotate(Vector3.up, UnityEngine.Random.Range(-180, 180));
+
+                if (skills)
+                {
+                    ZNetView netView = gameObject.GetComponent<ZNetView>();
+
+                    if (spawnAbility.m_copySkill != 0 && spawnAbility.m_copySkillToRandomFactor > 0f)
+                        netView.GetZDO().Set(ZDOVars.s_randomSkillFactor, 1f + skills.GetSkillLevel(spawnAbility.m_copySkill) * spawnAbility.m_copySkillToRandomFactor);
 
                     if (spawnAbility.m_levelUpSettings.Count > 0)
                     {
-                        Character component3 = gameObject.GetComponent<Character>();
-                        if ((object)component3 != null)
+                        Character character = gameObject.GetComponent<Character>();
+                        if ((object)character != null)
                         {
                             for (int num = spawnAbility.m_levelUpSettings.Count - 1; num >= 0; num--)
                             {
                                 LevelUpSettings levelUpSettings = spawnAbility.m_levelUpSettings[num];
                                 if (skills.GetSkillLevel(levelUpSettings.m_skill) >= (float)levelUpSettings.m_skillLevel)
                                 {
-                                    component3.SetLevel(levelUpSettings.m_setLevel);
-                                    int num2 = (spawnAbility.m_setMaxInstancesFromWeaponLevel ? spawnAbility.m_weapon.m_quality : levelUpSettings.m_maxSpawns);
-                                    if (num2 > 0)
-                                    {
-                                        component.GetZDO().Set(ZDOVars.s_maxInstances, num2);
-                                    }
+                                    character.SetLevel(levelUpSettings.m_setLevel);
+                                    int maxInstances = spawnAbility.m_setMaxInstancesFromWeaponLevel ? spawnAbility.m_weapon.m_quality : levelUpSettings.m_maxSpawns;
+                                    if (maxInstances > 0)
+                                        netView.GetZDO().Set(ZDOVars.s_maxInstances, maxInstances);
 
                                     break;
                                 }
@@ -349,57 +360,43 @@ namespace WizshBoneTwitchIntegration.Extensions
 
                 if (spawnAbility.m_commandOnSpawn)
                 {
-                    Tameable component4 = gameObject.GetComponent<Tameable>();
-                    if ((object)component4 != null && spawnAbility.m_owner is Humanoid humanoid)
+                    Tameable tameable = gameObject.GetComponent<Tameable>();
+                    if ((object)tameable != null && spawnAbility.m_owner is Humanoid humanoid)
                     {
-                        component4.Command(humanoid, message: false);
+                        tameable.Command(humanoid, message: false);
                         if (humanoid == Player.m_localPlayer)
-                        {
                             Game.instance.IncrementPlayerStat(PlayerStatType.SkeletonSummons);
-                        }
                     }
                 }
 
                 if (spawnAbility.m_wakeUpAnimation)
-                {
                     gameObject.GetComponent<ZSyncAnimation>()?.SetBool("wakeup", value: true);
-                }
 
-                BaseAI component5 = gameObject.GetComponent<BaseAI>();
-                if (component5 != null)
+                BaseAI childAI = gameObject.GetComponent<BaseAI>();
+                if (childAI != null)
                 {
                     if (spawnAbility.m_alertSpawnedCreature)
-                    {
-                        component5.Alert();
-                    }
+                        childAI.Alert();
 
-                    BaseAI baseAI = spawnAbility.m_owner.GetBaseAI();
-                    if (component5.m_aggravatable && (bool)baseAI && baseAI.m_aggravatable)
-                    {
-                        component5.SetAggravated(baseAI.IsAggravated(), BaseAI.AggravatedReason.Damage);
-                    }
+                    BaseAI ownerAI = spawnAbility.m_owner.GetBaseAI();
+                    if (childAI.m_aggravatable && (bool)ownerAI && ownerAI.m_aggravatable)
+                        childAI.SetAggravated(ownerAI.IsAggravated(), BaseAI.AggravatedReason.Damage);
 
                     if (spawnAbility.m_passiveAggressive)
-                    {
-                        component5.m_passiveAggresive = true;
-                    }
+                        childAI.m_passiveAggresive = true;
                 }
 
                 spawnAbility.SetupAoe(gameObject.GetComponent<Character>(), spawnPoint);
 
-                if (!spawnAbilityData.noSpawnEffect)
+                if (createSpawnEffect)
                     spawnAbility.m_spawnEffects.Create(spawnPoint, Quaternion.identity);
 
-                if (spawnAbility.m_spawnDelay > 0f && (i + 1) % spawnAbilityData.batchSize == 0)
-                {
+                if (spawnAbility.m_spawnDelay > 0f && (i + 1) % batchSize == 0)
                     yield return new WaitForSeconds(spawnAbility.m_spawnDelay);
-                }
             }
 
             if (!spawnAbility.m_spawnOnAwake)
-            {
                 ZNetViewHelper.Destroy(spawnAbility.gameObject);
-            }
         }
     }
 }

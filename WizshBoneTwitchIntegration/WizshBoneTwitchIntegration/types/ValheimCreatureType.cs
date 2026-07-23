@@ -17,6 +17,7 @@
         public static string Charred_Mage => "Charred_Mage";
         public static string Charred_Melee => "Charred_Melee";
         public static string Charred_Twitcher => "Charred_Twitcher";
+        public static string Charred_Twitcher_Summoned => "Charred_Twitcher_Summoned";
         public static string Deathsquito => "Deathsquito";
         public static string Draugr => "Draugr";
         public static string Draugr_Elite => "Draugr_Elite";
