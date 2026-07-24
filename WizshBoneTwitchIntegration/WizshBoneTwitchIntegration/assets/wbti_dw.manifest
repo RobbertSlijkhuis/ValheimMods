@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 3477145720
+CRC: 3039291651
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 77fc87223ae42676cf01a484d71aeffd
+    Hash: 55a12473f09c64bf14282e9a3200744e
   TypeTreeHash:
     serializedVersion: 2
     Hash: 3ac90f470324935ea2e2d620fee1a7ff
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 77fc87223ae42676cf01a484d71aeffd
+    Hash: 55a12473f09c64bf14282e9a3200744e
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -166,6 +166,7 @@ Assets:
 - Assets/Custom/Creatures/Abomination/Abomination_recolor_WBTI.mat
 - Assets/Custom/Creatures/Hatchling/Hatchling_recolor_WBTI.mat
 - Assets/Custom/Creatures/Blob/Blob_recolor_WBTI.mat
+- Assets/Custom/Creatures/Deer/Deer_antlers_recolor_WBTI.mat
 - Assets/Custom/Creatures/Ulv/Ulv_recolor_WBTI.mat
 - Assets/Custom/Creatures/Neck/Neck_recolor_WBTI.mat
 - Assets/Custom/Creatures/Greydwarf/Greydwarf_Shaman_recolor_WBTI.mat
@@ -179,6 +180,7 @@ Assets:
 - Assets/Custom/Monobehaviour/Freezing_WBTI.asset
 - Assets/Custom/Creatures/Draugr/Draugr_recolor_WBTI.mat
 - Assets/Custom/Creatures/Draugr/Draugr_Elite_recolor_WBTI.mat
+- Assets/Custom/Creatures/Deer/Deer_recolor_WBTI.mat
 - Assets/Custom/PrefabInstance/FeoTheHistorian/FeoTheHistorian_WBTI.prefab
 - Assets/Custom/Creatures/Wraith/Wraith_recolor_WBTI.mat
 - Assets/Custom/Creatures/Bjorn/Bjorn_recolor_WBTI.mat

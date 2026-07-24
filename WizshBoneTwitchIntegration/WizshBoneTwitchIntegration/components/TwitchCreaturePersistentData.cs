@@ -60,9 +60,14 @@ namespace WizshBoneTwitchIntegration.Components
 
                 if (m_redeemTitle == "")
                 {
-                    Humanoid humanoid = gameObject.GetComponent<Humanoid>();
-                    creatureClaim.ReInit(m_redeemerName);
-                    humanoid.m_name = m_redeemerName;
+                    // This is the rehydration path for a permanent manual claim (chattingClaimDuration
+                    // == 0), which can be on an AnimalAI creature (e.g. Deer) with no Humanoid component.
+                    // ReInit's AddCreatureAssignment call already sets the display name itself, bracket-
+                    // aware, via TwitchChatting.RefreshIndexDisplayForOwner -> SetDisplayIndex - do not
+                    // also set Character.m_name here, it would clobber a just-applied [n] suffix back to
+                    // the plain name whenever this happens to be the last of its owner's simultaneously-
+                    // loaded manual claims to rehydrate.
+                    creatureClaim.ReInit(m_redeemerName, isSpawn: false);
                     return;
                 }
 
@@ -78,7 +83,7 @@ namespace WizshBoneTwitchIntegration.Components
                 {
                     // SpawnAbility redeems (e.g. biome-prefab showers like "Roots on the line!") use a
                     // placeholder CreatureData with no prefabName, so there's nothing to look up or reapply.
-                    creatureClaim.ReInit(m_redeemerName);
+                    creatureClaim.ReInit(m_redeemerName, isSpawn: true);
                     return;
                 }
 
@@ -104,7 +109,7 @@ namespace WizshBoneTwitchIntegration.Components
                     creatureData.prefabName = m_actualPrefabName;
                 }
 
-                creatureClaim.ReInit(m_redeemerName, creatureData);
+                creatureClaim.ReInit(m_redeemerName, isSpawn: true, creatureData);
                 ApplyCreatureData(creatureData);
             }
             catch (System.Exception e)
@@ -149,7 +154,7 @@ namespace WizshBoneTwitchIntegration.Components
             baseData?.SetFlag(PersistentComponentFlags.Creature, true);
 
             TwitchCreatureClaim creatureClaim = gameObject.GetComponent<TwitchCreatureClaim>() ?? gameObject.AddComponent<TwitchCreatureClaim>();
-            creatureClaim.ReInit(m_redeemerName, resolvedChildCreatureData);
+            creatureClaim.ReInit(m_redeemerName, isSpawn: true, resolvedChildCreatureData);
 
             ApplyCreatureData(resolvedChildCreatureData);
         }
@@ -192,6 +197,21 @@ namespace WizshBoneTwitchIntegration.Components
             ApplyMonsterAI(creatureData);
             ApplyAllowDrops(creatureData);
             ApplyTameable(creatureData);
+        }
+
+        // Called by TwitchCreatureClaim.OnDestroy() when a manually-claimed (non-spawn) creature is
+        // genuinely unclaimed - without this, the ZDO string field this component reads on Awake()
+        // (and the Creature flag that makes TwitchBasePersistentData re-add this component at all)
+        // would still be set, so the next reload would re-hydrate the claim right back into existence.
+        public void ClearClaimData()
+        {
+            if (m_netView == null || !m_netView.IsOwner())
+                return;
+
+            m_netView.GetZDO().Set(creatureDataHash, "");
+
+            TwitchBasePersistentData baseData = gameObject.GetComponent<TwitchBasePersistentData>();
+            baseData?.SetFlag(PersistentComponentFlags.Creature, false);
         }
 
         public void SetFollowing(bool following)

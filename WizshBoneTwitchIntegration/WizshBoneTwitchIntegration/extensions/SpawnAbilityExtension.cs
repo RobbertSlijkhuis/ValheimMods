@@ -88,7 +88,7 @@ namespace WizshBoneTwitchIntegration.Extensions
                     creaturePersistentData.SetData(customRewardEvent.RedeemerName, creatureData, customRewardEvent.CustomRewardTitle, false);
 
                     TwitchCreatureClaim creatureClaim = gameObject.GetComponent<TwitchCreatureClaim>() ?? gameObject.AddComponent<TwitchCreatureClaim>();
-                    creatureClaim.ReInit(customRewardEvent.RedeemerName, creatureData);
+                    creatureClaim.ReInit(customRewardEvent.RedeemerName, isSpawn: true, creatureData);
                 }
 
                 if (monsterAI == null && impactEffect != null)

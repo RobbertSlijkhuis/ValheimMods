@@ -50,12 +50,23 @@ namespace WizshBoneTwitchIntegration.Harmony
         // renaming player's own client instead, before the RPC is even sent.
         [HarmonyPrefix]
         [HarmonyPatch(typeof(Tameable), "SetText")]
-        public static void SetText_Prefix(ref Tameable __instance, ref string text)
+        public static bool SetText_Prefix(ref Tameable __instance, ref string text)
         {
             try
             {
+                // Checked before "claim:" - "unclaim:" contains that substring too, so this must
+                // come first or it'd be misread as a claim for a garbled "un<name>" username.
+                if (text.Contains("unclaim:"))
+                {
+                    __instance.gameObject.GetComponent<TwitchCreatureClaim>()?.Release();
+
+                    // Skip the vanilla rename entirely - Release()'s own teardown already restores
+                    // the true original name/tamed-name, so there's nothing left to rename to.
+                    return false;
+                }
+
                 if (!text.Contains("claim:"))
-                    return;
+                    return true;
 
                 TwitchCreatureClaim creatureClaim = __instance.gameObject.GetComponent<TwitchCreatureClaim>();
 
@@ -64,10 +75,12 @@ namespace WizshBoneTwitchIntegration.Harmony
 
                 text = text.Replace("claim:", "");
                 creatureClaim.Init(text);
+                return true;
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Something went wrong in SetText_Prefix: " + e);
+                return true;
             }
         }
 

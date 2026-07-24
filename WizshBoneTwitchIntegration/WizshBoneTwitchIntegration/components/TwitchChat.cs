@@ -180,6 +180,20 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 return;
             }
 
+            // Resolved centrally here (once per message) rather than broadcast to every claimed
+            // creature's own listener - releasing one claim shifts the live index of the others,
+            // so letting each creature independently re-check itself mid-broadcast caused releasing
+            // claim N to also sweep up whichever claim shifted into slot N right before its turn.
+            if (chatMessage.StartsWith("!unclaim", StringComparison.OrdinalIgnoreCase))
+            {
+                string target = chatMessage.Length > "!unclaim".Length
+                    ? chatMessage.Substring("!unclaim".Length).Trim()
+                    : "";
+
+                m_chatting.UnclaimForUser(userName, target);
+                return;
+            }
+
             if (m_customRewards == null)
                 m_customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
 

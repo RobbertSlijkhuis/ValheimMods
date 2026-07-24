@@ -15,6 +15,8 @@ namespace WizshBoneTwitchIntegration.Models
         public Material RecolorCultist;
         public Material RecolorCultistCape;
         public Material RecolorDeathsquito;
+        public Material RecolorDeer;
+        public Material RecolorDeerAntlers;
         public Material RecolorDraugr;
         public Material RecolorDraugrFem;
         public Material RecolorDraugrElite;

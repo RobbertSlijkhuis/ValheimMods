@@ -17,7 +17,7 @@ namespace WizshBoneTwitchIntegration.Components
         private TwitchCreatureAssignment m_assignment;
         private ZNetView m_netView;
         private NpcTalk m_npcTalk;
-        private Humanoid m_humanoid;
+        private Character m_character;
 
         public bool m_isSpawn = false;
         private string m_originalName;
@@ -41,7 +41,7 @@ namespace WizshBoneTwitchIntegration.Components
 
                 m_chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
                 m_chat = Game.instance.gameObject.GetComponent<TwitchChat>();
-                m_humanoid = gameObject.GetComponent<Humanoid>();
+                m_character = gameObject.GetComponent<Character>();
             }
             catch (Exception e)
             {
@@ -59,7 +59,7 @@ namespace WizshBoneTwitchIntegration.Components
 
             m_isSpawn = true;
             m_assignment = new TwitchCreatureAssignment(customRewardEvent.RedeemerName, gameObject, ProfileSettingsHelper.Current.chattingClaimDuration);
-            m_originalName = m_humanoid?.m_name;
+            m_originalName = m_character?.m_name;
 
             m_chatting.AddCreatureAssignment(m_assignment);
             SetupNpcTalk(creatureData);
@@ -88,17 +88,17 @@ namespace WizshBoneTwitchIntegration.Components
             // the *previous* claimant's name instead of the true original once unclaimed/expired.
             if (m_originalName == null)
             {
-                m_originalName = m_humanoid.m_name;
+                m_originalName = m_character.m_name;
 
-                // Tameable.GetHoverName() prefers this ZDO field over Humanoid.m_name whenever it's
-                // non-empty, so resetting only m_humanoid.m_name isn't enough to actually change what
+                // Tameable.GetHoverName() prefers this ZDO field over Character.m_name whenever it's
+                // non-empty, so resetting only m_character.m_name isn't enough to actually change what
                 // the player sees once a creature has ever been claim:-renamed - captured here, before
                 // any pending claim:-rename gets persisted, so the true original can be restored later.
                 if (m_netView != null && m_netView.IsValid())
                     m_originalTamedName = m_netView.GetZDO().GetString(ZDOVars.s_tamedName, "");
             }
 
-            m_humanoid.m_name = userName;
+            m_character.m_name = userName;
 
             if (ProfileSettingsHelper.Current.chattingClaimDuration == 0 && !(gameObject.GetComponent<TwitchBasePersistentData>()?.IsRedeemSpawn ?? false))
             {
@@ -138,7 +138,12 @@ namespace WizshBoneTwitchIntegration.Components
                 InvokeRepeating(nameof(CheckExpiry), ProfileSettingsHelper.Current.chattingInterval, ProfileSettingsHelper.Current.chattingInterval);
         }
 
-        public void ReInit(string userName, CreatureData creatureData = null)
+        // isSpawn must be passed explicitly rather than inferred from creatureData - the SpawnAbility
+        // placeholder-redeem rehydration path (TwitchCreaturePersistentData.Awake, m_savedPrefabName
+        // == "") is a genuine spawn with no CreatureData to reapply, so "creatureData != null" isn't
+        // a reliable signal. Getting this wrong excludes/includes a claim from index/bracket numbering
+        // incorrectly (see TwitchChatting.NonSpawnSiblings).
+        public void ReInit(string userName, bool isSpawn, CreatureData creatureData = null)
         {
             if (userName == null)
             {
@@ -146,9 +151,9 @@ namespace WizshBoneTwitchIntegration.Components
                 return;
             }
 
-            m_isSpawn = true;
+            m_isSpawn = isSpawn;
             m_assignment = new TwitchCreatureAssignment(userName, gameObject, ProfileSettingsHelper.Current.chattingClaimDuration);
-            m_originalName = m_humanoid.m_name;
+            m_originalName = m_character.m_name;
 
             m_chatting.AddCreatureAssignment(m_assignment);
             SetupNpcTalk(creatureData);
@@ -173,19 +178,33 @@ namespace WizshBoneTwitchIntegration.Components
                 if (m_assignment != null)
                     m_assignment.creature = null;
 
-                if (m_humanoid != null)
-                    m_humanoid.m_name = m_originalName;
+                if (m_character != null)
+                    m_character.m_name = m_originalName;
 
-                // Restores the vanilla Tameable rename field alongside Humanoid.m_name above - only
-                // set for claims made via Init(string) (see the capture there for why). Goes through
-                // Tameable.SetText() (which our own SetText_Prefix harmlessly no-ops for, since this
-                // won't contain "claim:") rather than writing the ZDO directly, so it stays routed
-                // through the normal owner-checked RPC instead of us hand-rolling that ourselves.
+                // Restores the vanilla Tameable rename field alongside Character.m_name above - only
+                // set for claims made via Init(string) (see the capture there for why).
                 if (m_originalTamedName != null)
-                    gameObject.GetComponent<Tameable>()?.SetText(m_originalTamedName);
+                    SetTameableText(m_originalTamedName);
 
                 m_lastMessageTime = DateTime.MinValue;
                 CancelInvoke(nameof(CheckExpiry));
+
+                // A genuine unclaim (chat, WBTIUnclaim, or unclaim:) on a manually-claimed (non-spawn)
+                // creature must also clear the persisted claim data, not just this component - otherwise
+                // TwitchCreaturePersistentData's ZDO string field (and the Creature flag that makes
+                // TwitchBasePersistentData re-add it) survive, and the next reload re-hydrates the claim
+                // right back into existence under the same name. Only for !m_isSpawn - a redeem-spawned
+                // creature that was also claim:-renamed keeps its own real persistent data intact.
+                if (m_isUnclaimDestroy && !m_isSpawn)
+                {
+                    TwitchCreaturePersistentData persistentData = gameObject.GetComponent<TwitchCreaturePersistentData>();
+
+                    if (persistentData != null)
+                    {
+                        persistentData.ClearClaimData();
+                        Destroy(persistentData);
+                    }
+                }
 
                 if (!m_isUnclaimDestroy)
                     Unassign();
@@ -274,9 +293,26 @@ namespace WizshBoneTwitchIntegration.Components
             string text = m_simpleTalkMessages[m_simpleTalkIndex % m_simpleTalkMessages.Count];
             m_simpleTalkIndex++;
 
-            // Same call NpcTalk.Say() makes internally for its speech bubble - only needs a
-            // GameObject to anchor to, no Character/MonsterAI/Animator involved (trigger is
-            // left empty so NpcTalk's own m_animator.SetTrigger(trigger) call is skipped there).
+            ShowBubbleText(text);
+        }
+
+        // Shared speech-bubble relay for both talk paths set up in SetupNpcTalk: creatures with a
+        // MonsterAI get a real NpcTalk (SayForce), everything else (e.g. AnimalAI-driven creatures
+        // like Deer, which never get an NpcTalk) falls back to the same direct Chat.instance.SetNpcText()
+        // call NpcTalk.Say() makes internally - only needs a GameObject to anchor to, no
+        // Character/MonsterAI/Animator involved (trigger left empty so NpcTalk's own
+        // m_animator.SetTrigger(trigger) call is skipped there).
+        private void ShowBubbleText(string text)
+        {
+            if (m_npcTalk != null)
+            {
+                m_npcTalk.SayForce(text, "Aggravated");
+                return;
+            }
+
+            if (Chat.instance == null)
+                return;
+
             Chat.instance.SetNpcText(gameObject, Vector3.up * 2f, ProfileSettingsHelper.Current.chattingCullingRange, 10f, "", text, large: false);
         }
 
@@ -292,22 +328,20 @@ namespace WizshBoneTwitchIntegration.Components
             if (message == null)
                 return;
 
-            if (message.message.Equals("!unclaim", StringComparison.OrdinalIgnoreCase))
-            {
-                m_isUnclaimDestroy = true;
-                Unassign();
-                return;
-            }
+            // "!unclaim" itself is intercepted centrally in TwitchChat.cs (calls
+            // TwitchChatting.UnclaimForUser directly) before ever reaching this per-creature
+            // broadcast - resolving it here independently per claim caused a releasing claim to
+            // shift another still-pending claim's live index into matching within the same broadcast.
 
             if (message.message.Equals("!heal", StringComparison.OrdinalIgnoreCase) && (m_originalName?.Contains("shaman") ?? false))
             {
-                if (m_humanoid == null)
+                if (m_character == null)
                 {
                     Jotunn.Logger.LogError("Cannot finish command !heal, humanoid is null");
                     return;
                 }
 
-                if (m_humanoid.InAttack())
+                if (m_character.InAttack())
                     return;
 
                 MonsterAI monsterAI = gameObject.GetComponent<MonsterAI>();
@@ -321,13 +355,48 @@ namespace WizshBoneTwitchIntegration.Components
                 if (m_chatting.CanCreatureTalk(gameObject))
                     m_npcTalk.SayForce("Alright... healing!", "Aggravated");
 
-                m_humanoid.EquipBestWeapon(m_humanoid, null, m_humanoid, null);
-                monsterAI.DoAttack(m_humanoid, true);
+                // EquipBestWeapon is Humanoid-only - this easter egg is gated to shaman-type
+                // creatures above (always Humanoid+MonsterAI), so the cast always succeeds in
+                // practice; the null-conditional just keeps this compiling now that m_character
+                // is typed as the shared Character base (for AnimalAI creature support).
+                (m_character as Humanoid)?.EquipBestWeapon(m_character, null, m_character, null);
+                monsterAI.DoAttack(m_character, true);
                 return;
             }
 
-            if (m_npcTalk != null && m_chatting.CanCreatureTalk(gameObject))
-                m_npcTalk.SayForce(message.message, "Aggravated");
+            if (m_chatting.CanCreatureTalk(gameObject))
+                ShowBubbleText(message.message);
+        }
+
+        // Called by TwitchChatting.UnclaimForUser once it has already decided this claim should be
+        // released - no matching happens here, the decision was made centrally against a stable
+        // snapshot (see UnclaimForUser for why that matters).
+        public void Release()
+        {
+            m_isUnclaimDestroy = true;
+            Unassign();
+        }
+
+        // Name-matching half of "!unclaim <name>" targeting - the index half lives entirely in
+        // TwitchChatting.UnclaimForUser now (it needs every sibling's position at once, not just
+        // this one claim's own state). Matches the localized species name rather than the raw
+        // prefab id (avoids "FallenValkyrie"-style confusion); spawned creatures also accept their
+        // current display name, since a redeem can rename them to something like "Fluffy" that
+        // m_originalName no longer reflects.
+        public bool MatchesNameTarget(string target)
+        {
+            string originalName = Localization.instance.Localize(m_originalName ?? "");
+
+            if (originalName.IndexOf(target, StringComparison.OrdinalIgnoreCase) >= 0)
+                return true;
+
+            if (m_isSpawn)
+            {
+                string currentName = Localization.instance.Localize(m_character?.m_name ?? "");
+                return currentName.IndexOf(target, StringComparison.OrdinalIgnoreCase) >= 0;
+            }
+
+            return false;
         }
 
         public void SayAMessage()
@@ -351,6 +420,37 @@ namespace WizshBoneTwitchIntegration.Components
 
             m_isUnclaimDestroy = true;
             Unassign();
+        }
+
+        // Renders (or clears) this claim's owner+index disambiguation suffix, e.g. "Alice [2]" -
+        // called by TwitchChatting.RefreshIndexDisplayForOwner whenever the owner's number of
+        // simultaneously-loaded manual claims changes. Never called for redeem spawns (m_isSpawn),
+        // those are excluded from indexing entirely. Writes both Character.m_name (what a non-tame
+        // creature's hover text reads) and, if present, the Tameable's ZDO-backed name via SetText -
+        // Tameable.GetHoverName() prefers that ZDO field over Character.m_name whenever it's set, so
+        // a claim:-renamed tame needs both written or the bracket silently wouldn't show.
+        public void SetDisplayIndex(int? index)
+        {
+            if (m_isSpawn || m_character == null)
+                return;
+
+            string displayName = index.HasValue ? $"{m_assignment.userName} [{index}]" : m_assignment.userName;
+            m_character.m_name = displayName;
+            SetTameableText(displayName);
+        }
+
+        // Ensures ownership before writing to Tameable's ZDO-backed name, mirroring the same
+        // ClaimOwnership() guard Init(string) already uses before its own claim takes effect -
+        // Tameable.SetText() ultimately routes through RPC_SetName, which only writes the ZDO on
+        // the peer that owns it. Skipping this can silently no-op, leaving a stale name (e.g. a
+        // previous claimant's) stuck in the ZDO forever - which a later re-claim would then wrongly
+        // capture as the creature's "original" name, since that's only ever captured once.
+        private void SetTameableText(string text)
+        {
+            if (m_netView != null && m_netView.IsValid() && !m_netView.IsOwner())
+                m_netView.ClaimOwnership();
+
+            gameObject.GetComponent<Tameable>()?.SetText(text);
         }
 
         private void Unassign()

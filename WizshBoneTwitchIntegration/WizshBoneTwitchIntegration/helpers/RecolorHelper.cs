@@ -54,6 +54,12 @@ namespace WizshBoneTwitchIntegration.Helpers
             { "Deathsquito", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/Cube") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorDeathsquito, emissive = true },
             }},
+            { "Deer", new List<RecolorCreatureData>() {
+                new RecolorCreatureData("Visual/Deer 003") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorDeer, emissive = true },
+                new RecolorCreatureData("Visual/CG/Pelvis/Spine/Spine1/Spine2/Neck/Neck1/Head/Antlers 01") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorDeerAntlers, emissive = true },
+                new RecolorCreatureData("Visual/CG/Pelvis/Spine/Spine1/Spine2/Neck/Neck1/Head/Antlers 04") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorDeerAntlers, emissive = true },
+                new RecolorCreatureData("Visual/CG/Pelvis/Spine/Spine1/Spine2/Neck/Neck1/Head/Antlers 05") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorDeerAntlers, emissive = true },
+            }},
             { "Draugr", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/_draugr_base/Cube.001") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorDraugr, emissive = true },
             }},
@@ -322,8 +328,25 @@ namespace WizshBoneTwitchIntegration.Helpers
                 Transform visualTrans = creature.transform.Find("Visual");
                 LevelEffects levelEffects = visualTrans.gameObject.GetComponent<LevelEffects>();
 
+                // Neutralize the hue/saturation/value/emissive shift each LevelSetup would otherwise
+                // apply to m_mainRender on (re)level - that's vanilla's own star-tint, and it would
+                // silently override the material tint Recolor() sets below whenever LevelEffects.Start()
+                // (Unity's Start() order between sibling components on the same GameObject is
+                // undefined) runs after this, or a level gets re-set later. Deliberately NOT clearing
+                // the list outright: each LevelSetup's m_enableObject/m_baseEnableObject also drives a
+                // real per-star mesh swap (e.g. Deer's bigger 1-/2-star antlers) - wiping the whole list
+                // left LevelEffects.SetupLevelVisualization() with nothing to look up, so that swap
+                // silently never ran and star deer ended up with their antlers stuck off.
                 if (levelEffects != null)
-                    levelEffects.m_levelSetups.Clear();
+                {
+                    foreach (LevelEffects.LevelSetup levelSetup in levelEffects.m_levelSetups)
+                    {
+                        levelSetup.m_hue = 0f;
+                        levelSetup.m_saturation = 0f;
+                        levelSetup.m_value = 0f;
+                        levelSetup.m_setEmissiveColor = false;
+                    }
+                }
 
                 Recolor(recolorCreatureData, resolvedColor, mat, recolorCreatureData.emissiveMultiplier);
             }

@@ -399,6 +399,9 @@ namespace WizshBoneTwitchIntegration
             CommandManager.Instance.AddConsoleCommand(new SetQuickRedeemCommand());
             CommandManager.Instance.AddConsoleCommand(new TestCommand());
             CommandManager.Instance.AddConsoleCommand(new UseRedeemCommand());
+            CommandManager.Instance.AddConsoleCommand(new ScanCommand());
+            CommandManager.Instance.AddConsoleCommand(new ClaimCommand());
+            CommandManager.Instance.AddConsoleCommand(new UnclaimCommand());
         }
 
         private void InitAssetBundle()
@@ -442,6 +445,8 @@ namespace WizshBoneTwitchIntegration
             materials.RecolorCultist = assetBundle.LoadAsset<Material>("Cultist_recolor_WBTI");
             materials.RecolorCultistCape = assetBundle.LoadAsset<Material>("CultistCape_recolor_WBTI");
             materials.RecolorDeathsquito = assetBundle.LoadAsset<Material>("Deathsquito_recolor_WBTI");
+            materials.RecolorDeer = assetBundle.LoadAsset<Material>("Deer_recolor_WBTI");
+            materials.RecolorDeerAntlers = assetBundle.LoadAsset<Material>("Deer_antlers_recolor_WBTI");
             materials.RecolorDraugr = assetBundle.LoadAsset<Material>("Draugr_recolor_WBTI");
             materials.RecolorDraugrFem = assetBundle.LoadAsset<Material>("Draugr_Ranged_recolor_WBTI");
             materials.RecolorDraugrElite = assetBundle.LoadAsset<Material>("Draugr_Elite_recolor_WBTI");

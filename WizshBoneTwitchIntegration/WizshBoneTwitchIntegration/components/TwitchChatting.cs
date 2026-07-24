@@ -46,6 +46,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public void AddCreatureAssignment(TwitchCreatureAssignment assignment)
         {
             m_creatureAssignments.Add(assignment);
+            RefreshIndexDisplayForOwner(assignment.userName);
         }
 
         public void RemoveCreatureAssignment(TwitchCreatureAssignment assignment)
@@ -67,12 +68,68 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
 
             m_creatureAssignments.Remove(assignment);
+            RefreshIndexDisplayForOwner(assignment.userName);
         }
 
-        public void RemoveCreatureAssignment(string userName)
+        // Only counts manually-claimed (non-spawn) creatures currently loaded near a player.
+        // Lowercased on both sides since callers pass either the raw stored assignment.userName
+        // (from AddCreatureAssignment/RemoveCreatureAssignment) or an already-lowercased incoming
+        // chat/command username (from UnclaimForUser) - never assume either side's casing.
+        private List<TwitchCreatureAssignment> NonSpawnSiblings(string userName)
         {
-            TwitchCreatureAssignment assignment = m_creatureAssignments.Find(item => item.userName == userName);
-            RemoveCreatureAssignment(assignment);
+            return m_creatureAssignments
+                .Where(a => a.userName.ToLower() == userName.ToLower() && !(a.creature.GetComponent<TwitchCreatureClaim>()?.m_isSpawn ?? true))
+                .OrderBy(a => a.claimedAt)
+                .ToList();
+        }
+
+        // Renumbers (or clears) the [n] suffix shown in a claimed creature's name for every one of
+        // this owner's other currently-loaded manual claims - called whenever one is added/removed,
+        // since the whole set's numbering can shift when membership changes.
+        private void RefreshIndexDisplayForOwner(string userName)
+        {
+            List<TwitchCreatureAssignment> siblings = NonSpawnSiblings(userName);
+
+            for (int i = 0; i < siblings.Count; i++)
+            {
+                TwitchCreatureClaim claim = siblings[i].creature?.GetComponent<TwitchCreatureClaim>();
+                claim?.SetDisplayIndex(siblings.Count >= 2 ? (int?)(i + 1) : null);
+            }
+        }
+
+        // Single resolution point for both the real "!unclaim" chat command (TwitchChat.cs) and the
+        // WBTIUnclaim admin command - resolves the full set of matching assignments up front, from
+        // one stable snapshot, THEN releases them. Releasing a claim renumbers its still-remaining
+        // siblings (RefreshIndexDisplayForOwner) - resolving everyone who matches before releasing
+        // anyone means that renumbering can never change which claim(s) this call already decided
+        // to target, unlike re-deriving "who's number N" fresh after each release mid-loop.
+        public void UnclaimForUser(string userName, string target)
+        {
+            List<TwitchCreatureAssignment> owned = m_creatureAssignments
+                .Where(a => a.userName.ToLower() == userName.ToLower())
+                .ToList();
+
+            List<TwitchCreatureAssignment> toRelease;
+
+            if (string.IsNullOrEmpty(target))
+            {
+                toRelease = owned;
+            }
+            else if (int.TryParse(target, out int index))
+            {
+                List<TwitchCreatureAssignment> nonSpawnSiblings = NonSpawnSiblings(userName);
+                TwitchCreatureAssignment match = index >= 1 && index <= nonSpawnSiblings.Count ? nonSpawnSiblings[index - 1] : null;
+                toRelease = match != null ? new List<TwitchCreatureAssignment> { match } : new List<TwitchCreatureAssignment>();
+            }
+            else
+            {
+                toRelease = owned
+                    .Where(a => a.creature?.GetComponent<TwitchCreatureClaim>()?.MatchesNameTarget(target) ?? false)
+                    .ToList();
+            }
+
+            foreach (TwitchCreatureAssignment assignment in toRelease)
+                assignment.creature?.GetComponent<TwitchCreatureClaim>()?.Release();
         }
 
         public bool ContainsCreatureAssignment(TwitchCreatureAssignment assignment)
@@ -82,7 +139,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public bool ContainsCreatureAssignment(string userName)
         {
-            return m_creatureAssignments.Find(item => item.userName == userName) != null;
+            return m_creatureAssignments.Find(item => item.userName.ToLower() == userName.ToLower()) != null;
         }
 
         public List<TwitchCreatureAssignment> GetAllCreatureAssignments()
@@ -92,7 +149,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public TwitchCreatureAssignment GetCreatureAssignment(string userName)
         {
-            return m_creatureAssignments.Find(item => item.userName == userName);
+            return m_creatureAssignments.Find(item => item.userName.ToLower() == userName.ToLower());
         }
 
         public bool CanCreatureTalk(GameObject creature)
@@ -129,9 +186,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
         }
 
-        public void ScanAndAssignUsers(bool command = false)
+        public void ScanAndAssignUsers(bool bypassGate = false, bool forceClaim = false, string forceClaimUserName = null)
         {
-            if (!command && (!m_auth.m_loggedIn || !m_enabled))
+            if (!bypassGate && (!m_auth.m_loggedIn || !m_enabled))
                 return;
 
             List<GameObject> creatures = new List<GameObject>();
@@ -145,21 +202,26 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             foreach (Collider obj in objects)
             {
                 TwitchCreatureClaim creatureClaim = obj.GetComponent<TwitchCreatureClaim>();
-                Humanoid humanoid = obj.gameObject.GetComponent<Humanoid>();
-                MonsterAI monsterAI = obj.gameObject.GetComponent<MonsterAI>();
+                Character character = obj.gameObject.GetComponent<Character>();
+                // BaseAI (not MonsterAI) so AnimalAI-driven creatures (e.g. Deer) are eligible too -
+                // claiming itself never touches MonsterAI-specific behavior (see TwitchCreatureClaim).
+                BaseAI baseAI = obj.gameObject.GetComponent<BaseAI>();
 
-                if (monsterAI == null || creatureClaim != null)
+                if (baseAI == null || creatureClaim != null)
+                    continue;
+
+                if (ProfileSettingsHelper.Current.chattingIgnoreTames && character != null && character.m_tamed)
                     continue;
 
                 List<string> users = m_chat.GetUsersInChatHistory();
                 List<string> assignedUsers = m_creatureAssignments.Select(item => item.userName).ToList();
                 users.RemoveAll(item => assignedUsers.Contains(item));
 
-                if (command)
+                if (forceClaim)
                 {
                     TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
                     TwitchCreatureClaim newCreatureClaimn = obj.gameObject.AddComponent<TwitchCreatureClaim>();
-                    newCreatureClaimn.Init(customRewards.m_alias ?? "DeathWizsh");
+                    newCreatureClaimn.Init(forceClaimUserName ?? (customRewards.m_alias ?? "DeathWizsh"));
                     return;
                 }
 
@@ -180,7 +242,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 m_chosenUser = chosenUser;
                 m_chosenPrefab = obj.gameObject;
-                m_chat.Send($"{chosenUser} you have been selected to become a {Localization.instance.Localize(humanoid.m_name)}! Type \"!claim\" to accept.");
+                m_chat.Send($"{chosenUser} you have been selected to become a {Localization.instance.Localize(character.m_name)}! Type \"!claim\" to accept.");
                 break;
             }
         }
@@ -203,8 +265,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 return;
             }
 
-            Humanoid humanoid = m_chosenPrefab.GetComponent<Humanoid>();
-            m_chat.Send($"Creature {Localization.instance.Localize(humanoid.m_name)} is now claimed by {m_chosenUser}!");
+            Character character = m_chosenPrefab.GetComponent<Character>();
+            m_chat.Send($"Creature {Localization.instance.Localize(character.m_name)} is now claimed by {m_chosenUser}!");
 
             TwitchCreatureClaim newCreatureClaimn = m_chosenPrefab.AddComponent<TwitchCreatureClaim>();
             newCreatureClaimn.Init(m_chosenUser);

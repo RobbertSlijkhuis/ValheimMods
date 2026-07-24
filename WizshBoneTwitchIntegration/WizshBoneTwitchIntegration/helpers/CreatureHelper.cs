@@ -205,11 +205,17 @@ namespace WizshBoneTwitchIntegration.Helpers
                 }
             }
 
-            TwitchCreaturePersistentData persistentData = creature.AddComponent<TwitchCreaturePersistentData>();
-            persistentData.SetData(customRewardEvent.RedeemerName, creatureData, customRewardEvent.CustomRewardTitle, ignoreWard);
-
+            // Init runs before SetData so TwitchCreatureClaim.m_originalName captures the true
+            // pre-rename species name - SetData's ApplyHumanoid can rename the creature (via
+            // creatureData.rename) and running it first would make m_originalName just capture
+            // that already-renamed name instead, breaking !unclaim <name> matching against the
+            // creature's real species (mirrors the ordering TwitchCreaturePersistentData.Awake()
+            // already uses on reload: ReInit before ApplyCreatureData).
             TwitchCreatureClaim creatureClaim = creature.AddComponent<TwitchCreatureClaim>();
             creatureClaim.Init(creatureData, customRewardEvent);
+
+            TwitchCreaturePersistentData persistentData = creature.AddComponent<TwitchCreaturePersistentData>();
+            persistentData.SetData(customRewardEvent.RedeemerName, creatureData, customRewardEvent.CustomRewardTitle, ignoreWard);
 
             if (force > 0f)
             {
