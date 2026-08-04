@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using Jotunn.Managers;
 using TwitchSDK.Interop;
 using UnityEngine;
@@ -44,9 +42,6 @@ namespace WizshBoneTwitchIntegration.Gui
 
         // Stored so CreateCreateView can create a scrollable editor container
         private CreateScrollableContainerDelegate m_createScrollable;
-
-        // Working copy - mutated in memory and flushed to disk immediately by Save()
-        private List<RedeemData> m_workingRedeems = new List<RedeemData>();
 
         private static readonly string[] RedeemTypes = new[]
         {
@@ -140,8 +135,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         public void Refresh()
         {
-            m_workingRedeems = new List<RedeemData>(RedeemHelper.redeems);
-            m_redeemsLabel.text = $"Redeems - {ProfileManager.ActiveProfile}: {m_workingRedeems.Count}";
+            m_redeemsLabel.text = $"Redeems - {ProfileManager.ActiveProfile}: {RedeemHelper.redeems.Count}";
 
             bool isSynced = ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile);
             if (m_addNewBtn != null) m_addNewBtn.interactable = !isSynced;
@@ -195,7 +189,7 @@ namespace WizshBoneTwitchIntegration.Gui
             bool isSynced = ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile);
             float yOffset = -(ListTopPadding + ItemHeight / 2f);
 
-            foreach (RedeemData redeem in m_workingRedeems)
+            foreach (RedeemData redeem in RedeemHelper.redeems)
             {
                 if (!string.IsNullOrEmpty(m_searchText)
                     && redeem.title.IndexOf(m_searchText, System.StringComparison.OrdinalIgnoreCase) < 0
@@ -385,9 +379,9 @@ namespace WizshBoneTwitchIntegration.Gui
                 description: $"Are you sure you want to delete '{redeem.title}'?\nThis cannot be undone.",
                 onConfirm:   () =>
                 {
-                    m_workingRedeems.Remove(redeem);
-                    RedeemHelper.redeems = new List<RedeemData>(m_workingRedeems);
-                    Save($"'{redeem.title}' removed.");
+                    bool deleted = RedeemManager.DeleteRedeem(redeem, out string error);
+                    m_listFeedbackText.text = deleted ? $"'{redeem.title}' removed." : error;
+                    RefreshList();
                 },
                 confirmText: "Delete",
                 cancelText:  "Cancel"
@@ -415,15 +409,12 @@ namespace WizshBoneTwitchIntegration.Gui
 
             if (targetProfile == ProfileManager.ActiveProfile)
             {
-                if (m_workingRedeems.Exists(r => r.title == newTitle))
-                    return $"A redeem named '{newTitle}' already exists in '{targetProfile}'.";
+                bool copiedWithin = RedeemManager.CopyRedeemWithinActiveProfile(redeem, newTitle, out string withinError);
+                if (!copiedWithin)
+                    return withinError;
 
-                RedeemData copy = redeem.DeepClone<RedeemData>();
-                copy.title = newTitle;
-
-                m_workingRedeems.Add(copy);
-                RedeemHelper.redeems = new List<RedeemData>(m_workingRedeems);
-                Save($"Copied '{redeem.title}' to '{newTitle}'.");
+                m_listFeedbackText.text = $"Copied '{redeem.title}' to '{newTitle}'.";
+                RefreshList();
                 return null;
             }
 
@@ -432,43 +423,6 @@ namespace WizshBoneTwitchIntegration.Gui
                 m_listFeedbackText.text = $"Copied '{redeem.title}' to '{targetProfile}' as '{newTitle}'.";
 
             return copied ? null : error;
-        }
-
-        private void Save(string successMessage = "Saved!")
-        {
-            string path = ProfileManager.GetActiveRedeemPath();
-            string backupPath = path + ".bak";
-
-            try
-            {
-                if (File.Exists(path))
-                    File.Copy(path, backupPath, overwrite: true);
-
-                ModData data = ExtraConfigHelper.ReadRedeemsConfig(path) ?? new ModData();
-
-                ExtraConfigHelper.WriteRedeemsConfig(path, data.creatureGroups, m_workingRedeems);
-
-                RedeemHelper.Reload();
-                m_listFeedbackText.text = successMessage;
-
-                TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
-                if (customRewards.IsLoggedIn && customRewards.m_enabled)
-                    customRewards.SetRewards();
-            }
-            catch (Exception ex)
-            {
-                Jotunn.Logger.LogError($"Failed to save redeems, restoring backup: {ex}");
-
-                if (File.Exists(backupPath))
-                {
-                    File.Copy(backupPath, path, overwrite: true);
-                    RedeemHelper.Reload();
-                }
-
-                m_listFeedbackText.text = "Save failed! Restored previous redeems file.";
-            }
-
-            RefreshList();
         }
 
         // =====================================================================
@@ -681,29 +635,29 @@ namespace WizshBoneTwitchIntegration.Gui
                 return;
             }
 
+            bool success;
+            string error;
+            string successMessage;
+
             if (m_editingOriginal != null)
             {
-                int index = m_workingRedeems.IndexOf(m_editingOriginal);
-                if (index >= 0)
-                    m_workingRedeems[index] = m_newRedeem;
-
-                RedeemHelper.redeems = new List<RedeemData>(m_workingRedeems);
-                Save($"'{m_newRedeem.title}' updated.");
-                ShowListView();
+                success = RedeemManager.UpdateRedeem(m_editingOriginal, m_newRedeem, out error);
+                successMessage = $"'{m_newRedeem.title}' updated.";
             }
             else
             {
-                if (m_workingRedeems.Exists(r => r.title == m_newRedeem.title))
-                {
-                    m_createFeedbackText.text = $"A redeem named '{m_newRedeem.title}' already exists.";
-                    return;
-                }
-
-                m_workingRedeems.Add(m_newRedeem);
-                RedeemHelper.redeems = new List<RedeemData>(m_workingRedeems);
-                Save($"'{m_newRedeem.title}' added.");
-                ShowListView();
+                success = RedeemManager.AddRedeem(m_newRedeem, out error);
+                successMessage = $"'{m_newRedeem.title}' added.";
             }
+
+            if (!success)
+            {
+                m_createFeedbackText.text = error;
+                return;
+            }
+
+            m_listFeedbackText.text = successMessage;
+            ShowListView();
         }
 
         private void RebuildStandardFields()
@@ -848,8 +802,9 @@ namespace WizshBoneTwitchIntegration.Gui
                     description: $"Auto-resolve is off. Pending '{redeem.title}' redeems won't be refunded automatically. Are you sure?",
                     onConfirm:   () =>
                     {
-                        redeem.enabled = false;
-                        Save();
+                        RedeemManager.SetEnabled(redeem, false, out string disableError);
+                        m_listFeedbackText.text = disableError ?? "Saved!";
+                        RefreshList();
                     },
                     confirmText: "Disable",
                     cancelText:  "Open history",
@@ -858,8 +813,9 @@ namespace WizshBoneTwitchIntegration.Gui
                 return;
             }
 
-            redeem.enabled = !redeem.enabled;
-            Save();
+            RedeemManager.SetEnabled(redeem, !redeem.enabled, out string error);
+            m_listFeedbackText.text = error ?? "Saved!";
+            RefreshList();
         }
 
         private void OnSearchChanged(string value)

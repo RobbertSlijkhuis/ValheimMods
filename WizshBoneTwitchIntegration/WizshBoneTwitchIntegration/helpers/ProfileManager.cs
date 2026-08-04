@@ -55,17 +55,25 @@ namespace WizshBoneTwitchIntegration.Helpers
                 : DefaultProfileName;
 
             if (!Directory.Exists($"{ProfilesPath}/{ActiveProfile}"))
-                CreateProfile(ActiveProfile, migrate: true);
+                CreateProfile(ActiveProfile, out _, migrate: true);
         }
 
-        public static bool CreateProfile(string name, bool migrate = false)
+        public static bool CreateProfile(string name, out string error, bool migrate = false)
         {
+            error = null;
+
+            if (!IsValidProfileName(name, out error))
+                return false;
+
             string profilePath  = $"{ProfilesPath}/{name}";
             string redeemPath   = $"{profilePath}/redeems.yaml";
             string settingsPath = $"{profilePath}/settings.yaml";
 
             if (Directory.Exists(profilePath))
+            {
+                error = $"A profile named '{name}' already exists.";
                 return false;
+            }
 
             Directory.CreateDirectory(profilePath);
 

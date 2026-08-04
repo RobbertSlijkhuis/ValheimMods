@@ -76,7 +76,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             try
             {
                 // Create the profile folder if it doesn't exist yet
-                ProfileManager.CreateProfile(profileName);
+                ProfileManager.CreateProfile(profileName, out _);
 
                 string destPath = ProfileManager.GetRedeemPath(profileName);
                 File.WriteAllText(destPath, yamlContent);

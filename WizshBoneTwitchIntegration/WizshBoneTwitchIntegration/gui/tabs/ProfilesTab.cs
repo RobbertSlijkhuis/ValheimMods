@@ -368,12 +368,9 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private string HandleCreateConfirm(string name)
         {
-            if (string.IsNullOrEmpty(name))
-                return "Please enter a profile name.";
-
-            bool created = ProfileManager.CreateProfile(name);
+            bool created = ProfileManager.CreateProfile(name, out string error);
             if (!created)
-                return $"Profile '{name}' already exists.";
+                return error;
 
             m_profileFeedbackText.text = $"Profile '{name}' created!";
             Refresh();

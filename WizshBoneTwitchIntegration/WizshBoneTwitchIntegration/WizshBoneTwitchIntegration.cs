@@ -401,6 +401,8 @@ namespace WizshBoneTwitchIntegration
             CommandManager.Instance.AddConsoleCommand(new ScanCommand());
             CommandManager.Instance.AddConsoleCommand(new ClaimCommand());
             CommandManager.Instance.AddConsoleCommand(new UnclaimCommand());
+            CommandManager.Instance.AddConsoleCommand(new TestProfilesCommand());
+            CommandManager.Instance.AddConsoleCommand(new TestRedeemsCommand());
         }
 
         private void InitAssetBundle()
