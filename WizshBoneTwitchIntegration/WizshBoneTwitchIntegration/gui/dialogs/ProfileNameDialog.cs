@@ -9,7 +9,8 @@ namespace WizshBoneTwitchIntegration.Gui
     {
         Import,
         Copy,
-        Rename
+        Rename,
+        Create
     }
 
     /// <summary>
@@ -210,6 +211,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 case ProfileNameDialogMode.Import: return "Import Profile";
                 case ProfileNameDialogMode.Copy:   return "Copy Profile";
                 case ProfileNameDialogMode.Rename: return "Rename Profile";
+                case ProfileNameDialogMode.Create: return "New Profile";
                 default:                           return "";
             }
         }
@@ -221,6 +223,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 case ProfileNameDialogMode.Import: return "Leave the name unchanged to update the existing profile.\nChange it to import as a new profile.";
                 case ProfileNameDialogMode.Copy:   return "Enter a name for the new profile copy.";
                 case ProfileNameDialogMode.Rename: return "Enter a new name for this profile.";
+                case ProfileNameDialogMode.Create: return "Enter a name for the new profile.";
                 default:                           return "";
             }
         }
@@ -232,6 +235,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 case ProfileNameDialogMode.Import: return "Import";
                 case ProfileNameDialogMode.Copy:   return "Copy";
                 case ProfileNameDialogMode.Rename: return "Rename";
+                case ProfileNameDialogMode.Create: return "Create";
                 default:                           return "Confirm";
             }
         }

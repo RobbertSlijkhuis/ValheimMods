@@ -45,6 +45,19 @@ namespace WizshBoneTwitchIntegration.Gui
         }
 
         /// <summary>
+        /// Adds a thin colored outline around a button's background image, matching its label
+        /// color - GUIManager.Instance.CreateButton's root GameObject carries both the Button and
+        /// its Image directly, so Outline (a Shadow variant that draws 4 diagonally-offset copies)
+        /// applied there reads as a border around the button.
+        /// </summary>
+        public static void AddBorder(GameObject buttonObj, Color color)
+        {
+            Outline outline = buttonObj.AddComponent<Outline>();
+            outline.effectColor = color;
+            outline.effectDistance = new Vector2(2f, 2f);
+        }
+
+        /// <summary>
         /// Creates a top-center anchored invisible container used to hold editor fields
         /// inside a scroll view content object.
         /// </summary>

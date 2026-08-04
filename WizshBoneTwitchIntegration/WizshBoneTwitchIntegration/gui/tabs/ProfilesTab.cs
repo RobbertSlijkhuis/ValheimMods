@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using Jotunn.Managers;
@@ -12,39 +12,45 @@ namespace WizshBoneTwitchIntegration.Gui
     internal class ProfilesTab
     {
         private GameObject m_root;
-        private InputField m_profileNameInput;
         private GameObject m_profileListContainer;
         private Text m_profileFeedbackText;
-        private Button m_syncButton;
+        private string m_searchText = "";
         private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
         private readonly ProfileNameDialog m_profileNameDialog = new ProfileNameDialog();
 
-        private const float ButtonWidth       = 330f;
-        private const float ButtonHeight      = 40f;
-        private const float ActiveButtonHeight = 56f;
-        private const float ButtonSpacing     = 5f;
-        private const float ButtonCenterX     = -35f;
+        private const float ItemHeight     = 40f;
+        private const float ItemSpacing    = 5f;
+        private const float ListTopPadding = 15f;
 
-        private const float ListTopPadding   = 15f;
-        private const float HeaderTopPadding = 30f;
-        private const float ContentTopY      = -(108f + HeaderTopPadding);
+        private const float ColNameX = -370f;
+        private const float ColNameW = 260f;
 
-        private const float ScrollViewLeft    = ButtonCenterX - ButtonWidth / 2f;
-        private const float InputFieldCenterX = ScrollViewLeft + ButtonWidth / 2f;
-        private const float ActionBtnWidth    = 80f;
-        private const float CreateBtnCenterX  = ScrollViewLeft + ButtonWidth + ButtonSpacing + ActionBtnWidth / 2f;
+        private const float ColCountX = -155f;
+        private const float ColCountW = 140f;
 
-        private const float RenameButtonWidth = 60f;
-        private const float RenameButtonX     = ButtonCenterX + ButtonWidth / 2f + ButtonSpacing + RenameButtonWidth / 2f;
-        private const float SecondaryButtonX  = RenameButtonX + RenameButtonWidth / 2f + ButtonSpacing + ButtonHeight / 2f;
+        // Row action buttons chain left-to-right: Copy, Import, Export, Sync, Edit, then
+        // either Reload (active row) or Delete (every other row) share the same rightmost slot.
+        private const float CopyBtnWidth      = 70f;
+        private const float ImportBtnWidth    = 80f;
+        private const float ExportBtnWidth    = 80f;
+        private const float SyncBtnWidth      = 80f;
+        private const float EditBtnWidth      = 80f;
+        private const float DeleteReloadWidth = 40f;
 
-        private const float ScrollViewRight  = 350f;
-        private const float BottomBtnHeight  = 60f;
-        private const float BottomBtnY       = 50f;
-        private const float SyncBtnBottomX   = ScrollViewRight - ActionBtnWidth / 2f;
-        private const float ExportBtnBottomX = SyncBtnBottomX - ActionBtnWidth - ButtonSpacing;
-        private const float ImportBtnBottomX = ExportBtnBottomX - ActionBtnWidth - ButtonSpacing;
-        private const float CopyBtnBottomX   = ImportBtnBottomX - ActionBtnWidth - ButtonSpacing;
+        private const float BtnCopyX   = -40f;
+        private const float BtnImportX = BtnCopyX + CopyBtnWidth / 2f + ItemSpacing + ImportBtnWidth / 2f;
+        private const float BtnExportX = BtnImportX + ImportBtnWidth / 2f + ItemSpacing + ExportBtnWidth / 2f;
+        private const float BtnSyncX   = BtnExportX + ExportBtnWidth / 2f + ItemSpacing + SyncBtnWidth / 2f;
+        private const float BtnEditX   = BtnSyncX + SyncBtnWidth / 2f + ItemSpacing + EditBtnWidth / 2f;
+        private const float BtnDeleteReloadX = BtnEditX + EditBtnWidth / 2f + ItemSpacing + DeleteReloadWidth / 2f;
+
+        // Spans the whole Copy..Delete/Reload button cluster, for the "Actions" column header.
+        private const float ActionsClusterLeft  = BtnCopyX - CopyBtnWidth / 2f;
+        private const float ActionsClusterRight = BtnDeleteReloadX + DeleteReloadWidth / 2f;
+        private const float ColActionsX = (ActionsClusterLeft + ActionsClusterRight) / 2f;
+        private const float ColActionsW = ActionsClusterRight - ActionsClusterLeft;
+
+        private const float NewProfileBtnWidth = 100f;
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
         private struct OpenFileName
@@ -89,201 +95,289 @@ namespace WizshBoneTwitchIntegration.Gui
             m_confirmDialog.Init();
             m_profileNameDialog.Init();
 
-            TabUIHelper.CreateTabTitle("New profile name:", m_root, new Vector2(InputFieldCenterX, ContentTopY), width: ButtonWidth);
+            var options = new TabListLayoutOptions
+            {
+                TitleText         = "Profiles:",
+                SearchPlaceholder = "Search profiles...",
 
-            m_profileNameInput = FieldUIBuilder.CreateInputField(m_root, new Vector2(InputFieldCenterX, ContentTopY - 30f), ButtonWidth);
+                ShowSearchBar   = true,
+                OnSearchChanged = OnSearchChanged,
 
-            GameObject createBtn = GUIManager.Instance.CreateButton(
-                text: "Create",
-                parent: m_root.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(CreateBtnCenterX, ContentTopY - 30f),
-                width: ActionBtnWidth,
-                height: ButtonHeight
-            );
-            createBtn.SetActive(true);
-            createBtn.GetComponent<Button>().onClick.AddListener(OnCreateProfile);
+                HeaderButtons = new List<HeaderButtonSpec>
+                {
+                    new HeaderButtonSpec("+ New", NewProfileBtnWidth, OnCreateProfile),
+                },
 
-            GameObject copyBtn = GUIManager.Instance.CreateButton(
-                text: "Copy",
-                parent: m_root.transform,
-                anchorMin: new Vector2(0.5f, 0f),
-                anchorMax: new Vector2(0.5f, 0f),
-                position: new Vector2(CopyBtnBottomX, BottomBtnY),
-                width: ActionBtnWidth,
-                height: BottomBtnHeight
-            );
-            copyBtn.SetActive(true);
-            copyBtn.GetComponent<Button>().onClick.AddListener(OnCopyProfile);
+                ColumnHeaders = new List<ColumnHeaderSpec>
+                {
+                    new ColumnHeaderSpec("Name", ColNameX, ColNameW, TextAnchor.MiddleLeft),
+                    new ColumnHeaderSpec("Redeem amount", ColCountX, ColCountW, TextAnchor.MiddleCenter),
+                    new ColumnHeaderSpec("Actions", ColActionsX, ColActionsW, TextAnchor.MiddleCenter),
+                },
 
-            GameObject importBtn = GUIManager.Instance.CreateButton(
-                text: "Import",
-                parent: m_root.transform,
-                anchorMin: new Vector2(0.5f, 0f),
-                anchorMax: new Vector2(0.5f, 0f),
-                position: new Vector2(ImportBtnBottomX, BottomBtnY),
-                width: ActionBtnWidth,
-                height: BottomBtnHeight
-            );
-            importBtn.SetActive(true);
-            importBtn.GetComponent<Button>().onClick.AddListener(OnImportProfile);
+                MainContainerName = "ProfileList",
+            };
 
-            GameObject exportBtn = GUIManager.Instance.CreateButton(
-                text: "Export",
-                parent: m_root.transform,
-                anchorMin: new Vector2(0.5f, 0f),
-                anchorMax: new Vector2(0.5f, 0f),
-                position: new Vector2(ExportBtnBottomX, BottomBtnY),
-                width: ActionBtnWidth,
-                height: BottomBtnHeight
-            );
-            exportBtn.SetActive(true);
-            exportBtn.GetComponent<Button>().onClick.AddListener(OnExportProfile);
+            TabListLayoutResult result = TabListLayout.Create(m_root, "ListView", createScrollable, options);
+            result.ListView.SetActive(true);
 
-            GameObject syncBtnObj = GUIManager.Instance.CreateButton(
-                text: "Sync",
-                parent: m_root.transform,
-                anchorMin: new Vector2(0.5f, 0f),
-                anchorMax: new Vector2(0.5f, 0f),
-                position: new Vector2(SyncBtnBottomX, BottomBtnY),
-                width: ActionBtnWidth,
-                height: BottomBtnHeight
-            );
-            syncBtnObj.SetActive(true);
-            m_syncButton = syncBtnObj.GetComponent<Button>();
-            m_syncButton.onClick.AddListener(OnSyncProfile);
-
-            m_profileFeedbackText = GUIManager.Instance.CreateText(
-                text: "",
-                parent: m_root.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(ScrollViewLeft + 300f, ContentTopY - 60f),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: FieldUIBuilder.LabelFontSize,
-                color: GUIManager.Instance.ValheimYellow,
-                outline: true,
-                outlineColor: Color.black,
-                width: 600f,
-                height: 20f,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-
-            TabUIHelper.CreateTabTitle("Available profiles:", m_root, new Vector2(-110f, ContentTopY - 87f), width: 180f);
-
-            m_profileListContainer = createScrollable("ProfileList", m_root, ContentTopY - 107f);
+            m_profileFeedbackText  = result.FeedbackText;
+            m_profileListContainer = result.MainContainer;
 
             return m_root;
         }
 
         public void Refresh()
         {
+            RefreshList();
+        }
+
+        private void RefreshList()
+        {
             TabUIHelper.ClearContainer(m_profileListContainer);
 
-            if (m_syncButton != null)
-                m_syncButton.interactable = !ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile);
-
             List<string> profiles = ProfileManager.GetProfiles();
-            float yOffset = -(ListTopPadding + ButtonHeight / 2f);
+            float yOffset = -(ListTopPadding + ItemHeight / 2f);
 
             foreach (string profile in profiles)
             {
-                bool isActive = profile == ProfileManager.ActiveProfile;
+                if (!string.IsNullOrEmpty(m_searchText)
+                    && profile.IndexOf(m_searchText, System.StringComparison.OrdinalIgnoreCase) < 0)
+                    continue;
+
                 string profileName = profile;
-                float btnHeight = isActive ? ActiveButtonHeight : ButtonHeight;
+                bool isActive = profile == ProfileManager.ActiveProfile;
+                bool isSynced = ProfileManager.IsSyncedProfile(profile);
 
-                yOffset -= isActive ? (ActiveButtonHeight - ButtonHeight) / 2f : 0f;
+                GameObject row = new GameObject("ProfileRow");
+                row.transform.SetParent(m_profileListContainer.transform, false);
 
-                GameObject btn = GUIManager.Instance.CreateButton(
+                RectTransform rowRt = row.AddComponent<RectTransform>();
+                rowRt.anchorMin        = new Vector2(0f, 1f);
+                rowRt.anchorMax        = new Vector2(1f, 1f);
+                rowRt.pivot            = new Vector2(0.5f, 0.5f);
+                rowRt.anchoredPosition = new Vector2(0f, yOffset);
+                rowRt.sizeDelta        = new Vector2(0f, ItemHeight);
+
+                Image rowBackground = row.AddComponent<Image>();
+                var revealOnHover = new List<GameObject>();
+
+                Text nameText = GUIManager.Instance.CreateText(
                     text: profile,
-                    parent: m_profileListContainer.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(ButtonCenterX, yOffset),
-                    width: ButtonWidth,
-                    height: btnHeight
+                    parent: row.transform,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: new Vector2(ColNameX, 0f),
+                    font: GUIManager.Instance.AveriaSerifBold,
+                    fontSize: FieldUIBuilder.LabelFontSize,
+                    color: isActive ? GUIManager.Instance.ValheimOrange : GUIManager.Instance.ValheimBeige,
+                    outline: true,
+                    outlineColor: Color.black,
+                    width: ColNameW,
+                    height: ItemHeight,
+                    addContentSizeFitter: false
+                ).GetComponent<Text>();
+                nameText.alignment = TextAnchor.MiddleLeft;
+
+                var redeemConfig = ExtraConfigHelper.ReadRedeemsConfig(ProfileManager.GetRedeemPath(profile));
+                int redeemCount = redeemConfig?.redeems?.Count ?? 0;
+
+                Text countText = GUIManager.Instance.CreateText(
+                    text: $"{redeemCount} redeems",
+                    parent: row.transform,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: new Vector2(ColCountX, 0f),
+                    font: GUIManager.Instance.AveriaSerifBold,
+                    fontSize: FieldUIBuilder.LabelFontSize,
+                    color: GUIManager.Instance.ValheimBeige,
+                    outline: true,
+                    outlineColor: Color.black,
+                    width: ColCountW,
+                    height: ItemHeight,
+                    addContentSizeFitter: false
+                ).GetComponent<Text>();
+                countText.alignment = TextAnchor.MiddleCenter;
+
+                // The row itself is clickable (selects this profile) - purely functional, no visual
+                // transition of its own; RowHoverReveal (added below) owns the hover-darken look.
+                Button rowSelectButton = row.AddComponent<Button>();
+                rowSelectButton.targetGraphic = rowBackground;
+                rowSelectButton.transition = Selectable.Transition.None;
+                if (!isActive)
+                    rowSelectButton.onClick.AddListener(() => OnSelectProfile(profileName));
+
+                GameObject copyBtn = GUIManager.Instance.CreateButton(
+                    text: "Copy",
+                    parent: row.transform,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: new Vector2(BtnCopyX, 0f),
+                    width: CopyBtnWidth,
+                    height: ItemHeight
                 );
-                btn.SetActive(true);
-                btn.GetComponentInChildren<Text>().color = isActive
-                    ? GUIManager.Instance.ValheimOrange
-                    : GUIManager.Instance.ValheimBeige;
+                copyBtn.GetComponentInChildren<Text>().color = Color.yellow;
+                TabUIHelper.AddBorder(copyBtn, Color.yellow);
+                copyBtn.GetComponent<Button>().onClick.AddListener(() => OnRowCopy(profileName));
+                revealOnHover.Add(copyBtn);
+
+                GameObject importBtn = GUIManager.Instance.CreateButton(
+                    text: "Import",
+                    parent: row.transform,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: new Vector2(BtnImportX, 0f),
+                    width: ImportBtnWidth,
+                    height: ItemHeight
+                );
+                importBtn.GetComponentInChildren<Text>().color = Color.yellow;
+                TabUIHelper.AddBorder(importBtn, Color.yellow);
+                importBtn.GetComponent<Button>().onClick.AddListener(() => OnRowImport(profileName));
+                revealOnHover.Add(importBtn);
+
+                GameObject exportBtn = GUIManager.Instance.CreateButton(
+                    text: "Export",
+                    parent: row.transform,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: new Vector2(BtnExportX, 0f),
+                    width: ExportBtnWidth,
+                    height: ItemHeight
+                );
+                exportBtn.GetComponentInChildren<Text>().color = Color.yellow;
+                TabUIHelper.AddBorder(exportBtn, Color.yellow);
+                exportBtn.GetComponent<Button>().onClick.AddListener(() => OnRowExport(profileName));
+                revealOnHover.Add(exportBtn);
+
+                GameObject syncBtn = GUIManager.Instance.CreateButton(
+                    text: "Sync",
+                    parent: row.transform,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: new Vector2(BtnSyncX, 0f),
+                    width: SyncBtnWidth,
+                    height: ItemHeight
+                );
+                syncBtn.GetComponentInChildren<Text>().color = Color.yellow;
+                TabUIHelper.AddBorder(syncBtn, Color.yellow);
+                syncBtn.GetComponent<Button>().interactable = !isSynced;
+                syncBtn.GetComponent<Button>().onClick.AddListener(() => OnRowSync(profileName));
+                revealOnHover.Add(syncBtn);
+
+                // The Reload/Delete slot stays permanently visible (not added to revealOnHover) so
+                // a row isn't empty-looking until hovered - Edit joins Copy/Import/Export/Sync above
+                // as hover-gated.
+                GameObject editBtn = GUIManager.Instance.CreateButton(
+                    text: "Edit",
+                    parent: row.transform,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: new Vector2(BtnEditX, 0f),
+                    width: EditBtnWidth,
+                    height: ItemHeight
+                );
+                editBtn.GetComponentInChildren<Text>().color = Color.cyan;
+                TabUIHelper.AddBorder(editBtn, Color.cyan);
+                editBtn.GetComponent<Button>().interactable = !isSynced;
+                editBtn.GetComponent<Button>().onClick.AddListener(() => OnRenameProfile(profileName));
+                revealOnHover.Add(editBtn);
 
                 if (isActive)
                 {
                     GameObject reloadBtn = GUIManager.Instance.CreateButton(
                         text: "↺",
-                        parent: m_profileListContainer.transform,
-                        anchorMin: new Vector2(0.5f, 1f),
-                        anchorMax: new Vector2(0.5f, 1f),
-                        position: new Vector2(SecondaryButtonX, yOffset),
-                        width: ButtonHeight,
-                        height: btnHeight
+                        parent: row.transform,
+                        anchorMin: new Vector2(0.5f, 0.5f),
+                        anchorMax: new Vector2(0.5f, 0.5f),
+                        position: new Vector2(BtnDeleteReloadX, 0f),
+                        width: DeleteReloadWidth,
+                        height: ItemHeight
                     );
                     reloadBtn.SetActive(true);
                     reloadBtn.GetComponentInChildren<Text>().color = GUIManager.Instance.ValheimOrange;
+                    TabUIHelper.AddBorder(reloadBtn, GUIManager.Instance.ValheimOrange);
                     reloadBtn.GetComponent<Button>().onClick.AddListener(() => OnReloadProfile(profileName));
                 }
                 else
                 {
-                    btn.GetComponent<Button>().onClick.AddListener(() => OnSelectProfile(profileName));
-
                     GameObject deleteBtn = GUIManager.Instance.CreateButton(
                         text: "X",
-                        parent: m_profileListContainer.transform,
-                        anchorMin: new Vector2(0.5f, 1f),
-                        anchorMax: new Vector2(0.5f, 1f),
-                        position: new Vector2(SecondaryButtonX, yOffset),
-                        width: ButtonHeight,
-                        height: ButtonHeight
+                        parent: row.transform,
+                        anchorMin: new Vector2(0.5f, 0.5f),
+                        anchorMax: new Vector2(0.5f, 0.5f),
+                        position: new Vector2(BtnDeleteReloadX, 0f),
+                        width: DeleteReloadWidth,
+                        height: ItemHeight
                     );
                     deleteBtn.SetActive(true);
                     deleteBtn.GetComponentInChildren<Text>().color = Color.red;
+                    TabUIHelper.AddBorder(deleteBtn, Color.red);
                     deleteBtn.GetComponent<Button>().onClick.AddListener(() => OnDeleteProfile(profileName));
                 }
 
-                GameObject renameBtn = GUIManager.Instance.CreateButton(
-                    text: "Edit",
-                    parent: m_profileListContainer.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(RenameButtonX, yOffset),
-                    width: RenameButtonWidth,
-                    height: btnHeight
-                );
-                renameBtn.SetActive(true);
-                renameBtn.GetComponentInChildren<Text>().color = GUIManager.Instance.ValheimBeige;
-                renameBtn.GetComponent<Button>().interactable = !ProfileManager.IsSyncedProfile(profileName);
-                renameBtn.GetComponent<Button>().onClick.AddListener(() => OnRenameProfile(profileName));
+                row.AddComponent<RowHoverReveal>().Init(rowBackground, revealOnHover);
 
-                yOffset -= btnHeight + ButtonSpacing;
-                if (isActive) yOffset += (ActiveButtonHeight - ButtonHeight) / 2f;
+                yOffset -= ItemHeight + ItemSpacing;
             }
 
             RectTransform contentRt = m_profileListContainer.GetComponent<RectTransform>();
-            contentRt.sizeDelta = new Vector2(contentRt.sizeDelta.x, Mathf.Abs(yOffset) + ButtonHeight / 2f);
+            contentRt.sizeDelta = new Vector2(contentRt.sizeDelta.x, Mathf.Abs(yOffset) + ItemHeight / 2f);
+        }
+
+        private void EnsureActive(string name)
+        {
+            if (name == ProfileManager.ActiveProfile)
+                return;
+
+            ProfileManager.SelectProfile(name);
+            Refresh();
+        }
+
+        private void OnRowCopy(string name)
+        {
+            EnsureActive(name);
+            OnCopyProfile();
+        }
+
+        private void OnRowImport(string name)
+        {
+            EnsureActive(name);
+            OnImportProfile();
+        }
+
+        private void OnRowExport(string name)
+        {
+            EnsureActive(name);
+            OnExportProfile();
+        }
+
+        private void OnRowSync(string name)
+        {
+            EnsureActive(name);
+            OnSyncProfile();
         }
 
         private void OnCreateProfile()
         {
-            if (m_profileNameInput == null)
-                return;
+            m_profileNameDialog.Show(
+                mode:          ProfileNameDialogMode.Create,
+                suggestedName: "",
+                onConfirm:     HandleCreateConfirm
+            );
+        }
 
-            string name = m_profileNameInput.text.Trim();
-
+        private string HandleCreateConfirm(string name)
+        {
             if (string.IsNullOrEmpty(name))
-            {
-                m_profileFeedbackText.text = "Please enter a profile name.";
-                return;
-            }
+                return "Please enter a profile name.";
 
             bool created = ProfileManager.CreateProfile(name);
-            m_profileFeedbackText.text = created
-                ? $"Profile '{name}' created!"
-                : $"Profile '{name}' already exists.";
+            if (!created)
+                return $"Profile '{name}' already exists.";
 
-            m_profileNameInput.text = "";
+            m_profileFeedbackText.text = $"Profile '{name}' created!";
             Refresh();
+            return null;
         }
 
         private void OnCopyProfile()
@@ -488,6 +582,12 @@ namespace WizshBoneTwitchIntegration.Gui
                     Refresh();
                 }
             );
+        }
+
+        private void OnSearchChanged(string value)
+        {
+            m_searchText = value;
+            RefreshList();
         }
     }
 }

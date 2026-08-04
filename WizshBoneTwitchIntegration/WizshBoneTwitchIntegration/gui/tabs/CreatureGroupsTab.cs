@@ -37,9 +37,8 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private CreateScrollableContainerDelegate m_createScrollable;
 
-        // Working copy only flushed to disk on Save
+        // Working copy - mutated in memory and flushed to disk immediately by Save()
         private List<CreatureGroupData> m_workingGroups = new List<CreatureGroupData>();
-        private readonly HashSet<string> m_unsavedNames = new HashSet<string>();
         private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
 
         private GameObject m_createScrollContent;
@@ -57,8 +56,13 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float BtnEditX    = 380f;
         private const float BtnDeleteX  = 460f;
 
+        // Spans the whole Edit..Delete button cluster, for the "Actions" column header.
+        private const float ActionsClusterLeft   = BtnEditX - ActionButtonWidth / 2f;
+        private const float ActionsClusterRight  = BtnDeleteX + ItemHeight / 2f;
+        private const float ActionsClusterCenterX = (ActionsClusterLeft + ActionsClusterRight) / 2f;
+        private const float ActionsClusterWidth   = ActionsClusterRight - ActionsClusterLeft;
+
         private const float NewGroupBtnWidth      = 160f;
-        private const float SaveBtnWidth          = 80f;
         private const float ToggleRawViewBtnWidth = 170f;
 
         public GameObject Create(GameObject parent, CreateScrollableContainerDelegate createScrollable)
@@ -100,7 +104,13 @@ namespace WizshBoneTwitchIntegration.Gui
                 HeaderButtons = new List<HeaderButtonSpec>
                 {
                     new HeaderButtonSpec("+ New Group", NewGroupBtnWidth, ShowCreateView),
-                    new HeaderButtonSpec("Save", SaveBtnWidth, OnSave, textColor: new Color(0.2f, 0.8f, 0.2f)),
+                },
+
+                ColumnHeaders = new List<ColumnHeaderSpec>
+                {
+                    new ColumnHeaderSpec("Name", ColNameX, ColNameW, TextAnchor.MiddleLeft),
+                    new ColumnHeaderSpec("Creatures", ColSummaryX, ColSummaryW, TextAnchor.MiddleLeft),
+                    new ColumnHeaderSpec("Actions", ActionsClusterCenterX, ActionsClusterWidth, TextAnchor.MiddleCenter),
                 },
 
                 MainContainerName = "CreatureGroupList",
@@ -137,8 +147,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     continue;
 
                 CreatureGroupData captured = group;
-                bool isUnsaved = m_unsavedNames.Contains(group.group);
-                Color labelColor = isUnsaved ? GUIManager.Instance.ValheimOrange : GUIManager.Instance.ValheimBeige;
+                Color labelColor = GUIManager.Instance.ValheimBeige;
 
                 GameObject row = new GameObject("GroupRow");
                 row.transform.SetParent(m_listContainer.transform, false);
@@ -201,6 +210,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     height: ItemHeight
                 );
                 editBtn.GetComponentInChildren<Text>().color = Color.cyan;
+                TabUIHelper.AddBorder(editBtn, Color.cyan);
                 editBtn.GetComponent<Button>().onClick.AddListener(() => ShowEditView(captured));
                 revealOnHover.Add(editBtn);
 
@@ -215,6 +225,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 );
                 deleteBtn.SetActive(true);
                 deleteBtn.GetComponentInChildren<Text>().color = Color.red;
+                TabUIHelper.AddBorder(deleteBtn, Color.red);
                 deleteBtn.GetComponent<Button>().onClick.AddListener(() => OnDeleteGroup(captured));
 
                 row.AddComponent<RowHoverReveal>().Init(rowBackground, revealOnHover);
@@ -234,20 +245,17 @@ namespace WizshBoneTwitchIntegration.Gui
                 onConfirm:   () =>
                 {
                     m_workingGroups.Remove(group);
-                    m_unsavedNames.Remove(group.group);
-                    m_listFeedbackText.text = $"'{group.group}' removed. Press Save to apply.";
-                    RefreshList();
+                    Save($"'{group.group}' removed.");
                 },
                 confirmText: "Delete",
                 cancelText:  "Cancel"
             );
         }
 
-        private void OnSave()
+        private void Save(string successMessage = "Saved!")
         {
             string path = ProfileManager.GetActiveRedeemPath();
             string backupPath = path + ".bak";
-            HashSet<string> unsavedNamesBackup = new HashSet<string>(m_unsavedNames);
 
             try
             {
@@ -259,8 +267,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 ExtraConfigHelper.WriteRedeemsConfig(path, m_workingGroups, data.redeems);
 
                 RedeemHelper.Reload();
-                m_unsavedNames.Clear();
-                m_listFeedbackText.text = "Saved!";
+                m_listFeedbackText.text = successMessage;
             }
             catch (Exception ex)
             {
@@ -271,10 +278,6 @@ namespace WizshBoneTwitchIntegration.Gui
                     File.Copy(backupPath, path, overwrite: true);
                     RedeemHelper.Reload();
                 }
-
-                m_unsavedNames.Clear();
-                foreach (string name in unsavedNamesBackup)
-                    m_unsavedNames.Add(name);
 
                 m_listFeedbackText.text = "Save failed! Restored previous creature groups file.";
             }
@@ -416,9 +419,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 if (index >= 0)
                     m_workingGroups[index] = m_newGroup;
 
-                m_unsavedNames.Add(m_newGroup.group);
+                Save($"'{m_newGroup.group}' updated.");
                 ShowListView();
-                m_listFeedbackText.text = $"'{m_newGroup.group}' updated (unsaved). Press Save to persist.";
             }
             else
             {
@@ -429,9 +431,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 }
 
                 m_workingGroups.Add(m_newGroup);
-                m_unsavedNames.Add(m_newGroup.group);
+                Save($"'{m_newGroup.group}' added.");
                 ShowListView();
-                m_listFeedbackText.text = $"'{m_newGroup.group}' added (unsaved). Press Save to persist.";
             }
         }
 

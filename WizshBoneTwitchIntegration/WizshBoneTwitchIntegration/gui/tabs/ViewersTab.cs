@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Jotunn.Managers;
@@ -35,7 +36,6 @@ namespace WizshBoneTwitchIntegration.Gui
         private CreateScrollableContainerDelegate m_createScrollable;
 
         private List<ViewerEntry> m_workingViewers = new List<ViewerEntry>();
-        private readonly HashSet<string> m_unsavedNames = new HashSet<string>();
         private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
 
         private GameObject m_createScrollContent;
@@ -55,8 +55,13 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float BtnEditX    = 380f;
         private const float BtnDeleteX  = 460f;
 
+        // Spans the whole Edit..Delete button cluster, for the "Actions" column header.
+        private const float ActionsClusterLeft   = BtnEditX - ActionButtonWidth / 2f;
+        private const float ActionsClusterRight  = BtnDeleteX + ItemHeight / 2f;
+        private const float ActionsClusterCenterX = (ActionsClusterLeft + ActionsClusterRight) / 2f;
+        private const float ActionsClusterWidth   = ActionsClusterRight - ActionsClusterLeft;
+
         private const float NewViewerBtnWidth = 160f;
-        private const float SaveBtnWidth      = 80f;
 
         public GameObject Create(GameObject parent, CreateScrollableContainerDelegate createScrollable)
         {
@@ -97,7 +102,14 @@ namespace WizshBoneTwitchIntegration.Gui
                 HeaderButtons = new List<HeaderButtonSpec>
                 {
                     new HeaderButtonSpec("+ New Viewer", NewViewerBtnWidth, ShowCreateView),
-                    new HeaderButtonSpec("Save", SaveBtnWidth, OnSave, textColor: new Color(0.2f, 0.8f, 0.2f)),
+                },
+
+                ColumnHeaders = new List<ColumnHeaderSpec>
+                {
+                    new ColumnHeaderSpec("Name", ColNameX, ColNameW, TextAnchor.MiddleLeft),
+                    new ColumnHeaderSpec("Color", ColColor1X, ColColor1W, TextAnchor.MiddleCenter),
+                    new ColumnHeaderSpec("Effects", ColEffectsX, ColEffectsW, TextAnchor.MiddleLeft),
+                    new ColumnHeaderSpec("Actions", ActionsClusterCenterX, ActionsClusterWidth, TextAnchor.MiddleCenter),
                 },
 
                 MainContainerName = "ViewerList",
@@ -134,8 +146,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     continue;
 
                 ViewerEntry captured = viewer;
-                bool isUnsaved = m_unsavedNames.Contains(viewer.name);
-                Color labelColor = isUnsaved ? GUIManager.Instance.ValheimOrange : GUIManager.Instance.ValheimBeige;
+                Color labelColor = GUIManager.Instance.ValheimBeige;
 
                 GameObject row = new GameObject("ViewerRow");
                 row.transform.SetParent(m_viewerListContainer.transform, false);
@@ -219,6 +230,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     height: ItemHeight
                 );
                 editBtn.GetComponentInChildren<Text>().color = Color.cyan;
+                TabUIHelper.AddBorder(editBtn, Color.cyan);
                 editBtn.GetComponent<Button>().onClick.AddListener(() => ShowEditView(captured));
                 revealOnHover.Add(editBtn);
 
@@ -233,6 +245,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 );
                 deleteBtn.SetActive(true);
                 deleteBtn.GetComponentInChildren<Text>().color = Color.red;
+                TabUIHelper.AddBorder(deleteBtn, Color.red);
                 deleteBtn.GetComponent<Button>().onClick.AddListener(() => OnDeleteViewer(captured));
 
                 row.AddComponent<RowHoverReveal>().Init(rowBackground, revealOnHover);
@@ -252,38 +265,56 @@ namespace WizshBoneTwitchIntegration.Gui
                 onConfirm:   () =>
                 {
                     m_workingViewers.Remove(viewer);
-                    m_unsavedNames.Remove(viewer.name);
-                    m_listFeedbackText.text = $"'{viewer.name}' removed. Press Save to apply.";
-                    RefreshList();
+                    Save($"'{viewer.name}' removed.");
                 },
                 confirmText: "Delete",
                 cancelText:  "Cancel"
             );
         }
 
-        private void OnSave()
+        private void Save(string successMessage = "Saved!")
         {
-            List<Dictionary<string, object>> viewers = new List<Dictionary<string, object>>();
+            string path = WizshBoneTwitchIntegration.viewersPath;
+            string backupPath = path + ".bak";
 
-            foreach (ViewerEntry viewer in m_workingViewers)
-                viewers.Add(viewer.ToDictionary());
-
-            Dictionary<string, object> output = new Dictionary<string, object>
+            try
             {
-                { "viewers", viewers }
-            };
+                if (File.Exists(path))
+                    File.Copy(path, backupPath, overwrite: true);
 
-            ISerializer serializer = new SerializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
+                List<Dictionary<string, object>> viewers = new List<Dictionary<string, object>>();
 
-            using (StreamWriter writer = new StreamWriter(WizshBoneTwitchIntegration.viewersPath, append: false))
-                serializer.Serialize(writer, output);
+                foreach (ViewerEntry viewer in m_workingViewers)
+                    viewers.Add(viewer.ToDictionary());
 
-            RecolorHelper.ReloadViewersConfig();
+                Dictionary<string, object> output = new Dictionary<string, object>
+                {
+                    { "viewers", viewers }
+                };
 
-            m_unsavedNames.Clear();
-            m_listFeedbackText.text = "Saved!";
+                ISerializer serializer = new SerializerBuilder()
+                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                    .Build();
+
+                using (StreamWriter writer = new StreamWriter(path, append: false))
+                    serializer.Serialize(writer, output);
+
+                RecolorHelper.ReloadViewersConfig();
+                m_listFeedbackText.text = successMessage;
+            }
+            catch (Exception ex)
+            {
+                Jotunn.Logger.LogError($"Failed to save viewers, restoring backup: {ex}");
+
+                if (File.Exists(backupPath))
+                {
+                    File.Copy(backupPath, path, overwrite: true);
+                    RecolorHelper.ReloadViewersConfig();
+                }
+
+                m_listFeedbackText.text = "Save failed! Restored previous viewers file.";
+            }
+
             RefreshList();
         }
 
@@ -373,9 +404,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 if (index >= 0)
                     m_workingViewers[index] = m_newViewer;
 
-                m_unsavedNames.Add(m_newViewer.name);
+                Save($"'{m_newViewer.name}' updated.");
                 ShowListView();
-                m_listFeedbackText.text = $"'{m_newViewer.name}' updated (unsaved). Press Save to persist.";
             }
             else
             {
@@ -386,9 +416,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 }
 
                 m_workingViewers.Add(m_newViewer);
-                m_unsavedNames.Add(m_newViewer.name);
+                Save($"'{m_newViewer.name}' added.");
                 ShowListView();
-                m_listFeedbackText.text = $"'{m_newViewer.name}' added (unsaved). Press Save to persist.";
             }
         }
 

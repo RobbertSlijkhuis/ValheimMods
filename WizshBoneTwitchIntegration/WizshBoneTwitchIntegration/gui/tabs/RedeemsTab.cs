@@ -24,8 +24,6 @@ namespace WizshBoneTwitchIntegration.Gui
         private Text m_listFeedbackText;
         private string m_searchText = "";
         private Button m_addNewBtn;
-        private Button m_saveBtn;
-        private readonly ProfileSidebar m_profileSidebar = new ProfileSidebar();
 
         // Create view
         private GameObject m_createView;
@@ -47,9 +45,8 @@ namespace WizshBoneTwitchIntegration.Gui
         // Stored so CreateCreateView can create a scrollable editor container
         private CreateScrollableContainerDelegate m_createScrollable;
 
-        // Working copy only flushed to disk on Save
+        // Working copy - mutated in memory and flushed to disk immediately by Save()
         private List<RedeemData> m_workingRedeems = new List<RedeemData>();
-        private readonly HashSet<string> m_unsavedTitles = new HashSet<string>();
 
         private static readonly string[] RedeemTypes = new[]
         {
@@ -80,10 +77,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float ListTopPadding      = 15f;
         private const float ActionButtonWidth   = 80f;
 
-        // Row columns are relative to the redeem list container's own center, which - now that the
-        // container is inset on the left to make room for the sidebar - is narrower than before.
-        // Kept compact enough to fit inside that narrower container (including the scrollbar eating
-        // into its right edge), instead of the old values that assumed the container's full old width.
+        // Row columns are relative to the redeem list container's own center.
         private const float ColToggleX = -426f;
         private const float ColToggleW = 44f;
         private const float ColTitleX  = -284f;
@@ -99,8 +93,13 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float BtnCopyX   = BtnEditX + ActionButtonWidth / 2f + ButtonSpacing + CopyBtnWidth / 2f;
         private const float BtnDeleteX = BtnCopyX + CopyBtnWidth / 2f + ButtonSpacing + ButtonHeight / 2f;
 
+        // Spans the whole Test..Delete button cluster, for the "Actions" column header.
+        private const float ActionsClusterLeft   = BtnTestX - ActionButtonWidth / 2f;
+        private const float ActionsClusterRight  = BtnDeleteX + ButtonHeight / 2f;
+        private const float ActionsClusterCenterX = (ActionsClusterLeft + ActionsClusterRight) / 2f;
+        private const float ActionsClusterWidth   = ActionsClusterRight - ActionsClusterLeft;
+
         private const float NewRedeemBtnWidth = 160f;
-        private const float SaveBtnWidth      = 80f;
 
         private const float TypeLabelX    = -341f;
         private const float TypeLabelW    = 210f;
@@ -146,9 +145,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             bool isSynced = ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile);
             if (m_addNewBtn != null) m_addNewBtn.interactable = !isSynced;
-            if (m_saveBtn != null)   m_saveBtn.interactable   = !isSynced;
 
-            m_profileSidebar.Refresh();
             RefreshList();
         }
 
@@ -169,18 +166,16 @@ namespace WizshBoneTwitchIntegration.Gui
                 {
                     new HeaderButtonSpec("+ New Redeem", NewRedeemBtnWidth, ShowCreateView,
                         onCreated: obj => m_addNewBtn = obj.GetComponent<Button>()),
-                    new HeaderButtonSpec("Save", SaveBtnWidth, OnSave,
-                        textColor: new Color(0.2f, 0.8f, 0.2f),
-                        onCreated: obj => m_saveBtn = obj.GetComponent<Button>()),
                 },
 
-                SidebarAccessoryButton = new SidebarAccessoryButtonSpec("↺ Reload", OnReloadRedeems,
-                    textColor: GUIManager.Instance.ValheimOrange),
-
-                ShowSidebar      = true,
-                SidebarWidth     = ProfileSidebar.Width,
-                SidebarTitleText = "Profiles",
-                PopulateSidebar  = container => m_profileSidebar.Create(container, Refresh),
+                ColumnHeaders = new List<ColumnHeaderSpec>
+                {
+                    new ColumnHeaderSpec("On/Off", ColToggleX, ColToggleW, TextAnchor.MiddleCenter),
+                    new ColumnHeaderSpec("Title", ColTitleX, ColTitleW, TextAnchor.MiddleLeft),
+                    new ColumnHeaderSpec("Type", ColTypeX, ColTypeW, TextAnchor.MiddleCenter),
+                    new ColumnHeaderSpec("Cost", ColCostX, ColCostW, TextAnchor.MiddleRight),
+                    new ColumnHeaderSpec("Actions", ActionsClusterCenterX, ActionsClusterWidth, TextAnchor.MiddleCenter),
+                },
 
                 MainContainerName = "RedeemList",
             };
@@ -208,8 +203,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     continue;
 
                 RedeemData captured = redeem;
-                bool isUnsaved = m_unsavedTitles.Contains(redeem.title);
-                Color labelColor = isUnsaved ? GUIManager.Instance.ValheimOrange : GUIManager.Instance.ValheimBeige;
+                Color labelColor = GUIManager.Instance.ValheimBeige;
 
                 GameObject row = new GameObject("RedeemRow");
                 row.transform.SetParent(m_redeemListContainer.transform, false);
@@ -236,9 +230,11 @@ namespace WizshBoneTwitchIntegration.Gui
                         height: ButtonHeight
                     );
                     toggleBtn.SetActive(true);
-                    toggleBtn.GetComponentInChildren<Text>().color = captured.enabled
+                    Color toggleColor = captured.enabled
                         ? new Color(0.2f, 0.8f, 0.2f)
                         : new Color(0.8f, 0.2f, 0.2f);
+                    toggleBtn.GetComponentInChildren<Text>().color = toggleColor;
+                    TabUIHelper.AddBorder(toggleBtn, toggleColor);
                     toggleBtn.GetComponent<Button>().onClick.AddListener(() => OnToggleRedeem(captured));
                 }
 
@@ -303,6 +299,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     height: ButtonHeight
                 );
                 testBtn.GetComponentInChildren<Text>().color = Color.yellow;
+                TabUIHelper.AddBorder(testBtn, Color.yellow);
                 testBtn.GetComponent<Button>().onClick.AddListener(() => OnTestRedeem(captured));
                 testBtn.AddComponent<TooltipTrigger>().Init("Executes the redeem so you can see how it works in-game.");
                 revealOnHover.Add(testBtn);
@@ -320,6 +317,7 @@ namespace WizshBoneTwitchIntegration.Gui
                         height: ButtonHeight
                     );
                     showBtn.GetComponentInChildren<Text>().color = GUIManager.Instance.ValheimBeige;
+                    TabUIHelper.AddBorder(showBtn, GUIManager.Instance.ValheimBeige);
                     showBtn.GetComponent<Button>().onClick.AddListener(() => ShowViewOnlyView(captured));
                     revealOnHover.Add(showBtn);
                 }
@@ -335,6 +333,7 @@ namespace WizshBoneTwitchIntegration.Gui
                         height: ButtonHeight
                     );
                     editBtn.GetComponentInChildren<Text>().color = Color.cyan;
+                    TabUIHelper.AddBorder(editBtn, Color.cyan);
                     editBtn.GetComponent<Button>().onClick.AddListener(() => ShowEditView(captured));
                     revealOnHover.Add(editBtn);
                 }
@@ -349,6 +348,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     height: ButtonHeight
                 );
                 copyBtn.GetComponentInChildren<Text>().color = GUIManager.Instance.ValheimBeige;
+                TabUIHelper.AddBorder(copyBtn, GUIManager.Instance.ValheimBeige);
                 copyBtn.GetComponent<Button>().onClick.AddListener(() => OnCopyRedeem(captured));
                 revealOnHover.Add(copyBtn);
 
@@ -365,6 +365,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     );
                     deleteBtn.SetActive(true);
                     deleteBtn.GetComponentInChildren<Text>().color = Color.red;
+                    TabUIHelper.AddBorder(deleteBtn, Color.red);
                     deleteBtn.GetComponent<Button>().onClick.AddListener(() => OnDeleteRedeem(captured));
                 }
 
@@ -385,10 +386,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 onConfirm:   () =>
                 {
                     m_workingRedeems.Remove(redeem);
-                    m_unsavedTitles.Remove(redeem.title);
                     RedeemHelper.redeems = new List<RedeemData>(m_workingRedeems);
-                    m_listFeedbackText.text = $"'{redeem.title}' removed. Press Save to apply.";
-                    RefreshList();
+                    Save($"'{redeem.title}' removed.");
                 },
                 confirmText: "Delete",
                 cancelText:  "Cancel"
@@ -423,10 +422,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 copy.title = newTitle;
 
                 m_workingRedeems.Add(copy);
-                m_unsavedTitles.Add(newTitle);
                 RedeemHelper.redeems = new List<RedeemData>(m_workingRedeems);
-                RefreshList();
-                m_listFeedbackText.text = $"Copied '{redeem.title}' to '{newTitle}' (unsaved). Press Save to persist.";
+                Save($"Copied '{redeem.title}' to '{newTitle}'.");
                 return null;
             }
 
@@ -437,11 +434,10 @@ namespace WizshBoneTwitchIntegration.Gui
             return copied ? null : error;
         }
 
-        private void OnSave()
+        private void Save(string successMessage = "Saved!")
         {
             string path = ProfileManager.GetActiveRedeemPath();
             string backupPath = path + ".bak";
-            HashSet<string> unsavedTitlesBackup = new HashSet<string>(m_unsavedTitles);
 
             try
             {
@@ -453,8 +449,11 @@ namespace WizshBoneTwitchIntegration.Gui
                 ExtraConfigHelper.WriteRedeemsConfig(path, data.creatureGroups, m_workingRedeems);
 
                 RedeemHelper.Reload();
-                m_unsavedTitles.Clear();
-                m_listFeedbackText.text = "Saved!";
+                m_listFeedbackText.text = successMessage;
+
+                TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+                if (customRewards.IsLoggedIn && customRewards.m_enabled)
+                    customRewards.SetRewards();
             }
             catch (Exception ex)
             {
@@ -466,23 +465,10 @@ namespace WizshBoneTwitchIntegration.Gui
                     RedeemHelper.Reload();
                 }
 
-                m_unsavedTitles.Clear();
-                foreach (string title in unsavedTitlesBackup)
-                    m_unsavedTitles.Add(title);
-
                 m_listFeedbackText.text = "Save failed! Restored previous redeems file.";
             }
 
             RefreshList();
-        }
-
-        private void OnReloadRedeems()
-        {
-            TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
-            bool reloaded = customRewards != null ? customRewards.ReloadRewards() : RedeemHelper.Reload();
-
-            Refresh();
-            m_listFeedbackText.text = reloaded ? "Reloaded!" : "Failed to reload redeems.";
         }
 
         // =====================================================================
@@ -701,10 +687,9 @@ namespace WizshBoneTwitchIntegration.Gui
                 if (index >= 0)
                     m_workingRedeems[index] = m_newRedeem;
 
-                m_unsavedTitles.Add(m_newRedeem.title);
                 RedeemHelper.redeems = new List<RedeemData>(m_workingRedeems);
+                Save($"'{m_newRedeem.title}' updated.");
                 ShowListView();
-                m_listFeedbackText.text = $"'{m_newRedeem.title}' updated (unsaved). Press Save to persist.";
             }
             else
             {
@@ -715,10 +700,9 @@ namespace WizshBoneTwitchIntegration.Gui
                 }
 
                 m_workingRedeems.Add(m_newRedeem);
-                m_unsavedTitles.Add(m_newRedeem.title);
                 RedeemHelper.redeems = new List<RedeemData>(m_workingRedeems);
+                Save($"'{m_newRedeem.title}' added.");
                 ShowListView();
-                m_listFeedbackText.text = $"'{m_newRedeem.title}' added (unsaved). Press Save to persist.";
             }
         }
 
@@ -865,9 +849,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     onConfirm:   () =>
                     {
                         redeem.enabled = false;
-                        OnSave();
-                        if (customRewards.IsLoggedIn && customRewards.m_enabled)
-                            customRewards.SetRewards();
+                        Save();
                     },
                     confirmText: "Disable",
                     cancelText:  "Open history",
@@ -877,9 +859,7 @@ namespace WizshBoneTwitchIntegration.Gui
             }
 
             redeem.enabled = !redeem.enabled;
-            OnSave();
-            if (customRewards.IsLoggedIn && customRewards.m_enabled)
-                customRewards.SetRewards();
+            Save();
         }
 
         private void OnSearchChanged(string value)
