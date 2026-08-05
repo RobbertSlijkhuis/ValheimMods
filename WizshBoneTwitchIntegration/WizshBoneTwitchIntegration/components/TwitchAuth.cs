@@ -39,9 +39,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 m_customRewards = gameObject.GetComponent<TwitchCustomRewards>();
 
                 wizshBoneGUI = new WizshBoneGUI();
-                wizshBoneGUI.onLogin.AddListener(InvokeAuth);
-                wizshBoneGUI.onToggleRedeems.AddListener(ToggleRedeems);
-                wizshBoneGUI.onToggleChatting.AddListener(ToggleChatting);
 
                 wizshBoneHUD = new WizshBoneHUD();
                 GUIManager.OnCustomGUIAvailable += OnGUIAvailable;

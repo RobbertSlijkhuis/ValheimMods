@@ -22,6 +22,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private Text m_listFeedbackText;
         private string m_searchText = "";
         private Button m_addNewBtn;
+        private SearchableDropdown m_profileDropdown;
 
         // Create view
         private GameObject m_createView;
@@ -96,6 +97,27 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private const float NewRedeemBtnWidth = 160f;
 
+        // List view no longer goes through the shared TabListLayout (Redeems needs a row order -
+        // profile title/dropdown, then redeem title/search bar - that diverges from the other
+        // list tabs), so it owns its own Y-offsets here instead.
+        private const float ContentLeftEdgeX = WizshBoneSettingsGUI.ContentLeftEdgeX;
+        private const float SearchWidth        = 380f;
+        private const float FeedbackTextWidth  = 400f;
+        private const float FeedbackTextHeight = 25f;
+        private const float ColumnHeaderGap    = 12f;
+        private const float ColumnHeaderHeight = 20f;
+
+        private const float ProfileTitleWidth    = 300f;
+        private const float ProfileDropdownWidth = SearchWidth;
+        private const float ProfileRowHeight     = FieldUIBuilder.FieldHeight;
+        private const float RedeemsTitleWidth    = 400f;
+
+        private const float ProfileTitleY    = -(110f + 45f);       // top anchor, matches other list tabs' header row
+        private const float ProfileRowY      = ProfileTitleY - 33f; // title -> control gap
+        private const float RedeemsTitleY    = ProfileRowY - 38f;   // control row -> next title gap
+        private const float SearchBarRowY    = RedeemsTitleY - 33f; // title -> control gap
+        private const float ContentTopOffset = SearchBarRowY - 71f; // control row -> scrollable content gap
+
         private const float TypeLabelX    = -341f;
         private const float TypeLabelW    = 210f;
         private const float TypeDropdownW = 320f;
@@ -140,6 +162,10 @@ namespace WizshBoneTwitchIntegration.Gui
             bool isSynced = ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile);
             if (m_addNewBtn != null) m_addNewBtn.interactable = !isSynced;
 
+            // Keep the dropdown's option list and shown value in sync with profiles created/
+            // renamed/deleted elsewhere (e.g. the Profiles tab) since this tab was last shown.
+            m_profileDropdown?.SetOptions(ProfileManager.GetProfiles(), ProfileManager.ActiveProfile);
+
             RefreshList();
         }
 
@@ -149,37 +175,131 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void CreateListView(CreateScrollableContainerDelegate createScrollable)
         {
-            var options = new TabListLayoutOptions
+            m_listView = UIContainer.Create(m_root, "ListView");
+
+            CreateProfileSection();
+            CreateRedeemsHeader();
+            CreateSearchBarRow();
+            CreateColumnHeaders();
+
+            m_redeemListContainer = createScrollable("RedeemList", m_listView, ContentTopOffset);
+        }
+
+        private void CreateProfileSection()
+        {
+            TabUIHelper.CreateTabTitle(
+                "Profile",
+                m_listView,
+                new Vector2(ContentLeftEdgeX + ProfileTitleWidth / 2f, ProfileTitleY),
+                width: ProfileTitleWidth
+            );
+
+            m_profileDropdown = new SearchableDropdown();
+            m_profileDropdown.Build(m_listView, new Vector2(ContentLeftEdgeX + ProfileDropdownWidth / 2f, ProfileRowY),
+                ProfileDropdownWidth, ProfileRowHeight, ProfileManager.GetProfiles(), ProfileManager.ActiveProfile);
+            m_profileDropdown.OnValueChanged += OnProfileSelected;
+        }
+
+        private void CreateRedeemsHeader()
+        {
+            m_redeemsLabel = TabUIHelper.CreateTabTitle(
+                $"Redeems - {ProfileManager.ActiveProfile}:",
+                m_listView,
+                new Vector2(ContentLeftEdgeX + RedeemsTitleWidth / 2f, RedeemsTitleY),
+                width: RedeemsTitleWidth
+            );
+
+            float rightEdge = -ContentLeftEdgeX;
+
+            m_listFeedbackText = GUIManager.Instance.CreateText(
+                text: "",
+                parent: m_listView.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2((ContentLeftEdgeX + rightEdge) / 2f, RedeemsTitleY),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: TabUIHelper.TitleFontSize,
+                color: GUIManager.Instance.ValheimYellow,
+                outline: true,
+                outlineColor: Color.black,
+                width: FeedbackTextWidth,
+                height: FeedbackTextHeight,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+            m_listFeedbackText.alignment = TextAnchor.MiddleCenter;
+        }
+
+        private void CreateSearchBarRow()
+        {
+            InputField searchField = FieldUIBuilder.CreateInputField(
+                parent: m_listView,
+                position: new Vector2(ContentLeftEdgeX + SearchWidth / 2f, SearchBarRowY),
+                width: SearchWidth
+            );
+            searchField.placeholder.GetComponent<Text>().text = "Search...";
+            searchField.onValueChanged.AddListener(OnSearchChanged);
+
+            GameObject addNewBtnObj = GUIManager.Instance.CreateButton(
+                text: "+ New",
+                parent: m_listView.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(ContentLeftEdgeX + SearchWidth + ButtonSpacing + NewRedeemBtnWidth / 2f, SearchBarRowY),
+                width: NewRedeemBtnWidth,
+                height: 36f
+            );
+            addNewBtnObj.SetActive(true);
+            m_addNewBtn = addNewBtnObj.GetComponent<Button>();
+            m_addNewBtn.onClick.AddListener(ShowCreateView);
+        }
+
+        private void CreateColumnHeaders()
+        {
+            float headerY = ContentTopOffset + ColumnHeaderGap;
+
+            CreateColumnHeader("On/Off", ColToggleX, ColToggleW, headerY, TextAnchor.MiddleCenter);
+            CreateColumnHeader("Title", ColTitleX, ColTitleW, headerY, TextAnchor.MiddleLeft);
+            CreateColumnHeader("Type", ColTypeX, ColTypeW, headerY, TextAnchor.MiddleCenter);
+            CreateColumnHeader("Cost", ColCostX, ColCostW, headerY, TextAnchor.MiddleRight);
+            CreateColumnHeader("Actions", ActionsClusterCenterX, ActionsClusterWidth, headerY, TextAnchor.MiddleCenter);
+        }
+
+        private void CreateColumnHeader(string text, float x, float width, float y, TextAnchor alignment)
+        {
+            Text header = GUIManager.Instance.CreateText(
+                text: text,
+                parent: m_listView.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(x, y),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: FieldUIBuilder.LabelFontSize,
+                color: GUIManager.Instance.ValheimOrange,
+                outline: true,
+                outlineColor: Color.black,
+                width: width,
+                height: ColumnHeaderHeight,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+            header.alignment = alignment;
+        }
+
+        private void OnProfileSelected(string selected)
+        {
+            if (selected == ProfileManager.ActiveProfile)
+                return;
+
+            bool switched = ProfileManager.SelectProfile(selected);
+            if (!switched)
             {
-                TitleText = $"Redeems - {ProfileManager.ActiveProfile}:",
+                // Defensive only - the dropdown only ever lists ProfileManager.GetProfiles().
+                // SetOptions doesn't fire OnValueChanged, so this can't loop back into here.
+                m_profileDropdown.SetOptions(ProfileManager.GetProfiles(), ProfileManager.ActiveProfile);
+                m_listFeedbackText.text = $"Profile '{selected}' no longer exists.";
+                return;
+            }
 
-                ShowSearchBar   = true,
-                OnSearchChanged = OnSearchChanged,
-
-                HeaderButtons = new List<HeaderButtonSpec>
-                {
-                    new HeaderButtonSpec("+ New Redeem", NewRedeemBtnWidth, ShowCreateView,
-                        onCreated: obj => m_addNewBtn = obj.GetComponent<Button>()),
-                },
-
-                ColumnHeaders = new List<ColumnHeaderSpec>
-                {
-                    new ColumnHeaderSpec("On/Off", ColToggleX, ColToggleW, TextAnchor.MiddleCenter),
-                    new ColumnHeaderSpec("Title", ColTitleX, ColTitleW, TextAnchor.MiddleLeft),
-                    new ColumnHeaderSpec("Type", ColTypeX, ColTypeW, TextAnchor.MiddleCenter),
-                    new ColumnHeaderSpec("Cost", ColCostX, ColCostW, TextAnchor.MiddleRight),
-                    new ColumnHeaderSpec("Actions", ActionsClusterCenterX, ActionsClusterWidth, TextAnchor.MiddleCenter),
-                },
-
-                MainContainerName = "RedeemList",
-            };
-
-            TabListLayoutResult result = TabListLayout.Create(m_root, "ListView", createScrollable, options);
-
-            m_listView            = result.ListView;
-            m_redeemsLabel        = result.TitleLabel;
-            m_listFeedbackText    = result.FeedbackText;
-            m_redeemListContainer = result.MainContainer;
+            Refresh();
         }
 
         private void RefreshList()

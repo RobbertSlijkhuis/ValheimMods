@@ -1,3 +1,4 @@
+using System;
 using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,6 +25,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private readonly TwitchAuth m_auth;
 
         // Tab buttons
+        private Button m_homeTabButton;
         private Button m_profilesTabButton;
         private Button m_redeemsTabButton;
         private Button m_rulesTabButton;
@@ -31,12 +33,14 @@ namespace WizshBoneTwitchIntegration.Gui
         private Button m_viewersTabButton;
 
         // Tabs
+        private HomeTab m_homeTab = new HomeTab();
         private ProfilesTab m_profilesTab = new ProfilesTab();
         private RedeemsTab m_redeemsTab = new RedeemsTab();
         private RulesTab m_rulesTab = new RulesTab();
         private CreatureGroupsTab m_creatureGroupsTab = new CreatureGroupsTab();
         private ViewersTab m_viewersTab = new ViewersTab();
 
+        private GameObject m_homeTabRoot;
         private GameObject m_profilesTabRoot;
         private GameObject m_redeemsTabRoot;
         private GameObject m_rulesTabRoot;
@@ -90,7 +94,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private void CreateGUI()
         {
             GameObject titleObj = GUIManager.Instance.CreateText(
-                text: "Settings",
+                text: "WizshBone Twitch Integration",
                 parent: panel.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
@@ -100,7 +104,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 color: GUIManager.Instance.ValheimOrange,
                 outline: true,
                 outlineColor: Color.black,
-                width: 200f,
+                width: 600f,
                 height: 30f,
                 addContentSizeFitter: false
             );
@@ -108,24 +112,26 @@ namespace WizshBoneTwitchIntegration.Gui
 
             CreateTabButtons();
 
+            Action onOpenHistory = () =>
+            {
+                CloseSettings();
+                m_auth?.wizshBoneGUI.OpenRedeemHistory();
+            };
+
+            m_homeTabRoot = m_homeTab.Create(panel, CreateScrollableContainer, m_auth, onOpenHistory);
             m_profilesTabRoot = m_profilesTab.Create(panel, CreateScrollableContainer);
             m_redeemsTabRoot = m_redeemsTab.Create(panel, CreateScrollableContainer,
                 onCloseRequested: () =>
                 {
-                    m_auth?.wizshBoneGUI.SignalReopenSettings();
                     CloseSettings();
                     m_auth?.wizshBoneGUI.CloseGUI();
                 },
-                onOpenHistory: () =>
-                {
-                    CloseSettings();
-                    m_auth?.wizshBoneGUI.OpenRedeemHistory();
-                });
+                onOpenHistory: onOpenHistory);
             m_rulesTabRoot = m_rulesTab.Create(panel, CreateScrollableContainer);
             m_creatureGroupsTabRoot = m_creatureGroupsTab.Create(panel, CreateScrollableContainer);
             m_viewersTabRoot = m_viewersTab.Create(panel, CreateScrollableContainer);
 
-            ShowTab(m_profilesTabRoot, m_profilesTabButton);
+            ShowTab(m_homeTabRoot, m_homeTabButton);
 
             GameObject closeButtonObj = GUIManager.Instance.CreateButton(
                 text: "Close",
@@ -137,13 +143,13 @@ namespace WizshBoneTwitchIntegration.Gui
                 height: 60f
             );
             closeButtonObj.SetActive(true);
-            closeButtonObj.GetComponent<Button>().onClick.AddListener(CloseSettings);
+            closeButtonObj.GetComponent<Button>().onClick.AddListener(() => m_auth?.wizshBoneGUI.CloseGUI());
         }
 
         private void CreateTabButtons()
         {
-            GameObject profilesTabBtn = GUIManager.Instance.CreateButton(
-                text: "Profiles",
+            GameObject homeTabBtn = GUIManager.Instance.CreateButton(
+                text: "Home",
                 parent: panel.transform,
                 anchorMin: new Vector2(0f, 1f),
                 anchorMax: new Vector2(0f, 1f),
@@ -151,9 +157,22 @@ namespace WizshBoneTwitchIntegration.Gui
                 width: 180f,
                 height: 40f
             );
+            homeTabBtn.SetActive(true);
+            m_homeTabButton = homeTabBtn.GetComponent<Button>();
+            m_tabDefaultColor = homeTabBtn.GetComponent<Image>().color;
+            m_homeTabButton.onClick.AddListener(() => ShowTab(m_homeTabRoot, m_homeTabButton));
+
+            GameObject profilesTabBtn = GUIManager.Instance.CreateButton(
+                text: "Profiles",
+                parent: panel.transform,
+                anchorMin: new Vector2(0f, 1f),
+                anchorMax: new Vector2(0f, 1f),
+                position: new Vector2(324f, -90f),
+                width: 180f,
+                height: 40f
+            );
             profilesTabBtn.SetActive(true);
             m_profilesTabButton = profilesTabBtn.GetComponent<Button>();
-            m_tabDefaultColor = profilesTabBtn.GetComponent<Image>().color;
             m_profilesTabButton.onClick.AddListener(() => ShowTab(m_profilesTabRoot, m_profilesTabButton));
 
             GameObject redeemsTabBtn = GUIManager.Instance.CreateButton(
@@ -161,7 +180,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: panel.transform,
                 anchorMin: new Vector2(0f, 1f),
                 anchorMax: new Vector2(0f, 1f),
-                position: new Vector2(325f, -90f),
+                position: new Vector2(508f, -90f),
                 width: 180f,
                 height: 40f
             );
@@ -170,11 +189,11 @@ namespace WizshBoneTwitchIntegration.Gui
             m_redeemsTabButton.onClick.AddListener(() => ShowTab(m_redeemsTabRoot, m_redeemsTabButton));
 
             GameObject rulesTabBtn = GUIManager.Instance.CreateButton(
-                text: "Rules",
+                text: "Settings",
                 parent: panel.transform,
                 anchorMin: new Vector2(0f, 1f),
                 anchorMax: new Vector2(0f, 1f),
-                position: new Vector2(510f, -90f),
+                position: new Vector2(692f, -90f),
                 width: 180f,
                 height: 40f
             );
@@ -187,7 +206,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: panel.transform,
                 anchorMin: new Vector2(0f, 1f),
                 anchorMax: new Vector2(0f, 1f),
-                position: new Vector2(695f, -90f),
+                position: new Vector2(876f, -90f),
                 width: 180f,
                 height: 40f
             );
@@ -200,7 +219,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: panel.transform,
                 anchorMin: new Vector2(0f, 1f),
                 anchorMax: new Vector2(0f, 1f),
-                position: new Vector2(880f, -90f),
+                position: new Vector2(1060f, -90f),
                 width: 180f,
                 height: 40f
             );
@@ -211,6 +230,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void ShowTab(GameObject tabToShow, Button activeButton)
         {
+            m_homeTabRoot.SetActive(false);
             m_profilesTabRoot.SetActive(false);
             m_redeemsTabRoot.SetActive(false);
             m_rulesTabRoot.SetActive(false);
@@ -220,6 +240,7 @@ namespace WizshBoneTwitchIntegration.Gui
             tabToShow.SetActive(true);
             RefreshActiveTab();
 
+            SetTabButtonColor(m_homeTabButton, m_homeTabRoot.activeSelf);
             SetTabButtonColor(m_profilesTabButton, m_profilesTabRoot.activeSelf);
             SetTabButtonColor(m_redeemsTabButton, m_redeemsTabRoot.activeSelf);
             SetTabButtonColor(m_rulesTabButton, m_rulesTabRoot.activeSelf);
@@ -229,6 +250,9 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void RefreshActiveTab()
         {
+            if (m_homeTabRoot != null && m_homeTabRoot.activeSelf)
+                m_homeTab.Refresh();
+
             if (m_profilesTabRoot != null && m_profilesTabRoot.activeSelf)
                 m_profilesTab.Refresh();
 
@@ -243,6 +267,18 @@ namespace WizshBoneTwitchIntegration.Gui
 
             if (m_viewersTabRoot != null && m_viewersTabRoot.activeSelf)
                 m_viewersTab.Refresh();
+        }
+
+        /// <summary>
+        /// Refreshes the Home tab's login/redeems/chatting status regardless of whether it's the
+        /// currently active tab, so auth-state changes (e.g. login completing) are reflected live
+        /// even while another tab is showing - mirrors the old WizshBoneGUI.UpdateGUI() behavior of
+        /// refreshing whenever its panel existed.
+        /// </summary>
+        public void RefreshHomeTab()
+        {
+            if (m_homeTabRoot != null)
+                m_homeTab.Refresh();
         }
 
         private void SetTabButtonColor(Button button, bool isActive)

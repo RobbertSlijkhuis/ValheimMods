@@ -103,7 +103,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
                 HeaderButtons = new List<HeaderButtonSpec>
                 {
-                    new HeaderButtonSpec("+ New Group", NewGroupBtnWidth, ShowCreateView),
+                    new HeaderButtonSpec("+ New", NewGroupBtnWidth, ShowCreateView),
                 },
 
                 ColumnHeaders = new List<ColumnHeaderSpec>
