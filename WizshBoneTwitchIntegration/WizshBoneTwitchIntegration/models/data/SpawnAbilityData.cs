@@ -44,6 +44,14 @@ namespace WizshBoneTwitchIntegration.Models
         [EditorHidden]
         public bool? randomYRotation;
 
+        // SAPHONETTE-CLEANUP: lets a SpawnAbility-family redeem (e.g. Log Rain) make its spawned
+        // prefabs periodically show a speech bubble, the same way SpawnCreature's talk fields do.
+        // Not surfaced in any narrowed View/editor - only set by SpecialRedeemHelper today. Remove
+        // these 3 fields once the bit is over.
+        [EditorHidden] public bool talks = false;
+        [EditorHidden] public string talkMessage;
+        [EditorHidden] public float talkInterval = 0;
+
         public SpawnAbilityData() { }
     }
 }

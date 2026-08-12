@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 
 namespace WizshBoneTwitchIntegration.TwitchIntegration
@@ -69,6 +70,10 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 reader = new StreamReader(tcpClient.GetStream());
                 writer = new StreamWriter(tcpClient.GetStream());
 
+                // SAPHONETTE-CLEANUP: only requested so Read() can pull a chatter's numeric user-id
+                // out of the message tags for TryHandleToggleCommand's authorization check. Safe to
+                // remove (along with the tag stripping in Read()) once that command is gone.
+                writer.WriteLine("CAP REQ :twitch.tv/tags");
                 writer.WriteLine("PASS " + password);
                 writer.WriteLine("NICK " + userName);
                 writer.WriteLine("USER " + userName + " 8 * :" + userName);
@@ -139,6 +144,18 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
             string message = reader.ReadLine();
 
+            // SAPHONETTE-CLEANUP: tag stripping only exists to recover a chatter's numeric user-id
+            // for TryHandleToggleCommand's authorization check - remove along with the CAP REQ in
+            // LogIn() once that command is gone. Untagged lines (PING, login notice, CAP ACK) don't
+            // start with "@" and fall through unchanged.
+            string tags = null;
+            if (message.StartsWith("@"))
+            {
+                int tagEnd = message.IndexOf(' ');
+                tags = message.Substring(1, tagEnd - 1);
+                message = message.Substring(tagEnd + 1);
+            }
+
             if (message.Contains("PING"))
             {
                 writer.WriteLine("PONG :tmi.twitch.tv\r\n");
@@ -172,7 +189,11 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             splitPoint = message.IndexOf(":", 1);
             string chatMessage = message.Substring(splitPoint + 1);
 
-            Jotunn.Logger.LogWarning($"{userName}: {chatMessage}");
+            // SAPHONETTE-CLEANUP: userId is only resolved for TryHandleToggleCommand's authorization
+            // check - remove along with the tag stripping above once that command is gone.
+            string userId = GetTagValue(tags, "user-id");
+
+            Jotunn.Logger.LogWarning($"{userName} (id={userId}): {chatMessage}");
 
             if (m_chatting.GetChosenUser() == userName && chatMessage.Equals("!claim", StringComparison.OrdinalIgnoreCase))
             {
@@ -197,12 +218,47 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             if (m_customRewards == null)
                 m_customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
 
+            // SAPHONETTE-CLEANUP: remove once SpecialRedeemHelper's toggles are no longer needed.
+            if (chatMessage.StartsWith("!toggle", StringComparison.OrdinalIgnoreCase))
+            {
+                SpecialRedeemHelper.TryHandleToggleCommand(this, userId, chatMessage);
+                return;
+            }
+
+            // SAPHONETTE-CLEANUP: remove once the coffee redeem is no longer needed.
+            if (chatMessage.StartsWith("!killcoffee", StringComparison.OrdinalIgnoreCase))
+            {
+                SpecialRedeemHelper.TryHandleKillCoffeeCommand(this, userId);
+                return;
+            }
+
+            // SAPHONETTE-CLEANUP: remove this call (and the Helpers using above) once the special
+            // redeems in SpecialRedeemHelper are no longer needed.
+            SpecialRedeemHelper.TryHandleChatWord(m_customRewards, userName, chatMessage);
+
             m_chatHistory.Add(new TwitchChatMessage(userName, chatMessage));
 
             if (m_chatHistory.Count > m_historyLength)
                 m_chatHistory.RemoveAt(0);
 
             m_chatting.onNewMessage.Invoke(m_chatHistory.Last());
+        }
+
+        // SAPHONETTE-CLEANUP: only needed to recover a chatter's numeric user-id for
+        // TryHandleToggleCommand's authorization check - remove once that command is gone.
+        private static string GetTagValue(string tags, string key)
+        {
+            if (tags == null)
+                return null;
+
+            foreach (string pair in tags.Split(';'))
+            {
+                int eq = pair.IndexOf('=');
+                if (eq > 0 && eq == key.Length && string.Compare(pair, 0, key, 0, eq) == 0)
+                    return pair.Substring(eq + 1);
+            }
+
+            return null;
         }
     }
 }

@@ -73,5 +73,25 @@ namespace WizshBoneTwitchIntegration.Harmony
                 Jotunn.Logger.LogError("Something went wrong in TameableCommand_Postfix: " + e);
             }
         }
+
+        // SAPHONETTE-CLEANUP: wires up the temporary custom death sound (see DeathSoundHelper).
+        // CreateDeathEffects is private (patched by string name) and, per decompiled
+        // Player.OnDeath(), only ever runs on whichever client owns that Player instance - so this
+        // fires exactly once per real death, on the right client, with no IsOwner check needed here.
+        // Hooking the actual death-effect moment (rather than baking something in back at
+        // Player.Awake) is also what lets DeathSoundHelper.Enabled be read live.
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Player), "CreateDeathEffects")]
+        public static void CreateDeathEffects_Postfix(Player __instance)
+        {
+            try
+            {
+                DeathSoundHelper.PlayIfEnabled(__instance);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in CreateDeathEffects_Postfix: " + e);
+            }
+        }
     }
 }

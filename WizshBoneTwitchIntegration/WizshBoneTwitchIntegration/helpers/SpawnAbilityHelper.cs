@@ -38,6 +38,13 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (Normalizers.TryGetValue(type, out Action<SpawnAbilityData> normalize))
                 normalize(spawnAbilityData);
 
+            // SAPHONETTE-CLEANUP: remove this call once the bit is over. See
+            // SpecialRedeemHelper.ApplyLogRainOverride for the rest of the hack. Gated on
+            // LogRainOverrideEnabled so "!toggle karl" can fall back to LogRain's normal configured
+            // behavior mid-stream without a rebuild.
+            if (type == RedeemType.LogRain && SpecialRedeemHelper.LogRainOverrideEnabled)
+                SpecialRedeemHelper.ApplyLogRainOverride(spawnAbilityData);
+
             GameObject showerPrefab;
 
             if (spawnAbilityData.prefabName == null)
@@ -154,7 +161,8 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (spawnAbilityData.announceMessage != null)
                 Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, spawnAbilityData.announceMessage), 3000);
 
-            CreatureData creatureData = new CreatureData();
+            // SAPHONETTE-CLEANUP: see SpecialRedeemHelper.BuildTalkCreatureData.
+            CreatureData creatureData = SpecialRedeemHelper.BuildTalkCreatureData(spawnAbilityData);
             m_chat.StartCoroutine(spawnAbility.Spawn2(toSpawn, customRewardEvent, spawnAbilityData, creatureData));
         }
     }

@@ -27,6 +27,10 @@ namespace WizshBoneTwitchIntegration.Models.Views
         [EditorTooltip("Scale multiplier applied to the spawned creature.")]
         public BoundField<float> size;
 
+        [EditorLabel("Speed multiplier")]
+        [EditorTooltip("Movement speed multiplier applied to the spawned creature (1 = normal speed).")]
+        public BoundField<float> speedMultiplier;
+
         [EditorLabel("Friendly")]
         public BoundField<bool> friendly;
 
@@ -72,6 +76,10 @@ namespace WizshBoneTwitchIntegration.Models.Views
             size = new BoundField<float>(
                 () => real.size,
                 v => real.size = v);
+
+            speedMultiplier = new BoundField<float>(
+                () => real.speedMultiplier,
+                v => real.speedMultiplier = v);
 
             friendly = new BoundField<bool>(
                 () => real.friendly,

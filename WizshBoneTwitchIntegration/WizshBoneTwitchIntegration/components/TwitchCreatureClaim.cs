@@ -153,7 +153,11 @@ namespace WizshBoneTwitchIntegration.Components
 
             m_isSpawn = isSpawn;
             m_assignment = new TwitchCreatureAssignment(userName, gameObject, ProfileSettingsHelper.Current.chattingClaimDuration);
-            m_originalName = m_character.m_name;
+
+            // Null-safe like Init(CreatureData, CustomRewardEvent)'s equivalent line - a non-creature
+            // spawn (e.g. the bathtub, requireMonsterComponents = false) has no Character component,
+            // so m_character is genuinely null here on rehydration.
+            m_originalName = m_character?.m_name;
 
             m_chatting.AddCreatureAssignment(m_assignment);
             SetupNpcTalk(creatureData);

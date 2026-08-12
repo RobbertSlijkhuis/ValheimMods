@@ -39,6 +39,7 @@ namespace WizshBoneTwitchIntegration.Models
         public string talkMessage;
         public bool talks = false;
         public float size = 1f;
+        public float speedMultiplier = 1f;
 
         [EditorLabel("Idle sound interval")]
         [EditorTooltip("Overrides the interval (seconds) between the creature's idle sound effect (e.g. a Fuling's laugh), and makes it always play instead of the default ~50% chance. Leave at 0 to use the creature's default behavior.")]
@@ -63,6 +64,20 @@ namespace WizshBoneTwitchIntegration.Models
         // Temporary hack: if > 0, fills the spawned prefab's Smelter (e.g. the hot tub's fuel
         // tank) up to this amount (clamped to Smelter.m_maxFuel) right after spawn.
         [EditorHidden] public float smelterFuelAmount = 0f;
+
+        // SAPHONETTE-CLEANUP: forces a friendly creature to always follow the player, independent
+        // of the commandable/isFollowing toggle, and to keep closing the distance instead of
+        // stopping ~3m out like a normal followed creature. See
+        // TwitchCreaturePersistentData.ApplyTameable/WantsToCloseDistance and
+        // harmony/SpecialRedeemPatchesWBTI.cs's Follow prefix. Remove once the "Don't forget your
+        // coffee!" bit is over.
+        [EditorHidden] public bool alwaysFollowOwner = false;
+
+        // SAPHONETTE-CLEANUP: makes a tamed creature never treat anything as an enemy - not just the
+        // player, but wild monsters too (a tamed creature normally still fights those off, see
+        // BaseAI.IsEnemy). See TwitchCreaturePersistentData.IsFullyPassive and
+        // harmony/SpecialRedeemPatchesWBTI.cs. Remove once the "Don't forget your coffee!" bit is over.
+        [EditorHidden] public bool fullyPassive = false;
 
         public CreatureData() { }
     }

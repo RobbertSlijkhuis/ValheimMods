@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Helpers;
@@ -29,6 +30,16 @@ namespace WizshBoneTwitchIntegration.Components
         public bool m_allowDamageStructures = true;
         public float m_damageScale = 0;
         public float m_healthScale = 0;
+
+        // SAPHONETTE-CLEANUP: read by harmony/SpecialRedeemPatchesWBTI.cs's IsEnemy prefix. Remove
+        // alongside that patch and CreatureData.fullyPassive once the bit is over.
+        public bool IsFullyPassive;
+
+        // SAPHONETTE-CLEANUP: read by harmony/SpecialRedeemPatchesWBTI.cs's Follow prefix, to make
+        // this specific creature keep closing the gap instead of stopping ~3m out like a normal
+        // followed creature. Remove alongside that patch and CreatureData.alwaysFollowOwner once the
+        // bit is over.
+        public bool WantsToCloseDistance;
 
         public string RedeemerName => m_redeemerName;
         public string RedeemTitle => m_redeemTitle;
@@ -71,7 +82,13 @@ namespace WizshBoneTwitchIntegration.Components
                     return;
                 }
 
-                RedeemData redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
+                // SAPHONETTE-CLEANUP: the fallback below is only needed to rehydrate a creature spawned
+                // by a SpecialRedeemHelper hack (bathtub/coffee Draugr) after a relog/zone reload -
+                // GetRedeemByTitle only searches the real YAML-backed redeem list, so without it every
+                // CreatureData field (size, speed, color, talk, friendly, etc.) silently resets to
+                // prefab defaults on rehydration. Remove once SpecialRedeemHelper is no longer needed.
+                RedeemData redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle)
+                    ?? SpecialRedeemHelper.TryGetRedeem(m_redeemTitle);
 
                 if (redeem == null)
                 {
@@ -235,6 +252,17 @@ namespace WizshBoneTwitchIntegration.Components
             m_damageScale           = creatureData.damageScale;
             m_healthScale           = creatureData.healthScale;
             transform.localScale    = new Vector3(creatureData.size, creatureData.size, creatureData.size);
+
+            if (creatureData.speedMultiplier != 1f)
+            {
+                Character character = gameObject.GetComponent<Character>();
+
+                if (character != null)
+                {
+                    character.m_speed    *= creatureData.speedMultiplier;
+                    character.m_runSpeed *= creatureData.speedMultiplier;
+                }
+            }
         }
 
         private void ApplyHumanoid(string redeemerName, CreatureData creatureData)
@@ -302,6 +330,9 @@ namespace WizshBoneTwitchIntegration.Components
             monsterAI.m_aggravatable = creatureData.aggravatable;
             monsterAI.m_mistVision   = creatureData.mistVision;
 
+            // SAPHONETTE-CLEANUP: see the field comment on CreatureData.fullyPassive.
+            IsFullyPassive = creatureData.fullyPassive;
+
             if (creatureData.idleSoundInterval > 0)
             {
                 monsterAI.m_idleSoundChance = 1f;
@@ -354,6 +385,32 @@ namespace WizshBoneTwitchIntegration.Components
                 if (m_isFollowing && Player.m_localPlayer != null)
                     tameable.m_monsterAI.SetFollowTarget(Player.m_localPlayer.gameObject);
             }
+
+            // SAPHONETTE-CLEANUP: see the field comment on CreatureData.alwaysFollowOwner. Player.m_localPlayer
+            // is only assigned later by an explicit SetLocalPlayer() call, not during Awake() - on a
+            // relog/zone-reload this Awake()-driven rehydration can easily run before that happens, so a
+            // one-shot null check here silently drops the follow target. Retry briefly instead.
+            if (creatureData.alwaysFollowOwner)
+                StartCoroutine(SetFollowTargetWhenPlayerReady(tameable.m_monsterAI));
+
+            WantsToCloseDistance = creatureData.alwaysFollowOwner;
+        }
+
+        // SAPHONETTE-CLEANUP: see the comment on the ApplyTameable call site above. Bounded wait
+        // (10s) rather than an indefinite one, in case Player.m_localPlayer genuinely never shows up
+        // (e.g. this instance rehydrating in a context with no local player at all).
+        private IEnumerator SetFollowTargetWhenPlayerReady(MonsterAI monsterAI)
+        {
+            float timeout = 10f;
+
+            while (Player.m_localPlayer == null && timeout > 0f)
+            {
+                yield return null;
+                timeout -= Time.deltaTime;
+            }
+
+            if (Player.m_localPlayer != null && monsterAI != null)
+                monsterAI.SetFollowTarget(Player.m_localPlayer.gameObject);
         }
     }
 }

@@ -34,6 +34,7 @@
     <None Remove="assets\wbti_dw.manifest" />
     <None Remove="resources\banned.txt" />
     <None Remove="resources\viewers.yaml" />
+    <None Remove="TEMP\UUH.wav" /> <!-- SAPHONETTE-CLEANUP: see the death sound ItemGroup below -->
   </ItemGroup>
 
   <ItemGroup>
@@ -71,6 +72,21 @@
     </PackageReference>
     <PackageReference Include="JotunnLib" Version="2.24.3" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="TEMP\" />
+  </ItemGroup>
+
+  <!-- SAPHONETTE-CLEANUP: temporary death sound for Saphonette's stream, not a permanent feature -
+       delete this ItemGroup (and its <None Remove> above), helpers/DeathSoundHelper.cs, its call
+       site in harmony/MiscPatchesWBTI.cs, and the matching blocks in publish.ps1, once the bit is
+       over. Loaded from disk at runtime (see DeathSoundHelper.cs), so it needs to land next to the
+       built DLL rather than being embedded. -->
+  <ItemGroup>
+    <None Include="TEMP\UUH.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <PropertyGroup>
