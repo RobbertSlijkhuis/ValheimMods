@@ -83,7 +83,7 @@ namespace WizshBoneTwitchIntegration
                     return;
 
                 TwitchAuth authComp = Game.instance.gameObject.GetComponent<TwitchAuth>();
-                bool guiVisible = authComp.wizshBoneGUI.IsAnyGUIVisible;
+                bool guiVisible = authComp.m_settingsGUI.IsAnyGUIVisible;
 
                 // ZInput is blocked while the GUI is open, so fall back to raw Unity input
                 // via KeyboardShortcut.IsDown() which bypasses the ZInput block entirely.
@@ -95,9 +95,9 @@ namespace WizshBoneTwitchIntegration
                     return;
 
                 if (guiVisible)
-                    authComp.wizshBoneGUI.CloseGUI();
+                    authComp.m_settingsGUI.CloseGUI();
                 else
-                    authComp.wizshBoneGUI.ShowGUI();
+                    authComp.m_settingsGUI.ShowSettings();
             }
             catch (Exception e)
             {

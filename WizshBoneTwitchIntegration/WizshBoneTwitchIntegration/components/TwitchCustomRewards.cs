@@ -159,7 +159,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     throw new RedeemException("Game is paused or menu is visible", ExceptionType.Warning);
                 }
 
-                if (m_auth?.wizshBoneGUI?.IsAnyGUIVisible == true && !WizshBoneTwitchIntegration.useRedeemCommand)
+                if (m_auth?.m_settingsGUI?.IsAnyGUIVisible == true && !WizshBoneTwitchIntegration.useRedeemCommand)
                 {
                     m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is currently in the settings menu! {(ProfileSettingsHelper.Current.autoResolveRedeems ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
                     throw new RedeemException("WizshBone GUI is open", ExceptionType.Warning);

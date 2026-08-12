@@ -26,7 +26,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public bool m_waitingForCode = false;
         private DateTime m_waitingForCodeSince;
 
-        public WizshBoneGUI wizshBoneGUI;
+        public WizshBoneSettingsGUI m_settingsGUI;
         public WizshBoneHUD wizshBoneHUD;
         public ConfirmDialog m_exitConfirmDialog = new ConfirmDialog();
         public LogoutProgressPanel m_logoutProgressPanel = new LogoutProgressPanel();
@@ -38,7 +38,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 m_chat = gameObject.GetComponent<TwitchChat>();
                 m_customRewards = gameObject.GetComponent<TwitchCustomRewards>();
 
-                wizshBoneGUI = new WizshBoneGUI();
+                m_settingsGUI = new WizshBoneSettingsGUI(this);
 
                 wizshBoneHUD = new WizshBoneHUD();
                 GUIManager.OnCustomGUIAvailable += OnGUIAvailable;
@@ -73,7 +73,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         private void UpdateAllGUI()
         {
-            wizshBoneGUI.UpdateGUI();
+            m_settingsGUI.RefreshHomeTab();
             wizshBoneHUD.UpdateHUD();
         }
 

@@ -61,7 +61,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                             cancelText:  "Open History",
                             onCancel:    () =>
                             {
-                                auth.wizshBoneGUI.OpenRedeemHistoryStandalone();
+                                auth.m_settingsGUI.m_redeemHistoryGUI.ShowGUI();
                             }
                         );
                         return false;
@@ -111,7 +111,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                             cancelText:  "Open History",
                             onCancel:    () =>
                             {
-                                auth.wizshBoneGUI.OpenRedeemHistoryStandalone();
+                                auth.m_settingsGUI.m_redeemHistoryGUI.ShowGUI();
                             }
                         );
                         return false;

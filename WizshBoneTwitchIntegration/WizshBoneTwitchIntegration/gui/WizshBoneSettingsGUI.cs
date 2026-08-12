@@ -23,6 +23,14 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private GameObject panel;
         private readonly TwitchAuth m_auth;
+        private bool m_blockingInput = false;
+
+        /// <summary>
+        /// Owned here rather than by a separate wrapper: this is the only class that ever opens
+        /// History as a nested view (Home/Redeems tab buttons), so it's the natural owner of its
+        /// lifecycle and of the "close everything" / "is anything visible" surface below.
+        /// </summary>
+        public readonly WizshBoneRedeemHistoryGUI m_redeemHistoryGUI;
 
         // Tab buttons
         private Button m_homeTabButton;
@@ -53,12 +61,37 @@ namespace WizshBoneTwitchIntegration.Gui
         public WizshBoneSettingsGUI(TwitchAuth auth)
         {
             m_auth = auth;
+            m_redeemHistoryGUI = new WizshBoneRedeemHistoryGUI(auth.m_customRewards);
+        }
+
+        /// <summary>
+        /// True if either this panel or its nested <see cref="m_redeemHistoryGUI"/> is currently
+        /// showing.
+        /// </summary>
+        public bool IsAnyGUIVisible => IsVisible || m_redeemHistoryGUI.IsVisible;
+
+        /// <summary>
+        /// Closes everything - this panel and, if it's up, the nested history view - without
+        /// triggering the history panel's "return to Settings" callback (see
+        /// <see cref="WizshBoneRedeemHistoryGUI.Hide"/>). Used for full teardown (F3, other
+        /// "close everything" buttons).
+        /// </summary>
+        public void CloseGUI()
+        {
+            CloseSettings();
+            m_redeemHistoryGUI.Hide();
         }
 
         public void ShowSettings()
         {
             if (GUIManager.Instance == null || !GUIManager.CustomGUIFront)
                 return;
+
+            if (!m_blockingInput)
+            {
+                m_blockingInput = true;
+                InputBlockGate.Push();
+            }
 
             if (panel != null)
             {
@@ -89,6 +122,12 @@ namespace WizshBoneTwitchIntegration.Gui
                 return;
 
             panel.SetActive(false);
+
+            if (m_blockingInput)
+            {
+                m_blockingInput = false;
+                InputBlockGate.Pop();
+            }
         }
 
         private void CreateGUI()
@@ -115,17 +154,13 @@ namespace WizshBoneTwitchIntegration.Gui
             Action onOpenHistory = () =>
             {
                 CloseSettings();
-                m_auth?.wizshBoneGUI.OpenRedeemHistory();
+                m_redeemHistoryGUI.ShowGUI(onClose: () => ShowSettings());
             };
 
             m_homeTabRoot = m_homeTab.Create(panel, CreateScrollableContainer, m_auth, onOpenHistory);
             m_profilesTabRoot = m_profilesTab.Create(panel, CreateScrollableContainer);
             m_redeemsTabRoot = m_redeemsTab.Create(panel, CreateScrollableContainer,
-                onCloseRequested: () =>
-                {
-                    CloseSettings();
-                    m_auth?.wizshBoneGUI.CloseGUI();
-                },
+                onCloseRequested: CloseGUI,
                 onOpenHistory: onOpenHistory);
             m_rulesTabRoot = m_rulesTab.Create(panel, CreateScrollableContainer);
             m_creatureGroupsTabRoot = m_creatureGroupsTab.Create(panel, CreateScrollableContainer);
@@ -143,7 +178,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 height: 60f
             );
             closeButtonObj.SetActive(true);
-            closeButtonObj.GetComponent<Button>().onClick.AddListener(() => m_auth?.wizshBoneGUI.CloseGUI());
+            closeButtonObj.GetComponent<Button>().onClick.AddListener(CloseGUI);
         }
 
         private void CreateTabButtons()
@@ -272,8 +307,8 @@ namespace WizshBoneTwitchIntegration.Gui
         /// <summary>
         /// Refreshes the Home tab's login/redeems/chatting status regardless of whether it's the
         /// currently active tab, so auth-state changes (e.g. login completing) are reflected live
-        /// even while another tab is showing - mirrors the old WizshBoneGUI.UpdateGUI() behavior of
-        /// refreshing whenever its panel existed.
+        /// even while another tab is showing - called by <see cref="TwitchAuth"/> whenever auth
+        /// state changes, whether or not this panel is currently open.
         /// </summary>
         public void RefreshHomeTab()
         {

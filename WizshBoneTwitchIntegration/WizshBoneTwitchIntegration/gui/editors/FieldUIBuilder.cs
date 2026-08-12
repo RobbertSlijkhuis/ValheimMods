@@ -23,7 +23,7 @@ namespace WizshBoneTwitchIntegration.Gui
         public const int FieldFontSize = 12;
         public const int PlaceholderFontSize = 14;
         private const int SubLabelFontSize = 11;
-        private const int TooltipFontSize = 12;
+        internal const int TooltipFontSize = 12;
 
         // Jotunn's default placeholder color (Color.grey) is low-contrast against the input field background.
         public static readonly Color PlaceholderColor = new Color(0.75f, 0.75f, 0.75f, 1f);
@@ -225,20 +225,6 @@ namespace WizshBoneTwitchIntegration.Gui
         /// </summary>
         private static bool BuildBoundField(GameObject parent, IBoundField boundField, Vector2 rowPosition, float fieldWidth, string labelText, string tooltip, List<DropdownOption> dropdownOptions = null)
         {
-            Type wrapped = boundField.WrappedType;
-
-            bool isString = wrapped == typeof(string);
-            bool isInt = wrapped == typeof(int);
-            bool isFloat = wrapped == typeof(float);
-            bool isBool = wrapped == typeof(bool);
-            bool isNullableInt = wrapped == typeof(int?);
-            bool isNullableFloat = wrapped == typeof(float?);
-            bool isNullableBool = wrapped == typeof(bool?);
-            bool isEnum = wrapped.IsEnum;
-
-            if (!isString && !isInt && !isFloat && !isBool && !isNullableInt && !isNullableFloat && !isNullableBool && !isEnum)
-                return false;
-
             Text labelComp = GUIManager.Instance.CreateText(
                 text: labelText,
                 parent: parent.transform,
@@ -258,6 +244,42 @@ namespace WizshBoneTwitchIntegration.Gui
 
             float fieldX = rowPosition.x + LabelWidth / 2f + LabelFieldGap + fieldWidth / 2f;
             Vector2 fieldPos = new Vector2(fieldX, rowPosition.y);
+
+            bool built = BuildBoundFieldControl(parent, boundField, fieldPos, fieldWidth, dropdownOptions);
+            if (!built)
+                return false;
+
+            if (tooltip != null)
+            {
+                float tooltipX = fieldX + fieldWidth / 2f + TooltipGap + TooltipWidth / 2f;
+                BuildTooltip(parent, tooltip, new Vector2(tooltipX, rowPosition.y));
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Builds just the input control for an <see cref="IBoundField"/> (no label, no tooltip),
+        /// centered at <paramref name="fieldPos"/> with the given width, wired to read/write
+        /// through the bound field's delegates. Extracted out of <see cref="BuildBoundField"/> so
+        /// callers with their own label/tooltip placement (e.g. <c>SettingsCardBuilder</c>'s
+        /// vertical card layout) can reuse the exact same per-type dispatch and write-back logic.
+        /// </summary>
+        internal static bool BuildBoundFieldControl(GameObject parent, IBoundField boundField, Vector2 fieldPos, float fieldWidth, List<DropdownOption> dropdownOptions = null)
+        {
+            Type wrapped = boundField.WrappedType;
+
+            bool isString = wrapped == typeof(string);
+            bool isInt = wrapped == typeof(int);
+            bool isFloat = wrapped == typeof(float);
+            bool isBool = wrapped == typeof(bool);
+            bool isNullableInt = wrapped == typeof(int?);
+            bool isNullableFloat = wrapped == typeof(float?);
+            bool isNullableBool = wrapped == typeof(bool?);
+            bool isEnum = wrapped.IsEnum;
+
+            if (!isString && !isInt && !isFloat && !isBool && !isNullableInt && !isNullableFloat && !isNullableBool && !isEnum)
+                return false;
 
             object currentValue = boundField.GetValue();
 
@@ -345,12 +367,6 @@ namespace WizshBoneTwitchIntegration.Gui
                 SearchableDropdown dd = new SearchableDropdown();
                 dd.Build(parent, fieldPos, fieldWidth, FieldHeight, names, current);
                 dd.OnValueChanged += val => boundField.SetValue(Enum.Parse(wrapped, val));
-            }
-
-            if (tooltip != null)
-            {
-                float tooltipX = fieldX + fieldWidth / 2f + TooltipGap + TooltipWidth / 2f;
-                BuildTooltip(parent, tooltip, new Vector2(tooltipX, rowPosition.y));
             }
 
             return true;

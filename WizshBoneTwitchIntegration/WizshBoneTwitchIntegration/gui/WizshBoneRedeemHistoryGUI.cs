@@ -25,18 +25,31 @@ namespace WizshBoneTwitchIntegration.Gui
         private Button m_filterButton;
         private string m_searchText = "";
         private Action m_onClose;
+        private bool m_blockingInput = false;
 
         public WizshBoneRedeemHistoryGUI(TwitchCustomRewards customRewards)
         {
             m_customRewards = customRewards;
         }
 
+        /// <summary>
+        /// Shows the panel, pushing an <see cref="InputBlockGate"/> block if one isn't already
+        /// outstanding for this panel. <paramref name="onClose"/> is purely a UX follow-up (e.g.
+        /// "return to Settings") - the input block is popped by this panel itself on any
+        /// close/hide, regardless of who opened it or whether a callback was supplied.
+        /// </summary>
         public void ShowGUI(Action onClose = null)
         {
             if (GUIManager.Instance == null || !GUIManager.CustomGUIFront)
                 return;
 
             m_onClose = onClose;
+
+            if (!m_blockingInput)
+            {
+                m_blockingInput = true;
+                InputBlockGate.Push();
+            }
 
             if (m_panel != null)
             {
@@ -64,13 +77,35 @@ namespace WizshBoneTwitchIntegration.Gui
             m_panel.SetActive(true);
         }
 
-        public void CloseGUI()
+        /// <summary>
+        /// Closes the panel, popping its input block and invoking <see cref="m_onClose"/>. Wired
+        /// to the panel's own "Close" button.
+        /// </summary>
+        public void CloseGUI() => Close(invokeOnClose: true);
+
+        /// <summary>
+        /// Deactivates the panel and pops its input block, without invoking <see cref="m_onClose"/>.
+        /// Used by full-teardown paths (F3, other "close everything" buttons) that must not trigger
+        /// a "return to Settings"-style callback meant only for the panel's own Close button.
+        /// </summary>
+        public void Hide() => Close(invokeOnClose: false);
+
+        private void Close(bool invokeOnClose)
         {
             if (m_panel != null)
                 m_panel.SetActive(false);
 
-            m_onClose?.Invoke();
+            if (m_blockingInput)
+            {
+                m_blockingInput = false;
+                InputBlockGate.Pop();
+            }
+
+            Action onClose = m_onClose;
             m_onClose = null;
+
+            if (invokeOnClose)
+                onClose?.Invoke();
         }
 
         private void CreateGUI()
