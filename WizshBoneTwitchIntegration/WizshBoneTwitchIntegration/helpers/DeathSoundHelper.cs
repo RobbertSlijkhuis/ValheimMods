@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.IO;
 using System.Reflection;
@@ -28,15 +29,33 @@ namespace WizshBoneTwitchIntegration.Helpers
         // effect immediately rather than only on the next respawn.
         public static bool Enabled = true;
 
+        // SAPHONETTE-CLEANUP: separate runtime toggle for the "!nik" chat command (anyone can type
+        // it, see SpecialRedeemHelper.TryHandleNikCommand) - kept independent from Enabled so the
+        // real death-sound and the chat-triggered one can be switched off separately. Defaults to
+        // off - must be turned on with "!toggle nik" each launch. Remove alongside the rest of the
+        // death sound bit.
+        public static bool NikCommandEnabled = false;
+
         public static void PlayIfEnabled(Player player)
         {
             if (!Enabled || player == null)
                 return;
 
-            WizshBoneTwitchIntegration.Instance.StartCoroutine(PlayWhenReady(player));
+            WizshBoneTwitchIntegration.Instance.StartCoroutine(PlayWhenReady(player, () => Enabled));
         }
 
-        private static IEnumerator PlayWhenReady(Player player)
+        // SAPHONETTE-CLEANUP: "!nik" chat command - plays the same sound at the local player's
+        // position, gated by NikCommandEnabled instead of Enabled. Remove alongside the rest of the
+        // death sound bit.
+        public static void PlayForNikCommand()
+        {
+            if (!NikCommandEnabled || Player.m_localPlayer == null)
+                return;
+
+            WizshBoneTwitchIntegration.Instance.StartCoroutine(PlayWhenReady(Player.m_localPlayer, () => NikCommandEnabled));
+        }
+
+        private static IEnumerator PlayWhenReady(Player player, Func<bool> isEnabled)
         {
             if (s_effectPrefab == null && !s_loading)
                 yield return WizshBoneTwitchIntegration.Instance.StartCoroutine(LoadClip());
@@ -45,15 +64,15 @@ namespace WizshBoneTwitchIntegration.Helpers
                     yield return null;
 
             // Re-check both - the clip can take a moment to load (only matters for the very first
-            // death after launch), and Enabled may have been toggled off again in the meantime.
-            if (s_effectPrefab == null || player == null || !Enabled)
+            // play after launch), and isEnabled() may have been toggled off again in the meantime.
+            if (s_effectPrefab == null || player == null || !isEnabled())
                 yield break;
 
-            GameObject instance = Object.Instantiate(s_effectPrefab, player.transform.position, Quaternion.identity);
+            GameObject instance = UnityEngine.Object.Instantiate(s_effectPrefab, player.transform.position, Quaternion.identity);
 
             // Nothing else cleans this clone up (EffectList.Create doesn't either - it just
             // Instantiates and leaves lifecycle to the prefab) - self-destroy once playback's done.
-            Object.Destroy(instance, (s_clip != null ? s_clip.length : 5f) + 1f);
+            UnityEngine.Object.Destroy(instance, (s_clip != null ? s_clip.length : 5f) + 1f);
         }
 
         private static IEnumerator LoadClip()
@@ -84,7 +103,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
 
                 GameObject prefab = new GameObject("WBTI_DeathSound");
-                Object.DontDestroyOnLoad(prefab);
+                UnityEngine.Object.DontDestroyOnLoad(prefab);
 
                 AudioSource audioSource = prefab.AddComponent<AudioSource>();
                 audioSource.playOnAwake = false;

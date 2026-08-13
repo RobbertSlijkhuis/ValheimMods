@@ -65,6 +65,27 @@ namespace WizshBoneTwitchIntegration.Models
         // tank) up to this amount (clamped to Smelter.m_maxFuel) right after spawn.
         [EditorHidden] public float smelterFuelAmount = 0f;
 
+        // SAPHONETTE-CLEANUP: optional prefab name of a vanilla item to equip in the creature's
+        // helmet slot right after spawn (e.g. "HelmetCelebration"). Must be an ItemDrop prefab with
+        // ItemType.Helmet. Leave null/empty to spawn with no helmet override. See
+        // CreatureHelper.EquipGear. Remove once the "Don't forget your coffee!" bit is over.
+        [EditorHidden] public string helmetItem = null;
+
+        // SAPHONETTE-CLEANUP: optional prefab name of a vanilla item to equip in the creature's
+        // hand right after spawn (e.g. "Tankard_dvergr"). Works for any equippable one-handed/tool
+        // item; not intended for real weapons since a fullyPassive creature never attacks and a
+        // non-passive one could still swap it out mid-combat during AI weapon selection (see
+        // CreatureHelper.EquipGear). Leave null/empty to spawn with no held item. Remove once the
+        // "Don't forget your coffee!" bit is over.
+        [EditorHidden] public string heldItem = null;
+
+        // SAPHONETTE-CLEANUP: if true, unequips whatever the creature's own default loadout put in
+        // its off-hand/shield slot right after spawn (e.g. a Draugr's random default shield).
+        // Independent of heldItem - a redeem can hold something in the main hand and still keep the
+        // shield if desired. See CreatureHelper.EquipGear. Remove once the "Don't forget your
+        // coffee!" bit is over.
+        [EditorHidden] public bool removeShield = false;
+
         // SAPHONETTE-CLEANUP: forces a friendly creature to always follow the player, independent
         // of the commandable/isFollowing toggle, and to keep closing the distance instead of
         // stopping ~3m out like a normal followed creature. See

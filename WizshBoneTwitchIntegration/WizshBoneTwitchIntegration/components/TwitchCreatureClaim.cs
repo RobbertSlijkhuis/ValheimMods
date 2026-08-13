@@ -236,6 +236,11 @@ namespace WizshBoneTwitchIntegration.Components
                 m_npcTalk.m_maxRange = 30f;
                 m_npcTalk.m_offset = 1f;
                 m_npcTalk.m_hideDialogDelay = 10f;
+
+                // A prefab that never had NpcTalk built in (e.g. Deathsquito/Somasquito) never had
+                // m_animator wired up in the editor either - without this, NpcTalkExtension.SayForce's
+                // m_animator.SetTrigger() NREs the first time this creature talks.
+                m_npcTalk.m_animator = gameObject.GetComponentInChildren<Animator>();
             }
             else
                 m_npcTalk = npcTalk;

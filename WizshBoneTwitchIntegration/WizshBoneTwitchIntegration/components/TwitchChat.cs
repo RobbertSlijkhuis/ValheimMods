@@ -232,6 +232,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 return;
             }
 
+            // SAPHONETTE-CLEANUP: remove once the death sound bit is no longer needed. Open to
+            // anyone - no user restriction like the commands above.
+            if (chatMessage.StartsWith("!nik", StringComparison.OrdinalIgnoreCase))
+            {
+                SpecialRedeemHelper.TryHandleNikCommand(chatMessage);
+                return;
+            }
+
             // SAPHONETTE-CLEANUP: remove this call (and the Helpers using above) once the special
             // redeems in SpecialRedeemHelper are no longer needed.
             SpecialRedeemHelper.TryHandleChatWord(m_customRewards, userName, chatMessage);

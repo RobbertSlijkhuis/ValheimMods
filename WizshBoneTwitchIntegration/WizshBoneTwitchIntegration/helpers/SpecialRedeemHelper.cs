@@ -14,9 +14,16 @@ namespace WizshBoneTwitchIntegration.Helpers
     internal static class SpecialRedeemHelper
     {
         // Special surprises for Saphonette's stream.
-        private static readonly string[] AllowedUsers = { "nikontheline", "GraziFM", "DeathWizsh", "Naffiy", "Naarke", "Alenea" };
+        private static readonly string[] AllowedUsers = { "nikontheline", "GraziFM", "DeathWizsh", "Naffiy", "Naarke", "Alenea", "Whurtlefak", "soma_af" };
         private static readonly string[] BathtubTriggerWords = { "hottub", "hot tub", "hot-tub" };
         private const string BathtubRedeemTitle = "WBTI: Saphonette bathtub";
+
+        // soma_af's Somasquito - scoped separately from AllowedUsers/BathtubTriggerWords since
+        // only soma_af (and the DeathWizsh test alias) should be able to trigger it, not everyone
+        // in the bathtub allowlist.
+        private static readonly string[] SomaUsers = { "soma_af", "DeathWizsh" };
+        private static readonly string[] SomaTriggerWords = { "hi", "hey", "hello" };
+        private const string SomaRedeemTitle = "WBTI: soma_af special";
 
         // SAPHONETTE-CLEANUP: runtime-only toggles for the redeems/effects most likely to need
         // shutting off mid-stream. Reset to enabled on every launch - DeathWizsh flips these (and
@@ -25,6 +32,7 @@ namespace WizshBoneTwitchIntegration.Helpers
         public static bool CoffeeRedeemEnabled = true;
         public static bool BlobCircleRedeemEnabled = true;
         public static bool BathtubRedeemEnabled = true;
+        public static bool SomasquitoRedeemEnabled = true;
         public static bool LogRainOverrideEnabled = true;
 
         // DeathWizsh's numeric Twitch user ID (not the login name, which can be reused by someone
@@ -36,7 +44,7 @@ namespace WizshBoneTwitchIntegration.Helpers
         // ApplyLogRainOverride (and its call site in SpawnAbilityHelper.SpawnAbility) once the bit
         // is over.
         private const string YggwoodLogPrefab = "yggashoot_log";
-        private const string YggwoodLogTalkMessage = "Its me-uh... K.A.R.L.!;K.A.R.L. to the rescue!Besides being handsome, I'm also long and hard!;Did you know K.A.R.L. stands for \"Kinetic Action Relationship Log\"?)"; // placeholder - easy to edit
+        private const string YggwoodLogTalkMessage = "Its me-uh... K.A.R.L.!;K.A.R.L. to the rescue!;Besides being handsome, I'm also long and hard!;Did you know K.A.R.L. stands for \"Kinetic Action Relationship Log\"?)";
         // Shown on-screen when the override fires - without it, unexpectedly talking logs just look
         // like a bug instead of an intentional bit. Placeholder - easy to edit.
         private const string YggwoodLogAnnounceMessage = "K.A.R.L. has jumped into the fray {{user}}!";
@@ -56,13 +64,11 @@ namespace WizshBoneTwitchIntegration.Helpers
         private const string BlobCircleRedeemTitle = "Oh no, oh no no no";
         private const int BlobCircleCount = 5;
         private const float BlobCircleRadius = 10f;
-        // placeholder - easy to edit
-        private const string BlobTalkMessage = "A foul smell from Nik on the line!;Bwaaawaugh! Nik sends his regards!;We ooze, therefore we are - blame Nik!;Something's rotten in the swamp tonight, Saphonette!;The bog is closing in... courtesy of Nik!;Uuhuh!";
-        private const float BlobTalkInterval = 5f;
+        private const string BlobTalkMessage = "A foul smell from Nik on the line!;Bwaaawaugh! Nik sends his regards!;We ooze, therefore we are - blame Nik!;Something's rotten in the swamp tonight, Nik!;The bog is closing in... courtesy of Nik!;Uuhuh!";
+        private const float BlobTalkInterval = 10f;
         private const int BlobWeatherDuration = 180;
         private const float BlobWeatherRadius = 150f;
         private const float BlobWeatherHeight = 50f;
-        // placeholder - easy to edit
         private const string BlobWeatherAnnounceMessage = "The bog rises around Saphonette... Nik stirs!";
 
         // HandleRedeem re-looks-up the redeem by title after TryGetChatWordRedeem already matched
@@ -71,6 +77,9 @@ namespace WizshBoneTwitchIntegration.Helpers
         {
             if (title == BathtubRedeemTitle)
                 return BathtubRedeemEnabled ? BuildBathtubRedeem() : null;
+
+            if (title == SomaRedeemTitle)
+                return SomasquitoRedeemEnabled ? BuildSomaRedeem() : null;
 
             if (title == CoffeeRedeemTitle)
                 return CoffeeRedeemEnabled ? BuildCoffeeRedeem() : null;
@@ -85,22 +94,23 @@ namespace WizshBoneTwitchIntegration.Helpers
             return null;
         }
 
-        // nikontheline/GraziFM/DeathWizsh saying "hottub"/"hot tub"/"hot-tub" in chat spawns a bathtub.
+        // nikontheline/GraziFM/DeathWizsh saying "hottub"/"hot tub"/"hot-tub" in chat spawns a
+        // bathtub. soma_af/DeathWizsh saying "hi"/"hey"/"hello" in chat spawns a Somasquito.
         public static RedeemData TryGetChatWordRedeem(string userName, string message)
         {
             if (userName == null || message == null)
                 return null;
 
-            if (!BathtubRedeemEnabled)
-                return null;
-
-            if (!MatchesAny(userName, AllowedUsers))
-                return null;
-
-            if (ContainsAny(message, BathtubTriggerWords))
+            if (BathtubRedeemEnabled && MatchesAny(userName, AllowedUsers) && ContainsAny(message, BathtubTriggerWords))
             {
                 Jotunn.Logger.LogWarning($"[WBTI] SpecialRedeemHelper: hottub trigger word validated in message from {userName}");
                 return BuildBathtubRedeem();
+            }
+
+            if (SomasquitoRedeemEnabled && MatchesAny(userName, SomaUsers) && ContainsAny(message, SomaTriggerWords))
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] SpecialRedeemHelper: soma trigger word validated in message from {userName}");
+                return BuildSomaRedeem();
             }
 
             return null;
@@ -144,8 +154,34 @@ namespace WizshBoneTwitchIntegration.Helpers
                             position = SpawnPositionType.InFrontOfPlayer,
                             requireMonsterComponents = false,
                             smelterFuelAmount = float.MaxValue,
-                            // placeholder - easy to edit
                             talkMessage = "Come join me in the hot tub Saphonette! I'm moist :);Is it hot in here? Or is that just Saphonette!;Oh my... its getting hot in here!;Who needs K.A.R.L. when you have a hot tub?!",
+                            talkInterval = 5,
+                            talks = true,
+                        }
+                    }
+                }
+            };
+        }
+
+        private static RedeemData BuildSomaRedeem()
+        {
+            return new RedeemData
+            {
+                title = SomaRedeemTitle,
+                type = RedeemType.SpawnCreature,
+                creatureData = new SpawnCreatureData
+                {
+                    list = new List<CreatureData>
+                    {
+                        new CreatureData
+                        {
+                            prefabName = "Deathsquito",
+                            name = "Somasquito",
+                            rename = true,
+                            size = 1.5f,
+                            color = "#FFBBDF",
+                            forceColor = true,
+                            talkMessage = "I'm gonna sting ya Saphonette!;Aint I... stunging?;Ready or not! Here I sting!;SaphonetteAboutToBeStung!",
                             talkInterval = 5,
                             talks = true,
                         }
@@ -172,13 +208,17 @@ namespace WizshBoneTwitchIntegration.Helpers
                             commandable = false,
                             alwaysFollowOwner = true,
                             fullyPassive = true,
-                            // placeholder - 3 different phrasings, easy to edit
-                            talkMessage = "Don't forget your coffee, Saphonette!;Coffee's getting cold, don't forget it!;Hey Saphonette, coffee time - don't forget!;Did you seriously microwaved the milk?!",
-                            talkInterval = 5,
+                            talkMessage = "Don't forget your coffee, Saphonette!;Coffee's getting cold, don't forget it!;Hey Saphonette, coffee time - don't forget!;Did you seriously microwaved the milk? ICK!",
+                            talkInterval = 10,
                             talks = true,
                             speedMultiplier = 4f,
                             name = "Coffee Reminder",
                             rename = true,
+                            helmetItem = "HelmetCelebration",
+                            heldItem = "Tankard_dvergr",
+                            removeShield = true,
+                            color = "#ff8fdd",
+                            forceColor = true,
                         }
                     }
                 }
@@ -220,6 +260,19 @@ namespace WizshBoneTwitchIntegration.Helpers
                 : "No coffee draugr found nearby.");
 
             Jotunn.Logger.LogWarning($"[WBTI] SpecialRedeemHelper: !killcoffee removed {killed} coffee draugr(s)");
+        }
+
+        // SAPHONETTE-CLEANUP: "!nik" chat command - open to anyone, no allowlist/admin gate, and no
+        // cooldown (every message plays it again). Bypasses the normal RedeemData/HandleRedeem
+        // pipeline entirely since it's just a local sound effect, not a game-world redeem - no chat
+        // confirmation either, the sound itself is the feedback. Remove alongside the rest of the
+        // death sound bit.
+        public static void TryHandleNikCommand(string message)
+        {
+            if (message == null || !message.StartsWith("!nik", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            DeathSoundHelper.PlayForNikCommand();
         }
 
         // Dispatched from TwitchCustomRewards.HandleRedeem separately from the normal per-type
@@ -287,7 +340,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             spawnAbilityData.spawns = new List<string> { YggwoodLogPrefab };
             spawnAbilityData.isBiomeList = false;
             spawnAbilityData.talks = true;
-            spawnAbilityData.talkInterval = 5;
+            spawnAbilityData.talkInterval = 10;
             spawnAbilityData.talkMessage = YggwoodLogTalkMessage;
             spawnAbilityData.announceMessage = YggwoodLogAnnounceMessage;
         }
@@ -348,22 +401,33 @@ namespace WizshBoneTwitchIntegration.Helpers
             switch (arg)
             {
                 case "coffee":
+                case "draugr":
                     CoffeeRedeemEnabled = !CoffeeRedeemEnabled;
                     chat.Send($"Coffee redeem is now {(CoffeeRedeemEnabled ? "ENABLED" : "DISABLED")}.");
                     break;
                 case "blob":
-                case "blobcircle":
+                case "blobs":
                     BlobCircleRedeemEnabled = !BlobCircleRedeemEnabled;
                     chat.Send($"Blob circle redeem is now {(BlobCircleRedeemEnabled ? "ENABLED" : "DISABLED")}.");
                     break;
                 case "bathtub":
+                case "tub":
                     BathtubRedeemEnabled = !BathtubRedeemEnabled;
                     chat.Send($"Bathtub redeem is now {(BathtubRedeemEnabled ? "ENABLED" : "DISABLED")}.");
+                    break;
+                case "soma":
+                case "somasquito":
+                    SomasquitoRedeemEnabled = !SomasquitoRedeemEnabled;
+                    chat.Send($"Somasquito redeem is now {(SomasquitoRedeemEnabled ? "ENABLED" : "DISABLED")}.");
                     break;
                 case "deathsound":
                 case "death":
                     DeathSoundHelper.Enabled = !DeathSoundHelper.Enabled;
                     chat.Send($"Death sound is now {(DeathSoundHelper.Enabled ? "ENABLED" : "DISABLED")}.");
+                    break;
+                case "nik":
+                    DeathSoundHelper.NikCommandEnabled = !DeathSoundHelper.NikCommandEnabled;
+                    chat.Send($"!nik sound is now {(DeathSoundHelper.NikCommandEnabled ? "ENABLED" : "DISABLED")}.");
                     break;
                 case "karl":
                 case "lograin":
@@ -373,10 +437,10 @@ namespace WizshBoneTwitchIntegration.Helpers
                     break;
                 case "status":
                 case "":
-                    chat.Send($"coffee={(CoffeeRedeemEnabled ? "ON" : "OFF")}, blob={(BlobCircleRedeemEnabled ? "ON" : "OFF")}, bathtub={(BathtubRedeemEnabled ? "ON" : "OFF")}, deathsound={(DeathSoundHelper.Enabled ? "ON" : "OFF")}, karl={(LogRainOverrideEnabled ? "ON" : "OFF")}");
+                    chat.Send($"coffee={(CoffeeRedeemEnabled ? "ON" : "OFF")}, blob={(BlobCircleRedeemEnabled ? "ON" : "OFF")}, bathtub={(BathtubRedeemEnabled ? "ON" : "OFF")}, somasquito={(SomasquitoRedeemEnabled ? "ON" : "OFF")}, deathsound={(DeathSoundHelper.Enabled ? "ON" : "OFF")}, nik={(DeathSoundHelper.NikCommandEnabled ? "ON" : "OFF")}, karl={(LogRainOverrideEnabled ? "ON" : "OFF")}");
                     break;
                 default:
-                    chat.Send("Usage: !toggle <coffee|blob|bathtub|deathsound|karl|status>");
+                    chat.Send("Usage: !toggle <coffee|blob|bathtub|somasquito|deathsound|nik|karl|status>");
                     break;
             }
 

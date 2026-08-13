@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using Jotunn.Managers;
+using System.Collections;
 using System.Collections.Generic;
 using TwitchSDK.Interop;
 using UnityEngine;
@@ -205,6 +206,18 @@ namespace WizshBoneTwitchIntegration.Helpers
                 }
             }
 
+            // SAPHONETTE-CLEANUP: deferred a frame rather than called immediately - MonsterAI.Start()
+            // (unconditionally calls Humanoid.EquipBestWeapon(null,...)) and Humanoid.Start()
+            // (GiveDefaultItems(), force-equips the prefab's random default shield) both run after
+            // this point - Unity defers Start() on a freshly Instantiate()'d object until after the
+            // current Update pass, so calling EquipGear synchronously here means the vanilla arm-up
+            // logic in those Start() calls runs afterward and can silently overwrite our held
+            // item/helmet with the creature's own default weapon/shield. Waiting one frame
+            // guarantees both Start() calls have already run, so our gear equips last and always
+            // wins the slot. Remove alongside the rest of the coffee bit.
+            if (humanoid != null)
+                humanoid.StartCoroutine(EquipGearNextFrame(humanoid, creatureData));
+
             // Init runs before SetData so TwitchCreatureClaim.m_originalName captures the true
             // pre-rename species name - SetData's ApplyHumanoid can rename the creature (via
             // creatureData.rename) and running it first would make m_originalName just capture
@@ -266,6 +279,74 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return;
 
             netView.GetZDO().Set(ZDOVars.s_fuel, Mathf.Min(fuelAmount, smelter.m_maxFuel));
+        }
+
+        // SAPHONETTE-CLEANUP: waits one frame (see the call site's comment for why) then equips
+        // optional cosmetic gear (creatureData.helmetItem/heldItem/removeShield) onto the spawned
+        // Humanoid. Uses the real equip route (Humanoid.EquipItem) rather than parenting a bare
+        // mesh to a bone, so vanilla VisEquipment/ZDO sync picks it up automatically for other
+        // clients and across zone reloads - same as any vanilla gear-wearing NPC, no custom
+        // RPC/ZDO write needed here. Runs on the spawning/owning client only. A missing/unresolvable
+        // item is logged and skipped, not thrown - cosmetic gear failing to resolve shouldn't abort
+        // the whole creature spawn. Remove alongside the rest of the coffee bit.
+        private static IEnumerator EquipGearNextFrame(Humanoid humanoid, CreatureData creatureData)
+        {
+            yield return null;
+
+            // The creature (or its ZNetView) may have been destroyed/despawned during that one
+            // frame of delay - bail out instead of equipping onto a dead object.
+            if (humanoid == null)
+                yield break;
+
+            EquipGear(humanoid, creatureData);
+        }
+
+        private static void EquipGear(Humanoid humanoid, CreatureData creatureData)
+        {
+            EquipItemByPrefabName(humanoid, creatureData.helmetItem, "helmet");
+            EquipItemByPrefabName(humanoid, creatureData.heldItem, "held item");
+
+            // Runs after the held-item equip above so it only ever removes the creature's own
+            // default shield, never something EquipItemByPrefabName just put there.
+            if (creatureData.removeShield)
+                humanoid.UnequipItem(humanoid.LeftItem);
+        }
+
+        private static void EquipItemByPrefabName(Humanoid humanoid, string prefabName, string slotLabel)
+        {
+            if (string.IsNullOrEmpty(prefabName))
+                return;
+
+            GameObject itemPrefab = PrefabManager.Instance.GetPrefab(prefabName);
+
+            if (itemPrefab == null)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] CreatureHelper: could not find {slotLabel} item prefab '{prefabName}' to equip, skipping.");
+                return;
+            }
+
+            ItemDrop itemDrop = itemPrefab.GetComponent<ItemDrop>();
+
+            if (itemDrop == null)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] CreatureHelper: prefab '{prefabName}' has no ItemDrop component, cannot equip as {slotLabel}.");
+                return;
+            }
+
+            // Humanoid.EquipItem expects the ItemData to already be a member of this humanoid's
+            // own inventory list - it does not add it itself, unlike ItemHelper.SpawnItem's loose
+            // world-drop path which just clones onto an already-instantiated ItemDrop.
+            ItemDrop.ItemData itemData = itemDrop.m_itemData.Clone();
+
+            // itemPrefab is the disabled prefab template from PrefabManager, not an instantiated/
+            // enabled ItemDrop, so its own Awake() (which normally sets m_itemData.m_dropPrefab)
+            // never ran - m_dropPrefab is still null on the clone. Humanoid.SetupVisEquipment reads
+            // m_dropPrefab.name for every equipped slot, so leaving this unset NREs there (and then
+            // again on every later equipment refresh, e.g. vanilla's own Start()/GiveDefaultItems()).
+            itemData.m_dropPrefab = itemPrefab;
+
+            humanoid.GetInventory().AddItem(itemData);
+            humanoid.EquipItem(itemData);
         }
 
         public static void SpawnCreatures(CreatureData creatureData, Transform transform, CustomRewardEvent customRewardEvent, bool ignoreWard = false, float force = 0f)
