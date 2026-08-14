@@ -14,31 +14,61 @@ namespace WizshBoneTwitchIntegration.Helpers
     {
         public static void InitExtraConfigs()
         {
-            ProfileManager.Init();
-
-            if (!File.Exists(WizshBoneTwitchIntegration.redeemsSchemaPath))
+            try
             {
-                Directory.CreateDirectory(WizshBoneTwitchIntegration.customConfigPath);
-                WriteFromEmbeddedResourceTo("WizshBoneTwitchIntegration.resources.redeems-schema.json", WizshBoneTwitchIntegration.redeemsSchemaPath);
+                ProfileManager.Init();
+            }
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Failed to initialize the default profile: {e}");
             }
 
-            if (!File.Exists(WizshBoneTwitchIntegration.bannedPath))
-            {
-                Directory.CreateDirectory(WizshBoneTwitchIntegration.customConfigPath);
-                WriteFromEmbeddedResourceTo("WizshBoneTwitchIntegration.resources.banned.txt", WizshBoneTwitchIntegration.bannedPath);
-            }
+            EnsureFileExists(WizshBoneTwitchIntegration.bannedPath, "WizshBoneTwitchIntegration.resources.banned.txt", "banned users");
+            EnsureFileExists(WizshBoneTwitchIntegration.viewersPath, "WizshBoneTwitchIntegration.resources.viewers.yaml", "viewers");
+        }
 
-            if (!File.Exists(WizshBoneTwitchIntegration.viewersPath))
+        /// <summary>
+        /// Recreates a single embedded-resource-backed config file from its default if missing.
+        /// Called both eagerly at startup (InitExtraConfigs) and lazily from the matching Read*
+        /// method below, so the file self-heals whenever it's next needed - not only on first run -
+        /// and one file's creation failing never blocks another's.
+        /// </summary>
+        private static void EnsureFileExists(string path, string embeddedResourceName, string description)
+        {
+            if (File.Exists(path))
+                return;
+
+            try
             {
-                Jotunn.Logger.LogWarning("Could not find viewers file! Writting...");
-                Directory.CreateDirectory(WizshBoneTwitchIntegration.customConfigPath);
-                WriteFromEmbeddedResourceTo("WizshBoneTwitchIntegration.resources.viewers.yaml", WizshBoneTwitchIntegration.viewersPath);
+                Jotunn.Logger.LogWarning($"[WBTI] Could not find {description} file at '{path}' - creating it from the default.");
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                WriteFromEmbeddedResourceTo(embeddedResourceName, path);
             }
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Failed to create default {description} file at '{path}': {e}");
+            }
+        }
+
+        /// <summary>
+        /// Same self-healing idea as EnsureFileExists, but for a profile's profile.yaml - seeded
+        /// via WriteDefaultRedeemsTo rather than a single fixed embedded resource path, since the
+        /// destination varies per profile.
+        /// </summary>
+        private static void EnsureRedeemsFileExists(string path)
+        {
+            if (File.Exists(path))
+                return;
+
+            Jotunn.Logger.LogWarning($"[WBTI] Could not find profile data file at '{path}' - recreating from the default.");
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            WriteDefaultRedeemsTo(path);
         }
 
         public static ModData ReadRedeemsConfig(string path = null)
         {
             path = path ?? ProfileManager.GetActiveRedeemPath();
+            EnsureRedeemsFileExists(path);
             return DeserializeYaml<ModData>(path);
         }
 
@@ -62,6 +92,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
             File.WriteAllText(path, serializer.Serialize(settings));
         }
 
@@ -72,20 +103,92 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static List<ViewerEntry> ReadViewersConfig()
         {
+            EnsureFileExists(WizshBoneTwitchIntegration.viewersPath, "WizshBoneTwitchIntegration.resources.viewers.yaml", "viewers");
             ViewerData data = DeserializeYaml<ViewerData>(WizshBoneTwitchIntegration.viewersPath);
-            return data?.viewers;
+            List<ViewerEntry> viewers = data?.viewers ?? new List<ViewerEntry>();
+
+            EnsureRequiredViewers(viewers);
+
+            return viewers;
+        }
+
+        private const string RequiredViewerName = "deathwizsh";
+
+        // Single source of truth for deathwizsh's required defaults. Both the "entry missing
+        // entirely" and "entry exists but a field is blank" paths in EnsureRequiredViewers pull
+        // from this, so a new ViewerEntry field only needs to be added here, plus one backfill
+        // line below.
+        private static ViewerEntry RequiredViewerDefault => new ViewerEntry
+        {
+            name = RequiredViewerName,
+            color1 = "#3489EB",
+            effects = new List<string> { "lightning" }
+        };
+
+        /// <summary>
+        /// Guarantees the "deathwizsh" entry is present in the given viewers list and that every
+        /// field on it is at least at its default value, healing whatever was lost - whether the
+        /// whole entry was deleted (hand-edited yaml, older save) or it merely predates a newer
+        /// ViewerEntry field. Case-insensitive on name. Never overwrites a field the user has
+        /// already set to something other than that field's default - only blank/default fields
+        /// are backfilled. Shared by ReadViewersConfig (every read) and ViewersTab.Save (every
+        /// write) so there is one source of truth for this guarantee.
+        /// </summary>
+        public static void EnsureRequiredViewers(List<ViewerEntry> viewers)
+        {
+            ViewerEntry existing = viewers.Find(v =>
+                string.Equals(v.name, RequiredViewerName, System.StringComparison.OrdinalIgnoreCase));
+
+            if (existing == null)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Required viewer '{RequiredViewerName}' missing from viewers config, re-adding it.");
+                viewers.Add(RequiredViewerDefault);
+                return;
+            }
+
+            ViewerEntry defaults = RequiredViewerDefault;
+
+            if (string.IsNullOrEmpty(existing.color1))
+                existing.color1 = defaults.color1;
+
+            if (existing.effects == null || existing.effects.Count == 0)
+                existing.effects = defaults.effects;
+
+            // Add one more "if existing.<field> is blank/default: existing.<field> = defaults.<field>"
+            // line here for each new ViewerEntry field added in the future.
+        }
+
+        /// <summary>
+        /// Serializes viewers straight to WizshBoneTwitchIntegration.viewersPath, same shape as
+        /// ViewersTab.Save()'s write. Used by RecolorHelper.ReloadViewersConfig() to restore the
+        /// file from the currently loaded viewers if it went missing after already being loaded
+        /// once, instead of silently resetting to the embedded stock template.
+        /// </summary>
+        public static void WriteViewersConfig(List<ViewerEntry> viewers)
+        {
+            viewers = viewers ?? new List<ViewerEntry>();
+            EnsureRequiredViewers(viewers);
+
+            List<Dictionary<string, object>> dicts = viewers.Select(v => v.ToDictionary()).ToList();
+            Dictionary<string, object> output = new Dictionary<string, object> { { "viewers", dicts } };
+
+            ISerializer serializer = new SerializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+
+            Directory.CreateDirectory(Path.GetDirectoryName(WizshBoneTwitchIntegration.viewersPath));
+            File.WriteAllText(WizshBoneTwitchIntegration.viewersPath, serializer.Serialize(output));
         }
 
         public static List<string> ReadBannedUsersFromFile()
         {
-            if (!File.Exists(WizshBoneTwitchIntegration.bannedPath))
-                throw new System.Exception("Cannot find file");
-
+            EnsureFileExists(WizshBoneTwitchIntegration.bannedPath, "WizshBoneTwitchIntegration.resources.banned.txt", "banned users");
             return File.ReadAllLines(WizshBoneTwitchIntegration.bannedPath).ToList();
         }
 
         public static void WriteBannedUsersToFile(List<string> bannedUsers)
         {
+            Directory.CreateDirectory(Path.GetDirectoryName(WizshBoneTwitchIntegration.bannedPath));
             File.WriteAllLines(WizshBoneTwitchIntegration.bannedPath, bannedUsers);
         }
 
@@ -112,21 +215,28 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static void WriteDefaultRedeemsTo(string path)
         {
-            WriteFromEmbeddedResourceTo("WizshBoneTwitchIntegration.resources.redeems.yaml", path);
+            WriteFromEmbeddedResourceTo("WizshBoneTwitchIntegration.resources.profile.yaml", path);
         }
 
         /// <summary>
-        /// Serializes a profile's creatureGroups + redeems to its redeems.yaml, matching the
-        /// hand-formatted layout (creatureGroups preamble, type banners, sorted groups) that
-        /// the in-game editor produces. Shared by RedeemsTab.OnSave and cross-profile redeem copy.
+        /// Serializes a profile's settings + creatureGroups + redeems to its profile.yaml,
+        /// matching the hand-formatted layout (settings/creatureGroups preambles, type banners,
+        /// sorted groups) that the in-game editor produces. Shared by RedeemsTab.OnSave,
+        /// cross-profile redeem copy, and ProfileSettingsHelper.Save.
         /// </summary>
-        public static void WriteRedeemsConfig(string path, List<CreatureGroupData> creatureGroups, List<RedeemData> redeems)
+        public static void WriteRedeemsConfig(string path, ProfileSettingsData settings, List<CreatureGroupData> creatureGroups, List<RedeemData> redeems)
         {
             ISerializer serializer = new SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
             var sb = new StringBuilder();
+
+            if (settings != null)
+            {
+                var settingsPreamble = new Dictionary<string, object> { { "settings", settings } };
+                sb.Append(serializer.Serialize(settingsPreamble));
+            }
 
             if (creatureGroups != null && creatureGroups.Count > 0)
             {
@@ -167,6 +277,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 }
             }
 
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
             File.WriteAllText(path, sb.ToString());
         }
 

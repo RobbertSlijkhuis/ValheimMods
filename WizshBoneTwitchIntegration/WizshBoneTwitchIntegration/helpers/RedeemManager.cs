@@ -95,9 +95,10 @@ namespace WizshBoneTwitchIntegration.Helpers
         }
 
         /// <summary>
-        /// Persists RedeemHelper.redeems (alongside whatever creatureGroups are already on disk)
-        /// to the active profile's redeems.yaml, backing up first and restoring on failure, then
-        /// reloads and pushes to Twitch if logged in. Extracted verbatim from RedeemsTab.Save().
+        /// Persists RedeemHelper.redeems (alongside whatever creatureGroups/settings are already
+        /// on disk) to the active profile's profile.yaml, backing up first and restoring on
+        /// failure, then reloads and pushes to Twitch if logged in. Extracted verbatim from
+        /// RedeemsTab.Save().
         /// </summary>
         private static bool Save(out string error)
         {
@@ -112,7 +113,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 ModData data = ExtraConfigHelper.ReadRedeemsConfig(path) ?? new ModData();
 
-                ExtraConfigHelper.WriteRedeemsConfig(path, data.creatureGroups, RedeemHelper.redeems);
+                ExtraConfigHelper.WriteRedeemsConfig(path, data.settings, data.creatureGroups, RedeemHelper.redeems);
 
                 RedeemHelper.Reload();
 

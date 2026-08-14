@@ -7,7 +7,8 @@ namespace WizshBoneTwitchIntegration.Configs
     internal static class PluginConfig
     {
         // Chatting/Creatures/Indestructible/Redeems/Twitchy Ward/HUD moved to per-profile
-        // settings (profiles/<name>/settings.yaml, see ProfileSettingsHelper/ProfileSettingsData).
+        // settings (profiles/<name>/profile.yaml's "settings:" key, see
+        // ProfileSettingsHelper/ProfileSettingsData).
 
         public static string sectionKeybinds = "Keybinds";
         public static string sectionDebug = "Debug";

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
-    /// Renders every per-profile "rule" setting (profiles/&lt;name&gt;/settings.yaml, see
-    /// ProfileSettingsHelper/ProfileSettingsData) grouped the same way PluginConfig.cs used to
+    /// Renders every per-profile "rule" setting (profiles/&lt;name&gt;/profile.yaml's "settings:"
+    /// key, see ProfileSettingsHelper/ProfileSettingsData) grouped the same way PluginConfig.cs used to
     /// group them. Rebuilt from scratch on every Refresh() (tab shown, or profile switched) so
     /// rows always reflect ProfileSettingsHelper.Current - there's no working-copy/Save button,
     /// each field writes straight through on edit (see RulesSettingsViews.cs). Each setting

@@ -4,8 +4,9 @@ namespace WizshBoneTwitchIntegration.Models
 {
     /// <summary>
     /// The "rules" settings that are scoped per-profile (as opposed to General/Debug/Performance,
-    /// which stay global BepInEx config) - persisted to profiles/&lt;name&gt;/settings.yaml and edited
-    /// through the Rules tab. Defaults mirror what these settings used to default to as BepInEx
+    /// which stay global BepInEx config) - persisted in profiles/&lt;name&gt;/profile.yaml's
+    /// "settings:" key (see ModData.settings) and edited through the Rules tab. Defaults
+    /// mirror what these settings used to default to as BepInEx
     /// ConfigEntry&lt;T&gt; values in PluginConfig.cs.
     /// </summary>
     internal class ProfileSettingsData

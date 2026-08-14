@@ -411,7 +411,7 @@ namespace WizshBoneTwitchIntegration.Gui
             ofn.lpstrFilter     = "YAML Files (*.yaml)\0*.yaml\0All Files (*.*)\0*.*\0";
             ofn.lpstrFile       = new string('\0', 260);
             ofn.nMaxFile        = 260;
-            ofn.lpstrTitle      = "Select a redeems.yaml to import";
+            ofn.lpstrTitle      = "Select a profile.yaml to import";
             ofn.lpstrInitialDir = downloadsPath;
             ofn.Flags           = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
 
@@ -464,7 +464,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 "Downloads"
             );
 
-            string defaultFileName = $"{ProfileManager.ActiveProfile}_redeems.yaml";
+            string defaultFileName = $"{ProfileManager.ActiveProfile}.yaml";
             string fileBuffer      = defaultFileName + new string('\0', 260 - defaultFileName.Length);
 
             OpenFileName ofn = new OpenFileName();

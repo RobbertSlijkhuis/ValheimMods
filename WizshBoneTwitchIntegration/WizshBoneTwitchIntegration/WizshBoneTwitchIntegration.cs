@@ -42,8 +42,6 @@ namespace WizshBoneTwitchIntegration
         public static readonly string HumanoidGroupSpawnFriendly = "WBTI_HumanoidGroupSpawnFriendly";
 
         public static readonly string customConfigPath = "BepInEx/config/WizshBoneTwitchIntegration";
-        public static readonly string redeemsConfigPath = customConfigPath + "/redeems.yaml";
-        public static readonly string redeemsSchemaPath = customConfigPath + "/redeems-schema.json";
         public static readonly string bannedPath = customConfigPath + "/banned.txt";
         public static readonly string viewersPath = customConfigPath + "/viewers.yaml";
 
@@ -403,6 +401,7 @@ namespace WizshBoneTwitchIntegration
             CommandManager.Instance.AddConsoleCommand(new UnclaimCommand());
             CommandManager.Instance.AddConsoleCommand(new TestProfilesCommand());
             CommandManager.Instance.AddConsoleCommand(new TestRedeemsCommand());
+            CommandManager.Instance.AddConsoleCommand(new TestSettingsCommand());
         }
 
         private void InitAssetBundle()

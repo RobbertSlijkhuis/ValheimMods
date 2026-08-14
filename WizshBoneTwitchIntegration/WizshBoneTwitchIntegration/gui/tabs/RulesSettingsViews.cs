@@ -7,7 +7,7 @@ namespace WizshBoneTwitchIntegration.Gui
     /// Narrowed BoundField&lt;T&gt; views over <see cref="ProfileSettingsHelper.Current"/>, one per
     /// PluginConfig.cs section that moved to per-profile storage - rendered by RulesTab through
     /// ObjectEditor, same as <c>models/views/RainView.cs</c> does for redeem data. Every setter
-    /// re-applies live side effects and persists to the active profile's settings.yaml immediately,
+    /// re-applies live side effects and persists to the active profile's profile.yaml immediately,
     /// so there's no separate Save button (matches how ConfigEntry.Value used to autosave).
     /// </summary>
     internal static class RulesSettingsViewHelper

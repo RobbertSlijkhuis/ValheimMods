@@ -9,7 +9,7 @@ namespace WizshBoneTwitchIntegration.Helpers
     {
         private static readonly string ProfilesPath = WizshBoneTwitchIntegration.customConfigPath + "/profiles";
         private static readonly string ActiveProfileFile = ProfilesPath + "/active.txt";
-        private const string DefaultProfileName = "default";
+        private const string DefaultProfileName = "Default";
         private const string RedeemsStem = "_redeems";
         private static readonly System.Text.RegularExpressions.Regex TrailingDuplicateNumberRegex =
             new System.Text.RegularExpressions.Regex(@" ?\(\d+\)$");
@@ -18,12 +18,29 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static string GetActiveRedeemPath()
         {
-            return $"{ProfilesPath}/{ActiveProfile}/redeems.yaml";
+            return GetRedeemPath(ActiveProfile);
         }
 
+        /// <summary>
+        /// Resolves a profile's data file path - "profile.yaml" (redeems + creatureGroups +
+        /// settings; the name "redeems.yaml" stopped fitting once settings moved in). Lazily
+        /// migrates a profile still on the old "redeems.yaml" name the first time its path is
+        /// resolved after upgrading, so every call site gets the rename for free without having
+        /// to hunt down every entry point - one File.Move, then never touched again.
+        /// </summary>
         public static string GetRedeemPath(string profileName)
         {
-            return $"{ProfilesPath}/{profileName}/redeems.yaml";
+            string profilePath = $"{ProfilesPath}/{profileName}";
+            string path = $"{profilePath}/profile.yaml";
+            string legacyPath = $"{profilePath}/redeems.yaml";
+
+            if (!File.Exists(path) && File.Exists(legacyPath))
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Migrating legacy redeems.yaml to profile.yaml for profile '{profileName}'.");
+                File.Move(legacyPath, path);
+            }
+
+            return path;
         }
 
         public static string GetActiveSettingsPath()
@@ -55,19 +72,17 @@ namespace WizshBoneTwitchIntegration.Helpers
                 : DefaultProfileName;
 
             if (!Directory.Exists($"{ProfilesPath}/{ActiveProfile}"))
-                CreateProfile(ActiveProfile, out _, migrate: true);
+                CreateProfile(ActiveProfile, out _);
         }
 
-        public static bool CreateProfile(string name, out string error, bool migrate = false)
+        public static bool CreateProfile(string name, out string error)
         {
             error = null;
 
             if (!IsValidProfileName(name, out error))
                 return false;
 
-            string profilePath  = $"{ProfilesPath}/{name}";
-            string redeemPath   = $"{profilePath}/redeems.yaml";
-            string settingsPath = $"{profilePath}/settings.yaml";
+            string profilePath = $"{ProfilesPath}/{name}";
 
             if (Directory.Exists(profilePath))
             {
@@ -77,20 +92,19 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             Directory.CreateDirectory(profilePath);
 
-            if (migrate && File.Exists(WizshBoneTwitchIntegration.redeemsConfigPath))
-                File.Copy(WizshBoneTwitchIntegration.redeemsConfigPath, redeemPath);
-            else
-                ExtraConfigHelper.WriteDefaultRedeemsTo(redeemPath);
+            ExtraConfigHelper.WriteDefaultRedeemsTo(GetRedeemPath(name));
 
-            ExtraConfigHelper.WriteDefaultSettingsTo(settingsPath);
+            // No settings block is written here - a profile.yaml with no "settings:" key is
+            // treated as "use ProfileSettingsData defaults" by ProfileSettingsHelper.Reload().
 
             return true;
         }
 
         /// <summary>
-        /// Copies the active profile's redeems.yaml into a new profile with the given name.
-        /// The .synced marker is intentionally not copied so the clone is locally owned.
-        /// Fails if the name is invalid or a profile with that name already exists.
+        /// Copies the active profile's profile.yaml (settings and all, since they now live in
+        /// the same file) into a new profile with the given name. The .synced marker is
+        /// intentionally not copied so the clone is locally owned. Fails if the name is invalid
+        /// or a profile with that name already exists.
         /// </summary>
         public static bool CopyProfileTo(string newProfileName, out string error)
         {
@@ -114,10 +128,6 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             Directory.CreateDirectory($"{ProfilesPath}/{newProfileName}");
             File.Copy(sourcePath, GetRedeemPath(newProfileName));
-
-            string settingsSourcePath = GetActiveSettingsPath();
-            if (File.Exists(settingsSourcePath))
-                File.Copy(settingsSourcePath, GetSettingsPath(newProfileName));
 
             return true;
         }
@@ -194,7 +204,10 @@ namespace WizshBoneTwitchIntegration.Helpers
         /// Strips the file extension, then a trailing " (N)" - the suffix browsers/Discord add
         /// when a same-named file is downloaded more than once - and then a trailing "_redeems"
         /// stem, so re-downloaded copies of the same export still resolve to the original
-        /// profile name instead of suggesting a new one each time.
+        /// profile name instead of suggesting a new one each time. Exports no longer append
+        /// "_redeems" (there's nothing left to disambiguate from now that settings live in the
+        /// same file), but the strip stays so files exported before that change still resolve
+        /// cleanly.
         /// </summary>
         public static string ResolveImportProfileName(string sourceFilePath)
         {
@@ -247,12 +260,10 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             File.Copy(sourceFilePath, GetRedeemPath(targetProfileName), overwrite: true);
 
-            // Import only ever carries a redeems.yaml (see ProfileManager's known limitation on
-            // full-profile import/export) - a brand-new profile still needs a settings.yaml so it
-            // isn't left without one.
-            string settingsPath = GetSettingsPath(targetProfileName);
-            if (!File.Exists(settingsPath))
-                ExtraConfigHelper.WriteDefaultSettingsTo(settingsPath);
+            // Settings now live inside profile.yaml (see ModData.settings), so importing the
+            // file carries them along automatically. A source file with no "settings:" key just
+            // leaves the target with none, which ProfileSettingsHelper.Reload() already treats
+            // as "use defaults" - no separate settings file needs writing here.
 
             if (targetProfileName == ActiveProfile)
             {
@@ -310,7 +321,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         /// <summary>
         /// Copies a single redeem (renamed to <paramref name="newTitle"/>) into another profile's
-        /// redeems.yaml. Used for copying into a profile other than the active one - the active
+        /// profile.yaml. Used for copying into a profile other than the active one - the active
         /// profile's redeems live in RedeemsTab's in-memory working buffer instead, so callers
         /// should handle that case separately rather than going through this method.
         /// </summary>
@@ -350,7 +361,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             copy.title = newTitle;
             data.redeems.Add(copy);
 
-            ExtraConfigHelper.WriteRedeemsConfig(targetPath, data.creatureGroups, data.redeems);
+            ExtraConfigHelper.WriteRedeemsConfig(targetPath, data.settings, data.creatureGroups, data.redeems);
 
             return true;
         }
@@ -374,7 +385,8 @@ namespace WizshBoneTwitchIntegration.Helpers
         }
 
         /// <summary>
-        /// Copies the active profile's redeems.yaml to the given destination path.
+        /// Copies the active profile's profile.yaml to the given destination path. Settings
+        /// travel along for free since they're embedded in the same file (see ModData.settings).
         /// </summary>
         public static bool ExportProfile(string destFilePath)
         {

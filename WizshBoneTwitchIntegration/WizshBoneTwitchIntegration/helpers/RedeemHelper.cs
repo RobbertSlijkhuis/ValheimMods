@@ -7,43 +7,41 @@ namespace WizshBoneTwitchIntegration.Helpers
 {
     internal class RedeemHelper
     {
-        
+
         public static List<RedeemData> redeems = new List<RedeemData>();
         public static List<CreatureGroupData> creatureGroups = new List<CreatureGroupData>();
         public static PlayerSnapshot playerSnapshot;
 
+        // Tracks which profile the lists above actually belong to, so a missing-file self-heal
+        // can tell "this exact profile was already loaded and then lost its file" (safe to
+        // restore from memory) apart from "a different/never-loaded profile is being read"
+        // (must fall back to the embedded stock template instead - there's nothing else to use).
+        private static string m_loadedProfileName;
+
         public static bool ReadRedeems()
         {
-            if (!FileExists())
+            string activeProfile = ProfileManager.ActiveProfile;
+            string path = ProfileManager.GetActiveRedeemPath();
+
+            if (!File.Exists(path) && m_loadedProfileName == activeProfile)
             {
-                Jotunn.Logger.LogError("Could not find redeems configuration");
-                return false;
+                Jotunn.Logger.LogWarning($"[WBTI] Active profile file at '{path}' is missing - restoring it from the currently loaded redeems/settings instead of resetting to defaults.");
+                ExtraConfigHelper.WriteRedeemsConfig(path, ProfileSettingsHelper.Current, creatureGroups, redeems);
+                return true;
             }
 
-            // Got an error saying it could not read redeems on line 25???
-            ModData data = ExtraConfigHelper.ReadRedeemsConfig();
+            // ReadRedeemsConfig() self-heals from the embedded stock template if the file is
+            // still missing at this point - i.e. this profile has never been loaded before.
+            ModData data = ExtraConfigHelper.ReadRedeemsConfig(path);
             redeems = data.redeems;
             creatureGroups = data.creatureGroups;
+            m_loadedProfileName = activeProfile;
             return true;
         }
 
         public static bool Reload()
         {
-            if (!FileExists())
-            {
-                Jotunn.Logger.LogError("Could not find redeems configuration for reload!");
-                return false;
-            }
-
-            ModData data = ExtraConfigHelper.ReadRedeemsConfig();
-            redeems = data.redeems;
-            creatureGroups = data.creatureGroups;
-            return true;
-        }
-
-        private static bool FileExists()
-        {
-            return File.Exists(ProfileManager.GetActiveRedeemPath());
+            return ReadRedeems();
         }
 
         public static RedeemData GetRedeemByTitle(string value)

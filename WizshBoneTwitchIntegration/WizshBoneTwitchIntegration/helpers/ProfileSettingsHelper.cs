@@ -1,3 +1,4 @@
+using System.IO;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
@@ -7,14 +8,16 @@ namespace WizshBoneTwitchIntegration.Helpers
     /// Per-profile equivalent of <see cref="RedeemHelper"/> for the "rules" settings
     /// (Chatting/Creatures/Indestructible/Redeems/Twitchy Ward/HUD) that used to be global
     /// BepInEx <c>ConfigEntry&lt;T&gt;</c> values in <c>PluginConfig.cs</c>. General/Debug/
-    /// Performance stay global and are untouched by this class.
+    /// Performance stay global and are untouched by this class. Settings live embedded in the
+    /// active profile's profile.yaml (<see cref="ModData.settings"/>), alongside redeems and
+    /// creatureGroups.
     /// </summary>
     internal static class ProfileSettingsHelper
     {
         public static ProfileSettingsData Current = new ProfileSettingsData();
 
         /// <summary>
-        /// Re-reads the active profile's settings.yaml and re-applies every live side effect
+        /// Re-reads the active profile's profile.yaml and re-applies every live side effect
         /// that used to live in PluginConfig.cs's SettingChanged handlers. Called at startup,
         /// on every profile switch/rename/import/sync, and after every Rules tab edit - so all
         /// call sites are null-guarded since the relevant live components may not exist yet
@@ -22,22 +25,64 @@ namespace WizshBoneTwitchIntegration.Helpers
         /// </summary>
         public static bool Reload()
         {
-            ProfileSettingsData data = ExtraConfigHelper.ReadSettingsConfig();
+            ModData data = ExtraConfigHelper.ReadRedeemsConfig();
 
             if (data == null)
             {
-                Jotunn.Logger.LogError("Could not find profile settings configuration for reload!");
+                Jotunn.Logger.LogError("Could not find profile redeems configuration for reload!");
                 return false;
             }
 
-            Current = data;
+            if (data.settings != null)
+            {
+                Current = data.settings;
+            }
+            else if (File.Exists(ProfileManager.GetActiveSettingsPath()))
+            {
+                // Pre-merge profile: settings still live in a standalone settings.yaml (this
+                // profile's profile.yaml predates settings being embedded in it). Adopt the
+                // legacy file's values once, then immediately fold them into profile.yaml via
+                // Save() so every reload after this one takes the fast path above. The old
+                // settings.yaml is left in place afterward - harmless, just unused.
+                Jotunn.Logger.LogWarning($"[WBTI] Migrating legacy settings.yaml for profile '{ProfileManager.ActiveProfile}' into profile.yaml.");
+                Current = ExtraConfigHelper.ReadSettingsConfig() ?? new ProfileSettingsData();
+                Save();
+            }
+            else
+            {
+                Current = new ProfileSettingsData();
+            }
+
             ApplyToLiveComponents();
             return true;
         }
 
+        /// <summary>
+        /// Persists Current into the active profile's profile.yaml (read-modify-write, same
+        /// backup-then-restore-on-failure shape as RedeemManager.Save/CreatureGroupsTab.Save) -
+        /// fires on every single Rules tab field edit, so failures must never corrupt the file.
+        /// </summary>
         public static void Save()
         {
-            ExtraConfigHelper.WriteSettingsConfig(ProfileManager.GetActiveSettingsPath(), Current);
+            string path = ProfileManager.GetActiveRedeemPath();
+            string backupPath = path + ".bak";
+
+            try
+            {
+                if (File.Exists(path))
+                    File.Copy(path, backupPath, overwrite: true);
+
+                ModData data = ExtraConfigHelper.ReadRedeemsConfig(path) ?? new ModData();
+
+                ExtraConfigHelper.WriteRedeemsConfig(path, Current, data.creatureGroups, data.redeems);
+            }
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogError($"Failed to save profile settings, restoring backup: {e}");
+
+                if (File.Exists(backupPath))
+                    File.Copy(backupPath, path, overwrite: true);
+            }
         }
 
         /// <summary>

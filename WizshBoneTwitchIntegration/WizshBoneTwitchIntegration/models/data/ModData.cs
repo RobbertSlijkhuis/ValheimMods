@@ -6,5 +6,6 @@ namespace WizshBoneTwitchIntegration.Models
     {
         public List<RedeemData> redeems;
         public List<CreatureGroupData> creatureGroups;
+        public ProfileSettingsData settings;
     }
 }

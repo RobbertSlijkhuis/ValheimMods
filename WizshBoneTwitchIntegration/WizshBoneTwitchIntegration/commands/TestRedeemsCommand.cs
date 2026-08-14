@@ -74,6 +74,7 @@ namespace WizshBoneTwitchIntegration.Commands
             var seedGroup = new CreatureGroupData { group = "WBTITestGroup" };
             ExtraConfigHelper.WriteRedeemsConfig(
                 ProfileManager.GetActiveRedeemPath(),
+                null,
                 new List<CreatureGroupData> { seedGroup },
                 RedeemHelper.redeems);
             RedeemHelper.Reload();

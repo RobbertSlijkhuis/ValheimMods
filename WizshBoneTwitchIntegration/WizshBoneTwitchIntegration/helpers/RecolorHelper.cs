@@ -3,6 +3,7 @@ using Jotunn;
 using Jotunn.Managers;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Models;
@@ -12,7 +13,21 @@ namespace WizshBoneTwitchIntegration.Helpers
 {
     internal class RecolorHelper
     {
-        public static List<ViewerEntry> m_viewers = ExtraConfigHelper.ReadViewersConfig();
+        public static List<ViewerEntry> m_viewers = LoadInitialViewers();
+
+        // Set once the very first load (successful or self-healed) completes, so
+        // ReloadViewersConfig can tell "m_viewers already holds a real load" apart from
+        // "nothing has been loaded yet" - see ReloadViewersConfig for why that distinction
+        // matters.
+        private static bool m_hasLoadedOnce;
+
+        private static List<ViewerEntry> LoadInitialViewers()
+        {
+            List<ViewerEntry> viewers = ExtraConfigHelper.ReadViewersConfig();
+            m_hasLoadedOnce = true;
+            return viewers;
+        }
+
         public static Dictionary<string, List<RecolorCreatureData>> creatureList = new Dictionary<string, List<RecolorCreatureData>>()
         {
             { "Abomination", new List<RecolorCreatureData>() {
@@ -574,7 +589,20 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static void ReloadViewersConfig()
         {
+            // The viewers file went missing after we already had it loaded once - the in-memory
+            // list is more trustworthy than the embedded stock template, so re-save what's
+            // actually loaded instead of silently reverting to defaults. ReadViewersConfig()'s
+            // own self-heal (falling back to the stock template) only kicks in below for the
+            // very first load, when there's nothing in memory yet to fall back to.
+            if (m_hasLoadedOnce && !File.Exists(WizshBoneTwitchIntegration.viewersPath))
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Viewers file at '{WizshBoneTwitchIntegration.viewersPath}' is missing - restoring it from the currently loaded viewers instead of resetting to defaults.");
+                ExtraConfigHelper.WriteViewersConfig(m_viewers);
+                return;
+            }
+
             m_viewers = ExtraConfigHelper.ReadViewersConfig();
+            m_hasLoadedOnce = true;
         }
 
         public static bool CanRecolorCreature(string name, string creature, string colorOverride = null)

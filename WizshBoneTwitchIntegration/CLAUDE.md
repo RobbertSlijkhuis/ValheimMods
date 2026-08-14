@@ -71,11 +71,11 @@ Redeem profiles created/edited in-game via the Redeems tab are **not** stored in
 
 Each saved redeem profile lives at:
 ```
-<Valheim install>/BepInEx/config/WizshBoneTwitchIntegration/profiles/<profile name>/redeems.yaml
+<Valheim install>/BepInEx/config/WizshBoneTwitchIntegration/profiles/<profile name>/profile.yaml
 ```
-There's also a legacy `<Valheim install>/BepInEx/config/WizshBoneTwitchIntegration/redeems.yaml` (no `profiles/` subfolder) — this one is only read once, to seed a brand-new profile via `ProfileManager.CreateProfile(migrate: true)`, and isn't touched afterward.
+This one file holds redeems, creatureGroups, and settings (`ModData`/`ProfileSettingsData`) — it was `redeems.yaml` before settings moved into it; `ProfileManager.GetRedeemPath()` auto-migrates any profile still on the old filename the first time its path is resolved, so this is transparent to every caller. There is no migration from the old pre-profiles top-level `redeems.yaml` (from before the `profiles/` folder existed) — too much has changed since; a fresh "default" profile is always seeded from the embedded `resources/profile.yaml`.
 
-When asked to inspect or edit a specific real redeem profile (as opposed to `resources/redeems.yaml`, the repo's embedded default-profile seed), look here rather than under the Thunderstore Mod Manager `DataFolder`.
+When asked to inspect or edit a specific real redeem profile (as opposed to `resources/profile.yaml`, the repo's embedded default-profile seed), look here rather than under the Thunderstore Mod Manager `DataFolder`.
 
 ## Testing
 

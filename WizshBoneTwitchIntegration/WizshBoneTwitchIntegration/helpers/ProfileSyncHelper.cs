@@ -31,29 +31,20 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return;
             }
 
-            string profileName   = ProfileManager.ActiveProfile;
-            string yamlPath      = ProfileManager.GetRedeemPath(profileName);
-            string settingsPath  = ProfileManager.GetSettingsPath(profileName);
+            string profileName = ProfileManager.ActiveProfile;
+            string yamlPath    = ProfileManager.GetRedeemPath(profileName);
 
             if (!File.Exists(yamlPath))
             {
-                Jotunn.Logger.LogError("ProfileSyncHelper: Cannot sync, redeems.yaml not found.");
+                Jotunn.Logger.LogError("ProfileSyncHelper: Cannot sync, profile.yaml not found.");
                 return;
             }
 
-            if (!File.Exists(settingsPath))
-            {
-                Jotunn.Logger.LogError("ProfileSyncHelper: Cannot sync, settings.yaml not found.");
-                return;
-            }
-
-            string yamlContent     = File.ReadAllText(yamlPath);
-            string settingsContent = File.ReadAllText(settingsPath);
+            string yamlContent = File.ReadAllText(yamlPath);
 
             ZPackage pkg = new ZPackage();
             pkg.Write(profileName);
             pkg.Write(yamlContent);
-            pkg.Write(settingsContent);
 
             List<ZNetPeer> peers = ZNet.instance.GetPeers();
 
@@ -69,9 +60,8 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         private static IEnumerator RPC_ReceiveProfile(long sender, ZPackage pkg)
         {
-            string profileName     = pkg.ReadString();
-            string yamlContent     = pkg.ReadString();
-            string settingsContent = pkg.ReadString();
+            string profileName = pkg.ReadString();
+            string yamlContent = pkg.ReadString();
 
             try
             {
@@ -80,9 +70,6 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 string destPath = ProfileManager.GetRedeemPath(profileName);
                 File.WriteAllText(destPath, yamlContent);
-
-                string settingsDestPath = ProfileManager.GetSettingsPath(profileName);
-                File.WriteAllText(settingsDestPath, settingsContent);
 
                 ProfileManager.MarkAsSynced(profileName);
 
@@ -109,7 +96,6 @@ namespace WizshBoneTwitchIntegration.Helpers
                         ZPackage relayPkg = new ZPackage();
                         relayPkg.Write(profileName);
                         relayPkg.Write(yamlContent);
-                        relayPkg.Write(settingsContent);
                         m_rpc.SendPackage(otherPeers, relayPkg);
                         Jotunn.Logger.LogInfo($"ProfileSyncHelper: Relayed profile '{profileName}' to {otherPeers.Count} other peer(s).");
                     }

@@ -264,7 +264,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
                 ModData data = ExtraConfigHelper.ReadRedeemsConfig(path) ?? new ModData();
 
-                ExtraConfigHelper.WriteRedeemsConfig(path, m_workingGroups, data.redeems);
+                ExtraConfigHelper.WriteRedeemsConfig(path, data.settings, m_workingGroups, data.redeems);
 
                 RedeemHelper.Reload();
                 m_listFeedbackText.text = successMessage;

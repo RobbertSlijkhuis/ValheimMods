@@ -73,8 +73,10 @@ namespace WizshBoneTwitchIntegration.Commands
             m_report.Check(ProfileManager.CreateProfile(createName, out _), "Create: fresh name succeeds");
             Track(createName);
             m_report.Check(!ProfileManager.CreateProfile(createName, out _), "Create: duplicate name rejected");
-            m_report.Check(File.Exists(ProfileManager.GetRedeemPath(createName)), "Create: redeems.yaml written");
-            m_report.Check(File.Exists(ProfileManager.GetSettingsPath(createName)), "Create: settings.yaml written");
+            m_report.Check(File.Exists(ProfileManager.GetRedeemPath(createName)), "Create: profile.yaml written");
+            m_report.Check(
+                ExtraConfigHelper.ReadRedeemsConfig(ProfileManager.GetRedeemPath(createName))?.settings == null,
+                "Create: no settings block written (ProfileSettingsHelper falls back to defaults)");
             string invalidCreateName = Prefix + "invalid_" + Path.GetInvalidFileNameChars()[0];
             m_report.Check(!ProfileManager.CreateProfile(invalidCreateName, out _), "Create: invalid name rejected");
 
@@ -95,13 +97,20 @@ namespace WizshBoneTwitchIntegration.Commands
             m_report.Check(ProfileManager.SelectProfile(source), "Select: source profile becomes active");
             m_report.Check(ProfileManager.ActiveProfile == source, "Select: ActiveProfile reflects source");
 
+            // Give this profile a distinguishing, non-default setting so later copy/export/
+            // import checks can verify settings actually travel with profile.yaml instead of
+            // just being structurally present.
+            const int SourceClaimDuration = 12345;
+            ProfileSettingsHelper.Current.chattingClaimDuration = SourceClaimDuration;
+            ProfileSettingsHelper.Save();
+
             // 4. Copy
             string copyTarget = NewTestName("copy_target");
             m_report.Check(ProfileManager.CopyProfileTo(copyTarget, out _), "Copy: creates new profile");
             Track(copyTarget);
             m_report.Check(
                 File.ReadAllText(ProfileManager.GetRedeemPath(copyTarget)) == File.ReadAllText(ProfileManager.GetActiveRedeemPath()),
-                "Copy: redeems match source");
+                "Copy: file (redeems + settings) matches source");
             m_report.Check(!ProfileManager.CopyProfileTo(copyTarget, out _), "Copy: existing target name rejected");
 
             // 5. Export
@@ -110,27 +119,31 @@ namespace WizshBoneTwitchIntegration.Commands
             m_report.Check(
                 File.Exists(exportPath) && File.ReadAllText(exportPath) == File.ReadAllText(ProfileManager.GetActiveRedeemPath()),
                 "Export: content matches active profile");
+            m_report.Check(
+                ExtraConfigHelper.ReadRedeemsConfig(exportPath)?.settings?.chattingClaimDuration == SourceClaimDuration,
+                "Export: settings travel with the file");
 
             // 6. Import - brand-new profile
             string importNewName = NewTestName("import_new");
             bool importedNew = ProfileManager.ImportProfileTo(exportPath, importNewName, out bool createdNew, out _);
             m_report.Check(importedNew && createdNew, "Import (new): creates a new profile");
             Track(importNewName);
-            m_report.Check(File.Exists(ProfileManager.GetSettingsPath(importNewName)), "Import (new): default settings.yaml written");
+            m_report.Check(
+                ExtraConfigHelper.ReadRedeemsConfig(ProfileManager.GetRedeemPath(importNewName))?.settings?.chattingClaimDuration == SourceClaimDuration,
+                "Import (new): settings carried over from imported file");
 
             // 7. Import - overwrite an existing, non-active profile
             string overwriteTarget = NewTestName("import_overwrite");
             m_report.Check(ProfileManager.CreateProfile(overwriteTarget, out _), "Import (overwrite): create target profile");
             Track(overwriteTarget);
-            string settingsBefore = File.ReadAllText(ProfileManager.GetSettingsPath(overwriteTarget));
             bool importedOver = ProfileManager.ImportProfileTo(exportPath, overwriteTarget, out bool createdOver, out _);
             m_report.Check(importedOver && !createdOver, "Import (overwrite): updates existing profile, not created");
             m_report.Check(
                 File.ReadAllText(ProfileManager.GetRedeemPath(overwriteTarget)) == File.ReadAllText(exportPath),
-                "Import (overwrite): redeems.yaml replaced with imported file");
+                "Import (overwrite): profile.yaml replaced with imported file");
             m_report.Check(
-                File.ReadAllText(ProfileManager.GetSettingsPath(overwriteTarget)) == settingsBefore,
-                "Import (overwrite): settings.yaml left untouched");
+                ExtraConfigHelper.ReadRedeemsConfig(ProfileManager.GetRedeemPath(overwriteTarget))?.settings?.chattingClaimDuration == SourceClaimDuration,
+                "Import (overwrite): settings replaced with imported file's settings");
 
             // 7b. Import into the currently-active test profile triggers a reload
             bool importedActive = ProfileManager.ImportProfileTo(exportPath, source, out _, out _);
@@ -158,13 +171,51 @@ namespace WizshBoneTwitchIntegration.Commands
             m_report.Check(
                 RedeemHelper.redeems?.Count == (copyRedeems?.redeems?.Count ?? -1),
                 "Select/Reload: RedeemHelper reflects copyTarget");
-            ProfileSettingsData copySettings = ExtraConfigHelper.ReadSettingsConfig(ProfileManager.GetSettingsPath(copyTarget));
             m_report.Check(
-                ProfileSettingsHelper.Current.chattingEnabled == copySettings.chattingEnabled,
-                "Select/Reload: ProfileSettingsHelper reflects copyTarget");
+                ProfileSettingsHelper.Current.chattingClaimDuration == SourceClaimDuration,
+                "Select/Reload: ProfileSettingsHelper reflects copyTarget's settings");
             m_report.Check(ProfileManager.SelectProfile(source), "Select/Reload: switch back to source");
 
-            // 11. Rename
+            // 11. Legacy redeems.yaml -> profile.yaml filename migration - a profile still on the
+            // old filename should have it renamed transparently the first time its path is
+            // resolved, no matter which caller triggers the resolve.
+            string filenameLegacyName = NewTestName("filename_legacy");
+            m_report.Check(ProfileManager.CreateProfile(filenameLegacyName, out _), "Filename migration: create profile");
+            Track(filenameLegacyName);
+            string newPath = ProfileManager.GetRedeemPath(filenameLegacyName);
+            string oldPath = newPath.Replace("profile.yaml", "redeems.yaml");
+            File.Move(newPath, oldPath);
+            m_report.Check(
+                !File.Exists(newPath) && File.Exists(oldPath),
+                "Filename migration: simulated legacy redeems.yaml in place");
+            string resolvedPath = ProfileManager.GetRedeemPath(filenameLegacyName);
+            m_report.Check(
+                resolvedPath == newPath && File.Exists(newPath) && !File.Exists(oldPath),
+                "Filename migration: GetRedeemPath renames redeems.yaml to profile.yaml on resolve");
+
+            // 12. Legacy settings.yaml migration - a profile from the old two-file scheme
+            // (profile.yaml with no "settings:" key + a standalone settings.yaml) should adopt
+            // the standalone file's values on first Reload, then fold them into profile.yaml so
+            // every later Reload takes the merged-file fast path.
+            string legacyName = NewTestName("legacy");
+            m_report.Check(ProfileManager.CreateProfile(legacyName, out _), "Legacy: create profile");
+            Track(legacyName);
+            const float LegacyCullingRange = 999f;
+            var legacySettings = new ProfileSettingsData { chattingCullingRange = LegacyCullingRange };
+            ExtraConfigHelper.WriteSettingsConfig(ProfileManager.GetSettingsPath(legacyName), legacySettings);
+            m_report.Check(
+                ExtraConfigHelper.ReadRedeemsConfig(ProfileManager.GetRedeemPath(legacyName))?.settings == null,
+                "Legacy: profile.yaml has no settings block yet");
+            m_report.Check(ProfileManager.SelectProfile(legacyName), "Legacy: select migrates on Reload");
+            m_report.Check(
+                ProfileSettingsHelper.Current.chattingCullingRange == LegacyCullingRange,
+                "Legacy: adopted values from standalone settings.yaml");
+            m_report.Check(
+                ExtraConfigHelper.ReadRedeemsConfig(ProfileManager.GetRedeemPath(legacyName))?.settings?.chattingCullingRange == LegacyCullingRange,
+                "Legacy: values folded into profile.yaml after migration");
+            m_report.Check(ProfileManager.SelectProfile(source), "Legacy: switch back to source");
+
+            // 13. Rename
             string renameTarget = NewTestName("rename_target");
             m_report.Check(ProfileManager.CreateProfile(renameTarget, out _), "Rename: create target profile");
             Track(renameTarget);
@@ -184,7 +235,7 @@ namespace WizshBoneTwitchIntegration.Commands
             Replace(source, sourceRenamed);
             source = sourceRenamed;
 
-            // 12. Delete - last on purpose: doubles as the run's actual teardown (unless --keep).
+            // 14. Delete - last on purpose: doubles as the run's actual teardown (unless --keep).
             TestDelete(originalActive, keepProfiles);
         }
 

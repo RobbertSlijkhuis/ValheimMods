@@ -234,19 +234,25 @@ namespace WizshBoneTwitchIntegration.Gui
                 editBtn.GetComponent<Button>().onClick.AddListener(() => ShowEditView(captured));
                 revealOnHover.Add(editBtn);
 
-                GameObject deleteBtn = GUIManager.Instance.CreateButton(
-                    text: "X",
-                    parent: row.transform,
-                    anchorMin: new Vector2(0.5f, 0.5f),
-                    anchorMax: new Vector2(0.5f, 0.5f),
-                    position: new Vector2(BtnDeleteX, 0f),
-                    width: ItemHeight,
-                    height: ItemHeight
-                );
-                deleteBtn.SetActive(true);
-                deleteBtn.GetComponentInChildren<Text>().color = Color.red;
-                TabUIHelper.AddBorder(deleteBtn, Color.red);
-                deleteBtn.GetComponent<Button>().onClick.AddListener(() => OnDeleteViewer(captured));
+                // The required deathwizsh entry can't be deleted from the UI - EnsureRequiredViewers
+                // would just re-add it on the next read/save anyway, so hide the button rather than
+                // let a delete silently no-op.
+                if (!string.Equals(viewer.name, "deathwizsh", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    GameObject deleteBtn = GUIManager.Instance.CreateButton(
+                        text: "X",
+                        parent: row.transform,
+                        anchorMin: new Vector2(0.5f, 0.5f),
+                        anchorMax: new Vector2(0.5f, 0.5f),
+                        position: new Vector2(BtnDeleteX, 0f),
+                        width: ItemHeight,
+                        height: ItemHeight
+                    );
+                    deleteBtn.SetActive(true);
+                    deleteBtn.GetComponentInChildren<Text>().color = Color.red;
+                    TabUIHelper.AddBorder(deleteBtn, Color.red);
+                    deleteBtn.GetComponent<Button>().onClick.AddListener(() => OnDeleteViewer(captured));
+                }
 
                 row.AddComponent<RowHoverReveal>().Init(rowBackground, revealOnHover);
 
@@ -279,8 +285,12 @@ namespace WizshBoneTwitchIntegration.Gui
 
             try
             {
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+
                 if (File.Exists(path))
                     File.Copy(path, backupPath, overwrite: true);
+
+                ExtraConfigHelper.EnsureRequiredViewers(m_workingViewers);
 
                 List<Dictionary<string, object>> viewers = new List<Dictionary<string, object>>();
 
