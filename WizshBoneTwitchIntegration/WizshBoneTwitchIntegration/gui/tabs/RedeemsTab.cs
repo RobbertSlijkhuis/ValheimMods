@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Jotunn.Managers;
 using TwitchSDK.Interop;
@@ -43,6 +44,9 @@ namespace WizshBoneTwitchIntegration.Gui
 
         // Stored so CreateCreateView can create a scrollable editor container
         private CreateScrollableContainerDelegate m_createScrollable;
+
+        private readonly ColumnSortState m_sortState = new ColumnSortState("title");
+        private readonly Dictionary<string, (string BaseText, Text Label)> m_sortableHeaders = new Dictionary<string, (string, Text)>();
 
         private static readonly string[] RedeemTypes = new[]
         {
@@ -257,14 +261,16 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             float headerY = ContentTopOffset + ColumnHeaderGap;
 
-            CreateColumnHeader("On/Off", ColToggleX, ColToggleW, headerY, TextAnchor.MiddleCenter);
-            CreateColumnHeader("Title", ColTitleX, ColTitleW, headerY, TextAnchor.MiddleLeft);
-            CreateColumnHeader("Type", ColTypeX, ColTypeW, headerY, TextAnchor.MiddleCenter);
-            CreateColumnHeader("Cost", ColCostX, ColCostW, headerY, TextAnchor.MiddleRight);
+            CreateColumnHeader("On/Off", ColToggleX, ColToggleW, headerY, TextAnchor.MiddleCenter, sortKey: "enabled");
+            CreateColumnHeader("Title", ColTitleX, ColTitleW, headerY, TextAnchor.MiddleLeft, sortKey: "title");
+            CreateColumnHeader("Type", ColTypeX, ColTypeW, headerY, TextAnchor.MiddleCenter, sortKey: "type");
+            CreateColumnHeader("Cost", ColCostX, ColCostW, headerY, TextAnchor.MiddleRight, sortKey: "points");
             CreateColumnHeader("Actions", ActionsClusterCenterX, ActionsClusterWidth, headerY, TextAnchor.MiddleCenter);
+
+            RefreshHeaderIndicators();
         }
 
-        private void CreateColumnHeader(string text, float x, float width, float y, TextAnchor alignment)
+        private void CreateColumnHeader(string text, float x, float width, float y, TextAnchor alignment, string sortKey = null)
         {
             Text header = GUIManager.Instance.CreateText(
                 text: text,
@@ -282,6 +288,36 @@ namespace WizshBoneTwitchIntegration.Gui
                 addContentSizeFitter: false
             ).GetComponent<Text>();
             header.alignment = alignment;
+
+            if (sortKey == null)
+                return;
+
+            // Same look, just clickable - an invisible Button on the existing Text GameObject, no
+            // background/hover/press styling of its own (mirrors ProfilesTab's row-click button).
+            Button headerBtn = header.gameObject.AddComponent<Button>();
+            headerBtn.targetGraphic = header;
+            headerBtn.transition = Selectable.Transition.None;
+            headerBtn.onClick.AddListener(() => OnHeaderClicked(sortKey));
+
+            m_sortableHeaders[sortKey] = (text, header);
+        }
+
+        private void OnHeaderClicked(string sortKey)
+        {
+            m_sortState.ToggleOrSet(sortKey);
+            RefreshHeaderIndicators();
+            RefreshList();
+        }
+
+        private void RefreshHeaderIndicators()
+        {
+            foreach (var kvp in m_sortableHeaders)
+            {
+                (string baseText, Text label) = kvp.Value;
+                label.text = kvp.Key == m_sortState.Key
+                    ? $"{baseText} {(m_sortState.Ascending ? "▲" : "▼")}"
+                    : baseText;
+            }
         }
 
         private void OnProfileSelected(string selected)
@@ -302,6 +338,34 @@ namespace WizshBoneTwitchIntegration.Gui
             Refresh();
         }
 
+        private List<RedeemData> GetSortedRedeems()
+        {
+            var redeems = new List<RedeemData>(RedeemHelper.redeems);
+
+            Comparison<RedeemData> comparison;
+            switch (m_sortState.Key)
+            {
+                case "enabled":
+                    comparison = (a, b) => a.enabled.CompareTo(b.enabled);
+                    break;
+                case "type":
+                    comparison = (a, b) => string.Compare(a.type, b.type, System.StringComparison.OrdinalIgnoreCase);
+                    break;
+                case "points":
+                    comparison = (a, b) => a.points.CompareTo(b.points);
+                    break;
+                default:
+                    comparison = (a, b) => string.Compare(a.title, b.title, System.StringComparison.OrdinalIgnoreCase);
+                    break;
+            }
+
+            redeems.Sort(comparison);
+            if (!m_sortState.Ascending)
+                redeems.Reverse();
+
+            return redeems;
+        }
+
         private void RefreshList()
         {
             TabUIHelper.ClearContainer(m_redeemListContainer);
@@ -309,7 +373,7 @@ namespace WizshBoneTwitchIntegration.Gui
             bool isSynced = ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile);
             float yOffset = -(ListTopPadding + ItemHeight / 2f);
 
-            foreach (RedeemData redeem in RedeemHelper.redeems)
+            foreach (RedeemData redeem in GetSortedRedeems())
             {
                 if (!string.IsNullOrEmpty(m_searchText)
                     && redeem.title.IndexOf(m_searchText, System.StringComparison.OrdinalIgnoreCase) < 0

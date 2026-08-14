@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Jotunn.Managers;
 using UnityEngine;
@@ -17,6 +19,9 @@ namespace WizshBoneTwitchIntegration.Gui
         private string m_searchText = "";
         private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
         private readonly ProfileNameDialog m_profileNameDialog = new ProfileNameDialog();
+
+        private readonly ColumnSortState m_sortState = new ColumnSortState("name");
+        private Action m_refreshHeaderIndicators;
 
         private const float ItemHeight     = 40f;
         private const float ItemSpacing    = 5f;
@@ -110,10 +115,13 @@ namespace WizshBoneTwitchIntegration.Gui
 
                 ColumnHeaders = new List<ColumnHeaderSpec>
                 {
-                    new ColumnHeaderSpec("Name", ColNameX, ColNameW, TextAnchor.MiddleLeft),
-                    new ColumnHeaderSpec("Redeem amount", ColCountX, ColCountW, TextAnchor.MiddleCenter),
+                    new ColumnHeaderSpec("Name", ColNameX, ColNameW, TextAnchor.MiddleLeft, sortKey: "name"),
+                    new ColumnHeaderSpec("Redeem amount", ColCountX, ColCountW, TextAnchor.MiddleCenter, sortKey: "redeemCount"),
                     new ColumnHeaderSpec("Actions", ColActionsX, ColActionsW, TextAnchor.MiddleCenter),
                 },
+
+                SortState = m_sortState,
+                OnHeaderClicked = OnHeaderClicked,
 
                 MainContainerName = "ProfileList",
             };
@@ -123,6 +131,8 @@ namespace WizshBoneTwitchIntegration.Gui
 
             m_profileFeedbackText  = result.FeedbackText;
             m_profileListContainer = result.MainContainer;
+            m_refreshHeaderIndicators = result.RefreshHeaderIndicators;
+            m_refreshHeaderIndicators?.Invoke();
 
             return m_root;
         }
@@ -132,14 +142,34 @@ namespace WizshBoneTwitchIntegration.Gui
             RefreshList();
         }
 
+        private void OnHeaderClicked(string sortKey)
+        {
+            m_sortState.ToggleOrSet(sortKey);
+            m_refreshHeaderIndicators?.Invoke();
+            RefreshList();
+        }
+
         private void RefreshList()
         {
             TabUIHelper.ClearContainer(m_profileListContainer);
 
-            List<string> profiles = ProfileManager.GetProfiles();
+            // Redeem count isn't a persisted field - it's read from each profile's YAML - so it
+            // has to be computed up front (rather than lazily inside the row loop) whenever sorting
+            // by it.
+            List<(string Name, int RedeemCount)> profiles = ProfileManager.GetProfiles()
+                .Select(p => (Name: p, RedeemCount: ExtraConfigHelper.ReadRedeemsConfig(ProfileManager.GetRedeemPath(p))?.redeems?.Count ?? 0))
+                .ToList();
+
+            Comparison<(string Name, int RedeemCount)> comparison = m_sortState.Key == "redeemCount"
+                ? (a, b) => a.RedeemCount.CompareTo(b.RedeemCount)
+                : (a, b) => string.Compare(a.Name, b.Name, System.StringComparison.OrdinalIgnoreCase);
+            profiles.Sort(comparison);
+            if (!m_sortState.Ascending)
+                profiles.Reverse();
+
             float yOffset = -(ListTopPadding + ItemHeight / 2f);
 
-            foreach (string profile in profiles)
+            foreach ((string profile, int redeemCount) in profiles)
             {
                 if (!string.IsNullOrEmpty(m_searchText)
                     && profile.IndexOf(m_searchText, System.StringComparison.OrdinalIgnoreCase) < 0)
@@ -178,9 +208,6 @@ namespace WizshBoneTwitchIntegration.Gui
                     addContentSizeFitter: false
                 ).GetComponent<Text>();
                 nameText.alignment = TextAnchor.MiddleLeft;
-
-                var redeemConfig = ExtraConfigHelper.ReadRedeemsConfig(ProfileManager.GetRedeemPath(profile));
-                int redeemCount = redeemConfig?.redeems?.Count ?? 0;
 
                 Text countText = GUIManager.Instance.CreateText(
                     text: $"{redeemCount} redeems",

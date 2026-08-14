@@ -44,12 +44,17 @@ namespace WizshBoneTwitchIntegration.Gui
         public float Width;
         public TextAnchor Alignment;
 
-        public ColumnHeaderSpec(string text, float x, float width, TextAnchor alignment = TextAnchor.MiddleLeft)
+        // Null (default) = not sortable, e.g. an "Actions" column - the header stays a plain,
+        // unclickable label. Non-null keys are matched against TabListLayoutOptions.SortState.Key.
+        public string SortKey;
+
+        public ColumnHeaderSpec(string text, float x, float width, TextAnchor alignment = TextAnchor.MiddleLeft, string sortKey = null)
         {
             Text = text;
             X = x;
             Width = width;
             Alignment = alignment;
+            SortKey = sortKey;
         }
     }
 
@@ -76,6 +81,13 @@ namespace WizshBoneTwitchIntegration.Gui
         // Null (default) shows no header row.
         public List<ColumnHeaderSpec> ColumnHeaders;
 
+        // Required whenever any ColumnHeaderSpec sets SortKey - the current sort column/direction,
+        // and the callback to run when a sortable header is clicked (toggle-or-set the key on this
+        // state, then re-sort and refresh rows; header indicator text is kept up to date via
+        // TabListLayoutResult.RefreshHeaderIndicators()).
+        public ColumnSortState SortState;
+        public Action<string> OnHeaderClicked;
+
         public string MainContainerName = "MainList";
     }
 
@@ -90,6 +102,11 @@ namespace WizshBoneTwitchIntegration.Gui
         // tab can place its own elements flush above the scrollable list without duplicating
         // TabListLayout's internal offset constants.
         public float ContentTopY;
+
+        // Updates every sortable header's label to append its sort indicator (or clear it), based
+        // on the current SortState. Call after ColumnSortState changes - headers are created once
+        // and never rebuilt, so this only touches existing Text components.
+        public Action RefreshHeaderIndicators;
     }
 
     /// <summary>
@@ -173,8 +190,9 @@ namespace WizshBoneTwitchIntegration.Gui
 
             GameObject mainContainer = createScrollable(options.MainContainerName, listView, ContentTopOffset);
 
+            Action refreshHeaderIndicators = null;
             if (options.ColumnHeaders != null)
-                CreateColumnHeaders(listView, options.ColumnHeaders);
+                refreshHeaderIndicators = CreateColumnHeaders(listView, options.ColumnHeaders, options.SortState, options.OnHeaderClicked);
 
             return new TabListLayoutResult
             {
@@ -182,7 +200,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 TitleLabel = titleLabel,
                 FeedbackText = feedbackText,
                 MainContainer = mainContainer,
-                ContentTopY = ContentTopOffset
+                ContentTopY = ContentTopOffset,
+                RefreshHeaderIndicators = refreshHeaderIndicators
             };
         }
 
@@ -208,9 +227,12 @@ namespace WizshBoneTwitchIntegration.Gui
             spec.OnCreated?.Invoke(btnObj);
         }
 
-        private static void CreateColumnHeaders(GameObject listView, List<ColumnHeaderSpec> columnHeaders)
+        // Returns a closure that refreshes every sortable header's indicator suffix from
+        // sortState's current value - null if none of the columns are sortable.
+        private static Action CreateColumnHeaders(GameObject listView, List<ColumnHeaderSpec> columnHeaders, ColumnSortState sortState, Action<string> onHeaderClicked)
         {
             float headerY = ContentTopOffset + ColumnHeaderGap;
+            var sortableHeaders = new List<(string Text, string SortKey, Text Label)>();
 
             foreach (ColumnHeaderSpec spec in columnHeaders)
             {
@@ -230,7 +252,29 @@ namespace WizshBoneTwitchIntegration.Gui
                     addContentSizeFitter: false
                 ).GetComponent<Text>();
                 header.alignment = spec.Alignment;
+
+                if (spec.SortKey == null)
+                    continue;
+
+                // Same look, just clickable - an invisible Button on the existing Text GameObject,
+                // no background/hover/press styling of its own (mirrors ProfilesTab's row-click button).
+                Button headerBtn = header.gameObject.AddComponent<Button>();
+                headerBtn.targetGraphic = header;
+                headerBtn.transition = Selectable.Transition.None;
+                string key = spec.SortKey;
+                headerBtn.onClick.AddListener(() => onHeaderClicked?.Invoke(key));
+
+                sortableHeaders.Add((spec.Text, spec.SortKey, header));
             }
+
+            if (sortableHeaders.Count == 0)
+                return null;
+
+            return () =>
+            {
+                foreach (var (text, sortKey, label) in sortableHeaders)
+                    label.text = sortKey == sortState.Key ? $"{text} {(sortState.Ascending ? "▲" : "▼")}" : text;
+            };
         }
     }
 }

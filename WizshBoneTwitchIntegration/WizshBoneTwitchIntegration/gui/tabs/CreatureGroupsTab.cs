@@ -41,6 +41,9 @@ namespace WizshBoneTwitchIntegration.Gui
         private List<CreatureGroupData> m_workingGroups = new List<CreatureGroupData>();
         private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
 
+        private readonly ColumnSortState m_sortState = new ColumnSortState("name");
+        private Action m_refreshHeaderIndicators;
+
         private GameObject m_createScrollContent;
         private float m_editorContainerYPos;
 
@@ -108,10 +111,13 @@ namespace WizshBoneTwitchIntegration.Gui
 
                 ColumnHeaders = new List<ColumnHeaderSpec>
                 {
-                    new ColumnHeaderSpec("Name", ColNameX, ColNameW, TextAnchor.MiddleLeft),
-                    new ColumnHeaderSpec("Creatures", ColSummaryX, ColSummaryW, TextAnchor.MiddleLeft),
+                    new ColumnHeaderSpec("Name", ColNameX, ColNameW, TextAnchor.MiddleLeft, sortKey: "name"),
+                    new ColumnHeaderSpec("Creatures", ColSummaryX, ColSummaryW, TextAnchor.MiddleLeft, sortKey: "creatures"),
                     new ColumnHeaderSpec("Actions", ActionsClusterCenterX, ActionsClusterWidth, TextAnchor.MiddleCenter),
                 },
+
+                SortState = m_sortState,
+                OnHeaderClicked = OnHeaderClicked,
 
                 MainContainerName = "CreatureGroupList",
             };
@@ -122,6 +128,29 @@ namespace WizshBoneTwitchIntegration.Gui
             m_groupsLabel      = result.TitleLabel;
             m_listFeedbackText = result.FeedbackText;
             m_listContainer    = result.MainContainer;
+            m_refreshHeaderIndicators = result.RefreshHeaderIndicators;
+            m_refreshHeaderIndicators?.Invoke();
+        }
+
+        private void OnHeaderClicked(string sortKey)
+        {
+            m_sortState.ToggleOrSet(sortKey);
+            m_refreshHeaderIndicators?.Invoke();
+            RefreshList();
+        }
+
+        private void SortWorkingGroups()
+        {
+            if (m_workingGroups == null || m_workingGroups.Count == 0)
+                return;
+
+            Comparison<CreatureGroupData> comparison = m_sortState.Key == "creatures"
+                ? (a, b) => (a.list?.Count ?? 0).CompareTo(b.list?.Count ?? 0)
+                : (a, b) => string.Compare(a.group, b.group, StringComparison.OrdinalIgnoreCase);
+
+            m_workingGroups.Sort(comparison);
+            if (!m_sortState.Ascending)
+                m_workingGroups.Reverse();
         }
 
         private void RefreshList()
@@ -136,6 +165,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 emptyRt.sizeDelta = new Vector2(emptyRt.sizeDelta.x, ItemHeight);
                 return;
             }
+
+            SortWorkingGroups();
 
             m_listFeedbackText.text = "";
             float yOffset = -(ListTopPadding + ItemHeight / 2f);

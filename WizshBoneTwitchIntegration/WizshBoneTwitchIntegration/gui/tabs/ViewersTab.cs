@@ -38,6 +38,9 @@ namespace WizshBoneTwitchIntegration.Gui
         private List<ViewerEntry> m_workingViewers = new List<ViewerEntry>();
         private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
 
+        private readonly ColumnSortState m_sortState = new ColumnSortState("name");
+        private Action m_refreshHeaderIndicators;
+
         private GameObject m_createScrollContent;
         private float m_editorContainerYPos;
 
@@ -106,11 +109,14 @@ namespace WizshBoneTwitchIntegration.Gui
 
                 ColumnHeaders = new List<ColumnHeaderSpec>
                 {
-                    new ColumnHeaderSpec("Name", ColNameX, ColNameW, TextAnchor.MiddleLeft),
-                    new ColumnHeaderSpec("Color", ColColor1X, ColColor1W, TextAnchor.MiddleCenter),
-                    new ColumnHeaderSpec("Effects", ColEffectsX, ColEffectsW, TextAnchor.MiddleLeft),
+                    new ColumnHeaderSpec("Name", ColNameX, ColNameW, TextAnchor.MiddleLeft, sortKey: "name"),
+                    new ColumnHeaderSpec("Color", ColColor1X, ColColor1W, TextAnchor.MiddleCenter, sortKey: "color1"),
+                    new ColumnHeaderSpec("Effects", ColEffectsX, ColEffectsW, TextAnchor.MiddleLeft, sortKey: "effects"),
                     new ColumnHeaderSpec("Actions", ActionsClusterCenterX, ActionsClusterWidth, TextAnchor.MiddleCenter),
                 },
+
+                SortState = m_sortState,
+                OnHeaderClicked = OnHeaderClicked,
 
                 MainContainerName = "ViewerList",
             };
@@ -121,6 +127,39 @@ namespace WizshBoneTwitchIntegration.Gui
             m_viewersLabel        = result.TitleLabel;
             m_listFeedbackText    = result.FeedbackText;
             m_viewerListContainer = result.MainContainer;
+            m_refreshHeaderIndicators = result.RefreshHeaderIndicators;
+            m_refreshHeaderIndicators?.Invoke();
+        }
+
+        private void OnHeaderClicked(string sortKey)
+        {
+            m_sortState.ToggleOrSet(sortKey);
+            m_refreshHeaderIndicators?.Invoke();
+            RefreshList();
+        }
+
+        private void SortWorkingViewers()
+        {
+            if (m_workingViewers == null || m_workingViewers.Count == 0)
+                return;
+
+            Comparison<ViewerEntry> comparison;
+            switch (m_sortState.Key)
+            {
+                case "color1":
+                    comparison = (a, b) => string.Compare(a.color1, b.color1, StringComparison.OrdinalIgnoreCase);
+                    break;
+                case "effects":
+                    comparison = (a, b) => (a.effects?.Count ?? 0).CompareTo(b.effects?.Count ?? 0);
+                    break;
+                default:
+                    comparison = (a, b) => string.Compare(a.name, b.name, StringComparison.OrdinalIgnoreCase);
+                    break;
+            }
+
+            m_workingViewers.Sort(comparison);
+            if (!m_sortState.Ascending)
+                m_workingViewers.Reverse();
         }
 
         private void RefreshList()
@@ -135,6 +174,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 emptyRt.sizeDelta = new Vector2(emptyRt.sizeDelta.x, ItemHeight);
                 return;
             }
+
+            SortWorkingViewers();
 
             m_listFeedbackText.text = "";
             float yOffset = -(ListTopPadding + ItemHeight / 2f);
