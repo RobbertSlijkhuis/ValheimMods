@@ -5,9 +5,9 @@ using WizshBoneTwitchIntegration.Components;
 
 namespace WizshBoneTwitchIntegration.Harmony
 {
-    // SAPHONETTE-CLEANUP: this whole file only exists to back CreatureData.fullyPassive/
-    // alwaysFollowOwner (see SpecialRedeemHelper's coffee redeem) - delete it entirely once the
-    // bit is over.
+    // Permanent creature-behavior patches backing CreatureData.fullyPassive/alwaysFollowOwner
+    // (currently only wired up via SpecialRedeemHelper's coffee redeem, but the patches themselves
+    // are not tied to that bit going away - see the field comments on CreatureData).
     [HarmonyPatch]
     public class SpecialRedeemPatchesWBTI
     {
@@ -16,17 +16,34 @@ namespace WizshBoneTwitchIntegration.Harmony
         // fully-passive creature never keeps a target long enough to reach DoAttack, for wild
         // monsters and the player alike (unlike a plain tamed creature, which still fights off
         // monsters that get close - see BaseAI.IsEnemy's tamed-vs-non-tamed branch).
+        //
+        // Also short-circuits when the *other* character is our fully-passive creature, so wild
+        // monsters never pick it as a target in the first place. Faction alone can't do this: the
+        // creature is tamed (friendly -> MakeTame()), and IsEnemy's tamed-vs-non-tamed branch
+        // always treats a non-tamed attacker as an enemy of a tamed target regardless of faction
+        // (same rule that lets wolves attack your tamed lox). This only gates AI target
+        // acquisition, not damage, so players can still kill it manually.
         [HarmonyPrefix]
         [HarmonyPatch(typeof(BaseAI), nameof(BaseAI.IsEnemy), new Type[] { typeof(Character) })]
-        public static bool IsEnemy_Prefix(BaseAI __instance, ref bool __result)
+        public static bool IsEnemy_Prefix(BaseAI __instance, Character other, ref bool __result)
         {
-            TwitchCreaturePersistentData persistentData = __instance.GetComponent<TwitchCreaturePersistentData>();
+            TwitchCreaturePersistentData selfData = __instance.GetComponent<TwitchCreaturePersistentData>();
 
-            if (persistentData == null || !persistentData.IsFullyPassive)
-                return true;
+            if (selfData != null && selfData.IsFullyPassive)
+            {
+                __result = false;
+                return false;
+            }
 
-            __result = false;
-            return false;
+            TwitchCreaturePersistentData otherData = other != null ? other.GetComponent<TwitchCreaturePersistentData>() : null;
+
+            if (otherData != null && otherData.IsFullyPassive)
+            {
+                __result = false;
+                return false;
+            }
+
+            return true;
         }
 
         // Vanilla BaseAI.Follow hardcodes StopMoving() once within 3m of the followed target

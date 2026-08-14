@@ -86,18 +86,20 @@ namespace WizshBoneTwitchIntegration.Models
         // coffee!" bit is over.
         [EditorHidden] public bool removeShield = false;
 
-        // SAPHONETTE-CLEANUP: forces a friendly creature to always follow the player, independent
-        // of the commandable/isFollowing toggle, and to keep closing the distance instead of
-        // stopping ~3m out like a normal followed creature. See
+        // Permanent creature-behavior feature (currently only wired up for the coffee draugr, but
+        // not tied to that bit going away). Forces a friendly creature to always follow the player,
+        // independent of the commandable/isFollowing toggle, and to keep closing the distance
+        // instead of stopping ~3m out like a normal followed creature. See
         // TwitchCreaturePersistentData.ApplyTameable/WantsToCloseDistance and
-        // harmony/SpecialRedeemPatchesWBTI.cs's Follow prefix. Remove once the "Don't forget your
-        // coffee!" bit is over.
+        // harmony/SpecialRedeemPatchesWBTI.cs's Follow prefix.
         [EditorHidden] public bool alwaysFollowOwner = false;
 
-        // SAPHONETTE-CLEANUP: makes a tamed creature never treat anything as an enemy - not just the
-        // player, but wild monsters too (a tamed creature normally still fights those off, see
-        // BaseAI.IsEnemy). See TwitchCreaturePersistentData.IsFullyPassive and
-        // harmony/SpecialRedeemPatchesWBTI.cs. Remove once the "Don't forget your coffee!" bit is over.
+        // Permanent creature-behavior feature (currently only wired up for the coffee draugr, but
+        // not tied to that bit going away). Makes a tamed creature never treat anything as an enemy
+        // in either direction - it never targets anything (a tamed creature normally still fights
+        // off wild monsters that get close, see BaseAI.IsEnemy's tamed-vs-non-tamed branch), and
+        // wild monsters never target it back either. See TwitchCreaturePersistentData.IsFullyPassive
+        // and harmony/SpecialRedeemPatchesWBTI.cs.
         [EditorHidden] public bool fullyPassive = false;
 
         public CreatureData() { }

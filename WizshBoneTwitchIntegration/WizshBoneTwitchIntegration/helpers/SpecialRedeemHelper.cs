@@ -27,8 +27,8 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         // SAPHONETTE-CLEANUP: runtime-only toggles for the redeems/effects most likely to need
         // shutting off mid-stream. Reset to enabled on every launch - DeathWizsh flips these (and
-        // DeathSoundHelper.Enabled) via the "!toggle" chat command (see TryHandleToggleCommand) so
-        // they can be shut off without a rebuild.
+        // DeathSoundHelper.Enabled, ShieldSoundHelper.Enabled) via the "!toggle" chat command (see
+        // TryHandleToggleCommand) so they can be shut off without a rebuild.
         public static bool CoffeeRedeemEnabled = true;
         public static bool BlobCircleRedeemEnabled = true;
         public static bool BathtubRedeemEnabled = true;
@@ -44,7 +44,7 @@ namespace WizshBoneTwitchIntegration.Helpers
         // ApplyLogRainOverride (and its call site in SpawnAbilityHelper.SpawnAbility) once the bit
         // is over.
         private const string YggwoodLogPrefab = "yggashoot_log";
-        private const string YggwoodLogTalkMessage = "Its me-uh... K.A.R.L.!;K.A.R.L. to the rescue!;Besides being handsome, I'm also long and hard!;Did you know K.A.R.L. stands for \"Kinetic Action Relationship Log\"?)";
+        private const string YggwoodLogTalkMessage = "Its me-uh... K.A.R.L.!;K.A.R.L. to the rescue!;Besides being handsome, I'm also long and hard!;Did you know K.A.R.L. stands for \"Kinetic Action Relationship Log\"?";
         // Shown on-screen when the override fires - without it, unexpectedly talking logs just look
         // like a bug instead of an intentional bit. Placeholder - easy to edit.
         private const string YggwoodLogAnnounceMessage = "K.A.R.L. has jumped into the fray {{user}}!";
@@ -64,7 +64,7 @@ namespace WizshBoneTwitchIntegration.Helpers
         private const string BlobCircleRedeemTitle = "Oh no, oh no no no";
         private const int BlobCircleCount = 5;
         private const float BlobCircleRadius = 10f;
-        private const string BlobTalkMessage = "A foul smell from Nik on the line!;Bwaaawaugh! Nik sends his regards!;We ooze, therefore we are - blame Nik!;Something's rotten in the swamp tonight, Nik!;The bog is closing in... courtesy of Nik!;Uuhuh!";
+        private const string BlobTalkMessage = "A foul smell from Nik on the line!;Bwaaawaugh! Nik sends his regards!;We ooze, therefore we are - blame Nik!;Something's rotten in the swamp tonight, its Nik!;The bog is closing in... courtesy of Nik!;Uuhuh!";
         private const float BlobTalkInterval = 10f;
         private const int BlobWeatherDuration = 180;
         private const float BlobWeatherRadius = 150f;
@@ -429,6 +429,10 @@ namespace WizshBoneTwitchIntegration.Helpers
                     DeathSoundHelper.NikCommandEnabled = !DeathSoundHelper.NikCommandEnabled;
                     chat.Send($"!nik sound is now {(DeathSoundHelper.NikCommandEnabled ? "ENABLED" : "DISABLED")}.");
                     break;
+                case "shield":
+                    ShieldSoundHelper.Enabled = !ShieldSoundHelper.Enabled;
+                    chat.Send($"Shield sound is now {(ShieldSoundHelper.Enabled ? "ENABLED" : "DISABLED")}.");
+                    break;
                 case "karl":
                 case "lograin":
                 case "logs":
@@ -437,10 +441,10 @@ namespace WizshBoneTwitchIntegration.Helpers
                     break;
                 case "status":
                 case "":
-                    chat.Send($"coffee={(CoffeeRedeemEnabled ? "ON" : "OFF")}, blob={(BlobCircleRedeemEnabled ? "ON" : "OFF")}, bathtub={(BathtubRedeemEnabled ? "ON" : "OFF")}, somasquito={(SomasquitoRedeemEnabled ? "ON" : "OFF")}, deathsound={(DeathSoundHelper.Enabled ? "ON" : "OFF")}, nik={(DeathSoundHelper.NikCommandEnabled ? "ON" : "OFF")}, karl={(LogRainOverrideEnabled ? "ON" : "OFF")}");
+                    chat.Send($"coffee={(CoffeeRedeemEnabled ? "ON" : "OFF")}, blob={(BlobCircleRedeemEnabled ? "ON" : "OFF")}, bathtub={(BathtubRedeemEnabled ? "ON" : "OFF")}, somasquito={(SomasquitoRedeemEnabled ? "ON" : "OFF")}, deathsound={(DeathSoundHelper.Enabled ? "ON" : "OFF")}, nik={(DeathSoundHelper.NikCommandEnabled ? "ON" : "OFF")}, shield={(ShieldSoundHelper.Enabled ? "ON" : "OFF")}, karl={(LogRainOverrideEnabled ? "ON" : "OFF")}");
                     break;
                 default:
-                    chat.Send("Usage: !toggle <coffee|blob|bathtub|somasquito|deathsound|nik|karl|status>");
+                    chat.Send("Usage: !toggle <coffee|blob|bathtub|somasquito|deathsound|nik|shield|karl|status>");
                     break;
             }
 

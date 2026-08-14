@@ -31,14 +31,13 @@ namespace WizshBoneTwitchIntegration.Components
         public float m_damageScale = 0;
         public float m_healthScale = 0;
 
-        // SAPHONETTE-CLEANUP: read by harmony/SpecialRedeemPatchesWBTI.cs's IsEnemy prefix. Remove
-        // alongside that patch and CreatureData.fullyPassive once the bit is over.
+        // Permanent feature (see CreatureData.fullyPassive). Read by
+        // harmony/SpecialRedeemPatchesWBTI.cs's IsEnemy prefix.
         public bool IsFullyPassive;
 
-        // SAPHONETTE-CLEANUP: read by harmony/SpecialRedeemPatchesWBTI.cs's Follow prefix, to make
-        // this specific creature keep closing the gap instead of stopping ~3m out like a normal
-        // followed creature. Remove alongside that patch and CreatureData.alwaysFollowOwner once the
-        // bit is over.
+        // Permanent feature (see CreatureData.alwaysFollowOwner). Read by
+        // harmony/SpecialRedeemPatchesWBTI.cs's Follow prefix, to make this creature keep closing
+        // the gap instead of stopping ~3m out like a normal followed creature.
         public bool WantsToCloseDistance;
 
         public string RedeemerName => m_redeemerName;
@@ -330,7 +329,7 @@ namespace WizshBoneTwitchIntegration.Components
             monsterAI.m_aggravatable = creatureData.aggravatable;
             monsterAI.m_mistVision   = creatureData.mistVision;
 
-            // SAPHONETTE-CLEANUP: see the field comment on CreatureData.fullyPassive.
+            // See the field comment on CreatureData.fullyPassive.
             IsFullyPassive = creatureData.fullyPassive;
 
             if (creatureData.idleSoundInterval > 0)
@@ -386,7 +385,7 @@ namespace WizshBoneTwitchIntegration.Components
                     tameable.m_monsterAI.SetFollowTarget(Player.m_localPlayer.gameObject);
             }
 
-            // SAPHONETTE-CLEANUP: see the field comment on CreatureData.alwaysFollowOwner. Player.m_localPlayer
+            // See the field comment on CreatureData.alwaysFollowOwner. Player.m_localPlayer
             // is only assigned later by an explicit SetLocalPlayer() call, not during Awake() - on a
             // relog/zone-reload this Awake()-driven rehydration can easily run before that happens, so a
             // one-shot null check here silently drops the follow target. Retry briefly instead.
@@ -396,7 +395,7 @@ namespace WizshBoneTwitchIntegration.Components
             WantsToCloseDistance = creatureData.alwaysFollowOwner;
         }
 
-        // SAPHONETTE-CLEANUP: see the comment on the ApplyTameable call site above. Bounded wait
+        // See the comment on the ApplyTameable call site above. Bounded wait
         // (10s) rather than an indefinite one, in case Player.m_localPlayer genuinely never shows up
         // (e.g. this instance rehydrating in a context with no local player at all).
         private IEnumerator SetFollowTargetWhenPlayerReady(MonsterAI monsterAI)

@@ -28,7 +28,6 @@ namespace WizshBoneTwitchIntegration.Components
         // Fallback talk used for non-creature prefabs (e.g. the hot tub) that have no MonsterAI -
         // NpcTalk.SayForce() calls m_animator.SetTrigger(), which NREs without one.
         private List<string> m_simpleTalkMessages;
-        private int m_simpleTalkIndex;
 
         public void Awake()
         {
@@ -299,8 +298,7 @@ namespace WizshBoneTwitchIntegration.Components
             if (!m_chatting.CanCreatureTalk(gameObject))
                 return;
 
-            string text = m_simpleTalkMessages[m_simpleTalkIndex % m_simpleTalkMessages.Count];
-            m_simpleTalkIndex++;
+            string text = m_simpleTalkMessages[UnityEngine.Random.Range(0, m_simpleTalkMessages.Count)];
 
             ShowBubbleText(text);
         }
