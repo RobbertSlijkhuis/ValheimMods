@@ -104,25 +104,24 @@ namespace WizshBoneTwitchIntegration.Components
                 // Pause()/Resume() instead of the blanket TimedDestruction handling below, since it
                 // needs to remember and resume from the remaining time rather than just stopping/
                 // restarting - see TwitchPersistentDestruction.Pause() for why both its possible
-                // destruction paths (TimedDestruction and the BreakAfterDelay coroutine) need this.
+                // destruction paths (own coroutines, not TimedDestruction - see its DestroyAfterDelay/
+                // BreakAfterDelay) need this.
                 gameObject.GetComponent<TwitchPersistentDestruction>()?.Pause();
 
                 // TimedDestruction schedules its destroy call via InvokeRepeating, which keeps
                 // firing on schedule regardless of the component's enabled state - it has to be
-                // explicitly cancelled to stop the object from being destroyed while frozen.
+                // explicitly cancelled to stop the object from being destroyed while frozen. Every
+                // TimedDestruction found here is unrelated to TwitchPersistentDestruction (which
+                // no longer uses TimedDestruction at all, precisely so it isn't at the mercy of this
+                // blanket cancel - see its DestroyAfterDelay), so no exclusion is needed - e.g. the
+                // Smite rod's own short-lived TimedDestruction.
                 // Re-scanned on every call (not just the first) rather than cached, because some
                 // hazards (e.g. the Smite rod) get a TimedDestruction attached a few lines after
                 // spawning - the very first FreezeDamage() call (from the Aoe.Awake() postfix) can
                 // run before that component even exists. TwitchTimeStopZone's poll calls this again
                 // shortly after, by which point any such component has been added and gets caught.
-                // Skips any TimedDestruction owned by TwitchPersistentDestruction - Pause() above
-                // already handles those precisely; this only covers other, unrelated uses (e.g. the
-                // Smite rod's own short-lived TimedDestruction).
                 foreach (TimedDestruction timedDestruction in GetComponentsInChildren<TimedDestruction>(true))
-                {
-                    if (timedDestruction.GetComponent<TwitchPersistentDestruction>() == null)
-                        timedDestruction.CancelInvoke();
-                }
+                    timedDestruction.CancelInvoke();
             }
             catch (Exception e)
             {
@@ -222,12 +221,10 @@ namespace WizshBoneTwitchIntegration.Components
                 }
 
                 // Same split as FreezeDamage(): TwitchPersistentDestruction resumes itself from the
-                // remaining time Pause() captured, other TimedDestruction uses just restart as-is.
+                // remaining time Pause() captured (it doesn't use TimedDestruction at all), other
+                // TimedDestruction uses just restart as-is, from scratch, with no exclusion needed.
                 foreach (TimedDestruction timedDestruction in GetComponentsInChildren<TimedDestruction>(true))
-                {
-                    if (timedDestruction.GetComponent<TwitchPersistentDestruction>() == null)
-                        timedDestruction.Trigger();
-                }
+                    timedDestruction.Trigger();
 
                 gameObject.GetComponent<TwitchPersistentDestruction>()?.Resume();
 

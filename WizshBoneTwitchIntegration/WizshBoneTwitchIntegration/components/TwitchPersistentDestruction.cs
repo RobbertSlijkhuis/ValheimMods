@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Components
 {
@@ -35,6 +36,7 @@ namespace WizshBoneTwitchIntegration.Components
         private bool m_paused;
         private bool m_timerStarted;
         private Coroutine m_timerElapsedRoutine;
+        private Coroutine m_destroyRoutine;
 
         public void Awake()
         {
@@ -84,7 +86,11 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void SetStarted(int duration, EffectList onDestroyEfects = null, bool breakOnDestroy = false)
         {
-            if (gameObject.GetComponent<TimedDestruction>() == null && m_breakRoutine == null)
+            // m_timerStarted (rather than m_destroyRoutine/m_breakRoutine being null) is the guard
+            // here because Pause() nulls both of those out while the timer is merely paused, not
+            // finished - using them would let a second SetStarted() call during a pause re-run this
+            // block and reset the ZDO's stored start time/duration.
+            if (!m_timerStarted)
             {
                 m_breakOnDestroy = breakOnDestroy;
                 m_isOwner = m_netView.IsOwner();
@@ -126,15 +132,13 @@ namespace WizshBoneTwitchIntegration.Components
                 return;
             }
 
-            TimedDestruction timedDestruction = gameObject.GetComponent<TimedDestruction>() ?? gameObject.AddComponent<TimedDestruction>();
-            timedDestruction.m_timeout = m_remainingTime;
-            timedDestruction.Trigger(m_remainingTime);
+            m_destroyRoutine = StartCoroutine(DestroyAfterDelay(m_remainingTime));
         }
 
         // Called by TwitchPhysicsFreezeData when a TimeStop zone freezes this object - stops
-        // whichever destruction path is active (TimedDestruction's InvokeRepeating ignores
-        // component.enabled, and coroutines keep running regardless of it too, so both need to be
-        // explicitly stopped) and remembers how much time was left.
+        // whichever destruction path is active (coroutines keep running regardless of this
+        // component's enabled state, so they have to be explicitly stopped) and remembers how much
+        // time was left.
         public void Pause()
         {
             if (!m_timerStarted || m_paused)
@@ -143,7 +147,11 @@ namespace WizshBoneTwitchIntegration.Components
             m_paused = true;
             m_remainingTime = Mathf.Max(0f, m_remainingTime - (Time.time - m_segmentStartTime));
 
-            gameObject.GetComponent<TimedDestruction>()?.CancelInvoke();
+            if (m_destroyRoutine != null)
+            {
+                StopCoroutine(m_destroyRoutine);
+                m_destroyRoutine = null;
+            }
 
             if (m_breakRoutine != null)
             {
@@ -183,10 +191,33 @@ namespace WizshBoneTwitchIntegration.Components
             if (delay > 0f)
                 yield return new WaitForSeconds(delay);
 
-            if (m_netView == null || !m_netView.IsOwner())
+            if (m_netView == null || !m_netView.IsValid())
                 yield break;
 
+            // Claim ownership first, mirroring ZNetViewHelper.Destroy() - the client that started
+            // this timer may no longer be the ZDO owner by the time it elapses (ownership can drift
+            // to another peer while this object stays loaded), and a non-owner's WearNTear.Destroy()
+            // never propagates. Without this, a stuck object would silently never break until some
+            // other event (e.g. a reload) happened to reclaim ownership or force it another way.
+            if (!m_netView.IsOwner())
+                m_netView.ClaimOwnership();
+
             gameObject.GetComponent<WearNTear>()?.Destroy();
+        }
+
+        // Used instead of vanilla TimedDestruction for the non-breakOnDestroy path - TimedDestruction's
+        // own DestroyNow() only destroys if m_nview.IsOwner(), with no reclaim fallback, so it silently
+        // no-ops forever (once per second) if ownership ever drifted away from this client. Claiming
+        // ownership here mirrors ZNetViewHelper.Destroy(), which this reuses for the actual destroy.
+        private IEnumerator DestroyAfterDelay(float delay)
+        {
+            if (delay > 0f)
+                yield return new WaitForSeconds(delay);
+
+            if (m_netView == null || !m_netView.IsValid())
+                yield break;
+
+            ZNetViewHelper.Destroy(gameObject);
         }
     }
 }
