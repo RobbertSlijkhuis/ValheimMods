@@ -11,6 +11,14 @@ namespace WizshBoneTwitchIntegration.Components
     internal class TwitchSafeZone : MonoBehaviour
     {
         private TwitchCustomRewards m_customRewards;
+
+        // Set to Player.m_localPlayer's own GameObject while this zone counted them as "inside"
+        // (i.e. EnterLocalPlayerZone ran and hasn't been matched by an exit yet), null otherwise.
+        // Only ever touched for the local player (see the ID check early in HandlePlayer) - a
+        // remote player entering/exiting the same trigger never writes this. Exit checks this
+        // instead of re-reading the live allowRedeemsOnBoats setting, so toggling that setting
+        // mid-session while a player is standing on a ship can't desync s_localPlayerZoneCount from
+        // reality - see HandlePlayer.
         private GameObject m_playerInZone;
         private Collider m_collider;
         private readonly string playerIdentifier = "Player(Clone)";
@@ -35,6 +43,32 @@ namespace WizshBoneTwitchIntegration.Components
         public static void ResetActiveSafeZones()
         {
             s_activeSafeZones.Clear();
+        }
+
+        // Called from OnDeath_Postfix (MiscPatchesWBTI) when the local player dies.
+        // Game._RequestRespawn() destroys the player GameObject ~10s later, which may still be
+        // standing inside a safe zone's trigger collider at that point; Unity does not fire
+        // OnTriggerExit when one side of an overlapping pair is destroyed, so without this the
+        // zone(s) the player was in never see the exit and s_localPlayerZoneCount/
+        // m_playerIsInSafeZone stay stuck. Handled right away, at death, rather than waiting for
+        // the actual destroy, since the player can't move out of the zone on their own in between.
+        public static void HandleLocalPlayerDeath()
+        {
+            if (s_localPlayerZoneCount == 0)
+                return;
+
+            foreach (TwitchSafeZone safeZone in s_activeSafeZones)
+            {
+                safeZone.m_playerInZone = null;
+            }
+
+            s_localPlayerZoneCount = 0;
+
+            TwitchCustomRewards customRewards = Game.instance?.gameObject.GetComponent<TwitchCustomRewards>();
+            if (customRewards != null)
+                customRewards.m_playerIsInSafeZone = false;
+
+            Game.instance?.gameObject.GetComponent<SafeZoneHUDPanel>()?.Hide();
         }
 
         public static bool IsPointInSafeZone(Vector3 point)
@@ -251,7 +285,13 @@ namespace WizshBoneTwitchIntegration.Components
 
         private void HandlePlayer(Collider collider, bool value, string message = null)
         {
-            if (transform.parent.gameObject.GetComponent<Ship>() != null && ProfileSettingsHelper.Current.allowRedeemsOnBoats)
+            // Only gates new entries. An exit always mirrors m_playerInZone (what this zone
+            // actually counted at entry) rather than re-checking the live setting here, otherwise
+            // toggling allowRedeemsOnBoats between a player's entry and exit leaves
+            // s_localPlayerZoneCount/m_playerIsInSafeZone stuck (or wrongly decremented). A ship
+            // with allowRedeemsOnBoats on this whole time never touches the count in either
+            // direction, since entry is skipped and m_playerInZone then stays null for the exit too.
+            if (value && transform.parent.gameObject.GetComponent<Ship>() != null && ProfileSettingsHelper.Current.allowRedeemsOnBoats)
                 return;
 
             if (collider.gameObject.name != playerIdentifier)
@@ -259,18 +299,25 @@ namespace WizshBoneTwitchIntegration.Components
 
             Player player = collider.gameObject.GetComponent<Player>();
 
-            if (message != null && message != "")
-                Jotunn.Logger.LogWarning(message);
-
-            m_playerInZone = value ? collider.gameObject : null;
-
+            // Everything below only concerns the local player - a remote player passing through
+            // the same trigger must never affect this client's own s_localPlayerZoneCount/
+            // m_playerIsInSafeZone, nor overwrite m_playerInZone out from under the local player.
             if (player.GetPlayerID() != Player.m_localPlayer.GetPlayerID())
                 return;
 
+            if (message != null && message != "")
+                Jotunn.Logger.LogWarning(message);
+
             if (value)
+            {
+                m_playerInZone = collider.gameObject;
                 EnterLocalPlayerZone();
-            else
+            }
+            else if (m_playerInZone != null)
+            {
+                m_playerInZone = null;
                 ExitLocalPlayerZone();
+            }
         }
 
         private void EnterLocalPlayerZone()
@@ -362,15 +409,10 @@ namespace WizshBoneTwitchIntegration.Components
                 if (Player.m_localPlayer == null)
                     return;
 
-                Player player = m_playerInZone.GetComponent<Player>();
-
-                if (player == null)
-                    return;
-
-                if (player.GetPlayerID() == Player.m_localPlayer.GetPlayerID())
-                {
-                    ExitLocalPlayerZone();
-                }
+                // m_playerInZone is only ever set for the local player (see HandlePlayer), so no
+                // further identity check is needed here.
+                m_playerInZone = null;
+                ExitLocalPlayerZone();
             }
             catch (Exception e)
             {

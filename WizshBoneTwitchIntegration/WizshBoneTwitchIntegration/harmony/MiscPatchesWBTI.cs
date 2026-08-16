@@ -1,8 +1,6 @@
 ﻿using HarmonyLib;
 using System;
-using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
-using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
@@ -91,6 +89,31 @@ namespace WizshBoneTwitchIntegration.Harmony
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Something went wrong in CreateDeathEffects_Postfix: " + e);
+            }
+        }
+
+        // Player.OnDeath() (protected, patched by string name) returns early for non-owners per
+        // decompiled Character.OnDeath()'s IsOwner() guard, so - like CreateDeathEffects above -
+        // this only ever runs anything for the client that owns the dying Player; the
+        // __instance == Player.m_localPlayer check below is still kept as a second, cheap guard.
+        //
+        // This is the trigger point for TwitchSafeZone.HandleLocalPlayerDeath(): Game._RequestRespawn()
+        // destroys the player GameObject ~10s after death (possibly still standing inside a safe
+        // zone's trigger at that point), and Unity never fires OnTriggerExit for a destroyed
+        // collider - so without this, the local player's safe-zone bookkeeping
+        // (s_localPlayerZoneCount/m_playerIsInSafeZone) would stay stuck if they died in one.
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Player), "OnDeath")]
+        public static void OnDeath_Postfix(Player __instance)
+        {
+            try
+            {
+                if (__instance == Player.m_localPlayer)
+                    TwitchSafeZone.HandleLocalPlayerDeath();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in Player.OnDeath_Postfix: " + e);
             }
         }
     }
