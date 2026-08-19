@@ -288,13 +288,13 @@ namespace WizshBoneTwitchIntegration.Helpers
         {
             if (Player.m_localPlayer.InInterior())
             {
-                chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! {(ProfileSettingsHelper.Current.autoResolveRedeems ? TwitchCustomRewards.m_refundAutoResolveOn : TwitchCustomRewards.m_refundAutoResolveOff)}");
+                chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! {TwitchCustomRewards.m_refundMessage}");
                 throw new RedeemException("Player is in dungeon and redeem is not allowed", ExceptionType.Warning);
             }
 
             if (CreatureHelper.GetNrOfTwitchInstances(ProfileSettingsHelper.Current.creaturesMaxRadius) >= ProfileSettingsHelper.Current.creaturesMaxAmount)
             {
-                chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the maximum spawned creature limit has been reached! {(ProfileSettingsHelper.Current.autoResolveRedeems ? TwitchCustomRewards.m_refundAutoResolveOn : TwitchCustomRewards.m_refundAutoResolveOff)}");
+                chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the maximum spawned creature limit has been reached! {TwitchCustomRewards.m_refundMessage}");
                 throw new RedeemException("To many spawned creatures", ExceptionType.Warning);
             }
 

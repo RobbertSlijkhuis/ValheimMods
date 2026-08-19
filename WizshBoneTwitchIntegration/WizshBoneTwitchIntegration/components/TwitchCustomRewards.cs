@@ -23,8 +23,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public bool m_enabled = false;
         public string m_alias;
         public string m_quickTestRedeem = "WBTI Timestop";
-        public static string m_refundAutoResolveOn;
-        public static string m_refundAutoResolveOff;
+        public static string m_refundMessage;
 
         public readonly List<CustomRewardEvent> m_redeemHistory = new List<CustomRewardEvent>();
         private const int m_redeemHistoryMaxSize = 500;
@@ -133,8 +132,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 //Jotunn.Logger.LogWarning($"Time: {customRewardEvent.RedeemedAt}");
                 //Jotunn.Logger.LogWarning($"Status: {customRewardEvent.Status}");
 
-                m_refundAutoResolveOn = $"Your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points has been refunded!";
-                m_refundAutoResolveOff = $"Please notify the streamer to refund your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points!";
+                m_refundMessage = $"Your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points has been refunded!";
 
                 // SAPHONETTE-CLEANUP: remove the fallback below once SpecialRedeemHelper is no
                 // longer needed - synthesized chat-word titles are what it resolves here.
@@ -152,31 +150,31 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (m_playerIsInSafeZone && !redeem.ignoreWard)
                 {
-                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a Twitch safe zone! {(ProfileSettingsHelper.Current.autoResolveRedeems ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
+                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a Twitch safe zone! {m_refundMessage}");
                     throw new RedeemException("Player is in safe zone", ExceptionType.Warning);
                 }
 
                 if (Game.IsPaused() || Menu.IsVisible())
                 {
-                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, either the game is currently paused or the streamer is busy in the menu! {(ProfileSettingsHelper.Current.autoResolveRedeems ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
+                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, either the game is currently paused or the streamer is busy in the menu! {m_refundMessage}");
                     throw new RedeemException("Game is paused or menu is visible", ExceptionType.Warning);
                 }
 
                 if (m_auth?.m_settingsGUI?.IsAnyGUIVisible == true && !WizshBoneTwitchIntegration.useRedeemCommand)
                 {
-                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is currently in the settings menu! {(ProfileSettingsHelper.Current.autoResolveRedeems ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
+                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is currently in the settings menu! {m_refundMessage}");
                     throw new RedeemException("WizshBone GUI is open", ExceptionType.Warning);
                 }
 
                 if (Player.m_localPlayer.IsSleeping())
                 {
-                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is currently sleeping and can't react! {(ProfileSettingsHelper.Current.autoResolveRedeems ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
+                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is currently sleeping and can't react! {m_refundMessage}");
                     throw new RedeemException("Player is sleeping", ExceptionType.Warning);
                 }
 
                 if (Player.m_localPlayer.IsTeleporting())
                 {
-                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is currently teleporting and can't react! {(ProfileSettingsHelper.Current.autoResolveRedeems ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
+                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is currently teleporting and can't react! {m_refundMessage}");
                     throw new RedeemException("Player is teleporting", ExceptionType.Warning);
                 }
 
@@ -184,7 +182,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 {
                     if (redeem.type == RedeemType.TerrainEdit || RedeemType.SpawnAbilityFamily.Contains(redeem.type))
                     {
-                        m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! {(ProfileSettingsHelper.Current.autoResolveRedeems ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
+                        m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! {m_refundMessage}");
                         throw new RedeemException("Player is in dungeon and redeem is not allowed", ExceptionType.Warning);
                     }
                 }
@@ -311,14 +309,11 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             if (WizshBoneTwitchIntegration.useRedeemCommand)
                 WizshBoneTwitchIntegration.useRedeemCommand = false;
 
-            if (ProfileSettingsHelper.Current.autoResolveRedeems)
-            {
-                if (Player.m_localPlayer != null)
-                    Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft, $"{customRewardEvent.CustomRewardTitle} canceled");
+            if (Player.m_localPlayer != null)
+                Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft, $"{customRewardEvent.CustomRewardTitle} canceled");
 
-                customRewardEvent.Status = CustomRewardRedemptionState.Canceled;
-                Twitch.API.ResolveCustomReward(customRewardEvent, CustomRewardRedemptionState.Canceled);
-            }
+            customRewardEvent.Status = CustomRewardRedemptionState.Canceled;
+            Twitch.API.ResolveCustomReward(customRewardEvent, CustomRewardRedemptionState.Canceled);
         }
 
         public bool IsPlayerInSafeZone(CustomRewardEvent customRewardEvent, bool ignoreWard = false)
@@ -326,7 +321,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             if (m_playerIsInSafeZone && !ignoreWard)
             {
                 WizshBoneTwitchIntegration.useRedeemCommand = true;
-                m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a Twitch safe zone! {(ProfileSettingsHelper.Current.autoResolveRedeems ? m_refundAutoResolveOn : m_refundAutoResolveOff)}");
+                m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a Twitch safe zone! {m_refundMessage}");
                 HandleRedeemException(new RedeemException("Player is in safe zone", ExceptionType.Warning), customRewardEvent);
                 return true;
             }
