@@ -57,6 +57,18 @@ namespace WizshBoneTwitchIntegration.Components
             if (s_localPlayerZoneCount == 0)
                 return;
 
+            ForceExitAllZones();
+        }
+
+        // Unconditionally clears all client-local safe-zone bookkeeping (zone membership on
+        // every live TwitchSafeZone, the local entry counter, the "in safe zone" flag, and the
+        // HUD panel). Never touches Wards/ships/trader zones themselves - purely resets this
+        // client's own tracking of whether the local player is standing in one. Shared by
+        // HandleLocalPlayerDeath (guarded above) and the Debug tab's "Reset Safezones" button
+        // (DebugTab), which calls this directly and unconditionally as a manual "unstick me"
+        // action - safe to call even when nothing is actually stuck.
+        public static void ForceExitAllZones()
+        {
             foreach (TwitchSafeZone safeZone in s_activeSafeZones)
             {
                 safeZone.m_playerInZone = null;

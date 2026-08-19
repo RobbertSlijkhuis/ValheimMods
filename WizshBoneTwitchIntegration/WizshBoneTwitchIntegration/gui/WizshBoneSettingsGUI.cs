@@ -39,6 +39,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private Button m_rulesTabButton;
         private Button m_creatureGroupsTabButton;
         private Button m_viewersTabButton;
+        private Button m_debugTabButton;
 
         // Tabs
         private HomeTab m_homeTab = new HomeTab();
@@ -47,6 +48,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private RulesTab m_rulesTab = new RulesTab();
         private CreatureGroupsTab m_creatureGroupsTab = new CreatureGroupsTab();
         private ViewersTab m_viewersTab = new ViewersTab();
+        private DebugTab m_debugTab = new DebugTab();
 
         private GameObject m_homeTabRoot;
         private GameObject m_profilesTabRoot;
@@ -54,6 +56,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private GameObject m_rulesTabRoot;
         private GameObject m_creatureGroupsTabRoot;
         private GameObject m_viewersTabRoot;
+        private GameObject m_debugTabRoot;
 
         private static readonly Color TabActiveColor = new Color(0.9f, 0.9f, 0.9f, 1f);
         private Color m_tabDefaultColor;
@@ -165,6 +168,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_rulesTabRoot = m_rulesTab.Create(panel, CreateScrollableContainer);
             m_creatureGroupsTabRoot = m_creatureGroupsTab.Create(panel, CreateScrollableContainer);
             m_viewersTabRoot = m_viewersTab.Create(panel, CreateScrollableContainer);
+            m_debugTabRoot = m_debugTab.Create(panel, CreateScrollableContainer);
 
             ShowTab(m_homeTabRoot, m_homeTabButton);
 
@@ -188,8 +192,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: panel.transform,
                 anchorMin: new Vector2(0f, 1f),
                 anchorMax: new Vector2(0f, 1f),
-                position: new Vector2(140f, -90f),
-                width: 180f,
+                position: new Vector2(125f, -90f),
+                width: 150f,
                 height: 40f
             );
             homeTabBtn.SetActive(true);
@@ -202,8 +206,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: panel.transform,
                 anchorMin: new Vector2(0f, 1f),
                 anchorMax: new Vector2(0f, 1f),
-                position: new Vector2(324f, -90f),
-                width: 180f,
+                position: new Vector2(280f, -90f),
+                width: 150f,
                 height: 40f
             );
             profilesTabBtn.SetActive(true);
@@ -215,8 +219,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: panel.transform,
                 anchorMin: new Vector2(0f, 1f),
                 anchorMax: new Vector2(0f, 1f),
-                position: new Vector2(508f, -90f),
-                width: 180f,
+                position: new Vector2(435f, -90f),
+                width: 150f,
                 height: 40f
             );
             redeemsTabBtn.SetActive(true);
@@ -228,8 +232,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: panel.transform,
                 anchorMin: new Vector2(0f, 1f),
                 anchorMax: new Vector2(0f, 1f),
-                position: new Vector2(692f, -90f),
-                width: 180f,
+                position: new Vector2(590f, -90f),
+                width: 150f,
                 height: 40f
             );
             rulesTabBtn.SetActive(true);
@@ -241,8 +245,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: panel.transform,
                 anchorMin: new Vector2(0f, 1f),
                 anchorMax: new Vector2(0f, 1f),
-                position: new Vector2(876f, -90f),
-                width: 180f,
+                position: new Vector2(745f, -90f),
+                width: 150f,
                 height: 40f
             );
             creatureGroupsTabBtn.SetActive(true);
@@ -254,13 +258,26 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: panel.transform,
                 anchorMin: new Vector2(0f, 1f),
                 anchorMax: new Vector2(0f, 1f),
-                position: new Vector2(1060f, -90f),
-                width: 180f,
+                position: new Vector2(900f, -90f),
+                width: 150f,
                 height: 40f
             );
             viewersTabBtn.SetActive(true);
             m_viewersTabButton = viewersTabBtn.GetComponent<Button>();
             m_viewersTabButton.onClick.AddListener(() => ShowTab(m_viewersTabRoot, m_viewersTabButton));
+
+            GameObject debugTabBtn = GUIManager.Instance.CreateButton(
+                text: "Debug",
+                parent: panel.transform,
+                anchorMin: new Vector2(0f, 1f),
+                anchorMax: new Vector2(0f, 1f),
+                position: new Vector2(1055f, -90f),
+                width: 150f,
+                height: 40f
+            );
+            debugTabBtn.SetActive(true);
+            m_debugTabButton = debugTabBtn.GetComponent<Button>();
+            m_debugTabButton.onClick.AddListener(() => ShowTab(m_debugTabRoot, m_debugTabButton));
         }
 
         private void ShowTab(GameObject tabToShow, Button activeButton)
@@ -271,6 +288,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_rulesTabRoot.SetActive(false);
             m_creatureGroupsTabRoot.SetActive(false);
             m_viewersTabRoot.SetActive(false);
+            m_debugTabRoot.SetActive(false);
 
             tabToShow.SetActive(true);
             RefreshActiveTab();
@@ -281,6 +299,7 @@ namespace WizshBoneTwitchIntegration.Gui
             SetTabButtonColor(m_rulesTabButton, m_rulesTabRoot.activeSelf);
             SetTabButtonColor(m_creatureGroupsTabButton, m_creatureGroupsTabRoot.activeSelf);
             SetTabButtonColor(m_viewersTabButton, m_viewersTabRoot.activeSelf);
+            SetTabButtonColor(m_debugTabButton, m_debugTabRoot.activeSelf);
         }
 
         private void RefreshActiveTab()
@@ -302,6 +321,9 @@ namespace WizshBoneTwitchIntegration.Gui
 
             if (m_viewersTabRoot != null && m_viewersTabRoot.activeSelf)
                 m_viewersTab.Refresh();
+
+            if (m_debugTabRoot != null && m_debugTabRoot.activeSelf)
+                m_debugTab.Refresh();
         }
 
         /// <summary>
