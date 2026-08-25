@@ -262,8 +262,8 @@ namespace WizshBoneTwitchIntegration.Gui
         /// Builds just the input control for an <see cref="IBoundField"/> (no label, no tooltip),
         /// centered at <paramref name="fieldPos"/> with the given width, wired to read/write
         /// through the bound field's delegates. Extracted out of <see cref="BuildBoundField"/> so
-        /// callers with their own label/tooltip placement (e.g. <c>SettingsCardBuilder</c>'s
-        /// vertical card layout) can reuse the exact same per-type dispatch and write-back logic.
+        /// callers with their own label/tooltip placement can reuse the exact same per-type
+        /// dispatch and write-back logic.
         /// </summary>
         internal static bool BuildBoundFieldControl(GameObject parent, IBoundField boundField, Vector2 fieldPos, float fieldWidth, List<DropdownOption> dropdownOptions = null)
         {

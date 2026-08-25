@@ -1,7 +1,6 @@
 ﻿using Jotunn.Entities;
-using System;
 using System.Diagnostics;
-using System.IO;
+using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
@@ -18,7 +17,7 @@ namespace WizshBoneTwitchIntegration.Commands
 
             using Process fileopener = new Process();
 
-            string path = Path.Combine(Environment.CurrentDirectory, WizshBoneTwitchIntegration.customConfigPath);
+            string path = ConfigPathHelper.GetEffectiveRoot();
             Jotunn.Logger.LogWarning(path);
 
             fileopener.StartInfo.FileName = path;

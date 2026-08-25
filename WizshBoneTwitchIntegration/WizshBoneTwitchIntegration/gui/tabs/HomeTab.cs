@@ -32,22 +32,22 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float LoginStatusY = -220f;
         private const float LoginButtonY = -205f;
 
-        private const float RedeemsStatusY = -330f;
-        private const float RedeemsButtonY = -315f;
-        private const float RedeemsHistoryButtonY = -385f;
+        private const float ChattingStatusY = -330f;
+        private const float ChattingButtonY = -315f;
 
-        private const float ChattingStatusY = -460f;
-        private const float ChattingButtonY = -445f;
+        private const float RedeemsStatusY = -405f;
+        private const float RedeemsButtonY = -390f;
+        private const float RedeemsHistoryButtonY = -460f;
 
         // Mutable element references
         private Text m_loginStatusText;
         private Text m_loginButtonText;
-        private GameObject m_redeemsSection;
-        private Text m_redeemsSectionStatusText;
-        private Text m_redeemsSectionButtonText;
         private GameObject m_chattingSection;
         private Text m_chattingSectionStatusText;
         private Text m_chattingSectionButtonText;
+        private GameObject m_redeemsSection;
+        private Text m_redeemsSectionStatusText;
+        private Text m_redeemsSectionButtonText;
 
         public GameObject Create(GameObject parent, CreateScrollableContainerDelegate createScrollable, TwitchAuth auth, Action onOpenHistory)
         {
@@ -63,8 +63,8 @@ namespace WizshBoneTwitchIntegration.Gui
             TabUIHelper.CreateTabTitle("Home:", m_root, new Vector2(-200f, TitleY));
 
             CreateTwitchSection();
-            CreateRedeemsSection();
             CreateChattingSection();
+            CreateRedeemsSection();
 
             return m_root;
         }
@@ -83,11 +83,18 @@ namespace WizshBoneTwitchIntegration.Gui
 
             // Show/hide and update conditional sections
             bool loggedIn = m_auth.m_userInfo != null;
-            m_redeemsSection.SetActive(loggedIn);
             m_chattingSection.SetActive(loggedIn);
+            m_redeemsSection.SetActive(loggedIn);
 
             if (loggedIn)
             {
+                m_chattingSectionStatusText.color = m_chatting.m_enabled
+                    ? GUIManager.Instance.ValheimYellow
+                    : GUIManager.Instance.ValheimBeige;
+                m_chattingSectionButtonText.text = m_chatting.m_enabled
+                    ? "Disable in-game chat messages"
+                    : "Enable in-game chat messages";
+
                 m_redeemsSectionStatusText.text = m_customRewards.m_enabled
                     ? "Redeems are currently enabled"
                     : "Redeems are currently disabled";
@@ -97,13 +104,6 @@ namespace WizshBoneTwitchIntegration.Gui
                 m_redeemsSectionButtonText.text = m_customRewards.m_enabled
                     ? "Disable Redeems"
                     : "Enable Redeems";
-
-                m_chattingSectionStatusText.color = m_chatting.m_enabled
-                    ? GUIManager.Instance.ValheimYellow
-                    : GUIManager.Instance.ValheimBeige;
-                m_chattingSectionButtonText.text = m_chatting.m_enabled
-                    ? "Disable in-game chat messages"
-                    : "Enable in-game chat messages";
             }
         }
 

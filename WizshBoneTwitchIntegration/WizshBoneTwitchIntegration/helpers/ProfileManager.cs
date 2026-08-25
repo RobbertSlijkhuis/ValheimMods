@@ -7,8 +7,10 @@ namespace WizshBoneTwitchIntegration.Helpers
 {
     internal static class ProfileManager
     {
-        private static readonly string ProfilesPath = WizshBoneTwitchIntegration.customConfigPath + "/profiles";
-        private static readonly string ActiveProfileFile = ProfilesPath + "/active.txt";
+        // Computed lazily so they pick up ConfigPathHelper's VirtualStore fallback - see
+        // ConfigPathHelper.GetEffectiveRoot().
+        private static string ProfilesPath => ConfigPathHelper.GetEffectiveRoot() + "/profiles";
+        private static string ActiveProfileFile => ProfilesPath + "/active.txt";
         private const string DefaultProfileName = "Default";
         private const string RedeemsStem = "_redeems";
         private static readonly System.Text.RegularExpressions.Regex TrailingDuplicateNumberRegex =

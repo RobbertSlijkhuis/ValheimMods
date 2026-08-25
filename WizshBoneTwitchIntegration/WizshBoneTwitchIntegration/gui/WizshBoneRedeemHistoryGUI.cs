@@ -288,13 +288,12 @@ namespace WizshBoneTwitchIntegration.Gui
                 return;
             }
 
-            int startIndex = history.Count - 1 - (m_currentPage * m_pageSize);
             float rowHeight = 60f;
             float yOffset = -10f;
 
-            for (int i = startIndex; i >= 0 && i > startIndex - m_pageSize; i--)
+            foreach (CustomRewardEvent entry in GetVisiblePageHistory())
             {
-                CreateHistoryRow(history[i], yOffset);
+                CreateHistoryRow(entry, yOffset);
                 yOffset -= rowHeight;
             }
 
@@ -386,7 +385,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void OnCompleteAll()
         {
-            List<CustomRewardEvent> history = GetFilteredHistory();
+            List<CustomRewardEvent> history = GetVisiblePageHistory();
             foreach (CustomRewardEvent entry in history)
             {
                 if (entry.Status == CustomRewardRedemptionState.Fulfilled || entry.Status == CustomRewardRedemptionState.Canceled)
@@ -401,7 +400,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void OnRefundAll()
         {
-            List<CustomRewardEvent> history = GetFilteredHistory();
+            List<CustomRewardEvent> history = GetVisiblePageHistory();
             foreach (CustomRewardEvent entry in history)
             {
                 if (entry.Status == CustomRewardRedemptionState.Fulfilled || entry.Status == CustomRewardRedemptionState.Canceled)
@@ -459,6 +458,24 @@ namespace WizshBoneTwitchIntegration.Gui
             }
 
             return filtered;
+        }
+
+        /// <summary>
+        /// The subset of <see cref="GetFilteredHistory"/> actually rendered on the current page -
+        /// i.e. the filtered history sliced to the current pagination window. "Complete All" /
+        /// "Refund All" operate on this rather than the full filtered list, so they only affect
+        /// what's visible on screen.
+        /// </summary>
+        private List<CustomRewardEvent> GetVisiblePageHistory()
+        {
+            List<CustomRewardEvent> history = GetFilteredHistory();
+            List<CustomRewardEvent> visible = new List<CustomRewardEvent>();
+
+            int startIndex = history.Count - 1 - (m_currentPage * m_pageSize);
+            for (int i = startIndex; i >= 0 && i > startIndex - m_pageSize; i--)
+                visible.Add(history[i]);
+
+            return visible;
         }
 
         public bool IsVisible => m_panel != null && m_panel.activeSelf;

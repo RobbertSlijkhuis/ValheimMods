@@ -42,8 +42,11 @@ namespace WizshBoneTwitchIntegration
         public static readonly string HumanoidGroupSpawnFriendly = "WBTI_HumanoidGroupSpawnFriendly";
 
         public static readonly string customConfigPath = "BepInEx/config/WizshBoneTwitchIntegration";
-        public static readonly string bannedPath = customConfigPath + "/banned.txt";
-        public static readonly string viewersPath = customConfigPath + "/viewers.yaml";
+        // Computed lazily (rather than eagerly like customConfigPath above) so they pick up
+        // ConfigPathHelper's VirtualStore fallback, which can only be decided once the game has
+        // actually started - see ConfigPathHelper.GetEffectiveRoot().
+        public static string bannedPath => ConfigPathHelper.GetEffectiveRoot() + "/banned.txt";
+        public static string viewersPath => ConfigPathHelper.GetEffectiveRoot() + "/viewers.yaml";
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html

@@ -1,4 +1,3 @@
-using System.Reflection;
 using UnityEngine;
 
 namespace WizshBoneTwitchIntegration.Gui
@@ -8,9 +7,7 @@ namespace WizshBoneTwitchIntegration.Gui
     /// key, see ProfileSettingsHelper/ProfileSettingsData) grouped the same way PluginConfig.cs used to
     /// group them. Rebuilt from scratch on every Refresh() (tab shown, or profile switched) so
     /// rows always reflect ProfileSettingsHelper.Current - there's no working-copy/Save button,
-    /// each field writes straight through on edit (see RulesSettingsViews.cs). Each setting
-    /// renders as a card (title / control / tooltip stacked) via SettingsCardBuilder, unlike
-    /// every other tab's horizontal ObjectEditor rows.
+    /// each field writes straight through on edit (see RulesSettingsViews.cs).
     /// </summary>
     internal class RulesTab
     {
@@ -22,8 +19,8 @@ namespace WizshBoneTwitchIntegration.Gui
         // shape - a title, then one big scrollable body - with no search bar or sidebar.
         private const float TitleY = -153f;
         private const float ScrollTopOffset = -175f;
-        private const float CardWidth = 1000f;
-        private const float CardSpacing = 12f;
+        private const float SectionStartX = -341f;
+        private const float FieldWidth = 320f;
         private const float SectionHeaderHeight = 25f;
         private const float SectionSpacing = 20f;
         private const float StartY = -20f;
@@ -62,33 +59,13 @@ namespace WizshBoneTwitchIntegration.Gui
             TabUIHelper.UpdateScrollContentHeight(m_scrollContent, StartY, Mathf.Abs(yOffset - StartY));
         }
 
-        /// <returns>Total height consumed by this section's header + cards.</returns>
+        /// <returns>Total height consumed by this section's header + fields.</returns>
         private float BuildSection(string title, object sectionView, float yOffset)
         {
-            TabUIHelper.CreateTabTitle(title.ToUpperInvariant(), m_scrollContent, new Vector2(0f, yOffset), width: CardWidth);
+            TabUIHelper.CreateTabTitle(title, m_scrollContent, new Vector2(SectionStartX, yOffset), width: FieldWidth);
 
-            float cardY = yOffset - SectionHeaderHeight;
-            float fieldsHeight = 0f;
-
-            foreach (FieldInfo field in sectionView.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
-            {
-                if (field.GetCustomAttribute<EditorHiddenAttribute>() != null)
-                    continue;
-
-                if (!(field.GetValue(sectionView) is IBoundField boundField))
-                    continue;
-
-                string label = field.GetCustomAttribute<EditorLabelAttribute>()?.Label ?? field.Name;
-                string tooltip = field.GetCustomAttribute<EditorTooltipAttribute>()?.Tooltip;
-
-                float cardHeight = SettingsCardBuilder.BuildCard(m_scrollContent, CardWidth, new Vector2(0f, cardY), label, tooltip, boundField);
-
-                cardY -= cardHeight + CardSpacing;
-                fieldsHeight += cardHeight + CardSpacing;
-            }
-
-            if (fieldsHeight > 0f)
-                fieldsHeight -= CardSpacing;
+            float fieldsY = yOffset - SectionHeaderHeight;
+            float fieldsHeight = new ObjectEditor(startX: SectionStartX, startY: fieldsY, fieldWidth: FieldWidth).Build(m_scrollContent, sectionView);
 
             return SectionHeaderHeight + fieldsHeight;
         }
