@@ -104,10 +104,6 @@ namespace WizshBoneTwitchIntegration.Helpers
                                   $"{(entry.duration > 0f ? $" ({entry.duration}s)" : "")}" +
                                   $"{(entry.persistsThroughDeath ? " [persists]" : "")}.");
 
-            // SAPHONETTE-CLEANUP: see ShieldSoundHelper.cs.
-            if (entry.name == StatusEffectType.StaffShield)
-                ShieldSoundHelper.PlayIfEnabled(player);
-
             return true;
         }
     }

@@ -72,30 +72,10 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
         }
 
-        // SAPHONETTE-CLEANUP: wires up the temporary custom death sound (see DeathSoundHelper).
-        // CreateDeathEffects is private (patched by string name) and, per decompiled
-        // Player.OnDeath(), only ever runs on whichever client owns that Player instance - so this
-        // fires exactly once per real death, on the right client, with no IsOwner check needed here.
-        // Hooking the actual death-effect moment (rather than baking something in back at
-        // Player.Awake) is also what lets DeathSoundHelper.Enabled be read live.
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Player), "CreateDeathEffects")]
-        public static void CreateDeathEffects_Postfix(Player __instance)
-        {
-            try
-            {
-                DeathSoundHelper.PlayIfEnabled(__instance);
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Something went wrong in CreateDeathEffects_Postfix: " + e);
-            }
-        }
-
         // Player.OnDeath() (protected, patched by string name) returns early for non-owners per
-        // decompiled Character.OnDeath()'s IsOwner() guard, so - like CreateDeathEffects above -
-        // this only ever runs anything for the client that owns the dying Player; the
-        // __instance == Player.m_localPlayer check below is still kept as a second, cheap guard.
+        // decompiled Character.OnDeath()'s IsOwner() guard, so this only ever runs anything for the
+        // client that owns the dying Player; the __instance == Player.m_localPlayer check below is
+        // still kept as a second, cheap guard.
         //
         // This is the trigger point for TwitchSafeZone.HandleLocalPlayerDeath(): Game._RequestRespawn()
         // destroys the player GameObject ~10s after death (possibly still standing inside a safe

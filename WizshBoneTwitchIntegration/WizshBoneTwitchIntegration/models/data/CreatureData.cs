@@ -57,49 +57,18 @@ namespace WizshBoneTwitchIntegration.Models
         // there.
         [EditorHidden] public bool forceColor = false;
 
-        // Temporary hack: lets SpawnCreature spawn non-creature prefabs (e.g. a hot tub) that
-        // have no MonsterAI/Humanoid components. See CreatureHelper.SpawnCreature.
-        [EditorHidden] public bool requireMonsterComponents = true;
-
-        // Temporary hack: if > 0, fills the spawned prefab's Smelter (e.g. the hot tub's fuel
-        // tank) up to this amount (clamped to Smelter.m_maxFuel) right after spawn.
-        [EditorHidden] public float smelterFuelAmount = 0f;
-
-        // SAPHONETTE-CLEANUP: optional prefab name of a vanilla item to equip in the creature's
-        // helmet slot right after spawn (e.g. "HelmetCelebration"). Must be an ItemDrop prefab with
-        // ItemType.Helmet. Leave null/empty to spawn with no helmet override. See
-        // CreatureHelper.EquipGear. Remove once the "Don't forget your coffee!" bit is over.
-        [EditorHidden] public string helmetItem = null;
-
-        // SAPHONETTE-CLEANUP: optional prefab name of a vanilla item to equip in the creature's
-        // hand right after spawn (e.g. "Tankard_dvergr"). Works for any equippable one-handed/tool
-        // item; not intended for real weapons since a fullyPassive creature never attacks and a
-        // non-passive one could still swap it out mid-combat during AI weapon selection (see
-        // CreatureHelper.EquipGear). Leave null/empty to spawn with no held item. Remove once the
-        // "Don't forget your coffee!" bit is over.
-        [EditorHidden] public string heldItem = null;
-
-        // SAPHONETTE-CLEANUP: if true, unequips whatever the creature's own default loadout put in
-        // its off-hand/shield slot right after spawn (e.g. a Draugr's random default shield).
-        // Independent of heldItem - a redeem can hold something in the main hand and still keep the
-        // shield if desired. See CreatureHelper.EquipGear. Remove once the "Don't forget your
-        // coffee!" bit is over.
-        [EditorHidden] public bool removeShield = false;
-
-        // Permanent creature-behavior feature (currently only wired up for the coffee draugr, but
-        // not tied to that bit going away). Forces a friendly creature to always follow the player,
-        // independent of the commandable/isFollowing toggle, and to keep closing the distance
-        // instead of stopping ~3m out like a normal followed creature. See
-        // TwitchCreaturePersistentData.ApplyTameable/WantsToCloseDistance and
+        // Permanent creature-behavior feature, not currently set by any redeem. Forces a friendly
+        // creature to always follow the player, independent of the commandable/isFollowing toggle,
+        // and to keep closing the distance instead of stopping ~3m out like a normal followed
+        // creature. See TwitchCreaturePersistentData.ApplyTameable/WantsToCloseDistance and
         // harmony/SpecialRedeemPatchesWBTI.cs's Follow prefix.
         [EditorHidden] public bool alwaysFollowOwner = false;
 
-        // Permanent creature-behavior feature (currently only wired up for the coffee draugr, but
-        // not tied to that bit going away). Makes a tamed creature never treat anything as an enemy
-        // in either direction - it never targets anything (a tamed creature normally still fights
-        // off wild monsters that get close, see BaseAI.IsEnemy's tamed-vs-non-tamed branch), and
-        // wild monsters never target it back either. See TwitchCreaturePersistentData.IsFullyPassive
-        // and harmony/SpecialRedeemPatchesWBTI.cs.
+        // Permanent creature-behavior feature, not currently set by any redeem. Makes a tamed
+        // creature never treat anything as an enemy in either direction - it never targets anything
+        // (a tamed creature normally still fights off wild monsters that get close, see
+        // BaseAI.IsEnemy's tamed-vs-non-tamed branch), and wild monsters never target it back either.
+        // See TwitchCreaturePersistentData.IsFullyPassive and harmony/SpecialRedeemPatchesWBTI.cs.
         [EditorHidden] public bool fullyPassive = false;
 
         public CreatureData() { }

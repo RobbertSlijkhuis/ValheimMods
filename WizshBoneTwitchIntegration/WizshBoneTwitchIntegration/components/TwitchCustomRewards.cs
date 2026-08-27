@@ -134,10 +134,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 m_refundMessage = $"Your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points has been refunded!";
 
-                // SAPHONETTE-CLEANUP: remove the fallback below once SpecialRedeemHelper is no
-                // longer needed - synthesized chat-word titles are what it resolves here.
-                RedeemData redeem = GetRedeemList().Find(item => item.title == customRewardEvent.CustomRewardTitle)
-                    ?? SpecialRedeemHelper.TryGetRedeem(customRewardEvent.CustomRewardTitle);
+                RedeemData redeem = GetRedeemList().Find(item => item.title == customRewardEvent.CustomRewardTitle);
                 if (redeem == null)
                 {
                     //m_chat.Send($"Could not find redeem! Your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points has been refunded!");
@@ -189,9 +186,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (redeem.type == RedeemType.SpawnCreature)
                     CreatureHelper.HandleSpawnCreatureRedeem(redeem, customRewardEvent, m_chat);
-
-                // SAPHONETTE-CLEANUP: remove once SpecialRedeemHelper is no longer needed.
-                SpecialRedeemHelper.TryHandleSpecialEffect(redeem, customRewardEvent, m_chat);
 
                 if (RedeemType.SpawnAbilityFamily.Contains(redeem.type))
                 {

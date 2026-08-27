@@ -81,13 +81,7 @@ namespace WizshBoneTwitchIntegration.Components
                     return;
                 }
 
-                // SAPHONETTE-CLEANUP: the fallback below is only needed to rehydrate a creature spawned
-                // by a SpecialRedeemHelper hack (bathtub/coffee Draugr) after a relog/zone reload -
-                // GetRedeemByTitle only searches the real YAML-backed redeem list, so without it every
-                // CreatureData field (size, speed, color, talk, friendly, etc.) silently resets to
-                // prefab defaults on rehydration. Remove once SpecialRedeemHelper is no longer needed.
-                RedeemData redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle)
-                    ?? SpecialRedeemHelper.TryGetRedeem(m_redeemTitle);
+                RedeemData redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
 
                 if (redeem == null)
                 {

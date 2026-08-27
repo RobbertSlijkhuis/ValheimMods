@@ -25,7 +25,7 @@ namespace WizshBoneTwitchIntegration.Components
         private DateTime m_lastMessageTime;
         private bool m_isUnclaimDestroy = false;
 
-        // Fallback talk used for non-creature prefabs (e.g. the hot tub) that have no MonsterAI -
+        // Fallback talk used for non-creature prefabs that have no MonsterAI -
         // NpcTalk.SayForce() calls m_animator.SetTrigger(), which NREs without one.
         private List<string> m_simpleTalkMessages;
 
@@ -153,9 +153,9 @@ namespace WizshBoneTwitchIntegration.Components
             m_isSpawn = isSpawn;
             m_assignment = new TwitchCreatureAssignment(userName, gameObject, ProfileSettingsHelper.Current.chattingClaimDuration);
 
-            // Null-safe like Init(CreatureData, CustomRewardEvent)'s equivalent line - a non-creature
-            // spawn (e.g. the bathtub, requireMonsterComponents = false) has no Character component,
-            // so m_character is genuinely null here on rehydration.
+            // Null-safe like Init(CreatureData, CustomRewardEvent)'s equivalent line - some
+            // rehydration paths (see TwitchCreaturePersistentData.Awake) have no Character component,
+            // so m_character is genuinely null here.
             m_originalName = m_character?.m_name;
 
             m_chatting.AddCreatureAssignment(m_assignment);
@@ -236,8 +236,8 @@ namespace WizshBoneTwitchIntegration.Components
                 m_npcTalk.m_offset = 1f;
                 m_npcTalk.m_hideDialogDelay = 10f;
 
-                // A prefab that never had NpcTalk built in (e.g. Deathsquito/Somasquito) never had
-                // m_animator wired up in the editor either - without this, NpcTalkExtension.SayForce's
+                // A prefab that never had NpcTalk built in (e.g. Deathsquito) never had m_animator
+                // wired up in the editor either - without this, NpcTalkExtension.SayForce's
                 // m_animator.SetTrigger() NREs the first time this creature talks.
                 m_npcTalk.m_animator = gameObject.GetComponentInChildren<Animator>();
             }

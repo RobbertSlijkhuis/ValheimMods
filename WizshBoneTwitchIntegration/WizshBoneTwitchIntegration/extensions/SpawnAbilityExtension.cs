@@ -93,9 +93,6 @@ namespace WizshBoneTwitchIntegration.Extensions
 
                 if (monsterAI == null && impactEffect != null)
                 {
-                    // SAPHONETTE-CLEANUP: see SpecialRedeemHelper.TryAttachTalk.
-                    SpecialRedeemHelper.TryAttachTalk(gameObject, customRewardEvent, creatureData);
-
                     Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
 
                     if (spawnAbilityData.dropVelocity != 0f)

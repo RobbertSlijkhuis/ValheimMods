@@ -5,9 +5,9 @@ using WizshBoneTwitchIntegration.Components;
 
 namespace WizshBoneTwitchIntegration.Harmony
 {
-    // Permanent creature-behavior patches backing CreatureData.fullyPassive/alwaysFollowOwner
-    // (currently only wired up via SpecialRedeemHelper's coffee redeem, but the patches themselves
-    // are not tied to that bit going away - see the field comments on CreatureData).
+    // Permanent creature-behavior patches backing CreatureData.fullyPassive/alwaysFollowOwner - not
+    // currently set by any redeem, but kept as reusable infrastructure for a future one that wants a
+    // friendly companion creature. See the field comments on CreatureData.
     [HarmonyPatch]
     public class SpecialRedeemPatchesWBTI
     {

@@ -69,7 +69,19 @@ namespace WizshBoneTwitchIntegration.Helpers
         {
             path = path ?? ProfileManager.GetActiveRedeemPath();
             EnsureRedeemsFileExists(path);
-            return DeserializeYaml<ModData>(path);
+            ModData data = DeserializeYaml<ModData>(path);
+
+            // A profile with zero redeems/creatureGroups serializes as a bare "redeems:"/
+            // "creatureGroups:" key (see WriteRedeemsConfig), which YamlDotNet deserializes back as
+            // null rather than an empty list - guarantee non-null lists here, once, rather than
+            // making every one of this method's many callers guard against it individually.
+            if (data != null)
+            {
+                data.redeems = data.redeems ?? new List<RedeemData>();
+                data.creatureGroups = data.creatureGroups ?? new List<CreatureGroupData>();
+            }
+
+            return data;
         }
 
         public static ProfileSettingsData ReadSettingsConfig(string path = null)
@@ -294,8 +306,14 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return null;
             }
 
+            // IgnoreUnmatchedProperties: an on-disk profile.yaml can predate a field being removed
+            // from a model (e.g. the CreatureData/SpawnAbilityData fields only ever set by the old
+            // Saphonette-special redeems) - without this, YamlDotNet throws on the now-unrecognized
+            // property instead of just ignoring it, which would otherwise nuke the whole profile
+            // back to an empty redeem list on next load.
             IDeserializer deserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .IgnoreUnmatchedProperties()
                 .Build();
 
             using (StringReader stringReader = new StringReader(fileContent))

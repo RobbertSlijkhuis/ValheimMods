@@ -32,6 +32,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             // ReadRedeemsConfig() self-heals from the embedded stock template if the file is
             // still missing at this point - i.e. this profile has never been loaded before.
+            // Guaranteed non-null redeems/creatureGroups - see ReadRedeemsConfig.
             ModData data = ExtraConfigHelper.ReadRedeemsConfig(path);
             redeems = data.redeems;
             creatureGroups = data.creatureGroups;

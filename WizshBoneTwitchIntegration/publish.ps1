@@ -52,20 +52,6 @@ if ($Target.Equals("Debug")) {
     Copy-Item -Path "$TargetPath\$name.dll" -Destination "$plug" -Force
     Copy-Item -Path "$TargetPath\$name.pdb" -Destination "$plug" -Force
     Copy-Item -Path "$TargetPath\$name.dll.mdb" -Destination "$plug" -Force
-
-    # SAPHONETTE-CLEANUP: temporary death sound for Saphonette's stream, not a permanent feature -
-    # loaded from disk at runtime (see helpers/DeathSoundHelper.cs). Remove this block (and the
-    # matching one in the Release section below) once the bit is over.
-    if (Test-Path "$TargetPath\UUH.wav") {
-        Copy-Item -Path "$TargetPath\UUH.wav" -Destination "$plug" -Force
-    }
-
-    # SAPHONETTE-CLEANUP: temporary shield sound for Saphonette's stream, not a permanent feature -
-    # loaded from disk at runtime (see helpers/ShieldSoundHelper.cs). Remove this block (and the
-    # matching one in the Release section below) once the bit is over.
-    if (Test-Path "$TargetPath\Where_is_my_bubble.wav") {
-        Copy-Item -Path "$TargetPath\Where_is_my_bubble.wav" -Destination "$plug" -Force
-    }
 }
 
 if($Target.Equals("Release")) {
@@ -78,15 +64,6 @@ if($Target.Equals("Release")) {
     Copy-Item -Path "$TargetPath\$TargetAssembly" -Destination "$PackagePath\plugins\$TargetAssembly" -Force
     Copy-Item -Path "$ProjectPath\README.md" -Destination "$PackagePath\README.md" -Force
 
-    # SAPHONETTE-CLEANUP: see the matching comment in the Debug block above.
-    if (Test-Path "$TargetPath\UUH.wav") {
-        Copy-Item -Path "$TargetPath\UUH.wav" -Destination "$PackagePath\plugins\UUH.wav" -Force
-    }
-
-    # SAPHONETTE-CLEANUP: see the matching comment in the Debug block above.
-    if (Test-Path "$TargetPath\Where_is_my_bubble.wav") {
-        Copy-Item -Path "$TargetPath\Where_is_my_bubble.wav" -Destination "$PackagePath\plugins\Where_is_my_bubble.wav" -Force
-    }
     Compress-Archive -Path "$PackagePath\*" -DestinationPath "$TargetPath\$TargetAssembly.zip" -Force
 }
 
