@@ -2,6 +2,7 @@ using BepInEx;
 using CraftingStationTweakz.Configs;
 using Jotunn.Managers;
 using Jotunn.Utils;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,14 +15,17 @@ namespace CraftingStationTweakz
     {
         public const string PluginGUID = "DeathWizsh.CraftingStationTweakz";
         public const string PluginName = "CraftingStationTweakz";
-        public const string PluginVersion = "0.0.1";
+        public const string PluginVersion = "1.0.0";
         public static CraftingStationTweakz Instance;
+
+        private const float DebounceSeconds = 0.3f;
+        private Coroutine extensionUpdateRoutine;
+        private Coroutine craftingStationUpdateRoutine;
 
         private void Awake()
         {
             Instance = this;
             PluginConfig.Init();
-
             PrefabManager.OnPrefabsRegistered += PatchPieces;
         }
 
@@ -30,6 +34,36 @@ namespace CraftingStationTweakz
             UpdateExtensionPieces();
             UpdateCraftingStation();
             PrefabManager.OnPrefabsRegistered -= PatchPieces;
+        }
+
+        // Coalesces rapid-fire SettingChanged events (e.g. dragging a slider in ConfigurationManager)
+        // into a single update once the value stops changing for DebounceSeconds.
+        public void RequestUpdateExtensionPieces()
+        {
+            if (extensionUpdateRoutine != null)
+                StopCoroutine(extensionUpdateRoutine);
+            extensionUpdateRoutine = StartCoroutine(DebounceUpdateExtensionPieces());
+        }
+
+        private IEnumerator DebounceUpdateExtensionPieces()
+        {
+            yield return new WaitForSeconds(DebounceSeconds);
+            extensionUpdateRoutine = null;
+            UpdateExtensionPieces();
+        }
+
+        public void RequestUpdateCraftingStation()
+        {
+            if (craftingStationUpdateRoutine != null)
+                StopCoroutine(craftingStationUpdateRoutine);
+            craftingStationUpdateRoutine = StartCoroutine(DebounceUpdateCraftingStation());
+        }
+
+        private IEnumerator DebounceUpdateCraftingStation()
+        {
+            yield return new WaitForSeconds(DebounceSeconds);
+            craftingStationUpdateRoutine = null;
+            UpdateCraftingStation();
         }
 
         public void UpdateExtensionPieces()
@@ -44,7 +78,21 @@ namespace CraftingStationTweakz
                 if (extension == null || piece == null)
                     continue;
 
-                //Jotunn.Logger.LogWarning($"Adjusting upgrade {ext.name}...");
+                extension.m_maxStationDistance = PluginConfig.extensionRange.Value;
+                piece.m_spaceRequirement = PluginConfig.extensionSpaceRange.Value;
+            }
+
+            // Already-placed/loaded extensions in the current world
+            foreach (var extension in StationExtension.m_allExtensions)
+            {
+                if (extension == null)
+                    continue;
+
+                Piece piece = extension.GetComponent<Piece>();
+                if (piece == null)
+                    continue;
+
+                Jotunn.Logger.LogWarning($"Adjusting live upgrade instance {extension.name}...");
                 extension.m_maxStationDistance = PluginConfig.extensionRange.Value;
                 piece.m_spaceRequirement = PluginConfig.extensionSpaceRange.Value;
             }
@@ -62,7 +110,17 @@ namespace CraftingStationTweakz
                 if (craftingStation == null || piece == null)
                     continue;
 
-                //Jotunn.Logger.LogWarning($"Adjusting craftin station {ext.name}...");
+                craftingStation.m_rangeBuild = PluginConfig.stationBuildRange.Value;
+                craftingStation.m_extraRangePerLevel = PluginConfig.stationBuildRangePerUpgrade.Value;
+            }
+
+            // Already-placed/loaded crafting stations in the current world
+            foreach (var craftingStation in CraftingStation.m_allStations)
+            {
+                if (craftingStation == null)
+                    continue;
+
+                Jotunn.Logger.LogWarning($"Adjusting live crafting station instance {craftingStation.name}...");
                 craftingStation.m_rangeBuild = PluginConfig.stationBuildRange.Value;
                 craftingStation.m_extraRangePerLevel = PluginConfig.stationBuildRangePerUpgrade.Value;
             }
