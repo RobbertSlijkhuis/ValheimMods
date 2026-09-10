@@ -33,10 +33,12 @@ namespace WizshBoneTwitchIntegration.Models
 
         [EditorLabel("Add condition")]
         [EditorTooltip("The global key that will enable this redeem.")]
+        [GlobalKeyDropdown]
         public string globalKeyAdd = "";
 
         [EditorLabel("Remove condition")]
         [EditorTooltip("The global key that will disable this redeem.")]
+        [GlobalKeyDropdown]
         public string globalKeyRemove = "";
 
         [EditorLabel("Ignore safezone")]

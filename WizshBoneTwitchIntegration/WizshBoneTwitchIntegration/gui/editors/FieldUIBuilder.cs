@@ -6,6 +6,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using WizshBoneTwitchIntegration.Models;
+using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.Gui
 {
@@ -116,6 +117,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 var seDropdown   = field.GetCustomAttribute<StatusEffectNameDropdownAttribute>();
                 var creatureDropdown = field.GetCustomAttribute<CreaturePrefabNameDropdownAttribute>();
                 var doorDropdown = field.GetCustomAttribute<DoorPrefabNameDropdownAttribute>();
+                var globalKeyDropdown = field.GetCustomAttribute<GlobalKeyDropdownAttribute>();
                 var onChanged    = field.GetCustomAttribute<OnValueChangedAttribute>();
                 var prefixAttr   = field.GetCustomAttribute<InputPrefixAttribute>();
 
@@ -145,6 +147,12 @@ namespace WizshBoneTwitchIntegration.Gui
                 {
                     string current = currentValue as string ?? "";
                     List<DropdownOption> options = EnsureIncludesCurrentValue(GetAvailableDoorPrefabOptions(), current);
+                    BuildStringDropdownField(parent, target, field, current, fieldPos, fieldWidth, options);
+                }
+                else if (globalKeyDropdown != null)
+                {
+                    string current = currentValue as string ?? "";
+                    List<DropdownOption> options = EnsureIncludesCurrentValue(GetAvailableGlobalKeyOptions(), current);
                     BuildStringDropdownField(parent, target, field, current, fieldPos, fieldWidth, options);
                 }
                 else if (dropdownAttr != null)
@@ -847,6 +855,33 @@ namespace WizshBoneTwitchIntegration.Gui
             options.Sort((a, b) => string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase));
             s_cachedDoorPrefabOptions = options;
             return options;
+        }
+
+        /// <summary>
+        /// Value = the global key string ZoneSystem stores (what gets saved), Label = a readable
+        /// name matching vanilla boss naming. A small fixed list, not a runtime scan, so no
+        /// caching is needed. Includes a leading "" -> "None" entry for the default/blank value.
+        /// Deliberately excludes <see cref="GlobalKeyType.DefeatedNothing"/> and
+        /// <see cref="GlobalKeyType.DefeatedNoBoss"/> - those are sentinel values never read by
+        /// ZoneSystem, not real global keys, so offering them here would silently produce a
+        /// redeem condition that can never be satisfied.
+        /// </summary>
+        public static List<DropdownOption> GetAvailableGlobalKeyOptions()
+        {
+            return new List<DropdownOption>
+            {
+                new DropdownOption("", "None"),
+                new DropdownOption(GlobalKeyType.DefeatedEikthyr, "Defeated Eikthyr"),
+                new DropdownOption(GlobalKeyType.DefeatedElder, "Defeated the Elder"),
+                new DropdownOption(GlobalKeyType.DefeatedBonemass, "Defeated Bonemass"),
+                new DropdownOption(GlobalKeyType.DefeatedModer, "Defeated Moder"),
+                new DropdownOption(GlobalKeyType.DefeatedYagluth, "Defeated Yagluth"),
+                new DropdownOption(GlobalKeyType.DefeatedQueen, "Defeated the Queen"),
+                new DropdownOption(GlobalKeyType.DefeatedFader, "Defeated Fader"),
+                new DropdownOption(GlobalKeyType.KilledBat, "Killed a Bat"),
+                new DropdownOption(GlobalKeyType.KilledTroll, "Killed a Troll"),
+                new DropdownOption(GlobalKeyType.killedSurtling, "Killed a Surtling"),
+            };
         }
 
         // Selected value in a LogPrefabNameDropdown list that means "replace this list with the
