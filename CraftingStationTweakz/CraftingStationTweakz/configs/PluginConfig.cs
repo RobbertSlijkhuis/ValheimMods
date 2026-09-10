@@ -1,5 +1,7 @@
-﻿using BepInEx.Configuration;
+﻿using BepInEx;
+using BepInEx.Configuration;
 using System;
+using System.IO;
 
 namespace CraftingStationTweakz.Configs
 {
@@ -14,6 +16,7 @@ namespace CraftingStationTweakz.Configs
 
         // Other
         private static int entryCount = 1000;
+        private static FileSystemWatcher configWatcher;
 
         public static void Init()
         {
@@ -24,6 +27,8 @@ namespace CraftingStationTweakz.Configs
         {
             try
             {
+                CraftingStationTweakz.Instance.Config.SaveOnConfigSet = false;
+
                 stationBuildRange = CraftingStationTweakz.Instance.Config.Bind(new ConfigDefinition(sectionGeneral, "Build range"), 20f,
                     new ConfigDescription("The base build range of the crafting station.", new AcceptableValueRange<float>(5f, 50f),
                     new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
@@ -48,6 +53,9 @@ namespace CraftingStationTweakz.Configs
                     CraftingStationTweakz.Instance.RequestUpdateExtensionPieces();
                 };
 
+                // Enable SaveOnConfigSet before the last bind allowing the config file to be created on first run
+                CraftingStationTweakz.Instance.Config.SaveOnConfigSet = true;
+
                 extensionSpaceRange = CraftingStationTweakz.Instance.Config.Bind(new ConfigDefinition(sectionGeneral, "Space requirement between upgrades"), 0f,
                     new ConfigDescription("The minimum required spacing between upgrades in order to place them (game default is 2).", new AcceptableValueRange<float>(0f, 10f),
                     new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
@@ -55,10 +63,33 @@ namespace CraftingStationTweakz.Configs
                 {
                     CraftingStationTweakz.Instance.RequestUpdateExtensionPieces();
                 };
+
+                configWatcher = new FileSystemWatcher(BepInEx.Paths.ConfigPath, CraftingStationTweakz.configFileName);
+                configWatcher.Changed += new FileSystemEventHandler(OnConfigFileChange);
+                configWatcher.Created += new FileSystemEventHandler(OnConfigFileChange);
+                configWatcher.Renamed += new RenamedEventHandler(OnConfigFileChange);
+                configWatcher.IncludeSubdirectories = true;
+                configWatcher.SynchronizingObject = ThreadingHelper.SynchronizingObject;
+                configWatcher.EnableRaisingEvents = true;
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not initialise general config: " + e);
+            }
+        }
+
+        private static void OnConfigFileChange(object sender, FileSystemEventArgs e)
+        {
+            if (!File.Exists(CraftingStationTweakz.configFileFullPath))
+                return;
+
+            try
+            {
+                CraftingStationTweakz.Instance.Config.Reload();
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Something went wrong while reloading the config, please check if the file exists and the entries are valid! " + error);
             }
         }
 

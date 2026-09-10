@@ -1,3 +1,8 @@
+### 1.1.5
+- Updated for Deep North release 1.0.7
+- Removed clone feature, seemed redundant and only caused a lot of extra setup
+- Fixed a case that could cause double recipes appearing in crafting and upgrading
+
 ### 1.1.4
 - Updated to Call to Arms update, increased Jotunn dependency to 2.26.1
 

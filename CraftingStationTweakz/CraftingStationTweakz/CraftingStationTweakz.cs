@@ -4,6 +4,7 @@ using Jotunn.Managers;
 using Jotunn.Utils;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 namespace CraftingStationTweakz
@@ -17,6 +18,8 @@ namespace CraftingStationTweakz
         public const string PluginName = "CraftingStationTweakz";
         public const string PluginVersion = "1.0.0";
         public static CraftingStationTweakz Instance;
+        public static string configFileName = PluginGUID + ".cfg";
+        public static string configFileFullPath = BepInEx.Paths.ConfigPath + Path.DirectorySeparatorChar.ToString() + configFileName;
 
         private const float DebounceSeconds = 0.3f;
         private Coroutine extensionUpdateRoutine;
