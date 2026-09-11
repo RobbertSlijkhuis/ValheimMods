@@ -1,7 +1,7 @@
 {
   "name": "UpgradeAntlerPickaxe",
   "description": "A mod that will allow you to upgrade the antler pickaxe just like any other",
-  "version_number": "1.1.4",
-  "dependencies": [ "ValheimModding-Jotunn-2.26.1" ],
+  "version_number": "1.2.0",
+  "dependencies": [ "ValheimModding-Jotunn-2.30.0" ],
   "website_url": ""
 }

@@ -1,5 +1,5 @@
-### 1.1.5
-- Updated for Deep North release 1.0.7
+### 1.2.0
+- Updated for Deep North release
 - Removed clone feature, seemed redundant and only caused a lot of extra setup
 - Fixed a case that could cause double recipes appearing in crafting and upgrading
 
@@ -17,7 +17,7 @@
 - Fixed internal name to be unique from JotunnModStub causing issues with my other mods
 
 ### 1.1.0
-- Removed the weapons I made for my friends and created entire new ones in this mod https://valheim.thunderstore.io/package/DeathWizsh/LegendaryWeapons/. The prefab names are not the same, if you update to this version they will be removed!
+- Removed the weapons I made for my friends and created entire new ones in this mod https://valheim.thunderstore.io/package/DeathWizsh/LegendaryWeapons/ or https://valheim.hexium.gg/mods/DeathWizsh/LegendaryWeapons. The prefab names are not the same, if you update to this version they will be removed!
 - Added config entries to set the name, description, crafting station, crafting recipe, upgrade costs & being able to choose wether to edit the orignal Antler Pickaxe or to create a clone
 - The plugin GUID has changed, please remove the old config & edit the new one (sorry :S) 
 
