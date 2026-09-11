@@ -44,14 +44,6 @@ namespace UpgradeAntlerPickaxe
         }
 
         /**
-         * Called when the mod is unloaded
-         */
-        public void OnDestroy()
-        {
-            Config.Save();
-        }
-
-        /**
          * Update the stats of the Antler Pickaxe
          */
         public void PatchStats()
