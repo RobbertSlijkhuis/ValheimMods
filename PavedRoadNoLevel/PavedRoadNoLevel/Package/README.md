@@ -9,7 +9,8 @@ The mod comes with a config, be sure to check wether the config has changed in f
  - **Stonecutter requirement**: Enable the Stonecutter as a requirement (to pave roads). Default: *true*
 
 ## Roadmap
-No features are planned for this mod. I do have plans to create a new mod for terrain modifications that will have these features in them.
+Nothing planned at the moment, I do have plans to create a new mod for terrain modifications that will have these features in them.
 
-## Bug/Suggestion
-Found a bug or have some suggestions? You can leave a post or bug report here: https://www.nexusmods.com/valheim/mods/2524/
+## Bugs & Suggestions
+Found a bug or have a suggestion? Join my Discord: https://discord.gg/FBtWqxhP2F
+Select the modding role and post your feedback or bug report there!

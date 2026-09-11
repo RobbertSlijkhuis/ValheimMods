@@ -128,6 +128,13 @@ copy-pasting the script wholesale:
 - ✅ `UpgradeAntlerPickaxe` — done. Also removed its root `README.MD`→`Package\README.md` copy
   per item 2, so `Package\README.md` is the source of truth there too; root README content
   left as-is (its extra inline changelog section was not backfilled into `Package\README.md`).
+  Its `plugins\` recreation was later backported to item 9 (see `PavedRoadNoLevel` entry below) —
+  it originally still did a plain `New-Item -Force` without clearing the folder first.
 - ✅ `CraftingStationTweakz` — done. Hit and fixed the item 2 README-clobbering bug (see above)
   and the item 9 stale-`plugins\`-contents bug; both callouts added to the checklist from this.
+- ✅ `PavedRoadNoLevel` — done. Hit the item 2 README-clobbering bug (same fix) and the item 9
+  stale-`plugins\`-contents bug (`Package\plugins\` had leftover `.dll.mdb`/`.pdb` from old
+  builds), fixed the same way as `CraftingStationTweakz`. Also backported the item 9 fix to
+  `UpgradeAntlerPickaxe\publish.ps1` itself, since inspecting it for this rollout showed it never
+  got that fix even though it's the reference implementation.
 - ⬜ All other mods in this monorepo — not started.

@@ -105,6 +105,12 @@ if($Target.Equals("Release")) {
     Write-Host "Version check passed: $pluginVersion matches manifest.json and has a CHANGELOG.md entry."
 
     Write-Host "$PackagePath\$TargetAssembly"
+    # Recreate plugins\ from scratch instead of New-Item -Force on an existing folder: it's
+    # gitignored so nothing else ever cleans it, and a stale .pdb/.dll.mdb from an old build
+    # would silently get zipped in via the allowlist's plugins entry below.
+    if (Test-Path -Path "$PackagePath\plugins") {
+        Remove-Item -Path "$PackagePath\plugins" -Recurse -Force
+    }
     New-Item -Type Directory -Path "$PackagePath\plugins" -Force
     Copy-Item -Path "$TargetPath\$TargetAssembly" -Destination "$PackagePath\plugins\$TargetAssembly" -Force
     # Package\README.md is the source of truth (maintained directly) — it is NOT copied over
