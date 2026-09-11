@@ -107,7 +107,9 @@ if($Target.Equals("Release")) {
     Write-Host "$PackagePath\$TargetAssembly"
     New-Item -Type Directory -Path "$PackagePath\plugins" -Force
     Copy-Item -Path "$TargetPath\$TargetAssembly" -Destination "$PackagePath\plugins\$TargetAssembly" -Force
-    Copy-Item -Path ".\README.md" -Destination "$PackagePath\README.md" -Force
+    # Package\README.md is the source of truth (maintained directly) — it is NOT copied over
+    # from the root README.MD, which is the fuller GitHub-facing doc and may include content
+    # (e.g. an inline changelog) not meant for the Thunderstore package page.
 
     # Zip lands inside Package itself, ready for upload. Package explicitly the files a
     # Thunderstore upload needs (an allowlist), rather than zipping everything in the folder

@@ -61,7 +61,8 @@ if($Target.Equals("Release")) {
 
     New-Item -Type Directory -Path "$PackagePath\plugins" -Force
     Copy-Item -Path "$TargetPath\$TargetAssembly" -Destination "$PackagePath\plugins\$TargetAssembly" -Force
-    Copy-Item -Path ".\README.md" -Destination "$PackagePath\README.md" -Force
+    # Package\README.md is the source of truth (maintained directly) — never copied over from
+    # a root-level README (see checklist item 2).
 
     $itemsToPackage = @(
         "$PackagePath\manifest.json",
@@ -86,8 +87,21 @@ copy-pasting the script wholesale:
 1. **Locate the actual publish/package script.** Path varies — check the mod's `.csproj`
    post-build `<Exec>` command for the real script path (e.g. `CraftingStationTweakz` calls
    `scripts/publish.ps1`, not a root-level `publish.ps1` like `UpgradeAntlerPickaxe`).
-2. **Check for the same "README copied from the wrong folder" bug** before assuming it exists —
-   don't blind-fix something that isn't broken there.
+2. **`Package\README.md` is the source of truth for every mod — it must never be overwritten
+   from a root-level README by the Release build.** Don't just check that the copy's source
+   *path* resolves; check whether the script copies over `Package\README.md` at all. In
+   `CraftingStationTweakz` the root-level `README.md` was the *unfilled JotunnModStub template*
+   (empty `## Features`/`## Changelog` headers, no real content), silently clobbering the real,
+   maintained `Package\README.md` on every Release build. In `UpgradeAntlerPickaxe` the root
+   `README.MD` was actually a fuller, actively-maintained doc (it even had extra content —
+   an inline changelog — `Package\README.md` lacked) and still overwrote `Package\README.md`
+   each build; fixed the same way even though the root content there was good, since the
+   direction of the copy was still wrong per this rule. In both mods the fix was the same:
+   remove the `Copy-Item ... -Destination "$PackagePath\README.md"` line entirely and leave
+   `Package\README.md`'s existing content untouched — don't backfill content from the root file
+   into it as part of this fix (a separate, deliberate content decision if wanted later). The
+   root-level README file itself is left alone in both cases (not deleted, not filled in) as a
+   separate follow-up.
 3. **Point the zip's `-DestinationPath` at that mod's own `Package\` folder**, not `bin\Release`.
 4. **Build the zip from an explicit allowlist** of that mod's actual `Package\` files — inspect
    what's really in `Package\` for that mod first; don't assume the same file set as
@@ -104,7 +118,16 @@ copy-pasting the script wholesale:
    check assumes `$ProjectPath\$name.cs` defines `PluginVersion = "..."` — confirm that mod's
    main file actually matches its assembly name before reusing the check as-is) and to its
    `CHANGELOG.md` heading format if different from `### X.Y.Z`.
+9. **Recreate `plugins\` from scratch before copying the DLL into it**, don't just
+   `New-Item -Force` an existing folder. It's gitignored (per item 5's pattern), so nothing else
+   ever cleans it — `CraftingStationTweakz\Package\plugins\` had accumulated stale
+   `.pdb`/`.dll.mdb` files from old builds, which the allowlist's `plugins` entry would have
+   silently zipped in alongside the current `.dll`.
 
 ## Status
-- ✅ `UpgradeAntlerPickaxe` — done.
+- ✅ `UpgradeAntlerPickaxe` — done. Also removed its root `README.MD`→`Package\README.md` copy
+  per item 2, so `Package\README.md` is the source of truth there too; root README content
+  left as-is (its extra inline changelog section was not backfilled into `Package\README.md`).
+- ✅ `CraftingStationTweakz` — done. Hit and fixed the item 2 README-clobbering bug (see above)
+  and the item 9 stale-`plugins\`-contents bug; both callouts added to the checklist from this.
 - ⬜ All other mods in this monorepo — not started.
