@@ -1,5 +1,5 @@
-### 0.0.2
-- Added a description to the manifest (duh!)
+### 1.0.0
+- Updated for Deep North release
 
 ### 0.0.1
 - Test release

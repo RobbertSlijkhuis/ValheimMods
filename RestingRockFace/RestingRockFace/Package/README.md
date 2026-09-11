@@ -10,5 +10,6 @@ A simple mod that allows you to set a specific face to your Rockies! Building a 
 - Add some more faces like angry, curious, baffled etc.
 - Add different models so we can have Flinty, Marbly, Grausty, Woody, Barky as well!
 
-## Bug/Suggestion
-Found a bug or have some suggestions? Join my discord: https://discord.gg/FBtWqxhP2F, choose the modding role and leave a post or bug report!
+## Bugs & Suggestions
+Found a bug or have a suggestion? Join my Discord: https://discord.gg/FBtWqxhP2F
+Select the modding role and post your feedback or bug report there!
