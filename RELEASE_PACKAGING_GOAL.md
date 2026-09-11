@@ -146,4 +146,14 @@ copy-pasting the script wholesale:
   `version_number` (`0.0.1`) doesn't match the code's `PluginVersion` (`1.0.0`), and
   `CHANGELOG.md` has no `1.0.0` entry — so the new version check will make the *next* Release
   build fail until the mod owner updates those files themselves.
+- ✅ `PlantCart` — done. Script lives at `scripts\publish.ps1` (like `CraftingStationTweakz`,
+  not a root-level `publish.ps1`). Hit and fixed the item 2 README-clobbering bug (`Package\README.md`
+  was being overwritten from the project-root `README.md`, which is the unfilled JotunnModStub
+  template) and the item 9 stale-`plugins\`-contents risk (previously a plain `New-Item -Force`
+  without clearing the folder first). Also normalized a pre-existing git-tracking quirk not
+  covered by the standard checklist: `Package\CHANGELOG.md` and `Package\icon.xcf` were tracked
+  under a lowercase `package/` path while the rest of the folder (`README.md`, `icon.png`,
+  `manifest.json`) was tracked under capital `Package/` — harmless on case-insensitive Windows
+  but a correctness risk on a case-sensitive checkout, so both files were `git mv`'d onto the
+  capital-`Package` path.
 - ⬜ All other mods in this monorepo — not started.

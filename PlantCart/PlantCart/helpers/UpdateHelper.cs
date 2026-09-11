@@ -29,22 +29,68 @@ namespace PlantCart.Helpers
 
         public static void UpdateTrader(UpdateTraderOptions options)
         {
-            GameObject currentPrefab = ZNetScene.instance.m_prefabs.Find(item => item.name == PlantCart.currentTrader);
-            Trader currentTrader = currentPrefab.GetComponent<Trader>();
-            Trader.TradeItem currentItem = currentTrader.m_items.Find(item => item.m_prefab == PlantCart.Instance.prefabs.Plow.GetComponent<ItemDrop>());
+            string oldTraderName = PlantCart.currentTrader;
+            bool traderChanged = options.trader != null && options.trader != oldTraderName;
+            string newTraderName = traderChanged ? options.trader : oldTraderName;
 
-            if (currentItem != null)
-                currentTrader.m_items.Remove(currentItem);
+            // Permanent prefab templates - governs any trader instantiated from now on
+            GameObject oldPrefab = ZNetScene.instance.m_prefabs.Find(item => item.name == oldTraderName);
+            Trader oldPrefabTrader = oldPrefab.GetComponent<Trader>();
+            RemoveTradeItem(oldPrefabTrader);
 
-            if (options.trader != null && options.trader != PlantCart.currentTrader)
+            Trader newPrefabTrader = oldPrefabTrader;
+            if (traderChanged)
             {
-                GameObject newprefab = ZNetScene.instance.m_prefabs.Find(item => item.name == options.trader);
-                Trader newTrader = newprefab.GetComponent<Trader>();
-                newTrader.m_items.Add(CreateNewTradeItem());
-                PlantCart.currentTrader = options.trader;
+                GameObject newPrefab = ZNetScene.instance.m_prefabs.Find(item => item.name == newTraderName);
+                newPrefabTrader = newPrefab.GetComponent<Trader>();
             }
-            else
-                currentTrader.m_items.Add(CreateNewTradeItem());
+            AddTradeItem(newPrefabTrader);
+
+            // Already-instantiated live NPC(s) in the currently loaded scene, if any
+            Trader oldLiveTrader = FindLiveTrader(oldTraderName);
+            RemoveTradeItem(oldLiveTrader);
+
+            Trader newLiveTrader = traderChanged ? FindLiveTrader(newTraderName) : oldLiveTrader;
+            AddTradeItem(newLiveTrader);
+
+            if (traderChanged)
+                PlantCart.currentTrader = newTraderName;
+        }
+
+        private static Trader FindLiveTrader(string prefabName)
+        {
+            if (prefabName == null)
+                return null;
+
+            int prefabHash = prefabName.GetStableHashCode();
+            Trader[] liveTraders = UnityEngine.Object.FindObjectsByType<Trader>(
+                FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+
+            foreach (Trader trader in liveTraders)
+            {
+                ZDO zdo = trader.GetComponent<ZNetView>()?.GetZDO();
+                if (zdo != null && zdo.GetPrefab() == prefabHash)
+                    return trader;
+            }
+            return null;
+        }
+
+        private static Trader.TradeItem FindTradeItem(Trader trader)
+        {
+            return trader?.m_items.Find(item => item.m_prefab == PlantCart.Instance.prefabs.Plow.GetComponent<ItemDrop>());
+        }
+
+        private static void RemoveTradeItem(Trader trader)
+        {
+            Trader.TradeItem existing = FindTradeItem(trader);
+            if (existing != null)
+                trader.m_items.Remove(existing);
+        }
+
+        private static void AddTradeItem(Trader trader)
+        {
+            if (trader != null)
+                trader.m_items.Add(CreateNewTradeItem());
         }
 
         public static Trader.TradeItem CreateNewTradeItem()
@@ -54,6 +100,7 @@ namespace PlantCart.Helpers
             item.m_price = PluginConfig.rustedPlow.cost.Value;
             item.m_requiredGlobalKey = PluginConfig.rustedPlow.requiredGlobalKey.Value;
             item.m_stack = PluginConfig.rustedPlow.stack.Value;
+            item.m_tooltip = string.Empty; // StoreGui.FillList() reads m_tooltip.Length with no null-guard; "new TradeItem()" leaves it null (Unity-deserialized vanilla entries default to "")
 
             return item;
         }

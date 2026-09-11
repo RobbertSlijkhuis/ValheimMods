@@ -1,7 +1,7 @@
 {
   "name": "PlantCart",
   "description": "A mod that lets you plant crops using a cart! Load it with seeds or crops, and it will automatically plant them in cultivated soil as you move.",
-  "version_number": "0.0.1",
-  "dependencies": [ "ValheimModding-Jotunn-2.29.0" ],
+  "version_number": "1.0.0",
+  "dependencies": [ "ValheimModding-Jotunn-2.30.0" ],
   "website_url": ""
 }

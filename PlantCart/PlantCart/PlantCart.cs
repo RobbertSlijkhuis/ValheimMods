@@ -16,7 +16,7 @@ namespace PlantCart
     {
         public const string PluginGUID = "DeathWizsh.PlantCart";
         public const string PluginName = "PlantCart";
-        public const string PluginVersion = "0.0.1";
+        public const string PluginVersion = "1.0.0";
         public static PlantCart Instance;
 
         private AssetBundle assetBundle;
