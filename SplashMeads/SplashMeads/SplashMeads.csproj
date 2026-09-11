@@ -38,9 +38,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="DeathWizshAPI">
-      <HintPath>..\..\DeathWizshAPI\DeathWizshAPI\bin\Debug\net48\DeathWizshAPI.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -57,10 +54,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.43">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="JotunnLib" Version="2.26.1" />
   </ItemGroup>
 
@@ -100,14 +93,6 @@
 
   <Target Name="JotunnPostBuildTask" AfterTargets="Build">
     <CallTarget Targets="CopyToUnity" Condition="Exists('$(UNITY_FOLDER)')" />
-  </Target>
-
-  <Target Name="ILRepacker" AfterTargets="Build">
-      <ItemGroup>
-          <InputAssemblies Include="$(TargetPath)" />
-          <InputAssemblies Include="$(OutputPath)DeathWizshAPI.dll" />
-      </ItemGroup>
-      <ILRepack Parallel="true" DebugInfo="true" Internalize="true" InputAssemblies="@(InputAssemblies)" OutputFile="$(TargetPath)" TargetKind="SameAsPrimaryAssembly" LibraryPath="$(OutputPath)" />
   </Target>
 
   <Target Name="JotunnPostBuildTaskWin" AfterTargets="Build" Condition=" '$(OS)' == 'Windows_NT' ">
