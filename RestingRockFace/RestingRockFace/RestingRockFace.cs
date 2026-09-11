@@ -16,7 +16,7 @@ namespace RestingRockFace
     {
         public const string PluginGUID = "DeathWizsh.RestingRockFace";
         public const string PluginName = "RestingRockFace";
-        public const string PluginVersion = "0.0.1";
+        public const string PluginVersion = "1.0.0";
         public static RestingRockFace Instance;
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
 
