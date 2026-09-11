@@ -137,4 +137,13 @@ copy-pasting the script wholesale:
   builds), fixed the same way as `CraftingStationTweakz`. Also backported the item 9 fix to
   `UpgradeAntlerPickaxe\publish.ps1` itself, since inspecting it for this rollout showed it never
   got that fix even though it's the reference implementation.
+- ✅ `RestingRockFace` — done. Script lives at `scripts\publish.ps1` (like
+  `CraftingStationTweakz`, not a root-level `publish.ps1`). Hit and fixed the item 2
+  README-clobbering bug (`Package\README.md` was being overwritten from the project-root
+  `README.md`, which is the unfilled JotunnModStub template) and the item 9
+  stale-`plugins\`-contents bug (`Package\plugins\` had leftover `.dll.mdb`/`.pdb` from an old
+  build). **Known pre-existing gap left unfixed, by explicit user choice**: `manifest.json`
+  `version_number` (`0.0.1`) doesn't match the code's `PluginVersion` (`1.0.0`), and
+  `CHANGELOG.md` has no `1.0.0` entry — so the new version check will make the *next* Release
+  build fail until the mod owner updates those files themselves.
 - ⬜ All other mods in this monorepo — not started.
