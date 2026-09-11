@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PavedRoadNoLevel.Configs;
+using System;
 using UnityEngine;
 
 namespace PavedRoadNoLevel.Helpers
@@ -29,7 +30,7 @@ namespace PavedRoadNoLevel.Helpers
                 throw new Exception("Could not find piece componenent");
 
             piece.m_allowAltGroundPlacement = value;
-            piece.m_craftingStation = PavedRoadNoLevel.Instance.configRequireStoncutter.Value ? PavedRoadNoLevel.Instance.stonecutterPiece : null;
+            piece.m_craftingStation = PluginConfig.configRequireStoncutter.Value ? PavedRoadNoLevel.Instance.stonecutterPiece : null;
         }
     }
 }
