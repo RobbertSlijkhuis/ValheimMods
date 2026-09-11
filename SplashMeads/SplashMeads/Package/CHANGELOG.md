@@ -1,3 +1,6 @@
+### 1.0.5
+- Updated for Deep North release
+
 ### 1.0.4
 - Fixed an error that broke hud icons in Call To Arms update
 
