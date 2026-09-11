@@ -81,6 +81,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="configs\PluginConfig.cs" />
     <Compile Include="Helpers\RecipeHelper.cs" />
     <Compile Include="Properties\IgnoreAccessModifiers.cs" />
     <Compile Include="LegendaryWeapons.cs" />

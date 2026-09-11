@@ -21,9 +21,6 @@ namespace UpgradeAntlerPickaxe
         public static string configFileName = PluginGUID + ".cfg";
         public static string configFileFullPath = BepInEx.Paths.ConfigPath + Path.DirectorySeparatorChar.ToString() + configFileName;
 
-        /**
-         * Called when the mod is being initialised
-         */
         public void Awake()
         {
             try
@@ -43,9 +40,6 @@ namespace UpgradeAntlerPickaxe
             }
         }
 
-        /**
-         * Update the stats of the Antler Pickaxe
-         */
         public void PatchStats()
         {
             try
@@ -62,9 +56,6 @@ namespace UpgradeAntlerPickaxe
             }
         }
 
-        /**
-         * Undo any changes made to the Antler Pickaxe
-         */
         public void UnpatchStats()
         {
             try
@@ -79,9 +70,6 @@ namespace UpgradeAntlerPickaxe
             }
         }
 
-        /**
-         * Update the stats of an item
-         */
         private void UpdateItemStats(ItemDrop item, bool unpatch = false)
         {
             if (unpatch)
@@ -98,9 +86,6 @@ namespace UpgradeAntlerPickaxe
             item.m_itemData.m_shared.m_durabilityPerLevel = 50;
         }
 
-        /**
-         * Get the original (vanilla) recipe for the Antler Pickaxe
-         */
         private Recipe GetOriginalRecipe()
         {
             GameObject antlerPickaxeObject = PrefabManager.Instance.GetPrefab("PickaxeAntler");
@@ -108,10 +93,6 @@ namespace UpgradeAntlerPickaxe
             return ObjectDB.instance.GetRecipe(antlerPickaxe.m_itemData);
         }
 
-        /**
-         * Apply the crafting station, requirements and min level to the original Antler Pickaxe recipe.
-         * Runs on every ObjectDB registration (every world load), since Valheim resets the recipe list on each load.
-         */
         private void PatchOriginalRecipe()
         {
             PatchRecipe(RecipeUpdateType.Recipe);
@@ -119,9 +100,6 @@ namespace UpgradeAntlerPickaxe
             PatchRecipe(RecipeUpdateType.MinRequiredLevel);
         }
 
-        /**
-         * Update recipe related fields when the config changes
-         */
         public void PatchRecipe(RecipeUpdateType updateType = RecipeUpdateType.Recipe)
         {
             try
