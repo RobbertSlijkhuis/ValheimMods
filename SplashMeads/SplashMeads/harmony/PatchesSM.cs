@@ -499,6 +499,9 @@ namespace SplashMeads.Harmony
 
         private static IconPosition UpdateHudIcon(Character character, RectTransform icon, int splashHash, IconPosition iconPos)
         {
+            if (icon == null)
+                return iconPos;
+
             if (!PluginConfig.showHudIcons.Value)
             {
                 icon.gameObject.SetActive(false);
