@@ -1,0 +1,7 @@
+{
+  "name": "RemoveAshlandsHeatHaze",
+  "description": "Removes the screen-wide heat-distortion VFX shown during Ashlands weather.",
+  "version_number": "0.0.1",
+  "website_url": "",
+  "dependencies": ["ValheimModding-Jotunn-2.30.0"]
+}
