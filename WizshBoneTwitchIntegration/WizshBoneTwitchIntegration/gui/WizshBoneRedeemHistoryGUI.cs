@@ -5,6 +5,7 @@ using TwitchSDK;
 using TwitchSDK.Interop;
 using UnityEngine;
 using UnityEngine.UI;
+using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Gui
@@ -21,8 +22,8 @@ namespace WizshBoneTwitchIntegration.Gui
         private Text m_pageLabel;
         private Button m_prevButton;
         private Button m_nextButton;
-        private bool m_hideTestRedeems = false;
-        private Button m_filterButton;
+        private Button m_completeAllButton;
+        private Button m_refundAllButton;
         private string m_searchText = "";
         private Action m_onClose;
         private bool m_blockingInput = false;
@@ -196,7 +197,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 height: 60f
             );
             completeAllBtn.SetActive(true);
-            completeAllBtn.GetComponent<Button>().onClick.AddListener(OnCompleteAll);
+            m_completeAllButton = completeAllBtn.GetComponent<Button>();
+            m_completeAllButton.onClick.AddListener(OnCompleteAll);
 
             GameObject refundAllBtn = GUIManager.Instance.CreateButton(
                 text: "Refund All",
@@ -208,27 +210,15 @@ namespace WizshBoneTwitchIntegration.Gui
                 height: 60f
             );
             refundAllBtn.SetActive(true);
-            refundAllBtn.GetComponent<Button>().onClick.AddListener(OnRefundAll);
-
-            GameObject filterButtonObj = GUIManager.Instance.CreateButton(
-                text: "Test Redeems: ON",
-                parent: m_panel.transform,
-                anchorMin: new Vector2(0.5f, 0f),
-                anchorMax: new Vector2(0.5f, 0f),
-                position: new Vector2(100f, 45f),
-                width: 200f,
-                height: 60f
-            );
-            filterButtonObj.SetActive(true);
-            m_filterButton = filterButtonObj.GetComponent<Button>();
-            m_filterButton.onClick.AddListener(ToggleTestFilter);
+            m_refundAllButton = refundAllBtn.GetComponent<Button>();
+            m_refundAllButton.onClick.AddListener(OnRefundAll);
 
             GameObject closeButton = GUIManager.Instance.CreateButton(
                 text: "Close",
                 parent: m_panel.transform,
                 anchorMin: new Vector2(0.5f, 0f),
                 anchorMax: new Vector2(0.5f, 0f),
-                position: new Vector2(290f, 45f),
+                position: new Vector2(100f, 45f),
                 width: 120f,
                 height: 60f
             );
@@ -259,14 +249,22 @@ namespace WizshBoneTwitchIntegration.Gui
             int totalPages = Mathf.Max(1, Mathf.CeilToInt((float)history.Count / m_pageSize));
             m_currentPage = Mathf.Clamp(m_currentPage, 0, totalPages - 1);
 
+            bool bulkRunning = m_customRewards.m_bulkResolveHelper.IsRunning;
+
             if (m_pageLabel != null)
-                m_pageLabel.text = $"Page {m_currentPage + 1} / {totalPages}";
+                m_pageLabel.text = bulkRunning ? BuildBulkProgressText() : $"Page {m_currentPage + 1} / {totalPages}";
 
             if (m_prevButton != null)
                 m_prevButton.interactable = m_currentPage > 0;
 
             if (m_nextButton != null)
                 m_nextButton.interactable = m_currentPage < totalPages - 1;
+
+            if (m_completeAllButton != null)
+                m_completeAllButton.interactable = !bulkRunning;
+
+            if (m_refundAllButton != null)
+                m_refundAllButton.interactable = !bulkRunning;
 
             if (history.Count == 0)
             {
@@ -383,34 +381,65 @@ namespace WizshBoneTwitchIntegration.Gui
             RefreshPage();
         }
 
-        private void OnCompleteAll()
-        {
-            List<CustomRewardEvent> history = GetVisiblePageHistory();
-            foreach (CustomRewardEvent entry in history)
-            {
-                if (entry.Status == CustomRewardRedemptionState.Fulfilled || entry.Status == CustomRewardRedemptionState.Canceled)
-                    continue;
+        private void OnCompleteAll() => StartBulkResolve(CustomRewardRedemptionState.Fulfilled);
 
-                entry.Status = CustomRewardRedemptionState.Fulfilled;
-                Twitch.API.ResolveCustomReward(entry, CustomRewardRedemptionState.Fulfilled);
-            }
+        private void OnRefundAll() => StartBulkResolve(CustomRewardRedemptionState.Canceled);
+
+        /// <summary>
+        /// Restored to operate on GetFilteredHistory() (every page of the current search filter),
+        /// matching pre-d51804d3 behavior - not GetVisiblePageHistory(), which only scoped this
+        /// to the current pagination window. The resolve calls themselves are spread across time
+        /// via BulkRedeemResolveHelper instead of firing all at once, to avoid the lag a large
+        /// synchronous batch of native Twitch SDK calls can cause.
+        /// </summary>
+        private void StartBulkResolve(CustomRewardRedemptionState targetState)
+        {
+            List<CustomRewardEvent> eligible = GetFilteredHistory().FindAll(BulkRedeemResolveHelper.IsEligible);
+
+            m_customRewards.m_bulkResolveHelper.EnqueueAll(
+                host: m_customRewards,
+                entries: eligible,
+                targetState: targetState,
+                onProgress: OnBulkResolveProgress,
+                onFinished: OnBulkResolveFinished
+            );
+
+            // Immediately reflects the disabled buttons / initial progress text, even before the
+            // first WaitForSecondsRealtime tick fires. If eligible is empty, this is a harmless
+            // no-op refresh.
+            RefreshPage();
+        }
+
+        private void OnBulkResolveProgress()
+        {
+            // Cheap label-only update - do NOT call the full RefreshPage() here. RefreshPage()
+            // tears down and rebuilds every row GameObject under m_contentRoot; doing that
+            // several times a second for the whole run would be wasteful and would flicker the
+            // row buttons for no reason. Per-row state catches up once, in OnBulkResolveFinished.
+            // Also guards against the panel having been closed - the queue keeps draining on
+            // m_customRewards in the background regardless.
+            if (m_panel == null || !m_panel.activeSelf || m_pageLabel == null)
+                return;
+
+            m_pageLabel.text = BuildBulkProgressText();
+        }
+
+        private void OnBulkResolveFinished()
+        {
+            // Full RefreshPage() reconciles everything at once: restores "Page X / Y", re-enables
+            // Complete All/Refund All, and refreshes every row's status color / button
+            // interactable state to match what the queue actually resolved.
+            if (m_panel == null || !m_panel.activeSelf)
+                return;
 
             RefreshPage();
         }
 
-        private void OnRefundAll()
+        private string BuildBulkProgressText()
         {
-            List<CustomRewardEvent> history = GetVisiblePageHistory();
-            foreach (CustomRewardEvent entry in history)
-            {
-                if (entry.Status == CustomRewardRedemptionState.Fulfilled || entry.Status == CustomRewardRedemptionState.Canceled)
-                    continue;
-
-                entry.Status = CustomRewardRedemptionState.Canceled;
-                Twitch.API.ResolveCustomReward(entry, CustomRewardRedemptionState.Canceled);
-            }
-
-            RefreshPage();
+            BulkRedeemResolveHelper resolver = m_customRewards.m_bulkResolveHelper;
+            string verb = resolver.TargetState == CustomRewardRedemptionState.Fulfilled ? "Completing" : "Refunding";
+            return $"{verb} {resolver.Completed}/{resolver.Total}...";
         }
 
         private void PrevPage()
@@ -425,16 +454,6 @@ namespace WizshBoneTwitchIntegration.Gui
             RefreshPage();
         }
 
-        private void ToggleTestFilter()
-        {
-            m_hideTestRedeems = !m_hideTestRedeems;
-            m_filterButton.GetComponentInChildren<Text>().text = m_hideTestRedeems
-                ? "Test Redeems: OFF"
-                : "Test Redeems: ON";
-            m_currentPage = 0;
-            RefreshPage();
-        }
-
         private List<CustomRewardEvent> GetFilteredHistory()
         {
             List<CustomRewardEvent> history = m_customRewards.m_redeemHistory;
@@ -442,9 +461,6 @@ namespace WizshBoneTwitchIntegration.Gui
 
             foreach (CustomRewardEvent entry in history)
             {
-                if (m_hideTestRedeems && entry.RedemptionId == Guid.Empty.ToString())
-                    continue;
-
                 if (!string.IsNullOrEmpty(m_searchText))
                 {
                     bool matchesName   = entry.RedeemerName.IndexOf(m_searchText, StringComparison.OrdinalIgnoreCase) >= 0;
@@ -462,9 +478,9 @@ namespace WizshBoneTwitchIntegration.Gui
 
         /// <summary>
         /// The subset of <see cref="GetFilteredHistory"/> actually rendered on the current page -
-        /// i.e. the filtered history sliced to the current pagination window. "Complete All" /
-        /// "Refund All" operate on this rather than the full filtered list, so they only affect
-        /// what's visible on screen.
+        /// i.e. the filtered history sliced to the current pagination window. Used only for
+        /// rendering rows in <see cref="RefreshPage"/> - "Complete All"/"Refund All" operate on
+        /// the full <see cref="GetFilteredHistory"/> list instead, via <see cref="StartBulkResolve"/>.
         /// </summary>
         private List<CustomRewardEvent> GetVisiblePageHistory()
         {

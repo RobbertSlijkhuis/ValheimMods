@@ -28,6 +28,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public readonly List<CustomRewardEvent> m_redeemHistory = new List<CustomRewardEvent>();
         private const int m_redeemHistoryMaxSize = 500;
 
+        public readonly BulkRedeemResolveHelper m_bulkResolveHelper = new BulkRedeemResolveHelper();
+
         public void Awake()
         {
             try
