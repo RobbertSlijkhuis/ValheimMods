@@ -1,5 +1,8 @@
 ﻿using HarmonyLib;
 using System;
+using System.Collections.Generic;
+using System.Reflection;
+using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.TwitchIntegration;
@@ -9,6 +12,58 @@ namespace WizshBoneTwitchIntegration.Harmony
     [HarmonyPatch]
     public class MiscPatchesWBTI
     {
+        private static readonly FieldInfo s_instancesField = AccessTools.Field(typeof(ZNetScene), "m_instances");
+        private static float s_nextStaleInstanceScanTime;
+        private const float StaleInstanceScanInterval = 1f;
+
+        // Defensive + diagnostic. ZNetScene.RemoveObjects() NREs (UnityEngine.Component.get_gameObject(),
+        // called on m_instances.Values) whenever m_instances still holds a ZNetView whose GameObject was
+        // already destroyed through a path that skipped ZNetScene.Destroy()'s own m_instances.Remove()
+        // step - once that happens it repeats every tick forever (~30/s), since the exception aborts
+        // before vanilla ever reaches its own cleanup. Root cause not yet confirmed (traced through
+        // several destroy paths without finding the exact one); sanitize any such stale entries before
+        // vanilla iterates them, and log which prefab it was so a recurrence can be traced to its source
+        // instead of just crashing on every subsequent tick. Throttled - this walks the entire tracked-
+        // object dictionary, which isn't free to do unconditionally 30x/second on top of vanilla's own
+        // per-tick reconciliation.
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(ZNetScene), "RemoveObjects")]
+        public static void RemoveObjects_Prefix(ZNetScene __instance)
+        {
+            try
+            {
+                if (Time.time < s_nextStaleInstanceScanTime || s_instancesField == null)
+                    return;
+
+                s_nextStaleInstanceScanTime = Time.time + StaleInstanceScanInterval;
+
+                if (!(s_instancesField.GetValue(__instance) is Dictionary<ZDO, ZNetView> instances) || instances.Count == 0)
+                    return;
+
+                List<ZDO> stale = null;
+
+                foreach (KeyValuePair<ZDO, ZNetView> entry in instances)
+                {
+                    if (entry.Value == null)
+                        (stale ??= new List<ZDO>()).Add(entry.Key);
+                }
+
+                if (stale == null)
+                    return;
+
+                foreach (ZDO zdo in stale)
+                {
+                    GameObject prefab = __instance.GetPrefab(zdo.GetPrefab());
+                    Jotunn.Logger.LogWarning($"[WBTI] Found a destroyed ZNetView still tracked by ZNetScene (prefab: {(prefab != null ? prefab.name : zdo.GetPrefab().ToString())}) - removing it to prevent a NullReferenceException in ZNetScene.RemoveObjects.");
+                    instances.Remove(zdo);
+                }
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("RemoveObjects_Prefix failed: " + e);
+            }
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(ZoneSystem), "GlobalKeyAdd")]
         public static void GlobalKeyAdd_Postfix(ref ZoneSystem __instance, string keyStr, bool canSaveToServerOptionKeys = true)

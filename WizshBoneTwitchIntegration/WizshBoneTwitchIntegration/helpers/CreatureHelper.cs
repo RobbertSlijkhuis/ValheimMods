@@ -162,29 +162,24 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
 
             Vector3 spawnPosition = transform.position;
-            Quaternion spawnRotation = transform.rotation;
 
             string positionType = creatureData.position;
             float positionRadius = creatureData.positionRadius;
 
+            // A monster's configured roam radius doesn't make sense at full size in a cramped
+            // dungeon room - cap it down indoors so retries land in the room more often. This is
+            // tuning, not a safety requirement: TransformHelper's own floor/ceiling/obstruction
+            // checks + fallback-to-player already guarantee a safe result for any radius.
             if (Player.m_localPlayer.InInterior())
-            {
-                // Dungeon ceilings/floors break the open-world ground snapping used by other
-                // position types, so force a (radius-limited) Random spawn near the player.
-                if (positionType != SpawnPositionType.OnPlayer && positionType != SpawnPositionType.Random)
-                    positionType = SpawnPositionType.Random;
+                positionRadius = Mathf.Min(positionRadius, 10f);
 
-                if (positionType == SpawnPositionType.Random)
-                    positionRadius = Mathf.Min(positionRadius, 10f);
-            }
+            spawnPosition = positionType == SpawnPositionType.WorldPosition
+                ? creatureData.positionOffset.ToVector()
+                : TransformHelper.UpdateSpawnLocation(positionType, transform, creatureData.positionOffset, positionRadius);
 
-            if (positionType == SpawnPositionType.WorldPosition)
-                spawnPosition = creatureData.positionOffset.ToVector();
-            else
-            {
-                spawnPosition = TransformHelper.UpdateSpawnLocation(positionType, transform, creatureData.positionOffset, positionRadius);
-                spawnRotation = TransformHelper.UpdateSpawnRotation(positionType, spawnRotation);
-            }
+            Quaternion spawnRotation = creatureData.facePlayer
+                ? TransformHelper.FacePlayer(spawnPosition, transform.rotation)
+                : TransformHelper.RandomFacing();
 
             GameObject creature = ZNetViewHelper.Instantiate(prefab, spawnPosition, spawnRotation);
             MonsterAI monsterAI = creature.GetComponent<MonsterAI>();
@@ -221,7 +216,9 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
 
             monsterAI.StartCoroutine(monsterAI.WakeUpAfterDelay(1f));
-            monsterAI.LookAt(transform.position);
+
+            if (creatureData.facePlayer)
+                monsterAI.LookAt(transform.position);
 
             if (creatureData.announceMessage != null)
                 Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, creatureData.announceMessage), 3000);
@@ -401,7 +398,6 @@ namespace WizshBoneTwitchIntegration.Helpers
             {
                 ValheimCreatureType.Greydwarf_Elite,
                 ValheimCreatureType.Abomination,
-                ValheimCreatureType.Bat,
                 ValheimCreatureType.Bjorn,
                 ValheimCreatureType.BonemawSerpent,
                 ValheimCreatureType.Deathsquito,

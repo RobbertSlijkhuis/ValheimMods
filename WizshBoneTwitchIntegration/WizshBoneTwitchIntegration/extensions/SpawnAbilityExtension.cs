@@ -291,7 +291,7 @@ namespace WizshBoneTwitchIntegration.Extensions
                 {
                     if (!instanceCounts.TryGetValue(prefab, out int existingCount))
                     {
-                        existingCount = SpawnSystem.GetNrOfInstances(prefab);
+                        existingCount = SpawnSystem.GetNrOfInstances(prefab, targetPosition, 0f);
                         instanceCounts[prefab] = existingCount;
                     }
 

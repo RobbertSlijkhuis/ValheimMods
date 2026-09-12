@@ -1,11 +1,17 @@
 using System;
 using System.Reflection;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Components
 {
     internal class TwitchPhysicsFreezeData : MonoBehaviour
     {
+        // A one-shot burst effect (e.g. Detonate's fx_blobLava_explosion) plays out well within
+        // this window - just needs to be long enough that TwitchTimeStopZone's poll can find and
+        // pause it first if the zone is still active.
+        private const float SpawnedFxCleanupDelay = 5f;
+
         private Rigidbody m_rigidbody;
         private Projectile m_projectile;
         private TwitchWindmillPersistentData m_windmillData;
@@ -89,7 +95,20 @@ namespace WizshBoneTwitchIntegration.Components
                     m_aoes[i].enabled = false;
 
                     foreach (GameObject fx in m_aoes[i].m_initiateEffect.Create(m_aoes[i].transform.position, m_aoes[i].transform.rotation))
+                    {
                         fx.transform.SetParent(transform, worldPositionStays: true);
+
+                        // A ZNetView never unregisters itself from ZNetScene's internal tracking on a
+                        // plain OnDestroy() - only ZNetScene.Destroy() does that (confirmed by
+                        // decompiling ZNetView.OnDestroy(), which only releases held references).
+                        // Left as a child here with nothing else destroying it, this fx would
+                        // eventually get swept away by Unity's own destroy cascade whenever this
+                        // (possibly much longer-lived) hazard root is destroyed - which, if fx has its
+                        // own ZNetView (confirmed for fx_blobLava_explosion), leaves a dangling entry
+                        // that NREs ZNetScene.RemoveObjects on every tick forever afterward. Give it an
+                        // explicit destroy on its own short schedule instead of relying on the parent.
+                        ZNetViewHelper.Destroy(fx, SpawnedFxCleanupDelay);
+                    }
 
                     // The real Initiate() still needs to fire normally once unfrozen, to deal the
                     // postponed damage (same as Smite) - but it would also re-run m_initiateEffect.

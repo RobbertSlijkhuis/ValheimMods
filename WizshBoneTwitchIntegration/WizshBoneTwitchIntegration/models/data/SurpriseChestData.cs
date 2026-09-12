@@ -8,11 +8,12 @@ namespace WizshBoneTwitchIntegration.Models
     {
         public int amount = 1;
         public string announceMessage;
+        public bool facePlayer = true;
         public float force = 200f;
         [EditorHidden] public bool interact = true;
         public List<SurpriseChestSpawnData> items = new List<SurpriseChestSpawnData>();
         [EditorHidden] public int mimicChance = 0;
-        [EditorHidden] public string position = SpawnPositionType.InFrontOfPlayer;
+        [EditorHidden] public string position = SpawnPositionType.Random;
         [EditorHidden] public PositionOffsetData positionOffset = new PositionOffsetData();
         public bool random = true;
         public string redeemTitle;

@@ -95,6 +95,11 @@ namespace WizshBoneTwitchIntegration.Components
             return gameObject.name;
         }
 
+        public float GetHoverOffset()
+        {
+            return 0f;
+        }
+
         public bool Interact(Humanoid user, bool hold, bool alt)
         {
             try

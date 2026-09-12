@@ -156,4 +156,27 @@ copy-pasting the script wholesale:
   `manifest.json`) was tracked under capital `Package/` — harmless on case-insensitive Windows
   but a correctness risk on a case-sensitive checkout, so both files were `git mv`'d onto the
   capital-`Package` path.
+- ✅ `WizshBoneTwitchIntegration` — done. Script is a root-level `publish.ps1` (like
+  `UpgradeAntlerPickaxe`, not the `scripts\publish.ps1` pattern). Unlike every mod fixed so far,
+  its Release branch had none of the guard logic at all *and* was zipping to the wrong place —
+  `Compress-Archive -Path "$PackagePath\*" -DestinationPath "$TargetPath\$TargetAssembly.zip"`
+  zipped everything unfiltered from `Package\` (no allowlist) into `bin\Release\net48\...dll.zip`,
+  not `Package\` itself, with no version in the name; fixed to the standard allowlist/destination/
+  naming per items 3-4. Hit and fixed the item 2 README-clobbering bug (`Package\README.md` was
+  being overwritten from the project-root `README.md`, the unfilled JotunnModStub template — note
+  both files were already byte-identical, so the fix freezes the placeholder text rather than
+  restoring real content) and applied the item 9 preventive `plugins\` recreate-from-scratch fix
+  (no stale contents existed yet, but applied per the established pattern). Also added copying the
+  vendored native `TwitchSDK\x86_64\R66_core.dll` into `Package\plugins\` — this mod's Release
+  package previously shipped without it even though the Debug deploy path already copied it; the
+  plugin throws `DllNotFoundException: R66_core` at runtime without it. Stripped a pre-existing
+  UTF-8 BOM from both `Package\manifest.json` and `Package\README.md` so the new BOM check (and
+  Thunderstore) accept them. Added the missing `*/Package/*.zip` gitignore rule to the **shared
+  root `.gitignore`** rather than a new per-mod file, since this mod has no `.gitignore` of its
+  own and already inherited the existing `*/Package/plugins/*` rule from there.
+  **Known pre-existing gaps left unfixed, by explicit user choice**: `Package\CHANGELOG.md`
+  doesn't exist at all (not even a stub) — the new version check will make the *next* Release
+  build fail until the mod owner creates it with a `0.0.1`-or-current entry, same as the
+  `RestingRockFace` precedent. `Package\manifest.json` also still has placeholder content
+  (`name: "JotunnModStub"`, empty `description`/`website_url`) — left as a separate follow-up.
 - ⬜ All other mods in this monorepo — not started.

@@ -279,9 +279,15 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 {
                     if (Player.m_localPlayer != null)
                         Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft, $"{customRewardEvent.CustomRewardTitle} fullfilled");
-                    
+
                     customRewardEvent.Status = CustomRewardRedemptionState.Fulfilled;
-                    Twitch.API.ResolveCustomReward(customRewardEvent, CustomRewardRedemptionState.Fulfilled);
+
+                    // A test/command-triggered redeem (or any redeem processed before we're
+                    // actually logged in) has no real reward ID behind it - resolving it would
+                    // either be a pointless real API call or, if Twitch.API hasn't been
+                    // initialized yet, throw trying to bootstrap one from scratch.
+                    if (IsLoggedIn)
+                        Twitch.API.ResolveCustomReward(customRewardEvent, CustomRewardRedemptionState.Fulfilled);
                 }
 
                 if (WizshBoneTwitchIntegration.useRedeemCommand)
@@ -307,14 +313,20 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft, $"{customRewardEvent.CustomRewardTitle} canceled");
 
             customRewardEvent.Status = CustomRewardRedemptionState.Canceled;
-            Twitch.API.ResolveCustomReward(customRewardEvent, CustomRewardRedemptionState.Canceled);
+
+            // See the matching guard in HandleRedeem's success path: resolving against the real
+            // Twitch API only makes sense once we're actually logged in - otherwise it's either a
+            // pointless call for a locally-fabricated test event, or throws trying to bootstrap a
+            // Twitch.API instance that has no business existing yet (e.g. a DllNotFoundException
+            // from the native SDK library never having been loaded).
+            if (IsLoggedIn)
+                Twitch.API.ResolveCustomReward(customRewardEvent, CustomRewardRedemptionState.Canceled);
         }
 
         public bool IsPlayerInSafeZone(CustomRewardEvent customRewardEvent, bool ignoreWard = false)
         {
             if (m_playerIsInSafeZone && !ignoreWard)
             {
-                WizshBoneTwitchIntegration.useRedeemCommand = true;
                 m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a Twitch safe zone! {m_refundMessage}");
                 HandleRedeemException(new RedeemException("Player is in safe zone", ExceptionType.Warning), customRewardEvent);
                 return true;

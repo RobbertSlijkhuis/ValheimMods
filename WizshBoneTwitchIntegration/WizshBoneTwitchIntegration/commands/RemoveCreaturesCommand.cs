@@ -2,6 +2,7 @@
 using System;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
+using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Commands
 {
@@ -38,8 +39,7 @@ namespace WizshBoneTwitchIntegration.Commands
                         if (netView == null || !netView.IsValid())
                             continue;
 
-                        netView.Destroy();
-                        GameObject.Destroy(gameObject);
+                        ZNetViewHelper.Destroy(gameObject);
                     }
                 }
             }

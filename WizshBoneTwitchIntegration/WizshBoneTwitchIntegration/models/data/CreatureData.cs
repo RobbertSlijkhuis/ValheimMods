@@ -30,6 +30,7 @@ namespace WizshBoneTwitchIntegration.Models
 
         [CreaturePrefabNameDropdown]
         public string prefabName;
+        public bool facePlayer = false;
         public string position = SpawnPositionType.Random;
         public PositionOffsetData positionOffset = new PositionOffsetData();
         public float positionRadius = 10f;

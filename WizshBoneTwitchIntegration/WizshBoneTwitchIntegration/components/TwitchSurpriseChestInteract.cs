@@ -40,6 +40,11 @@ namespace WizshBoneTwitchIntegration.Components
             return $"Surprise {m_surpriseChest.m_type} Chest";
         }
 
+        public float GetHoverOffset()
+        {
+            return 0f;
+        }
+
         public bool Interact(Humanoid user, bool hold, bool alt)
         {
             try

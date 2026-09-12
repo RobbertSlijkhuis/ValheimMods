@@ -125,7 +125,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void Send(string message, string announce = "")
         {
-            if (WizshBoneTwitchIntegration.useRedeemCommand && writer == null) return;
+            if (writer == null) return;
 
             writer.WriteLine($"PRIVMSG #{m_channel} :{announce} WBTI: {message}");
             writer.Flush();

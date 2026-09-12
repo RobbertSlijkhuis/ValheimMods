@@ -83,7 +83,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
 
             foreach (Heightmap heightmap in heightmaps)
-                heightmap.GetAndCreateTerrainCompiler().DoOperation(pos, settings);
+                heightmap.GetAndCreateTerrainCompiler().DoOperation(pos, Vector3.zero, settings);
         }
 
         private static void ApplyRectangleWall(Vector3 origin, Vector3 forward, TerrainOp.Settings settings, float width, float stepSize)
@@ -151,7 +151,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 }
 
                 comp.Save();
-                heightmap.Poke(delayed: false);
+                heightmap.Poke();
             }
 
             if (ClutterSystem.instance != null)

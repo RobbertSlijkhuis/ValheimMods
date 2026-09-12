@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
 
@@ -39,6 +40,11 @@ namespace WizshBoneTwitchIntegration.Helpers
                 UnityEngine.Object.Destroy(gameObject);
         }
 
+        // BUG (fixed here): this used to unconditionally call netView.Destroy() for anything with
+        // a ZNetView, silently ignoring "delay" entirely - every ZNetView-tracked caller asking
+        // for a delayed destroy actually got destroyed immediately instead. Route the ZNetView
+        // case through a coroutine so the delay is honored for networked objects too, instead of
+        // only ever working for the plain-GameObject fallback below.
         public static void Destroy(GameObject gameObject, float delay)
         {
             if (gameObject == null)
@@ -48,13 +54,28 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             if (netView != null && netView.IsValid())
             {
-                if (!netView.IsOwner())
-                    netView.ClaimOwnership();
+                if (delay <= 0f)
+                {
+                    if (!netView.IsOwner())
+                        netView.ClaimOwnership();
 
-                netView.Destroy();
+                    netView.Destroy();
+                    return;
+                }
+
+                WizshBoneTwitchIntegration.Instance.StartCoroutine(DestroyAfterDelay(gameObject, delay));
             }
             else
                 UnityEngine.Object.Destroy(gameObject, delay);
+        }
+
+        // Re-enters Destroy(GameObject) after the wait rather than duplicating the ownership-claim/
+        // netView.Destroy() logic here - that overload's own null check safely no-ops if the object
+        // was already destroyed by some other path in the meantime.
+        private static IEnumerator DestroyAfterDelay(GameObject gameObject, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            Destroy(gameObject);
         }
     }
 }

@@ -143,7 +143,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             {
                 foreach (GameObject prefab in spawnAbility.m_spawnPrefab)
                 {
-                    if (SpawnSystem.GetNrOfInstances(prefab) + toSpawn > spawnAbilityData.maxSpawned)
+                    if (SpawnSystem.GetNrOfInstances(prefab, spawnAbility.transform.position, 0f) + toSpawn > spawnAbilityData.maxSpawned)
                     {
                         m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, there isn't enough room left for the full spawn amount! {TwitchCustomRewards.m_refundMessage}");
                         throw new RedeemException("Not enough space left for this redeem", ExceptionType.Warning);
