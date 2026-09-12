@@ -20,7 +20,7 @@ WizshBoneTwitchIntegration/
 ├── models/                           # Custom prefabs, materials, sprites, effect lists
 ├── configs/PluginConfig.cs           # BepInEx config entries
 ├── commands/                         # In-game console commands (debug/management)
-├── gui/                              # In-game UI panels
+├── GUI_OLD/                          # Legacy in-game UI panels (F4). Being replaced from scratch; don't add new features here.
 ├── TwitchOAuth/                      # OAuth token management
 ├── TwitchSDK/                        # Wrapper around native TwitchSDK.dll
 └── resources/                        # YAML schemas and redeem definitions

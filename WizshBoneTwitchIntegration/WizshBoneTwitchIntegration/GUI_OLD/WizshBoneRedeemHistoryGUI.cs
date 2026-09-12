@@ -86,7 +86,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         /// <summary>
         /// Deactivates the panel and pops its input block, without invoking <see cref="m_onClose"/>.
-        /// Used by full-teardown paths (F3, other "close everything" buttons) that must not trigger
+        /// Used by full-teardown paths (F4, other "close everything" buttons) that must not trigger
         /// a "return to Settings"-style callback meant only for the panel's own Close button.
         /// </summary>
         public void Hide() => Close(invokeOnClose: false);

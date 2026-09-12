@@ -9,7 +9,7 @@ namespace WizshBoneTwitchIntegration.Gui
     /// <summary>
     /// Landing tab of <see cref="WizshBoneSettingsGUI"/> - Twitch login, and the "Redeems enabled"
     /// / "Chatting enabled" toggles. Ported from the old standalone WizshBoneGUI outer panel, which
-    /// used to sit in front of the Settings panel; F3 now opens Settings directly onto this tab.
+    /// used to sit in front of the Settings panel; F4 now opens Settings directly onto this tab.
     /// </summary>
     internal class HomeTab
     {

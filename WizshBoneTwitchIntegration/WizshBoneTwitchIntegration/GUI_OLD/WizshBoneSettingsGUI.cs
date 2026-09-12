@@ -76,7 +76,7 @@ namespace WizshBoneTwitchIntegration.Gui
         /// <summary>
         /// Closes everything - this panel and, if it's up, the nested history view - without
         /// triggering the history panel's "return to Settings" callback (see
-        /// <see cref="WizshBoneRedeemHistoryGUI.Hide"/>). Used for full teardown (F3, other
+        /// <see cref="WizshBoneRedeemHistoryGUI.Hide"/>). Used for full teardown (F4, other
         /// "close everything" buttons).
         /// </summary>
         public void CloseGUI()

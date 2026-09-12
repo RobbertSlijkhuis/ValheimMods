@@ -33,7 +33,7 @@ namespace WizshBoneTwitchIntegration.Configs
 
         public static void InitGeneralConfig()
         {
-            configWizshBoneWindow = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionKeybinds, "Open WizshBone window", new KeyboardShortcut(KeyCode.F3),
+            configWizshBoneWindow = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionKeybinds, "Open WizshBone window", new KeyboardShortcut(KeyCode.F4),
                 new ConfigDescription("Settings of the WizshBone Twitch Integration", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
 
