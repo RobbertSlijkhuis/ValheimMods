@@ -9,39 +9,39 @@ namespace SplashMeads.Configs
     internal static class PluginConfig
     {
         private static string mead1Name = "Splash Fire Resistance Barley Wine";
-        private static string mead1Recipe = "BarleyWine:6, LeatherScraps:3, Resin:2";
+        private static string mead1Recipe = "BarleyWine:3, LeatherScraps:3, Resin:3";
         public static SplashMeadConfig mead1 = new SplashMeadConfig();
 
         private static string mead2Name = "Splash Frost Resistance Mead";
-        private static string mead2Recipe = "MeadFrostResist:6, LeatherScraps:3, Resin:2";
+        private static string mead2Recipe = "MeadFrostResist:3, LeatherScraps:3, Resin:3";
         public static SplashMeadConfig mead2 = new SplashMeadConfig();
 
         private static string mead3Name = "Splash Poison Resistance Mead";
-        private static string mead3Recipe = "MeadPoisonResist:6, LeatherScraps:3, Resin:2";
+        private static string mead3Recipe = "MeadPoisonResist:3, LeatherScraps:3, Resin:3";
         public static SplashMeadConfig mead3 = new SplashMeadConfig();
 
         private static string mead4Name = "Splash Ratatosk Tonic";
-        private static string mead4Recipe = "MeadHasty:6, LeatherScraps:3, Resin:2";
+        private static string mead4Recipe = "MeadHasty:3, LeatherScraps:3, Resin:3";
         public static SplashMeadConfig mead4 = new SplashMeadConfig();
 
         private static string mead5Name = "Splash Vananidir Mead";
-        private static string mead5Recipe = "MeadSwimmer:6, LeatherScraps:3, Resin:2";
+        private static string mead5Recipe = "MeadSwimmer:3, LeatherScraps:3, Resin:3";
         public static SplashMeadConfig mead5 = new SplashMeadConfig();
 
         private static string mead6Name = "Splash Anti-Sting Mead";
-        private static string mead6Recipe = "MeadBugRepellent:6, LeatherScraps:3, Resin:2";
+        private static string mead6Recipe = "MeadBugRepellent:3, LeatherScraps:3, Resin:3";
         public static SplashMeadConfig mead6 = new SplashMeadConfig();
 
         private static string mead7Name = "Splash Major Health Mead";
-        private static string mead7Recipe = "MeadHealthMajor:6, LeatherScraps:3, Resin:2";
+        private static string mead7Recipe = "MeadHealthMajor:3, LeatherScraps:3, Resin:3";
         public static SplashMeadConfig mead7 = new SplashMeadConfig();
 
         private static string mead8Name = "Splash Medium Health Mead";
-        private static string mead8Recipe = "MeadHealthMedium:6, LeatherScraps:3, Resin:2";
+        private static string mead8Recipe = "MeadHealthMedium:3, LeatherScraps:3, Resin:3";
         public static SplashMeadConfig mead8 = new SplashMeadConfig();
 
         private static string mead9Name = "Splash Minor Health Mead";
-        private static string mead9Recipe = "MeadHealthMinor:6, LeatherScraps:3, Resin:2";
+        private static string mead9Recipe = "MeadHealthMinor:3, LeatherScraps:3, Resin:3";
         public static SplashMeadConfig mead9 = new SplashMeadConfig();
 
         // Other
@@ -126,7 +126,7 @@ namespace SplashMeads.Configs
                     description = "Applies " + mead1Name.Replace("Splash ", "") + " to friendlies hit or in the splash radius",
                     craftingStation = CraftingStationType.Workbench,
                     minStationLevel = 3,
-                    recipeAmount = 2,
+                    recipeAmount = 3,
                 };
                 mead1.GenerateConfig(options);
 
@@ -135,7 +135,7 @@ namespace SplashMeads.Configs
                     description = "Applies " + mead2Name.Replace("Splash ", "") + " to friendlies hit or in the splash radius",
                     craftingStation = CraftingStationType.Workbench,
                     minStationLevel = 3,
-                    recipeAmount = 2,
+                    recipeAmount = 3,
                 };
                 mead2.GenerateConfig(options2);
 
@@ -144,7 +144,7 @@ namespace SplashMeads.Configs
                     description = "Applies " + mead3Name.Replace("Splash ", "") + " to friendlies hit or in the splash radius",
                     craftingStation = CraftingStationType.Workbench,
                     minStationLevel = 3,
-                    recipeAmount = 2,
+                    recipeAmount = 3,
                 };
                 mead3.GenerateConfig(options3);
 
@@ -153,7 +153,7 @@ namespace SplashMeads.Configs
                     description = "Applies " + mead4Name.Replace("Splash ", "") + " to friendlies hit or in the splash radius",
                     craftingStation = CraftingStationType.Workbench,
                     minStationLevel = 3,
-                    recipeAmount = 2,
+                    recipeAmount = 3,
                 };
                 mead4.GenerateConfig(options4);
 
@@ -162,7 +162,7 @@ namespace SplashMeads.Configs
                     description = "Applies " + mead5Name.Replace("Splash ", "") + " to friendlies hit or in the splash radius",
                     craftingStation = CraftingStationType.Workbench,
                     minStationLevel = 3,
-                    recipeAmount = 2,
+                    recipeAmount = 3,
                 };
                 mead5.GenerateConfig(options5);
 
@@ -171,7 +171,7 @@ namespace SplashMeads.Configs
                     description = "Applies " + mead6Name.Replace("Splash ", "") + " to friendlies hit or in the splash radius",
                     craftingStation = CraftingStationType.Workbench,
                     minStationLevel = 3,
-                    recipeAmount = 2,
+                    recipeAmount = 3,
                 };
                 mead6.GenerateConfig(options6);
 
@@ -180,7 +180,7 @@ namespace SplashMeads.Configs
                     description = "Applies " + mead7Name.Replace("Splash ", "") + " to friendlies hit or in the splash radius",
                     craftingStation = CraftingStationType.Workbench,
                     minStationLevel = 3,
-                    recipeAmount = 2,
+                    recipeAmount = 3,
                     duration = 120,
                     isCooldown = true
                 };
@@ -191,7 +191,7 @@ namespace SplashMeads.Configs
                     description = "Applies " + mead8Name.Replace("Splash ", "") + " to friendlies hit or in the splash radius",
                     craftingStation = CraftingStationType.Workbench,
                     minStationLevel = 3,
-                    recipeAmount = 2,
+                    recipeAmount = 3,
                     duration = 120,
                     isCooldown = true
                 };
@@ -202,7 +202,7 @@ namespace SplashMeads.Configs
                     description = "Applies " + mead9Name.Replace("Splash ", "") + " to friendlies hit or in the splash radius",
                     craftingStation = CraftingStationType.Workbench,
                     minStationLevel = 3,
-                    recipeAmount = 2,
+                    recipeAmount = 3,
                     duration = 120,
                     isCooldown = true
                 };

@@ -11,5 +11,5 @@ A simple mod that allows you to set a specific face to your Rockies! Building a 
 - Add different models so we can have Flinty, Marbly, Grausty, Woody, Barky as well!
 
 ## Bugs & Suggestions
-Found a bug or have a suggestion? Join my Discord: https://discord.gg/FBtWqxhP2F
+Found a bug or have a suggestion? Join my Discord: https://discord.gg/FBtWqxhP2F  
 Select the modding role and post your feedback or bug report there!

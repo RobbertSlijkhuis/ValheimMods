@@ -13,5 +13,6 @@ The mod comes with a config, be sure to check wether the config has changed on f
 ## Roadmap
 There are currently no features planned
 
-## Bug/Suggestion
-Found a bug or have some suggestions? You can leave a post or bug report here: https://www.nexusmods.com/valheim/mods/2523/
+## Bugs & Suggestions
+Found a bug or have a suggestion? Join my Discord: https://discord.gg/FBtWqxhP2F  
+Select the modding role and post your feedback or bug report there!

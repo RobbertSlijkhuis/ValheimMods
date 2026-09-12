@@ -15,7 +15,7 @@ These config values apply to **all** crafting stations:
 Nothing planned at the moment, Possibly add crafting station-specific config options in the future by suggestion/feedback
 
 ## Bugs & Suggestions
-Found a bug or have a suggestion? Join my Discord: https://discord.gg/FBtWqxhP2F
+Found a bug or have a suggestion? Join my Discord: https://discord.gg/FBtWqxhP2F  
 Select the modding role and post your feedback or bug report there!
 
 ## Screenshots

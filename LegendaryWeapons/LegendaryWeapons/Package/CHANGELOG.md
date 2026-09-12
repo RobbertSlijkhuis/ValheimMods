@@ -1,7 +1,7 @@
-### 1.1.6
-- Updated to Deep North update, increased Jotunn dependency to 2.30.0
+### 1.1.0
+- Updated for Deep North release
 
-### 1.1.5
+### 1.0.5
 - Updated to Call to Arms update, increased Jotunn dependency to 2.26.1
 
 ### 1.0.4

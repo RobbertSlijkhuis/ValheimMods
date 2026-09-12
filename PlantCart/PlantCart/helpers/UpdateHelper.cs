@@ -101,6 +101,7 @@ namespace PlantCart.Helpers
             item.m_requiredGlobalKey = PluginConfig.rustedPlow.requiredGlobalKey.Value;
             item.m_stack = PluginConfig.rustedPlow.stack.Value;
             item.m_tooltip = string.Empty; // StoreGui.FillList() reads m_tooltip.Length with no null-guard; "new TradeItem()" leaves it null (Unity-deserialized vanilla entries default to "")
+            item.m_buyPlayerEffects = new EffectList(); // StoreGui.BuySelectedItem() calls m_buyPlayerEffects.Create() with no null-guard after a successful purchase; "new TradeItem()" leaves it null (Unity-deserialized vanilla entries default to a real EffectList)
 
             return item;
         }

@@ -28,8 +28,9 @@ The following options are available for each weapon:
 ## Roadmap
 There are currently no features planned
 
-## Bug/Suggestion
-Found a bug or have some suggestions? You can leave a post or bug report here: https://www.nexusmods.com/valheim/mods/2522/
+## Bugs & Suggestions
+Found a bug or have a suggestion? Join my Discord: https://discord.gg/FBtWqxhP2F  
+Select the modding role and post your feedback or bug report there!
 
 ## Screenshots
 ![Hammer_1](https://robhost.nl/img/valheim/Hammer_1.jpg)

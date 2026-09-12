@@ -47,7 +47,7 @@ This mod was commissioned to add the three resistance meads, but more will be ad
 - Currently the splash meads will phase through friendlies, keep that in mind when you throw one. I do not know if this is possible to fix as arrows also go through friendlies and this might be standard behaviour of the game.
 
 ## Bugs & Suggestions
-Found a bug or have a suggestion? Join my Discord: https://discord.gg/FBtWqxhP2F
+Found a bug or have a suggestion? Join my Discord: https://discord.gg/FBtWqxhP2F  
 Select the modding role and post your feedback or bug report there!
 
 ## Screenshots
