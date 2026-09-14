@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     /// <summary>
     /// One selectable entry in a <see cref="SearchableDropdown"/>: <see cref="Value"/> is what

@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using WizshBoneTwitchIntegration.Gui;
+using WizshBoneTwitchIntegration.GuiOld;
 using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.Models

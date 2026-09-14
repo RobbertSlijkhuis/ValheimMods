@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using WizshBoneTwitchIntegration.Types;
-using WizshBoneTwitchIntegration.Gui;
+using WizshBoneTwitchIntegration.GuiOld;
 using System.Reflection;
 using System;
 using System.Collections;

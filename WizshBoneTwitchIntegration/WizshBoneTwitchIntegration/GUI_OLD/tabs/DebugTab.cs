@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Configs;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     /// <summary>
     /// Debug tab of <see cref="WizshBoneSettingsGUI"/> - exposes debug-only toggles and one-off

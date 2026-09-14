@@ -1,6 +1,6 @@
 using System;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     [AttributeUsage(AttributeTargets.Field)]
     internal class OnValueChangedAttribute : Attribute

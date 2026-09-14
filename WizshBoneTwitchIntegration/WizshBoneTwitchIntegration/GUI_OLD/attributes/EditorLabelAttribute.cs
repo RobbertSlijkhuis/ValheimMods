@@ -1,6 +1,6 @@
 using System;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     /// <summary>
     /// Overrides the auto-generated label text for a field in <see cref="ObjectEditor"/>.

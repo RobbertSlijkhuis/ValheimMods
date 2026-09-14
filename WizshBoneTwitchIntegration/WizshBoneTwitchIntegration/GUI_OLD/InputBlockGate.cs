@@ -1,6 +1,6 @@
 using Jotunn.Managers;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     /// <summary>
     /// Reference-counted wrapper around <see cref="GUIManager.BlockInput"/>. Several panels/dialogs

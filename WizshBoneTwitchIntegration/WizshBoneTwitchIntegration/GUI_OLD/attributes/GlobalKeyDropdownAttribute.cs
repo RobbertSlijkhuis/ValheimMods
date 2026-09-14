@@ -1,6 +1,6 @@
 using System;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     /// <summary>
     /// Marks a <see cref="string"/> field as a dropdown populated from the known Valheim global

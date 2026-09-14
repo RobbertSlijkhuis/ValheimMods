@@ -1,6 +1,6 @@
 using System;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     /// <summary>
     /// Marks a field as visible in <see cref="ObjectEditor"/> only when the sibling

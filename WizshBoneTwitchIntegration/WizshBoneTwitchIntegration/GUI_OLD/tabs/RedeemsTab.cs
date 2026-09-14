@@ -10,7 +10,7 @@ using WizshBoneTwitchIntegration.Models.Views;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 using WizshBoneTwitchIntegration.Types;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     internal class RedeemsTab
     {

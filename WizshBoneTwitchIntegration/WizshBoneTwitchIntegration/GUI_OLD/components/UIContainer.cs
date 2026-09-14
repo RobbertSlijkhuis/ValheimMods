@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     /// <summary>
     /// Factory for creating invisible full-stretch <see cref="GameObject"/> containers

@@ -2,6 +2,7 @@
 using System;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Gui;
+using WizshBoneTwitchIntegration.GuiOld;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
@@ -22,6 +23,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                 Game.instance.gameObject.AddComponent<TwitchChatting>();
                 Game.instance.gameObject.AddComponent<SafeZoneHUDPanel>();
                 Game.instance.gameObject.AddComponent<StatusEffectManager>();
+                Game.instance.gameObject.AddComponent<WizshBoneGUI>();
 
                 TwitchSafeZone.ResetLocalPlayerZoneCount();
                 TwitchSafeZone.ResetActiveSafeZones();

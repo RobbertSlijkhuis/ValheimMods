@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     /// <summary>
     /// Renders every per-profile "rule" setting (profiles/&lt;name&gt;/profile.yaml's "settings:"

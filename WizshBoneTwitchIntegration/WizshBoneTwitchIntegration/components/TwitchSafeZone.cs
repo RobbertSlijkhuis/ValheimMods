@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Configs;
-using WizshBoneTwitchIntegration.Gui;
+using WizshBoneTwitchIntegration.GuiOld;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 

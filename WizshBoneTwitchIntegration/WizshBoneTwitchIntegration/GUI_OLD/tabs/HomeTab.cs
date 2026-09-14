@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     /// <summary>
     /// Landing tab of <see cref="WizshBoneSettingsGUI"/> - Twitch login, and the "Redeems enabled"

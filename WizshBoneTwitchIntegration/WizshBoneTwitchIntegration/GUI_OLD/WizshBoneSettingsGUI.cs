@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     // Delegate for creating scrollable containers
     internal delegate GameObject CreateScrollableContainerDelegate(string name, GameObject parent, float topOffset, float leftInset = 0f);

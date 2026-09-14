@@ -1,7 +1,7 @@
 using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Helpers;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     /// <summary>
     /// Narrowed BoundField&lt;T&gt; views over <see cref="ProfileSettingsHelper.Current"/>, one per

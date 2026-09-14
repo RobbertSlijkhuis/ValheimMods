@@ -9,7 +9,7 @@ using WizshBoneTwitchIntegration.Models;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     internal class ViewersTab
     {

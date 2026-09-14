@@ -1,4 +1,4 @@
-using WizshBoneTwitchIntegration.Gui;
+using WizshBoneTwitchIntegration.GuiOld;
 using WizshBoneTwitchIntegration.Models;
 
 namespace WizshBoneTwitchIntegration.Models.Views

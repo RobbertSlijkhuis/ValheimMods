@@ -7,7 +7,7 @@ using UnityEngine;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.Models.Views;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     internal class ObjectEditor
     {

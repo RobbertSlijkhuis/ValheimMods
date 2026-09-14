@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     internal class CreatureGroupsTab
     {

@@ -1,6 +1,6 @@
 using System;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     /// <summary>
     /// Adds a descriptive tooltip line rendered below the input field in <see cref="ObjectEditor"/>.

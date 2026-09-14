@@ -10,6 +10,7 @@ using UnityEngine;
 using WizshBoneTwitchIntegration.Commands;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Configs;
+using WizshBoneTwitchIntegration.Gui;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
@@ -34,6 +35,7 @@ namespace WizshBoneTwitchIntegration
         public CustomStatusEffects effects = new CustomStatusEffects();
         public CustomSprites sprites = new CustomSprites();
         public CustomEffectLists effectLists = new CustomEffectLists();
+        private ButtonConfig wizshBoneWindowButtonOld;
         private ButtonConfig wizshBoneWindowButton;
         private ButtonConfig quickTestRedeemButton;
         public static bool useRedeemCommand = false;
@@ -73,6 +75,7 @@ namespace WizshBoneTwitchIntegration
         public void Update()
         {
             HandleWizshBoneWindowInput();
+            HandleNewUIWindowInput();
             HandleQuickTestRedeemInput();
         }
 
@@ -80,7 +83,7 @@ namespace WizshBoneTwitchIntegration
         {
             try
             {
-                if (ZInput.instance == null || wizshBoneWindowButton == null || !Player.m_localPlayer)
+                if (ZInput.instance == null || wizshBoneWindowButtonOld == null || !Player.m_localPlayer)
                     return;
 
                 TwitchAuth authComp = Game.instance.gameObject.GetComponent<TwitchAuth>();
@@ -89,8 +92,8 @@ namespace WizshBoneTwitchIntegration
                 // ZInput is blocked while the GUI is open, so fall back to raw Unity input
                 // via KeyboardShortcut.IsDown() which bypasses the ZInput block entirely.
                 bool togglePressed = guiVisible
-                    ? PluginConfig.configWizshBoneWindow.Value.IsDown()
-                    : ZInput.GetButtonDown(wizshBoneWindowButton.Name);
+                    ? PluginConfig.configWizshBoneWindowOld.Value.IsDown()
+                    : ZInput.GetButtonDown(wizshBoneWindowButtonOld.Name);
 
                 if (!togglePressed)
                     return;
@@ -103,6 +106,38 @@ namespace WizshBoneTwitchIntegration
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not show WizshBone settings GUI: " + e);
+            }
+        }
+
+        private void HandleNewUIWindowInput()
+        {
+            try
+            {
+                if (ZInput.instance == null || wizshBoneWindowButton == null || !Player.m_localPlayer)
+                    return;
+
+                WizshBoneGUI newUI = Game.instance.gameObject.GetComponent<WizshBoneGUI>();
+                if (newUI == null)
+                    return;
+
+                bool guiVisible = newUI.IsVisible;
+
+                // Same ZInput-blocked-while-GUI-open gotcha as HandleWizshBoneWindowInput above.
+                bool togglePressed = guiVisible
+                    ? PluginConfig.configWizshBoneWindow.Value.IsDown()
+                    : ZInput.GetButtonDown(wizshBoneWindowButton.Name);
+
+                if (!togglePressed)
+                    return;
+
+                if (guiVisible)
+                    newUI.CloseShell();
+                else
+                    newUI.ShowShell();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Could not show new WizshBone UI: {e}");
             }
         }
 
@@ -354,6 +389,14 @@ namespace WizshBoneTwitchIntegration
         {
             try
             {
+                wizshBoneWindowButtonOld = new ButtonConfig
+                {
+                    Name = "WizshBone Window (Old)",
+                    ShortcutConfig = PluginConfig.configWizshBoneWindowOld,
+                };
+
+                InputManager.Instance.AddButton(PluginGUID, wizshBoneWindowButtonOld);
+
                 wizshBoneWindowButton = new ButtonConfig
                 {
                     Name = "WizshBone Window",

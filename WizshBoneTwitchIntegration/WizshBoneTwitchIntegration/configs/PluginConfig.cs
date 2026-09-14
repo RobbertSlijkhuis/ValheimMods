@@ -14,6 +14,7 @@ namespace WizshBoneTwitchIntegration.Configs
         public static string sectionDebug = "Debug";
         public static string sectionPerformance = "Performance";
 
+        public static ConfigEntry<KeyboardShortcut> configWizshBoneWindowOld;
         public static ConfigEntry<KeyboardShortcut> configWizshBoneWindow;
         public static ConfigEntry<KeyboardShortcut> configQuickTestRedeemKey;
 
@@ -33,8 +34,12 @@ namespace WizshBoneTwitchIntegration.Configs
 
         public static void InitGeneralConfig()
         {
-            configWizshBoneWindow = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionKeybinds, "Open WizshBone window", new KeyboardShortcut(KeyCode.F4),
-                new ConfigDescription("Settings of the WizshBone Twitch Integration", null,
+            configWizshBoneWindowOld = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionKeybinds, "Open WizshBone window (Old)", new KeyboardShortcut(KeyCode.F4),
+                new ConfigDescription("Settings of the WizshBone Twitch Integration (old UI)", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+
+            configWizshBoneWindow = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionKeybinds, "Open WizshBone window", new KeyboardShortcut(KeyCode.F3),
+                new ConfigDescription("WizshBone Twitch Integration UI", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
 
             configQuickTestRedeemKey = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionKeybinds, "Quick test redeem key", new KeyboardShortcut(KeyCode.Y),

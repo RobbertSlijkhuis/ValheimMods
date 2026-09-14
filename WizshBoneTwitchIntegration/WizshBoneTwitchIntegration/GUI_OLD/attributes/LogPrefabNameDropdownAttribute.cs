@@ -1,6 +1,6 @@
 using System;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     /// <summary>
     /// Marks a <see cref="System.Collections.Generic.List{T}"/> of <see cref="string"/> field as

@@ -2,7 +2,7 @@ using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     /// <summary>
     /// Shared UI utility methods used across all settings tabs.

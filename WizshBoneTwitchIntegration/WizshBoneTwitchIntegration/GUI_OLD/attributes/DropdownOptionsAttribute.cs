@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     /// <summary>
     /// Marks a <see cref="List{T}"/> of <see cref="string"/> field as dropdown-driven in the UI.

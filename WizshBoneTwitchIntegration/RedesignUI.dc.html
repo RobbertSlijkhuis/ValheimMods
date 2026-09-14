@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&amp;family=Alegreya+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+  .wbti2-scroll::-webkit-scrollbar{width:12px}
+  .wbti2-scroll::-webkit-scrollbar-track{background:#1c140dcc}
+  .wbti2-scroll::-webkit-scrollbar-thumb{background:#6b5638}
+</style>
+</helmet>
+
+<div style="width:1200px;height:720px;background:linear-gradient(160deg,#8fb3c9 0%,#a9c9a0 40%,#5c8a52 70%,#3f6a3c 100%);position:relative;font-family:'Alegreya Sans',sans-serif;overflow:hidden">
+  <div style="position:absolute;bottom:34px;right:34px;z-index:40;display:flex;flex-direction:column-reverse;gap:8px;align-items:flex-end;pointer-events:none">
+    <sc-for list="{{ toasts }}" as="t" hint-placeholder-count="0">
+      <div style="pointer-events:auto;min-width:220px;max-width:320px;padding:12px 16px;background:#171d24;border:1px solid {{ t.border }};border-left:3px solid {{ t.border }};color:{{ t.color }};font:700 13px 'Alegreya Sans',sans-serif;box-shadow:0 6px 20px #00000070;display:flex;align-items:center;gap:10px">
+        <span style="font-size:15px">{{ t.icon }}</span><span>{{ t.message }}</span>
+      </div>
+    </sc-for>
+  </div>
+  <div style="position:absolute;inset:18px;border:3px solid #120d08;display:flex;box-shadow:inset 0 0 90px #00000080">
+
+    <div style="width:216px;flex:none;background-image:linear-gradient(#00000075,#00000075),url('assets/wood_bg_final.png');background-size:100% 100%,cover;background-repeat:no-repeat,no-repeat;display:flex;flex-direction:column;padding:0 0 20px;border-right:2px solid #120d08">
+      <div style="height:53px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font:700 18px 'Cinzel',serif;color:#f2a94f;text-align:center;text-shadow:0 2px 3px #00000090;padding:0 14px;border-bottom:1px solid #ffffff20;margin-bottom:14px">WizshBone</div>
+
+      <sc-for list="{{ navGroups }}" as="grp" hint-placeholder-count="3">
+        <div style="padding:10px 20px 4px;font:700 11px 'Alegreya Sans',sans-serif;color:#a88a55;letter-spacing:.08em">{{ grp.label }}</div>
+        <sc-for list="{{ grp.items }}" as="tab" hint-placeholder-count="2">
+          <div onClick="{{ tab.onClick }}" style="padding:11px 20px;background:{{ tab.bg }};border-left:3px solid {{ tab.borderColor }};color:{{ tab.color }};font:700 14px 'Alegreya Sans',sans-serif;cursor:pointer">{{ tab.label }}</div>
+        </sc-for>
+      </sc-for>
+
+      <div style="flex:1"></div>
+      <div onClick="{{ noop }}" style="margin:0 20px;padding:11px 0;text-align:center;background:#2a1414;border:1px solid #b23a3a;color:#e05a5a;font:700 13px 'Alegreya Sans',sans-serif;cursor:pointer">Close</div>
+    </div>
+
+    <div style="flex:1;display:flex;flex-direction:column;background-image:url('assets/wood_bg_final.png');background-size:cover;background-repeat:no-repeat;min-width:0;position:relative">
+
+      <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:0;background:#00000090;display:flex;align-items:center;justify-content:center;z-index:20">
+          <div style="width:440px;background:#3a2a18;background-image:url('assets/wood_bg_final.png');background-size:cover;border:2px solid #120d08;box-shadow:0 8px 30px #000000a0;padding:26px 30px;display:flex;flex-direction:column;gap:16px">
+            <div style="font:700 18px 'Cinzel',serif;color:#f2a94f;text-align:center;text-shadow:0 2px 3px #00000090">{{ modalTitle }}</div>
+            <div style="font:400 14px/1.4 'Alegreya Sans',sans-serif;color:#d8cfc0;text-align:center;white-space:pre-line">{{ modalMessage }}</div>
+
+            <sc-if value="{{ modalIsInput }}" hint-placeholder-val="{{ false }}">
+              <input value="{{ modalValue }}" onChange="{{ modalValueChange }}" placeholder="Enter text..." style="padding:10px 14px;background:#171d24;border:1px solid #caa25a;color:#e8e0d0;font:400 14px 'Alegreya Sans',sans-serif"></input>
+            </sc-if>
+            <sc-if value="{{ modalIsRedeemCopy }}" hint-placeholder-val="{{ false }}">
+              <select value="{{ modalTargetProfile }}" onChange="{{ modalTargetProfileChange }}" style="padding:10px 14px;background:#171d24;border:1px solid #caa25a;color:#e8e0d0;font:400 14px 'Alegreya Sans',sans-serif">
+                <sc-for list="{{ profileNames }}" as="pn" hint-placeholder-count="3">
+                  <option value="{{ pn }}">{{ pn }}</option>
+                </sc-for>
+              </select>
+              <input value="{{ modalValue }}" onChange="{{ modalValueChange }}" style="padding:10px 14px;background:#171d24;border:1px solid #caa25a;color:#e8e0d0;font:400 14px 'Alegreya Sans',sans-serif"></input>
+            </sc-if>
+            <sc-if value="{{ modalIsViewer }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <div style="font:700 12px 'Alegreya Sans',sans-serif;color:#e8e0d0">Name</div>
+                <input value="{{ modalValue }}" onChange="{{ modalValueChange }}" style="padding:10px 14px;background:#171d24;border:1px solid #caa25a;color:#e8e0d0;font:400 14px 'Alegreya Sans',sans-serif"></input>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <div style="font:700 12px 'Alegreya Sans',sans-serif;color:#e8e0d0">Color</div>
+                <input type="color" value="{{ modalColor }}" onChange="{{ modalColorChange }}" style="width:100%;height:36px;padding:0;background:{{ modalColor }};border:1px solid #caa25a;cursor:pointer"></input>
+              </div>
+            </sc-if>
+
+            <div style="display:flex;gap:14px;justify-content:center;margin-top:6px">
+              <div onClick="{{ modalConfirm }}" style="padding:10px 26px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 14px 'Alegreya Sans',sans-serif;cursor:pointer">{{ modalConfirmLabel }}</div>
+              <div onClick="{{ modalCancel }}" style="padding:10px 26px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 14px 'Alegreya Sans',sans-serif;cursor:pointer">Cancel</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ historyOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;top:53px;left:0;right:0;bottom:0;background:#00000090;z-index:20">
+          <div style="position:absolute;inset:24px;background:#3a2a18;background-image:url('assets/wood_bg_final.png');background-size:cover;border:2px solid #120d08;box-shadow:0 8px 30px #000000a0;padding:26px 30px;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div style="font:700 15px 'Alegreya Sans',sans-serif;color:#e8b060;letter-spacing:.04em">REDEEM HISTORY</div>
+              <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#8a8070">{{ historyEntries.length }} pending</div>
+            </div>
+            <input placeholder="Search by viewer or redeem..." value="{{ historySearch }}" onChange="{{ historySearchChange }}" style="padding:10px 14px;background:#171d24;border:1px solid #ffffff20;color:#e8e0d0;font:400 14px 'Alegreya Sans',sans-serif"></input>
+            <div style="display:grid;grid-template-columns:1.4fr 2.6fr 0.8fr 2fr;padding:8px 12px;color:#a88a55;font:700 12px 'Alegreya Sans',sans-serif;letter-spacing:.04em">
+              <div>VIEWER</div><div>REDEEM</div><div>COST</div><div style="text-align:right">ACTIONS</div>
+            </div>
+            <div class="wbti2-scroll" style="flex:1;overflow-y:auto">
+              <sc-for list="{{ historyEntries }}" as="h" hint-placeholder-count="7">
+                <div onMouseEnter="{{ h.onHover }}" onMouseLeave="{{ h.onLeave }}" style="display:grid;grid-template-columns:1.4fr 2.6fr 0.8fr 2fr;align-items:center;min-height:38px;padding:10px 12px;background:{{ h.zebra }}">
+                  <div style="color:{{ h.textColor }};font:700 13px 'Alegreya Sans',sans-serif">{{ h.viewer }}</div>
+                  <div style="color:{{ h.textColor }};font:400 14px 'Alegreya Sans',sans-serif">{{ h.title }}</div>
+                  <div style="color:{{ h.textColor }};font:400 13px 'Alegreya Sans',sans-serif">{{ h.cost }}</div>
+                  <div style="display:flex;gap:8px;justify-content:flex-end">
+                    <sc-if value="{{ h.showActions }}" hint-placeholder-val="{{ true }}">
+                      <div onClick="{{ h.onComplete }}" style="padding:6px 14px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 12px 'Alegreya Sans',sans-serif;cursor:pointer">Complete</div>
+                      <div onClick="{{ h.onRefund }}" style="padding:6px 14px;background:#171d24;border:1px solid #4fa06a;color:#7fe08a;font:700 12px 'Alegreya Sans',sans-serif;cursor:pointer">Refund</div>
+                    </sc-if>
+                    <sc-if value="{{ h.statusLabel }}" hint-placeholder-val="{{ false }}">
+                      <div style="font:700 12px 'Alegreya Sans',sans-serif;color:{{ h.textColor }}">{{ h.statusLabel }}</div>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:16px">
+              <div onClick="{{ historyPrevPage }}" style="padding:6px 14px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:700 13px 'Alegreya Sans',sans-serif;cursor:pointer">&#8249;</div>
+              <div style="color:#8a8070;font:400 13px 'Alegreya Sans',sans-serif">Page {{ historyPage }} / {{ historyPageCount }}</div>
+              <div onClick="{{ historyNextPage }}" style="padding:6px 14px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:700 13px 'Alegreya Sans',sans-serif;cursor:pointer">&#8250;</div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <div onClick="{{ historyCompleteAll }}" style="flex:1;text-align:center;padding:10px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 13px 'Alegreya Sans',sans-serif;cursor:pointer">Complete All</div>
+              <div onClick="{{ historyRefundAll }}" style="flex:1;text-align:center;padding:10px;background:#171d24;border:1px solid #4fa06a;color:#7fe08a;font:700 13px 'Alegreya Sans',sans-serif;cursor:pointer">Refund All</div>
+              <div onClick="{{ closeHistory }}" style="flex:1;text-align:center;padding:10px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:700 13px 'Alegreya Sans',sans-serif;cursor:pointer">Close</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <div style="height:53px;box-sizing:border-box;display:flex;align-items:center;gap:16px;padding:0 26px;background:#00000055;border-bottom:1px solid #ffffff18">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:9px;height:9px;background:{{ loginDotColor }}"></div>
+          <div style="font:700 13px 'Alegreya Sans',sans-serif;color:{{ loginTextColor }}">{{ loginStatusLabel }}</div>
+        </div>
+        <sc-if value="{{ showLoginButton }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ toggleLoginDemo }}" style="padding:5px 14px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 12px 'Alegreya Sans',sans-serif;cursor:pointer">Log in</div>
+        </sc-if>
+        <sc-if value="{{ showLogoutButton }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ toggleLoginDemo }}" style="padding:5px 14px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 12px 'Alegreya Sans',sans-serif;cursor:pointer">Log out</div>
+        </sc-if>
+        <sc-if value="{{ showReopenBrowserButton }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ reopenBrowser }}" style="padding:5px 14px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 12px 'Alegreya Sans',sans-serif;cursor:pointer">Open browser again</div>
+        </sc-if>
+        <sc-if value="{{ showResetLoginButton }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ resetLogin }}" style="padding:5px 14px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 12px 'Alegreya Sans',sans-serif;cursor:pointer">Log out</div>
+        </sc-if>
+        <div style="flex:1"></div>
+        <div style="font:400 12px 'Alegreya Sans',sans-serif;color:#8a8070">Created by DeathWizsh</div>
+        <div style="font:700 12px 'Alegreya Sans',sans-serif;color:#e8b060">v1.4.2</div>
+      </div>
+
+      <div class="wbti2-scroll" style="flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column">
+
+        <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+          <div style="font:700 15px 'Alegreya Sans',sans-serif;color:#e8b060;letter-spacing:.04em;margin-bottom:16px">OVERVIEW</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px">
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px">
+              <div style="font:400 12px 'Alegreya Sans',sans-serif;color:#a89d88;margin-bottom:6px">Active profile</div>
+              <div style="font:700 20px 'Alegreya Sans',sans-serif;color:#e8e0d0">{{ activeProfileName }}</div>
+              <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#8a8070;margin-top:4px">{{ redeemsList.length }} redeems configured</div>
+            </div>
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px">
+              <div style="font:400 12px 'Alegreya Sans',sans-serif;color:#a89d88;margin-bottom:6px">Redeem status</div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+                <div onClick="{{ toggleRedeems }}" style="width:40px;height:20px;background:{{ redeemsTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ redeemsKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box">
+                  <div style="width:14px;height:14px;background:#e8e0d0"></div>
+                </div>
+                <div style="font:700 16px 'Alegreya Sans',sans-serif;color:{{ redeemsStatusColor }}">{{ redeemsStatusLabel }}</div>
+              </div>
+              <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#8a8070">{{ enabledRedeemsCount }} / {{ redeemsList.length }} enabled</div>
+            </div>
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px">
+              <div style="font:400 12px 'Alegreya Sans',sans-serif;color:#a89d88;margin-bottom:6px">Chatting feature</div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+                <div onClick="{{ toggleSettingsChat }}" style="width:40px;height:20px;background:{{ settingsTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ settingsKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box">
+                  <div style="width:14px;height:14px;background:#e8e0d0"></div>
+                </div>
+                <div style="font:700 16px 'Alegreya Sans',sans-serif;color:{{ settingsChatStatusColor }}">{{ settingsChatStatusLabel }}</div>
+              </div>
+              <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#8a8070;display:flex;align-items:center;gap:6px">
+                <input value="{{ scanRadius }}" onChange="{{ scanRadiusChange }}" style="width:44px;padding:3px 6px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 13px 'Alegreya Sans',sans-serif"></input>
+                m radius &middot;
+                <input value="{{ scanInterval }}" onChange="{{ scanIntervalChange }}" style="width:44px;padding:3px 6px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 13px 'Alegreya Sans',sans-serif"></input>
+                s interval
+              </div>
+            </div>
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px">
+              <div style="font:400 12px 'Alegreya Sans',sans-serif;color:#a89d88;margin-bottom:6px">Auto resolve redeem</div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+                <div onClick="{{ toggleAutoResolve }}" style="width:40px;height:20px;background:{{ autoResolveTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ autoResolveKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box">
+                  <div style="width:14px;height:14px;background:#e8e0d0"></div>
+                </div>
+                <div style="font:700 16px 'Alegreya Sans',sans-serif;color:{{ autoResolveColor }}">{{ autoResolveLabel }}</div>
+              </div>
+              <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#8a8070">Whether the redeems are resolved automaticly</div>
+            </div>
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px">
+              <div style="font:400 12px 'Alegreya Sans',sans-serif;color:#a89d88;margin-bottom:6px">Enable redeems on login</div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+                <div onClick="{{ toggleEnableRedeemsOnLogin }}" style="width:40px;height:20px;background:{{ enableRedeemsOnLoginTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ enableRedeemsOnLoginKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box">
+                  <div style="width:14px;height:14px;background:#e8e0d0"></div>
+                </div>
+                <div style="font:700 16px 'Alegreya Sans',sans-serif;color:{{ enableRedeemsOnLoginColor }}">{{ enableRedeemsOnLoginLabel }}</div>
+              </div>
+              <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#8a8070">Automatically turns redeems on when you connect</div>
+            </div>
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px">
+              <div style="font:400 12px 'Alegreya Sans',sans-serif;color:#a89d88;margin-bottom:6px">Redemption log</div>
+              <div onClick="{{ openHistory }}" style="display:inline-block;padding:7px 16px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 13px 'Alegreya Sans',sans-serif;cursor:pointer;margin-bottom:6px">View history</div>
+              <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#8a8070">{{ redeemHistoryCount }} redeems in history</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px">
+            <div onClick="{{ goRedeems }}" style="padding:11px 22px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 13px 'Alegreya Sans',sans-serif;cursor:pointer">Create a new redeem</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isDebug }}" hint-placeholder-val="{{ false }}">
+          <div style="font:700 15px 'Alegreya Sans',sans-serif;color:#e8b060;letter-spacing:.04em;margin-bottom:16px">DEBUG</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px">
+              <div style="font:400 12px 'Alegreya Sans',sans-serif;color:#a89d88;margin-bottom:6px">Safezone registration</div>
+              <div onClick="{{ resetSafezone }}" style="display:inline-block;padding:7px 16px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 13px 'Alegreya Sans',sans-serif;cursor:pointer;margin-bottom:6px">Reset safezone registration</div>
+              <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#8a8070">Use if safezones stop registering correctly</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isProfiles }}" hint-placeholder-val="{{ false }}">
+          <div style="font:700 15px 'Alegreya Sans',sans-serif;color:#e8b060;letter-spacing:.04em;margin-bottom:14px">PROFILES</div>
+          <div style="display:flex;gap:12px;margin-bottom:14px">
+            <input placeholder="Search profiles..." value="{{ searchProfiles }}" onChange="{{ searchProfilesChange }}" style="flex:none;width:350px;padding:10px 14px;background:#171d24;border:1px solid #ffffff20;color:#e8e0d0;font:400 14px 'Alegreya Sans',sans-serif"></input>
+            <div onClick="{{ openNewProfile }}" style="padding:10px 20px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 14px 'Alegreya Sans',sans-serif;cursor:pointer">+ New profile</div>
+            <div onClick="{{ openImportProfile }}" style="padding:10px 20px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 14px 'Alegreya Sans',sans-serif;cursor:pointer">Import</div>
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1.2fr 2.6fr;padding:8px 12px;color:#a88a55;font:700 12px 'Alegreya Sans',sans-serif;letter-spacing:.04em">
+            <div>NAME</div><div>REDEEMS</div><div style="text-align:right">ACTIONS</div>
+          </div>
+          <div style="flex:1;min-height:0;overflow-y:auto">
+            <sc-for list="{{ profiles }}" as="p" hint-placeholder-count="5">
+            <div onClick="{{ p.onSelect }}" onMouseEnter="{{ p.onHover }}" onMouseLeave="{{ p.onLeave }}" style="display:grid;grid-template-columns:2fr 1.2fr 2.6fr;align-items:center;padding:12px;background:{{ p.zebra }};cursor:pointer">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="color:{{ p.nameColor }};font:{{ p.nameWeight }} 14px 'Alegreya Sans',sans-serif">{{ p.name }}</div>
+                <sc-if value="{{ p.isActive }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:2px 8px;background:#2a2010;border:1px solid #caa25a;color:#f0a850;font:700 10px 'Alegreya Sans',sans-serif;letter-spacing:.04em">ACTIVE</div>
+                </sc-if>
+              </div>
+              <div style="color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif">{{ p.redeems }}</div>
+              <div style="display:flex;gap:6px;justify-content:flex-end">
+                <sc-if value="{{ p.hovered }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ p.onCopy }}" title="Copy" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#171d24;border:1px solid #ffffff25;color:#c8bfa8;font:14px 'Alegreya Sans',sans-serif;cursor:pointer">&#10697;</div>
+                  <div onClick="{{ p.onExport }}" title="Export" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#171d24;border:1px solid #ffffff25;color:#c8bfa8;font:14px 'Alegreya Sans',sans-serif;cursor:pointer">&#8595;</div>
+                  <div onClick="{{ p.onSync }}" title="Sync" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#171d24;border:1px solid #ffffff25;color:#c8bfa8;font:14px 'Alegreya Sans',sans-serif;cursor:pointer">&#8644;</div>
+                  <div onClick="{{ p.onEdit }}" title="Rename" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:14px 'Alegreya Sans',sans-serif;cursor:pointer">&#9998;</div>
+                </sc-if>
+                <sc-if value="{{ p.canDelete }}" hint-placeholder-val="{{ true }}">
+                  <div onClick="{{ p.onDelete }}" title="Delete" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#2a1414;border:1px solid #b23a3a;color:#e05a5a;font:14px 'Alegreya Sans',sans-serif;cursor:pointer">&#10005;</div>
+                </sc-if>
+                <sc-if value="{{ p.isActive }}" hint-placeholder-val="{{ false }}">
+                  <div title="Active profile" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#2a2010;border:1px solid #caa25a;color:#f0a850;font:14px 'Alegreya Sans',sans-serif">&#10227;</div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isRedeems }}" hint-placeholder-val="{{ false }}">
+          <sc-if value="{{ wizardOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:22px;flex:1;min-height:0;display:flex;flex-direction:column">
+              <div style="display:flex;gap:8px;margin-bottom:18px">
+                <sc-for list="{{ wizardSteps }}" as="st" hint-placeholder-count="3">
+                  <div style="flex:1;height:5px;background:{{ st.bg }}"></div>
+                </sc-for>
+              </div>
+              <div style="font:700 15px 'Alegreya Sans',sans-serif;color:#e8b060;letter-spacing:.04em;margin-bottom:16px">{{ wizardTitle }}</div>
+
+              <div class="wbti2-scroll" style="flex:1;min-height:0;overflow-y:auto;padding-right:6px">
+              <sc-if value="{{ wizardStepIs1 }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;gap:16px">
+                  <div class="wbti2-scroll" style="width:180px;flex:none;max-height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding-right:6px">
+                    <sc-for list="{{ effectTypes }}" as="et" hint-placeholder-count="6">
+                      <div onClick="{{ et.onClick }}" style="padding:11px 14px;background:{{ et.bg }};border:1px solid {{ et.border }};color:{{ et.color }};font:700 13px 'Alegreya Sans',sans-serif;cursor:pointer">{{ et.label }}</div>
+                    </sc-for>
+                  </div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:12px">
+                    <div style="width:100%;height:210px;background:repeating-linear-gradient(45deg,#00000030,#00000030 10px,#00000010 10px,#00000010 20px);border:1px solid #ffffff20;display:flex;align-items:center;justify-content:center;color:#8a8070;font:12px ui-monospace,monospace">{{ wizardPreviewLabel }}</div>
+                    <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8b060">{{ wizardSelectedLabel }}</div>
+                    <div style="font:400 13px/1.5 'Alegreya Sans',sans-serif;color:#c8bfa8">{{ wizardSelectedDescription }}</div>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ wizardStepIs2 }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:14px">
+                  <sc-if value="{{ wizardIsDetonate }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <div style="font:700 12px 'Alegreya Sans',sans-serif;color:#e8e0d0">What should it detonate?</div>
+                      <div style="display:flex;gap:6px">
+                        <sc-for list="{{ detonateTypeOptions }}" as="dt" hint-placeholder-count="4">
+                          <div onClick="{{ dt.onClick }}" style="flex:1;padding:10px 8px;text-align:center;background:{{ dt.bg }};border:1px solid {{ dt.border }};color:{{ dt.color }};font:700 12px 'Alegreya Sans',sans-serif;cursor:pointer">{{ dt.label }}</div>
+                        </sc-for>
+                      </div>
+                    </div>
+
+                    <sc-if value="{{ wizardDraft.detonateType }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;flex-direction:column;gap:8px">
+                        <div style="font:700 12px 'Alegreya Sans',sans-serif;color:#e8e0d0">Narrow it down (optional)</div>
+                        <div style="display:flex;gap:8px">
+                          <input value="{{ wizardDraft.detonateValueInput }}" onChange="{{ wizardDetonateValueInputChange }}" placeholder="e.g. salmon" style="flex:1;padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+                          <div onClick="{{ wizardAddDetonateValue }}" style="padding:9px 18px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 13px 'Alegreya Sans',sans-serif;cursor:pointer">+ Add</div>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px">
+                          <sc-for list="{{ wizardDraft.detonateValueChips }}" as="chip" hint-placeholder-count="0">
+                            <div style="display:flex;align-items:center;gap:6px;padding:5px 10px;background:#2a2016;border:1px solid #caa25a;color:#f0a850;font:700 12px 'Alegreya Sans',sans-serif">{{ chip.value }}<span onClick="{{ chip.onRemove }}" style="cursor:pointer;color:#e05a5a">&#10005;</span></div>
+                          </sc-for>
+                        </div>
+                        <div style="font:400 12px/1.4 'Alegreya Sans',sans-serif;color:#8a8070">Needs at least one value &mdash; starts with '{{ wizardDraft.detonateType }}'. Add more or remove to fine-tune which {{ wizardDetonateTypeLabelLower }} names match.</div>
+                      </div>
+                    </sc-if>
+
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <div style="display:flex;align-items:baseline;justify-content:space-between">
+                        <div style="font:700 12px 'Alegreya Sans',sans-serif;color:#e8e0d0">Radius</div>
+                        <div style="font:400 12px 'Alegreya Sans',sans-serif;color:#c8bfa8">{{ wizardDraft.radius }}m</div>
+                      </div>
+                      <input type="range" min="1" max="50" value="{{ wizardDraft.radius }}" onChange="{{ wizardRadiusChange }}" style="width:100%;accent-color:#f2a94f"></input>
+                    </div>
+
+                    <div style="display:flex;flex-direction:column;gap:10px;padding:14px;background:#00000030;border:1px solid #ffffff15">
+                      <div onClick="{{ wizardToggleDamageBasedOnMaxHealth }}" style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                        <div style="width:38px;height:20px;background:{{ wizardDamageBasedTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ wizardDamageBasedKnobAlign }};padding:2px;box-sizing:border-box;flex:none">
+                          <div style="width:14px;height:14px;background:#e8e0d0"></div>
+                        </div>
+                        <div style="font:700 12px 'Alegreya Sans',sans-serif;color:#e8e0d0">Based on max health</div>
+                      </div>
+
+                      <sc-if value="{{ wizardDraft.damageBasedOnMaxHealth }}" hint-placeholder-val="{{ false }}">
+                        <div style="display:flex;gap:12px">
+                          <div style="display:flex;flex-direction:column;gap:6px;flex:1">
+                            <div style="font:400 12px 'Alegreya Sans',sans-serif;color:#c8bfa8">Max health %</div>
+                            <input value="{{ wizardDraft.damageMaxHealthPercent }}" onChange="{{ wizardDamageMaxHealthPercentChange }}" placeholder="100" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+                          </div>
+                          <div style="display:flex;flex-direction:column;gap:6px;flex:1">
+                            <div style="font:400 12px 'Alegreya Sans',sans-serif;color:#c8bfa8">Armor %</div>
+                            <input value="{{ wizardDraft.damageArmorPercent }}" onChange="{{ wizardDamageArmorPercentChange }}" placeholder="0" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+                          </div>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ wizardDamageNotBasedOnMaxHealth }}" hint-placeholder-val="{{ true }}">
+                        <div style="display:flex;gap:12px">
+                          <div style="display:flex;flex-direction:column;gap:6px;flex:1">
+                            <div style="font:400 12px 'Alegreya Sans',sans-serif;color:#c8bfa8">Blunt damage</div>
+                            <input value="{{ wizardDraft.damageBlunt }}" onChange="{{ wizardDamageBluntChange }}" placeholder="0" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+                          </div>
+                          <div style="display:flex;flex-direction:column;gap:6px;flex:1">
+                            <div style="font:400 12px 'Alegreya Sans',sans-serif;color:#c8bfa8">Fire damage</div>
+                            <input value="{{ wizardDraft.damageFire }}" onChange="{{ wizardDamageFireChange }}" placeholder="0" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+                          </div>
+                        </div>
+                      </sc-if>
+
+                      <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:4px">
+                        <sc-for list="{{ wizardDamageFlags }}" as="flag" hint-placeholder-count="4">
+                          <div onClick="{{ flag.onToggle }}" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                            <div style="width:34px;height:18px;background:{{ flag.trackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ flag.knobAlign }};padding:2px;box-sizing:border-box;flex:none">
+                              <div style="width:12px;height:12px;background:#e8e0d0"></div>
+                            </div>
+                            <div style="font:400 12px 'Alegreya Sans',sans-serif;color:#c8bfa8">{{ flag.label }}</div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <div style="font:700 12px 'Alegreya Sans',sans-serif;color:#e8e0d0">Announce message</div>
+                      <input value="{{ wizardDraft.announceMessage }}" onChange="{{ wizardAnnounceMessageChange }}" placeholder="Shown mid-screen when triggered" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+                      <sc-if value="{{ wizardDraft.announceMessage }}" hint-placeholder-val="{{ false }}">
+                        <div style="padding:12px;background:#000000a0;text-align:center;color:#fff;font:700 14px 'Alegreya Sans',sans-serif">{{ wizardDraft.announceMessage }}</div>
+                      </sc-if>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ wizardIsNotDetonate }}" hint-placeholder-val="{{ true }}">
+                    <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88"><span style="color:#e8b060;font-weight:700">{{ wizardDraft.type }}</span> has no extra parameters &mdash; continue to set up the reward.</div>
+                  </sc-if>
+                </div>
+              </sc-if>
+              <sc-if value="{{ wizardStepIs3 }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:18px">
+
+                  <div style="display:flex;align-items:flex-start;gap:14px;padding:14px;background:#171d24;border:1px solid #ffffff20">
+                    <input type="color" value="{{ wizardDraft.bgColor }}" onChange="{{ wizardBgColorChange }}" style="width:64px;height:64px;flex:none;padding:0;background:{{ wizardDraft.bgColor }};border:1px solid #ffffff20;cursor:pointer"></input>
+                    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+                      <div style="display:flex;align-items:center">
+                        <sc-if value="{{ redeemPrefix }}" hint-placeholder-val="{{ true }}">
+                          <div style="padding:6px 8px;background:#00000060;color:#a89d88;font:700 15px 'Alegreya Sans',sans-serif;white-space:nowrap">{{ redeemPrefix }}&nbsp;</div>
+                        </sc-if>
+                        <input value="{{ wizardDraft.title }}" onChange="{{ wizardTitleChange }}" placeholder="Reward title" style="flex:1;min-width:0;padding:6px 8px;background:#00000040;border:1px solid #ffffff20;color:#fff;font:700 15px 'Alegreya Sans',sans-serif"></input>
+                      </div>
+                      <input value="{{ wizardDraft.description }}" onChange="{{ wizardDescriptionChange }}" placeholder="Shown to viewers when they open the reward" style="padding:6px 8px;background:#00000040;border:1px solid #ffffff20;color:#c8bfa8;font:400 12px 'Alegreya Sans',sans-serif"></input>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:none">
+                      <input value="{{ wizardDraft.cost }}" onChange="{{ wizardCostChange }}" placeholder="0" style="width:80px;padding:6px 8px;background:#00000060;border:1px solid #ffffff20;color:#f0a850;font:700 13px 'Alegreya Sans',sans-serif;text-align:center"></input>
+                      <div style="font:400 10px 'Alegreya Sans',sans-serif;color:#8a8070">points</div>
+                    </div>
+                  </div>
+                  <div style="font:400 11px 'Alegreya Sans',sans-serif;color:#8a8070;text-align:center;margin-top:-8px">This is the Twitch reward tile viewers will see &mdash; edit it directly above</div>
+
+                  <div style="display:flex;align-items:flex-end;gap:14px">
+                    <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+                      <div style="font:700 12px 'Alegreya Sans',sans-serif;color:#e8e0d0">Cooldown (sec)</div>
+                      <input value="{{ wizardDraft.cooldown }}" onChange="{{ wizardCooldownChange }}" placeholder="0" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+                    </div>
+                    <div style="flex:1;height:36px;display:flex;align-items:center;gap:24px">
+                      <div style="display:flex;align-items:center;gap:10px">
+                        <div onClick="{{ wizardToggleUserInput }}" style="width:40px;height:20px;background:{{ wizardUserInputTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ wizardUserInputKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box">
+                          <div style="width:14px;height:14px;background:#e8e0d0"></div>
+                        </div>
+                        <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#e8e0d0">Requires viewer input</div>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:10px">
+                        <div onClick="{{ wizardToggleIgnoreSafezone }}" style="width:40px;height:20px;background:{{ wizardIgnoreSafezoneTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ wizardIgnoreSafezoneKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box">
+                          <div style="width:14px;height:14px;background:#e8e0d0"></div>
+                        </div>
+                        <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#e8e0d0">Ignore safezone</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style="display:flex;gap:14px">
+                    <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+                      <div style="font:700 12px 'Alegreya Sans',sans-serif;color:#e8e0d0">Add condition</div>
+                      <input value="{{ wizardDraft.addCondition }}" onChange="{{ wizardAddConditionChange }}" placeholder="Global key that enables it" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+                      <div style="font:700 12px 'Alegreya Sans',sans-serif;color:#e8e0d0">Remove condition</div>
+                      <input value="{{ wizardDraft.removeCondition }}" onChange="{{ wizardRemoveConditionChange }}" placeholder="Global key that disables it" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+
+              </div>
+
+              <div style="display:flex;justify-content:space-between;margin-top:22px">
+                <div onClick="{{ wizardBack }}" style="padding:10px 20px;background:#171d24;border:1px solid #ffffff25;color:#c8bfa8;font:700 13px 'Alegreya Sans',sans-serif;cursor:pointer">{{ wizardBackLabel }}</div>
+                <div onClick="{{ wizardNextClick }}" style="padding:10px 24px;background:{{ wizardNextBg }};border:1px solid {{ wizardNextBorder }};color:{{ wizardNextColor }};font:700 13px 'Alegreya Sans',sans-serif;cursor:{{ wizardNextCursor }}">{{ wizardNextLabel }}</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ wizardClosed }}" hint-placeholder-val="{{ true }}">
+            <div style="font:700 15px 'Alegreya Sans',sans-serif;color:#e8b060;letter-spacing:.04em;margin-bottom:14px">REDEEMS</div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+              <input placeholder="Search redeems by title or type" value="{{ searchRedeems }}" onChange="{{ searchRedeemsChange }}" style="flex:none;width:350px;padding:10px 14px;background:#171d24;border:1px solid #ffffff20;color:#e8e0d0;font:400 14px 'Alegreya Sans',sans-serif"></input>
+              <div onClick="{{ openNewRedeem }}" style="padding:10px 20px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 14px 'Alegreya Sans',sans-serif;cursor:pointer">+ New redeem</div>
+              <div style="flex:1"></div>
+              <div style="position:relative">
+                <div style="position:absolute;bottom:100%;left:0;margin-bottom:14px;font:700 11px 'Alegreya Sans',sans-serif;color:#f0a850;letter-spacing:.04em;white-space:nowrap">PROFILE</div>
+                <select value="{{ activeProfileName }}" onChange="{{ activeProfileSelectChange }}" style="padding:10px 32px 10px 12px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 13px 'Alegreya Sans',sans-serif;cursor:pointer">
+                  <sc-for list="{{ profileNames }}" as="pn" hint-placeholder-count="3">
+                    <option value="{{ pn }}">{{ pn }}</option>
+                  </sc-for>
+                </select>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:0.6fr 3fr 1.2fr 1fr 2fr;padding:8px 12px;color:#a88a55;font:700 12px 'Alegreya Sans',sans-serif;letter-spacing:.04em">
+              <div>ON</div><div>TITLE</div><div>TYPE</div><div>COST</div><div style="text-align:right">ACTIONS</div>
+            </div>
+            <div style="flex:1;min-height:0;overflow-y:auto">
+              <sc-for list="{{ redeemsList }}" as="r" hint-placeholder-count="6">
+              <div onMouseEnter="{{ r.onHover }}" onMouseLeave="{{ r.onLeave }}" style="display:grid;grid-template-columns:0.6fr 3fr 1.2fr 1fr 2fr;align-items:center;padding:10px 12px;background:{{ r.zebra }}">
+                <div onClick="{{ r.onToggle }}" style="width:40px;height:20px;background:{{ r.trackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ r.knobAlign }};padding:2px;cursor:pointer;box-sizing:border-box">
+                  <div style="width:14px;height:14px;background:#e8e0d0"></div>
+                </div>
+                <div style="color:#e8e0d0;font:400 14px 'Alegreya Sans',sans-serif">{{ r.title }}</div>
+                <div onMouseEnter="{{ r.onTypeHover }}" onMouseLeave="{{ r.onTypeLeave }}" style="position:relative;color:#8fb3c9;font:400 13px 'Alegreya Sans',sans-serif;cursor:default">
+                  {{ r.type }}
+                  <sc-if value="{{ r.typeHovered }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:absolute;top:22px;left:0;width:240px;background:#1c140d;border:1px solid #caa25a;box-shadow:0 8px 22px #000000a0;z-index:40;padding:10px">
+                      <div style="width:100%;height:100px;background:repeating-linear-gradient(45deg,#00000030,#00000030 10px,#00000010 10px,#00000010 20px);border:1px solid #ffffff20;margin-bottom:8px"></div>
+                      <div style="font:700 13px 'Alegreya Sans',sans-serif;color:#e8b060;margin-bottom:4px">{{ r.type }}</div>
+                      <div style="font:400 12px/1.5 'Alegreya Sans',sans-serif;color:#c8bfa8;white-space:normal">{{ r.typeDescription }}</div>
+                    </div>
+                  </sc-if>
+                </div>
+                <div style="color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif">{{ r.cost }} pts</div>
+                <div style="display:flex;gap:6px;justify-content:flex-end">
+                  <sc-if value="{{ r.hovered }}" hint-placeholder-val="{{ false }}">
+                    <div title="Test" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#171d24;border:1px solid #ffffff25;color:#c8bfa8;font:14px 'Alegreya Sans',sans-serif;cursor:pointer">&#9654;</div>
+                    <div onClick="{{ r.onEdit }}" title="Edit" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:14px 'Alegreya Sans',sans-serif;cursor:pointer">&#9998;</div>
+                    <div onClick="{{ r.onCopy }}" title="Copy" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#171d24;border:1px solid #ffffff25;color:#c8bfa8;font:14px 'Alegreya Sans',sans-serif;cursor:pointer">&#10697;</div>
+                  </sc-if>
+                  <div onClick="{{ r.onDelete }}" title="Delete" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#2a1414;border:1px solid #b23a3a;color:#e05a5a;font:14px 'Alegreya Sans',sans-serif;cursor:pointer">&#10005;</div>
+                </div>
+              </div>
+            </sc-for>
+            </div>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+          <div style="font:700 15px 'Alegreya Sans',sans-serif;color:#e8b060;letter-spacing:.04em;margin-bottom:14px">REDEEMS</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px;display:flex;gap:24px">
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Enable redeems on login</div>
+                <div onClick="{{ toggleEnableRedeemsOnLogin }}" style="width:46px;height:22px;background:{{ enableRedeemsOnLoginTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ enableRedeemsOnLoginKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box;flex:none">
+                  <div style="width:16px;height:16px;background:#e8e0d0"></div>
+                </div>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Automatically turns redeems on when you connect</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Auto resolve</div>
+                <div onClick="{{ toggleAutoResolve }}" style="width:46px;height:22px;background:{{ autoResolveTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ autoResolveKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box;flex:none">
+                  <div style="width:16px;height:16px;background:#e8e0d0"></div>
+                </div>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Whether the redeems are resolved automaticly</div>
+              </div>
+            </div>
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px;display:flex;flex-direction:column;gap:8px">
+              <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Redeem prefix</div>
+              <input value="{{ redeemPrefix }}" onChange="{{ redeemPrefixChange }}" placeholder="WBTI" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+              <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Added in front of every redeem title. No trailing space needed, it's added automatically.</div>
+            </div>
+          </div>
+
+          <div style="font:700 15px 'Alegreya Sans',sans-serif;color:#e8b060;letter-spacing:.04em;margin:22px 0 14px">CHATTING</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px;display:flex;gap:24px">
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Enable in-game chatting feature</div>
+                <div onClick="{{ toggleSettingsChat }}" style="width:46px;height:22px;background:{{ settingsTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ settingsKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box;flex:none">
+                  <div style="width:16px;height:16px;background:#e8e0d0"></div>
+                </div>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Whether viewer chat messages are shown above creatures in-game</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Ignore tames</div>
+                <div onClick="{{ toggleIgnoreTames }}" style="width:46px;height:22px;background:{{ ignoreTamesTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ ignoreTamesKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box;flex:none">
+                  <div style="width:16px;height:16px;background:#e8e0d0"></div>
+                </div>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Excludes tamed creatures from the chat feature</div>
+              </div>
+            </div>
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px;display:flex;flex-direction:column;gap:8px">
+              <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Chatting black list</div>
+              <input value="Nightbot,StreamElements,Wizshbot" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+              <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Prevents bots or viewers from being chosen for the chat feature</div>
+            </div>
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px;display:flex;gap:24px">
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Claim duration</div>
+                <input value="{{ claimDuration }}" onChange="{{ claimDurationChange }}" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">0 means permanent</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Max chat balloons</div>
+                <input value="{{ maxChatBalloons }}" onChange="{{ maxChatBalloonsChange }}" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Max balloons shown at once</div>
+              </div>
+            </div>
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px;display:flex;gap:24px">
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Scan radius</div>
+                <input value="{{ scanRadius }}" onChange="{{ scanRadiusChange }}" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Meters around player to scan for targets</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Scan interval</div>
+                <input value="{{ scanInterval }}" onChange="{{ scanIntervalChange }}" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Seconds between chat scans</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="font:700 15px 'Alegreya Sans',sans-serif;color:#e8b060;letter-spacing:.04em;margin:22px 0 14px">CREATURES</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px;display:flex;gap:24px">
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Same faction</div>
+                <div onClick="{{ toggleSameFaction }}" style="width:46px;height:22px;background:{{ sameFactionTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ sameFactionKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box;flex:none">
+                  <div style="width:16px;height:16px;background:#e8e0d0"></div>
+                </div>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Spawned creatures won't attack each other</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Health/damage scaling</div>
+                <div onClick="{{ toggleHealthDamageScaling }}" style="width:46px;height:22px;background:{{ healthDamageScalingTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ healthDamageScalingKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box;flex:none">
+                  <div style="width:16px;height:16px;background:#e8e0d0"></div>
+                </div>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Scale spawned creatures by biome tier</div>
+              </div>
+            </div>
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px;display:flex;gap:24px">
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Damage scaling per biome tier</div>
+                <input value="{{ damageScalingPerTier }}" onChange="{{ damageScalingPerTierChange }}" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Multiplier added per biome tier</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Health scaling per biome tier</div>
+                <input value="{{ healthScalingPerTier }}" onChange="{{ healthScalingPerTierChange }}" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Multiplier added per biome tier</div>
+              </div>
+            </div>
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px;display:flex;gap:24px">
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Max creature amount</div>
+                <input value="{{ maxCreatureAmount }}" onChange="{{ maxCreatureAmountChange }}" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Max creatures spawned by the mod at once</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Max creature radius</div>
+                <input value="{{ maxCreatureRadius }}" onChange="{{ maxCreatureRadiusChange }}" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Meters from player creatures can spawn</div>
+              </div>
+            </div>
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px;display:flex;flex-direction:column;gap:8px">
+              <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Friendly follow radius with emote</div>
+              <input value="{{ friendlyFollowRadius }}" onChange="{{ friendlyFollowRadiusChange }}" style="max-width:200px;padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+              <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Meters friendly creatures will follow when emoted at</div>
+            </div>
+          </div>
+
+          <div style="font:700 15px 'Alegreya Sans',sans-serif;color:#e8b060;letter-spacing:.04em;margin:22px 0 14px">INDESTRUCTIBLE</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px;display:flex;gap:24px">
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Boats</div>
+                <div onClick="{{ toggleIndestructibleBoats }}" style="width:46px;height:22px;background:{{ indestructibleBoatsTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ indestructibleBoatsKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box;flex:none">
+                  <div style="width:16px;height:16px;background:#e8e0d0"></div>
+                </div>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Makes boats indestructible</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Chests</div>
+                <div onClick="{{ toggleIndestructibleChests }}" style="width:46px;height:22px;background:{{ indestructibleChestsTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ indestructibleChestsKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box;flex:none">
+                  <div style="width:16px;height:16px;background:#e8e0d0"></div>
+                </div>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Makes chests indestructible</div>
+              </div>
+            </div>
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px;display:flex;gap:24px">
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Portals</div>
+                <div onClick="{{ toggleIndestructiblePortals }}" style="width:46px;height:22px;background:{{ indestructiblePortalsTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ indestructiblePortalsKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box;flex:none">
+                  <div style="width:16px;height:16px;background:#e8e0d0"></div>
+                </div>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Makes portals indestructible</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Crops</div>
+                <div onClick="{{ toggleIndestructibleCrops }}" style="width:46px;height:22px;background:{{ indestructibleCropsTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ indestructibleCropsKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box;flex:none">
+                  <div style="width:16px;height:16px;background:#e8e0d0"></div>
+                </div>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Makes crops indestructible</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="font:700 15px 'Alegreya Sans',sans-serif;color:#e8b060;letter-spacing:.04em;margin:22px 0 14px">SAFEZONES</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px;display:flex;flex-direction:column;gap:8px">
+              <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Twitch Ward recipe</div>
+              <input value="{{ twitchWardRecipe }}" onChange="{{ twitchWardRecipeChange }}" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+              <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Comma-separated item:amount pairs required to craft the ward</div>
+            </div>
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px;display:flex;gap:24px">
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Ward burns spawned creatures</div>
+                <div onClick="{{ toggleWardBurns }}" style="width:46px;height:22px;background:{{ wardBurnsTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ wardBurnsKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box;flex:none">
+                  <div style="width:16px;height:16px;background:#e8e0d0"></div>
+                </div>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Damages mod-spawned creatures that enter the ward</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Ward pushes out spawned creatures</div>
+                <div onClick="{{ toggleWardPushes }}" style="width:46px;height:22px;background:{{ wardPushesTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ wardPushesKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box;flex:none">
+                  <div style="width:16px;height:16px;background:#e8e0d0"></div>
+                </div>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Knocks mod-spawned creatures back outside the ward</div>
+              </div>
+            </div>
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:16px;display:flex;gap:24px">
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Add safezone to traders</div>
+                <div onClick="{{ toggleSafezoneTraders }}" style="width:46px;height:22px;background:{{ safezoneTradersTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ safezoneTradersKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box;flex:none">
+                  <div style="width:16px;height:16px;background:#e8e0d0"></div>
+                </div>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Creates a safezone around trader NPCs</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="font:700 14px 'Alegreya Sans',sans-serif;color:#e8e0d0">Add safezone to boats</div>
+                <div onClick="{{ toggleSafezoneBoats }}" style="width:46px;height:22px;background:{{ safezoneBoatsTrackBg }};border:1px solid #00000060;display:flex;align-items:center;justify-content:{{ safezoneBoatsKnobAlign }};padding:2px;cursor:pointer;box-sizing:border-box;flex:none">
+                  <div style="width:16px;height:16px;background:#e8e0d0"></div>
+                </div>
+                <div style="font:400 13px 'Alegreya Sans',sans-serif;color:#a89d88">Only for player-built boats</div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isGroups }}" hint-placeholder-val="{{ false }}">
+          <sc-if value="{{ groupEditorOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#00000045;border:1px solid #ffffff15;padding:22px;max-width:640px">
+              <div style="font:700 15px 'Alegreya Sans',sans-serif;color:#f0a850;margin-bottom:16px">{{ groupEditorTitle }}</div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">
+                <div style="font:700 12px 'Alegreya Sans',sans-serif;color:#e8e0d0">Group name</div>
+                <input value="{{ groupDraft.name }}" onChange="{{ groupNameChange }}" style="padding:9px 12px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 14px 'Alegreya Sans',sans-serif"></input>
+              </div>
+              <div style="font:700 12px 'Alegreya Sans',sans-serif;color:#e8e0d0;margin-bottom:8px">Creatures</div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+                <sc-for list="{{ groupDraft.entries }}" as="en" hint-placeholder-count="3">
+                  <div style="display:flex;gap:8px;align-items:center">
+                    <select value="{{ en.prefab }}" onChange="{{ en.onPrefabChange }}" style="flex:1;padding:8px 10px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 13px 'Alegreya Sans',sans-serif">
+                      <sc-for list="{{ prefabOptions }}" as="pf" hint-placeholder-count="6">
+                        <option value="{{ pf }}">{{ pf }}</option>
+                      </sc-for>
+                    </select>
+                    <input value="{{ en.amount }}" onChange="{{ en.onAmountChange }}" style="width:70px;padding:8px 10px;background:#171d24;border:1px solid #ffffff20;color:#c8bfa8;font:400 13px 'Alegreya Sans',sans-serif"></input>
+                    <div onClick="{{ en.onRemove }}" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#2a1414;border:1px solid #b23a3a;color:#e05a5a;font:14px 'Alegreya Sans',sans-serif;cursor:pointer">&#10005;</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div onClick="{{ groupAddEntry }}" style="display:inline-block;padding:9px 20px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 13px 'Alegreya Sans',sans-serif;cursor:pointer;margin-bottom:20px">+ Add creature</div>
+              <div style="display:flex;justify-content:space-between">
+                <div onClick="{{ groupEditorCancel }}" style="padding:10px 20px;background:#171d24;border:1px solid #ffffff25;color:#c8bfa8;font:700 13px 'Alegreya Sans',sans-serif;cursor:pointer">Cancel</div>
+                <div onClick="{{ groupEditorSave }}" style="padding:10px 24px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 13px 'Alegreya Sans',sans-serif;cursor:pointer">{{ groupEditorSaveLabel }}</div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ groupEditorClosed }}" hint-placeholder-val="{{ true }}">
+            <div style="font:700 15px 'Alegreya Sans',sans-serif;color:#e8b060;letter-spacing:.04em;margin-bottom:14px">CREATURE GROUPS</div>
+            <div style="display:flex;gap:12px;margin-bottom:14px">
+              <input placeholder="Search groups..." value="{{ searchGroups }}" onChange="{{ searchGroupsChange }}" style="flex:none;width:350px;padding:10px 14px;background:#171d24;border:1px solid #ffffff20;color:#e8e0d0;font:400 14px 'Alegreya Sans',sans-serif"></input>
+              <div onClick="{{ openNewGroup }}" style="padding:10px 20px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 14px 'Alegreya Sans',sans-serif;cursor:pointer">+ New group</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1.3fr 5fr 0.8fr;padding:8px 12px;color:#a88a55;font:700 12px 'Alegreya Sans',sans-serif;letter-spacing:.04em">
+              <div>NAME</div><div>CREATURES</div><div></div>
+            </div>
+            <div style="flex:1;min-height:0;overflow-y:auto">
+              <sc-for list="{{ groups }}" as="g" hint-placeholder-count="6">
+              <div onMouseEnter="{{ g.onHover }}" onMouseLeave="{{ g.onLeave }}" style="display:grid;grid-template-columns:1.3fr 5fr 0.8fr;align-items:center;padding:12px;background:{{ g.zebra }}">
+                <div style="color:#e8b060;font:700 14px 'Alegreya Sans',sans-serif">{{ g.name }}</div>
+                <div style="color:#c8bfa8;font:400 13px/1.4 'Alegreya Sans',sans-serif;padding-right:12px">{{ g.count }} creature(s) &mdash; {{ g.creatures }}</div>
+                <div style="display:flex;gap:6px;justify-content:flex-end">
+                  <sc-if value="{{ g.hovered }}" hint-placeholder-val="{{ false }}">
+                    <div onClick="{{ g.onEdit }}" title="Edit" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:14px 'Alegreya Sans',sans-serif;cursor:pointer">&#9998;</div>
+                  </sc-if>
+                  <div onClick="{{ g.onDelete }}" title="Delete" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#2a1414;border:1px solid #b23a3a;color:#e05a5a;font:14px 'Alegreya Sans',sans-serif;cursor:pointer">&#10005;</div>
+                </div>
+              </div>
+            </sc-for>
+            </div>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ isViewers }}" hint-placeholder-val="{{ false }}">
+          <div style="font:700 15px 'Alegreya Sans',sans-serif;color:#e8b060;letter-spacing:.04em;margin-bottom:14px">VIEWERS</div>
+          <div style="display:flex;gap:12px;margin-bottom:14px">
+            <input placeholder="Search viewers..." value="{{ searchViewers }}" onChange="{{ searchViewersChange }}" style="flex:none;width:350px;padding:10px 14px;background:#171d24;border:1px solid #ffffff20;color:#e8e0d0;font:400 14px 'Alegreya Sans',sans-serif"></input>
+            <div onClick="{{ openNewViewer }}" style="padding:10px 20px;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:700 14px 'Alegreya Sans',sans-serif;cursor:pointer">+ New viewer</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1.8fr 1.2fr 1fr 0.8fr;padding:8px 12px;color:#a88a55;font:700 12px 'Alegreya Sans',sans-serif;letter-spacing:.04em">
+            <div>NAME</div><div>COLOR</div><div>EFFECTS</div><div></div>
+          </div>
+          <div style="flex:1;min-height:0;overflow-y:auto">
+            <sc-for list="{{ viewers }}" as="v" hint-placeholder-count="8">
+            <div onMouseEnter="{{ v.onHover }}" onMouseLeave="{{ v.onLeave }}" style="display:grid;grid-template-columns:1.8fr 1.2fr 1fr 0.8fr;align-items:center;padding:11px 12px;background:{{ v.zebra }}">
+              <div style="color:#e8e0d0;font:400 14px 'Alegreya Sans',sans-serif">{{ v.name }}</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:14px;height:14px;background:{{ v.color }};border:1px solid #00000060"></div>
+                <div style="color:#8a8070;font:400 12px 'Alegreya Sans',sans-serif">{{ v.color }}</div>
+              </div>
+              <div style="color:#8a8070;font:400 14px 'Alegreya Sans',sans-serif">-</div>
+              <div style="display:flex;gap:6px;justify-content:flex-end">
+                <sc-if value="{{ v.hovered }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ v.onEdit }}" title="Edit" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#171d24;border:1px solid #caa25a;color:#f0a850;font:14px 'Alegreya Sans',sans-serif;cursor:pointer">&#9998;</div>
+                </sc-if>
+                <div onClick="{{ v.onDelete }}" title="Delete" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#2a1414;border:1px solid #b23a3a;color:#e05a5a;font:14px 'Alegreya Sans',sans-serif;cursor:pointer">&#10005;</div>
+              </div>
+            </div>
+          </sc-for>
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    activeTab: 'Home',
+    redeemsEnabled: false,
+    chatEnabled: false,
+    settingsChatOn: false,
+    isLoggedIn: true,
+    loginPhase: 'idle',
+    cullingRange: 20,
+    claimDuration: 0,
+    scanInterval: 5,
+    scanRadius: 20,
+    maxChatBalloons: 8,
+    ignoreTames: false,
+    sameFaction: false,
+    healthDamageScaling: true,
+    damageScalingPerTier: 0.1,
+    healthScalingPerTier: 0.1,
+    maxCreatureAmount: 10,
+    maxCreatureRadius: 20,
+    friendlyFollowRadius: 5,
+    indestructibleBoats: false,
+    indestructibleChests: false,
+    indestructiblePortals: false,
+    indestructibleCrops: false,
+    autoResolveEnabled: true,
+    enableRedeemsOnLogin: true,
+    redeemPrefix: 'WBTI',
+    redeemHistoryCount: 47,
+    historyOpen: false,
+    historySearch: '',
+    historyPage: 1,
+    historyHoverIndex: null,
+    testRedeemsOn: true,
+    historyData: [
+      { viewer:'WizshBone', title:'WBTI Timestop', cost:300 },
+      { viewer:'WizshBone', title:'WBTI Spawn: Roots on the line!', cost:300 },
+      { viewer:'WizshBone', title:'WBTI Spawn: Log Rain', cost:265 },
+      { viewer:'WizshBone', title:'WBTI Flashbang!', cost:265 },
+      { viewer:'WizshBone', title:'WBTI Spawn: Doors of DOOM!', cost:300 },
+      { viewer:'WizshBone', title:'WBTI Detonate: Fizsh!', cost:300 },
+      { viewer:'WizshBone', title:'WBTI Spawn: Fizsh!', cost:300 }
+    ],
+    twitchWardRecipe: 'FineWood:5, GreydwarfEye:5, SurtlingCore:1',
+    wardBurns: false,
+    wardPushes: true,
+    safezoneTraders: false,
+    safezoneBoats: false,
+    redeemToggles: { 0:true,1:true,2:true,3:true,4:true,5:true },
+    wizardOpen: false,
+    wizardStep: 1,
+    wizardEditIndex: null,
+    wizardDraft: null,
+    wizardAdvancedOpen: false,
+
+    profiles: [
+      { name:'default', redeems:35 },
+      { name:'dwtest', redeems:3 },
+      { name:'NikOnTheLine', redeems:33 },
+      { name:'Phenazo', redeems:78 },
+      { name:'Phenazo Random', redeems:35 }
+    ],
+    activeProfileName: 'default',
+    searchProfiles: '',
+    modal: null,
+
+    redeemsData: [
+      { title:'Detonate: Fizsh!', type:'Detonate', cost:300, description:'Detonate fish around the streamer!' },
+      { title:'NUKE!', type:'Detonate', cost:1000000, description:'' },
+      { title:'Spawn: Doors of DOOM!', type:'Door', cost:300, description:'' },
+      { title:'Flashbang!', type:'Flashbang', cost:265, description:'' },
+      { title:'Spawn: Log Rain', type:'LogRain', cost:265, description:'' },
+      { title:'Spawn: Fader Meteors', type:'Meteor', cost:300, description:'' }
+    ],
+    searchRedeems: '',
+
+    groupsData: [
+      { name:'Greydwarfs', entries:[{prefab:'Greydwarf',amount:2},{prefab:'Greydwarf Shaman',amount:1},{prefab:'Greydwarf Brute',amount:1}] },
+      { name:'Skeletons', entries:[{prefab:'Skeleton',amount:1},{prefab:'Rancid Remains',amount:1},{prefab:'Ghost',amount:1}] },
+      { name:'Draugr', entries:[{prefab:'Draugr',amount:2},{prefab:'Draugr Elite',amount:1}] },
+      { name:'Goblins', entries:[{prefab:'Fuling',amount:1},{prefab:'Fuling Berserker',amount:1},{prefab:'Fuling Shaman',amount:1}] },
+      { name:'Seekers', entries:[{prefab:'Seeker',amount:1},{prefab:'Seeker Soldier',amount:1}] },
+      { name:'BlackForest', entries:['Greydwarf','Greydwarf Shaman','Greydwarf Brute','Skeleton','Rancid Remains','Ghost','Bear','Troll'].map(p=>({prefab:p,amount:1})) },
+      { name:'Swamp', entries:['Leech','Blob','Oozer','Surtling','Draugr','Draugr Elite','Wraith','Abomination'].map(p=>({prefab:p,amount:1})) },
+      { name:'Mountains', entries:['Bat','Drake','Fenring','Cultist','Stone Golem','Ulv','Wolf'].map(p=>({prefab:p,amount:1})) },
+      { name:'Plains', entries:['Fuling','Fuling Berserker','Fuling Shaman','Growth','Deathsquito','Lox'].map(p=>({prefab:p,amount:1})) }
+    ],
+    searchGroups: '',
+    groupEditorMode: null,
+    groupEditingIndex: null,
+    groupDraft: null,
+
+    viewersData: [
+      { name:'1mmun1tyy', color:'#78D662' },
+      { name:'beardedfeo', color:'#FF69B4' },
+      { name:'bellakaramella', color:'#3489EB' },
+      { name:'cloudedrogue', color:'#c94040' },
+      { name:'crys_v', color:'#f36aec' },
+      { name:'daitjen', color:'#8a9199' },
+      { name:'dragonmancer123456789', color:'#e04444' },
+      { name:'durdyjay', color:'#FF004C' },
+      { name:'firgaardttv', color:'#c9a869' }
+    ],
+    searchViewers: '',
+    profileHoverIndex: null,
+    redeemHoverIndex: null,
+    groupHoverIndex: null,
+    toasts: []
+  };
+
+  noop = () => {};
+  openHistory = () => this.setState({ historyOpen: true, historyPage: 1, historySearch: '' });
+  closeHistory = () => this.setState({ historyOpen: false });
+  historySearchChange = (e) => this.setState({ historySearch: e.target.value });
+  historyPrevPage = () => this.setState(st => ({ historyPage: Math.max(1, st.historyPage - 1) }));
+  historyNextPage = () => this.setState(st => ({ historyPage: st.historyPage + 1 }));
+  historyCompleteAll = () => this.setState(st => ({ historyData: st.historyData.map(h => ({ ...h, status: 'completed' })) }));
+  historyRefundAll = () => this.setState(st => ({ historyData: st.historyData.map(h => ({ ...h, status: 'refunded' })) }));
+  toggleTestRedeems = () => this.setState(st => ({ testRedeemsOn: !st.testRedeemsOn }));
+  historyCompleteOne = (i) => this.setState(st => ({ historyData: st.historyData.map((h,idx) => idx === i ? { ...h, status: 'completed' } : h) }));
+  historyRefundOne = (i) => this.setState(st => ({ historyData: st.historyData.map((h,idx) => idx === i ? { ...h, status: 'refunded' } : h) }));
+
+  // ---- toasts ----
+  showToast = (message, type = 'success') => {
+    const id = Date.now() + Math.random();
+    this.setState(st => ({ toasts: [...st.toasts, { id, message, type }] }));
+    setTimeout(() => this.setState(st => ({ toasts: st.toasts.filter(t => t.id !== id) })), 3400);
+  };
+
+  // ---- generic modal ----
+  openModal = (m) => this.setState({ modal: m });
+  closeModal = () => this.setState({ modal: null });
+  modalValueChange = (e) => { const v = e.target.value; this.setState(st => ({ modal: { ...st.modal, value: v } })); };
+  modalColorChange = (e) => { const v = e.target.value; this.setState(st => ({ modal: { ...st.modal, color: v } })); };
+  modalTargetProfileChange = (e) => { const v = e.target.value; this.setState(st => ({ modal: { ...st.modal, targetProfile: v } })); };
+  confirmModal = () => {
+    const m = this.state.modal;
+    if (!m) return;
+    if (m.kind === 'profileRename') {
+      this.setState(st => ({ profiles: st.profiles.map(p => p.name === m.name ? { ...p, name: m.value } : p), activeProfileName: st.activeProfileName === m.name ? m.value : st.activeProfileName, modal: null }));
+      this.showToast(`Profile renamed to '${m.value}'`);
+    } else if (m.kind === 'profileCopy' || m.kind === 'profileImport') {
+      this.setState(st => {
+        if (m.kind === 'profileImport' && m.value === m.name) return { modal: null };
+        const src = st.profiles.find(p => p.name === m.name);
+        return { profiles: [...st.profiles, { name: m.value, redeems: src ? src.redeems : 0 }], modal: null };
+      });
+      if (m.kind === 'profileImport' && m.value === m.name) this.showToast(`Profile '${m.name}' updated from import`);
+      else if (m.kind === 'profileImport') this.showToast(`Imported as new profile '${m.value}'`);
+      else this.showToast(`Profile copied to '${m.value}'`);
+    } else if (m.kind === 'profileNew') {
+      if (!m.value.trim()) { this.showToast('Profile name cannot be empty', 'error'); return; }
+      this.setState(st => ({ profiles: [...st.profiles, { name: m.value, redeems: 0 }], modal: null }));
+      this.showToast(`Profile '${m.value}' created`);
+    } else if (m.kind === 'profileDelete') {
+      this.setState(st => ({ profiles: st.profiles.filter(p => p.name !== m.name), modal: null }));
+      this.showToast(`Profile '${m.name}' deleted`);
+    } else if (m.kind === 'redeemDelete') {
+      this.setState(st => ({ redeemsData: st.redeemsData.filter((_,i) => i !== m.index), modal: null }));
+      this.showToast(`Redeem '${m.name}' deleted`);
+    } else if (m.kind === 'redeemCopy') {
+      this.setState({ modal: null });
+      this.showToast(`Redeem copied to profile '${m.targetProfile}'`);
+    } else if (m.kind === 'groupDelete') {
+      this.setState(st => ({ groupsData: st.groupsData.filter((_,i) => i !== m.index), modal: null }));
+      this.showToast(`Creature group '${m.name}' deleted`);
+    } else if (m.kind === 'viewerEdit') {
+      this.setState(st => ({ viewersData: st.viewersData.map((v,i) => i === m.index ? { name: m.value, color: m.color } : v), modal: null }));
+      this.showToast(`Viewer '${m.value}' updated`);
+    } else if (m.kind === 'viewerNew') {
+      this.setState(st => ({ viewersData: [...st.viewersData, { name: m.value, color: m.color }], modal: null }));
+      this.showToast(`Viewer '${m.value}' added`);
+    } else if (m.kind === 'viewerDelete') {
+      this.setState(st => ({ viewersData: st.viewersData.filter((_,i) => i !== m.index), modal: null }));
+      this.showToast(`Viewer '${m.name}' deleted`);
+    }
+  };
+
+  openNewProfile = () => this.openModal({ kind:'profileNew', value:'' });
+  openImportProfile = () => this.openModal({ kind:'profileImport', name:'', value:'' });
+  activeProfileSelectChange = (e) => {
+    const name = e.target.value;
+    this.setState({ activeProfileName: name });
+    this.showToast(`Switched to profile '${name}'`);
+  };
+  searchProfilesChange = (e) => this.setState({ searchProfiles: e.target.value });
+  searchRedeemsChange = (e) => this.setState({ searchRedeems: e.target.value });
+  searchGroupsChange = (e) => this.setState({ searchGroups: e.target.value });
+  searchViewersChange = (e) => this.setState({ searchViewers: e.target.value });
+  openNewViewer = () => this.openModal({ kind:'viewerNew', value:'', color:'#ffffff' });
+  toggleLoginDemo = () => {
+    if (this.state.isLoggedIn) { this.setState({ isLoggedIn: false, loginPhase: 'idle' }); return; }
+    if (this.state.loginPhase !== 'idle') return;
+    this.setState({ loginPhase: 'waiting' });
+    setTimeout(() => {
+      this.setState({ loginPhase: 'fetching' });
+      setTimeout(() => this.setState({ isLoggedIn: true, loginPhase: 'idle' }), 4200);
+    }, 4600);
+  };
+
+
+  // ---- redeem wizard (also used for editing) ----
+  blankWizardDraft = () => ({ type:null, description:'', title:'', cost:'', detonateType:null, detonateValueInput:'', detonateValues:[], radius:10, announceMessage:'', damageBasedOnMaxHealth:true, damageMaxHealthPercent:'100', damageArmorPercent:'0', damageBlunt:'', damageFire:'', damageShips:false, damageStructures:false, damageBosses:false, damageTerrain:false, bgColor: this.randomColor(), cooldown:'', addCondition:'', removeCondition:'', ignoreSafezone:false, userInput:false });
+  randomColor = () => {
+    const colors = ['#ff8c1a','#a855f7','#22c55e','#3b82f6','#ef4444','#eab308'];
+    return colors[Math.floor(Math.random() * colors.length)];
+  };
+  openNewRedeem = () => this.setState({ wizardOpen: true, wizardStep: 1, wizardEditIndex: null, wizardDraft: this.blankWizardDraft() });
+  stripPrefix = (title) => {
+    const p = this.state.redeemPrefix || '';
+    if (!p) return title;
+    const m = title.match(new RegExp('^' + p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[:\\s]*'));
+    return m ? title.slice(m[0].length) : title;
+  };
+  openEditRedeem = (i) => {
+    const r = this.state.redeemsData[i];
+    this.setState({ wizardOpen: true, wizardStep: 2, wizardEditIndex: i, wizardDraft: {
+      ...this.blankWizardDraft(), type:r.type, description:r.description||'', title:this.stripPrefix(r.title), cost:r.cost,
+      bgColor: r.bgColor || this.randomColor(), cooldown: r.cooldown ?? '', addCondition: r.addCondition||'', removeCondition: r.removeCondition||'',
+      ignoreSafezone: !!r.ignoreSafezone, userInput: !!r.userInput
+    } });
+  };
+  wizardDescriptionChange = (e) => { const v = e.target.value; this.setState(st => ({ wizardDraft: { ...st.wizardDraft, description: v } })); };
+  wizardTitleChange = (e) => { const v = e.target.value; this.setState(st => ({ wizardDraft: { ...st.wizardDraft, title: v } })); };
+  wizardCostChange = (e) => { const v = e.target.value; this.setState(st => ({ wizardDraft: { ...st.wizardDraft, cost: v } })); };
+  wizardDetonateValueInputChange = (e) => { const v = e.target.value; this.setState(st => ({ wizardDraft: { ...st.wizardDraft, detonateValueInput: v } })); };
+  wizardAddDetonateValue = () => this.setState(st => {
+    const v = (st.wizardDraft.detonateValueInput || '').trim();
+    if (!v) return {};
+    return { wizardDraft: { ...st.wizardDraft, detonateValues: [...st.wizardDraft.detonateValues, v], detonateValueInput: '' } };
+  });
+  wizardRemoveDetonateValue = (i) => this.setState(st => {
+    if (st.wizardDraft.detonateValues.length <= 1) return {};
+    return { wizardDraft: { ...st.wizardDraft, detonateValues: st.wizardDraft.detonateValues.filter((_,idx) => idx !== i) } };
+  });
+  wizardSetDetonateType = (t) => this.setState(st => ({ wizardDraft: { ...st.wizardDraft, detonateType: t, detonateValues: [t] } }));
+  wizardRadiusChange = (e) => { const v = e.target.value; this.setState(st => ({ wizardDraft: { ...st.wizardDraft, radius: v } })); };
+  wizardAnnounceMessageChange = (e) => { const v = e.target.value; this.setState(st => ({ wizardDraft: { ...st.wizardDraft, announceMessage: v } })); };
+  wizardToggleDamageBasedOnMaxHealth = () => this.setState(st => ({ wizardDraft: { ...st.wizardDraft, damageBasedOnMaxHealth: !st.wizardDraft.damageBasedOnMaxHealth } }));
+  wizardDamageMaxHealthPercentChange = (e) => { const v = e.target.value; this.setState(st => ({ wizardDraft: { ...st.wizardDraft, damageMaxHealthPercent: v } })); };
+  wizardDamageArmorPercentChange = (e) => { const v = e.target.value; this.setState(st => ({ wizardDraft: { ...st.wizardDraft, damageArmorPercent: v } })); };
+  wizardDamageBluntChange = (e) => { const v = e.target.value; this.setState(st => ({ wizardDraft: { ...st.wizardDraft, damageBlunt: v } })); };
+  wizardDamageFireChange = (e) => { const v = e.target.value; this.setState(st => ({ wizardDraft: { ...st.wizardDraft, damageFire: v } })); };
+  wizardToggleDamageFlag = (key) => this.setState(st => ({ wizardDraft: { ...st.wizardDraft, [key]: !st.wizardDraft[key] } }));
+  wizardCooldownChange = (e) => { const v = e.target.value; this.setState(st => ({ wizardDraft: { ...st.wizardDraft, cooldown: v } })); };
+  wizardBgColorChange = (e) => { const v = e.target.value; this.setState(st => ({ wizardDraft: { ...st.wizardDraft, bgColor: v } })); };
+  wizardAddConditionChange = (e) => { const v = e.target.value; this.setState(st => ({ wizardDraft: { ...st.wizardDraft, addCondition: v } })); };
+  wizardRemoveConditionChange = (e) => { const v = e.target.value; this.setState(st => ({ wizardDraft: { ...st.wizardDraft, removeCondition: v } })); };
+  wizardToggleIgnoreSafezone = () => this.setState(st => ({ wizardDraft: { ...st.wizardDraft, ignoreSafezone: !st.wizardDraft.ignoreSafezone } }));
+  wizardToggleUserInput = () => this.setState(st => ({ wizardDraft: { ...st.wizardDraft, userInput: !st.wizardDraft.userInput } }));
+  wizardToggleAdvanced = () => this.setState(st => ({ wizardAdvancedOpen: !st.wizardAdvancedOpen }));
+  wizardBack = () => {
+    const isEdit = this.state.wizardEditIndex !== null;
+    const floor = isEdit ? 2 : 1;
+    if (this.state.wizardStep === floor) this.setState({ wizardOpen: false, wizardDraft: null });
+    else this.setState(st => ({ wizardStep: st.wizardStep - 1 }));
+  };
+  wizardNext = () => {
+    if (this.state.wizardStep === 3) {
+      const d = this.state.wizardDraft;
+      const cost = Number(d.cost) || 0;
+      const prefix = this.state.redeemPrefix || '';
+      const fullTitle = prefix ? `${prefix} ${d.title}` : d.title;
+      const shared = {
+        title: fullTitle, cost, description: d.description, bgColor: d.bgColor, cooldown: d.cooldown,
+        addCondition: d.addCondition, removeCondition: d.removeCondition, ignoreSafezone: d.ignoreSafezone, userInput: d.userInput
+      };
+      if (this.state.wizardEditIndex === null) {
+        this.setState(st => ({
+          redeemsData: [...st.redeemsData, { ...shared, type: d.type || 'Custom' }],
+          wizardOpen: false, wizardDraft: null
+        }));
+        this.showToast(`Redeem '${fullTitle}' created`);
+      } else {
+        this.setState(st => ({
+          redeemsData: st.redeemsData.map((r,i) => i === st.wizardEditIndex ? { ...r, ...shared, type: d.type || r.type } : r),
+          wizardOpen: false, wizardDraft: null, wizardEditIndex: null
+        }));
+        this.showToast(`Redeem '${fullTitle}' updated`);
+      }
+    } else {
+      this.setState(st => ({ wizardStep: st.wizardStep + 1 }));
+    }
+  };
+
+  // ---- creature groups ----
+  blankGroupEntry = () => ({ prefab:'Greydwarf', amount:1 });
+  openEditGroup = (i) => this.setState(st => ({
+    groupEditorMode:'edit', groupEditingIndex: i,
+    groupDraft: { name: st.groupsData[i].name, entries: st.groupsData[i].entries.map(en => ({ ...en })) }
+  }));
+  openNewGroup = () => this.setState({ groupEditorMode:'new', groupEditingIndex: null, groupDraft: { name:'', entries:[] } });
+  groupEditorCancel = () => this.setState({ groupEditorMode: null, groupEditingIndex: null, groupDraft: null });
+  groupEditorSave = () => {
+    const d = this.state.groupDraft;
+    if (this.state.groupEditorMode === 'new') {
+      this.setState(st => ({ groupsData: [...st.groupsData, d], groupEditorMode: null, groupDraft: null }));
+      this.showToast(`Creature group '${d.name}' created`);
+    } else {
+      this.setState(st => ({
+        groupsData: st.groupsData.map((g,i) => i === st.groupEditingIndex ? d : g),
+        groupEditorMode: null, groupEditingIndex: null, groupDraft: null
+      }));
+      this.showToast(`Creature group '${d.name}' updated`);
+    }
+  };
+  groupNameChange = (e) => { const v = e.target.value; this.setState(st => ({ groupDraft: { ...st.groupDraft, name: v } })); };
+  groupAddEntry = () => this.setState(st => ({ groupDraft: { ...st.groupDraft, entries: [...st.groupDraft.entries, this.blankGroupEntry()] } }));
+  updateGroupEntry = (i, patch) => this.setState(st => ({
+    groupDraft: { ...st.groupDraft, entries: st.groupDraft.entries.map((en,idx) => idx === i ? { ...en, ...patch } : en) }
+  }));
+  removeGroupEntry = (i) => this.setState(st => ({ groupDraft: { ...st.groupDraft, entries: st.groupDraft.entries.filter((_,idx) => idx !== i) } }));
+
+  renderVals() {
+    const s = this.state;
+    const groupsDef = [
+      ['General', ['Home','Profiles','Viewers','Debug']],
+      [`Profile: ${s.activeProfileName}`, ['Redeems','Settings','Creature groups']]
+    ];
+    const navGroups = groupsDef.map(([label, items]) => ({
+      label,
+      items: items.map(name => ({
+        label: name,
+        onClick: () => this.setState({ activeTab: name, historyOpen: false }),
+        bg: s.activeTab === name ? '#00000050' : 'transparent',
+        borderColor: s.activeTab === name ? '#f0a850' : 'transparent',
+        color: s.activeTab === name ? '#e8b060' : '#c8bfa8'
+      }))
+    }));
+
+    const profiles = s.profiles.map((p,i) => ({p,i}))
+      .filter(({p}) => p.name.toLowerCase().includes(s.searchProfiles.toLowerCase()))
+      .map(({p,i}) => {
+        const isActive = p.name === s.activeProfileName;
+        return {
+          ...p,
+          isActive,
+          nameColor: isActive ? '#e8b060' : '#e8e0d0',
+          nameWeight: isActive ? 700 : 400,
+          zebra: i % 2 ? 'transparent' : '#00000030',
+          hovered: s.profileHoverIndex === i,
+          onHover: () => this.setState({ profileHoverIndex: i }),
+          onLeave: () => this.setState({ profileHoverIndex: null }),
+          onSelect: () => this.setState({ activeProfileName: p.name }),
+          onCopy: (e) => { e.stopPropagation(); this.openModal({ kind:'profileCopy', name: p.name, value: p.name + ' - copy 1' }); },
+          onExport: (e) => { e.stopPropagation(); this.showToast(`Profile '${p.name}' exported`); },
+          onSync: (e) => { e.stopPropagation(); this.showToast(`Profile '${p.name}' synced`); },
+          onEdit: (e) => { e.stopPropagation(); this.openModal({ kind:'profileRename', name: p.name, value: p.name }); },
+          canDelete: !isActive,
+          onDelete: (e) => { e.stopPropagation(); this.openModal({ kind:'profileDelete', name: p.name, value: p.name }); }
+        };
+      });
+
+    const effectDescriptions = {
+      Detonate: 'Spawns an explosive charge on the streamer that detonates after a short fuse, dealing area damage.',
+      Door: 'Spawns a stack of doors around the streamer, boxing them in until they break out.',
+      Flashbang: 'Triggers a blinding flash and loud bang near the streamer, disorienting them briefly.',
+      LogRain: 'Drops a shower of logs from the sky above the streamer.',
+      Meteor: 'Calls down a meteor strike near the streamer\u2019s position.',
+      'Spawn Creature': 'Spawns one or more creatures from a chosen group near the streamer.'
+    };
+    const redeemsList = s.redeemsData.map((r,i) => ({r,i}))
+      .filter(({r}) => (r.title + ' ' + r.type).toLowerCase().includes(s.searchRedeems.toLowerCase()))
+      .map(({r,i}) => {
+        const on = s.redeemToggles[i];
+        const displayTitle = s.redeemPrefix ? `${s.redeemPrefix} ${this.stripPrefix(r.title)}` : r.title;
+        return {
+          ...r, title: displayTitle, zebra: i % 2 ? 'transparent' : '#00000030',
+          hovered: s.redeemHoverIndex === i,
+          onHover: () => this.setState({ redeemHoverIndex: i }),
+          onLeave: () => this.setState({ redeemHoverIndex: null }),
+          typeHovered: s.redeemTypeHoverIndex === i,
+          typeDescription: effectDescriptions[r.type] || '',
+          onTypeHover: () => this.setState({ redeemTypeHoverIndex: i }),
+          onTypeLeave: () => this.setState({ redeemTypeHoverIndex: null }),
+          onToggle: () => this.setState(st => ({ redeemToggles: { ...st.redeemToggles, [i]: !st.redeemToggles[i] } })),
+          trackBg: on ? '#3a6b3f' : '#3a2020',
+          knobAlign: on ? 'flex-end' : 'flex-start',
+          onEdit: () => this.openEditRedeem(i),
+          onCopy: () => this.openModal({ kind:'redeemCopy', name: r.title, value: r.title + ' - copy', targetProfile: s.activeProfileName }),
+          onDelete: () => this.openModal({ kind:'redeemDelete', name: r.title, index: i })
+        };
+      });
+
+    const groups = s.groupsData.map((g,i) => ({g,i}))
+      .filter(({g}) => g.name.toLowerCase().includes(s.searchGroups.toLowerCase()))
+      .map(({g,i}) => ({
+        name: g.name,
+        count: g.entries.length,
+        creatures: g.entries.map(en => en.prefab).join(', '),
+        zebra: i % 2 ? 'transparent' : '#00000030',
+        hovered: s.groupHoverIndex === i,
+        onHover: () => this.setState({ groupHoverIndex: i }),
+        onLeave: () => this.setState({ groupHoverIndex: null }),
+        onEdit: () => this.openEditGroup(i),
+        onDelete: () => this.openModal({ kind:'groupDelete', name: g.name, index: i })
+      }));
+
+    const viewers = s.viewersData.map((v,i) => ({v,i}))
+      .filter(({v}) => v.name.toLowerCase().includes(s.searchViewers.toLowerCase()))
+      .map(({v,i}) => ({
+        hovered: s.viewerHoverIndex === i,
+        onHover: () => this.setState({ viewerHoverIndex: i }),
+        onLeave: () => this.setState({ viewerHoverIndex: null }),
+        ...v,
+        zebra: i % 2 ? 'transparent' : '#00000030',
+        onEdit: () => this.openModal({ kind:'viewerEdit', name: v.name, value: v.name, color: v.color, index: i }),
+        onDelete: () => this.openModal({ kind:'viewerDelete', name: v.name, index: i })
+      }));
+
+    const effectNames = ['Detonate','Flashbang','Mist','Doors of Doom','Windmills of Death','Smite','Log Rain','Meteors','Trap','Roots','Spawn Creature','Status Effect','Surprise Chest','Terrain Edit','TimeStop','Weather'];
+    const effectTypes = s.wizardDraft ? effectNames.map(name => ({
+      label: name,
+      onClick: () => this.setState(st => ({ wizardDraft: { ...st.wizardDraft, type: name } })),
+      bg: s.wizardDraft.type === name ? '#2a2016' : '#171d24',
+      border: s.wizardDraft.type === name ? '#f0a850' : '#ffffff25',
+      color: s.wizardDraft.type === name ? '#f0a850' : '#c8bfa8'
+    })) : [];
+
+    const isEdit = s.wizardEditIndex !== null;
+    const wizardSteps = (isEdit ? [2,3] : [1,2,3]).map(n => ({ bg: n <= s.wizardStep ? '#f0a850' : '#ffffff20' }));
+    const stepTitles = { 1: 'CHOOSE AN EFFECT', 2: 'CONFIGURE PARAMETERS', 3: 'SETUP CHANNEL POINT REWARD' };
+
+    const prefabOptions = ['Greydwarf','Greydwarf Shaman','Greydwarf Brute','Skeleton','Rancid Remains','Ghost','Draugr','Draugr Elite','Fuling','Fuling Berserker','Fuling Shaman','Seeker','Seeker Soldier','Bear','Troll','Leech','Blob','Oozer','Surtling','Wraith','Abomination','Bat','Drake','Fenring','Cultist','Stone Golem','Ulv','Wolf','Growth','Deathsquito','Lox'];
+
+    const modalTitles = {
+      profileRename:'Rename Profile', profileCopy:'Copy Profile', profileImport:'Import Profile', profileNew:'New Profile', profileDelete:'Delete Profile',
+      redeemDelete:'Delete Redeem', redeemCopy:'Copy Redeem',
+      groupDelete:'Delete Creature Group',
+      viewerEdit:'Edit Viewer', viewerNew:'New Viewer', viewerDelete:'Delete Viewer'
+    };
+    const isConfirmKind = k => k === 'profileDelete' || k === 'redeemDelete' || k === 'groupDelete' || k === 'viewerDelete';
+    const modalMessages = {
+      profileRename:'Enter a new name for this profile.', profileCopy:'Enter a name for the new profile copy.',
+      profileImport: s.modal && s.modal.name ? 'Leave the name unchanged to update the existing profile.\nChange it to import as a new profile.' : 'Enter a name for the imported profile.',
+      profileNew:'Enter a name for the new profile.',
+      redeemCopy: s.modal ? `Copy '${s.modal.name}' to profile:` : ''
+    };
+
+    return {
+      navGroups,
+      isHome: s.activeTab === 'Home',
+      isDebug: s.activeTab === 'Debug',
+      isProfiles: s.activeTab === 'Profiles',
+      isRedeems: s.activeTab === 'Redeems',
+      isSettings: s.activeTab === 'Settings',
+      isGroups: s.activeTab === 'Creature groups',
+      isViewers: s.activeTab === 'Viewers',
+      username: 'DeathWizsh',
+      loginDotColor: s.isLoggedIn ? '#5ad06a' : (s.loginPhase === 'idle' ? '#e05a5a' : '#f0a850'),
+      loginTextColor: s.isLoggedIn ? '#e8e0d0' : (s.loginPhase === 'idle' ? '#f0a850' : '#f0a850'),
+      showLoginButton: !s.isLoggedIn && s.loginPhase === 'idle',
+      showLogoutButton: s.isLoggedIn,
+      showReopenBrowserButton: s.loginPhase === 'waiting',
+      showResetLoginButton: s.loginPhase === 'fetching',
+      reopenBrowser: this.toggleLoginDemo,
+      resetLogin: () => this.setState({ isLoggedIn: false, loginPhase: 'idle' }),
+      loginStatusLabel: s.isLoggedIn ? 'Connected as DeathWizsh'
+        : s.loginPhase === 'waiting' ? 'Waiting for authorization \u2014 CHECK YOUR BROWSER!'
+        : s.loginPhase === 'fetching' ? 'Fetching profile\u2026'
+        : 'Not connected',
+      toggleLoginDemo: this.toggleLoginDemo,
+      activeProfileName: s.activeProfileName,
+      activeProfileSelectChange: this.activeProfileSelectChange,
+      profileNames: s.profiles.map(p => p.name),
+      redeemsStatusLabel: s.redeemsEnabled ? 'Enabled' : 'Disabled',
+      redeemsStatusColor: s.redeemsEnabled ? '#7fe08a' : '#e05a5a',
+      redeemsTrackBg: s.redeemsEnabled ? '#3a6b3f' : '#3a2020',
+      redeemsKnobAlign: s.redeemsEnabled ? 'flex-end' : 'flex-start',
+      toggleRedeems: () => this.setState(st => ({ redeemsEnabled: !st.redeemsEnabled })),
+      chatTrackBg: s.chatEnabled ? '#3a6b3f' : '#3a2020',
+      chatKnobAlign: s.chatEnabled ? 'flex-end' : 'flex-start',
+      toggleChat: () => this.setState(st => ({ chatEnabled: !st.chatEnabled })),
+      settingsTrackBg: s.settingsChatOn ? '#3a6b3f' : '#3a2020',
+      settingsKnobAlign: s.settingsChatOn ? 'flex-end' : 'flex-start',
+      toggleSettingsChat: () => this.setState(st => ({ settingsChatOn: !st.settingsChatOn })),
+      goRedeems: () => this.setState({ activeTab: 'Redeems' }),
+      resetSafezone: () => this.showToast('Safezone registration reset'),
+      redeemHistoryCount: s.redeemHistoryCount,
+      openHistory: this.openHistory,
+      closeHistory: this.closeHistory,
+      historyOpen: s.historyOpen,
+      historySearch: s.historySearch,
+      historySearchChange: this.historySearchChange,
+      historyPage: s.historyPage,
+      historyPageCount: 1,
+      historyPrevPage: this.historyPrevPage,
+      historyNextPage: this.historyNextPage,
+      historyCompleteAll: this.historyCompleteAll,
+      historyRefundAll: this.historyRefundAll,
+      toggleTestRedeems: this.toggleTestRedeems,
+      testRedeemsTrackBg: s.testRedeemsOn ? '#3a6b3f' : '#3a2020',
+      testRedeemsKnobAlign: s.testRedeemsOn ? 'flex-end' : 'flex-start',
+      toasts: s.toasts.map(t => ({
+        message: t.message,
+        border: t.type === 'error' ? '#b23a3a' : '#4fa06a',
+        color: t.type === 'error' ? '#e05a5a' : '#7fe08a',
+        icon: t.type === 'error' ? '\u2715' : '\u2713'
+      })),
+      historyEntries: s.historyData
+        .map((h,i) => ({h,i}))
+        .filter(({h}) => (h.viewer + ' ' + h.title).toLowerCase().includes(s.historySearch.toLowerCase()))
+        .map(({h,i}) => ({
+          viewer: h.viewer, title: h.title, cost: h.cost,
+          zebra: i % 2 ? 'transparent' : '#00000030',
+          hovered: s.historyHoverIndex === i,
+          onHover: () => this.setState({ historyHoverIndex: i }),
+          onLeave: () => this.setState({ historyHoverIndex: null }),
+          onComplete: () => this.historyCompleteOne(i),
+          onRefund: () => this.historyRefundOne(i),
+          showActions: !h.status,
+          statusLabel: h.status === 'completed' ? 'Completed' : h.status === 'refunded' ? 'Refunded' : '',
+          textColor: h.status === 'completed' ? '#f0a850' : h.status === 'refunded' ? '#7fe08a' : '#e8e0d0'
+        })),
+      enabledRedeemsCount: Object.values(s.redeemToggles).filter(Boolean).length,
+      settingsChatStatusLabel: s.settingsChatOn ? 'Enabled' : 'Disabled',
+      settingsChatStatusColor: s.settingsChatOn ? '#7fe08a' : '#e05a5a',
+      cullingRange: s.cullingRange,
+      claimDuration: s.claimDuration,
+      cullingRangeChange: (e) => this.setState({ cullingRange: e.target.value }),
+      claimDurationChange: (e) => this.setState({ claimDuration: e.target.value }),
+      scanInterval: s.scanInterval,
+      scanRadius: s.scanRadius,
+      maxChatBalloons: s.maxChatBalloons,
+      scanIntervalChange: (e) => this.setState({ scanInterval: e.target.value }),
+      scanRadiusChange: (e) => this.setState({ scanRadius: e.target.value }),
+      maxChatBalloonsChange: (e) => this.setState({ maxChatBalloons: e.target.value }),
+      ignoreTamesTrackBg: s.ignoreTames ? '#3a6b3f' : '#3a2020',
+      ignoreTamesKnobAlign: s.ignoreTames ? 'flex-end' : 'flex-start',
+      toggleIgnoreTames: () => this.setState(st => ({ ignoreTames: !st.ignoreTames })),
+      sameFactionTrackBg: s.sameFaction ? '#3a6b3f' : '#3a2020',
+      sameFactionKnobAlign: s.sameFaction ? 'flex-end' : 'flex-start',
+      toggleSameFaction: () => this.setState(st => ({ sameFaction: !st.sameFaction })),
+      healthDamageScalingTrackBg: s.healthDamageScaling ? '#3a6b3f' : '#3a2020',
+      healthDamageScalingKnobAlign: s.healthDamageScaling ? 'flex-end' : 'flex-start',
+      toggleHealthDamageScaling: () => this.setState(st => ({ healthDamageScaling: !st.healthDamageScaling })),
+      damageScalingPerTier: s.damageScalingPerTier,
+      healthScalingPerTier: s.healthScalingPerTier,
+      damageScalingPerTierChange: (e) => this.setState({ damageScalingPerTier: e.target.value }),
+      healthScalingPerTierChange: (e) => this.setState({ healthScalingPerTier: e.target.value }),
+      maxCreatureAmount: s.maxCreatureAmount,
+      maxCreatureRadius: s.maxCreatureRadius,
+      maxCreatureAmountChange: (e) => this.setState({ maxCreatureAmount: e.target.value }),
+      maxCreatureRadiusChange: (e) => this.setState({ maxCreatureRadius: e.target.value }),
+      friendlyFollowRadius: s.friendlyFollowRadius,
+      friendlyFollowRadiusChange: (e) => this.setState({ friendlyFollowRadius: e.target.value }),
+      indestructibleBoatsTrackBg: s.indestructibleBoats ? '#3a6b3f' : '#3a2020',
+      indestructibleBoatsKnobAlign: s.indestructibleBoats ? 'flex-end' : 'flex-start',
+      toggleIndestructibleBoats: () => this.setState(st => ({ indestructibleBoats: !st.indestructibleBoats })),
+      indestructibleChestsTrackBg: s.indestructibleChests ? '#3a6b3f' : '#3a2020',
+      indestructibleChestsKnobAlign: s.indestructibleChests ? 'flex-end' : 'flex-start',
+      toggleIndestructibleChests: () => this.setState(st => ({ indestructibleChests: !st.indestructibleChests })),
+      indestructiblePortalsTrackBg: s.indestructiblePortals ? '#3a6b3f' : '#3a2020',
+      indestructiblePortalsKnobAlign: s.indestructiblePortals ? 'flex-end' : 'flex-start',
+      toggleIndestructiblePortals: () => this.setState(st => ({ indestructiblePortals: !st.indestructiblePortals })),
+      indestructibleCropsTrackBg: s.indestructibleCrops ? '#3a6b3f' : '#3a2020',
+      indestructibleCropsKnobAlign: s.indestructibleCrops ? 'flex-end' : 'flex-start',
+      toggleIndestructibleCrops: () => this.setState(st => ({ indestructibleCrops: !st.indestructibleCrops })),
+      autoResolveEnabled: s.autoResolveEnabled,
+      autoResolveLabel: s.autoResolveEnabled ? 'Enabled' : 'Disabled',
+      autoResolveColor: s.autoResolveEnabled ? '#7fe08a' : '#e05a5a',
+      autoResolveTrackBg: s.autoResolveEnabled ? '#3a6b3f' : '#3a2020',
+      autoResolveKnobAlign: s.autoResolveEnabled ? 'flex-end' : 'flex-start',
+      toggleAutoResolve: () => this.setState(st => ({ autoResolveEnabled: !st.autoResolveEnabled })),
+      enableRedeemsOnLogin: s.enableRedeemsOnLogin,
+      enableRedeemsOnLoginLabel: s.enableRedeemsOnLogin ? 'Enabled' : 'Disabled',
+      enableRedeemsOnLoginColor: s.enableRedeemsOnLogin ? '#7fe08a' : '#e05a5a',
+      enableRedeemsOnLoginTrackBg: s.enableRedeemsOnLogin ? '#3a6b3f' : '#3a2020',
+      enableRedeemsOnLoginKnobAlign: s.enableRedeemsOnLogin ? 'flex-end' : 'flex-start',
+      toggleEnableRedeemsOnLogin: () => this.setState(st => ({ enableRedeemsOnLogin: !st.enableRedeemsOnLogin })),
+      redeemPrefix: s.redeemPrefix,
+      redeemPrefixChange: (e) => this.setState({ redeemPrefix: e.target.value }),
+      twitchWardRecipe: s.twitchWardRecipe,
+      twitchWardRecipeChange: (e) => this.setState({ twitchWardRecipe: e.target.value }),
+      wardBurnsTrackBg: s.wardBurns ? '#3a6b3f' : '#3a2020',
+      wardBurnsKnobAlign: s.wardBurns ? 'flex-end' : 'flex-start',
+      toggleWardBurns: () => this.setState(st => ({ wardBurns: !st.wardBurns })),
+      wardPushesTrackBg: s.wardPushes ? '#3a6b3f' : '#3a2020',
+      wardPushesKnobAlign: s.wardPushes ? 'flex-end' : 'flex-start',
+      toggleWardPushes: () => this.setState(st => ({ wardPushes: !st.wardPushes })),
+      safezoneTradersTrackBg: s.safezoneTraders ? '#3a6b3f' : '#3a2020',
+      safezoneTradersKnobAlign: s.safezoneTraders ? 'flex-end' : 'flex-start',
+      toggleSafezoneTraders: () => this.setState(st => ({ safezoneTraders: !st.safezoneTraders })),
+      safezoneBoatsTrackBg: s.safezoneBoats ? '#3a6b3f' : '#3a2020',
+      safezoneBoatsKnobAlign: s.safezoneBoats ? 'flex-end' : 'flex-start',
+      toggleSafezoneBoats: () => this.setState(st => ({ safezoneBoats: !st.safezoneBoats })),
+      profiles, redeemsList, groups, viewers,
+      viewersData: s.viewersData,
+
+      searchProfiles: s.searchProfiles, searchProfilesChange: this.searchProfilesChange,
+      searchRedeems: s.searchRedeems, searchRedeemsChange: this.searchRedeemsChange,
+      searchGroups: s.searchGroups, searchGroupsChange: this.searchGroupsChange,
+      searchViewers: s.searchViewers, searchViewersChange: this.searchViewersChange,
+      openNewProfile: this.openNewProfile,
+      openImportProfile: this.openImportProfile,
+      openNewViewer: this.openNewViewer,
+      openNewRedeem: this.openNewRedeem,
+      openNewGroup: this.openNewGroup,
+
+      wizardOpen: s.wizardOpen,
+      wizardClosed: !s.wizardOpen,
+      wizardDraft: s.wizardDraft ? {
+        ...s.wizardDraft,
+        detonateValueChips: (s.wizardDraft.detonateValues || []).map((value,i) => ({ value, onRemove: () => this.wizardRemoveDetonateValue(i) }))
+      } : {},
+      wizardSteps,
+      wizardTitle: stepTitles[s.wizardStep],
+      wizardStepIs1: s.wizardStep === 1,
+      wizardStepIs2: s.wizardStep === 2,
+      wizardStepIs3: s.wizardStep === 3,
+      effectTypes,
+      wizardSelectedLabel: s.wizardDraft && s.wizardDraft.type ? s.wizardDraft.type : 'Choose an effect from the list',
+      wizardSelectedDescription: s.wizardDraft && s.wizardDraft.type ? effectDescriptions[s.wizardDraft.type] : 'Select an effect on the left to see what it does and how it looks in-game.',
+      wizardPreviewLabel: s.wizardDraft && s.wizardDraft.type ? `preview: ${s.wizardDraft.type}` : 'preview',
+      wizardDescriptionChange: this.wizardDescriptionChange,
+      wizardIsDetonate: !!(s.wizardDraft && s.wizardDraft.type === 'Detonate'),
+      wizardIsNotDetonate: !(s.wizardDraft && s.wizardDraft.type === 'Detonate'),
+      wizardDamageNotBasedOnMaxHealth: !!(s.wizardDraft && !s.wizardDraft.damageBasedOnMaxHealth),
+      wizardToggleDamageBasedOnMaxHealth: this.wizardToggleDamageBasedOnMaxHealth,
+      wizardDamageBasedTrackBg: s.wizardDraft && s.wizardDraft.damageBasedOnMaxHealth ? '#3a6b3f' : '#3a2020',
+      wizardDamageBasedKnobAlign: s.wizardDraft && s.wizardDraft.damageBasedOnMaxHealth ? 'flex-end' : 'flex-start',
+      wizardDamageMaxHealthPercentChange: this.wizardDamageMaxHealthPercentChange,
+      wizardDamageArmorPercentChange: this.wizardDamageArmorPercentChange,
+      wizardDamageBluntChange: this.wizardDamageBluntChange,
+      wizardDamageFireChange: this.wizardDamageFireChange,
+      wizardDamageFlags: s.wizardDraft ? [
+        { key:'damageShips', label:'Damages ships' },
+        { key:'damageStructures', label:'Damages structures' },
+        { key:'damageBosses', label:'Damages bosses' },
+        { key:'damageTerrain', label:'Damages terrain' }
+      ].map(f => ({
+        label: f.label,
+        trackBg: s.wizardDraft[f.key] ? '#3a6b3f' : '#3a2020',
+        knobAlign: s.wizardDraft[f.key] ? 'flex-end' : 'flex-start',
+        onToggle: () => this.wizardToggleDamageFlag(f.key)
+      })) : [],
+      detonateTypeOptions: s.wizardDraft ? [
+        { key:'Fish', label:'Fish' },
+        { key:'Creature', label:'Any creature' },
+        { key:'CreatureSpawned', label:'Mod-spawned' },
+        { key:'Piece', label:'Build pieces' }
+      ].map(o => ({
+        label: o.label,
+        onClick: () => this.wizardSetDetonateType(o.key),
+        bg: s.wizardDraft.detonateType === o.key ? '#2a2016' : '#171d24',
+        border: s.wizardDraft.detonateType === o.key ? '#f0a850' : '#ffffff25',
+        color: s.wizardDraft.detonateType === o.key ? '#f0a850' : '#c8bfa8'
+      })) : [],
+      wizardDetonateTypeLabelLower: s.wizardDraft && s.wizardDraft.detonateType ? ({ Fish:'fish', Creature:'creature', CreatureSpawned:'mod-spawned creature', Piece:'build piece' }[s.wizardDraft.detonateType]) : 'object',
+      wizardDetonateValueInputChange: this.wizardDetonateValueInputChange,
+      wizardAddDetonateValue: this.wizardAddDetonateValue,
+      wizardRadiusChange: this.wizardRadiusChange,
+      wizardAnnounceMessageChange: this.wizardAnnounceMessageChange,
+      wizardCooldownChange: this.wizardCooldownChange,
+      wizardBgColorChange: this.wizardBgColorChange,
+      wizardAddConditionChange: this.wizardAddConditionChange,
+      wizardRemoveConditionChange: this.wizardRemoveConditionChange,
+      wizardToggleIgnoreSafezone: this.wizardToggleIgnoreSafezone,
+      wizardToggleUserInput: this.wizardToggleUserInput,
+      wizardIgnoreSafezoneTrackBg: s.wizardDraft && s.wizardDraft.ignoreSafezone ? '#3a6b3f' : '#3a2020',
+      wizardIgnoreSafezoneKnobAlign: s.wizardDraft && s.wizardDraft.ignoreSafezone ? 'flex-end' : 'flex-start',
+      wizardUserInputTrackBg: s.wizardDraft && s.wizardDraft.userInput ? '#3a6b3f' : '#3a2020',
+      wizardUserInputKnobAlign: s.wizardDraft && s.wizardDraft.userInput ? 'flex-end' : 'flex-start',
+      wizardToggleAdvanced: this.wizardToggleAdvanced,
+      wizardAdvancedOpen: s.wizardAdvancedOpen,
+      wizardAdvancedArrow: s.wizardAdvancedOpen ? '\u25be' : '\u25b8',
+      wizardTitleOrPlaceholder: s.wizardDraft && s.wizardDraft.title ? s.wizardDraft.title : 'Reward title',
+      wizardCostOrZero: s.wizardDraft ? (s.wizardDraft.cost || '0') : '0',
+      wizardTitleChange: this.wizardTitleChange,
+      wizardCostChange: this.wizardCostChange,
+      wizardBackLabel: s.wizardStep === (isEdit ? 2 : 1) ? 'Cancel' : 'Back',
+      wizardNextLabel: s.wizardStep === 3 ? (s.wizardEditIndex === null ? 'Save redeem' : 'Save changes') : 'Next',
+      wizardBack: this.wizardBack,
+      wizardNext: this.wizardNext,
+      wizardNextDisabled: s.wizardStep === 1 && !(s.wizardDraft && s.wizardDraft.type),
+      wizardNextClick: (s.wizardStep === 1 && !(s.wizardDraft && s.wizardDraft.type)) ? undefined : this.wizardNext,
+      wizardNextBg: (s.wizardStep === 1 && !(s.wizardDraft && s.wizardDraft.type)) ? '#171d24' : '#171d24',
+      wizardNextBorder: (s.wizardStep === 1 && !(s.wizardDraft && s.wizardDraft.type)) ? '#ffffff20' : '#caa25a',
+      wizardNextColor: (s.wizardStep === 1 && !(s.wizardDraft && s.wizardDraft.type)) ? '#6a6258' : '#f0a850',
+      wizardNextCursor: (s.wizardStep === 1 && !(s.wizardDraft && s.wizardDraft.type)) ? 'default' : 'pointer',
+
+      groupEditorOpen: s.groupEditorMode !== null,
+      groupEditorClosed: s.groupEditorMode === null,
+      groupEditorTitle: s.groupEditorMode === 'new' ? 'New Creature Group' : 'Edit Creature Group',
+      groupEditorSaveLabel: s.groupEditorMode === 'new' ? '+ Add group' : 'Save changes',
+      groupDraft: s.groupDraft ? {
+        ...s.groupDraft,
+        entries: s.groupDraft.entries.map((en,i) => ({
+          ...en,
+          onPrefabChange: (e) => this.updateGroupEntry(i, { prefab: e.target.value }),
+          onAmountChange: (e) => this.updateGroupEntry(i, { amount: e.target.value }),
+          onRemove: () => this.removeGroupEntry(i)
+        }))
+      } : { name:'', entries:[] },
+      groupNameChange: this.groupNameChange,
+      groupAddEntry: this.groupAddEntry,
+      groupEditorCancel: this.groupEditorCancel,
+      groupEditorSave: this.groupEditorSave,
+      prefabOptions,
+
+      modalOpen: !!s.modal,
+      modalTitle: s.modal ? modalTitles[s.modal.kind] : '',
+      modalMessage: s.modal ? (modalMessages[s.modal.kind] !== undefined ? modalMessages[s.modal.kind] : `Are you sure you want to delete '${s.modal.name}'?\nThis cannot be undone.`) : '',
+      modalIsInput: s.modal ? ['profileRename','profileCopy','profileImport','profileNew'].includes(s.modal.kind) : false,
+      modalIsRedeemCopy: s.modal ? s.modal.kind === 'redeemCopy' : false,
+      modalIsViewer: s.modal ? (s.modal.kind === 'viewerEdit' || s.modal.kind === 'viewerNew') : false,
+      modalValue: s.modal ? (s.modal.value || '') : '',
+      modalColor: s.modal ? (s.modal.color || '#ffffff') : '#ffffff',
+      modalValueChange: this.modalValueChange,
+      modalColorChange: this.modalColorChange,
+      modalTargetProfile: s.modal ? s.modal.targetProfile : '',
+      modalTargetProfileChange: this.modalTargetProfileChange,
+      modalConfirmLabel: s.modal ? (isConfirmKind(s.modal.kind) ? 'Confirm' : (s.modal.kind === 'redeemCopy' ? 'Copy' : (s.modal.kind.includes('New') ? 'Create' : 'Save'))) : '',
+      modalConfirm: this.confirmModal,
+      modalCancel: this.closeModal,
+
+      noop: this.noop
+    };
+  }
+}
+
+</script>
+</body>
+</html>

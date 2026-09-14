@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.Types;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     internal static class FieldUIBuilder
     {

@@ -1,4 +1,4 @@
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     /// <summary>
     /// Tracks which column a list/table tab is currently sorted by and in which direction.

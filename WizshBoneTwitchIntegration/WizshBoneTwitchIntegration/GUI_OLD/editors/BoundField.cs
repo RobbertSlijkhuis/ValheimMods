@@ -1,6 +1,6 @@
 using System;
 
-namespace WizshBoneTwitchIntegration.Gui
+namespace WizshBoneTwitchIntegration.GuiOld
 {
     /// <summary>
     /// Non-generic view of a <see cref="BoundField{T}"/> so <see cref="ObjectEditor"/>/

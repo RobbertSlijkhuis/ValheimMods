@@ -8,23 +8,7 @@ All work is within `WizshBoneTwitchIntegration/` (the C# plugin). The sibling `G
 
 ## Key files and structure
 
-```
-WizshBoneTwitchIntegration/
-├── WizshBoneTwitchIntegration.cs     # Plugin entry point (BepInPlugin, Harmony init, asset loading)
-├── components/
-│   ├── TwitchAuth.cs                 # OAuth flow with Twitch API
-│   ├── TwitchCustomRewards.cs        # Receives redemptions, dispatches to handlers
-│   └── TwitchChat.cs                 # In-game chat display
-├── harmony/                          # Harmony patches on vanilla Valheim methods
-├── helpers/                          # Game-effect utilities (spawn, damage, items, etc.)
-├── models/                           # Custom prefabs, materials, sprites, effect lists
-├── configs/PluginConfig.cs           # BepInEx config entries
-├── commands/                         # In-game console commands (debug/management)
-├── GUI_OLD/                          # Legacy in-game UI panels (F4). Being replaced from scratch; don't add new features here.
-├── TwitchOAuth/                      # OAuth token management
-├── TwitchSDK/                        # Wrapper around native TwitchSDK.dll
-└── resources/                        # YAML schemas and redeem definitions
-```
+`GUI_OLD/` is legacy (in-game UI panels, opened with F4) and being replaced from scratch — don't add new features there.
 
 ## How redemptions work
 
