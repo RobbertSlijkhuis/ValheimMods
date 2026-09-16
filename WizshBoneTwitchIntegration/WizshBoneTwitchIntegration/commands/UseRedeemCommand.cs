@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TwitchSDK.Interop;
+using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
@@ -51,6 +52,8 @@ namespace WizshBoneTwitchIntegration.Commands
 
                 TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
 
+                // Matched against the raw (prefix-free) RedeemData.title so console usage can
+                // stay short (e.g. "WBTIUseRedeem Timestop" rather than the full "WBTI Timestop").
                 RedeemData redeem = customRewards.GetRedeemList().Find(item => item.title == title);
                 if (redeem != null && !redeem.enabled)
                 {
@@ -62,7 +65,10 @@ namespace WizshBoneTwitchIntegration.Commands
                 currentRewardEvent.RedemptionId = Guid.Empty.ToString();
                 currentRewardEvent.RedeemerName = "WizshBone";
                 currentRewardEvent.RedeemedAt = DateTime.Now.ToShortDateString();
-                currentRewardEvent.CustomRewardTitle = title;
+                // HandleRedeem looks the redeem up by its Twitch-facing (prefixed) title - fall
+                // back to the raw typed title verbatim if no redeem was found, so the "could not
+                // find redeem" error downstream still echoes back what was actually typed.
+                currentRewardEvent.CustomRewardTitle = redeem != null ? RedeemManager.GetFullTitle(redeem) : title;
                 currentRewardEvent.CustomRewardCost = 100;
                 currentRewardEvent.Status = CustomRewardRedemptionState.Unfulfilled;
                 WizshBoneTwitchIntegration.useRedeemCommand = true;

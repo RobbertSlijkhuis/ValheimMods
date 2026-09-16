@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Configs;
-using WizshBoneTwitchIntegration.GuiOld;
+using WizshBoneTwitchIntegration.Gui;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
@@ -16,9 +16,9 @@ namespace WizshBoneTwitchIntegration.Components
         // (i.e. EnterLocalPlayerZone ran and hasn't been matched by an exit yet), null otherwise.
         // Only ever touched for the local player (see the ID check early in HandlePlayer) - a
         // remote player entering/exiting the same trigger never writes this. Exit checks this
-        // instead of re-reading the live allowRedeemsOnBoats setting, so toggling that setting
-        // mid-session while a player is standing on a ship can't desync s_localPlayerZoneCount from
-        // reality - see HandlePlayer.
+        // instead of re-reading the live safezoneBoats/safezoneTraders settings, so toggling those
+        // settings mid-session while a player is standing on a ship/at a trader can't desync
+        // s_localPlayerZoneCount from reality - see HandlePlayer.
         private GameObject m_playerInZone;
         private Collider m_collider;
         private readonly string playerIdentifier = "Player(Clone)";
@@ -80,7 +80,7 @@ namespace WizshBoneTwitchIntegration.Components
             if (customRewards != null)
                 customRewards.m_playerIsInSafeZone = false;
 
-            Game.instance?.gameObject.GetComponent<SafeZoneHUDPanel>()?.Hide();
+            Game.instance?.gameObject.GetComponent<WizshBoneGUI>()?.HideSafeZoneHUD();
         }
 
         public static bool IsPointInSafeZone(Vector3 point)
@@ -299,11 +299,15 @@ namespace WizshBoneTwitchIntegration.Components
         {
             // Only gates new entries. An exit always mirrors m_playerInZone (what this zone
             // actually counted at entry) rather than re-checking the live setting here, otherwise
-            // toggling allowRedeemsOnBoats between a player's entry and exit leaves
+            // toggling safezoneBoats between a player's entry and exit leaves
             // s_localPlayerZoneCount/m_playerIsInSafeZone stuck (or wrongly decremented). A ship
-            // with allowRedeemsOnBoats on this whole time never touches the count in either
+            // with safezoneBoats off this whole time never touches the count in either
             // direction, since entry is skipped and m_playerInZone then stays null for the exit too.
-            if (value && transform.parent.gameObject.GetComponent<Ship>() != null && ProfileSettingsHelper.Current.allowRedeemsOnBoats)
+            if (value && transform.parent.gameObject.GetComponent<Ship>() != null && !ProfileSettingsHelper.Current.safezoneBoats)
+                return;
+
+            // Same idea for traders - only gate new entries, same reasoning as the ship check above.
+            if (value && transform.parent.gameObject.GetComponent<Trader>() != null && !ProfileSettingsHelper.Current.safezoneTraders)
                 return;
 
             if (collider.gameObject.name != playerIdentifier)
@@ -339,7 +343,7 @@ namespace WizshBoneTwitchIntegration.Components
             if (s_localPlayerZoneCount == 1)
             {
                 m_customRewards.m_playerIsInSafeZone = true;
-                Game.instance.gameObject.GetComponent<SafeZoneHUDPanel>()?.Show();
+                Game.instance.gameObject.GetComponent<WizshBoneGUI>()?.ShowSafeZoneHUD();
             }
         }
 
@@ -351,7 +355,7 @@ namespace WizshBoneTwitchIntegration.Components
             if (s_localPlayerZoneCount == 0)
             {
                 m_customRewards.m_playerIsInSafeZone = false;
-                Game.instance.gameObject.GetComponent<SafeZoneHUDPanel>()?.Hide();
+                Game.instance.gameObject.GetComponent<WizshBoneGUI>()?.HideSafeZoneHUD();
             }
         }
 
@@ -362,7 +366,10 @@ namespace WizshBoneTwitchIntegration.Components
                 if (!ProfileSettingsHelper.Current.wardBurnCreatures && !ProfileSettingsHelper.Current.wardPushCreatures)
                     return;
 
-                if (transform.parent.gameObject.GetComponent<Ship>() != null && ProfileSettingsHelper.Current.allowRedeemsOnBoats)
+                if (transform.parent.gameObject.GetComponent<Ship>() != null && !ProfileSettingsHelper.Current.safezoneBoats)
+                    return;
+
+                if (transform.parent.gameObject.GetComponent<Trader>() != null && !ProfileSettingsHelper.Current.safezoneTraders)
                     return;
 
                 TwitchCreaturePersistentData persistentData = collider.gameObject.GetComponent<TwitchCreaturePersistentData>();

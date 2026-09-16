@@ -1,18 +1,565 @@
+using System;
+using System.Collections.Generic;
+using Jotunn.Managers;
+using TwitchSDK.Interop;
 using UnityEngine;
+using UnityEngine.UI;
+using WizshBoneTwitchIntegration.Helpers;
+using WizshBoneTwitchIntegration.Models;
+using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Gui.Tabs
 {
     /// <summary>
-    /// Redeems tab content. Stub for now - real content (redeem list, the redeem wizard,
-    /// mirroring GUI_OLD/tabs/RedeemsTab.cs) is future rounds' scope.
+    /// Redeems tab content - list/toggle/test/copy/delete plus a profile quick-switcher (built
+    /// directly against RedesignUI.dc.html's structure, mirroring <see cref="ProfilesTab"/>'s
+    /// toolbar/column-header/row patterns), and the create/edit wizard
+    /// (<see cref="RedeemWizard"/>) swapped in over the list the same way
+    /// GUI_OLD/tabs/RedeemsTab.cs swaps its list/create views. Backend calls
+    /// (<see cref="RedeemManager"/>/<see cref="ProfileManager"/>) are reused unchanged.
     /// </summary>
     internal class RedeemsTab : IShellTabView
     {
+        private GameObject m_root;
+        private GameObject m_listRoot;
+        private GameObject m_redeemListContainer;
+        private string m_searchText = "";
+
+        private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
+        private readonly CopyRedeemDialog m_copyRedeemDialog = new CopyRedeemDialog();
+        private readonly RedeemWizard m_redeemWizard = new RedeemWizard();
+
+        private SearchableDropdown m_profileDropdown;
+
+        private readonly ColumnSortState m_sortState = new ColumnSortState("title");
+        private readonly List<(string Text, string SortKey, Text Label)> m_sortableHeaders = new List<(string, string, Text)>();
+
+        /// <summary>
+        /// Wired up by <see cref="WizshBoneShellGUI"/> right after construction (same pattern as
+        /// <see cref="HomeTab.OnNavigateToTab"/>) so the Test action can close the whole shell
+        /// panel before running the redeem, matching GUI_OLD's <c>OnTestRedeem</c>.
+        /// </summary>
+        public Action OnCloseRequested;
+
+        /// <summary>
+        /// Wired up by <see cref="WizshBoneShellGUI"/> right after construction (same pattern as
+        /// <see cref="OnCloseRequested"/>) so the disable-redeem confirm dialog's "Open history"
+        /// cancel option can open <see cref="RedeemHistorySection"/> without this class needing a
+        /// reference to the shell itself.
+        /// </summary>
+        public Action OnOpenHistoryRequested;
+
+        // ── layout constants (same derived-from-shell-size pattern as ProfilesTab.cs) ──────────
+        private const float ContentWidth  = WizshBoneShellGUI.PanelWidth - ShellSidebar.Width;   // 980
+        private const float ContentMargin = 30f;
+        private const float LeftEdgeX  = -(ContentWidth / 2f) + ContentMargin;                   // -460
+        private const float RightEdgeX = (ContentWidth / 2f) - ContentMargin - ScrollableList.ScrollbarWidth; // 444
+
+        private const float TitleY   = -30f;
+        private const float TitleWidth = 300f;
+        private const float ToolbarY = -75f;
+        private const float ColumnHeaderY = -112f;
+        private const float ListTopInset = 131f;
+
+        private const float SearchWidth = 300f;
+        private const float ToolbarButtonSpacing = 10f;
+        private const float NewRedeemBtnWidth = 150f;
+        private const float ProfileDropdownWidth = 220f;
+        private const float ProfileLabelWidth = 60f;
+
+        // Title was far wider than any real title needs (leaving a large dead gap before Type),
+        // while the action-button cluster sat flush against Cost with no breathing room at all
+        // (see ActionsClusterWidth/ActionsClusterLeft below) - narrowed Title and handed the
+        // freed width to Type/Cost (now comfortably wide for their new left-aligned text, see
+        // BuildColumnHeaders/BuildRow) and to the gap in front of Actions.
+        private const float ColOnW      = 60f;
+        private const float ColTitleW   = 240f;
+        private const float ColTypeW    = 160f;
+        private const float ColCostW    = 120f;
+        private const float ColActionsW = 324f;
+
+        // On is the only column flush with the list's true left edge - inset just its content,
+        // not the column boundary itself, so ColTitleX/ColTypeX/ColCostX/ColActionsX (all derived
+        // from ColOnW) don't shift.
+        private const float ColOnTextW  = ColOnW - ListRow.LeftPadding;
+        private const float ColOnX      = LeftEdgeX + ListRow.LeftPadding + ColOnTextW / 2f;
+
+        // Title also gets a little breathing room from the On toggle just left of it, plus a
+        // little more before Type starts on its right - same shrink-and-shift treatment as On
+        // above (left edge stays at ColOnW + LeftPadding, only the width/center shift), so
+        // ColTypeX/ColCostX/ColActionsX (derived from the full ColTitleW) don't move.
+        private const float ColTitleRightGap = 10f;
+        private const float ColTitleTextW = ColTitleW - ListRow.LeftPadding - ColTitleRightGap;
+        private const float ColTitleX   = LeftEdgeX + ColOnW + ListRow.LeftPadding + ColTitleTextW / 2f;
+        private const float ColTypeX    = LeftEdgeX + ColOnW + ColTitleW + ColTypeW / 2f;
+        private const float ColCostX    = LeftEdgeX + ColOnW + ColTitleW + ColTypeW + ColCostW / 2f;
+        private const float ColActionsX = RightEdgeX - ColActionsW / 2f;
+
+        private const float ActionBtnWidth = 70f;
+        private const float DeleteBtnWidth = 40f;
+
+        // The button cluster is anchored to the list's true right edge (RightEdgeX), not to
+        // ColActionsW's own left edge - so Delete's right edge always lands flush at RightEdgeX
+        // (matching the right-aligned Actions header above it) regardless of how wide the mostly-
+        // empty ColActionsW column itself is, and the cluster no longer eats into Cost's column
+        // the way "RightEdgeX - ColActionsW" used to.
+        private const float ActionsClusterWidth = ActionBtnWidth * 3f + DeleteBtnWidth + ListRow.ItemSpacing * 3f;
+        private const float ActionsClusterLeft  = RightEdgeX - ActionsClusterWidth;
+
+        private const float BtnTestX   = ActionsClusterLeft + ActionBtnWidth / 2f;
+        private const float BtnEditX   = BtnTestX + ActionBtnWidth / 2f + ListRow.ItemSpacing + ActionBtnWidth / 2f;
+        private const float BtnCopyX   = BtnEditX + ActionBtnWidth / 2f + ListRow.ItemSpacing + ActionBtnWidth / 2f;
+        private const float BtnDeleteX = BtnCopyX + ActionBtnWidth / 2f + ListRow.ItemSpacing + DeleteBtnWidth / 2f;
+
         public GameObject Create(GameObject parent)
         {
-            GameObject root = UIContainer.Create(parent, "RedeemsTab");
-            GuiHelper.CreateTitle(ShellTab.Redeems.Label(), root, new Vector2(0f, -30f)).alignment = TextAnchor.MiddleCenter;
-            return root;
+            m_root = UIContainer.Create(parent, "RedeemsTab");
+
+            m_confirmDialog.Init();
+            m_copyRedeemDialog.Init();
+
+            // UIContainer.Create defaults to inactive - fine for every other tab's own m_root,
+            // since WizshBoneShellGUI.SelectTab explicitly activates whichever tab root is
+            // selected. m_listRoot is a second, nested container inside that root (needed so this
+            // tab can swap it out for the wizard) that nothing outside RedeemsTab manages, so it
+            // needs its own explicit activation here - without it the tab opens with both
+            // m_listRoot and the (still-closed) wizard root inactive, i.e. showing nothing.
+            m_listRoot = UIContainer.Create(m_root, "RedeemListView", startActive: true);
+
+            GuiHelper.CreateTitle("Redeems", m_listRoot, new Vector2(LeftEdgeX + TitleWidth / 2f, TitleY), width: TitleWidth);
+
+            BuildToolbar();
+            BuildColumnHeaders();
+
+            m_redeemListContainer = ScrollableList.CreateStretched(
+                m_listRoot, "RedeemList",
+                offsetMin: new Vector2(ContentMargin, ContentMargin),
+                offsetMax: new Vector2(-ContentMargin, -ListTopInset),
+                autoHideScrollbar: true);
+
+            m_redeemWizard.Create(m_root);
+            m_redeemWizard.OnFinished = OnWizardFinished;
+
+            RefreshList();
+
+            return m_root;
+        }
+
+        /// <summary>
+        /// Re-populates the row list and profile dropdown. Call whenever the shell re-shows this
+        /// tab (redeems/profiles on disk may have changed via sync, the Profiles tab, or another
+        /// session). Doesn't force the wizard closed if it's open - matches GUI_OLD's Refresh(),
+        /// which only ever touched the list view regardless of which sub-view was showing.
+        /// </summary>
+        public void Refresh()
+        {
+            m_profileDropdown?.SetOptions(ProfileManager.GetProfiles(), ProfileManager.ActiveProfile);
+            RefreshList();
+        }
+
+        // ── toolbar / column headers ────────────────────────────────────────
+
+        private void BuildToolbar()
+        {
+            float searchX = LeftEdgeX + SearchWidth / 2f;
+            InputField searchField = GuiFieldBuilder.CreateInputField(m_listRoot, new Vector2(searchX, ToolbarY), SearchWidth, placeholderText: "Search redeems by title or type...");
+            searchField.onValueChanged.AddListener(OnSearchChanged);
+
+            float cursor = LeftEdgeX + SearchWidth;
+            CreateToolbarButton("+ New redeem", NewRedeemBtnWidth, cursor, OpenCreate);
+
+            float dropdownX = RightEdgeX - ProfileDropdownWidth / 2f;
+            float labelX = dropdownX - ProfileDropdownWidth / 2f - 8f - ProfileLabelWidth / 2f;
+
+            Text profileLabel = GUIManager.Instance.CreateText(
+                text: "Profile:",
+                parent: m_listRoot.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(labelX, ToolbarY),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: GuiFieldBuilder.FieldFontSize,
+                color: GUIManager.Instance.ValheimOrange,
+                outline: true,
+                outlineColor: Color.black,
+                width: ProfileLabelWidth,
+                height: 36f,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+            profileLabel.alignment = TextAnchor.MiddleRight;
+
+            m_profileDropdown = new SearchableDropdown();
+            m_profileDropdown.Build(m_listRoot, new Vector2(dropdownX, ToolbarY), ProfileDropdownWidth, GuiFieldBuilder.FieldHeight, ProfileManager.GetProfiles(), ProfileManager.ActiveProfile);
+            m_profileDropdown.OnValueChanged += OnProfileSelected;
+        }
+
+        private void CreateToolbarButton(string text, float width, float cursorX, UnityEngine.Events.UnityAction onClick)
+        {
+            float centerX = cursorX + ToolbarButtonSpacing + width / 2f;
+
+            GameObject btnObj = GUIManager.Instance.CreateButton(
+                text: text,
+                parent: m_listRoot.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(centerX, ToolbarY),
+                width: width,
+                height: 36f
+            );
+            btnObj.SetActive(true);
+            btnObj.GetComponent<Button>().onClick.AddListener(onClick);
+        }
+
+        private void BuildColumnHeaders()
+        {
+            CreateSortableHeader("On", ColOnX, ColOnTextW, TextAnchor.MiddleLeft, "enabled");
+            CreateSortableHeader("Title", ColTitleX, ColTitleTextW, TextAnchor.MiddleLeft, "title");
+            CreateSortableHeader("Type", ColTypeX, ColTypeW, TextAnchor.MiddleLeft, "type");
+            CreateSortableHeader("Cost", ColCostX, ColCostW, TextAnchor.MiddleLeft, "points");
+            CreateSortableHeader("Actions", ColActionsX, ColActionsW, TextAnchor.MiddleRight, null);
+        }
+
+        private void CreateSortableHeader(string text, float x, float width, TextAnchor alignment, string sortKey)
+        {
+            Text header = GUIManager.Instance.CreateText(
+                text: text,
+                parent: m_listRoot.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(x, ColumnHeaderY),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: GuiFieldBuilder.FieldFontSize,
+                color: GUIManager.Instance.ValheimOrange,
+                outline: true,
+                outlineColor: Color.black,
+                width: width,
+                height: 20f,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+            header.alignment = alignment;
+
+            if (sortKey == null)
+                return;
+
+            Button headerBtn = header.gameObject.AddComponent<Button>();
+            headerBtn.targetGraphic = header;
+            headerBtn.transition = Selectable.Transition.None;
+            headerBtn.onClick.AddListener(() => OnHeaderClicked(sortKey));
+
+            m_sortableHeaders.Add((text, sortKey, header));
+        }
+
+        private void RefreshHeaderIndicators()
+        {
+            foreach (var (text, sortKey, label) in m_sortableHeaders)
+                label.text = sortKey == m_sortState.Key ? $"{text} {(m_sortState.Ascending ? "▲" : "▼")}" : text;
+        }
+
+        private void OnHeaderClicked(string sortKey)
+        {
+            m_sortState.ToggleOrSet(sortKey);
+            RefreshHeaderIndicators();
+            RefreshList();
+        }
+
+        private void OnSearchChanged(string value)
+        {
+            m_searchText = value;
+            RefreshList();
+        }
+
+        private void OnProfileSelected(string selected)
+        {
+            if (selected == ProfileManager.ActiveProfile)
+                return;
+
+            bool switched = ProfileManager.SelectProfile(selected);
+            if (!switched)
+            {
+                // Defensive only - the dropdown only ever lists ProfileManager.GetProfiles().
+                m_profileDropdown.SetOptions(ProfileManager.GetProfiles(), ProfileManager.ActiveProfile);
+                return;
+            }
+
+            RefreshList();
+        }
+
+        // ── row list ─────────────────────────────────────────────────────────
+
+        private List<RedeemData> GetSortedRedeems()
+        {
+            var redeems = new List<RedeemData>(RedeemHelper.redeems);
+
+            Comparison<RedeemData> comparison;
+            switch (m_sortState.Key)
+            {
+                case "enabled":
+                    comparison = (a, b) => a.enabled.CompareTo(b.enabled);
+                    break;
+                case "type":
+                    comparison = (a, b) => string.Compare(RedeemEffectCatalog.LabelFor(a.type), RedeemEffectCatalog.LabelFor(b.type), StringComparison.OrdinalIgnoreCase);
+                    break;
+                case "points":
+                    comparison = (a, b) => a.points.CompareTo(b.points);
+                    break;
+                default:
+                    comparison = (a, b) => string.Compare(a.title, b.title, StringComparison.OrdinalIgnoreCase);
+                    break;
+            }
+
+            redeems.Sort(comparison);
+            if (!m_sortState.Ascending)
+                redeems.Reverse();
+
+            return redeems;
+        }
+
+        private void RefreshList()
+        {
+            GuiHelper.ClearContainer(m_redeemListContainer);
+            RefreshHeaderIndicators();
+
+            float yOffset = -(ListRow.ListTopPadding + ListRow.ItemHeight / 2f);
+            int rowIndex = 0;
+
+            foreach (RedeemData redeem in GetSortedRedeems())
+            {
+                // Search matches the Twitch-facing (prefixed) title shown in the list, not the
+                // raw stored RedeemData.title, so typing the prefix (or the plain name) both work.
+                if (!string.IsNullOrEmpty(m_searchText)
+                    && RedeemManager.GetFullTitle(redeem).IndexOf(m_searchText, StringComparison.OrdinalIgnoreCase) < 0
+                    && redeem.type.IndexOf(m_searchText, StringComparison.OrdinalIgnoreCase) < 0)
+                    continue;
+
+                BuildRow(redeem, yOffset, rowIndex);
+                yOffset -= ListRow.ItemHeight + ListRow.ItemSpacing;
+                rowIndex++;
+            }
+
+            RectTransform contentRt = m_redeemListContainer.GetComponent<RectTransform>();
+            contentRt.sizeDelta = new Vector2(contentRt.sizeDelta.x, Mathf.Abs(yOffset) + ListRow.ItemHeight / 2f);
+        }
+
+        private void BuildRow(RedeemData redeem, float yOffset, int rowIndex)
+        {
+            RedeemData captured = redeem;
+
+            var (row, rowBackground) = ListRow.Create(m_redeemListContainer, "RedeemRow", yOffset);
+            var revealOnHover = new List<GameObject>();
+
+            Color toggleColor = captured.enabled ? new Color(0.2f, 0.8f, 0.2f) : new Color(0.8f, 0.2f, 0.2f);
+            GameObject toggleBtn = ListRow.CreateActionButton(row, captured.enabled ? "On" : "Off", ColOnX, ColOnTextW - 10f, ListRow.ItemHeight, toggleColor, () => OnToggleRedeem(captured));
+            toggleBtn.SetActive(true);
+
+            // Shows the Twitch-facing (prefixed) title - RedeemData.title itself is stored
+            // prefix-free, see RedeemManager.GetFullTitle.
+            Text titleText = GUIManager.Instance.CreateText(
+                text: RedeemManager.GetFullTitle(captured),
+                parent: row.transform,
+                anchorMin: new Vector2(0.5f, 0.5f),
+                anchorMax: new Vector2(0.5f, 0.5f),
+                position: new Vector2(ColTitleX, 0f),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: GuiFieldBuilder.FieldFontSize,
+                color: GUIManager.Instance.ValheimBeige,
+                outline: true,
+                outlineColor: Color.black,
+                width: ColTitleTextW,
+                height: ListRow.ItemHeight,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+            titleText.alignment = TextAnchor.MiddleLeft;
+
+            Text typeText = GUIManager.Instance.CreateText(
+                text: RedeemEffectCatalog.LabelFor(captured.type),
+                parent: row.transform,
+                anchorMin: new Vector2(0.5f, 0.5f),
+                anchorMax: new Vector2(0.5f, 0.5f),
+                position: new Vector2(ColTypeX, 0f),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: GuiFieldBuilder.FieldFontSize,
+                color: new Color(0.56f, 0.7f, 0.79f, 1f),
+                outline: true,
+                outlineColor: Color.black,
+                width: ColTypeW,
+                height: ListRow.ItemHeight,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+            typeText.alignment = TextAnchor.MiddleLeft;
+
+            string typeDescription = RedeemEffectCatalog.DescriptionFor(captured.type);
+            if (!string.IsNullOrEmpty(typeDescription))
+                typeText.gameObject.AddComponent<TooltipTrigger>().Init(typeDescription);
+
+            Text costText = GUIManager.Instance.CreateText(
+                text: $"{captured.points} pts",
+                parent: row.transform,
+                anchorMin: new Vector2(0.5f, 0.5f),
+                anchorMax: new Vector2(0.5f, 0.5f),
+                position: new Vector2(ColCostX, 0f),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: GuiFieldBuilder.FieldFontSize,
+                color: GUIManager.Instance.ValheimBeige,
+                outline: true,
+                outlineColor: Color.black,
+                width: ColCostW,
+                height: ListRow.ItemHeight,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+            costText.alignment = TextAnchor.MiddleLeft;
+
+            GameObject testBtn = ListRow.CreateActionButton(row, "Test", BtnTestX, ActionBtnWidth, ListRow.ItemHeight, Color.yellow, () => OnTestRedeem(captured));
+            testBtn.AddComponent<TooltipTrigger>().Init("Executes the redeem so you can see how it works in-game.");
+            revealOnHover.Add(testBtn);
+
+            GameObject editBtn = ListRow.CreateActionButton(row, "Edit", BtnEditX, ActionBtnWidth, ListRow.ItemHeight, Color.cyan, () => OpenEdit(captured));
+            revealOnHover.Add(editBtn);
+
+            GameObject copyBtn = ListRow.CreateActionButton(row, "Copy", BtnCopyX, ActionBtnWidth, ListRow.ItemHeight, GUIManager.Instance.ValheimBeige, () => OnCopyRedeem(captured));
+            revealOnHover.Add(copyBtn);
+
+            GameObject deleteBtn = ListRow.CreateActionButton(row, "X", BtnDeleteX, DeleteBtnWidth, ListRow.ItemHeight, Color.red, () => OnDeleteRedeem(captured));
+            deleteBtn.SetActive(true);
+
+            ListRow.AttachHoverReveal(row, rowBackground, revealOnHover, ListRow.ZebraColor(rowIndex));
+        }
+
+        // ── wizard hookup ────────────────────────────────────────────────────
+
+        private void OpenCreate()
+        {
+            m_listRoot.SetActive(false);
+            m_redeemWizard.OpenCreate();
+        }
+
+        private void OpenEdit(RedeemData redeem)
+        {
+            m_listRoot.SetActive(false);
+            m_redeemWizard.OpenEdit(redeem);
+        }
+
+        private void OnWizardFinished(string toastMessage)
+        {
+            m_listRoot.SetActive(true);
+            RefreshList();
+
+            if (toastMessage != null)
+                ToastNotifications.Show(toastMessage);
+        }
+
+        // ── row action handlers ─────────────────────────────────────────────
+
+        private void OnToggleRedeem(RedeemData redeem)
+        {
+            TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+            string fullTitle = RedeemManager.GetFullTitle(redeem);
+
+            // HasUnresolvedRedeemsFor/history entries key off the Twitch-facing (prefixed) title,
+            // not RedeemData.title - see RedeemManager.GetFullTitle.
+            bool willDisable = redeem.enabled;
+            if (willDisable && customRewards.HasUnresolvedRedeemsFor(fullTitle))
+            {
+                m_confirmDialog.Show(
+                    title:       "Disable Redeem",
+                    description: $"Auto-resolve is off. Pending '{fullTitle}' redeems won't be refunded automatically. Are you sure?",
+                    onConfirm:   () =>
+                    {
+                        RedeemManager.SetEnabled(redeem, false, out string disableError);
+                        ToastNotifications.Show(disableError ?? $"'{fullTitle}' disabled.");
+                        RefreshList();
+                    },
+                    confirmText: "Disable",
+                    cancelText:  "Open history",
+                    onCancel:    () => OnOpenHistoryRequested?.Invoke());
+                return;
+            }
+
+            RedeemManager.SetEnabled(redeem, !redeem.enabled, out string error);
+            ToastNotifications.Show(error ?? $"'{fullTitle}' {(redeem.enabled ? "enabled" : "disabled")}.");
+            RefreshList();
+        }
+
+        private void OnTestRedeem(RedeemData redeem)
+        {
+            // A background row's Test button is still clickable while these dialogs are open (no
+            // full-screen blocker) - close everything first, matching GUI_OLD's OnTestRedeem, so
+            // nothing is left orphaned on screen holding an outstanding InputBlockGate.Push().
+            m_confirmDialog.Hide();
+            m_copyRedeemDialog.Hide();
+
+            OnCloseRequested?.Invoke();
+
+            TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+
+            CustomRewardEvent rewardEvent = new CustomRewardEvent
+            {
+                RedeemerName      = "WizshBone",
+                RedeemedAt        = DateTime.Now.ToShortDateString(),
+                // Must match what TwitchCustomRewards.HandleRedeem looks the redeem up by - the
+                // Twitch-facing (prefixed) title, not the raw RedeemData.title.
+                CustomRewardTitle = RedeemManager.GetFullTitle(redeem),
+                CustomRewardCost  = redeem.points,
+                Status            = CustomRewardRedemptionState.Unfulfilled
+            };
+
+            WizshBoneTwitchIntegration.useRedeemCommand = true;
+            customRewards.HandleRedeem(rewardEvent);
+        }
+
+        private void OnCopyRedeem(RedeemData redeem)
+        {
+            m_copyRedeemDialog.Show(
+                redeemTitle:    RedeemManager.GetFullTitle(redeem),
+                profiles:       ProfileManager.GetProfiles(),
+                defaultProfile: ProfileManager.ActiveProfile,
+                // Seeds the new redeem's raw (prefix-free) title, so keep this based on the raw
+                // RedeemData.title rather than the displayed full title.
+                suggestedName:  $"{redeem.title} - copy",
+                onConfirm:      (targetProfile, newTitle) => HandleCopyRedeemConfirm(redeem, targetProfile, newTitle));
+        }
+
+        private string HandleCopyRedeemConfirm(RedeemData redeem, string targetProfile, string newTitle)
+        {
+            if (string.IsNullOrWhiteSpace(newTitle))
+                return "Please enter a name.";
+
+            if (ProfileManager.IsSyncedProfile(targetProfile))
+                return $"Cannot copy into '{targetProfile}' - it is a synced (read-only) profile.";
+
+            string sourceFullTitle = RedeemManager.GetFullTitle(redeem);
+
+            if (targetProfile == ProfileManager.ActiveProfile)
+            {
+                bool copiedWithin = RedeemManager.CopyRedeemWithinActiveProfile(redeem, newTitle, out string withinError);
+                if (!copiedWithin)
+                    return withinError;
+
+                ToastNotifications.Show($"Copied '{sourceFullTitle}' to '{newTitle}'.");
+                RefreshList();
+                return null;
+            }
+
+            bool copied = ProfileManager.CopyRedeemToOtherProfile(redeem, targetProfile, newTitle, out string error);
+            if (copied)
+                ToastNotifications.Show($"Copied '{sourceFullTitle}' to '{targetProfile}' as '{newTitle}'.");
+
+            return copied ? null : error;
+        }
+
+        private void OnDeleteRedeem(RedeemData redeem)
+        {
+            string fullTitle = RedeemManager.GetFullTitle(redeem);
+
+            m_confirmDialog.Show(
+                title:       "Delete Redeem",
+                description: $"Are you sure you want to delete '{fullTitle}'?\nThis cannot be undone.",
+                onConfirm:   () =>
+                {
+                    bool deleted = RedeemManager.DeleteRedeem(redeem, out string error);
+                    ToastNotifications.Show(deleted ? $"'{fullTitle}' removed." : error);
+                    RefreshList();
+                },
+                confirmText: "Delete");
         }
     }
 }

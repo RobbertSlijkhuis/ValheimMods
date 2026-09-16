@@ -13,6 +13,39 @@ namespace WizshBoneTwitchIntegration.Helpers
     /// </summary>
     internal static class RedeemManager
     {
+        /// <summary>
+        /// The Twitch-facing title for <paramref name="redeem"/>: the active profile's
+        /// <see cref="ProfileSettingsHelper.Current"/>.<c>redeemTitlePrefix</c> prepended to
+        /// <see cref="RedeemData.title"/>. <see cref="RedeemData.title"/> itself is stored
+        /// prefix-free (the GUI shows the prefix as a read-only badge next to the title field,
+        /// it never gets baked into the saved title) - this is the one place that combines them,
+        /// so every place that actually talks to Twitch (<see cref="TwitchIntegration.TwitchCustomRewards.SetRewards"/>,
+        /// its redemption-matching lookups, the GUI's list/toasts) goes through it instead of
+        /// reading <see cref="RedeemData.title"/> directly.
+        ///
+        /// Idempotent against a title that already happens to start with the current prefix (e.g.
+        /// a redeem saved before this method existed, or one created via GUI_OLD, which always
+        /// bakes the prefix into the stored title) - it's stripped first, then re-added exactly
+        /// once, so calling this repeatedly or on already-prefixed data never doubles it up.
+        /// </summary>
+        public static string GetFullTitle(RedeemData redeem)
+        {
+            return GetFullTitle(redeem?.title, ProfileSettingsHelper.Current.redeemTitlePrefix);
+        }
+
+        internal static string GetFullTitle(string rawTitle, string prefix)
+        {
+            rawTitle = rawTitle ?? "";
+
+            if (string.IsNullOrEmpty(prefix))
+                return rawTitle;
+
+            string prefixWithSpace = prefix + " ";
+            string suffix = rawTitle.StartsWith(prefixWithSpace) ? rawTitle.Substring(prefixWithSpace.Length) : rawTitle;
+
+            return string.IsNullOrEmpty(suffix) ? prefix : prefixWithSpace + suffix;
+        }
+
         public static bool AddRedeem(RedeemData redeem, out string error)
         {
             error = null;

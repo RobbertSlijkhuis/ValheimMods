@@ -1,4 +1,5 @@
 using System.IO;
+using WizshBoneTwitchIntegration.Gui;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
@@ -107,9 +108,8 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (customRewards != null)
                 customRewards.m_playerIsInSafeZone = false;
 
-            TwitchAuth auth = Game.instance?.gameObject.GetComponent<TwitchAuth>();
-            if (auth?.wizshBoneHUD != null)
-                auth.wizshBoneHUD.RepositionHUD();
+            WizshBoneGUI gui = Game.instance?.gameObject.GetComponent<WizshBoneGUI>();
+            gui?.RepositionHUD();
 
             Jotunn.Managers.PrefabManager prefabManager = Jotunn.Managers.PrefabManager.Instance;
             UnityEngine.GameObject guardStone = prefabManager?.GetPrefab("WBTI_guard_stone");

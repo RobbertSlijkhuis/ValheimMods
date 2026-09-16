@@ -98,7 +98,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                     // WaitForSecondsRealtime, not WaitForSeconds: this must keep draining even
                     // while Game.IsPaused() (Time.timeScale == 0) - e.g. the logout/quit confirm
-                    // dialog. See TwitchAuth.cs and gui/LogoutProgressPanel.cs for existing
+                    // dialog. See TwitchAuth.cs and GUI/Hud/LogoutProgressHUD.cs for existing
                     // WaitForSecondsRealtime precedent used for the same "must not stall on
                     // pause" reason. (DetonateHelper/FlashBangHelper intentionally use
                     // WaitForSeconds instead, since those ARE in-game simulation effects that

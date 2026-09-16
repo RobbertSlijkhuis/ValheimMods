@@ -39,13 +39,17 @@ namespace WizshBoneTwitchIntegration.Models
         // Redeems
         public bool enableRedeemsOnLogin = true;
         public bool autoResolveRedeems = true;
-        public bool allowRedeemsOnBoats = true;
+        public string redeemTitlePrefix = "WBTI";
 
         // Twitchy Ward
         public string wardRecipe = "FineWood:5, GreydwarfEye:5, SurtlingCore:1";
         public bool wardBurnCreatures = false;
         public bool wardPushCreatures = true;
         public float wardPushForce = 2000f;
+
+        // Safezones
+        public bool safezoneTraders = true;
+        public bool safezoneBoats = false;
 
         // HUD
         public HudPosition hudPosition = HudPosition.BottomRight;

@@ -1,3 +1,4 @@
+using System;
 using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,9 +9,9 @@ namespace WizshBoneTwitchIntegration.Gui
     /// <summary>
     /// Top bar: Twitch login status dot+label, login/logout button, and "Created by DeathWizsh"
     /// + the plugin version on the far right. Login state text/logic ported verbatim from
-    /// GUI_OLD/tabs/HomeTab.cs (GetLoginButtonText/GetLoginStatusMessage/Login), except the
-    /// unresolved-redeems logout guard's Cancel button just dismisses here rather than routing to
-    /// a history view (out of scope this round).
+    /// GUI_OLD/tabs/HomeTab.cs (GetLoginButtonText/GetLoginStatusMessage/Login), including the
+    /// unresolved-redeems logout guard's Cancel button routing to <see cref="RedeemHistorySection"/>
+    /// via <see cref="OnOpenHistoryRequested"/> (GUI_OLD's <c>onCancel: () => m_onOpenHistory?.Invoke()</c>).
     /// </summary>
     internal class ShellTopBar
     {
@@ -20,6 +21,15 @@ namespace WizshBoneTwitchIntegration.Gui
         private static readonly Color ColorLoggedOut = new Color(0.8f, 0.18f, 0.18f);
 
         private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
+
+        /// <summary>
+        /// Wired up by <see cref="WizshBoneShellGUI"/> right after <see cref="Create"/> (same
+        /// "wire a callback after construction" pattern as <see cref="Tabs.HomeTab.OnNavigateToTab"/>)
+        /// so the logout-with-unresolved-redeems confirm dialog's "Open history" cancel option can
+        /// open <see cref="RedeemHistorySection"/> without this class needing a reference to the
+        /// shell itself.
+        /// </summary>
+        public Action OnOpenHistoryRequested;
 
         private TwitchAuth m_auth;
         private TwitchCustomRewards m_customRewards;
@@ -44,7 +54,11 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMax: new Vector2(1f, 1f),
                 offsetMin: new Vector2(sidebarWidth, -Height),
                 offsetMax: Vector2.zero);
-            GuiHelper.AddBackground(root, new Color(0f, 0f, 0f, 0.35f));
+            GuiHelper.AddBackground(root, new Color(0f, 0f, 0f, 0.6f));
+
+            GuiHelper.AddBackground(GuiHelper.CreateRegion(root, "BottomBorder",
+                new Vector2(0f, 0f), new Vector2(1f, 0f),
+                Vector2.zero, new Vector2(0f, 2f)), GuiHelper.DividerColorSubtle);
 
             m_statusDot = StatusDot.Create(
                 root,
@@ -89,7 +103,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent:              root.transform,
                 anchorMin:           new Vector2(1f, 0.5f),
                 anchorMax:           new Vector2(1f, 0.5f),
-                position:            new Vector2(-170f, 0f),
+                position:            new Vector2(-200f, 0f),
                 font:                GUIManager.Instance.AveriaSerifBold,
                 fontSize:            12,
                 color:               GUIManager.Instance.ValheimBeige,
@@ -102,11 +116,13 @@ namespace WizshBoneTwitchIntegration.Gui
             credit.alignment = TextAnchor.MiddleRight;
 
             Text version = GUIManager.Instance.CreateText(
-                text:                WizshBoneTwitchIntegration.PluginVersion,
+                text:                "v" + WizshBoneTwitchIntegration.PluginVersion,
                 parent:              root.transform,
                 anchorMin:           new Vector2(1f, 0.5f),
                 anchorMax:           new Vector2(1f, 0.5f),
-                position:            new Vector2(-30f, 0f),
+                // Right edge lands at -30 from the top bar's true right edge, matching the
+                // ContentMargin (30f) every tab uses for its own right-edge content boundary below.
+                position:            new Vector2(-60f, 0f),
                 font:                GUIManager.Instance.AveriaSerifBold,
                 fontSize:            12,
                 color:               GUIManager.Instance.ValheimOrange,
@@ -154,7 +170,8 @@ namespace WizshBoneTwitchIntegration.Gui
                             Refresh();
                         },
                         confirmText: "Log Out",
-                        cancelText:  "Cancel");
+                        cancelText:  "Open history",
+                        onCancel:    () => OnOpenHistoryRequested?.Invoke());
                     return;
                 }
 

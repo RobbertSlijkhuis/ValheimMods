@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using TwitchSDK;
 using TwitchSDK.Interop;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Gui;
 using WizshBoneTwitchIntegration.GuiOld;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
@@ -27,9 +28,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private DateTime m_waitingForCodeSince;
 
         public WizshBoneSettingsGUI m_settingsGUI;
-        public WizshBoneHUD wizshBoneHUD;
-        public ConfirmDialog m_exitConfirmDialog = new ConfirmDialog();
-        public LogoutProgressPanel m_logoutProgressPanel = new LogoutProgressPanel();
+
+        // GuiOld is still `using`d in this file for WizshBoneSettingsGUI (F4's own panel, kept
+        // as-is - see wbti_guiold_decoupling). LogoutProgressHUD is the one Gui.* panel that
+        // still lives here - Show/UpdateMessage/Hide are called directly from this class's own
+        // logout/quit sequence below, unlike WizshBoneHUD/ConfirmDialog which moved to
+        // WizshBoneGUI (see its own doc comment). No naming collision with GuiOld to qualify
+        // around here: GuiOld's equivalent kept its old name, LogoutProgressPanel.
+        public LogoutProgressHUD m_logoutProgressHUD = new LogoutProgressHUD();
 
         public void Awake()
         {
@@ -40,7 +46,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 m_settingsGUI = new WizshBoneSettingsGUI(this);
 
-                wizshBoneHUD = new WizshBoneHUD();
                 GUIManager.OnCustomGUIAvailable += OnGUIAvailable;
             }
             catch (Exception e)
@@ -53,9 +58,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             try
             {
-                wizshBoneHUD.ShowHUD();
-                m_exitConfirmDialog.Init();
-                m_logoutProgressPanel.Init();
+                m_logoutProgressHUD.Init();
                 GUIManager.OnCustomGUIAvailable -= OnGUIAvailable;
             }
             catch (Exception e)
@@ -74,7 +77,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private void UpdateAllGUI()
         {
             m_settingsGUI.RefreshHomeTab();
-            wizshBoneHUD.UpdateHUD();
         }
 
         public void ToggleRedeems()
@@ -284,7 +286,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void LogoutBackToMainMenu()
         {
-            m_logoutProgressPanel.Show(this, "Removing redeems from Twitch, this could take a moment");
+            m_logoutProgressHUD.Show(this, "Removing redeems from Twitch, this could take a moment");
             TaskAwaiter awaiter = m_customRewards.ClearRewards();
             awaiter.OnCompleted(OnLogoutBackToMainMenu);
         }
@@ -300,15 +302,15 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         private IEnumerator DelayedLogout()
         {
-            m_logoutProgressPanel.UpdateMessage("Logging out...");
+            m_logoutProgressHUD.UpdateMessage("Logging out...");
             yield return new WaitForSecondsRealtime(1f);
-            m_logoutProgressPanel.Hide();
+            m_logoutProgressHUD.Hide();
             Menu.instance.OnLogoutYes();
         }
 
         public void LogoutQuitApplication()
         {
-            m_logoutProgressPanel.Show(this, "Removing redeems from Twitch, this could take a moment");
+            m_logoutProgressHUD.Show(this, "Removing redeems from Twitch, this could take a moment");
             TaskAwaiter awaiter = m_customRewards.ClearRewards();
             awaiter.OnCompleted(ShowQuitMessage);
         }
@@ -324,7 +326,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         private IEnumerator DelayedQuit()
         {
-            m_logoutProgressPanel.UpdateMessage("Quitting game...");
+            m_logoutProgressHUD.UpdateMessage("Quitting game...");
             yield return new WaitForSecondsRealtime(1f);
             Menu.instance.OnQuitYes();
         }

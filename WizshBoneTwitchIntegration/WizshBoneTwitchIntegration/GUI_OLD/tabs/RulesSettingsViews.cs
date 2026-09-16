@@ -158,9 +158,12 @@ namespace WizshBoneTwitchIntegration.GuiOld
 
         [EditorLabel("Allow redeems on boats")]
         [EditorTooltip("Wether the redeems are allowed on boats or should act like wards")]
+        // Underlying field is now ProfileSettingsData.safezoneBoats (renamed, inverted meaning -
+        // true means the safezone is active). Inverted here too so this row keeps showing/storing
+        // exactly what it always did ("allowed" = true = no safezone).
         public BoundField<bool> allowRedeemsOnBoats = new BoundField<bool>(
-            () => ProfileSettingsHelper.Current.allowRedeemsOnBoats,
-            v => { ProfileSettingsHelper.Current.allowRedeemsOnBoats = v; RulesSettingsViewHelper.Persist(); });
+            () => !ProfileSettingsHelper.Current.safezoneBoats,
+            v => { ProfileSettingsHelper.Current.safezoneBoats = !v; RulesSettingsViewHelper.Persist(); });
     }
 
     internal sealed class WardSettingsView

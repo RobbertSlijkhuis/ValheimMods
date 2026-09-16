@@ -17,5 +17,15 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         /// tab-root convention. Called once, when the shell panel is first built.
         /// </summary>
         GameObject Create(GameObject parent);
+
+        /// <summary>
+        /// Re-reads whatever live state this tab shows so it's up to date. Called by
+        /// <see cref="WizshBoneShellGUI"/> whenever this tab becomes the active one (tab-switch or
+        /// panel re-open) - mirroring <c>GUI_OLD/WizshBoneSettingsGUI.cs</c>'s
+        /// <c>RefreshActiveTab</c>, not called every frame. A required interface member rather than
+        /// optional/default because net48's CLR doesn't support default interface implementations -
+        /// tabs with nothing live to refresh just leave the body empty.
+        /// </summary>
+        void Refresh();
     }
 }

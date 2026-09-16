@@ -14,12 +14,23 @@ namespace WizshBoneTwitchIntegration.Gui
         public const int TitleFontSize = 16;
 
         /// <summary>
+        /// Shared border/divider styling (ported from RedesignUI.dc.html's `border:3px solid
+        /// #120d08` panel frame and its sidebar-right/title-underline/topbar-bottom lines) - kept
+        /// here since <see cref="WizshBoneShellGUI"/>, <see cref="ShellSidebar"/>, and
+        /// <see cref="ShellTopBar"/> all need the same values.
+        /// </summary>
+        public const float PanelBorderThickness = 4f;
+        public static readonly Color PanelBorderColor = new Color(0.071f, 0.051f, 0.031f, 1f); // #120d08
+        public static readonly Color DividerColorStrong = new Color(1f, 1f, 1f, 0.13f);         // ~#ffffff20, title underline
+        public static readonly Color DividerColorSubtle = new Color(1f, 1f, 1f, 0.09f);         // ~#ffffff18, top-bar bottom
+
+        /// <summary>
         /// Creates a left-aligned orange section title label.
         /// </summary>
         public static Text CreateTitle(string text, GameObject parent, Vector2 position, float width = 300f)
         {
             Text label = GUIManager.Instance.CreateText(
-                text:                text,
+                text:                text.ToUpperInvariant(),
                 parent:              parent.transform,
                 anchorMin:           new Vector2(0.5f, 1f),
                 anchorMax:           new Vector2(0.5f, 1f),
@@ -77,6 +88,46 @@ namespace WizshBoneTwitchIntegration.Gui
             Image image = region.AddComponent<Image>();
             image.color = color;
             return image;
+        }
+
+        /// <summary>
+        /// Adds a thin colored outline around a button's background image, matching its label
+        /// color - copy-adapted from GUI_OLD/tabs/TabUIHelper.cs's AddBorder (same technique:
+        /// GUIManager.Instance.CreateButton's root GameObject carries both the Button and its
+        /// Image directly, so an Outline applied there reads as a border around the button).
+        /// </summary>
+        public static void AddBorder(GameObject buttonObj, Color color)
+        {
+            Outline outline = buttonObj.AddComponent<Outline>();
+            outline.effectColor = color;
+            outline.effectDistance = new Vector2(2f, 2f);
+        }
+
+        /// <summary>
+        /// Adds a thin border frame near a panel's outer edge - four flat-colored bars built the
+        /// same way as the sidebar/topbar/content regions (<see cref="CreateRegion"/>/
+        /// <see cref="AddBackground"/>), added as the panel's last children so they draw on top of
+        /// everything else already filling it edge-to-edge (ported from RedesignUI.dc.html's
+        /// `border:3px solid #120d08` panel frame, kept subtle/close to the edge rather than the
+        /// mockup's wide inset matte).
+        /// </summary>
+        public static void AddPanelBorder(GameObject panel, float inset, float thickness, Color color)
+        {
+            AddBackground(CreateRegion(panel, "BorderTop",
+                new Vector2(0f, 1f), new Vector2(1f, 1f),
+                new Vector2(inset, -inset - thickness), new Vector2(-inset, -inset)), color);
+
+            AddBackground(CreateRegion(panel, "BorderBottom",
+                new Vector2(0f, 0f), new Vector2(1f, 0f),
+                new Vector2(inset, inset), new Vector2(-inset, inset + thickness)), color);
+
+            AddBackground(CreateRegion(panel, "BorderLeft",
+                new Vector2(0f, 0f), new Vector2(0f, 1f),
+                new Vector2(inset, inset), new Vector2(inset + thickness, -inset)), color);
+
+            AddBackground(CreateRegion(panel, "BorderRight",
+                new Vector2(1f, 0f), new Vector2(1f, 1f),
+                new Vector2(-inset - thickness, inset), new Vector2(-inset, -inset)), color);
         }
     }
 }

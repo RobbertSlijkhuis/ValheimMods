@@ -22,7 +22,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public bool m_playerIsInSafeZone = false;
         public bool m_enabled = false;
         public string m_alias;
-        public string m_quickTestRedeem = "WBTI Timestop";
+        public string m_quickTestRedeem = "Timestop";
         public static string m_refundMessage;
 
         public readonly List<CustomRewardEvent> m_redeemHistory = new List<CustomRewardEvent>();
@@ -136,7 +136,10 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 m_refundMessage = $"Your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points has been refunded!";
 
-                RedeemData redeem = GetRedeemList().Find(item => item.title == customRewardEvent.CustomRewardTitle);
+                // customRewardEvent.CustomRewardTitle is whatever was actually pushed to Twitch -
+                // the Twitch-facing (prefixed) title, not the raw RedeemData.title - so match
+                // against RedeemManager.GetFullTitle() rather than item.title directly.
+                RedeemData redeem = GetRedeemList().Find(item => RedeemManager.GetFullTitle(item) == customRewardEvent.CustomRewardTitle);
                 if (redeem == null)
                 {
                     //m_chat.Send($"Could not find redeem! Your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points has been refunded!");
@@ -367,7 +370,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         IsUserInputRequired = redeem.userInput,
                         Cost = redeem.points,
                         Prompt = redeem.description,
-                        Title = redeem.title,
+                        // The Twitch-facing (prefixed) title - RedeemData.title itself is stored
+                        // prefix-free, see RedeemManager.GetFullTitle.
+                        Title = RedeemManager.GetFullTitle(redeem),
                         IsEnabled = redeem.enabled && isEnabled,
                     });
                 }

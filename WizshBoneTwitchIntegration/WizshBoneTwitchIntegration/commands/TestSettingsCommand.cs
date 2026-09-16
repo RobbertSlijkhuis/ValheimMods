@@ -102,12 +102,15 @@ namespace WizshBoneTwitchIntegration.Commands
 
                 enableRedeemsOnLogin = false,
                 autoResolveRedeems   = false,
-                allowRedeemsOnBoats  = false,
+                redeemTitlePrefix    = "TEST",
 
                 wardRecipe        = "Wood:99, Stone: 1, Iron:5",
                 wardBurnCreatures = true,
                 wardPushCreatures = false,
                 wardPushForce     = 4321f,
+
+                safezoneTraders = false,
+                safezoneBoats   = true,
 
                 hudPosition = HudPosition.Custom,
                 hudOffsetX  = -12.5f,
@@ -186,11 +189,13 @@ namespace WizshBoneTwitchIntegration.Commands
                 && a.indestructibleVegetables == b.indestructibleVegetables
                 && a.enableRedeemsOnLogin == b.enableRedeemsOnLogin
                 && a.autoResolveRedeems == b.autoResolveRedeems
-                && a.allowRedeemsOnBoats == b.allowRedeemsOnBoats
+                && a.redeemTitlePrefix == b.redeemTitlePrefix
                 && a.wardRecipe == b.wardRecipe
                 && a.wardBurnCreatures == b.wardBurnCreatures
                 && a.wardPushCreatures == b.wardPushCreatures
                 && a.wardPushForce == b.wardPushForce
+                && a.safezoneTraders == b.safezoneTraders
+                && a.safezoneBoats == b.safezoneBoats
                 && a.hudPosition == b.hudPosition
                 && a.hudOffsetX == b.hudOffsetX
                 && a.hudOffsetY == b.hudOffsetY;

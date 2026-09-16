@@ -2,7 +2,6 @@
 using System;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Gui;
-using WizshBoneTwitchIntegration.GuiOld;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
@@ -21,7 +20,6 @@ namespace WizshBoneTwitchIntegration.Harmony
                 Game.instance.gameObject.AddComponent<TwitchCustomRewards>();
                 Game.instance.gameObject.AddComponent<TwitchAuth>();
                 Game.instance.gameObject.AddComponent<TwitchChatting>();
-                Game.instance.gameObject.AddComponent<SafeZoneHUDPanel>();
                 Game.instance.gameObject.AddComponent<StatusEffectManager>();
                 Game.instance.gameObject.AddComponent<WizshBoneGUI>();
 
@@ -51,7 +49,8 @@ namespace WizshBoneTwitchIntegration.Harmony
                 {
                     if (auth.m_customRewards.HasUnresolvedRedeems())
                     {
-                        auth.m_exitConfirmDialog.Show(
+                        WizshBoneGUI gui = Game.instance.gameObject.GetComponent<WizshBoneGUI>();
+                        gui?.ShowExitConfirm(
                             title:       "Log Out",
                             description: "Auto-resolve is off. Pending redeems won't be refunded automatically. Log out anyway?",
                             onConfirm:   () =>
@@ -61,10 +60,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                             },
                             confirmText: "Log Out",
                             cancelText:  "Open History",
-                            onCancel:    () =>
-                            {
-                                auth.m_settingsGUI.m_redeemHistoryGUI.ShowGUI();
-                            }
+                            onCancel:    () => gui?.ShowHistory()
                         );
                         return false;
                     }
@@ -101,7 +97,8 @@ namespace WizshBoneTwitchIntegration.Harmony
                 {
                     if (auth.m_customRewards.HasUnresolvedRedeems())
                     {
-                        auth.m_exitConfirmDialog.Show(
+                        WizshBoneGUI gui = Game.instance.gameObject.GetComponent<WizshBoneGUI>();
+                        gui?.ShowExitConfirm(
                             title:       "Quit Game",
                             description: "Auto-resolve is off. Pending redeems won't be refunded automatically. Quit anyway?",
                             onConfirm:   () =>
@@ -111,10 +108,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                             },
                             confirmText: "Quit",
                             cancelText:  "Open History",
-                            onCancel:    () =>
-                            {
-                                auth.m_settingsGUI.m_redeemHistoryGUI.ShowGUI();
-                            }
+                            onCancel:    () => gui?.ShowHistory()
                         );
                         return false;
                     }
