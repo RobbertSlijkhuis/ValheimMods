@@ -13,6 +13,7 @@ namespace WizshBoneTwitchIntegration.Configs
         public static string sectionKeybinds = "Keybinds";
         public static string sectionDebug = "Debug";
         public static string sectionPerformance = "Performance";
+        public static string sectionAppearance = "Appearance";
 
         public static ConfigEntry<KeyboardShortcut> configWizshBoneWindowOld;
         public static ConfigEntry<KeyboardShortcut> configWizshBoneWindow;
@@ -20,6 +21,10 @@ namespace WizshBoneTwitchIntegration.Configs
 
         // Debug
         public static ConfigEntry<bool> configShowSafeZoneDebug;
+
+        // Appearance
+        public static ConfigEntry<bool> configAlternativeToggles;
+        public static ConfigEntry<bool> configAlternativeSidebar;
 
         // Performance
         public static ConfigEntry<int> configShipIdlePhysicsThrottle;
@@ -58,6 +63,15 @@ namespace WizshBoneTwitchIntegration.Configs
 
             configShipIdlePhysicsThrottle = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionPerformance, "Idle boat physics throttle", 4,
                 new ConfigDescription("Redeem-spawned boats with nobody at the helm only run their full buoyancy physics every Nth physics tick instead of every tick (e.g. 4 = ~12.5Hz instead of 50Hz). Reduces the performance cost of large boat piles (e.g. Boatpocalypse). Set to 1 to disable throttling. Boats being actively steered always run at full rate regardless of this setting.", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+
+
+            configAlternativeToggles = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionAppearance, "Alternative toggle style", false,
+                new ConfigDescription("Switches every boolean field in the WizshBone UI to a rectangle-style toggle. Takes effect the next time you reopen the panel, not immediately.", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
+
+            configAlternativeSidebar = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionAppearance, "Alternative sidebar style", false,
+                new ConfigDescription("Switches the WizshBone UI's sidebar tab buttons to an alternate look. Takes effect the next time you reopen the panel, not immediately.", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
         }
 

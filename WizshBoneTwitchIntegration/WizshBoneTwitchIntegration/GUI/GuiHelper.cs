@@ -164,8 +164,11 @@ namespace WizshBoneTwitchIntegration.Gui
             rt.anchorMin = new Vector2(0.5f, 1f);
             rt.anchorMax = new Vector2(0.5f, 1f);
             rt.pivot = new Vector2(0.5f, 1f);
-            rt.sizeDelta = new Vector2(width, height);
-            rt.anchoredPosition = topCenter;
+            // Rounded to whole pixels - callers derive width/topCenter from divisions (e.g.
+            // CardWidth = ContentWidth/3) that don't come out even, and legacy uGUI Text doesn't
+            // pixel-snap, so a fractional position/size here blurs every glyph inside the card.
+            rt.sizeDelta = new Vector2(Mathf.Round(width), Mathf.Round(height));
+            rt.anchoredPosition = new Vector2(Mathf.Round(topCenter.x), Mathf.Round(topCenter.y));
 
             Image bg = card.AddComponent<Image>();
             bg.color = CardBackgroundColor;
@@ -197,14 +200,15 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: card.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(x, y),
+                // Rounded to whole pixels - see the same note in CreateCard.
+                position: new Vector2(Mathf.Round(x), Mathf.Round(y)),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: fontSize,
                 color: color,
                 outline: true,
                 outlineColor: Color.black,
-                width: width,
-                height: height,
+                width: Mathf.Round(width),
+                height: Mathf.Round(height),
                 addContentSizeFitter: false
             ).GetComponent<Text>();
             label.alignment = TextAnchor.MiddleLeft;
@@ -242,6 +246,12 @@ namespace WizshBoneTwitchIntegration.Gui
         /// own sibling card before that got fixed). Returns the toggle and status Text so a caller
         /// that needs to mutate the status word later (Help's live safezone-debug toggle) can hold
         /// onto them.
+        ///
+        /// Renders through <see cref="GuiFieldBuilder.CreateStyledBoolField"/>, so it automatically
+        /// switches between the stock Jötunn circle toggle and the mockup's rectangle graphic based
+        /// on <see cref="Configs.PluginConfig.configAlternativeToggles"/> - both occupy the same
+        /// <see cref="GuiFieldBuilder.FieldHeight"/>-wide footprint, so the row's layout math below
+        /// doesn't need to branch on which one was used.
         /// </summary>
         public static (Toggle Toggle, Text Status) CreateToggleStatusRow(GameObject card, float cardWidth, bool currentValue, Action<bool> onChanged, Color enabledColor)
         {
@@ -249,12 +259,13 @@ namespace WizshBoneTwitchIntegration.Gui
             const float statusY = -60f;
             const float statusGap = 12f;
 
-            Toggle toggle = GuiFieldBuilder.CreateBoolField(card, new Vector2(0f, toggleY), cardWidth - 24f, currentValue, onChanged);
-
             // The status word sits a gap right of the toggle, sharing the same top-center (0.5, 1)
             // anchor convention every other element on the card uses.
             float titleLeftEdge = -cardWidth / 2f + 12f;
             float toggleRightEdge = titleLeftEdge + GuiFieldBuilder.FieldHeight;
+
+            Toggle toggle = GuiFieldBuilder.CreateStyledBoolField(card, new Vector2(0f, toggleY), cardWidth - 24f, currentValue, onChanged);
+
             float statusLeftEdge = toggleRightEdge + statusGap;
             float statusRightEdge = cardWidth / 2f - 12f;
             float statusWidth = statusRightEdge - statusLeftEdge;
@@ -282,9 +293,10 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: card.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(x, y),
-                width: width,
-                height: height
+                // Rounded to whole pixels - see the same note in CreateCard.
+                position: new Vector2(Mathf.Round(x), Mathf.Round(y)),
+                width: Mathf.Round(width),
+                height: Mathf.Round(height)
             );
             btnObj.SetActive(true);
             btnObj.GetComponent<Button>().onClick.AddListener(() => onClick());

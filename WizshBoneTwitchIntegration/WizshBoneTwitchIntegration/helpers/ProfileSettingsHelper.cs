@@ -54,6 +54,9 @@ namespace WizshBoneTwitchIntegration.Helpers
                 Current = new ProfileSettingsData();
             }
 
+            if (!string.IsNullOrEmpty(Current.redeemTitlePrefix) && Current.redeemTitlePrefix.Length > 6)
+                Current.redeemTitlePrefix = Current.redeemTitlePrefix.Substring(0, 6);
+
             ApplyToLiveComponents();
             return true;
         }

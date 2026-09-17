@@ -104,9 +104,10 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                     () => ProfileSettingsHelper.Current.autoResolveRedeems,
                     v => ProfileSettingsHelper.Current.autoResolveRedeems = v));
 
-            StringFieldRow("Redeem prefix", "Added in front of every redeem title. No trailing space needed, it's added automatically.",
+            StringFieldRow("Redeem prefix", "Added in front of every redeem title. No trailing space needed, it's added automatically. Max 6 characters.",
                 () => ProfileSettingsHelper.Current.redeemTitlePrefix,
-                v => ProfileSettingsHelper.Current.redeemTitlePrefix = v);
+                v => ProfileSettingsHelper.Current.redeemTitlePrefix = v,
+                maxLength: 6);
         }
 
         private void BuildChattingSection()
@@ -239,7 +240,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 var f = fields[i];
                 GameObject cell = CreateCell(row, x, width);
                 GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
-                GuiFieldBuilder.CreateBoolField(cell, new Vector2(0f, -56f), width - 24f, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
+                GuiFieldBuilder.CreateStyledBoolField(cell, new Vector2(0f, -56f), width - 24f, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
                 GuiHelper.CreateCardDescription(cell, f.Description, width - 24f);
             });
         }
@@ -270,12 +271,12 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             });
         }
 
-        private void StringFieldRow(string title, string description, Func<string> get, Action<string> set)
+        private void StringFieldRow(string title, string description, Func<string> get, Action<string> set, int maxLength = 0)
         {
             GameObject row = CreateRow();
             GameObject cell = CreateCell(row, 0f, ScrollContentWidth);
             GuiHelper.CreateCardTitle(cell, title, ScrollContentWidth - 24f);
-            InputField input = GuiFieldBuilder.CreateInputField(cell, new Vector2(0f, -58f), ScrollContentWidth - 24f, get());
+            InputField input = GuiFieldBuilder.CreateInputField(cell, new Vector2(0f, -58f), ScrollContentWidth - 24f, get(), maxLength: maxLength);
             input.onValueChanged.AddListener(v => { set(v); ProfileSettingsPersistHelper.Persist(); });
             GuiHelper.CreateCardDescription(cell, description, ScrollContentWidth - 24f);
         }

@@ -116,7 +116,10 @@ namespace WizshBoneTwitchIntegration.Components
             // RecolorCreature always replaces the material outright, so no reset is needed when the
             // new name does recolor.
             if (RecolorHelper.CanRecolorCreature(m_assignment.userName, m_assignment.creature.name))
+            {
                 RecolorHelper.RecolorCreature(m_assignment.userName, gameObject);
+                CreatureHelper.GetValheimCreature(m_assignment.creature.name)?.spawnEffects.Create(transform.position, transform.rotation);
+            }
             else if (RecolorHelper.IsCreatureInList(m_assignment.creature.name))
                 RecolorHelper.UnColorCreature(gameObject);
 

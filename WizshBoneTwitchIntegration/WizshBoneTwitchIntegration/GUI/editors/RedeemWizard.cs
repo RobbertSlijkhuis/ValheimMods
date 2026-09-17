@@ -511,9 +511,9 @@ namespace WizshBoneTwitchIntegration.Gui
             float quarterWidth = halfWidth / 2f;
             float toggle1X = rightHalfX - quarterWidth / 2f;
             float toggle2X = rightHalfX + quarterWidth / 2f;
-            m_userInputToggle = GuiFieldBuilder.CreateBoolField(m_step3Root, new Vector2(toggle1X, toggleRowY), quarterWidth, false, v => m_working.userInput = v);
+            m_userInputToggle = GuiFieldBuilder.CreateStyledBoolField(m_step3Root, new Vector2(toggle1X, toggleRowY), quarterWidth, false, v => m_working.userInput = v);
             CreateInlineToggleLabel(m_step3Root, "Requires viewer input", toggle1X, quarterWidth, toggleRowY);
-            m_ignoreSafezoneToggle = GuiFieldBuilder.CreateBoolField(m_step3Root, new Vector2(toggle2X, toggleRowY), quarterWidth, false, v => m_working.ignoreWard = v);
+            m_ignoreSafezoneToggle = GuiFieldBuilder.CreateStyledBoolField(m_step3Root, new Vector2(toggle2X, toggleRowY), quarterWidth, false, v => m_working.ignoreWard = v);
             CreateInlineToggleLabel(m_step3Root, "Ignore safezone", toggle2X, quarterWidth, toggleRowY);
 
             y -= LabelHeight + RowHeight + RowGap;
@@ -776,13 +776,14 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: parent.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(x, y),
+                // Rounded to whole pixels - see the same note in CreateInlineToggleLabel.
+                position: new Vector2(Mathf.Round(x), Mathf.Round(y)),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: GuiFieldBuilder.FieldFontSize,
                 color: GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
-                width: width,
+                width: Mathf.Round(width),
                 height: LabelHeight,
                 addContentSizeFitter: false
             ).GetComponent<Text>();
@@ -811,13 +812,16 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: parent.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(labelX, y - RowHeight / 4f),
+                // Rounded to whole pixels - labelWidth/labelX above can land on a half-pixel (e.g.
+                // an odd labelWidth halved for centering), and legacy uGUI Text doesn't pixel-snap
+                // (see GuiHelper's CreateCard/CreateCardText for the same fix).
+                position: new Vector2(Mathf.Round(labelX), Mathf.Round(y - RowHeight / 4f)),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: GuiFieldBuilder.FieldFontSize,
                 color: GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
-                width: labelWidth,
+                width: Mathf.Round(labelWidth),
                 height: RowHeight,
                 addContentSizeFitter: false
             ).GetComponent<Text>();

@@ -77,7 +77,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 { ValheimCreatureType.GoblinBrute, new ValheimCreature(5.6f, e.SpawnEffectMedium) },
                 { ValheimCreatureType.GoblinShaman, new ValheimCreature(5.4f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.BlobTar, new ValheimCreature(5.3f, e.SpawnEffectSmall) },
-                { ValheimCreatureType.Lox, new ValheimCreature(5.6f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Lox, new ValheimCreature(5.6f, e.SpawnEffectMedium) },
                 { ValheimCreatureType.Unbjorn, new ValheimCreature(5.6f, e.SpawnEffectMedium) },
                 { ValheimCreatureType.Yagluth, new ValheimCreature(5.6f, e.SpawnEffectMedium) },
 

@@ -2,6 +2,7 @@ using System;
 using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.UI;
+using WizshBoneTwitchIntegration.Configs;
 
 namespace WizshBoneTwitchIntegration.Gui
 {
@@ -34,17 +35,20 @@ namespace WizshBoneTwitchIntegration.Gui
         /// Wraps Jötunn's own <see cref="GUIManager.CreateInputField"/> - a genuine Jötunn API,
         /// not a GUI_OLD-only wrapper - with this mod's default styling applied.
         /// </summary>
-        public static InputField CreateInputField(GameObject parent, Vector2 position, float width, string initialValue = "", string placeholderText = "")
+        public static InputField CreateInputField(GameObject parent, Vector2 position, float width, string initialValue = "", string placeholderText = "", int maxLength = 0)
         {
             GameObject inputObj = GUIManager.Instance.CreateInputField(
                 parent: parent.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: position,
+                // Rounded to whole pixels - callers often derive position/width from divisions
+                // (e.g. a card width split in three) that don't come out even, and legacy uGUI
+                // Text doesn't pixel-snap, so a fractional value here blurs the field's text.
+                position: new Vector2(Mathf.Round(position.x), Mathf.Round(position.y)),
                 contentType: InputField.ContentType.Standard,
                 placeholderText: placeholderText,
                 fontSize: FieldFontSize,
-                width: width,
+                width: Mathf.Round(width),
                 height: FieldHeight
             );
 
@@ -52,6 +56,8 @@ namespace WizshBoneTwitchIntegration.Gui
             inputField.textComponent.alignment = TextAnchor.MiddleLeft;
             StylePlaceholder(inputField);
             inputField.text = initialValue;
+            if (maxLength > 0)
+                inputField.characterLimit = maxLength;
             return inputField;
         }
 
@@ -130,12 +136,126 @@ namespace WizshBoneTwitchIntegration.Gui
             toggleRt.anchorMin = new Vector2(0.5f, 1f);
             toggleRt.anchorMax = new Vector2(0.5f, 1f);
             toggleRt.pivot = new Vector2(0.5f, 0.5f);
-            toggleRt.anchoredPosition = new Vector2(leftAlignedX, position.y - FieldHeight / 4f);
+            // Rounded to whole pixels - see the same note in CreateInputField.
+            toggleRt.anchoredPosition = new Vector2(Mathf.Round(leftAlignedX), Mathf.Round(position.y - FieldHeight / 4f));
 
             Toggle toggle = toggleObj.GetComponent<Toggle>();
             toggle.isOn = currentValue;
             toggle.onValueChanged.AddListener(val => onChanged?.Invoke(val));
             return toggle;
+        }
+
+        public const float RectToggleWidth = 40f;
+        public const float RectToggleHeight = 20f;
+        private const float RectToggleBorderThickness = 1f;
+        private const float RectTogglePadding = 2f;
+
+        // RedesignUI.dc.html's boolean-graphic track/knob colors.
+        public static readonly Color RectToggleEnabledColor = new Color(0.227f, 0.420f, 0.247f);  // #3a6b3f
+        public static readonly Color RectToggleDisabledColor = new Color(0.227f, 0.125f, 0.125f); // #3a2020
+        public static readonly Color RectToggleBorderColor = new Color(0f, 0f, 0f, 0.376f);        // #00000060
+        public static readonly Color RectToggleKnobColor = new Color(0.910f, 0.878f, 0.816f);      // #e8e0d0
+
+        /// <summary>
+        /// Rectangle-track toggle matching RedesignUI.dc.html's boolean graphic (Home's Redeem
+        /// status/Auto resolve/Enable on login/Chatting toggles in the mockup) - a green/dark-red
+        /// track with a square knob that slides left/right, as an alternate to
+        /// <see cref="CreateBoolField"/>'s stock Jötunn circle toggle. Built from plain
+        /// <see cref="Image"/>s rather than Jötunn's toggle prefab, since that prefab's look is a
+        /// fixed checkbox sprite swap and can't be recolored/reshaped into a track+knob.
+        /// </summary>
+        public static Toggle CreateRectBoolField(GameObject parent, Vector2 position, bool currentValue, Action<bool> onChanged, float width = RectToggleWidth, float height = RectToggleHeight)
+        {
+            // Every computed dimension below is rounded, not just the root position - a caller
+            // passing a non-whole width/height (today's two call sites don't, but that's not
+            // guaranteed forever) could otherwise leave the track/knob edges on a fractional
+            // canvas unit.
+            width = Mathf.Round(width);
+            height = Mathf.Round(height);
+
+            GameObject root = new GameObject("RectToggle", typeof(RectTransform));
+            root.transform.SetParent(parent.transform, false);
+
+            RectTransform rootRt = (RectTransform)root.transform;
+            rootRt.anchorMin = new Vector2(0.5f, 1f);
+            rootRt.anchorMax = new Vector2(0.5f, 1f);
+            rootRt.pivot = new Vector2(0.5f, 0.5f);
+            rootRt.sizeDelta = new Vector2(width, height);
+            // Rounded to whole pixels - see the same note in CreateInputField.
+            rootRt.anchoredPosition = new Vector2(Mathf.Round(position.x), Mathf.Round(position.y));
+
+            // The border color fills the whole root; the inset Track image on top leaves a
+            // 1px rim visible, matching the mockup's `border:1px solid #00000060` track div.
+            Image border = root.AddComponent<Image>();
+            border.color = RectToggleBorderColor;
+
+            GameObject trackObj = new GameObject("Track", typeof(RectTransform));
+            trackObj.transform.SetParent(root.transform, false);
+            RectTransform trackRt = (RectTransform)trackObj.transform;
+            trackRt.anchorMin = Vector2.zero;
+            trackRt.anchorMax = Vector2.one;
+            trackRt.offsetMin = new Vector2(RectToggleBorderThickness, RectToggleBorderThickness);
+            trackRt.offsetMax = new Vector2(-RectToggleBorderThickness, -RectToggleBorderThickness);
+            Image track = trackObj.AddComponent<Image>();
+            track.raycastTarget = false;
+
+            float trackWidthLocal = Mathf.Round(width - RectToggleBorderThickness * 2f);
+            float knobSize = Mathf.Round(height - RectToggleBorderThickness * 2f - RectTogglePadding * 2f);
+            float knobLeftX = Mathf.Round(RectTogglePadding);
+            float knobRightX = Mathf.Round(trackWidthLocal - RectTogglePadding - knobSize);
+
+            GameObject knobObj = new GameObject("Knob", typeof(RectTransform));
+            knobObj.transform.SetParent(trackObj.transform, false);
+            RectTransform knobRt = (RectTransform)knobObj.transform;
+            knobRt.anchorMin = new Vector2(0f, 0.5f);
+            knobRt.anchorMax = new Vector2(0f, 0.5f);
+            knobRt.pivot = new Vector2(0f, 0.5f);
+            knobRt.sizeDelta = new Vector2(knobSize, knobSize);
+            Image knob = knobObj.AddComponent<Image>();
+            knob.color = RectToggleKnobColor;
+            knob.raycastTarget = false;
+
+            Toggle toggle = root.AddComponent<Toggle>();
+            toggle.targetGraphic = border;
+            toggle.transition = Selectable.Transition.None;
+            toggle.isOn = currentValue;
+
+            void ApplyVisual(bool on)
+            {
+                track.color = on ? RectToggleEnabledColor : RectToggleDisabledColor;
+                knobRt.anchoredPosition = new Vector2(Mathf.Round(on ? knobRightX : knobLeftX), 0f);
+            }
+
+            ApplyVisual(currentValue);
+            toggle.onValueChanged.AddListener(val =>
+            {
+                ApplyVisual(val);
+                onChanged?.Invoke(val);
+            });
+
+            return toggle;
+        }
+
+        /// <summary>
+        /// Single place that decides whether a boolean field renders as Jötunn's stock circle
+        /// toggle (<see cref="CreateBoolField"/>) or the mockup's rectangle track+knob
+        /// (<see cref="CreateRectBoolField"/>), based on <see cref="PluginConfig.configAlternativeToggles"/>.
+        /// Every boolean-field call site should go through this instead of calling either widget
+        /// directly, so flipping that one config value changes every toggle in the UI at once.
+        ///
+        /// Occupies the same <see cref="FieldHeight"/>-wide, left-aligned footprint within the
+        /// given <paramref name="position"/>/<paramref name="width"/> slot that
+        /// <see cref="CreateBoolField"/>'s circle does, so a caller's surrounding layout math
+        /// (e.g. a status word positioned to the right of the toggle) doesn't need to know which
+        /// style is active.
+        /// </summary>
+        public static Toggle CreateStyledBoolField(GameObject parent, Vector2 position, float width, bool currentValue, Action<bool> onChanged)
+        {
+            if (!PluginConfig.configAlternativeToggles.Value)
+                return CreateBoolField(parent, position, width, currentValue, onChanged);
+
+            float centerX = position.x - width / 2f + FieldHeight / 2f;
+            return CreateRectBoolField(parent, new Vector2(centerX, position.y), currentValue, onChanged, width: FieldHeight);
         }
 
         /// <summary>

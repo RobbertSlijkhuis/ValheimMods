@@ -265,13 +265,16 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 parent: card.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(x, topY),
+                // Rounded to whole pixels - x/width come from CardWidth-derived divisions that
+                // don't come out even, and legacy uGUI Text doesn't pixel-snap (see GuiHelper's
+                // CreateCard/CreateCardText for the same fix).
+                position: new Vector2(Mathf.Round(x), topY),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 11,
                 color: GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
-                width: width,
+                width: Mathf.Round(width),
                 height: 18f,
                 addContentSizeFitter: false
             ).GetComponent<Text>();

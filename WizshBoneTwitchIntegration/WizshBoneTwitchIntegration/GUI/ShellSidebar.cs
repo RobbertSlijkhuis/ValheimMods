@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.UI;
+using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Gui
@@ -24,6 +25,28 @@ namespace WizshBoneTwitchIntegration.Gui
         public const float Width = 220f;
 
         private static readonly Color TabActiveColor = new Color(0.9f, 0.9f, 0.9f, 1f);
+
+        // RedesignUI.dc.html's sidebar tab-button colors, used only when configAlternativeSidebar is on.
+        private static readonly Color AltRowActiveBgColor = new Color(0f, 0f, 0f, 80f / 255f);    // #00000050
+        private static readonly Color AltRowInactiveBgColor = new Color(0f, 0f, 0f, 0f);           // transparent
+        private static readonly Color AltBorderAccentColor = new Color(240f / 255f, 168f / 255f, 80f / 255f);  // #f0a850
+        private static readonly Color AltTextActiveColor = new Color(232f / 255f, 176f / 255f, 96f / 255f);    // #e8b060
+        private static readonly Color AltTextInactiveColor = new Color(200f / 255f, 191f / 255f, 168f / 255f); // #c8bfa8
+        private const float AltBorderAccentWidth = 3f;
+
+        /// <summary>
+        /// Per-tab visuals a style's construction path populated - <see cref="BorderAccent"/>/
+        /// <see cref="Label"/> stay null under the stock style, since <see cref="SetActiveTab"/>
+        /// only ever reaches for them when <see cref="m_useAlternativeStyle"/> is true, which is
+        /// only true when <see cref="CreateAltTabRow"/> (which always sets them) built every entry.
+        /// </summary>
+        private class TabButtonVisual
+        {
+            public Button Button;
+            public Image Background;
+            public Image BorderAccent;
+            public Text Label;
+        }
 
         private static readonly ShellTab[] GeneralGroupTabs =
         {
@@ -61,9 +84,10 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float ButtonSpacing     = 6f;
         private const float GroupGap          = 16f;
 
-        private readonly Dictionary<ShellTab, Button> m_tabButtons = new Dictionary<ShellTab, Button>();
+        private readonly Dictionary<ShellTab, TabButtonVisual> m_tabButtons = new Dictionary<ShellTab, TabButtonVisual>();
         private Color m_tabDefaultColor;
         private Text m_profileGroupHeaderText;
+        private bool m_useAlternativeStyle;
 
         /// <summary>
         /// Builds the sidebar region as a child of <paramref name="panel"/>.
@@ -72,6 +96,14 @@ namespace WizshBoneTwitchIntegration.Gui
         /// <param name="onClose">Invoked when the Close button is clicked.</param>
         public GameObject Create(GameObject panel, Action<ShellTab> onSelectTab, Action onClose)
         {
+            // ShellSidebar is a readonly field of WizshBoneShellGUI, reused (not reconstructed)
+            // across a style-change rebuild (see WizshBoneShellGUI.DestroyPanel) - reset every
+            // piece of mutable per-build state so a second Create() call is as clean as the first.
+            m_useAlternativeStyle = PluginConfig.configAlternativeSidebar.Value;
+            m_tabButtons.Clear();
+            m_tabDefaultColor = default;
+            m_profileGroupHeaderText = null;
+
             GameObject root = GuiHelper.CreateRegion(
                 panel, "Sidebar",
                 anchorMin: new Vector2(0f, 0f),
@@ -135,11 +167,21 @@ namespace WizshBoneTwitchIntegration.Gui
         /// </summary>
         public void SetActiveTab(ShellTab activeTab)
         {
-            foreach (KeyValuePair<ShellTab, Button> kvp in m_tabButtons)
+            foreach (KeyValuePair<ShellTab, TabButtonVisual> kvp in m_tabButtons)
             {
-                Image image = kvp.Value.GetComponent<Image>();
-                if (image != null)
-                    image.color = kvp.Key == activeTab ? TabActiveColor : m_tabDefaultColor;
+                bool isActive = kvp.Key == activeTab;
+                TabButtonVisual visual = kvp.Value;
+
+                if (m_useAlternativeStyle)
+                {
+                    visual.Background.color = isActive ? AltRowActiveBgColor : AltRowInactiveBgColor;
+                    visual.BorderAccent.color = isActive ? AltBorderAccentColor : AltRowInactiveBgColor;
+                    visual.Label.color = isActive ? AltTextActiveColor : AltTextInactiveColor;
+                }
+                else
+                {
+                    visual.Background.color = isActive ? TabActiveColor : m_tabDefaultColor;
+                }
             }
         }
 
@@ -184,28 +226,109 @@ namespace WizshBoneTwitchIntegration.Gui
             {
                 ShellTab capturedTab = tab;
 
-                GameObject btnObj = GUIManager.Instance.CreateButton(
-                    text:      tab.Label(),
-                    parent:    root.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position:  new Vector2(0f, y),
-                    width:     Width - 30f,
-                    height:    ButtonHeight
-                );
-                btnObj.SetActive(true);
-
-                Button button = btnObj.GetComponent<Button>();
-                if (m_tabButtons.Count == 0)
-                    m_tabDefaultColor = btnObj.GetComponent<Image>().color;
-
-                button.onClick.AddListener(() => onSelectTab(capturedTab));
-                m_tabButtons[tab] = button;
+                TabButtonVisual visual = m_useAlternativeStyle
+                    ? CreateAltTabRow(root, capturedTab, y, onSelectTab)
+                    : CreateStockTabButton(root, capturedTab, y, onSelectTab);
+                m_tabButtons[tab] = visual;
 
                 y -= ButtonHeight + ButtonSpacing;
             }
 
             return y - GroupGap;
+        }
+
+        /// <summary>
+        /// Today's stock look: Jötunn's own sprite-backed button, active/inactive distinguished by
+        /// tinting that one Image - unchanged from before the Alternative UI style existed.
+        /// </summary>
+        private TabButtonVisual CreateStockTabButton(GameObject root, ShellTab tab, float y, Action<ShellTab> onSelectTab)
+        {
+            GameObject btnObj = GUIManager.Instance.CreateButton(
+                text:      tab.Label(),
+                parent:    root.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position:  new Vector2(0f, y),
+                width:     Width - 30f,
+                height:    ButtonHeight
+            );
+            btnObj.SetActive(true);
+
+            Button button = btnObj.GetComponent<Button>();
+            Image background = btnObj.GetComponent<Image>();
+            if (m_tabButtons.Count == 0)
+                m_tabDefaultColor = background.color;
+
+            button.onClick.AddListener(() => onSelectTab(tab));
+
+            return new TabButtonVisual { Button = button, Background = background };
+        }
+
+        /// <summary>
+        /// RedesignUI.dc.html's tab-row look: a transparent row that tints to <see cref="AltRowActiveBgColor"/>
+        /// with a left <see cref="AltBorderAccentColor"/> border accent when active - hand-built from
+        /// plain Images the same way <see cref="GuiFieldBuilder.CreateRectBoolField"/> is, since
+        /// Jötunn's button prefab brings its own sprite background that can't be recolored into
+        /// this shape.
+        /// </summary>
+        private TabButtonVisual CreateAltTabRow(GameObject root, ShellTab tab, float y, Action<ShellTab> onSelectTab)
+        {
+            GameObject rowObj = new GameObject("TabRow", typeof(RectTransform));
+            rowObj.transform.SetParent(root.transform, false);
+
+            RectTransform rowRt = (RectTransform)rowObj.transform;
+            rowRt.anchorMin = new Vector2(0.5f, 1f);
+            rowRt.anchorMax = new Vector2(0.5f, 1f);
+            rowRt.pivot = new Vector2(0.5f, 0.5f);
+            rowRt.sizeDelta = new Vector2(Width - 30f, ButtonHeight);
+            rowRt.anchoredPosition = new Vector2(0f, Mathf.Round(y));
+
+            Image background = rowObj.AddComponent<Image>();
+            background.color = AltRowInactiveBgColor;
+
+            Button button = rowObj.AddComponent<Button>();
+            button.targetGraphic = background;
+            button.transition = Selectable.Transition.None;
+            button.onClick.AddListener(() => onSelectTab(tab));
+
+            GameObject borderObj = new GameObject("BorderAccent", typeof(RectTransform));
+            borderObj.transform.SetParent(rowObj.transform, false);
+            RectTransform borderRt = (RectTransform)borderObj.transform;
+            borderRt.anchorMin = new Vector2(0f, 0f);
+            borderRt.anchorMax = new Vector2(0f, 1f);
+            borderRt.pivot = new Vector2(0f, 0.5f);
+            borderRt.sizeDelta = new Vector2(AltBorderAccentWidth, 0f);
+            borderRt.anchoredPosition = Vector2.zero;
+            Image borderAccent = borderObj.AddComponent<Image>();
+            borderAccent.raycastTarget = false;
+            borderAccent.color = AltRowInactiveBgColor;
+
+            // CreateText leaves the RectTransform's pivot at Unity's default (0.5, 0.5), so
+            // position.x is always the box's CENTER, never its left edge - matching every other
+            // left-point-anchored text in this codebase (e.g. ShellTopBar.cs's m_statusLabel),
+            // position.x is the desired left edge plus half the box's own width.
+            float labelLeftEdge = AltBorderAccentWidth + 12f;
+            float labelWidth = Width - 30f - AltBorderAccentWidth - 20f;
+
+            Text label = GUIManager.Instance.CreateText(
+                text:                 tab.Label(),
+                parent:               rowObj.transform,
+                anchorMin:            new Vector2(0f, 0.5f),
+                anchorMax:            new Vector2(0f, 0.5f),
+                position:             new Vector2(labelLeftEdge + labelWidth / 2f, 0f),
+                font:                 GUIManager.Instance.AveriaSerifBold,
+                fontSize:             14,
+                color:                AltTextInactiveColor,
+                outline:              true,
+                outlineColor:         Color.black,
+                width:                labelWidth,
+                height:               ButtonHeight,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+            label.alignment = TextAnchor.MiddleLeft;
+            label.raycastTarget = false;
+
+            return new TabButtonVisual { Button = button, Background = background, BorderAccent = borderAccent, Label = label };
         }
     }
 }
