@@ -31,7 +31,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         private const float TitleY = -30f;
         private const float TitleWidth = 300f;
-        private const float ScrollTopInset = 65f;
+        private const float DescriptionY = -50f;
+        private const float ScrollTopInset = 72f;
 
         private const float SectionHeaderHeight = 35f;
         private const float SectionGap = 10f;
@@ -55,6 +56,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             float leftEdgeX = -(ContentWidth / 2f) + ContentMargin;
             GuiHelper.CreateTitle("Settings", m_root, new Vector2(leftEdgeX + TitleWidth / 2f, TitleY), width: TitleWidth);
+            GuiHelper.CreateTabDescription(
+                "Settings are specific to each profile.",
+                m_root, new Vector2(0f, DescriptionY), width: ContentWidth - 2f * ContentMargin);
 
             m_scrollContent = ScrollableList.CreateStretched(
                 m_root, "SettingsScroll",

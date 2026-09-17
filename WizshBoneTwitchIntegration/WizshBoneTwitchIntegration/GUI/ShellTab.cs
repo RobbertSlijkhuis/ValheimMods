@@ -14,7 +14,7 @@ namespace WizshBoneTwitchIntegration.Gui
         Settings,
         CreatureGroups,
         Viewers,
-        Debug
+        Help
     }
 
     internal static class ShellTabExtensions
@@ -30,7 +30,7 @@ namespace WizshBoneTwitchIntegration.Gui
             ShellTab.Settings,
             ShellTab.CreatureGroups,
             ShellTab.Viewers,
-            ShellTab.Debug
+            ShellTab.Help
         };
 
         public static string Label(this ShellTab tab)
@@ -43,7 +43,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 case ShellTab.Settings: return "Settings";
                 case ShellTab.CreatureGroups: return "Creature groups";
                 case ShellTab.Viewers: return "Viewers";
-                case ShellTab.Debug: return "Debug";
+                case ShellTab.Help: return "Help";
                 default: return tab.ToString();
             }
         }

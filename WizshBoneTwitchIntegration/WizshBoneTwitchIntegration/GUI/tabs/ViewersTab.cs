@@ -47,9 +47,10 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         private const float TitleY   = -30f;
         private const float TitleWidth = 300f;
-        private const float ToolbarY = -75f;
-        private const float ColumnHeaderY = -112f;
-        private const float ListTopInset = 131f;
+        private const float DescriptionY = -50f;
+        private const float ToolbarY = -99f;
+        private const float ColumnHeaderY = -136f;
+        private const float ListTopInset = 155f;
 
         private const float SearchWidth = 300f;
         private const float ToolbarButtonSpacing = 10f;
@@ -93,6 +94,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             m_viewerEditDialog.Init();
 
             GuiHelper.CreateTitle("Viewers", m_root, new Vector2(LeftEdgeX + TitleWidth / 2f, TitleY), width: TitleWidth);
+            GuiHelper.CreateTabDescription(
+                "Register viewers here to give them cosmetics, like a name color, and later effects and other perks.",
+                m_root, new Vector2(0f, DescriptionY), width: ContentWidth - 2f * ContentMargin);
 
             BuildToolbar();
             BuildColumnHeaders();

@@ -143,7 +143,7 @@ namespace WizshBoneTwitchIntegration.Gui
         /// on click. <paramref name="currentHexValue"/>/the callback use the same "#RRGGBB" hex
         /// string format the redeem/creature data models already store colors as.
         /// </summary>
-        public static GameObject CreateColorField(GameObject parent, Vector2 position, float width, string currentHexValue, string pickerTitle, Action<string> onChanged)
+        public static GameObject CreateColorField(GameObject parent, Vector2 position, float width, string currentHexValue, string pickerTitle, Action<string> onChanged, float height = FieldHeight)
         {
             Color initialColor = ParseHexColor(currentHexValue);
 
@@ -155,7 +155,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMax: new Vector2(0.5f, 1f),
                 position: position,
                 width: width,
-                height: FieldHeight
+                height: height
             );
             swatchBtn.SetActive(true);
 

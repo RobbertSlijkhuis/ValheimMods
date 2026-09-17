@@ -68,8 +68,14 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float ContentHeight = WizshBoneShellGUI.PanelHeight - ShellTopBar.Height;  // 660
         private const float ContentMargin = 30f;
 
-        private const float LeftEdgeX  = -(ContentWidth / 2f) + ContentMargin;
-        private const float RightEdgeX =  (ContentWidth / 2f) - ContentMargin - ScrollableList.ScrollbarWidth;
+        // BuildBackground's card sits ContentMargin from the section root; everything below sits
+        // a further InnerPadding inside THAT card - without it, the title/search/headers/list all
+        // sit flush against the card's own border with no breathing room (and "No redeems yet..."
+        // ends up wide enough to clip against the scroll viewport's mask).
+        private const float InnerPadding = 20f;
+
+        private const float LeftEdgeX  = -(ContentWidth / 2f) + ContentMargin + InnerPadding;
+        private const float RightEdgeX =  (ContentWidth / 2f) - ContentMargin - InnerPadding - ScrollableList.ScrollbarWidth;
 
         // BuildBackground's card used to inset only 15px (BackgroundInset); every Y below was
         // tuned to sit snugly against that. Now that it insets ContentMargin (30px) on every side
@@ -86,7 +92,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float PaginationY     = 115f;  // measured from the root's bottom edge
         private const float ActionRowY      = 65f;   // measured from the root's bottom edge
 
-        private const float AvailableWidth = ContentWidth - 2f * ContentMargin - ScrollableList.ScrollbarWidth;
+        private const float AvailableWidth = ContentWidth - 2f * ContentMargin - 2f * InnerPadding - ScrollableList.ScrollbarWidth;
 
         private const float ColViewerW  = AvailableWidth * 1.4f / 6.8f;
         private const float ColRedeemW  = AvailableWidth * 2.6f / 6.8f;
@@ -132,15 +138,15 @@ namespace WizshBoneTwitchIntegration.Gui
             ).GetComponent<Text>();
             m_pendingCountText.alignment = TextAnchor.MiddleRight;
 
-            m_searchField = GuiFieldBuilder.CreateInputField(m_root, new Vector2(0f, SearchY), ContentWidth - 2f * ContentMargin, placeholderText: "Search by viewer or redeem...");
+            m_searchField = GuiFieldBuilder.CreateInputField(m_root, new Vector2(0f, SearchY), ContentWidth - 2f * ContentMargin - 2f * InnerPadding, placeholderText: "Search by viewer or redeem...");
             m_searchField.onValueChanged.AddListener(OnSearchChanged);
 
             BuildColumnHeaders();
 
             m_listContainer = ScrollableList.CreateStretched(
                 m_root, "History",
-                offsetMin: new Vector2(ContentMargin, ListOffsetBottom),
-                offsetMax: new Vector2(-ContentMargin, -ListOffsetTop),
+                offsetMin: new Vector2(ContentMargin + InnerPadding, ListOffsetBottom),
+                offsetMax: new Vector2(-(ContentMargin + InnerPadding), -ListOffsetTop),
                 autoHideScrollbar: true);
 
             BuildPaginationRow();
@@ -272,7 +278,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     color: GUIManager.Instance.ValheimBeige,
                     outline: true,
                     outlineColor: Color.black,
-                    width: ContentWidth - 2f * ContentMargin,
+                    width: AvailableWidth,
                     height: 30f,
                     addContentSizeFitter: false
                 );

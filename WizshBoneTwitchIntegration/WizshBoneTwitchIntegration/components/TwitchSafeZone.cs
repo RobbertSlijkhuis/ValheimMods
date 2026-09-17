@@ -64,8 +64,8 @@ namespace WizshBoneTwitchIntegration.Components
         // every live TwitchSafeZone, the local entry counter, the "in safe zone" flag, and the
         // HUD panel). Never touches Wards/ships/trader zones themselves - purely resets this
         // client's own tracking of whether the local player is standing in one. Shared by
-        // HandleLocalPlayerDeath (guarded above) and the Debug tab's "Reset Safezones" button
-        // (DebugTab), which calls this directly and unconditionally as a manual "unstick me"
+        // HandleLocalPlayerDeath (guarded above) and the Help tab's "Reset Safezones" button
+        // (HelpTab), which calls this directly and unconditionally as a manual "unstick me"
         // action - safe to call even when nothing is actually stuck.
         public static void ForceExitAllZones()
         {

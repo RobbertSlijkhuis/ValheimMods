@@ -199,7 +199,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent:              m_panel.transform,
                 anchorMin:           new Vector2(0.5f, 1f),
                 anchorMax:           new Vector2(0.5f, 1f),
-                position:            new Vector2(-FieldWidth / 2f, y),
+                position:            new Vector2(0f, y),
                 font:                GUIManager.Instance.AveriaSerifBold,
                 fontSize:            GuiFieldBuilder.FieldFontSize,
                 color:               GUIManager.Instance.ValheimBeige,

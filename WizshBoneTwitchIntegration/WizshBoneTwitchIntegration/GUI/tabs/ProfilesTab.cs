@@ -46,9 +46,10 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         private const float TitleY   = -30f;
         private const float TitleWidth = 300f;
-        private const float ToolbarY = -75f;
-        private const float ColumnHeaderY = -112f;
-        private const float ListTopInset = 131f; // distance from the root's top edge to the list
+        private const float DescriptionY = -50f;
+        private const float ToolbarY = -99f;
+        private const float ColumnHeaderY = -136f;
+        private const float ListTopInset = 155f; // distance from the root's top edge to the list
 
         private const float SearchWidth = 300f;
         private const float ToolbarButtonSpacing = 10f;
@@ -130,6 +131,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             m_inputDialog.Init();
 
             GuiHelper.CreateTitle("Profiles", m_root, new Vector2(LeftEdgeX + TitleWidth / 2f, TitleY), width: TitleWidth);
+            GuiHelper.CreateTabDescription(
+                "Profiles hold their own redeems and settings - switch between profiles to change your whole setup at once.",
+                m_root, new Vector2(0f, DescriptionY), width: ContentWidth - 2f * ContentMargin);
 
             BuildToolbar();
             BuildColumnHeaders();

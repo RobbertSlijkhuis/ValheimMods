@@ -37,7 +37,7 @@ namespace WizshBoneTwitchIntegration.Gui
             { ShellTab.Settings, new SettingsTab() },
             { ShellTab.CreatureGroups, new CreatureGroupsTab() },
             { ShellTab.Viewers, new ViewersTab() },
-            { ShellTab.Debug, new DebugTab() },
+            { ShellTab.Help, new HelpTab() },
         };
 
         private readonly Dictionary<ShellTab, GameObject> m_tabRoots = new Dictionary<ShellTab, GameObject>();

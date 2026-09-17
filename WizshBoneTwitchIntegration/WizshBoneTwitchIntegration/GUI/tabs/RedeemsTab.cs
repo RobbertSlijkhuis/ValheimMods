@@ -57,9 +57,10 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         private const float TitleY   = -30f;
         private const float TitleWidth = 300f;
-        private const float ToolbarY = -75f;
-        private const float ColumnHeaderY = -112f;
-        private const float ListTopInset = 131f;
+        private const float DescriptionY = -50f;
+        private const float ToolbarY = -99f;
+        private const float ColumnHeaderY = -136f;
+        private const float ListTopInset = 155f;
 
         private const float SearchWidth = 300f;
         private const float ToolbarButtonSpacing = 10f;
@@ -127,6 +128,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             m_listRoot = UIContainer.Create(m_root, "RedeemListView", startActive: true);
 
             GuiHelper.CreateTitle("Redeems", m_listRoot, new Vector2(LeftEdgeX + TitleWidth / 2f, TitleY), width: TitleWidth);
+            GuiHelper.CreateTabDescription(
+                "These are your channel point rewards. Twitch allows a maximum of 50 enabled at once - keep an eye on how many you have active.",
+                m_listRoot, new Vector2(0f, DescriptionY), width: ContentWidth - 2f * ContentMargin);
 
             BuildToolbar();
             BuildColumnHeaders();
@@ -389,7 +393,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             string typeDescription = RedeemEffectCatalog.DescriptionFor(captured.type);
             if (!string.IsNullOrEmpty(typeDescription))
-                typeText.gameObject.AddComponent<TooltipTrigger>().Init(typeDescription);
+                typeText.gameObject.AddComponent<TooltipTrigger>().Init("Effect type", typeDescription);
 
             Text costText = GUIManager.Instance.CreateText(
                 text: $"{captured.points} pts",
@@ -409,7 +413,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             costText.alignment = TextAnchor.MiddleLeft;
 
             GameObject testBtn = ListRow.CreateActionButton(row, "Test", BtnTestX, ActionBtnWidth, ListRow.ItemHeight, Color.yellow, () => OnTestRedeem(captured));
-            testBtn.AddComponent<TooltipTrigger>().Init("Executes the redeem so you can see how it works in-game.");
+            testBtn.AddComponent<TooltipTrigger>().Init("Test redeem", "Executes the redeem so you can see how it works in-game.");
             revealOnHover.Add(testBtn);
 
             GameObject editBtn = ListRow.CreateActionButton(row, "Edit", BtnEditX, ActionBtnWidth, ListRow.ItemHeight, Color.cyan, () => OpenEdit(captured));

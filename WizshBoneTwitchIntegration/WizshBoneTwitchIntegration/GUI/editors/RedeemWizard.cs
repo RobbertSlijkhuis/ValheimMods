@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.UI;
@@ -60,8 +61,8 @@ namespace WizshBoneTwitchIntegration.Gui
         private InputField m_cooldownInput;
         private Toggle m_userInputToggle;
         private Toggle m_ignoreSafezoneToggle;
-        private InputField m_addConditionInput;
-        private InputField m_removeConditionInput;
+        private SearchableDropdown m_addConditionDropdown;
+        private SearchableDropdown m_removeConditionDropdown;
 
         // Nav
         private Text m_feedbackText;
@@ -79,7 +80,6 @@ namespace WizshBoneTwitchIntegration.Gui
         // ── layout constants (same derived-from-shell-size pattern as ProfilesTab.cs) ──────────
         private const float ContentWidth  = WizshBoneShellGUI.PanelWidth - ShellSidebar.Width;
         private const float ContentMargin = 30f;
-        private const float LeftEdgeX = -(ContentWidth / 2f) + ContentMargin;
 
         // BuildBackground's card used to inset only 15px (BackgroundInset); StepBarY was tuned to
         // sit snugly against that. Now that it insets ContentMargin (30px) on every side to match
@@ -90,18 +90,47 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float StepBarWidth = 280f;
         private const float StepBarHeight = 5f;
         private const float StepBarGap   = 8f;
-        private const float StepTitleY   = -55f;
+        private const int   StepBarCount = 3;
+
+        // Top edge (not center - see the PivotToTop call in BuildStepIndicator) of the step title
+        // text, offset below the step bars' own bottom edge by StepTitleGap. Previously this was a
+        // center-pivoted -55, whose box top (-42.5) landed ABOVE the bars' own bottom edge (-47.5)
+        // - the title text sat flush against, almost overlapping, the bar above it.
+        private const float StepTitleGap = 12f;
+        private const float StepTitleY   = StepBarY - StepBarHeight / 2f - StepTitleGap;
         private const float BodyTopY     = -95f;
+
+        // The step bars are centered as a row (BuildStepIndicator), independent of ContentMargin -
+        // so this, not a ContentMargin-derived LeftEdgeX, is the left edge everything in step 1
+        // (the effect list, the preview column) aligns to. Computed from the same bar geometry
+        // BuildStepIndicator itself uses, so the two can't drift apart again.
+        private const float StepRowWidth = StepBarCount * StepBarWidth + (StepBarCount - 1) * StepBarGap;
+        private const float StepRowLeftX = -StepRowWidth / 2f;
 
         private const float FieldWidth  = 460f;
         private const float RowHeight   = 36f;
         private const float LabelHeight = 20f;
         private const float RowGap      = 14f;
 
+        // Step 3 spans nearly the full wizard card, not the narrow FieldWidth column steps 1/2 use
+        // - RedesignUI.dc.html's step-3 content sits in a `flex:1` column (own 22px padding) inside
+        // the wizard's own card, not a fixed-width centered form. Step3Padding here mirrors that
+        // 22px inset (rounded to match this file's other paddings) from the wizard card's edges
+        // (the wizard card itself is ContentWidth - 2*ContentMargin wide).
+        private const float Step3Padding = 30f;
+        private const float Step3Width   = ContentWidth - 2f * ContentMargin - 2f * Step3Padding;
+
+        // Step 3's reward-preview card (BuildStep3) - swatch + title/description + points, all in
+        // one card matching RedesignUI.dc.html's step-3 layout.
+        private const float BoxPadding          = 14f;
+        private const float BoxRowGap           = 6f;
+        private const float BoxSwatchSize       = 64f;
+        private const float BoxPointsColumnWidth = 90f;
+
         private const float TypeListWidth  = 220f;
         private const float TypeListHeight = 380f;
         private const float TypeBtnHeight  = 34f;
-        private const float PreviewX       = LeftEdgeX + TypeListWidth + 30f + (FieldWidth - TypeListWidth) / 2f;
+        private const float PreviewX       = StepRowLeftX + TypeListWidth + 30f + (FieldWidth - TypeListWidth) / 2f;
 
         // Also shifted +15 to clear the card's now-bigger bottom inset - see the StepBarY comment
         // above and RedeemHistorySection.cs's matching ActionRowY fix.
@@ -192,11 +221,9 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void BuildStepIndicator()
         {
-            int barCount = 3;
-            float totalWidth = barCount * StepBarWidth + (barCount - 1) * StepBarGap;
-            float startX = -totalWidth / 2f + StepBarWidth / 2f;
+            float startX = StepRowLeftX + StepBarWidth / 2f;
 
-            for (int i = 0; i < barCount; i++)
+            for (int i = 0; i < StepBarCount; i++)
             {
                 GameObject bar = new GameObject($"StepBar{i + 1}");
                 bar.transform.SetParent(m_root.transform, false);
@@ -228,6 +255,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 addContentSizeFitter: false
             ).GetComponent<Text>();
             m_stepTitleText.alignment = TextAnchor.MiddleCenter;
+            GuiHelper.PivotToTop(m_stepTitleText.rectTransform, StepTitleY);
         }
 
         private void RefreshStepIndicator()
@@ -254,7 +282,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             GameObject listContent = ScrollableList.CreateFixed(
                 m_step1Root, "EffectTypeList",
-                anchoredPosition: new Vector2(LeftEdgeX + TypeListWidth / 2f, BodyTopY),
+                anchoredPosition: new Vector2(StepRowLeftX + TypeListWidth / 2f, BodyTopY),
                 width: TypeListWidth, height: TypeListHeight);
 
             float yOffset = -(TypeBtnHeight / 2f);
@@ -307,6 +335,12 @@ namespace WizshBoneTwitchIntegration.Gui
                 addContentSizeFitter: false
             ).GetComponent<Text>();
             m_previewSelectedLabel.alignment = TextAnchor.MiddleLeft;
+            // Both this and m_previewSelectedDescription below default to a center pivot, so
+            // without re-pivoting, each one's box extends both above AND below its given Y - at
+            // BodyTopY and BodyTopY - 40f respectively, that put the label's bottom half and the
+            // description's top half on top of each other. PivotToTop makes BodyTopY the label's
+            // top edge instead, so it only grows downward from there.
+            GuiHelper.PivotToTop(m_previewSelectedLabel.rectTransform, BodyTopY);
 
             m_previewSelectedDescription = GUIManager.Instance.CreateText(
                 text: "",
@@ -325,6 +359,7 @@ namespace WizshBoneTwitchIntegration.Gui
             ).GetComponent<Text>();
             m_previewSelectedDescription.alignment = TextAnchor.UpperLeft;
             m_previewSelectedDescription.horizontalOverflow = HorizontalWrapMode.Wrap;
+            GuiHelper.MakeDescriptionExpandDownward(m_previewSelectedDescription, BodyTopY - 40f);
         }
 
         private void RefreshStep1Selection()
@@ -367,6 +402,11 @@ namespace WizshBoneTwitchIntegration.Gui
             ).GetComponent<Text>();
             m_step2PlaceholderText.alignment = TextAnchor.UpperCenter;
             m_step2PlaceholderText.horizontalOverflow = HorizontalWrapMode.Wrap;
+            // Same center-pivot fix as m_previewSelectedLabel/Description in BuildStep1 - without
+            // it, this box's top half sits above BodyTopY instead of starting there, putting it
+            // noticeably higher/tighter under the step bar than step 1's (genuinely top-pivoted)
+            // content does.
+            GuiHelper.PivotToTop(m_step2PlaceholderText.rectTransform, BodyTopY);
         }
 
         private void RefreshStep2Placeholder()
@@ -383,23 +423,57 @@ namespace WizshBoneTwitchIntegration.Gui
 
             float y = BodyTopY;
 
-            // Background color - built once with a placeholder value; PopulateStep3Fields keeps
-            // the swatch's overlay in sync with m_working.backgroundColor on every step-3 entry
-            // (the picker's own onChanged callback keeps m_working in sync the other way).
-            CreateRowLabel(m_step3Root, "Background color", y);
-            GameObject bgSwatch = GuiFieldBuilder.CreateColorField(m_step3Root, new Vector2(-FieldWidth / 2f + 60f, y - LabelHeight), 120f, "#a970ff", "Redeem background color", v => m_working.backgroundColor = v);
-            m_bgColorOverlay = bgSwatch.transform.Find("ColorOverlay").GetComponent<Image>();
-            y -= LabelHeight + RowHeight + RowGap;
+            // Reward preview card - color swatch + title/description column + points column, all
+            // in one dark card, matching RedesignUI.dc.html's step-3 "live preview tile" (no
+            // separate "Background color"/"Title"/"Description" captions - the fields' own
+            // styling/placement already reads as a preview of the actual Twitch reward tile).
+            float boxContentHeight = 2f * RowHeight + BoxRowGap;
+            float boxHeight = 2f * BoxPadding + boxContentHeight;
+            GameObject rewardBox = GuiHelper.CreateCard(m_step3Root, new Vector2(0f, y), Step3Width, boxHeight);
 
-            // Title (prefix badge + input)
-            CreateRowLabel(m_step3Root, "Title", y);
+            // Swatch - PopulateStep3Fields keeps its overlay in sync with m_working.backgroundColor
+            // on every step-3 entry (the picker's own onChanged callback keeps m_working in sync
+            // the other way).
+            float swatchX = -Step3Width / 2f + BoxPadding + BoxSwatchSize / 2f;
+            float swatchY = -BoxPadding - BoxSwatchSize / 2f;
+            GameObject bgSwatch = GuiFieldBuilder.CreateColorField(rewardBox, new Vector2(swatchX, swatchY), BoxSwatchSize, "#a970ff", "Redeem background color", v => m_working.backgroundColor = v, BoxSwatchSize);
+            m_bgColorOverlay = bgSwatch.transform.Find("ColorOverlay").GetComponent<Image>();
+
+            // Points column - flush with the box's right edge, top-aligned with the title row.
+            float pointsX = Step3Width / 2f - BoxPadding - BoxPointsColumnWidth / 2f;
+            float pointsInputY = -BoxPadding - RowHeight / 2f;
+            m_costInput = GuiFieldBuilder.CreateIntField(rewardBox, new Vector2(pointsX, pointsInputY), BoxPointsColumnWidth - 10f, 0, v => m_working.points = v);
+            Text pointsCaption = GUIManager.Instance.CreateText(
+                text: "points",
+                parent: rewardBox.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(pointsX, pointsInputY - RowHeight / 2f - 10f),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: 10,
+                color: GUIManager.Instance.ValheimBeige,
+                outline: true,
+                outlineColor: Color.black,
+                width: BoxPointsColumnWidth,
+                height: 16f,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+            pointsCaption.alignment = TextAnchor.MiddleCenter;
+
+            // Middle column: title row (prefix badge + input), description row directly beneath it.
+            float middleLeftX = swatchX + BoxSwatchSize / 2f + BoxPadding;
+            float middleRightX = pointsX - BoxPointsColumnWidth / 2f - BoxPadding;
+            float middleWidth = middleRightX - middleLeftX;
+            float middleCenterX = (middleLeftX + middleRightX) / 2f;
+
+            float titleRowY = -BoxPadding - RowHeight / 2f;
             float prefixWidth = 90f;
             m_prefixBadgeText = GUIManager.Instance.CreateText(
                 text: "",
-                parent: m_step3Root.transform,
+                parent: rewardBox.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(-FieldWidth / 2f + prefixWidth / 2f, y - LabelHeight),
+                position: new Vector2(middleLeftX + prefixWidth / 2f, titleRowY),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: GuiFieldBuilder.FieldFontSize,
                 color: GUIManager.Instance.ValheimBeige,
@@ -411,40 +485,96 @@ namespace WizshBoneTwitchIntegration.Gui
             ).GetComponent<Text>();
             m_prefixBadgeText.alignment = TextAnchor.MiddleCenter;
 
-            float titleInputWidth = FieldWidth - prefixWidth - 10f;
-            float titleInputX = -FieldWidth / 2f + prefixWidth + 10f + titleInputWidth / 2f;
-            m_titleInput = GuiFieldBuilder.CreateInputField(m_step3Root, new Vector2(titleInputX, y - LabelHeight), titleInputWidth, placeholderText: "Reward title");
+            float titleInputWidth = middleWidth - prefixWidth - 10f;
+            float titleInputX = middleLeftX + prefixWidth + 10f + titleInputWidth / 2f;
+            m_titleInput = GuiFieldBuilder.CreateInputField(rewardBox, new Vector2(titleInputX, titleRowY), titleInputWidth, placeholderText: "Reward title");
             m_titleInput.onValueChanged.AddListener(OnTitleInputChanged);
-            y -= LabelHeight + RowHeight + RowGap;
 
-            // Description
-            CreateRowLabel(m_step3Root, "Description", y);
-            m_descriptionInput = GuiFieldBuilder.CreateInputField(m_step3Root, new Vector2(0f, y - LabelHeight), FieldWidth, placeholderText: "Shown to viewers when they open the reward");
+            float descriptionRowY = titleRowY - RowHeight - BoxRowGap;
+            m_descriptionInput = GuiFieldBuilder.CreateInputField(rewardBox, new Vector2(middleCenterX, descriptionRowY), middleWidth, placeholderText: "Shown to viewers when they open the reward");
             m_descriptionInput.onValueChanged.AddListener(v => m_working.description = v);
+
+            y -= boxHeight + RowGap;
+
+            // Cooldown + toggles, one row: cooldown alone on the left half, both toggles side by
+            // side on the right half (matches RedesignUI.dc.html's Row A) - now that step 3 spans
+            // the full card width, each toggle+label slot has enough room to not need stacking.
+            float halfWidth = (Step3Width - 20f) / 2f;
+            float leftHalfX = -Step3Width / 2f + halfWidth / 2f;
+            float rightHalfX = Step3Width / 2f - halfWidth / 2f;
+
+            CreateRowLabel(m_step3Root, "Cooldown (sec)", y, halfWidth, leftHalfX);
+            m_cooldownInput = GuiFieldBuilder.CreateIntField(m_step3Root, new Vector2(leftHalfX, y - LabelHeight), halfWidth, 0, v => m_working.cooldown = v);
+            GuiHelper.PivotToTop((RectTransform)m_cooldownInput.transform, y - LabelHeight);
+
+            float toggleRowY = y - LabelHeight; // align with the cooldown input, not its label
+            float quarterWidth = halfWidth / 2f;
+            float toggle1X = rightHalfX - quarterWidth / 2f;
+            float toggle2X = rightHalfX + quarterWidth / 2f;
+            m_userInputToggle = GuiFieldBuilder.CreateBoolField(m_step3Root, new Vector2(toggle1X, toggleRowY), quarterWidth, false, v => m_working.userInput = v);
+            CreateInlineToggleLabel(m_step3Root, "Requires viewer input", toggle1X, quarterWidth, toggleRowY);
+            m_ignoreSafezoneToggle = GuiFieldBuilder.CreateBoolField(m_step3Root, new Vector2(toggle2X, toggleRowY), quarterWidth, false, v => m_working.ignoreWard = v);
+            CreateInlineToggleLabel(m_step3Root, "Ignore safezone", toggle2X, quarterWidth, toggleRowY);
+
             y -= LabelHeight + RowHeight + RowGap;
 
-            // Cost / Cooldown
-            float halfWidth = (FieldWidth - 20f) / 2f;
-            CreateRowLabel(m_step3Root, "Cost (points)", y, halfWidth, -FieldWidth / 2f + halfWidth / 2f);
-            CreateRowLabel(m_step3Root, "Cooldown (sec)", y, halfWidth, FieldWidth / 2f - halfWidth / 2f);
-            m_costInput = GuiFieldBuilder.CreateIntField(m_step3Root, new Vector2(-FieldWidth / 2f + halfWidth / 2f, y - LabelHeight), halfWidth, 0, v => m_working.points = v);
-            m_cooldownInput = GuiFieldBuilder.CreateIntField(m_step3Root, new Vector2(FieldWidth / 2f - halfWidth / 2f, y - LabelHeight), halfWidth, 0, v => m_working.cooldown = v);
-            y -= LabelHeight + RowHeight + RowGap;
+            // Add / remove condition - dropdowns over Valheim's global keys, matching GUI_OLD's
+            // FieldUIBuilder.BuildStringDropdownField wiring: OnValueChanged writes straight into
+            // m_working, and PopulateStep3Fields re-syncs the displayed value/options every time
+            // step 3 is (re-)entered.
+            CreateRowLabel(m_step3Root, "Add condition", y, halfWidth, leftHalfX);
+            CreateRowLabel(m_step3Root, "Remove condition", y, halfWidth, rightHalfX);
+            m_addConditionDropdown = new SearchableDropdown();
+            GameObject addConditionToggle = m_addConditionDropdown.Build(m_step3Root, new Vector2(leftHalfX, y - LabelHeight), halfWidth, GuiFieldBuilder.FieldHeight, GetAvailableGlobalKeyOptions(), "");
+            GuiHelper.PivotToTop((RectTransform)addConditionToggle.transform, y - LabelHeight);
+            m_addConditionDropdown.OnValueChanged += v => m_working.globalKeyAdd = v;
+            m_removeConditionDropdown = new SearchableDropdown();
+            GameObject removeConditionToggle = m_removeConditionDropdown.Build(m_step3Root, new Vector2(rightHalfX, y - LabelHeight), halfWidth, GuiFieldBuilder.FieldHeight, GetAvailableGlobalKeyOptions(), "");
+            GuiHelper.PivotToTop((RectTransform)removeConditionToggle.transform, y - LabelHeight);
+            m_removeConditionDropdown.OnValueChanged += v => m_working.globalKeyRemove = v;
+        }
 
-            // User input / ignore safezone toggles
-            m_userInputToggle = GuiFieldBuilder.CreateBoolField(m_step3Root, new Vector2(-FieldWidth / 2f + halfWidth / 2f, y), halfWidth, false, v => m_working.userInput = v);
-            CreateInlineToggleLabel(m_step3Root, "Requires viewer input", -FieldWidth / 2f + halfWidth / 2f, halfWidth, y);
-            m_ignoreSafezoneToggle = GuiFieldBuilder.CreateBoolField(m_step3Root, new Vector2(FieldWidth / 2f - halfWidth / 2f, y), halfWidth, false, v => m_working.ignoreWard = v);
-            CreateInlineToggleLabel(m_step3Root, "Ignore safezone", FieldWidth / 2f - halfWidth / 2f, halfWidth, y);
-            y -= RowHeight + RowGap;
+        /// <summary>
+        /// Value = the global key string ZoneSystem stores (what gets saved), Label = a readable
+        /// name matching vanilla boss naming. A small fixed list, not a runtime scan, so no
+        /// caching is needed. Ported from GUI_OLD/editors/FieldUIBuilder.cs's method of the same
+        /// name - includes a leading "" -> "None" entry, deliberately excludes
+        /// <see cref="GlobalKeyType.DefeatedNothing"/>/<see cref="GlobalKeyType.DefeatedNoBoss"/>
+        /// (sentinels never read by ZoneSystem, not real global keys).
+        /// </summary>
+        private static List<DropdownOption> GetAvailableGlobalKeyOptions()
+        {
+            return new List<DropdownOption>
+            {
+                new DropdownOption("", "None"),
+                new DropdownOption(GlobalKeyType.DefeatedEikthyr, "Defeated Eikthyr"),
+                new DropdownOption(GlobalKeyType.DefeatedElder, "Defeated the Elder"),
+                new DropdownOption(GlobalKeyType.DefeatedBonemass, "Defeated Bonemass"),
+                new DropdownOption(GlobalKeyType.DefeatedModer, "Defeated Moder"),
+                new DropdownOption(GlobalKeyType.DefeatedYagluth, "Defeated Yagluth"),
+                new DropdownOption(GlobalKeyType.DefeatedQueen, "Defeated the Queen"),
+                new DropdownOption(GlobalKeyType.DefeatedFader, "Defeated Fader"),
+                new DropdownOption(GlobalKeyType.KilledBat, "Killed a Bat"),
+                new DropdownOption(GlobalKeyType.KilledTroll, "Killed a Troll"),
+                new DropdownOption(GlobalKeyType.killedSurtling, "Killed a Surtling"),
+            };
+        }
 
-            // Add / remove condition
-            CreateRowLabel(m_step3Root, "Add condition", y, halfWidth, -FieldWidth / 2f + halfWidth / 2f);
-            CreateRowLabel(m_step3Root, "Remove condition", y, halfWidth, FieldWidth / 2f - halfWidth / 2f);
-            m_addConditionInput = GuiFieldBuilder.CreateInputField(m_step3Root, new Vector2(-FieldWidth / 2f + halfWidth / 2f, y - LabelHeight), halfWidth, placeholderText: "Global key that enables it");
-            m_addConditionInput.onValueChanged.AddListener(v => m_working.globalKeyAdd = v);
-            m_removeConditionInput = GuiFieldBuilder.CreateInputField(m_step3Root, new Vector2(FieldWidth / 2f - halfWidth / 2f, y - LabelHeight), halfWidth, placeholderText: "Global key that disables it");
-            m_removeConditionInput.onValueChanged.AddListener(v => m_working.globalKeyRemove = v);
+        /// <summary>
+        /// Returns <paramref name="options"/> with <paramref name="currentValue"/> added in
+        /// (sorted) if it's missing - so a saved value set outside this curated list (e.g. via
+        /// GUI_OLD or a hand-edited profile.yaml) still displays correctly instead of silently
+        /// reverting to "None". Ported from GUI_OLD/editors/FieldUIBuilder.cs's method of the same
+        /// name.
+        /// </summary>
+        private static List<DropdownOption> EnsureIncludesCurrentValue(List<DropdownOption> options, string currentValue)
+        {
+            if (string.IsNullOrEmpty(currentValue) || options.Any(o => o.Value == currentValue))
+                return options;
+
+            var withCurrent = new List<DropdownOption>(options) { new DropdownOption(currentValue, currentValue) };
+            withCurrent.Sort((a, b) => string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase));
+            return withCurrent;
         }
 
         private void OnTitleInputChanged(string suffix)
@@ -495,8 +625,8 @@ namespace WizshBoneTwitchIntegration.Gui
             m_cooldownInput.text = m_working.cooldown.ToString();
             m_userInputToggle.isOn = m_working.userInput;
             m_ignoreSafezoneToggle.isOn = m_working.ignoreWard;
-            m_addConditionInput.text = m_working.globalKeyAdd ?? "";
-            m_removeConditionInput.text = m_working.globalKeyRemove ?? "";
+            m_addConditionDropdown.SetOptions(EnsureIncludesCurrentValue(GetAvailableGlobalKeyOptions(), m_working.globalKeyAdd), m_working.globalKeyAdd ?? "");
+            m_removeConditionDropdown.SetOptions(EnsureIncludesCurrentValue(GetAvailableGlobalKeyOptions(), m_working.globalKeyRemove), m_working.globalKeyRemove ?? "");
 
             m_feedbackText.text = "";
         }
@@ -657,6 +787,12 @@ namespace WizshBoneTwitchIntegration.Gui
                 addContentSizeFitter: false
             ).GetComponent<Text>();
             label.alignment = TextAnchor.MiddleLeft;
+            // CreateText leaves Unity's default center pivot in place, so without this, the label's
+            // box (center-pivoted on y) extends both above AND below y - its bottom half then
+            // overlapped whatever field sits at y - LabelHeight below it (also center-pivoted, so
+            // its own top half reaches back up past that point). PivotToTop makes y the label's top
+            // edge instead, so "field at y - LabelHeight" lands exactly at the label's bottom edge.
+            GuiHelper.PivotToTop(label.rectTransform, y);
         }
 
         private void CreateInlineToggleLabel(GameObject parent, string text, float centerX, float slotWidth, float y)

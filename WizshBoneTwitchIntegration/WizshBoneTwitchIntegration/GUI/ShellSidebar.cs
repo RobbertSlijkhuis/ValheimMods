@@ -9,7 +9,7 @@ namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
     /// Left sidebar: "WizshBone" title, two labeled nav groups (matching RedesignUI.dc.html) -
-    /// "General" (Home/Profiles/Viewers/Debug) and a dynamic "Profile: {activeProfileName}"
+    /// "General" (Home/Profiles/Viewers/Help) and a dynamic "Profile: {activeProfileName}"
     /// group (Redeems/Settings/Creature groups) - and a Close button pinned to the bottom.
     /// GUI_OLD/WizshBoneSettingsGUI.cs uses a horizontal tab-button row with no grouping instead
     /// of a vertical sidebar, so this layout is new; the active/inactive button-color idiom is
@@ -27,7 +27,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private static readonly ShellTab[] GeneralGroupTabs =
         {
-            ShellTab.Home, ShellTab.Profiles, ShellTab.Viewers, ShellTab.Debug
+            ShellTab.Home, ShellTab.Profiles, ShellTab.Viewers, ShellTab.Help
         };
 
         // CreatureGroups is deliberately left out for now - the concept is being rethought from

@@ -30,6 +30,19 @@ namespace WizshBoneTwitchIntegration.Gui
             m_text = text;
         }
 
+        /// <summary>
+        /// Overload for a tooltip that leads with a bold, colored title line above a description
+        /// paragraph - used by <see cref="GuiHelper.CreateHelpIcon"/>'s "?" markers. Formats both
+        /// into the same single <see cref="m_text"/> string <see cref="OnPointerEnter"/>'s existing
+        /// preferredHeight-based sizing already measures, rather than adding a second Text element
+        /// with its own layout math.
+        /// </summary>
+        public void Init(string title, string description)
+        {
+            string titleHex = ColorUtility.ToHtmlStringRGB(GUIManager.Instance.ValheimOrange);
+            m_text = $"<b><color=#{titleHex}>{title}</color></b>\n{description}";
+        }
+
         public void OnPointerEnter(PointerEventData eventData)
         {
             Canvas rootCanvas = GetRootCanvas(gameObject);
@@ -81,6 +94,7 @@ namespace WizshBoneTwitchIntegration.Gui
             tooltipText.horizontalOverflow = HorizontalWrapMode.Wrap;
             tooltipText.verticalOverflow   = VerticalWrapMode.Overflow;
             tooltipText.raycastTarget      = false;
+            tooltipText.supportRichText    = true;
 
             float textHeight = Mathf.Max(MinTextHeight, tooltipText.preferredHeight);
             tooltipText.rectTransform.sizeDelta = new Vector2(TextWidth, textHeight);
