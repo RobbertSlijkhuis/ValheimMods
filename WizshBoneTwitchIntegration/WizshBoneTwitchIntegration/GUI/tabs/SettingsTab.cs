@@ -1,5 +1,4 @@
 using System;
-using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.UI;
 using WizshBoneTwitchIntegration.Helpers;
@@ -25,9 +24,6 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private GameObject m_scrollContent;
         private float m_cursorY;
 
-        private static readonly Color DescriptionColor = new Color(0.54f, 0.5f, 0.44f, 1f);
-        private static readonly Color CardBackground = new Color(0f, 0f, 0f, 0.6f);
-
         // ── layout constants (same derived-from-shell-size pattern as ProfilesTab.cs) ──────────
         private const float ContentWidth = WizshBoneShellGUI.PanelWidth - ShellSidebar.Width;
         private const float ContentMargin = 30f;
@@ -37,9 +33,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private const float TitleWidth = 300f;
         private const float ScrollTopInset = 65f;
 
-        private const float SectionHeaderHeight = 30f;
+        private const float SectionHeaderHeight = 35f;
         private const float SectionGap = 10f;
-        private const float RowHeight = 92f;
+        private const float RowHeight = 120f;
         private const float RowSpacing = 10f;
         // The mockup's paired fields (e.g. "Enable redeems on login" + "Auto resolve") are two flex
         // columns inside ONE bordered card, not two separate cards with a gap between them - so the
@@ -226,7 +222,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         private void SectionHeader(string title)
         {
-            GuiHelper.CreateTitle(title, m_scrollContent, new Vector2(0f, m_cursorY), width: ScrollContentWidth);
+            Text header = GuiHelper.CreateTitle(title, m_scrollContent, new Vector2(0f, m_cursorY), width: ScrollContentWidth);
+            GuiHelper.PivotToTop(header.rectTransform, m_cursorY);
             m_cursorY -= SectionHeaderHeight;
         }
 
@@ -237,9 +234,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             {
                 var f = fields[i];
                 GameObject cell = CreateCell(row, x, width);
-                CellText(cell, f.Title, -14f, 14, width);
-                GuiFieldBuilder.CreateBoolField(cell, new Vector2(0f, -44f), width - 24f, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
-                CellDescription(cell, f.Description, width);
+                GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
+                GuiFieldBuilder.CreateBoolField(cell, new Vector2(0f, -56f), width - 24f, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
+                GuiHelper.CreateCardDescription(cell, f.Description, width - 24f);
             });
         }
 
@@ -250,9 +247,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             {
                 var f = fields[i];
                 GameObject cell = CreateCell(row, x, width);
-                CellText(cell, f.Title, -14f, 14, width);
-                GuiFieldBuilder.CreateIntField(cell, new Vector2(0f, -44f), width - 24f, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
-                CellDescription(cell, f.Description, width);
+                GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
+                GuiFieldBuilder.CreateIntField(cell, new Vector2(0f, -58f), width - 24f, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
+                GuiHelper.CreateCardDescription(cell, f.Description, width - 24f);
             });
         }
 
@@ -263,9 +260,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             {
                 var f = fields[i];
                 GameObject cell = CreateCell(row, x, width);
-                CellText(cell, f.Title, -14f, 14, width);
-                GuiFieldBuilder.CreateFloatField(cell, new Vector2(0f, -44f), width - 24f, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
-                CellDescription(cell, f.Description, width);
+                GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
+                GuiFieldBuilder.CreateFloatField(cell, new Vector2(0f, -58f), width - 24f, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
+                GuiHelper.CreateCardDescription(cell, f.Description, width - 24f);
             });
         }
 
@@ -273,10 +270,10 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         {
             GameObject row = CreateRow();
             GameObject cell = CreateCell(row, 0f, ScrollContentWidth);
-            CellText(cell, title, -14f, 14, ScrollContentWidth);
-            InputField input = GuiFieldBuilder.CreateInputField(cell, new Vector2(0f, -44f), ScrollContentWidth - 24f, get());
+            GuiHelper.CreateCardTitle(cell, title, ScrollContentWidth - 24f);
+            InputField input = GuiFieldBuilder.CreateInputField(cell, new Vector2(0f, -58f), ScrollContentWidth - 24f, get());
             input.onValueChanged.AddListener(v => { set(v); ProfileSettingsPersistHelper.Persist(); });
-            CellDescription(cell, description, ScrollContentWidth);
+            GuiHelper.CreateCardDescription(cell, description, ScrollContentWidth - 24f);
         }
 
         /// <summary>
@@ -315,60 +312,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         private static GameObject CreateCell(GameObject row, float x, float width)
         {
-            GameObject cell = new GameObject("Cell");
-            cell.transform.SetParent(row.transform, false);
-
-            RectTransform rt = cell.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 1f);
-            rt.anchorMax = new Vector2(0.5f, 1f);
-            rt.pivot = new Vector2(0.5f, 1f);
-            rt.sizeDelta = new Vector2(width, RowHeight);
-            rt.anchoredPosition = new Vector2(x, 0f);
-
-            Image bg = cell.AddComponent<Image>();
-            bg.color = CardBackground;
-
-            return cell;
-        }
-
-        private static void CellText(GameObject cell, string text, float y, int fontSize, float cellWidth)
-        {
-            Text label = GUIManager.Instance.CreateText(
-                text: text,
-                parent: cell.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(0f, y),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: fontSize,
-                color: GUIManager.Instance.ValheimBeige,
-                outline: true,
-                outlineColor: Color.black,
-                width: cellWidth - 24f,
-                height: 20f,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-            label.alignment = TextAnchor.MiddleLeft;
-        }
-
-        private static void CellDescription(GameObject cell, string text, float cellWidth)
-        {
-            Text label = GUIManager.Instance.CreateText(
-                text: text,
-                parent: cell.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(0f, -68f),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 11,
-                color: DescriptionColor,
-                outline: true,
-                outlineColor: Color.black,
-                width: cellWidth - 24f,
-                height: 20f,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-            label.alignment = TextAnchor.MiddleLeft;
+            return GuiHelper.CreateCard(row, new Vector2(x, 0f), width, RowHeight);
         }
     }
 }

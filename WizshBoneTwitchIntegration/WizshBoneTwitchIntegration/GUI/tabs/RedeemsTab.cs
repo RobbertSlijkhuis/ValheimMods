@@ -73,7 +73,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         // freed width to Type/Cost (now comfortably wide for their new left-aligned text, see
         // BuildColumnHeaders/BuildRow) and to the gap in front of Actions.
         private const float ColOnW      = 60f;
-        private const float ColTitleW   = 240f;
+        private const float ColTitleW   = 280f;
         private const float ColTypeW    = 160f;
         private const float ColCostW    = 120f;
         private const float ColActionsW = 324f;
@@ -348,7 +348,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             var revealOnHover = new List<GameObject>();
 
             Color toggleColor = captured.enabled ? new Color(0.2f, 0.8f, 0.2f) : new Color(0.8f, 0.2f, 0.2f);
-            GameObject toggleBtn = ListRow.CreateActionButton(row, captured.enabled ? "On" : "Off", ColOnX, ColOnTextW - 10f, ListRow.ItemHeight, toggleColor, () => OnToggleRedeem(captured));
+            GameObject toggleBtn = ListRow.CreateActionButton(row, captured.enabled ? "On" : "Off", ColOnX - 5f, ColOnTextW - 10f, ListRow.ItemHeight, toggleColor, () => OnToggleRedeem(captured));
             toggleBtn.SetActive(true);
 
             // Shows the Twitch-facing (prefixed) title - RedeemData.title itself is stored

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Jotunn.Managers;
 using UnityEngine;
-using UnityEngine.UI;
 using WizshBoneTwitchIntegration.Gui.Tabs;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
@@ -84,13 +83,6 @@ namespace WizshBoneTwitchIntegration.Gui
                 draggable: false
             );
             m_panel.transform.SetAsLastSibling();
-
-            // Jötunn's woodpanel_trophys sprite is 9-sliced by default, which keeps its rustic
-            // carved-frame border art at native pixel size/shape regardless of panel size - that's
-            // the source of the uneven, not-quite-straight edge, not a stretch/transparency issue.
-            // Simple bypasses the border art entirely for a plain stretched texture with a
-            // straight rectangular edge (our own GuiHelper.AddPanelBorder line draws the frame now).
-            m_panel.GetComponent<Image>().type = Image.Type.Simple;
 
             BuildGUI(auth, customRewards);
             m_panel.SetActive(true);

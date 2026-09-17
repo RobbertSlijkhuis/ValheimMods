@@ -17,6 +17,18 @@ namespace WizshBoneTwitchIntegration.Gui
     {
         public const float Height = 60f;
 
+        // BottomBorderLeftInset is 0 so the divider spans flush with the top bar's own left edge.
+        private const float BottomBorderThickness = 2f;
+        private const float BottomBorderLeftInset = 0f;
+
+        // Aligns the status dot with every tab's title left edge (ContentMargin = 30f in
+        // GUI/tabs/*.cs) and gives the status label a real gap after the dot instead of the two
+        // nearly touching.
+        private const float StatusDotLeftEdgeX = 30f;
+        private const float StatusDotDiameter = 14f;
+        private const float StatusLabelGap = 12f;
+        private const float StatusLabelWidth = 420f;
+
         private static readonly Color ColorLoggedIn = new Color(0.18f, 0.8f, 0.18f);
         private static readonly Color ColorLoggedOut = new Color(0.8f, 0.18f, 0.18f);
 
@@ -56,16 +68,17 @@ namespace WizshBoneTwitchIntegration.Gui
                 offsetMax: Vector2.zero);
             GuiHelper.AddBackground(root, new Color(0f, 0f, 0f, 0.6f));
 
-            GuiHelper.AddBackground(GuiHelper.CreateRegion(root, "BottomBorder",
+            GameObject bottomBorder = GuiHelper.CreateRegion(root, "BottomBorder",
                 new Vector2(0f, 0f), new Vector2(1f, 0f),
-                Vector2.zero, new Vector2(0f, 2f)), GuiHelper.DividerColorSubtle);
+                new Vector2(BottomBorderLeftInset, 0f), new Vector2(0f, BottomBorderThickness));
+            GuiHelper.AddBackground(bottomBorder, GuiHelper.DividerColorSubtle);
 
             m_statusDot = StatusDot.Create(
                 root,
                 anchorMin: new Vector2(0f, 0.5f),
                 anchorMax: new Vector2(0f, 0.5f),
-                position:  new Vector2(24f, 0f),
-                diameter:  14f,
+                position:  new Vector2(StatusDotLeftEdgeX + StatusDotDiameter / 2f, 0f),
+                diameter:  StatusDotDiameter,
                 color:     ColorLoggedOut);
 
             m_statusLabel = GUIManager.Instance.CreateText(
@@ -73,13 +86,13 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent:              root.transform,
                 anchorMin:           new Vector2(0f, 0.5f),
                 anchorMax:           new Vector2(0f, 0.5f),
-                position:            new Vector2(160f, 0f),
+                position:            new Vector2(StatusDotLeftEdgeX + StatusDotDiameter + StatusLabelGap + StatusLabelWidth / 2f, 0f),
                 font:                GUIManager.Instance.AveriaSerifBold,
                 fontSize:            13,
                 color:               GUIManager.Instance.ValheimBeige,
                 outline:             true,
                 outlineColor:        Color.black,
-                width:               260f,
+                width:               StatusLabelWidth,
                 height:              34f,
                 addContentSizeFitter: false
             ).GetComponent<Text>();
@@ -90,7 +103,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent:    root.transform,
                 anchorMin: new Vector2(0f, 0.5f),
                 anchorMax: new Vector2(0f, 0.5f),
-                position:  new Vector2(430f, 0f),
+                position:  new Vector2(460f, 0f),
                 width:     140f,
                 height:    36f
             );
@@ -151,7 +164,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             m_statusDot.color = fullyLoggedIn ? ColorLoggedIn : ColorLoggedOut;
             m_statusLabel.text = GetLoginStatusMessage();
-            m_statusLabel.color = fullyLoggedIn ? GUIManager.Instance.ValheimYellow : GUIManager.Instance.ValheimBeige;
+            m_statusLabel.color = fullyLoggedIn ? GUIManager.Instance.ValheimOrange : GUIManager.Instance.ValheimBeige;
             m_loginButtonText.text = GetLoginButtonText();
         }
 
@@ -190,7 +203,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 return "Logout";
 
             if (m_auth.m_waitingForCode)
-                return "Open Browser Again";
+                return "Re-open Browser";
 
             return "Twitch Login";
         }

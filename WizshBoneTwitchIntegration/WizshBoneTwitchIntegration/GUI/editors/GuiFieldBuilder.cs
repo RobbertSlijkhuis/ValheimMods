@@ -22,7 +22,7 @@ namespace WizshBoneTwitchIntegration.Gui
     {
         public const float FieldHeight = 36f;
 
-        public const int FieldFontSize = 12;
+        public const int FieldFontSize = 13;
         public const int PlaceholderFontSize = 14;
 
         // Jotunn's default placeholder color (Color.grey) is low-contrast against the input
@@ -105,6 +105,16 @@ namespace WizshBoneTwitchIntegration.Gui
 
         /// <summary>
         /// Creates a toggle, left-aligned within the given field slot rather than centered.
+        ///
+        /// Jotunn's CreateToggle (GUIManager.cs) builds Unity's stock toggle prefab and resizes its
+        /// "Background" child (the visible circle) to (<see cref="FieldHeight"/>, FieldHeight), but
+        /// leaves that child's anchoredPosition at Unity's stock (10, -10) - calibrated for the
+        /// prefab's original 20x20 Background, not our size - untouched. So the *visible* circle's
+        /// left edge actually sits at the toggle root's left edge + 10 - FieldHeight, not flush with
+        /// the root RectTransform's own left edge like a naive center/half-width calc would assume.
+        /// leftAlignedX below solves for the root position that puts the circle's true left edge at
+        /// <c>position.x - width/2</c>, so passing the same position/width used for a title Text
+        /// above it lines the two up exactly.
         /// </summary>
         public static Toggle CreateBoolField(GameObject parent, Vector2 position, float width, bool currentValue, Action<bool> onChanged)
         {
@@ -114,7 +124,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 height: FieldHeight
             );
 
-            float leftAlignedX = position.x - width / 2f + FieldHeight / 2f + 5f;
+            float leftAlignedX = position.x - width / 2f + FieldHeight - 10f;
 
             RectTransform toggleRt = toggleObj.GetComponent<RectTransform>();
             toggleRt.anchorMin = new Vector2(0.5f, 1f);

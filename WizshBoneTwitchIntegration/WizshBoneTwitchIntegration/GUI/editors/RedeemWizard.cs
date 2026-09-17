@@ -111,8 +111,6 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float BackBtnX  = -150f;
         private const float NextBtnX  =  150f;
 
-        private static readonly Color LabelColor = new Color(0.9f, 0.87f, 0.78f, 1f);
-
         /// <summary>
         /// Builds the wizard's root as a child of <paramref name="parent"/>, hidden until
         /// <see cref="OpenCreate"/>/<see cref="OpenEdit"/>. Called once by
@@ -651,7 +649,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 position: new Vector2(x, y),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: GuiFieldBuilder.FieldFontSize,
-                color: LabelColor,
+                color: GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
                 width: width,
@@ -680,7 +678,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 position: new Vector2(labelX, y - RowHeight / 4f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: GuiFieldBuilder.FieldFontSize,
-                color: LabelColor,
+                color: GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
                 width: labelWidth,

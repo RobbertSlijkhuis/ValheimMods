@@ -24,7 +24,6 @@ namespace WizshBoneTwitchIntegration.Gui
         public const float Width = 220f;
 
         private static readonly Color TabActiveColor = new Color(0.9f, 0.9f, 0.9f, 1f);
-        private static readonly Color GroupHeaderColor = new Color(0.7f, 0.65f, 0.55f, 1f);
 
         private static readonly ShellTab[] GeneralGroupTabs =
         {
@@ -41,7 +40,15 @@ namespace WizshBoneTwitchIntegration.Gui
         };
 
         private const float TitleY           = -30f;
+
+        // DividerRightInset pulls the title divider bar in from the sidebar's right edge.
         private const float DividerThickness = 2f;
+        private const float DividerRightInset = 2f;
+
+        // Independent of GuiHelper.PanelBorderThickness (the outer wood panel frame's own thickness).
+        private const float RightBorderThickness = 2f;
+        private const float RightBorderTopInset = 3f;
+        private const float RightBorderBottomInset = 5f;
 
         // Pinned to ShellTopBar.Height (rather than a separate hand-picked Y) so this divider and
         // the top bar's own bottom-edge divider always land in the exact same pixel band instead
@@ -73,9 +80,10 @@ namespace WizshBoneTwitchIntegration.Gui
                 offsetMax: new Vector2(Width, 0f));
             GuiHelper.AddBackground(root, new Color(0f, 0f, 0f, 0.6f));
 
-            GuiHelper.AddBackground(GuiHelper.CreateRegion(root, "RightBorder",
+            GameObject rightBorder = GuiHelper.CreateRegion(root, "RightBorder",
                 new Vector2(1f, 0f), new Vector2(1f, 1f),
-                new Vector2(-GuiHelper.PanelBorderThickness, 0f), Vector2.zero), GuiHelper.PanelBorderColor);
+                new Vector2(-RightBorderThickness, RightBorderBottomInset), new Vector2(0f, -RightBorderTopInset));
+            GuiHelper.AddBackground(rightBorder, GuiHelper.PanelBorderColor);
 
             Text title = GUIManager.Instance.CreateText(
                 text:                "WizshBone",
@@ -94,9 +102,10 @@ namespace WizshBoneTwitchIntegration.Gui
             ).GetComponent<Text>();
             title.alignment = TextAnchor.MiddleCenter;
 
-            GuiHelper.AddBackground(GuiHelper.CreateRegion(root, "TitleDivider",
+            GameObject titleDivider = GuiHelper.CreateRegion(root, "TitleDivider",
                 new Vector2(0f, 1f), new Vector2(1f, 1f),
-                new Vector2(0f, TitleDividerY - DividerThickness), new Vector2(0f, TitleDividerY)), GuiHelper.DividerColorStrong);
+                new Vector2(0f, TitleDividerY - DividerThickness), new Vector2(-DividerRightInset, TitleDividerY));
+            GuiHelper.AddBackground(titleDivider, GuiHelper.DividerColorStrong);
 
             float y = FirstGroupY;
 
@@ -113,6 +122,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 height:    44f
             );
             closeBtnObj.SetActive(true);
+            closeBtnObj.GetComponentInChildren<Text>().color = Color.red;
+            GuiHelper.AddBorder(closeBtnObj, Color.red);
             closeBtnObj.GetComponent<Button>().onClick.AddListener(() => onClose());
 
             return root;
@@ -155,7 +166,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 position:            new Vector2(0f, y),
                 font:                GUIManager.Instance.AveriaSerifBold,
                 fontSize:            13,
-                color:               GroupHeaderColor,
+                color:               GUIManager.Instance.ValheimBeige,
                 outline:             true,
                 outlineColor:        Color.black,
                 width:               Width - 30f,

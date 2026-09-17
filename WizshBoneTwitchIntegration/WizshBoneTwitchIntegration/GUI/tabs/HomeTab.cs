@@ -41,11 +41,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         /// </summary>
         public Action<ShellTab> OnNavigateToTab;
 
-        private static readonly Color MutedLabelColor = new Color(0.66f, 0.62f, 0.53f, 1f);
-        private static readonly Color DescriptionColor = new Color(0.54f, 0.5f, 0.44f, 1f);
-        private static readonly Color CardBackground = new Color(0f, 0f, 0f, 0.6f);
         private static readonly Color EnabledColor = new Color(0.95f, 0.65f, 0.2f, 1f);
-        private static readonly Color DisabledColor = new Color(0.6f, 0.56f, 0.49f, 1f);
 
         // ── layout constants (same derived-from-shell-size pattern as ProfilesTab.cs) ──────────
         private const float ContentWidth  = WizshBoneShellGUI.PanelWidth - ShellSidebar.Width;
@@ -63,7 +59,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private const float CardGap = 14f;
         private const float RowGap = 14f;
         private const float CardWidth = (ContentWidth - 2f * ContentMargin - 2f * CardGap) / 3f;
-        private const float CardHeight = 150f;
+        private const float CardHeight = 160f;
         private const float ButtonRowY = GridTopY - 2f * CardHeight - RowGap - 30f;
 
         public GameObject Create(GameObject parent)
@@ -192,35 +188,20 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         private void BuildActiveProfileCard(Vector2 topCenter, int totalRedeems)
         {
-            GameObject card = CreateCard(topCenter);
+            GameObject card = GuiHelper.CreateCard(m_overviewRoot, topCenter, CardWidth, CardHeight);
 
-            CreateCardText(card, "Active profile", -14f, 16, MutedLabelColor);
-            CreateCardText(card, ProfileManager.ActiveProfile, -44f, 22, GUIManager.Instance.ValheimOrange, height: 30f);
-            CreateCardText(card, $"{totalRedeems} redeems configured", -74f, 15, DescriptionColor);
+            GuiHelper.CreateCardTitle(card, "Active profile", CardWidth - 24f);
+            GuiHelper.CreateCardText(card, ProfileManager.ActiveProfile, -54f, 22, GUIManager.Instance.ValheimOrange, CardWidth - 24f, height: 30f);
+            GuiHelper.CreateCardDescription(card, $"{totalRedeems} redeems configured", CardWidth - 24f);
         }
 
         private void BuildRedemptionLogCard(Vector2 topCenter, TwitchCustomRewards customRewards)
         {
-            GameObject card = CreateCard(topCenter);
+            GameObject card = GuiHelper.CreateCard(m_overviewRoot, topCenter, CardWidth, CardHeight);
 
-            CreateCardText(card, "Redemption log", -14f, 16, MutedLabelColor);
-
-            const float historyBtnWidth = 140f;
-            float historyBtnX = -(CardWidth - 24f) / 2f + historyBtnWidth / 2f;
-
-            GameObject historyBtnObj = GUIManager.Instance.CreateButton(
-                text: "View history",
-                parent: card.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(historyBtnX, -44f),
-                width: historyBtnWidth,
-                height: 28f
-            );
-            historyBtnObj.SetActive(true);
-            historyBtnObj.GetComponent<Button>().onClick.AddListener(ShowHistory);
-
-            CreateCardText(card, $"{customRewards.m_redeemHistory.Count} redeems in history", -82f, 15, DescriptionColor);
+            GuiHelper.CreateCardTitle(card, "Redemption log", CardWidth - 24f);
+            GuiHelper.CreateCardButton(card, "View history", CardWidth, ShowHistory);
+            GuiHelper.CreateCardDescription(card, $"{customRewards.m_redeemHistory.Count} redeems in history", CardWidth - 24f);
         }
 
         /// <summary>
@@ -230,13 +211,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         /// </summary>
         private void BuildToggleCard(Vector2 topCenter, string title, Func<bool> getValue, Action<bool> onChanged, string description)
         {
-            GameObject card = CreateCard(topCenter);
+            GameObject card = GuiHelper.CreateCard(m_overviewRoot, topCenter, CardWidth, CardHeight);
             BuildToggleRow(card, title, getValue, onChanged);
-            // Descriptions can wrap onto a second line (e.g. "Whether the redeems are resolved
-            // automaticly" is wider than the card) - tall enough for 2 lines at fontSize 13, same
-            // fix as the profile-name box: too-short a height drops the whole overflowing line
-            // instead of clipping it.
-            CreateCardText(card, description, -74f, 13, DescriptionColor, height: 38f);
+            GuiHelper.CreateCardDescription(card, description, CardWidth - 24f, height: 38f);
         }
 
         /// <summary>
@@ -245,66 +222,53 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         /// </summary>
         private void BuildToggleRow(GameObject card, string title, Func<bool> getValue, Action<bool> onChanged)
         {
-            CreateCardText(card, title, -14f, 16, MutedLabelColor);
-
-            bool currentValue = getValue();
-            GuiFieldBuilder.CreateBoolField(card, new Vector2(-CardWidth / 2f + 26f, -46f), 40f, currentValue, onChanged);
-
-            // Toggle sits ~56px in from the card's left edge (see leftAlignedX in
-            // GuiFieldBuilder.CreateBoolField); the status word picks up right after it, sharing
-            // the same top-center (0.5, 1) anchor convention every other element on this card uses.
-            float statusWidth = CardWidth - 68f;
-            float statusCenterX = -CardWidth / 2f + 56f + statusWidth / 2f;
-            Text statusText = GUIManager.Instance.CreateText(
-                text: currentValue ? "Enabled" : "Disabled",
-                parent: card.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(statusCenterX, -50f),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 16,
-                color: currentValue ? EnabledColor : DisabledColor,
-                outline: true,
-                outlineColor: Color.black,
-                width: statusWidth,
-                height: 24f,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-            statusText.alignment = TextAnchor.MiddleLeft;
+            GuiHelper.CreateCardTitle(card, title, CardWidth - 24f);
+            GuiHelper.CreateToggleStatusRow(card, CardWidth, getValue(), onChanged, EnabledColor);
         }
 
         private void BuildChattingCard(Vector2 topCenter, TwitchAuth auth, TwitchChatting chatting)
         {
-            GameObject card = CreateCard(topCenter);
+            GameObject card = GuiHelper.CreateCard(m_overviewRoot, topCenter, CardWidth, CardHeight);
             BuildToggleRow(card, "Chatting feature", () => chatting.m_enabled, _ => { auth.ToggleChatting(); Refresh(); });
 
             float inputWidth = (CardWidth - 24f - 12f) / 2f;
             float leftX = -CardWidth / 2f + 12f + inputWidth / 2f;
             float rightX = leftX + inputWidth + 12f;
 
-            GuiFieldBuilder.CreateFloatField(card, new Vector2(leftX, -80f), inputWidth,
+            // Same fixed top edge every card's description uses (GuiHelper.CardDescriptionTopY) -
+            // Chatting has no description, so its input-fields row occupies that slot instead.
+            // Jotunn's CreateInputField leaves Unity's default center pivot in place, so without
+            // GuiHelper.PivotToTop the fields would sit vertically centered on fieldTopY instead of
+            // flush under the toggle row above them.
+            const float fieldTopY = GuiHelper.CardDescriptionTopY;
+
+            InputField radiusField = GuiFieldBuilder.CreateFloatField(card, new Vector2(leftX, fieldTopY), inputWidth,
                 ProfileSettingsHelper.Current.chattingRadius,
                 v => { ProfileSettingsHelper.Current.chattingRadius = v; ProfileSettingsPersistHelper.Persist(); });
+            GuiHelper.PivotToTop((RectTransform)radiusField.transform, fieldTopY);
 
-            GuiFieldBuilder.CreateFloatField(card, new Vector2(rightX, -80f), inputWidth,
+            InputField intervalField = GuiFieldBuilder.CreateFloatField(card, new Vector2(rightX, fieldTopY), inputWidth,
                 ProfileSettingsHelper.Current.chattingInterval,
                 v => { ProfileSettingsHelper.Current.chattingInterval = v; ProfileSettingsPersistHelper.Persist(); });
+            GuiHelper.PivotToTop((RectTransform)intervalField.transform, fieldTopY);
 
-            CreateCaptionUnder(card, "radius (m)", leftX, inputWidth);
-            CreateCaptionUnder(card, "interval (s)", rightX, inputWidth);
+            const float captionGap = 6f;
+            float captionTopY = fieldTopY - GuiFieldBuilder.FieldHeight - captionGap;
+            CreateCaptionUnder(card, "radius (m)", leftX, inputWidth, captionTopY);
+            CreateCaptionUnder(card, "interval (s)", rightX, inputWidth, captionTopY);
         }
 
-        private static void CreateCaptionUnder(GameObject card, string text, float x, float width)
+        private static void CreateCaptionUnder(GameObject card, string text, float x, float width, float topY)
         {
             Text caption = GUIManager.Instance.CreateText(
                 text: text,
                 parent: card.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(x, -105f),
+                position: new Vector2(x, topY),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 11,
-                color: DescriptionColor,
+                color: GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
                 width: width,
@@ -312,54 +276,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 addContentSizeFitter: false
             ).GetComponent<Text>();
             caption.alignment = TextAnchor.MiddleCenter;
-        }
-
-        // ── low-level card/text helpers ─────────────────────────────────────────────────────
-
-        private GameObject CreateCard(Vector2 topCenter)
-        {
-            GameObject card = new GameObject("Card");
-            card.transform.SetParent(m_overviewRoot.transform, false);
-
-            RectTransform rt = card.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 1f);
-            rt.anchorMax = new Vector2(0.5f, 1f);
-            rt.pivot = new Vector2(0.5f, 1f);
-            rt.sizeDelta = new Vector2(CardWidth, CardHeight);
-            rt.anchoredPosition = topCenter;
-
-            Image bg = card.AddComponent<Image>();
-            bg.color = CardBackground;
-
-            return card;
-        }
-
-        /// <summary>
-        /// <paramref name="height"/> must comfortably exceed <paramref name="fontSize"/>'s natural
-        /// line height - Unity's default vertical overflow (Truncate) doesn't partially clip a
-        /// single line that doesn't fully fit its box, it drops the whole line, so a too-short box
-        /// renders nothing at all rather than a clipped one. 24px default only suits fontSize up to
-        /// ~17; larger text (e.g. the 22pt profile name) must pass a taller height explicitly.
-        /// </summary>
-        private static Text CreateCardText(GameObject card, string text, float y, int fontSize, Color color, float height = 24f)
-        {
-            Text label = GUIManager.Instance.CreateText(
-                text: text,
-                parent: card.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(0f, y),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: fontSize,
-                color: color,
-                outline: true,
-                outlineColor: Color.black,
-                width: CardWidth - 24f,
-                height: height,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-            label.alignment = TextAnchor.MiddleLeft;
-            return label;
+            GuiHelper.PivotToTop(caption.rectTransform, topY);
         }
     }
 }
