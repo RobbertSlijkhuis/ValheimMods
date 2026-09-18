@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 901782718, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+  m_Name: Harpooned_GHH
+  m_EditorClassIdentifier: 
+  m_name: $se_harpooned_name
+  m_category: 
+  m_icon: {fileID: 21300000, guid: 1702edce99a34b14b902eb11e361d554, type: 2}
+  m_flashIcon: 1
+  m_cooldownIcon: 0
+  m_tooltip: $se_harpooned_tooltip
+  m_attributes: 0
+  m_startMessageType: 1
+  m_startMessage: 
+  m_stopMessageType: 1
+  m_stopMessage: 
+  m_repeatMessageType: 1
+  m_repeatMessage: 
+  m_repeatInterval: 60
+  m_ttl: 0
+  m_startEffects:
+    m_effectPrefabs:
+    - m_prefab: {fileID: 1709254077376921, guid: 75cfef2be8c19ee4fb7975d15e66d6a2,
+        type: 3}
+      m_enabled: 1
+      m_variant: -1
+      m_attach: 1
+      m_follow: 0
+      m_inheritParentRotation: 0
+      m_inheritParentScale: 0
+      m_multiplyParentVisualScale: 0
+      m_randomRotation: 0
+      m_scale: 0
+      m_childTransform: 
+  m_stopEffects:
+    m_effectPrefabs: []
+  m_cooldown: 0
+  m_activationAnimation: gpower
+  m_character: {fileID: 0}
+  m_pullForce: 1
+  m_forcePower: 2
+  m_pullSpeed: 1000
+  m_smoothDistance: 2
+  m_maxLineSlack: 0.3
+  m_breakDistance: 8
+  m_maxDistance: 40
+  m_staminaDrain: 0.1
+  m_staminaDrainInterval: 0.1

@@ -179,4 +179,14 @@ copy-pasting the script wholesale:
   build fail until the mod owner creates it with a `0.0.1`-or-current entry, same as the
   `RestingRockFace` precedent. `Package\manifest.json` also still has placeholder content
   (`name: "JotunnModStub"`, empty `description`/`website_url`) — left as a separate follow-up.
+- ✅ `GrapplingHarpoonHook` — done. Script lives at `scripts\publish.ps1` (like
+  `CraftingStationTweakz`). Its Release branch was the stock JotunnModStub one (no guards, zipped
+  `Package\*` unfiltered into `bin\Release`, and overwrote `Package\README.md` from the project-root
+  `README.md`) — fixed per items 2-4 and 9. The asset bundle is an `EmbeddedResource`, so
+  `plugins\` only needs the DLL. Stripped a pre-existing UTF-8 BOM from `Package\manifest.json` and
+  `Package\README.md`, created `Package\CHANGELOG.md` with a stub `### 0.0.1` / "Initial release"
+  entry (user's choice) so the first Release build passes the version check, and added the missing
+  `*/Package/*.zip` rule to the mod's own `.gitignore`. **Left as follow-ups**: `manifest.json` still
+  has placeholder content (`name: "JotunnModStub"`, empty `description`/`website_url`), the
+  `Package\README.md` body is still the template, and the Unix `scripts\publish.sh` wasn't touched.
 - ⬜ All other mods in this monorepo — not started.

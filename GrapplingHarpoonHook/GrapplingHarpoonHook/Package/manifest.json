@@ -1,0 +1,7 @@
+{
+  "name": "GrapplingHarpoonHook",
+  "description": "Turns the Grappling Hook into a harpoon too. Its secondary attack latches onto creatures like the Abyssal Harpoon so you can move them. Needs a reload between shots.",
+  "version_number": "0.0.1",
+  "dependencies": ["ValheimModding-Jotunn-2.30.1"],
+  "website_url": ""
+}
