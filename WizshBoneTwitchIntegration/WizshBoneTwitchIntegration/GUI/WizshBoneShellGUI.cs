@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Jotunn.Managers;
 using UnityEngine;
-using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Gui.Tabs;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
@@ -26,8 +25,6 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private GameObject m_panel;
         private bool m_blockingInput;
-        private bool m_builtWithAlternativeToggles;
-        private bool m_builtWithAlternativeSidebar;
 
         private readonly ShellSidebar m_sidebar = new ShellSidebar();
         private readonly ShellTopBar m_topBar = new ShellTopBar();
@@ -60,15 +57,6 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             if (GUIManager.Instance == null || !GUIManager.CustomGUIFront)
                 return;
-
-            // The Alternative toggle/sidebar styles are only picked up at build time - if either
-            // changed since this panel was last built, rebuild fresh instead of reusing the stale
-            // one. This only pays a rebuild cost right when a style actually changed; the common
-            // case below (unchanged) keeps the instant-reuse path.
-            if (m_panel != null && (
-                PluginConfig.configAlternativeToggles.Value != m_builtWithAlternativeToggles ||
-                PluginConfig.configAlternativeSidebar.Value != m_builtWithAlternativeSidebar))
-                DestroyPanel();
 
             if (!m_blockingInput)
             {
@@ -115,21 +103,6 @@ namespace WizshBoneTwitchIntegration.Gui
         }
 
         /// <summary>
-        /// Tears down the built panel so the next <see cref="Show"/> call rebuilds it from
-        /// scratch - used when <see cref="PluginConfig.configAlternativeToggles"/> or
-        /// <see cref="PluginConfig.configAlternativeSidebar"/> changed since the last build.
-        /// <see cref="m_sidebar"/>/<see cref="m_topBar"/> are readonly fields reused
-        /// across the rebuild rather than reconstructed, so both their own Create() methods must
-        /// stay idempotent (see ShellSidebar.Create()'s own reset block).
-        /// </summary>
-        private void DestroyPanel()
-        {
-            UnityEngine.Object.Destroy(m_panel);
-            m_panel = null;
-            m_tabRoots.Clear();
-        }
-
-        /// <summary>
         /// Re-reads Twitch auth state into the top bar. Called by <see cref="WizshBoneGUI"/> every
         /// frame while the shell is visible.
         /// </summary>
@@ -166,9 +139,6 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void BuildGUI(TwitchAuth auth, TwitchCustomRewards customRewards)
         {
-            m_builtWithAlternativeToggles = PluginConfig.configAlternativeToggles.Value;
-            m_builtWithAlternativeSidebar = PluginConfig.configAlternativeSidebar.Value;
-
             m_sidebar.Create(m_panel, SelectTab, Close);
             m_topBar.Create(m_panel, ShellSidebar.Width, auth, customRewards);
             ToastNotifications.Init(m_panel);

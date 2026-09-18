@@ -511,9 +511,9 @@ namespace WizshBoneTwitchIntegration.Gui
             float quarterWidth = halfWidth / 2f;
             float toggle1X = rightHalfX - quarterWidth / 2f;
             float toggle2X = rightHalfX + quarterWidth / 2f;
-            m_userInputToggle = GuiFieldBuilder.CreateStyledBoolField(m_step3Root, new Vector2(toggle1X, toggleRowY), quarterWidth, false, v => m_working.userInput = v);
+            m_userInputToggle = GuiFieldBuilder.CreateBoolField(m_step3Root, new Vector2(toggle1X, toggleRowY), quarterWidth, false, v => m_working.userInput = v);
             CreateInlineToggleLabel(m_step3Root, "Requires viewer input", toggle1X, quarterWidth, toggleRowY);
-            m_ignoreSafezoneToggle = GuiFieldBuilder.CreateStyledBoolField(m_step3Root, new Vector2(toggle2X, toggleRowY), quarterWidth, false, v => m_working.ignoreWard = v);
+            m_ignoreSafezoneToggle = GuiFieldBuilder.CreateBoolField(m_step3Root, new Vector2(toggle2X, toggleRowY), quarterWidth, false, v => m_working.ignoreWard = v);
             CreateInlineToggleLabel(m_step3Root, "Ignore safezone", toggle2X, quarterWidth, toggleRowY);
 
             y -= LabelHeight + RowHeight + RowGap;

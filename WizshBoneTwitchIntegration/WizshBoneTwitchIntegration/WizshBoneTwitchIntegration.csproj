@@ -33,6 +33,14 @@
     <None Remove="assets\wbti_dw.manifest" />
     <None Remove="resources\banned.txt" />
     <None Remove="resources\viewers.yaml" />
+    <None Remove="resources\WizehBoneMatteGradient.png" />
+    <None Remove="resources\WizehBone_Gradient.png" />
+    <None Remove="resources\WizshBone.png" />
+    <None Remove="resources\WizshBoneMatte.png" />
+    <None Remove="resources\WizshBoneTitle.png" />
+    <None Remove="resources\WizshBone_Original.png" />
+    <None Remove="resources\WizshBone_Outlined.png" />
+    <None Remove="resources\WizshBone_Simple.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,11 +49,16 @@
     <EmbeddedResource Include="resources\banned.txt" />
     <EmbeddedResource Include="resources\profile.yaml" />
     <EmbeddedResource Include="resources\viewers.yaml" />
+    <EmbeddedResource Include="resources\WizehBone_Gradient.png" />
+    <EmbeddedResource Include="resources\WizshBone_Original.png" />
+    <EmbeddedResource Include="resources\WizshBone_Outlined.png" />
+    <EmbeddedResource Include="resources\WizshBone_Simple.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />

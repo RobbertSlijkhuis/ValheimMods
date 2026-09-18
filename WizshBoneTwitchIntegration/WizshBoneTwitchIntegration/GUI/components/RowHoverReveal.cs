@@ -14,7 +14,7 @@ namespace WizshBoneTwitchIntegration.Gui
     /// </summary>
     internal class RowHoverReveal : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
-        private static readonly Color HoverColor = new Color(0f, 0f, 0f, 0.5f);
+        private static readonly Color HoverColor = new Color(0f, 0f, 0f, 0.8f);
 
         private Image m_background;
         private List<GameObject> m_revealOnHover;

@@ -1,7 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.UI;
+// System.Drawing types below are always fully qualified (System.Drawing.Color would otherwise
+// collide with UnityEngine.Color, used unqualified throughout this file).
 
 namespace WizshBoneTwitchIntegration.Gui
 {
@@ -13,6 +19,77 @@ namespace WizshBoneTwitchIntegration.Gui
     internal static class GuiHelper
     {
         public const int TitleFontSize = 16;
+
+        private static readonly Dictionary<string, Sprite> s_embeddedSpriteCache = new Dictionary<string, Sprite>();
+
+        /// <summary>
+        /// Loads a PNG embedded via <c>&lt;EmbeddedResource&gt;</c> in the .csproj (e.g.
+        /// "WizshBoneTwitchIntegration.resources.WizshBone.png") into a <see cref="Sprite"/>,
+        /// caching the result so a rebuilt panel (e.g. <see cref="ShellSidebar"/>'s Create) doesn't
+        /// re-decode the PNG every time.
+        ///
+        /// Decodes via <see cref="System.Drawing.Bitmap"/> rather than Unity's
+        /// Texture2D.LoadImage/ImageConversion - that route pulls in
+        /// UnityEngine.ImageConversionModule.dll, whose netstandard 2.1 dependency conflicts with
+        /// this net48 project's netstandard 2.0 facade (CS1705), and pinning Valheim's own
+        /// netstandard.dll to fix that in turn breaks on missing System.Memory/ReadOnlySpan
+        /// polyfills. System.Drawing avoids that whole dependency chain.
+        /// </summary>
+        public static Sprite LoadEmbeddedSprite(string resourceName)
+        {
+            if (s_embeddedSpriteCache.TryGetValue(resourceName, out Sprite cached))
+                return cached;
+
+            Sprite sprite = DecodeEmbeddedPng(resourceName);
+            s_embeddedSpriteCache[resourceName] = sprite;
+            return sprite;
+        }
+
+        private static Sprite DecodeEmbeddedPng(string resourceName)
+        {
+            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
+            using (System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(stream))
+            {
+                int width = bitmap.Width;
+                int height = bitmap.Height;
+
+                System.Drawing.Imaging.BitmapData bmpData = bitmap.LockBits(
+                    new System.Drawing.Rectangle(0, 0, width, height),
+                    System.Drawing.Imaging.ImageLockMode.ReadOnly,
+                    System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+                Color32[] pixels;
+                try
+                {
+                    byte[] buffer = new byte[bmpData.Stride * height];
+                    Marshal.Copy(bmpData.Scan0, buffer, 0, buffer.Length);
+
+                    // Bitmap rows run top-down and are BGRA; Unity's pixel array runs bottom-up
+                    // (row 0 = image bottom) and RGBA, so both need flipping while copying.
+                    pixels = new Color32[width * height];
+                    for (int y = 0; y < height; y++)
+                    {
+                        int srcRow = y * bmpData.Stride;
+                        int destRow = (height - 1 - y) * width;
+                        for (int x = 0; x < width; x++)
+                        {
+                            int i = srcRow + x * 4;
+                            pixels[destRow + x] = new Color32(buffer[i + 2], buffer[i + 1], buffer[i], buffer[i + 3]);
+                        }
+                    }
+                }
+                finally
+                {
+                    bitmap.UnlockBits(bmpData);
+                }
+
+                Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+                texture.SetPixels32(pixels);
+                texture.Apply();
+
+                return Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.5f));
+            }
+        }
 
         /// <summary>
         /// Shared border/divider styling (ported from RedesignUI.dc.html's `border:3px solid
@@ -246,12 +323,6 @@ namespace WizshBoneTwitchIntegration.Gui
         /// own sibling card before that got fixed). Returns the toggle and status Text so a caller
         /// that needs to mutate the status word later (Help's live safezone-debug toggle) can hold
         /// onto them.
-        ///
-        /// Renders through <see cref="GuiFieldBuilder.CreateStyledBoolField"/>, so it automatically
-        /// switches between the stock Jötunn circle toggle and the mockup's rectangle graphic based
-        /// on <see cref="Configs.PluginConfig.configAlternativeToggles"/> - both occupy the same
-        /// <see cref="GuiFieldBuilder.FieldHeight"/>-wide footprint, so the row's layout math below
-        /// doesn't need to branch on which one was used.
         /// </summary>
         public static (Toggle Toggle, Text Status) CreateToggleStatusRow(GameObject card, float cardWidth, bool currentValue, Action<bool> onChanged, Color enabledColor)
         {
@@ -264,7 +335,7 @@ namespace WizshBoneTwitchIntegration.Gui
             float titleLeftEdge = -cardWidth / 2f + 12f;
             float toggleRightEdge = titleLeftEdge + GuiFieldBuilder.FieldHeight;
 
-            Toggle toggle = GuiFieldBuilder.CreateStyledBoolField(card, new Vector2(0f, toggleY), cardWidth - 24f, currentValue, onChanged);
+            Toggle toggle = GuiFieldBuilder.CreateBoolField(card, new Vector2(0f, toggleY), cardWidth - 24f, currentValue, onChanged);
 
             float statusLeftEdge = toggleRightEdge + statusGap;
             float statusRightEdge = cardWidth / 2f - 12f;

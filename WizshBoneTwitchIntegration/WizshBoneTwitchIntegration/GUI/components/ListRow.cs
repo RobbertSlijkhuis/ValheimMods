@@ -114,10 +114,11 @@ namespace WizshBoneTwitchIntegration.Gui
         }
 
         /// <summary>
-        /// The alternating-row-stripe color RedesignUI.dc.html uses for every list
-        /// (<c>zebra: i % 2 ? 'transparent' : '#00000030'</c>) - shared here so Profiles/Viewers/
-        /// Redeems/RedeemHistory all compute the same stripe instead of each hardcoding it.
+        /// The alternating-row-stripe color used for every list - shared here so Profiles/Viewers/
+        /// Redeems/RedeemHistory all compute the same stripe instead of each hardcoding it. Alpha
+        /// bumped to 0.4 from RedesignUI.dc.html's own 0.3 (<c>zebra: i % 2 ? 'transparent' :
+        /// '#00000030'</c>) per Robbert's request.
         /// </summary>
-        public static Color ZebraColor(int rowIndex) => rowIndex % 2 == 0 ? new Color(0f, 0f, 0f, 0.3f) : Color.clear;
+        public static Color ZebraColor(int rowIndex) => rowIndex % 2 == 0 ? new Color(0f, 0f, 0f, 0.4f) : Color.clear;
     }
 }

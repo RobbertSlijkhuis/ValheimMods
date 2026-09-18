@@ -19,10 +19,6 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private GameObject m_root;
         private Toggle m_safeZoneDebugToggle;
         private Text m_safeZoneDebugStatusText;
-        private Toggle m_alternativeSidebarToggle;
-        private Text m_alternativeSidebarStatusText;
-        private Toggle m_alternativeTogglesToggle;
-        private Text m_alternativeTogglesStatusText;
 
         private static readonly Color EnabledColor = new Color(0.95f, 0.65f, 0.2f, 1f);
 
@@ -60,8 +56,6 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             BuildSafezoneUnstuckCard(CardTopCenter(0, 0));
             BuildSafezoneBoundsCard(CardTopCenter(0, 1));
-            BuildAlternativeSidebarCard(CardTopCenter(0, 2));
-            BuildAlternativeTogglesCard(CardTopCenter(1, 0));
 
             return m_root;
         }
@@ -72,10 +66,6 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             // while this tab wasn't visible - matches GUI_OLD/tabs/DebugTab.cs's Refresh().
             if (m_safeZoneDebugToggle != null)
                 m_safeZoneDebugToggle.isOn = PluginConfig.configShowSafeZoneDebug.Value;
-            if (m_alternativeSidebarToggle != null)
-                m_alternativeSidebarToggle.isOn = PluginConfig.configAlternativeSidebar.Value;
-            if (m_alternativeTogglesToggle != null)
-                m_alternativeTogglesToggle.isOn = PluginConfig.configAlternativeToggles.Value;
         }
 
         private void BuildDescriptionLines()
@@ -133,52 +123,6 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             m_safeZoneDebugStatusText.text = value ? "Enabled" : "Disabled";
             m_safeZoneDebugStatusText.color = value ? EnabledColor : GUIManager.Instance.ValheimBeige;
-        }
-
-        private void BuildAlternativeSidebarCard(Vector2 topCenter)
-        {
-            GameObject card = GuiHelper.CreateCard(m_root, topCenter, CardWidth, CardHeight);
-            GuiHelper.CreateCardTitle(card, "Alternative sidebar style", CardWidth - 24f);
-
-            bool currentValue = PluginConfig.configAlternativeSidebar.Value;
-            var row = GuiHelper.CreateToggleStatusRow(card, CardWidth, currentValue, OnAlternativeSidebarToggled, EnabledColor);
-            m_alternativeSidebarToggle = row.Toggle;
-            m_alternativeSidebarStatusText = row.Status;
-
-            GuiHelper.CreateCardDescription(card, "Switches the sidebar's tab buttons to the alternate look. Takes effect next time you reopen this panel.", CardWidth - 24f, height: 38f);
-        }
-
-        private void OnAlternativeSidebarToggled(bool value)
-        {
-            // Not live - WizshBoneShellGUI checks this value against what the panel was last
-            // built with and rebuilds next time it's reopened, rather than restyling in place.
-            PluginConfig.configAlternativeSidebar.Value = value;
-
-            m_alternativeSidebarStatusText.text = value ? "Enabled" : "Disabled";
-            m_alternativeSidebarStatusText.color = value ? EnabledColor : GUIManager.Instance.ValheimBeige;
-        }
-
-        private void BuildAlternativeTogglesCard(Vector2 topCenter)
-        {
-            GameObject card = GuiHelper.CreateCard(m_root, topCenter, CardWidth, CardHeight);
-            GuiHelper.CreateCardTitle(card, "Alternative toggle style", CardWidth - 24f);
-
-            bool currentValue = PluginConfig.configAlternativeToggles.Value;
-            var row = GuiHelper.CreateToggleStatusRow(card, CardWidth, currentValue, OnAlternativeTogglesToggled, EnabledColor);
-            m_alternativeTogglesToggle = row.Toggle;
-            m_alternativeTogglesStatusText = row.Status;
-
-            GuiHelper.CreateCardDescription(card, "Switches every boolean field to the rectangle-style toggle. Takes effect next time you reopen this panel.", CardWidth - 24f, height: 38f);
-        }
-
-        private void OnAlternativeTogglesToggled(bool value)
-        {
-            // Not live - WizshBoneShellGUI checks this value against what the panel was last
-            // built with and rebuilds next time it's reopened, rather than restyling in place.
-            PluginConfig.configAlternativeToggles.Value = value;
-
-            m_alternativeTogglesStatusText.text = value ? "Enabled" : "Disabled";
-            m_alternativeTogglesStatusText.color = value ? EnabledColor : GUIManager.Instance.ValheimBeige;
         }
 
         private void OnUnstuckSafezones()

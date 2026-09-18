@@ -240,7 +240,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 var f = fields[i];
                 GameObject cell = CreateCell(row, x, width);
                 GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
-                GuiFieldBuilder.CreateStyledBoolField(cell, new Vector2(0f, -56f), width - 24f, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
+                GuiFieldBuilder.CreateBoolField(cell, new Vector2(0f, -56f), width - 24f, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
                 GuiHelper.CreateCardDescription(cell, f.Description, width - 24f);
             });
         }
