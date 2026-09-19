@@ -78,10 +78,10 @@ namespace ModularMagic_EarthStaffs
 
                 prefabs.Nova.AddComponent<NovaTerrainEdit>();
 
-                snapshots.staffEarth0.Init(prefabs.StaffEarth0.GetComponent<ItemDrop>().m_itemData);
-                snapshots.staffEarth1.Init(prefabs.StaffEarth1.GetComponent<ItemDrop>().m_itemData);
-                snapshots.staffEarth2.Init(prefabs.StaffEarth2.GetComponent<ItemDrop>().m_itemData);
-                snapshots.staffEarth3.Init(prefabs.StaffEarth3.GetComponent<ItemDrop>().m_itemData);
+                snapshots.staffEarth0.Init(prefabs.StaffEarth0.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffEarth0);
+                snapshots.staffEarth1.Init(prefabs.StaffEarth1.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffEarth1);
+                snapshots.staffEarth2.Init(prefabs.StaffEarth2.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffEarth2);
+                snapshots.staffEarth3.Init(prefabs.StaffEarth3.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffEarth3);
 
                 PrefabManager.OnVanillaPrefabsAvailable -= AddEarthStaffs;
             }

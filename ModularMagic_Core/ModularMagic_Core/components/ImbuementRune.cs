@@ -1,3 +1,4 @@
+using ModularMagic_Core.Types;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -28,12 +29,12 @@ namespace ModularMagic_Core.Components
 
         public string GetName(string weaponType)
         {
-            return Localization.instance.Localize($"${m_nameKey}_{weaponType.ToLower()}");
+            return Localization.instance.Localize($"${m_nameKey}_{(weaponType ?? WeaponType.None).ToLower()}");
         }
 
         public string GetDescription(string weaponType)
         {
-            return Localization.instance.Localize($"${m_descriptionKey}_{weaponType.ToLower()}");
+            return Localization.instance.Localize($"${m_descriptionKey}_{(weaponType ?? WeaponType.None).ToLower()}");
         }
     }
 }

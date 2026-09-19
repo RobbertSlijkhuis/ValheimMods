@@ -22,7 +22,7 @@ namespace ModularMagic_Core.Models
         public Imbuement(int tier, string weaponType)
         {
             this.tier = tier;
-            this.weaponType = weaponType;
+            this.weaponType = weaponType ?? WeaponType.None;
         }
 
         public ImbuementRune rune

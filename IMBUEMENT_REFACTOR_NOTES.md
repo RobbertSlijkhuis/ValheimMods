@@ -90,6 +90,8 @@ Suggested fix: apply health only in `SetData`, and keep only the local visuals i
 
 ## Implementation status
 
+The shared API is documented for staff-mod authors in `ModularMagic_Core/IMBUEMENT_API.md`.
+
 The approved plan is in `C:\Users\robbe\.claude\plans\lets-gather-information-first-deep-frog.md`.
 
 - **Phase 1 (shared model): written, not yet built or tested.**
@@ -134,12 +136,28 @@ The approved plan is in `C:\Users\robbe\.claude\plans\lets-gather-information-fi
 
 **All four phases are written. Nothing has been built or tested yet.** Build order: Core first, then EarthStaffs.
 
+## Code review (`/code-review high` on ModularMagic_Core)
+
+Eight findings. Outcome:
+
+- **Fixed (written, not yet built or tested):**
+  - `ImbuementSlots.m_weaponType` now defaults to `WeaponType.None`, and `GetName`/`GetDescription`/`Imbuement` are null-safe, so a staff mod that forgets it no longer breaks every rune hover.
+  - The same rune can not be slotted while the same rune is marked for removal in any slot (`RuneTable.IsRuneMarkedForRemoval`). This also closes a case where a rune could be lost: with the old rune marked for removal, slotting the same rune again made the working copy equal the saved copy, so no draft was stored and the consumed rune was not dropped. Consequence chosen by the user: changing a rune's level takes two applies (remove and apply, then slot the new one).
+  - `RuneTableRuneInteract.OnDestroy` removes its `m_onSave` listener (they piled up on the table with every refresh or re-attach; this predates the refactor).
+  - Save and draft requests that reach a stand the receiver no longer owns are forwarded to the real owner (with a hop counter, max 3) instead of being dropped, so the runes consumed for them are not lost. The RPCs now carry a hop count (`Register<string, long, int>`).
+- **Decided: no anti-cheat.** The save and draft requests are authorised by the editor id that the client sends, which anyone can read from the stand, and the owner does not check tier, allowed weapon or one-rune-per-type. A modified client can therefore overwrite runes or give itself runes. The user does not want protection against modified clients ("if they want to cheat that way so be it"). Do not add sender checks or extra validation for this. (If a sender check were ever added, the forwarded request would have to carry the original sender, because forwarding changes the sender.)
+- **Not done on purpose:** performance caching (`SyncFromStand` skipping on an unchanged data revision, caching the rune in `Imbuement`); the user does not want caching. Old-format migration (decided: none).
+
 ## Follow-ups (not done)
 
 - **Two-player test** of phases 2 and 3 (see the verification list in the plan file), including the `Missing prefab hash` check in the other client's log.
 - **Rune consolidation:** merge the tier variants into one rune with a level (needs Unity changes). The save format is already keyed by rune id and level.
-- **Startup attack tweaks:** whether `AttackHelper.UpdateCone/Nova/Rain/Summon` read config before the server sync.
-- **`UpdateHelper` variants** across the staff mods could be unified later.
+- **Startup attack tweaks / config sync: checked and fixed (not yet built or tested in-game).**
+  - Jotunn applies server values by setting `ConfigEntry.BoxedValue` (`SynchronizationManager`, and again when disconnecting), which raises `SettingChanged`. Every entry in `StaffConfig` (28 of 28) and `SecondaryAttackConfig` (19 of 19) has a `SettingChanged` handler that re-applies the value to the prefab, so the startup tweaks (`AttackHelper.UpdateCone/Nova/Rain/Summon`, `CreateStaff`) are refreshed when a synced value arrives.
+  - **Real gap found:** the staff snapshots (`ItemDataSnapShot`) copied the staff stats once at startup, and `ApplyImbuements` writes those copies onto the equipped staff on every equip. After a synced or changed config value, an imbued staff used the stale startup numbers (eitr cost, blunt damage and per level, accuracy, attack speed, projectile speed). This predates the refactor.
+  - **Fix:** `ItemDataSnapShot.Init(itemData, config)` now keeps the `StaffConfig` and reads those values from it on every access. Four unused snapshot fields (pierce and slash damage, per level, and `secondaryAttack`) were removed.
+  - **How to test in single player:** change a staff's eitr cost (or accuracy, damage) in the config manager, take the staff off and equip it again, and it should use the new value without a restart. To test the real sync: change a value on a server and join with a client that has the default config.
+- **`UpdateHelper` variants:** deliberately left as is. `UpdateHelper.cs` is a copy-paste pattern in 11 projects (Armors, Food, Utilities, PlantCart, SplashMeads, Testing, Fire, Ice, Lightning, EarthStaffs and Core's stub), with two families of options classes (`UpdateItemDataOptions` and `UpdateItemDropStatsOptions`). Revisit when a second staff mod adopts the imbuement API, and extract only the common item-data part into Core then.
 - **BloodMagic:** the `Awake` health write (see the section above).
 - **Mushroom projectile** on Staff 0 still randomizes per client.
 

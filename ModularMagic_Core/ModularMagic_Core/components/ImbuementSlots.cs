@@ -1,3 +1,4 @@
+using ModularMagic_Core.Types;
 using UnityEngine;
 
 namespace ModularMagic_Core.Components
@@ -10,6 +11,7 @@ namespace ModularMagic_Core.Components
     {
         public int m_slots = 1;
         public int m_tier = 1;
-        public string m_weaponType;
+        // Decides which runes are allowed. When a staff mod forgets to set it no rune can be slotted
+        public string m_weaponType = WeaponType.None;
     }
 }

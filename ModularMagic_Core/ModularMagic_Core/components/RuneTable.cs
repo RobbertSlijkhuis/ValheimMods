@@ -18,6 +18,8 @@ namespace ModularMagic_Core.Components
     {
         private const string DraftRpcName = "RPC_MMC_SaveDraft";
         private const string SaveRpcName = "RPC_MMC_SaveImbuements";
+        // How many times a request may be passed on when the owner of the stand changed while it was on its way
+        private const int MaxForwardHops = 3;
 
         private ZNetView netView;
         // The working copy of the editor, this includes the runes that are not saved yet
@@ -77,8 +79,8 @@ namespace ModularMagic_Core.Components
             // Saving is done by the owner of the stand, the editor asks for it with this RPC
             if (netView != null)
             {
-                netView.Register<string, long>(SaveRpcName, RPC_SaveImbuements);
-                netView.Register<string, long>(DraftRpcName, RPC_SaveDraft);
+                netView.Register<string, long, int>(SaveRpcName, RPC_SaveImbuements);
+                netView.Register<string, long, int>(DraftRpcName, RPC_SaveDraft);
             }
             else
                 Jotunn.Logger.LogWarning("[Imbuements] The rune table stand has no ZNetView, saving imbuements will not work");
@@ -271,6 +273,21 @@ namespace ModularMagic_Core.Components
             return working;
         }
 
+        // A rune that is marked for removal in any slot is still on the staff until the changes are saved,
+        // so the same rune can not be slotted again before that
+        public bool IsRuneMarkedForRemoval(string runeId)
+        {
+            for (int i = 0; i < m_imbuements.Count; i++)
+            {
+                ImbuementRune replacedRune = GetReplacedRune(i);
+
+                if (replacedRune != null && replacedRune.m_id == runeId)
+                    return true;
+            }
+
+            return false;
+        }
+
         // A saved rune that is removed or replaced in the working copy, it stays visible until the changes are saved
         private ImbuementRune GetReplacedRune(int index)
         {
@@ -328,7 +345,7 @@ namespace ModularMagic_Core.Components
                 string imbuementsString = ImbuementHelper.Serialize(m_imbuements);
 
                 // The owner of the stand writes the data, only the owner can change it reliably
-                netView.InvokeRPC(SaveRpcName, imbuementsString, m_editorId);
+                netView.InvokeRPC(SaveRpcName, imbuementsString, m_editorId, 0);
 
                 m_itemData.m_customData[ImbuementHelper.DataKey] = imbuementsString;
                 m_imbuementsString = imbuementsString;
@@ -346,12 +363,15 @@ namespace ModularMagic_Core.Components
         }
 
         // Runs on the owner of the stand
-        private void RPC_SaveImbuements(long sender, string imbuementsString, long editorId)
+        private void RPC_SaveImbuements(long sender, string imbuementsString, long editorId, int hops)
         {
             try
             {
                 if (!netView.IsOwner())
+                {
+                    ForwardToOwner(SaveRpcName, imbuementsString, editorId, hops);
                     return;
+                }
 
                 ZDO zdo = netView.GetZDO();
                 ItemData standItem = ImbuementHelper.LoadItemFromZDO(zdo);
@@ -383,6 +403,21 @@ namespace ModularMagic_Core.Components
             }
         }
 
+        // The owner of the stand can change while a request is on its way. Pass it on to the new owner,
+        // otherwise the runes that were used for the request are lost
+        private void ForwardToOwner(string rpcName, string data, long editorId, int hops)
+        {
+            long owner = netView.GetZDO().GetOwner();
+
+            if (owner == 0 || hops >= MaxForwardHops)
+            {
+                Jotunn.Logger.LogWarning($"[Imbuements] Could not pass on {rpcName}, the stand has no owner or the request was passed on too often");
+                return;
+            }
+
+            netView.InvokeRPC(owner, rpcName, data, editorId, hops + 1);
+        }
+
         private void OnRuneActivation()
         {
             // The viewers also invoke this when they refresh, they have nothing to remember
@@ -396,16 +431,19 @@ namespace ModularMagic_Core.Components
             if (netView == null || !netView.IsValid())
                 return;
 
-            netView.InvokeRPC(DraftRpcName, ImbuementHelper.Serialize(m_imbuements), m_editorId);
+            netView.InvokeRPC(DraftRpcName, ImbuementHelper.Serialize(m_imbuements), m_editorId, 0);
         }
 
         // Runs on the owner of the stand
-        private void RPC_SaveDraft(long sender, string draft, long editorId)
+        private void RPC_SaveDraft(long sender, string draft, long editorId, int hops)
         {
             try
             {
                 if (!netView.IsOwner())
+                {
+                    ForwardToOwner(DraftRpcName, draft, editorId, hops);
                     return;
+                }
 
                 ZDO zdo = netView.GetZDO();
                 ItemData standItem = ImbuementHelper.LoadItemFromZDO(zdo);

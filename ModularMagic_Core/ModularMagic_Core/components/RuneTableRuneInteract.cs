@@ -92,6 +92,13 @@ namespace ModularMagic_Core.components
             m_resetInteract = attached.AddComponent<RuneTableRuneResetInteract>();
         }
 
+        private void OnDestroy()
+        {
+            // The table lives on when the runes are removed and shown again, so the listener would pile up
+            if (m_imbuementTable != null)
+                m_imbuementTable.m_onSave.RemoveListener(OnSave);
+        }
+
         // A rune that is taken out of a slot drops from that slot, just like a removed saved rune drops when the changes are saved
         private void DropRune(ImbuementRune rune)
         {
@@ -219,6 +226,14 @@ namespace ModularMagic_Core.components
             if (m_imbuementTable.m_imbuements.Find(item => item.type == imbuementRune.m_type) != null)
             {
                 Jotunn.Logger.LogWarning("Already slotted a rune of the same type!");
+                return false;
+            }
+
+            // The same rune can not be on the staff twice, also not while the old one is waiting to be removed by saving
+            if (m_imbuementTable.IsRuneMarkedForRemoval(imbuementRune.m_id))
+            {
+                Jotunn.Logger.LogWarning("The same rune is still on the staff, waiting to be removed!");
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "That rune is still on this staff, apply the changes first");
                 return false;
             }
 
