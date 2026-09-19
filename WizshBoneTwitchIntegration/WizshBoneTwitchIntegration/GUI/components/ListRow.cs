@@ -81,7 +81,7 @@ namespace WizshBoneTwitchIntegration.Gui
         /// </summary>
         public static GameObject CreateActionButton(GameObject row, string text, float x, float width, float height, Color color, UnityAction onClick)
         {
-            GameObject btnObj = GUIManager.Instance.CreateButton(
+            GameObject btnObj = GuiHelper.CreateButton(
                 text: text,
                 parent: row.transform,
                 anchorMin: new Vector2(0.5f, 0.5f),

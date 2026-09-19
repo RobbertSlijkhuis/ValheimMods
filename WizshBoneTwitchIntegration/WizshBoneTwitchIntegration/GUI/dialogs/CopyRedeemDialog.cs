@@ -194,7 +194,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private Button CreateButton(float posX, Color textColor)
         {
-            GameObject btnObj = GUIManager.Instance.CreateButton(
+            GameObject btnObj = GuiHelper.CreateButton(
                 text:      "",
                 parent:    m_panel.transform,
                 anchorMin: new Vector2(0.5f, 0f),

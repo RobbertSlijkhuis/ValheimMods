@@ -36,7 +36,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         /// <summary>
         /// Wired up by <see cref="WizshBoneShellGUI"/> right after <see cref="Create"/> (same
-        /// "wire a callback after construction" pattern as <see cref="Tabs.HomeTab.OnNavigateToTab"/>)
+        /// "wire a callback after construction" pattern as <see cref="Tabs.HomeTab.OnCreateRedeemRequested"/>)
         /// so the logout-with-unresolved-redeems confirm dialog's "Open history" cancel option can
         /// open <see cref="RedeemHistorySection"/> without this class needing a reference to the
         /// shell itself.
@@ -98,7 +98,7 @@ namespace WizshBoneTwitchIntegration.Gui
             ).GetComponent<Text>();
             m_statusLabel.alignment = TextAnchor.MiddleLeft;
 
-            GameObject loginBtnObj = GUIManager.Instance.CreateButton(
+            GameObject loginBtnObj = GuiHelper.CreateButton(
                 text:      "",
                 parent:    root.transform,
                 anchorMin: new Vector2(0f, 0.5f),

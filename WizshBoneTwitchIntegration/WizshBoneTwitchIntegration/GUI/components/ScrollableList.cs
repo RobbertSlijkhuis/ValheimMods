@@ -17,7 +17,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         public const float ScrollSensitivity = 1000f;
 
-        private static readonly Color TrackColor  = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+        internal static readonly Color TrackColor  = new Color(0.2f, 0.2f, 0.2f, 0.8f);
         private static readonly Color HandleColor = new Color(0.6f, 0.6f, 0.6f, 1f);
 
         /// <summary>

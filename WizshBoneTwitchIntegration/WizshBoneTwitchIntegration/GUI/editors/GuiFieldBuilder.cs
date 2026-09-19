@@ -78,16 +78,20 @@ namespace WizshBoneTwitchIntegration.Gui
 
         /// <summary>
         /// Creates an integer-only <see cref="InputField"/>; <paramref name="onChanged"/> only
-        /// fires for values that actually parse as an int.
+        /// fires for values that actually parse as an int - or, with <paramref name="emptyAsZero"/>,
+        /// also for an emptied box, reported as 0 (otherwise clearing the box leaves the previous
+        /// value in place). <paramref name="maxLength"/> caps the typed length (0 = no cap).
         /// </summary>
-        public static InputField CreateIntField(GameObject parent, Vector2 position, float width, int currentValue, Action<int> onChanged)
+        public static InputField CreateIntField(GameObject parent, Vector2 position, float width, int currentValue, Action<int> onChanged, bool emptyAsZero = false, int maxLength = 0)
         {
-            InputField input = CreateInputField(parent, position, width, currentValue.ToString());
+            InputField input = CreateInputField(parent, position, width, currentValue.ToString(), maxLength: maxLength);
             input.contentType = InputField.ContentType.IntegerNumber;
             input.onValueChanged.AddListener(val =>
             {
                 if (int.TryParse(val, out int result))
                     onChanged?.Invoke(result);
+                else if (emptyAsZero && string.IsNullOrEmpty(val))
+                    onChanged?.Invoke(0);
             });
             return input;
         }
@@ -123,7 +127,7 @@ namespace WizshBoneTwitchIntegration.Gui
         /// </summary>
         public static Toggle CreateBoolField(GameObject parent, Vector2 position, float width, bool currentValue, Action<bool> onChanged)
         {
-            GameObject toggleObj = GUIManager.Instance.CreateToggle(
+            GameObject toggleObj = GuiHelper.CreateToggle(
                 parent: parent.transform,
                 width: FieldHeight,
                 height: FieldHeight
@@ -154,7 +158,7 @@ namespace WizshBoneTwitchIntegration.Gui
             Color initialColor = ParseHexColor(currentHexValue);
 
             // Button - keeps its default Valheim style so borders are visible
-            GameObject swatchBtn = GUIManager.Instance.CreateButton(
+            GameObject swatchBtn = GuiHelper.CreateButton(
                 text: "",
                 parent: parent.transform,
                 anchorMin: new Vector2(0.5f, 1f),

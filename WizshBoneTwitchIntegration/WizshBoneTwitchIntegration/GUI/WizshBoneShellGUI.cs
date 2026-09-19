@@ -51,6 +51,12 @@ namespace WizshBoneTwitchIntegration.Gui
         /// </summary>
         private Action m_openHistory;
 
+        /// <summary>
+        /// The tab history was opened from, so its Back button returns there rather than staying
+        /// on Home. Reset to Home by every <see cref="SelectTab"/> call (see <see cref="BuildGUI"/>).
+        /// </summary>
+        private ShellTab m_historyReturnTab = ShellTab.Home;
+
         public bool IsVisible => m_panel != null && m_panel.activeSelf;
 
         public void Show(TwitchAuth auth, TwitchCustomRewards customRewards)
@@ -153,34 +159,56 @@ namespace WizshBoneTwitchIntegration.Gui
             foreach (ShellTab tab in ShellTabExtensions.All)
                 m_tabRoots[tab] = m_tabViews[tab].Create(content);
 
-            // HomeTab's "Create a new redeem" button needs to switch tabs without holding a
-            // reference to this shell class itself - wired here rather than threaded through
-            // IShellTabView.Create, since no other tab needs cross-tab navigation (yet).
+            // Resolved before HomeTab's callback wiring below, since HomeTab's "Create a new redeem"
+            // button needs to call RedeemsTab.OpenCreate() after switching tabs - wired here rather
+            // than threaded through IShellTabView.Create, since no other tab needs cross-tab
+            // navigation (yet).
+            RedeemsTab redeemsTab = m_tabViews[ShellTab.Redeems] as RedeemsTab;
+
             Action openHistory = null;
             if (m_tabViews[ShellTab.Home] is HomeTab homeTab)
             {
-                homeTab.OnNavigateToTab = SelectTab;
-
                 // History lives as an inline section owned by HomeTab (see
                 // RedeemHistorySection/HomeTab.ShowHistory), not a shell-level overlay - so opening
                 // it from a different tab (RedeemsTab's/ShellTopBar's "Open history" confirm-dialog
                 // cancel options) means switching to Home first, then telling it to show the
-                // section - the same "navigate then act" shape OnNavigateToTab above already uses
-                // for "Create a new redeem", just in reverse.
+                // section - the same "navigate then act" shape used below for "Create a new redeem",
+                // just in reverse.
                 openHistory = () =>
                 {
+                    ShellTab from = m_activeTab;
                     SelectTab(ShellTab.Home);
+                    m_historyReturnTab = from; // after SelectTab, which resets it
                     homeTab.ShowHistory();
+                };
+
+                // Back from history returns to whichever tab it was opened from (Home's own
+                // "View history" button never goes through openHistory, so it stays on Home).
+                homeTab.OnHistoryBack = () =>
+                {
+                    ShellTab target = m_historyReturnTab;
+                    m_historyReturnTab = ShellTab.Home;
+                    if (target != ShellTab.Home)
+                        SelectTab(target);
                 };
 
                 m_topBar.OnOpenHistoryRequested = openHistory;
                 m_openHistory = openHistory;
+
+                if (redeemsTab != null)
+                {
+                    homeTab.OnCreateRedeemRequested = () =>
+                    {
+                        SelectTab(ShellTab.Redeems);
+                        redeemsTab.OpenCreate();
+                    };
+                }
             }
 
             // RedeemsTab's Test action needs to close the whole shell panel first (so the player
             // can actually see the effect play out) without holding a reference to this shell
             // class itself - same "wire a callback after construction" pattern as HomeTab above.
-            if (m_tabViews[ShellTab.Redeems] is RedeemsTab redeemsTab)
+            if (redeemsTab != null)
             {
                 redeemsTab.OnCloseRequested = Close;
                 redeemsTab.OnOpenHistoryRequested = openHistory;
@@ -193,6 +221,8 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void SelectTab(ShellTab tab)
         {
+            m_historyReturnTab = ShellTab.Home;
+
             foreach (KeyValuePair<ShellTab, GameObject> kvp in m_tabRoots)
                 kvp.Value.SetActive(kvp.Key == tab);
 

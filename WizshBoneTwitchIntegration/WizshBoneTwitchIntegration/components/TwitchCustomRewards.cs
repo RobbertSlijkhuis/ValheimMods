@@ -362,11 +362,19 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             {
                 if (ProgressionHelper.IsAllowedByGlobalKeys(redeem.globalKeyAdd, redeem.globalKeyRemove))
                 {
+                    // Capped here too (not just in the wizard) so a hand-edited profile.yaml can't
+                    // send Twitch a cooldown it rejects.
+                    int cooldownSeconds = CooldownHelper.ClampSeconds(redeem.cooldown);
+
                     listRewards.Add(new CustomRewardDefinition()
                     {
                         BackgroundColor = redeem.backgroundColor,
-                        GlobalCooldownSeconds = redeem.cooldown,
-                        IsGlobalCooldownEnabled = redeem.cooldown > 0,
+                        GlobalCooldownSeconds = cooldownSeconds,
+                        IsGlobalCooldownEnabled = cooldownSeconds > 0,
+                        MaxPerStream = redeem.maxPerStream,
+                        IsMaxPerStreamEnabled = redeem.maxPerStream > 0,
+                        MaxPerUserPerStream = redeem.maxPerUserPerStream,
+                        IsMaxPerUserPerStreamEnabled = redeem.maxPerUserPerStream > 0,
                         IsUserInputRequired = redeem.userInput,
                         Cost = redeem.points,
                         Prompt = redeem.description,

@@ -12,14 +12,28 @@ namespace WizshBoneTwitchIntegration.Gui
     /// feedback <see cref="Text"/>), so this is new infrastructure, not a port - built as shared
     /// GUI/ infra since every planned tab's mockup leans on the same pattern, not just Profiles.
     /// </summary>
+    internal enum ToastType
+    {
+        Success,
+        Warning,
+        Error
+    }
+
     internal static class ToastNotifications
     {
+        private static readonly Color SuccessBorderColor = new Color(0.30f, 0.75f, 0.35f, 1f);
+        private static readonly Color ErrorBorderColor   = new Color(0.85f, 0.25f, 0.22f, 1f);
+
         private const float ToastWidth    = 320f;
         private const float ToastHeight   = 50f;
         private const float ToastSpacing  = 8f;
         private const float BottomMargin  = 20f;
         private const float RightMargin   = 20f;
         private const float DisplaySeconds = 3.5f;
+        private const float BorderWidth   = 4f;
+        private const float LeftBorderWidth = 4f;
+        private const float BackgroundTint  = 0.10f; // 0 = plain preview color, 1 = full type color
+        private const int   FontSize      = 14;
 
         private static GameObject s_container;
 
@@ -55,7 +69,7 @@ namespace WizshBoneTwitchIntegration.Gui
         /// Queues a toast with the given message. Safe to call from any tab once
         /// <see cref="Init"/> has run.
         /// </summary>
-        public static void Show(string message)
+        public static void Show(string message, ToastType type)
         {
             if (s_container == null)
             {
@@ -75,8 +89,26 @@ namespace WizshBoneTwitchIntegration.Gui
             toastRt.sizeDelta = new Vector2(ToastWidth, ToastHeight);
 
             Image background = toastObj.AddComponent<Image>();
-            background.color = new Color(0f, 0f, 0f, 0.85f);
-            GuiHelper.AddBorder(toastObj, GUIManager.Instance.ValheimOrange);
+            Color typeColor = GetBorderColor(type);
+            // Base fill is the Redeem Wizard's step-1 preview placeholder color (the scrollbar
+            // track's RGB, fully opaque), with a little of the type color mixed in.
+            Color trackColor = ScrollableList.TrackColor;
+            Color baseColor = new Color(trackColor.r, trackColor.g, trackColor.b, 1f);
+            background.color = Color.Lerp(baseColor, typeColor, BackgroundTint);
+            GuiHelper.AddBorder(toastObj, typeColor, BorderWidth);
+
+            // The Outline above already gives the left edge BorderWidth px (drawn outside the
+            // rect), so this inner bar only adds the difference up to LeftBorderWidth.
+            GameObject leftBar = new GameObject("LeftBorder");
+            leftBar.transform.SetParent(toastObj.transform, false);
+
+            RectTransform leftBarRt = leftBar.AddComponent<RectTransform>();
+            leftBarRt.anchorMin = new Vector2(0f, 0f);
+            leftBarRt.anchorMax = new Vector2(0f, 1f);
+            leftBarRt.pivot     = new Vector2(0f, 0.5f);
+            leftBarRt.sizeDelta = new Vector2(LeftBorderWidth - BorderWidth, 0f);
+            leftBarRt.anchoredPosition = Vector2.zero;
+            leftBar.AddComponent<Image>().color = typeColor;
 
             Text text = GUIManager.Instance.CreateText(
                 text:                message,
@@ -85,8 +117,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 anchorMax:           Vector2.one,
                 position:            Vector2.zero,
                 font:                GUIManager.Instance.AveriaSerifBold,
-                fontSize:            13,
-                color:               GUIManager.Instance.ValheimBeige,
+                fontSize:            FontSize,
+                color:               typeColor,
                 outline:             true,
                 outlineColor:        Color.black,
                 width:               ToastWidth - 20f,
@@ -101,6 +133,16 @@ namespace WizshBoneTwitchIntegration.Gui
 
             ToastEntryTimer timer = toastObj.AddComponent<ToastEntryTimer>();
             timer.BeginExpiry(DisplaySeconds, () => Remove(toastObj));
+        }
+
+        private static Color GetBorderColor(ToastType type)
+        {
+            switch (type)
+            {
+                case ToastType.Success: return SuccessBorderColor;
+                case ToastType.Error:   return ErrorBorderColor;
+                default:                return GUIManager.Instance.ValheimOrange;
+            }
         }
 
         private static void Remove(GameObject toastObj)

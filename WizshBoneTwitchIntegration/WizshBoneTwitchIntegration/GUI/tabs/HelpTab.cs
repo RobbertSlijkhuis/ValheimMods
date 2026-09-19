@@ -20,6 +20,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private Toggle m_safeZoneDebugToggle;
         private Text m_safeZoneDebugStatusText;
 
+        private ToastType m_nextToastType = ToastType.Success;
+
         private static readonly Color EnabledColor = new Color(0.95f, 0.65f, 0.2f, 1f);
 
         // ── layout constants (same 3-col card grid math as HomeTab.cs) ─────────────────────────
@@ -56,6 +58,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             BuildSafezoneUnstuckCard(CardTopCenter(0, 0));
             BuildSafezoneBoundsCard(CardTopCenter(0, 1));
+            BuildToastPreviewCard(CardTopCenter(0, 2));
 
             return m_root;
         }
@@ -115,6 +118,22 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             GuiHelper.CreateCardDescription(card, "Shows the bounds of active safezones (ships, wards, traders) in-game as a wireframe outline.", CardWidth - 24f, height: 38f);
         }
 
+        private void BuildToastPreviewCard(Vector2 topCenter)
+        {
+            GameObject card = GuiHelper.CreateCard(m_root, topCenter, CardWidth, CardHeight);
+            GuiHelper.CreateCardTitle(card, "Toast styles", CardWidth - 24f);
+            GuiHelper.CreateCardButton(card, "Show next toast", CardWidth, OnShowNextToast);
+            GuiHelper.CreateCardDescription(card, "Cycles through the success, warning and error toast styles.", CardWidth - 24f, height: 38f);
+        }
+
+        private void OnShowNextToast()
+        {
+            ToastType type = m_nextToastType;
+            m_nextToastType = (ToastType)(((int)m_nextToastType + 1) % 3);
+
+            ToastNotifications.Show($"This is a {type.ToString().ToLowerInvariant()} toast.", type);
+        }
+
         private void OnSafeZoneDebugToggled(bool value)
         {
             // Setting .Value fires configShowSafeZoneDebug.SettingChanged, which already calls
@@ -130,7 +149,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             // Clears this client's own stuck safe-zone bookkeeping (entry counter / "in safe
             // zone" flag / HUD) - never touches placed Wards, ships, or trader zones.
             TwitchSafeZone.ForceExitAllZones();
-            ToastNotifications.Show("Safezone state reset.");
+            ToastNotifications.Show("Safezone state reset.", ToastType.Success);
         }
     }
 }

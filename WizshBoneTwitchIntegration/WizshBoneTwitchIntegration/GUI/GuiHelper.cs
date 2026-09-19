@@ -359,7 +359,7 @@ namespace WizshBoneTwitchIntegration.Gui
             const float y = -60f;
             float x = -(cardWidth - 24f) / 2f + width / 2f;
 
-            GameObject btnObj = GUIManager.Instance.CreateButton(
+            GameObject btnObj = CreateButton(
                 text: text,
                 parent: card.transform,
                 anchorMin: new Vector2(0.5f, 1f),
@@ -423,11 +423,66 @@ namespace WizshBoneTwitchIntegration.Gui
         /// GUIManager.Instance.CreateButton's root GameObject carries both the Button and its
         /// Image directly, so an Outline applied there reads as a border around the button).
         /// </summary>
-        public static void AddBorder(GameObject buttonObj, Color color)
+        public static void AddBorder(GameObject buttonObj, Color color, float width = 2f)
         {
             Outline outline = buttonObj.AddComponent<Outline>();
             outline.effectColor = color;
-            outline.effectDistance = new Vector2(2f, 2f);
+            outline.effectDistance = new Vector2(width, width);
+        }
+
+        /// <summary>
+        /// Wraps <see cref="GUIManager.CreateButton"/> (same signature/defaults) so every button in
+        /// this UI automatically gets <see cref="SuppressDuplicateSelectSound"/> applied - a call
+        /// site can't forget it the way a "call the real method, then remember an extra line"
+        /// convention could. Use this instead of GUIManager.Instance.CreateButton directly.
+        /// </summary>
+        public static GameObject CreateButton(string text, Transform parent, Vector2 anchorMin, Vector2 anchorMax, Vector2 position, float width = 0f, float height = 0f)
+        {
+            GameObject buttonObj = GUIManager.Instance.CreateButton(text, parent, anchorMin, anchorMax, position, width, height);
+            SuppressDuplicateSelectSound(buttonObj);
+            return buttonObj;
+        }
+
+        /// <summary>
+        /// Silences the duplicate "select" sound Valheim's ButtonSfx component plays on top of the
+        /// normal click sound - GUIManager.ApplyButtonStyle (run internally by CreateButton) wires
+        /// both m_sfxPrefab (Button.onClick) and m_selectSfxPrefab (ISelectHandler.OnSelect, which
+        /// fires the instant a click selects the button), so every button would otherwise play two
+        /// sounds per click. Leaves m_sfxPrefab untouched. Only called from <see cref="CreateButton"/>
+        /// above.
+        /// </summary>
+        private static void SuppressDuplicateSelectSound(GameObject buttonObj)
+        {
+            if (buttonObj.TryGetComponent(out ButtonSfx buttonSfx))
+                buttonSfx.m_selectSfxPrefab = null;
+        }
+
+        /// <summary>
+        /// Wraps <see cref="GUIManager.CreateToggle"/> (same signature) so every toggle in this UI
+        /// automatically gets <see cref="AddToggleClickSound"/> applied. Use this instead of
+        /// GUIManager.Instance.CreateToggle directly.
+        /// </summary>
+        public static GameObject CreateToggle(Transform parent, float width, float height)
+        {
+            GameObject toggleObj = GUIManager.Instance.CreateToggle(parent, width, height);
+            AddToggleClickSound(toggleObj);
+            return toggleObj;
+        }
+
+        /// <summary>
+        /// Gives a toggle the same click sound a button gets - GUIManager.ApplyToogleStyle (run
+        /// internally by CreateToggle) never attaches a ButtonSfx at all, so toggles are silent by
+        /// default in both this UI and GUI_OLD (confirmed by decompiling Jotunn.dll). ButtonSfx's
+        /// m_sfxPrefab only ever fires from Button.onClick - a Toggle isn't a Button, so that path
+        /// never fires - but m_selectSfxPrefab fires from ISelectHandler.OnSelect, which every
+        /// Selectable (including Toggle) raises on click. So the toggle's one sound is wired through
+        /// m_selectSfxPrefab, reusing the same "sfx_gui_button" click prefab Jötunn uses for buttons'
+        /// own click sound, for a consistent feel. Only called from <see cref="CreateToggle"/> above.
+        /// </summary>
+        private static void AddToggleClickSound(GameObject toggleObj)
+        {
+            ButtonSfx buttonSfx = toggleObj.GetComponent<ButtonSfx>() ?? toggleObj.AddComponent<ButtonSfx>();
+            buttonSfx.m_selectSfxPrefab = PrefabManager.Cache.GetPrefab<GameObject>("sfx_gui_button");
         }
 
         /// <summary>

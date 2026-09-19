@@ -75,6 +75,8 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             if (!Directory.Exists($"{ProfilesPath}/{ActiveProfile}"))
                 CreateProfile(ActiveProfile, out _);
+
+            ProfileMigrationHelper.MigrateAllProfilesOnDisk();
         }
 
         public static bool CreateProfile(string name, out string error)

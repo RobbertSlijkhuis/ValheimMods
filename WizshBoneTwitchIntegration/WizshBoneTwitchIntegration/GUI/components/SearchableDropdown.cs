@@ -55,6 +55,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private List<DropdownOption> m_options = new List<DropdownOption>();
         private string m_value = "";
         private float m_width;
+        private bool m_showSearch = true;
 
         private GameObject m_toggleObj;
         private RectTransform m_toggleRt;
@@ -86,21 +87,26 @@ namespace WizshBoneTwitchIntegration.Gui
         }
 
         /// <summary>Builds the toggle button at <paramref name="position"/>. Returns the toggle GameObject.</summary>
-        public GameObject Build(GameObject parent, Vector2 position, float width, float height, List<string> options, string currentValue)
+        public GameObject Build(GameObject parent, Vector2 position, float width, float height, List<string> options, string currentValue, bool showSearch = true)
         {
-            return Build(parent, position, width, height, ToOptions(options), currentValue);
+            return Build(parent, position, width, height, ToOptions(options), currentValue, showSearch);
         }
 
-        /// <summary>Builds the toggle button at <paramref name="position"/>. Returns the toggle GameObject.</summary>
-        public GameObject Build(GameObject parent, Vector2 position, float width, float height, List<DropdownOption> options, string currentValue)
+        /// <summary>
+        /// Builds the toggle button at <paramref name="position"/>. Returns the toggle GameObject.
+        /// Pass <paramref name="showSearch"/> false for short option lists that don't need the
+        /// panel's search box.
+        /// </summary>
+        public GameObject Build(GameObject parent, Vector2 position, float width, float height, List<DropdownOption> options, string currentValue, bool showSearch = true)
         {
-            m_options = options ?? new List<DropdownOption>();
-            m_width   = width;
+            m_options    = options ?? new List<DropdownOption>();
+            m_width      = width;
+            m_showSearch = showSearch;
             m_value   = (!string.IsNullOrEmpty(currentValue) && m_options.Any(o => o.Value == currentValue))
                 ? currentValue
                 : (m_options.Count > 0 ? m_options[0].Value : "");
 
-            m_toggleObj = GUIManager.Instance.CreateButton(
+            m_toggleObj = GuiHelper.CreateButton(
                 text: "",
                 parent: parent.transform,
                 anchorMin: new Vector2(0.5f, 1f),
@@ -247,7 +253,8 @@ namespace WizshBoneTwitchIntegration.Gui
 
             int rowCount   = Mathf.Max(m_options.Count, 1);
             float listHeight = Mathf.Min(PanelMaxListHeight, rowCount * OptionItemHeight + Mathf.Max(0, rowCount - 1) * OptionItemSpacing);
-            float panelHeight = SearchInputHeight + PanelPadding * 3f + listHeight;
+            float searchBlockHeight = m_showSearch ? SearchInputHeight + PanelPadding : 0f;
+            float panelHeight = searchBlockHeight + PanelPadding * 2f + listHeight;
             panelRt.sizeDelta = new Vector2(m_width, panelHeight);
 
             // Same panel sprite GUIManager.ApplyDropdownStyle uses for a Dropdown's template background.
@@ -265,29 +272,32 @@ namespace WizshBoneTwitchIntegration.Gui
 
             float innerWidth = m_width - PanelPadding * 2f;
 
-            GameObject inputObj = GUIManager.Instance.CreateInputField(
-                parent: m_panelObj.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(0f, -(SearchInputHeight / 2f) - PanelPadding),
-                contentType: InputField.ContentType.Standard,
-                placeholderText: "Search...",
-                fontSize: GuiFieldBuilder.FieldFontSize,
-                width: innerWidth,
-                height: SearchInputHeight
-            );
-            m_searchInput = inputObj.GetComponent<InputField>();
-            GuiFieldBuilder.StylePlaceholder(m_searchInput);
-            m_searchInput.text = "";
-            m_searchInput.onValueChanged.AddListener(OnFilterChanged);
+            if (m_showSearch)
+            {
+                GameObject inputObj = GUIManager.Instance.CreateInputField(
+                    parent: m_panelObj.transform,
+                    anchorMin: new Vector2(0.5f, 1f),
+                    anchorMax: new Vector2(0.5f, 1f),
+                    position: new Vector2(0f, -(SearchInputHeight / 2f) - PanelPadding),
+                    contentType: InputField.ContentType.Standard,
+                    placeholderText: "Search...",
+                    fontSize: GuiFieldBuilder.FieldFontSize,
+                    width: innerWidth,
+                    height: SearchInputHeight
+                );
+                m_searchInput = inputObj.GetComponent<InputField>();
+                GuiFieldBuilder.StylePlaceholder(m_searchInput);
+                m_searchInput.text = "";
+                m_searchInput.onValueChanged.AddListener(OnFilterChanged);
+            }
 
-            float listY = -(SearchInputHeight + PanelPadding * 2f);
+            float listY = -(searchBlockHeight + PanelPadding);
             m_listContent = ScrollableList.CreateFixed(m_panelObj, "SearchableDropdown", new Vector2(0f, listY), innerWidth, listHeight);
 
             m_filteredOptions = new List<DropdownOption>(m_options);
             RefreshOptionRows();
 
-            m_searchInput.ActivateInputField();
+            m_searchInput?.ActivateInputField();
         }
 
         private void Close()

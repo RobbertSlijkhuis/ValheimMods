@@ -175,7 +175,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         {
             float centerX = cursorX + ToolbarButtonSpacing + width / 2f;
 
-            GameObject btnObj = GUIManager.Instance.CreateButton(
+            GameObject btnObj = GuiHelper.CreateButton(
                 text: text,
                 parent: m_root.transform,
                 anchorMin: new Vector2(0.5f, 1f),
@@ -418,7 +418,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             if (!created)
                 return error;
 
-            ToastNotifications.Show($"Profile '{name}' created!");
+            ToastNotifications.Show($"Profile '{name}' created!", ToastType.Success);
             RefreshList();
             return null;
         }
@@ -441,7 +441,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             if (!copied)
                 return error;
 
-            ToastNotifications.Show($"Copied '{ProfileManager.ActiveProfile}' to '{newName}'.");
+            ToastNotifications.Show($"Copied '{ProfileManager.ActiveProfile}' to '{newName}'.", ToastType.Success);
             RefreshList();
             return null;
         }
@@ -485,7 +485,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             }
             catch (Exception e)
             {
-                ToastNotifications.Show("Import failed: " + e.Message);
+                ToastNotifications.Show("Import failed: " + e.Message, ToastType.Error);
                 Jotunn.Logger.LogWarning("[WBTI] Profile import failed: " + e);
             }
         }
@@ -500,7 +500,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
                 ToastNotifications.Show(profileCreated
                     ? $"Created and imported profile '{targetName}'."
-                    : $"Updated profile '{targetName}' with imported file.");
+                    : $"Updated profile '{targetName}' with imported file.", ToastType.Success);
                 RefreshList();
                 return null;
             }
@@ -540,11 +540,11 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 bool exported = ProfileManager.ExportProfile(destPath);
                 ToastNotifications.Show(exported
                     ? $"Exported '{ProfileManager.ActiveProfile}' to {Path.GetFileName(destPath)}."
-                    : "Export failed: profile file not found.");
+                    : "Export failed: profile file not found.", exported ? ToastType.Success : ToastType.Error);
             }
             catch (Exception e)
             {
-                ToastNotifications.Show("Export failed: " + e.Message);
+                ToastNotifications.Show("Export failed: " + e.Message, ToastType.Error);
                 Jotunn.Logger.LogWarning("[WBTI] Profile export failed: " + e);
             }
         }
@@ -553,18 +553,18 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         {
             if (ZNet.instance == null || ZNet.instance.GetPeers().Count == 0)
             {
-                ToastNotifications.Show("Sync failed: no players connected.");
+                ToastNotifications.Show("Sync failed: no players connected.", ToastType.Error);
                 return;
             }
 
             if (ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile))
             {
-                ToastNotifications.Show("Only the original owner can sync this profile.");
+                ToastNotifications.Show("Only the original owner can sync this profile.", ToastType.Warning);
                 return;
             }
 
             ProfileSyncHelper.SendActiveProfileToAll();
-            ToastNotifications.Show($"Profile '{ProfileManager.ActiveProfile}' synced to all online players.");
+            ToastNotifications.Show($"Profile '{ProfileManager.ActiveProfile}' synced to all online players.", ToastType.Success);
         }
 
         private void OnReloadProfile(string name)
@@ -579,7 +579,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             ToastNotifications.Show(reloaded
                 ? $"Profile '{name}' reloaded."
-                : $"Failed to reload profile '{name}'.");
+                : $"Failed to reload profile '{name}'.", reloaded ? ToastType.Success : ToastType.Error);
         }
 
         private void OnRenameProfile(string name)
@@ -603,7 +603,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 if (!renamed)
                     return error;
 
-                ToastNotifications.Show($"Renamed '{oldName}' to '{newName}'.");
+                ToastNotifications.Show($"Renamed '{oldName}' to '{newName}'.", ToastType.Success);
                 RefreshList();
                 return null;
             }
@@ -624,7 +624,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                     bool deleted = ProfileManager.DeleteProfile(name);
                     ToastNotifications.Show(deleted
                         ? $"Profile '{name}' deleted."
-                        : $"Cannot delete profile '{name}'.");
+                        : $"Cannot delete profile '{name}'.", deleted ? ToastType.Success : ToastType.Error);
                     RefreshList();
                 }
             );

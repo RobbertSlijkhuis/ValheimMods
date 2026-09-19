@@ -130,7 +130,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             searchField.onValueChanged.AddListener(OnSearchChanged);
 
             float newBtnX = LeftEdgeX + SearchWidth + ToolbarButtonSpacing + NewViewerBtnWidth / 2f;
-            GameObject newBtnObj = GUIManager.Instance.CreateButton(
+            GameObject newBtnObj = GuiHelper.CreateButton(
                 text: "+ New viewer",
                 parent: m_root.transform,
                 anchorMin: new Vector2(0.5f, 1f),
@@ -487,7 +487,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 ExtraConfigHelper.WriteViewersConfig(viewers);
 
                 RecolorHelper.ReloadViewersConfig();
-                ToastNotifications.Show(successMessage);
+                ToastNotifications.Show(successMessage, ToastType.Success);
             }
             catch (Exception ex)
             {
@@ -499,7 +499,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                     RecolorHelper.ReloadViewersConfig();
                 }
 
-                ToastNotifications.Show("Save failed! Restored previous viewers file.");
+                ToastNotifications.Show("Save failed! Restored previous viewers file.", ToastType.Error);
             }
 
             RefreshList();

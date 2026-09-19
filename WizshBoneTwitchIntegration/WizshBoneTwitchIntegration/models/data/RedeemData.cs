@@ -31,6 +31,13 @@ namespace WizshBoneTwitchIntegration.Models
         [EditorTooltip("Cooldown of the redeem in seconds.")] 
         public int cooldown = 0;
 
+        // Display-only: which unit (see CooldownHelper) the wizard shows `cooldown` in. `cooldown`
+        // itself is always stored in seconds.
+        public string cooldownUnit = "seconds";
+
+        public int maxPerStream = 0;
+        public int maxPerUserPerStream = 0;
+
         [EditorLabel("Add condition")]
         [EditorTooltip("The global key that will enable this redeem.")]
         [GlobalKeyDropdown]

@@ -23,12 +23,13 @@ namespace WizshBoneTwitchIntegration.Gui
     {
         public const float Width = 220f;
 
-        private static readonly Color TabActiveColor = new Color(0.9f, 0.9f, 0.9f, 1f);
+        internal static readonly Color TabActiveColor = new Color(0.8f, 0.8f, 0.8f, 1f);
 
         private class TabButtonVisual
         {
             public Button Button;
             public Image Background;
+            public Text Label;
         }
 
         private static readonly ShellTab[] GeneralGroupTabs =
@@ -132,7 +133,7 @@ namespace WizshBoneTwitchIntegration.Gui
             y = CreateGroup(root, "General", GeneralGroupTabs, y, onSelectTab, isProfileGroup: false);
             y = CreateGroup(root, $"Profile: {ProfileManager.ActiveProfile}", ProfileGroupTabs, y, onSelectTab, isProfileGroup: true);
 
-            GameObject closeBtnObj = GUIManager.Instance.CreateButton(
+            GameObject closeBtnObj = GuiHelper.CreateButton(
                 text:      "Close",
                 parent:    root.transform,
                 anchorMin: new Vector2(0.5f, 0f),
@@ -218,7 +219,7 @@ namespace WizshBoneTwitchIntegration.Gui
         /// </summary>
         private TabButtonVisual CreateStockTabButton(GameObject root, ShellTab tab, float y, Action<ShellTab> onSelectTab)
         {
-            GameObject btnObj = GUIManager.Instance.CreateButton(
+            GameObject btnObj = GuiHelper.CreateButton(
                 text:      tab.Label(),
                 parent:    root.transform,
                 anchorMin: new Vector2(0.5f, 1f),
@@ -234,9 +235,12 @@ namespace WizshBoneTwitchIntegration.Gui
             if (m_tabButtons.Count == 0)
                 m_tabDefaultColor = background.color;
 
+            Text label = btnObj.GetComponentInChildren<Text>();
+            label.color = GUIManager.Instance.ValheimOrange;
+
             button.onClick.AddListener(() => onSelectTab(tab));
 
-            return new TabButtonVisual { Button = button, Background = background };
+            return new TabButtonVisual { Button = button, Background = background, Label = label };
         }
     }
 }

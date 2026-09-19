@@ -36,7 +36,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         /// <summary>
         /// Wired up by <see cref="WizshBoneShellGUI"/> right after construction (same pattern as
-        /// <see cref="HomeTab.OnNavigateToTab"/>) so the Test action can close the whole shell
+        /// <see cref="HomeTab.OnCreateRedeemRequested"/>) so the Test action can close the whole shell
         /// panel before running the redeem, matching GUI_OLD's <c>OnTestRedeem</c>.
         /// </summary>
         public Action OnCloseRequested;
@@ -65,7 +65,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private const float SearchWidth = 300f;
         private const float ToolbarButtonSpacing = 10f;
         private const float NewRedeemBtnWidth = 150f;
-        private const float ProfileDropdownWidth = 220f;
+        private const float HistoryBtnWidth = 160f;
+        private const float ProfileDropdownWidth = 180f; // narrowed from 220 to make room for the 160-wide history button
         private const float ProfileLabelWidth = 60f;
 
         // Title was far wider than any real title needs (leaving a large dead gap before Type),
@@ -171,6 +172,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             float cursor = LeftEdgeX + SearchWidth;
             CreateToolbarButton("+ New redeem", NewRedeemBtnWidth, cursor, OpenCreate);
+            cursor += ToolbarButtonSpacing + NewRedeemBtnWidth;
+            CreateToolbarButton("View history",HistoryBtnWidth, cursor, () => OnOpenHistoryRequested?.Invoke());
 
             float dropdownX = RightEdgeX - ProfileDropdownWidth / 2f;
             float labelX = dropdownX - ProfileDropdownWidth / 2f - 8f - ProfileLabelWidth / 2f;
@@ -193,7 +196,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             profileLabel.alignment = TextAnchor.MiddleRight;
 
             m_profileDropdown = new SearchableDropdown();
-            m_profileDropdown.Build(m_listRoot, new Vector2(dropdownX, ToolbarY), ProfileDropdownWidth, GuiFieldBuilder.FieldHeight, ProfileManager.GetProfiles(), ProfileManager.ActiveProfile);
+            m_profileDropdown.Build(m_listRoot, new Vector2(dropdownX, ToolbarY), ProfileDropdownWidth, GuiFieldBuilder.FieldHeight, ProfileManager.GetProfiles(), ProfileManager.ActiveProfile, showSearch: false);
             m_profileDropdown.OnValueChanged += OnProfileSelected;
         }
 
@@ -201,7 +204,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         {
             float centerX = cursorX + ToolbarButtonSpacing + width / 2f;
 
-            GameObject btnObj = GUIManager.Instance.CreateButton(
+            GameObject btnObj = GuiHelper.CreateButton(
                 text: text,
                 parent: m_listRoot.transform,
                 anchorMin: new Vector2(0.5f, 1f),
@@ -430,7 +433,12 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         // ── wizard hookup ────────────────────────────────────────────────────
 
-        private void OpenCreate()
+        /// <summary>
+        /// Called by <see cref="WizshBoneShellGUI"/> when Home's "Create a new redeem" button
+        /// navigates here (same pattern as <see cref="OnCloseRequested"/>), in addition to this
+        /// tab's own toolbar "+ New" button.
+        /// </summary>
+        public void OpenCreate()
         {
             m_listRoot.SetActive(false);
             m_redeemWizard.OpenCreate();
@@ -448,7 +456,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             RefreshList();
 
             if (toastMessage != null)
-                ToastNotifications.Show(toastMessage);
+                ToastNotifications.Show(toastMessage, ToastType.Success);
         }
 
         // ── row action handlers ─────────────────────────────────────────────
@@ -469,7 +477,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                     onConfirm:   () =>
                     {
                         RedeemManager.SetEnabled(redeem, false, out string disableError);
-                        ToastNotifications.Show(disableError ?? $"'{fullTitle}' disabled.");
+                        ToastNotifications.Show(disableError ?? $"'{fullTitle}' disabled.", disableError != null ? ToastType.Error : ToastType.Success);
                         RefreshList();
                     },
                     confirmText: "Disable",
@@ -479,7 +487,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             }
 
             RedeemManager.SetEnabled(redeem, !redeem.enabled, out string error);
-            ToastNotifications.Show(error ?? $"'{fullTitle}' {(redeem.enabled ? "enabled" : "disabled")}.");
+            ToastNotifications.Show(error ?? $"'{fullTitle}' {(redeem.enabled ? "enabled" : "disabled")}.", error != null ? ToastType.Error : ToastType.Success);
             RefreshList();
         }
 
@@ -538,14 +546,14 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 if (!copiedWithin)
                     return withinError;
 
-                ToastNotifications.Show($"Copied '{sourceFullTitle}' to '{newTitle}'.");
+                ToastNotifications.Show($"Copied '{sourceFullTitle}' to '{newTitle}'.", ToastType.Success);
                 RefreshList();
                 return null;
             }
 
             bool copied = ProfileManager.CopyRedeemToOtherProfile(redeem, targetProfile, newTitle, out string error);
             if (copied)
-                ToastNotifications.Show($"Copied '{sourceFullTitle}' to '{targetProfile}' as '{newTitle}'.");
+                ToastNotifications.Show($"Copied '{sourceFullTitle}' to '{targetProfile}' as '{newTitle}'.", ToastType.Success);
 
             return copied ? null : error;
         }
@@ -560,7 +568,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 onConfirm:   () =>
                 {
                     bool deleted = RedeemManager.DeleteRedeem(redeem, out string error);
-                    ToastNotifications.Show(deleted ? $"'{fullTitle}' removed." : error);
+                    ToastNotifications.Show(deleted ? $"'{fullTitle}' removed." : error, deleted ? ToastType.Success : ToastType.Error);
                     RefreshList();
                 },
                 confirmText: "Delete");

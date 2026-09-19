@@ -67,9 +67,18 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static ModData ReadRedeemsConfig(string path = null)
         {
+            return ReadRedeemsConfig(path, out _);
+        }
+
+        /// <param name="migrated">True if the file was in an older format and the returned data was
+        /// upgraded in memory (see ProfileMigrationHelper) - the file itself is only rewritten by
+        /// the next save.</param>
+        public static ModData ReadRedeemsConfig(string path, out bool migrated)
+        {
             path = path ?? ProfileManager.GetActiveRedeemPath();
             EnsureRedeemsFileExists(path);
             ModData data = DeserializeYaml<ModData>(path);
+            migrated = ProfileMigrationHelper.Migrate(data, path);
 
             // A profile with zero redeems/creatureGroups serializes as a bare "redeems:"/
             // "creatureGroups:" key (see WriteRedeemsConfig), which YamlDotNet deserializes back as
@@ -243,6 +252,10 @@ namespace WizshBoneTwitchIntegration.Helpers
                 .Build();
 
             var sb = new StringBuilder();
+
+            // Stamped on every save so a rewritten file is never mistaken for legacy again (and
+            // re-migrated) - see ProfileMigrationHelper.
+            sb.AppendLine($"version: {ProfileMigrationHelper.CurrentVersion}");
 
             if (settings != null)
             {

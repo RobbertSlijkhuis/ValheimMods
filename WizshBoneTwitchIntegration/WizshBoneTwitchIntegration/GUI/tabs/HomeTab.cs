@@ -36,10 +36,20 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
 
         /// <summary>
-        /// Wired up by <see cref="WizshBoneShellGUI"/> right after construction so "Create a new
-        /// redeem" can switch tabs without this class needing a reference to the shell itself.
+        /// Wired up by <see cref="WizshBoneShellGUI"/> right after construction (same "wire a
+        /// callback after construction" pattern as <see cref="RedeemsTab.OnCloseRequested"/>) so
+        /// "Create a new redeem" can switch to the Redeems tab and open its create wizard without
+        /// this class needing a reference to the shell or to <see cref="Tabs.RedeemsTab"/> itself.
         /// </summary>
-        public Action<ShellTab> OnNavigateToTab;
+        public Action OnCreateRedeemRequested;
+
+        /// <summary>
+        /// Wired up by <see cref="WizshBoneShellGUI"/> (same pattern as
+        /// <see cref="OnCreateRedeemRequested"/>), fired after the history section's Back has
+        /// restored the overview grid, so the shell can return to whichever tab the history was
+        /// opened from instead of always staying on Home.
+        /// </summary>
+        public Action OnHistoryBack;
 
         private static readonly Color EnabledColor = new Color(0.95f, 0.65f, 0.2f, 1f);
 
@@ -107,6 +117,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         {
             m_overviewRoot.SetActive(true);
             Rebuild();
+            OnHistoryBack?.Invoke();
         }
 
         private void Rebuild()
@@ -146,7 +157,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             BuildRedemptionLogCard(CardTopCenter(1, 2), customRewards);
 
-            GameObject createBtnObj = GUIManager.Instance.CreateButton(
+            GameObject createBtnObj = GuiHelper.CreateButton(
                 text: "Create a new redeem",
                 parent: m_overviewRoot.transform,
                 anchorMin: new Vector2(0.5f, 1f),
@@ -156,7 +167,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 height: 40f
             );
             createBtnObj.SetActive(true);
-            createBtnObj.GetComponent<Button>().onClick.AddListener(() => OnNavigateToTab?.Invoke(ShellTab.Redeems));
+            createBtnObj.GetComponent<Button>().onClick.AddListener(() => OnCreateRedeemRequested?.Invoke());
         }
 
         private static Vector2 CardTopCenter(int row, int col)

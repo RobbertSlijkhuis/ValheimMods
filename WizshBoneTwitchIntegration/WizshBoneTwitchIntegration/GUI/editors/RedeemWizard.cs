@@ -43,11 +43,13 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private readonly List<Image> m_stepBars = new List<Image>();
         private Text m_stepTitleText;
+        private Text m_stepDescriptionText;
 
         // Step 1
         private Text m_previewSelectedLabel;
         private Text m_previewSelectedDescription;
         private readonly Dictionary<string, (GameObject Btn, Image Bg, Text Label)> m_effectButtons = new Dictionary<string, (GameObject, Image, Text)>();
+        private Color m_typeButtonDefaultColor;
 
         // Step 2
         private Text m_step2PlaceholderText;
@@ -55,17 +57,28 @@ namespace WizshBoneTwitchIntegration.Gui
         // Step 3
         private Image m_bgColorOverlay;
         private InputField m_titleInput;
-        private Text m_prefixBadgeText;
+        private InputField m_prefixInput;
         private InputField m_descriptionInput;
         private InputField m_costInput;
         private InputField m_cooldownInput;
+        private SearchableDropdown m_cooldownUnitDropdown;
+        private InputField m_maxPerStreamInput;
+        private InputField m_maxPerUserPerStreamInput;
         private Toggle m_userInputToggle;
         private Toggle m_ignoreSafezoneToggle;
         private SearchableDropdown m_addConditionDropdown;
         private SearchableDropdown m_removeConditionDropdown;
 
+        // Title row geometry LayoutTitleRow re-derives the prefix/title input sizes from
+        private float m_titleRowLeftX;
+        private float m_titleRowWidth;
+
+        // True while PopulateStep3Fields/OnCooldownChanged write the cooldown controls
+        // themselves, so those writes don't re-enter OnCooldownChanged (and, on populate, don't
+        // round a saved cooldown down to a whole number of the shown unit).
+        private bool m_syncingCooldown;
+
         // Nav
-        private Text m_feedbackText;
         private Button m_backBtn;
         private Text m_backBtnText;
         private Button m_nextBtn;
@@ -79,18 +92,25 @@ namespace WizshBoneTwitchIntegration.Gui
 
         // ── layout constants (same derived-from-shell-size pattern as ProfilesTab.cs) ──────────
         private const float ContentWidth  = WizshBoneShellGUI.PanelWidth - ShellSidebar.Width;
+        private const float ContentHeight = WizshBoneShellGUI.PanelHeight - ShellTopBar.Height;   // 660
         private const float ContentMargin = 30f;
 
-        // BuildBackground's card used to inset only 15px (BackgroundInset); StepBarY was tuned to
-        // sit snugly against that. Now that it insets ContentMargin (30px) on every side to match
-        // the other tabs, the step bar is shifted 15px further down so it still sits inside the
-        // (now bigger) card instead of poking above it - see the identical fix in
-        // RedeemHistorySection.cs's TitleY.
-        private const float StepBarY     = -45f;
-        private const float StepBarWidth = 280f;
-        private const float StepBarHeight = 5f;
-        private const float StepBarGap   = 8f;
+        // The wizard's content sits ContentMargin from the section root's edges, like the other
+        // tabs. StepRowWidth is that full content width - the step indicator's card, and
+        // everything below it (step 1's list/preview, step 3's cards), spans it.
+        private const float StepRowWidth = ContentWidth - 2f * ContentMargin;
+        private const float StepRowLeftX = -StepRowWidth / 2f;
+
+        // The step indicator (bars + title + description) sits inside its own card, inset by
+        // StepIndicatorPadding on every side, so the bars are narrower than StepRowWidth.
+        private const float StepIndicatorPadding = 14f;
         private const int   StepBarCount = 3;
+        private const float StepBarGap   = 8f;
+        private const float StepBarHeight = 5f;
+        private const float StepBarY     = -(ContentMargin + StepIndicatorPadding + StepBarHeight / 2f);
+        private const float StepBarWidth = (StepRowWidth - 2f * StepIndicatorPadding - (StepBarCount - 1) * StepBarGap) / StepBarCount;
+        private const float StepBarsWidth = StepBarCount * StepBarWidth + (StepBarCount - 1) * StepBarGap;
+        private const float StepBarsLeftX = -StepBarsWidth / 2f;
 
         // Top edge (not center - see the PivotToTop call in BuildStepIndicator) of the step title
         // text, offset below the step bars' own bottom edge by StepTitleGap. Previously this was a
@@ -98,14 +118,18 @@ namespace WizshBoneTwitchIntegration.Gui
         // - the title text sat flush against, almost overlapping, the bar above it.
         private const float StepTitleGap = 12f;
         private const float StepTitleY   = StepBarY - StepBarHeight / 2f - StepTitleGap;
-        private const float BodyTopY     = -95f;
+        private const float StepTitleHeight = 25f;
 
-        // The step bars are centered as a row (BuildStepIndicator), independent of ContentMargin -
-        // so this, not a ContentMargin-derived LeftEdgeX, is the left edge everything in step 1
-        // (the effect list, the preview column) aligns to. Computed from the same bar geometry
-        // BuildStepIndicator itself uses, so the two can't drift apart again.
-        private const float StepRowWidth = StepBarCount * StepBarWidth + (StepBarCount - 1) * StepBarGap;
-        private const float StepRowLeftX = -StepRowWidth / 2f;
+        // One-line description directly under the step title (top-anchored like the title).
+        private const float StepDescriptionGap    = 4f;
+        private const float StepDescriptionHeight = 18f;
+        private const float StepDescriptionY      = StepTitleY - StepTitleHeight - StepDescriptionGap;
+
+        // The indicator card runs from ContentMargin down to StepIndicatorPadding below the
+        // description; the step bodies start a RowGap under it.
+        private const float StepIndicatorBottomY = StepDescriptionY - StepDescriptionHeight - StepIndicatorPadding;
+        private const float StepIndicatorHeight  = -StepIndicatorBottomY - ContentMargin;
+        private const float BodyTopY             = StepIndicatorBottomY - RowGap;
 
         private const float FieldWidth  = 460f;
         private const float RowHeight   = 36f;
@@ -114,29 +138,71 @@ namespace WizshBoneTwitchIntegration.Gui
 
         // Step 3 spans nearly the full wizard card, not the narrow FieldWidth column steps 1/2 use
         // - RedesignUI.dc.html's step-3 content sits in a `flex:1` column (own 22px padding) inside
-        // the wizard's own card, not a fixed-width centered form. Step3Padding here mirrors that
-        // 22px inset (rounded to match this file's other paddings) from the wizard card's edges
-        // (the wizard card itself is ContentWidth - 2*ContentMargin wide).
-        private const float Step3Padding = 30f;
-        private const float Step3Width   = ContentWidth - 2f * ContentMargin - 2f * Step3Padding;
+        // the wizard's own section, not a fixed-width centered form. It spans the same
+        // ContentWidth - 2*ContentMargin as the step-bar row, so the two line up exactly.
+        private const float Step3Width   = ContentWidth - 2f * ContentMargin;
 
         // Step 3's reward-preview card (BuildStep3) - swatch + title/description + points, all in
         // one card matching RedesignUI.dc.html's step-3 layout.
         private const float BoxPadding          = 14f;
         private const float BoxRowGap           = 6f;
-        private const float BoxSwatchSize       = 64f;
         private const float BoxPointsColumnWidth = 90f;
 
-        private const float TypeListWidth  = 220f;
-        private const float TypeListHeight = 380f;
-        private const float TypeBtnHeight  = 34f;
-        private const float PreviewX       = StepRowLeftX + TypeListWidth + 30f + (FieldWidth - TypeListWidth) / 2f;
+        // Same 10f-per-side text inset Jotunn's CreateInputField gives every input (text width is
+        // width - 20f), so the prefix badge's text sits as far from its border as the title's does.
+        private const float PrefixTextPadding = 20f;
+        private const float PrefixGap         = 4f;
 
-        // Also shifted +15 to clear the card's now-bigger bottom inset - see the StepBarY comment
-        // above and RedeemHistorySection.cs's matching ActionRowY fix.
-        private const float BtnY      = 55f;
+        // Step 3's cooldown, toggles and conditions cards (BuildStep3) - same padding as the
+        // preview card, with a fixed gap between the two halves of a row and a fixed-width unit
+        // dropdown beside the cooldown number.
+        // Longest typed count (points, cooldown, limits) - keeps int.Parse from overflowing.
+        private const int   CountMaxLength     = 9;
+        private const float CardColumnGap      = 20f;
+        private const float CooldownUnitWidth  = 130f;
+
+        // The conditions card's one-line description (BuildStep3) and the gap under it.
+        private const float ConditionDescriptionHeight = 20f;
+        private const float ConditionDescriptionGap    = 10f;
+
+        // A toggle's label is centered this far below the toggle's `position.y` - the same offset
+        // GuiHelper.CreateToggleStatusRow uses (toggle at -56, status word at -60) for Home's cards,
+        // so the label reads as vertically centered on the toggle graphic, not sitting under it.
+        private const float ToggleLabelYOffset = 4f;
+
+        // The type list runs from BodyTopY down to a RowGap above the Back/Next buttons' top edge,
+        // so step 1's body fills the same vertical space step 3's cards do.
+        private const float TypeListWidth  = 220f;
+        private const float TypeListHeight = ContentHeight - (BtnY + BtnHeight / 2f) - RowGap + BodyTopY;
+        private const float TypeBtnHeight  = 34f;
+
+        // The preview column spans the rest of the same row the type list and step-indicator bars
+        // already anchor to (StepRowLeftX/StepRowWidth), not the narrower FieldWidth (that's step
+        // 2's per-type *form field* width, a different, intentionally-narrow context) - previously
+        // this column was wrongly sized off FieldWidth, leaving most of the row's width unused.
+        private const float PreviewGapX   = RowGap;   // same as the vertical gaps between cards
+        private const float PreviewWidth  = StepRowWidth - TypeListWidth - PreviewGapX;
+        private const float PreviewX      = StepRowLeftX + TypeListWidth + PreviewGapX + PreviewWidth / 2f;
+
+        // Reserved space for a future per-type image/video thumbnail (no actual media yet - see
+        // PreviewImagePlaceholder in BuildStep1), sized/positioned per RedesignUI.dc.html's own
+        // step-1 preview box. The selected effect's title + description sit in a fixed-height card
+        // (same fill as step 3's cards, BoxPadding around the text) at the bottom of the column,
+        // ending level with the type list; the image placeholder takes all the height above it.
+        private const float PreviewCardHeight  = 156f;
+        private const float PreviewImageGap    = 14f; // matches RowGap's existing section-gap value
+        private const float PreviewImageHeight = TypeListHeight - PreviewCardHeight - PreviewImageGap;
+        private const float PreviewLabelTopY   = BodyTopY - PreviewImageHeight - PreviewImageGap;
+
+        private const float PreviewTextWidth  = PreviewWidth - 2f * BoxPadding;
+        private const float PreviewTextTopY   = PreviewLabelTopY - BoxPadding;
+
+        // BtnY is the buttons' center measured up from the root's bottom edge: the section's bottom
+        // margin plus half the button height, so the buttons' lower edge sits ContentMargin above
+        // the root's - see RedeemHistorySection.ActionRowY.
         private const float BtnWidth  = 160f;
         private const float BtnHeight = 44f;
+        private const float BtnY      = ContentMargin + BtnHeight / 2f;
         private const float BackBtnX  = -150f;
         private const float NextBtnX  =  150f;
 
@@ -149,7 +215,6 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             m_root = UIContainer.Create(parent, "RedeemWizard");
 
-            BuildBackground();
             BuildStepIndicator();
             BuildStep1();
             BuildStep2();
@@ -197,31 +262,13 @@ namespace WizshBoneTwitchIntegration.Gui
             OnFinished?.Invoke(toastMessage);
         }
 
-        // ── background ───────────────────────────────────────────────────────
-
-        /// <summary>
-        /// The darker inset card behind the whole wizard - missing from the original port, which
-        /// built the step bar/steps/nav row directly on the tab's own backdrop with no card of
-        /// their own. Built first so every later sibling draws on top of it. Inset by
-        /// <see cref="ContentMargin"/> on all four sides so the card sits an even distance from the
-        /// section edges. No border - a semi-transparent fill alone is enough to separate it.
-        /// </summary>
-        private void BuildBackground()
-        {
-            GameObject background = GuiHelper.CreateRegion(
-                m_root, "Background",
-                anchorMin: Vector2.zero,
-                anchorMax: Vector2.one,
-                offsetMin: new Vector2(ContentMargin, ContentMargin),
-                offsetMax: new Vector2(-ContentMargin, -ContentMargin));
-            GuiHelper.AddBackground(background, new Color(0f, 0f, 0f, 0.6f));
-        }
-
         // ── step indicator / title ──────────────────────────────────────────
 
         private void BuildStepIndicator()
         {
-            float startX = StepRowLeftX + StepBarWidth / 2f;
+            GuiHelper.CreateCard(m_root, new Vector2(0f, -ContentMargin), StepRowWidth, StepIndicatorHeight);
+
+            float startX = StepBarsLeftX + StepBarWidth / 2f;
 
             for (int i = 0; i < StepBarCount; i++)
             {
@@ -251,11 +298,29 @@ namespace WizshBoneTwitchIntegration.Gui
                 outline: true,
                 outlineColor: Color.black,
                 width: ContentWidth - 2f * ContentMargin,
-                height: 25f,
+                height: StepTitleHeight,
                 addContentSizeFitter: false
             ).GetComponent<Text>();
             m_stepTitleText.alignment = TextAnchor.MiddleCenter;
             GuiHelper.PivotToTop(m_stepTitleText.rectTransform, StepTitleY);
+
+            m_stepDescriptionText = GUIManager.Instance.CreateText(
+                text: "",
+                parent: m_root.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(0f, StepDescriptionY),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: 13,
+                color: GUIManager.Instance.ValheimBeige,
+                outline: true,
+                outlineColor: Color.black,
+                width: ContentWidth - 2f * ContentMargin,
+                height: StepDescriptionHeight,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+            m_stepDescriptionText.alignment = TextAnchor.MiddleCenter;
+            GuiHelper.PivotToTop(m_stepDescriptionText.rectTransform, StepDescriptionY);
         }
 
         private void RefreshStepIndicator()
@@ -271,7 +336,16 @@ namespace WizshBoneTwitchIntegration.Gui
             }
 
             string[] titles = { "", "CHOOSE AN EFFECT", "CONFIGURE PARAMETERS", "SETUP CHANNEL POINT REWARD" };
-            m_stepTitleText.text = m_step >= 1 && m_step <= 3 ? titles[m_step] : "";
+            string[] descriptions =
+            {
+                "",
+                "Pick what happens in the game when a viewer redeems this reward.",
+                "Adjust how the chosen effect behaves.",
+                "Set how the reward looks on Twitch and how often it can be redeemed."
+            };
+            bool validStep = m_step >= 1 && m_step <= 3;
+            m_stepTitleText.text = validStep ? titles[m_step] : "";
+            m_stepDescriptionText.text = validStep ? descriptions[m_step] : "";
         }
 
         // ── step 1: choose effect ────────────────────────────────────────────
@@ -290,7 +364,7 @@ namespace WizshBoneTwitchIntegration.Gui
             {
                 string capturedType = info.Type;
 
-                GameObject btnObj = GUIManager.Instance.CreateButton(
+                GameObject btnObj = GuiHelper.CreateButton(
                     text: info.Label,
                     parent: listContent.transform,
                     anchorMin: new Vector2(0.5f, 1f),
@@ -302,8 +376,13 @@ namespace WizshBoneTwitchIntegration.Gui
                 btnObj.SetActive(true);
 
                 Image bg = btnObj.GetComponent<Image>();
+                if (m_effectButtons.Count == 0)
+                    m_typeButtonDefaultColor = bg.color;
                 Text label = btnObj.GetComponentInChildren<Text>();
+                label.color = GUIManager.Instance.ValheimOrange;
                 label.alignment = TextAnchor.MiddleLeft;
+                RectTransform labelRt = label.rectTransform;
+                labelRt.offsetMin = new Vector2(labelRt.offsetMin.x + ListRow.LeftPadding, labelRt.offsetMin.y);
 
                 btnObj.GetComponent<Button>().onClick.AddListener(() =>
                 {
@@ -319,47 +398,69 @@ namespace WizshBoneTwitchIntegration.Gui
 
             ScrollableList.SetContentHeight(listContent, Mathf.Abs(yOffset));
 
+            // Reserved space for a future per-type image/video thumbnail - no media exists yet, so
+            // this is just a flat placeholder in the scrollbar track's own dark shade.
+            GameObject previewImagePlaceholder = new GameObject("PreviewImagePlaceholder");
+            previewImagePlaceholder.transform.SetParent(m_step1Root.transform, false);
+
+            RectTransform previewImageRt = previewImagePlaceholder.AddComponent<RectTransform>();
+            previewImageRt.anchorMin = new Vector2(0.5f, 1f);
+            previewImageRt.anchorMax = new Vector2(0.5f, 1f);
+            previewImageRt.pivot = new Vector2(0.5f, 1f);
+            previewImageRt.sizeDelta = new Vector2(PreviewWidth, PreviewImageHeight);
+            previewImageRt.anchoredPosition = new Vector2(PreviewX, BodyTopY);
+
+            Image previewImageBg = previewImagePlaceholder.AddComponent<Image>();
+            // Fully opaque here, unlike ScrollableList.TrackColor's own alpha - that field stays
+            // translucent for the real scrollbar track, this placeholder just reuses its RGB.
+            Color trackColor = ScrollableList.TrackColor;
+            previewImageBg.color = new Color(trackColor.r, trackColor.g, trackColor.b, 1f);
+
+            // Built before the two texts below (siblings draw in creation order), so the card sits
+            // behind them.
+            GuiHelper.CreateCard(m_step1Root, new Vector2(PreviewX, PreviewLabelTopY), PreviewWidth, PreviewCardHeight);
+
             m_previewSelectedLabel = GUIManager.Instance.CreateText(
                 text: "",
                 parent: m_step1Root.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(PreviewX, BodyTopY),
+                position: new Vector2(PreviewX, PreviewTextTopY),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 16,
                 color: GUIManager.Instance.ValheimOrange,
                 outline: true,
                 outlineColor: Color.black,
-                width: FieldWidth - TypeListWidth,
+                width: PreviewTextWidth,
                 height: 26f,
                 addContentSizeFitter: false
             ).GetComponent<Text>();
             m_previewSelectedLabel.alignment = TextAnchor.MiddleLeft;
             // Both this and m_previewSelectedDescription below default to a center pivot, so
             // without re-pivoting, each one's box extends both above AND below its given Y - at
-            // BodyTopY and BodyTopY - 40f respectively, that put the label's bottom half and the
-            // description's top half on top of each other. PivotToTop makes BodyTopY the label's
-            // top edge instead, so it only grows downward from there.
-            GuiHelper.PivotToTop(m_previewSelectedLabel.rectTransform, BodyTopY);
+            // PreviewTextTopY and PreviewTextTopY - 40f respectively, that put the label's bottom
+            // half and the description's top half on top of each other. PivotToTop makes
+            // PreviewTextTopY the label's top edge instead, so it only grows downward from there.
+            GuiHelper.PivotToTop(m_previewSelectedLabel.rectTransform, PreviewTextTopY);
 
             m_previewSelectedDescription = GUIManager.Instance.CreateText(
                 text: "",
                 parent: m_step1Root.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(PreviewX, BodyTopY - 40f),
+                position: new Vector2(PreviewX, PreviewTextTopY - 40f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 13,
                 color: GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
-                width: FieldWidth - TypeListWidth,
+                width: PreviewTextWidth,
                 height: 100f,
                 addContentSizeFitter: false
             ).GetComponent<Text>();
             m_previewSelectedDescription.alignment = TextAnchor.UpperLeft;
             m_previewSelectedDescription.horizontalOverflow = HorizontalWrapMode.Wrap;
-            GuiHelper.MakeDescriptionExpandDownward(m_previewSelectedDescription, BodyTopY - 40f);
+            GuiHelper.MakeDescriptionExpandDownward(m_previewSelectedDescription, PreviewTextTopY - 40f);
         }
 
         private void RefreshStep1Selection()
@@ -369,8 +470,7 @@ namespace WizshBoneTwitchIntegration.Gui
             foreach (var kvp in m_effectButtons)
             {
                 bool selected = hasType && kvp.Key == m_working.type;
-                kvp.Value.Bg.color = selected ? new Color(0.95f, 0.65f, 0.2f, 0.35f) : new Color(1f, 1f, 1f, 0.08f);
-                kvp.Value.Label.color = selected ? GUIManager.Instance.ValheimOrange : GUIManager.Instance.ValheimBeige;
+                kvp.Value.Bg.color = selected ? ShellSidebar.TabActiveColor : m_typeButtonDefaultColor;
             }
 
             m_previewSelectedLabel.text = hasType ? RedeemEffectCatalog.LabelFor(m_working.type) : "Choose an effect from the list";
@@ -424,114 +524,214 @@ namespace WizshBoneTwitchIntegration.Gui
             float y = BodyTopY;
 
             // Reward preview card - color swatch + title/description column + points column, all
-            // in one dark card, matching RedesignUI.dc.html's step-3 "live preview tile" (no
-            // separate "Background color"/"Title"/"Description" captions - the fields' own
-            // styling/placement already reads as a preview of the actual Twitch reward tile).
+            // in one dark card, matching RedesignUI.dc.html's step-3 "live preview tile". One label
+            // row on top ("Color" / "Title and description" / "Points"), same label style as the
+            // cooldown/rest cards below; the content rows start under it at contentTopY.
+            float labelRowY = -BoxPadding;
+            float contentTopY = labelRowY - LabelHeight;
             float boxContentHeight = 2f * RowHeight + BoxRowGap;
-            float boxHeight = 2f * BoxPadding + boxContentHeight;
+            float boxHeight = 2f * BoxPadding + LabelHeight + boxContentHeight;
             GameObject rewardBox = GuiHelper.CreateCard(m_step3Root, new Vector2(0f, y), Step3Width, boxHeight);
 
             // Swatch - PopulateStep3Fields keeps its overlay in sync with m_working.backgroundColor
             // on every step-3 entry (the picker's own onChanged callback keeps m_working in sync
             // the other way).
-            float swatchX = -Step3Width / 2f + BoxPadding + BoxSwatchSize / 2f;
-            float swatchY = -BoxPadding - BoxSwatchSize / 2f;
-            GameObject bgSwatch = GuiFieldBuilder.CreateColorField(rewardBox, new Vector2(swatchX, swatchY), BoxSwatchSize, "#a970ff", "Redeem background color", v => m_working.backgroundColor = v, BoxSwatchSize);
+            // Square sized to span both stacked inputs (title row + gap + description row), so its
+            // top/bottom edges line up with them.
+            float swatchSize = boxContentHeight;
+            float swatchX = -Step3Width / 2f + BoxPadding + swatchSize / 2f;
+            float swatchY = contentTopY - swatchSize / 2f;
+            GameObject bgSwatch = GuiFieldBuilder.CreateColorField(rewardBox, new Vector2(swatchX, swatchY), swatchSize, "#a970ff", "Redeem background color", v => m_working.backgroundColor = v, swatchSize);
             m_bgColorOverlay = bgSwatch.transform.Find("ColorOverlay").GetComponent<Image>();
 
             // Points column - flush with the box's right edge, top-aligned with the title row.
             float pointsX = Step3Width / 2f - BoxPadding - BoxPointsColumnWidth / 2f;
-            float pointsInputY = -BoxPadding - RowHeight / 2f;
-            m_costInput = GuiFieldBuilder.CreateIntField(rewardBox, new Vector2(pointsX, pointsInputY), BoxPointsColumnWidth - 10f, 0, v => m_working.points = v);
-            Text pointsCaption = GUIManager.Instance.CreateText(
-                text: "points",
-                parent: rewardBox.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(pointsX, pointsInputY - RowHeight / 2f - 10f),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 10,
-                color: GUIManager.Instance.ValheimBeige,
-                outline: true,
-                outlineColor: Color.black,
-                width: BoxPointsColumnWidth,
-                height: 16f,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-            pointsCaption.alignment = TextAnchor.MiddleCenter;
+            float pointsInputY = contentTopY - RowHeight / 2f;
+            m_costInput = GuiFieldBuilder.CreateIntField(rewardBox, new Vector2(pointsX, pointsInputY), BoxPointsColumnWidth, 0, v => m_working.points = Mathf.Max(0, v), emptyAsZero: true, maxLength: CountMaxLength);
 
             // Middle column: title row (prefix badge + input), description row directly beneath it.
-            float middleLeftX = swatchX + BoxSwatchSize / 2f + BoxPadding;
+            float middleLeftX = swatchX + swatchSize / 2f + BoxPadding;
             float middleRightX = pointsX - BoxPointsColumnWidth / 2f - BoxPadding;
             float middleWidth = middleRightX - middleLeftX;
             float middleCenterX = (middleLeftX + middleRightX) / 2f;
 
-            float titleRowY = -BoxPadding - RowHeight / 2f;
-            float prefixWidth = 90f;
-            m_prefixBadgeText = GUIManager.Instance.CreateText(
-                text: "",
-                parent: rewardBox.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(middleLeftX + prefixWidth / 2f, titleRowY),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: GuiFieldBuilder.FieldFontSize,
-                color: GUIManager.Instance.ValheimBeige,
-                outline: true,
-                outlineColor: Color.black,
-                width: prefixWidth,
-                height: RowHeight,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-            m_prefixBadgeText.alignment = TextAnchor.MiddleCenter;
+            CreateRowLabel(rewardBox, "Color", labelRowY, swatchSize, swatchX);
+            CreateRowLabel(rewardBox, "Title and description", labelRowY, middleWidth, middleCenterX);
+            CreateRowLabel(rewardBox, "Points", labelRowY, BoxPointsColumnWidth, pointsX);
 
-            float titleInputWidth = middleWidth - prefixWidth - 10f;
-            float titleInputX = middleLeftX + prefixWidth + 10f + titleInputWidth / 2f;
-            m_titleInput = GuiFieldBuilder.CreateInputField(rewardBox, new Vector2(titleInputX, titleRowY), titleInputWidth, placeholderText: "Reward title");
+            float titleRowY = contentTopY - RowHeight / 2f;
+            m_titleRowLeftX = middleLeftX;
+            m_titleRowWidth = middleWidth;
+
+            // Prefix: a disabled-looking input sitting directly in front of the title input. Both
+            // are created at placeholder sizes here and sized for real by LayoutTitleRow, which
+            // also re-runs whenever step 3 is entered (the prefix can differ per profile).
+            m_prefixInput = GuiFieldBuilder.CreateInputField(rewardBox, new Vector2(middleLeftX, titleRowY), 100f);
+            m_prefixInput.interactable = false;
+            m_prefixInput.textComponent.alignment = TextAnchor.MiddleCenter;
+
+            m_titleInput = GuiFieldBuilder.CreateInputField(rewardBox, new Vector2(middleCenterX, titleRowY), middleWidth, placeholderText: "Reward title");
             m_titleInput.onValueChanged.AddListener(OnTitleInputChanged);
+            LayoutTitleRow();
 
             float descriptionRowY = titleRowY - RowHeight - BoxRowGap;
-            m_descriptionInput = GuiFieldBuilder.CreateInputField(rewardBox, new Vector2(middleCenterX, descriptionRowY), middleWidth, placeholderText: "Shown to viewers when they open the reward");
+            m_descriptionInput = GuiFieldBuilder.CreateInputField(rewardBox, new Vector2(middleCenterX, descriptionRowY), middleWidth, placeholderText: "Description shown to viewers when they open the reward");
             m_descriptionInput.onValueChanged.AddListener(v => m_working.description = v);
 
             y -= boxHeight + RowGap;
 
-            // Cooldown + toggles, one row: cooldown alone on the left half, both toggles side by
-            // side on the right half (matches RedesignUI.dc.html's Row A) - now that step 3 spans
-            // the full card width, each toggle+label slot has enough room to not need stacking.
-            float halfWidth = (Step3Width - 20f) / 2f;
-            float leftHalfX = -Step3Width / 2f + halfWidth / 2f;
-            float rightHalfX = Step3Width / 2f - halfWidth / 2f;
+            // Both cards below share the same two-column grid inside their own BoxPadding inset.
+            float halfWidth = (Step3Width - 2f * BoxPadding - CardColumnGap) / 2f;
+            float leftHalfX = -Step3Width / 2f + BoxPadding + halfWidth / 2f;
+            float rightHalfX = Step3Width / 2f - BoxPadding - halfWidth / 2f;
 
-            CreateRowLabel(m_step3Root, "Cooldown (sec)", y, halfWidth, leftHalfX);
-            m_cooldownInput = GuiFieldBuilder.CreateIntField(m_step3Root, new Vector2(leftHalfX, y - LabelHeight), halfWidth, 0, v => m_working.cooldown = v);
-            GuiHelper.PivotToTop((RectTransform)m_cooldownInput.transform, y - LabelHeight);
+            // Cooldown card: one row of three equal columns - cooldown (number + unit dropdown),
+            // limit per stream, limit per user per stream. 0/empty means "off" for all three
+            // (SetRewards only enables the Twitch-side flag for values above 0).
+            float cooldownCardHeight = 2f * BoxPadding + LabelHeight + RowHeight;
+            GameObject cooldownCard = GuiHelper.CreateCard(m_step3Root, new Vector2(0f, y), Step3Width, cooldownCardHeight);
 
-            float toggleRowY = y - LabelHeight; // align with the cooldown input, not its label
-            float quarterWidth = halfWidth / 2f;
-            float toggle1X = rightHalfX - quarterWidth / 2f;
-            float toggle2X = rightHalfX + quarterWidth / 2f;
-            m_userInputToggle = GuiFieldBuilder.CreateBoolField(m_step3Root, new Vector2(toggle1X, toggleRowY), quarterWidth, false, v => m_working.userInput = v);
-            CreateInlineToggleLabel(m_step3Root, "Requires viewer input", toggle1X, quarterWidth, toggleRowY);
-            m_ignoreSafezoneToggle = GuiFieldBuilder.CreateBoolField(m_step3Root, new Vector2(toggle2X, toggleRowY), quarterWidth, false, v => m_working.ignoreWard = v);
-            CreateInlineToggleLabel(m_step3Root, "Ignore safezone", toggle2X, quarterWidth, toggleRowY);
+            float thirdWidth = (Step3Width - 2f * BoxPadding - 2f * CardColumnGap) / 3f;
+            float firstThirdX = -Step3Width / 2f + BoxPadding + thirdWidth / 2f;
+            float secondThirdX = firstThirdX + thirdWidth + CardColumnGap;
+            float thirdThirdX = secondThirdX + thirdWidth + CardColumnGap;
 
-            y -= LabelHeight + RowHeight + RowGap;
+            float cooldownRowY = -BoxPadding;
+            CreateRowLabel(cooldownCard, "Cooldown", cooldownRowY, thirdWidth, firstThirdX);
+
+            float cooldownNumberWidth = thirdWidth - CooldownUnitWidth - BoxRowGap;
+            float cooldownNumberX = firstThirdX - thirdWidth / 2f + cooldownNumberWidth / 2f;
+            float cooldownUnitX = firstThirdX + thirdWidth / 2f - CooldownUnitWidth / 2f;
+
+            m_cooldownInput = GuiFieldBuilder.CreateIntField(cooldownCard, new Vector2(cooldownNumberX, cooldownRowY - LabelHeight), cooldownNumberWidth, 0, _ => OnCooldownChanged(), emptyAsZero: true, maxLength: CountMaxLength);
+            GuiHelper.PivotToTop((RectTransform)m_cooldownInput.transform, cooldownRowY - LabelHeight);
+
+            m_cooldownUnitDropdown = new SearchableDropdown();
+            GameObject cooldownUnitToggle = m_cooldownUnitDropdown.Build(cooldownCard, new Vector2(cooldownUnitX, cooldownRowY - LabelHeight), CooldownUnitWidth, GuiFieldBuilder.FieldHeight, GetCooldownUnitOptions(), CooldownHelper.Seconds, showSearch: false);
+            GuiHelper.PivotToTop((RectTransform)cooldownUnitToggle.transform, cooldownRowY - LabelHeight);
+            m_cooldownUnitDropdown.OnValueChanged += _ => OnCooldownChanged();
+
+            CreateRowLabel(cooldownCard, "Limit per stream", cooldownRowY, thirdWidth, secondThirdX);
+            CreateRowLabel(cooldownCard, "Limit per user per stream", cooldownRowY, thirdWidth, thirdThirdX);
+            m_maxPerStreamInput = GuiFieldBuilder.CreateIntField(cooldownCard, new Vector2(secondThirdX, cooldownRowY - LabelHeight), thirdWidth, 0, v => m_working.maxPerStream = Mathf.Max(0, v), emptyAsZero: true, maxLength: CountMaxLength);
+            GuiHelper.PivotToTop((RectTransform)m_maxPerStreamInput.transform, cooldownRowY - LabelHeight);
+            m_maxPerUserPerStreamInput = GuiFieldBuilder.CreateIntField(cooldownCard, new Vector2(thirdThirdX, cooldownRowY - LabelHeight), thirdWidth, 0, v => m_working.maxPerUserPerStream = Mathf.Max(0, v), emptyAsZero: true, maxLength: CountMaxLength);
+            GuiHelper.PivotToTop((RectTransform)m_maxPerUserPerStreamInput.transform, cooldownRowY - LabelHeight);
+
+            y -= cooldownCardHeight + RowGap;
+
+            // Conditions card: a one-line description on top, then the add/remove condition
+            // dropdowns. Single line only - the card's height is fixed, and a description that
+            // wrapped would be dropped entirely by Unity's vertical-truncate on a too-short box.
+            float conditionCardHeight = 2f * BoxPadding + ConditionDescriptionHeight + ConditionDescriptionGap + LabelHeight + RowHeight;
+            GameObject conditionCard = GuiHelper.CreateCard(m_step3Root, new Vector2(0f, y), Step3Width, conditionCardHeight);
+
+            GuiHelper.CreateCardDescription(
+                conditionCard,
+                "Offer this redeem only once the add key is set, and hide it once the remove key is set. Both are optional.",
+                -BoxPadding, Step3Width - 2f * BoxPadding, ConditionDescriptionHeight);
+
+            float conditionRowY = -(BoxPadding + ConditionDescriptionHeight + ConditionDescriptionGap);
 
             // Add / remove condition - dropdowns over Valheim's global keys, matching GUI_OLD's
             // FieldUIBuilder.BuildStringDropdownField wiring: OnValueChanged writes straight into
             // m_working, and PopulateStep3Fields re-syncs the displayed value/options every time
             // step 3 is (re-)entered.
-            CreateRowLabel(m_step3Root, "Add condition", y, halfWidth, leftHalfX);
-            CreateRowLabel(m_step3Root, "Remove condition", y, halfWidth, rightHalfX);
+            CreateRowLabel(conditionCard, "Add condition", conditionRowY, halfWidth, leftHalfX);
+            CreateRowLabel(conditionCard, "Remove condition", conditionRowY, halfWidth, rightHalfX);
             m_addConditionDropdown = new SearchableDropdown();
-            GameObject addConditionToggle = m_addConditionDropdown.Build(m_step3Root, new Vector2(leftHalfX, y - LabelHeight), halfWidth, GuiFieldBuilder.FieldHeight, GetAvailableGlobalKeyOptions(), "");
-            GuiHelper.PivotToTop((RectTransform)addConditionToggle.transform, y - LabelHeight);
+            GameObject addConditionToggle = m_addConditionDropdown.Build(conditionCard, new Vector2(leftHalfX, conditionRowY - LabelHeight), halfWidth, GuiFieldBuilder.FieldHeight, GetAvailableGlobalKeyOptions(), "");
+            GuiHelper.PivotToTop((RectTransform)addConditionToggle.transform, conditionRowY - LabelHeight);
             m_addConditionDropdown.OnValueChanged += v => m_working.globalKeyAdd = v;
             m_removeConditionDropdown = new SearchableDropdown();
-            GameObject removeConditionToggle = m_removeConditionDropdown.Build(m_step3Root, new Vector2(rightHalfX, y - LabelHeight), halfWidth, GuiFieldBuilder.FieldHeight, GetAvailableGlobalKeyOptions(), "");
-            GuiHelper.PivotToTop((RectTransform)removeConditionToggle.transform, y - LabelHeight);
+            GameObject removeConditionToggle = m_removeConditionDropdown.Build(conditionCard, new Vector2(rightHalfX, conditionRowY - LabelHeight), halfWidth, GuiFieldBuilder.FieldHeight, GetAvailableGlobalKeyOptions(), "");
+            GuiHelper.PivotToTop((RectTransform)removeConditionToggle.transform, conditionRowY - LabelHeight);
             m_removeConditionDropdown.OnValueChanged += v => m_working.globalKeyRemove = v;
+
+            y -= conditionCardHeight + RowGap;
+
+            // Toggles card: the two toggles, one per column (no label above them, so the row
+            // starts at the card's top padding).
+            float toggleCardHeight = 2f * BoxPadding + RowHeight;
+            GameObject toggleCard = GuiHelper.CreateCard(m_step3Root, new Vector2(0f, y), Step3Width, toggleCardHeight);
+
+            // GuiFieldBuilder.CreateBoolField's `position.y` is NOT the toggle graphic's center: the
+            // circle's center ends up ~1px below it (root at y - FieldHeight/4, circle 8px above
+            // the root's center). So pass the row's center + 1 to put the circle - and the label
+            // beside it - in the vertical middle of the row (BoxPadding above and below).
+            float toggleRowY = -(BoxPadding + RowHeight / 2f) + 1f;
+            m_userInputToggle = GuiFieldBuilder.CreateBoolField(toggleCard, new Vector2(leftHalfX, toggleRowY), halfWidth, false, v => m_working.userInput = v);
+            CreateInlineToggleLabel(toggleCard, "Requires viewer input", leftHalfX, halfWidth, toggleRowY);
+            m_ignoreSafezoneToggle = GuiFieldBuilder.CreateBoolField(toggleCard, new Vector2(rightHalfX, toggleRowY), halfWidth, false, v => m_working.ignoreWard = v);
+            CreateInlineToggleLabel(toggleCard, "Ignore safezone", rightHalfX, halfWidth, toggleRowY);
+        }
+
+        /// <summary>
+        /// Sizes the prefix badge to the current profile's actual prefix (measured with the
+        /// input's own font, plus <see cref="PrefixTextPadding"/>) and gives the title input the
+        /// rest of the middle column. Re-run on every step-3 entry because the prefix can differ
+        /// per profile; an empty prefix hides the badge and its gap entirely.
+        /// </summary>
+        private void LayoutTitleRow()
+        {
+            string prefix = ProfileSettingsHelper.Current.redeemTitlePrefix ?? "";
+            bool hasPrefix = prefix.Length > 0;
+            m_prefixInput.gameObject.SetActive(hasPrefix);
+
+            float prefixWidth = 0f;
+            float gap = 0f;
+            if (hasPrefix)
+            {
+                Text prefixText = m_prefixInput.textComponent;
+                float textWidth = prefixText.cachedTextGenerator.GetPreferredWidth(prefix, prefixText.GetGenerationSettings(Vector2.zero)) / prefixText.pixelsPerUnit;
+                prefixWidth = Mathf.Round(Mathf.Ceil(textWidth) + PrefixTextPadding);
+                gap = PrefixGap;
+
+                RectTransform prefixRt = (RectTransform)m_prefixInput.transform;
+                prefixRt.sizeDelta = new Vector2(prefixWidth, prefixRt.sizeDelta.y);
+                prefixRt.anchoredPosition = new Vector2(Mathf.Round(m_titleRowLeftX + prefixWidth / 2f), prefixRt.anchoredPosition.y);
+            }
+
+            float titleWidth = Mathf.Round(m_titleRowWidth - prefixWidth - gap);
+            RectTransform titleRt = (RectTransform)m_titleInput.transform;
+            titleRt.sizeDelta = new Vector2(titleWidth, titleRt.sizeDelta.y);
+            titleRt.anchoredPosition = new Vector2(Mathf.Round(m_titleRowLeftX + prefixWidth + gap + titleWidth / 2f), titleRt.anchoredPosition.y);
+        }
+
+        private static int ParseCount(string text)
+        {
+            return int.TryParse(text, out int value) ? Mathf.Max(0, value) : 0;
+        }
+
+        private static List<DropdownOption> GetCooldownUnitOptions()
+        {
+            return CooldownHelper.Units.Select(u => new DropdownOption(u, CooldownHelper.Label(u))).ToList();
+        }
+
+        /// <summary>
+        /// Recomputes <see cref="RedeemData.cooldown"/> (seconds) from the shown number and unit.
+        /// If that exceeds the cap the field snaps back to the largest allowed number for the
+        /// unit, so the user sees the clamp.
+        /// </summary>
+        private void OnCooldownChanged()
+        {
+            if (m_syncingCooldown)
+                return;
+
+            string unit = m_cooldownUnitDropdown.Value;
+            int value = ParseCount(m_cooldownInput.text);
+            int seconds = CooldownHelper.ToSeconds(value, unit);
+
+            m_working.cooldown = seconds;
+            m_working.cooldownUnit = unit;
+
+            int shown = CooldownHelper.FromSeconds(seconds, unit);
+            if (shown != value)
+            {
+                m_syncingCooldown = true;
+                m_cooldownInput.text = shown.ToString();
+                m_syncingCooldown = false;
+            }
         }
 
         /// <summary>
@@ -615,44 +815,35 @@ namespace WizshBoneTwitchIntegration.Gui
             if (ColorUtility.TryParseHtmlString(m_working.backgroundColor, out Color bgColor))
                 m_bgColorOverlay.color = bgColor;
 
-            m_prefixBadgeText.text = ProfileSettingsHelper.Current.redeemTitlePrefix ?? "";
+            m_prefixInput.text = ProfileSettingsHelper.Current.redeemTitlePrefix ?? "";
+            LayoutTitleRow();
 
             // m_working.title is normalized to prefix-free by OpenEdit/OnTitleInputChanged, but
             // strip again defensively (StripKnownPrefix is a no-op if there's nothing to strip).
             m_titleInput.text = StripKnownPrefix(m_working.title);
             m_descriptionInput.text = m_working.description ?? "";
             m_costInput.text = m_working.points.ToString();
-            m_cooldownInput.text = m_working.cooldown.ToString();
+
+            m_syncingCooldown = true;
+            m_cooldownUnitDropdown.SetOptions(GetCooldownUnitOptions(), m_working.cooldownUnit ?? CooldownHelper.Seconds);
+            m_cooldownInput.text = m_working.cooldown > 0
+                ? CooldownHelper.FromSeconds(m_working.cooldown, m_cooldownUnitDropdown.Value).ToString()
+                : "0";
+            m_syncingCooldown = false;
+            m_maxPerStreamInput.text = Mathf.Max(0, m_working.maxPerStream).ToString();
+            m_maxPerUserPerStreamInput.text = Mathf.Max(0, m_working.maxPerUserPerStream).ToString();
+
             m_userInputToggle.isOn = m_working.userInput;
             m_ignoreSafezoneToggle.isOn = m_working.ignoreWard;
             m_addConditionDropdown.SetOptions(EnsureIncludesCurrentValue(GetAvailableGlobalKeyOptions(), m_working.globalKeyAdd), m_working.globalKeyAdd ?? "");
             m_removeConditionDropdown.SetOptions(EnsureIncludesCurrentValue(GetAvailableGlobalKeyOptions(), m_working.globalKeyRemove), m_working.globalKeyRemove ?? "");
-
-            m_feedbackText.text = "";
         }
 
         // ── nav row ───────────────────────────────────────────────────────
 
         private void BuildNavRow()
         {
-            m_feedbackText = GUIManager.Instance.CreateText(
-                text: "",
-                parent: m_root.transform,
-                anchorMin: new Vector2(0.5f, 0f),
-                anchorMax: new Vector2(0.5f, 0f),
-                position: new Vector2(0f, BtnY + 40f),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: GuiFieldBuilder.FieldFontSize,
-                color: GUIManager.Instance.ValheimYellow,
-                outline: true,
-                outlineColor: Color.black,
-                width: ContentWidth - 2f * ContentMargin,
-                height: 24f,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-            m_feedbackText.alignment = TextAnchor.MiddleCenter;
-
-            GameObject backBtnObj = GUIManager.Instance.CreateButton(
+            GameObject backBtnObj = GuiHelper.CreateButton(
                 text: "Back",
                 parent: m_root.transform,
                 anchorMin: new Vector2(0.5f, 0f),
@@ -666,7 +857,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_backBtnText = backBtnObj.GetComponentInChildren<Text>();
             m_backBtn.onClick.AddListener(OnBack);
 
-            GameObject nextBtnObj = GUIManager.Instance.CreateButton(
+            GameObject nextBtnObj = GuiHelper.CreateButton(
                 text: "Next",
                 parent: m_root.transform,
                 anchorMin: new Vector2(0.5f, 0f),
@@ -711,7 +902,7 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             if (string.IsNullOrEmpty(m_titleInput.text.Trim()))
             {
-                m_feedbackText.text = "Title is required.";
+                ToastNotifications.Show("Title is required.", ToastType.Warning);
                 return;
             }
 
@@ -734,7 +925,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             if (!success)
             {
-                m_feedbackText.text = error;
+                ToastNotifications.Show(error, ToastType.Error);
                 return;
             }
 
@@ -815,7 +1006,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 // Rounded to whole pixels - labelWidth/labelX above can land on a half-pixel (e.g.
                 // an odd labelWidth halved for centering), and legacy uGUI Text doesn't pixel-snap
                 // (see GuiHelper's CreateCard/CreateCardText for the same fix).
-                position: new Vector2(Mathf.Round(labelX), Mathf.Round(y - RowHeight / 4f)),
+                position: new Vector2(Mathf.Round(labelX), Mathf.Round(y - ToggleLabelYOffset)),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: GuiFieldBuilder.FieldFontSize,
                 color: GUIManager.Instance.ValheimBeige,

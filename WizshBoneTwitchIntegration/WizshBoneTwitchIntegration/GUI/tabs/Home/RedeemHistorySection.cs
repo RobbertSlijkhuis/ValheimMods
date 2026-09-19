@@ -68,45 +68,49 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float ContentHeight = WizshBoneShellGUI.PanelHeight - ShellTopBar.Height;  // 660
         private const float ContentMargin = 30f;
 
-        // BuildBackground's card sits ContentMargin from the section root; everything below sits
-        // a further InnerPadding inside THAT card - without it, the title/search/headers/list all
-        // sit flush against the card's own border with no breathing room (and "No redeems yet..."
-        // ends up wide enough to clip against the scroll viewport's mask).
-        private const float InnerPadding = 20f;
+        // Same section padding as the other tabs: ContentMargin from the section root on every
+        // side, TitleY at -30. The rightmost edge reserves the scrollbar's width (see ProfilesTab).
+        private const float LeftEdgeX  = -(ContentWidth / 2f) + ContentMargin;
+        private const float RightEdgeX =  (ContentWidth / 2f) - ContentMargin - ScrollableList.ScrollbarWidth;
 
-        private const float LeftEdgeX  = -(ContentWidth / 2f) + ContentMargin + InnerPadding;
-        private const float RightEdgeX =  (ContentWidth / 2f) - ContentMargin - InnerPadding - ScrollableList.ScrollbarWidth;
-
-        // BuildBackground's card used to inset only 15px (BackgroundInset); every Y below was
-        // tuned to sit snugly against that. Now that it insets ContentMargin (30px) on every side
-        // to match the other tabs, the whole content block is shifted 15px further in on both the
-        // top and bottom edges too, so it still sits inside the (now bigger) card instead of
-        // poking above/below it.
-        private const float TitleY          = -45f;
+        private const float ActionBtnHeight = 40f;
+        private const float TitleY          = -30f;
         private const float TitleWidth      = 300f;
         private const float PendingCountWidth = 200f;
-        private const float SearchY         = -90f;
-        private const float ColumnHeaderY   = -127f;
-        private const float ListOffsetTop   = 165f;
-        private const float ListOffsetBottom = 145f;
-        private const float PaginationY     = 115f;  // measured from the root's bottom edge
-        private const float ActionRowY      = 65f;   // measured from the root's bottom edge
+        private const float PendingCountGap   = 14f;   // between the search field's right edge and the pending text
+        private const float SearchWidth     = 300f;   // same as the other tabs' list search fields
+        // Same vertical rhythm as ProfilesTab/RedeemsTab/ViewersTab: under-title description,
+        // then the search row, column headers, and the list.
+        private const float DescriptionY    = -50f;
+        private const float SearchY         = -99f;
+        private const float ColumnHeaderY   = -136f;
+        private const float ListOffsetTop   = 155f;
+        private const float ActionRowY      = ContentMargin + ActionBtnHeight / 2f;   // measured from the root's bottom edge
+        private const float PaginationY     = ActionRowY + 50f;  // measured from the root's bottom edge
+        private const float ListOffsetBottom = PaginationY + 30f;
 
-        private const float AvailableWidth = ContentWidth - 2f * ContentMargin - 2f * InnerPadding - ScrollableList.ScrollbarWidth;
+        private const float AvailableWidth = ContentWidth - 2f * ContentMargin - ScrollableList.ScrollbarWidth;
 
-        private const float ColViewerW  = AvailableWidth * 1.4f / 6.8f;
-        private const float ColRedeemW  = AvailableWidth * 2.6f / 6.8f;
-        private const float ColCostW    = AvailableWidth * 0.8f / 6.8f;
-        private const float ColActionsW = AvailableWidth * 2.0f / 6.8f;
+        // The columns (headers + row content) sit ListRow.LeftPadding in from the list's left and
+        // right edges, so row text/status/buttons aren't flush against the zebra stripe's ends.
+        // The title, search field and pending count above keep the true LeftEdgeX/RightEdgeX.
+        private const float ColumnsLeftX  = LeftEdgeX + ListRow.LeftPadding;
+        private const float ColumnsRightX = RightEdgeX - ListRow.LeftPadding;
+        private const float ColumnsWidth  = AvailableWidth - 2f * ListRow.LeftPadding;
 
-        private const float ColViewerX  = LeftEdgeX + ColViewerW / 2f;
-        private const float ColRedeemX  = LeftEdgeX + ColViewerW + ColRedeemW / 2f;
-        private const float ColCostX    = LeftEdgeX + ColViewerW + ColRedeemW + ColCostW / 2f;
-        private const float ColActionsX = RightEdgeX - ColActionsW / 2f;
+        private const float ColViewerW  = ColumnsWidth * 1.4f / 6.8f;
+        private const float ColRedeemW  = ColumnsWidth * 2.6f / 6.8f;
+        private const float ColCostW    = ColumnsWidth * 0.8f / 6.8f;
+        private const float ColActionsW = ColumnsWidth * 2.0f / 6.8f;
+
+        private const float ColViewerX  = ColumnsLeftX + ColViewerW / 2f;
+        private const float ColRedeemX  = ColumnsLeftX + ColViewerW + ColRedeemW / 2f;
+        private const float ColCostX    = ColumnsLeftX + ColViewerW + ColRedeemW + ColCostW / 2f;
+        private const float ColActionsX = ColumnsRightX - ColActionsW / 2f;
 
         private const float ActionBtnWidth = 90f;
         private const float ActionBtnGap   = 10f;
-        private const float BtnRefundX   = RightEdgeX - ActionBtnWidth / 2f;
+        private const float BtnRefundX   = ColumnsRightX - ActionBtnWidth / 2f;
         private const float BtnCompleteX = BtnRefundX - ActionBtnWidth - ActionBtnGap;
 
         /// <summary>
@@ -117,16 +121,17 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             m_root = UIContainer.Create(parent, "RedeemHistorySection");
 
-            BuildBackground();
-
             GuiHelper.CreateTitle("Redeem History", m_root, new Vector2(LeftEdgeX + TitleWidth / 2f, TitleY), width: TitleWidth);
+            GuiHelper.CreateTabDescription(
+                "Redeems triggered this session. Complete a redeem to mark it fulfilled on Twitch, or refund it to give the viewer their points back.",
+                m_root, new Vector2(0f, DescriptionY), width: ContentWidth - 2f * ContentMargin);
 
             m_pendingCountText = GUIManager.Instance.CreateText(
                 text: "",
                 parent: m_root.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(RightEdgeX - PendingCountWidth / 2f, TitleY),
+                position: new Vector2(LeftEdgeX + SearchWidth + PendingCountGap + PendingCountWidth / 2f, SearchY),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: 13,
                 color: GUIManager.Instance.ValheimBeige,
@@ -136,17 +141,17 @@ namespace WizshBoneTwitchIntegration.Gui
                 height: 24f,
                 addContentSizeFitter: false
             ).GetComponent<Text>();
-            m_pendingCountText.alignment = TextAnchor.MiddleRight;
+            m_pendingCountText.alignment = TextAnchor.MiddleLeft;
 
-            m_searchField = GuiFieldBuilder.CreateInputField(m_root, new Vector2(0f, SearchY), ContentWidth - 2f * ContentMargin - 2f * InnerPadding, placeholderText: "Search by viewer or redeem...");
+            m_searchField = GuiFieldBuilder.CreateInputField(m_root, new Vector2(LeftEdgeX + SearchWidth / 2f, SearchY), SearchWidth, placeholderText: "Search by viewer or redeem...");
             m_searchField.onValueChanged.AddListener(OnSearchChanged);
 
             BuildColumnHeaders();
 
             m_listContainer = ScrollableList.CreateStretched(
                 m_root, "History",
-                offsetMin: new Vector2(ContentMargin + InnerPadding, ListOffsetBottom),
-                offsetMax: new Vector2(-(ContentMargin + InnerPadding), -ListOffsetTop),
+                offsetMin: new Vector2(ContentMargin, ListOffsetBottom),
+                offsetMax: new Vector2(-ContentMargin, -ListOffsetTop),
                 autoHideScrollbar: true);
 
             BuildPaginationRow();
@@ -186,25 +191,6 @@ namespace WizshBoneTwitchIntegration.Gui
                 m_root.SetActive(false);
         }
 
-        // ── background ───────────────────────────────────────────────────────
-
-        /// <summary>
-        /// The same darker inset card <see cref="RedeemWizard.BuildBackground"/> draws behind the
-        /// redeems wizard. Built first so every later sibling draws on top of it. Inset by
-        /// <see cref="ContentMargin"/> on all four sides so the card sits an even distance from the
-        /// section edges. No border - a semi-transparent fill alone is enough to separate it.
-        /// </summary>
-        private void BuildBackground()
-        {
-            GameObject background = GuiHelper.CreateRegion(
-                m_root, "Background",
-                anchorMin: Vector2.zero,
-                anchorMax: Vector2.one,
-                offsetMin: new Vector2(ContentMargin, ContentMargin),
-                offsetMax: new Vector2(-ContentMargin, -ContentMargin));
-            GuiHelper.AddBackground(background, new Color(0f, 0f, 0f, 0.6f));
-        }
-
         // ── column headers / rows ────────────────────────────────────────────
 
         private void BuildColumnHeaders()
@@ -215,6 +201,12 @@ namespace WizshBoneTwitchIntegration.Gui
             CreateHeader("Actions", ColActionsX, ColActionsW, TextAnchor.MiddleRight);
         }
 
+        // Legacy uGUI Text doesn't pixel-snap, and the column centers/widths are fractions of
+        // AvailableWidth - so a text box's edges can land on half pixels and blur every glyph (same
+        // issue as GuiHelper.CreateCard). The position is rounded to a whole pixel at the call
+        // site; rounding the width to an even number keeps center +/- width/2 on whole pixels too.
+        private static float EvenWidth(float width) => Mathf.Round(width / 2f) * 2f;
+
         private void CreateHeader(string text, float x, float width, TextAnchor alignment)
         {
             Text header = GUIManager.Instance.CreateText(
@@ -222,13 +214,13 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: m_root.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(x, ColumnHeaderY),
+                position: new Vector2(Mathf.Round(x), Mathf.Round(ColumnHeaderY)),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: GuiFieldBuilder.FieldFontSize,
                 color: GUIManager.Instance.ValheimOrange,
                 outline: true,
                 outlineColor: Color.black,
-                width: width,
+                width: EvenWidth(width),
                 height: 20f,
                 addContentSizeFitter: false
             ).GetComponent<Text>();
@@ -263,7 +255,12 @@ namespace WizshBoneTwitchIntegration.Gui
                 m_refundAllButton.interactable = !bulkRunning;
 
             if (m_pendingCountText != null)
-                m_pendingCountText.text = $"{CountUnresolved(filtered)} pending";
+            {
+                int pending = CountUnresolved(filtered);
+                m_pendingCountText.text = $"{pending} pending";
+                m_pendingCountText.color = GUIManager.Instance.ValheimOrange;
+                m_pendingCountText.gameObject.SetActive(pending > 0);
+            }
 
             if (filtered.Count == 0)
             {
@@ -343,13 +340,13 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: row.transform,
                 anchorMin: new Vector2(0.5f, 0.5f),
                 anchorMax: new Vector2(0.5f, 0.5f),
-                position: new Vector2(x, 0f),
+                position: new Vector2(Mathf.Round(x), 0f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: GuiFieldBuilder.FieldFontSize,
                 color: color,
                 outline: true,
                 outlineColor: Color.black,
-                width: width,
+                width: EvenWidth(width),
                 height: ListRow.ItemHeight,
                 addContentSizeFitter: false
             ).GetComponent<Text>();
@@ -361,7 +358,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void BuildPaginationRow()
         {
-            GameObject prevBtnObj = GUIManager.Instance.CreateButton(
+            GameObject prevBtnObj = GuiHelper.CreateButton(
                 text: "<",
                 parent: m_root.transform,
                 anchorMin: new Vector2(0.5f, 0f),
@@ -391,7 +388,7 @@ namespace WizshBoneTwitchIntegration.Gui
             ).GetComponent<Text>();
             m_pageLabel.alignment = TextAnchor.MiddleCenter;
 
-            GameObject nextBtnObj = GUIManager.Instance.CreateButton(
+            GameObject nextBtnObj = GuiHelper.CreateButton(
                 text: ">",
                 parent: m_root.transform,
                 anchorMin: new Vector2(0.5f, 0f),
@@ -410,40 +407,40 @@ namespace WizshBoneTwitchIntegration.Gui
             const float btnWidth = 220f;
             const float gap = 14f;
 
-            GameObject completeAllObj = GUIManager.Instance.CreateButton(
+            GameObject completeAllObj = GuiHelper.CreateButton(
                 text: "Complete All",
                 parent: m_root.transform,
                 anchorMin: new Vector2(0.5f, 0f),
                 anchorMax: new Vector2(0.5f, 0f),
                 position: new Vector2(-(btnWidth + gap), ActionRowY),
                 width: btnWidth,
-                height: 40f
+                height: ActionBtnHeight
             );
             completeAllObj.SetActive(true);
             m_completeAllButton = completeAllObj.GetComponent<Button>();
             m_completeAllButton.onClick.AddListener(() => StartBulkResolve(CustomRewardRedemptionState.Fulfilled));
 
-            GameObject refundAllObj = GUIManager.Instance.CreateButton(
+            GameObject refundAllObj = GuiHelper.CreateButton(
                 text: "Refund All",
                 parent: m_root.transform,
                 anchorMin: new Vector2(0.5f, 0f),
                 anchorMax: new Vector2(0.5f, 0f),
                 position: new Vector2(0f, ActionRowY),
                 width: btnWidth,
-                height: 40f
+                height: ActionBtnHeight
             );
             refundAllObj.SetActive(true);
             m_refundAllButton = refundAllObj.GetComponent<Button>();
             m_refundAllButton.onClick.AddListener(() => StartBulkResolve(CustomRewardRedemptionState.Canceled));
 
-            GameObject backObj = GUIManager.Instance.CreateButton(
+            GameObject backObj = GuiHelper.CreateButton(
                 text: "Back",
                 parent: m_root.transform,
                 anchorMin: new Vector2(0.5f, 0f),
                 anchorMax: new Vector2(0.5f, 0f),
                 position: new Vector2(btnWidth + gap, ActionRowY),
                 width: btnWidth,
-                height: 40f
+                height: ActionBtnHeight
             );
             backObj.SetActive(true);
             backObj.GetComponent<Button>().onClick.AddListener(GoBack);
