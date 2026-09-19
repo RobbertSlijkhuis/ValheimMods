@@ -53,6 +53,11 @@ namespace ModularMagic_Core.Components
             return PluginConfig.piece1.name.Value;
         }
 
+        public float GetHoverOffset()
+        {
+            return 0f;
+        }
+
         public bool UseItem(Humanoid user, ItemDrop.ItemData item)
         {
             return false;

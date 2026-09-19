@@ -10,11 +10,12 @@ namespace ModularMagic_Core.Harmony
     {
         [HarmonyPostfix]
         [HarmonyPatch(typeof(ItemStand), "UseItem")]
-        public static void UseItem_Postfix(ref ItemStand __instance, Humanoid user, ItemData item)
+        public static void UseItem_Postfix(ref ItemStand __instance, Humanoid user, ItemData item, ItemData ___m_queuedItem)
         {
             try
             {
-                if (__instance == null || __instance.m_currentItemName != "" || item == null)
+                // UseItem only queues the item (attached later in UpdateAttach); it is queued only if the stand accepted it
+                if (__instance == null || __instance.m_currentItemName != "" || item == null || ___m_queuedItem != item)
                     return;
 
                 string imbuementsString = item.m_customData.GetValueSafe(ModularMagic_Core.imbuementDataKey);

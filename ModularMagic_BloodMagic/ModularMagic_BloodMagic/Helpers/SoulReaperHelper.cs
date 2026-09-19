@@ -133,7 +133,7 @@ namespace ModularMagic_BloodMagic.Helpers
 
             GameObject creaturePrefab = spawnAbility.m_spawnPrefab[Random.Range(0, spawnAbility.m_spawnPrefab.Length)];
 
-            if (spawnAbility.m_maxSpawned > 0 && SpawnSystem.GetNrOfInstances(creaturePrefab) >= spawnAbility.m_maxSpawned)
+            if (spawnAbility.m_maxSpawned > 0 && SpawnSystem.GetNrOfInstances(creaturePrefab, finalPos, 0f) >= spawnAbility.m_maxSpawned)
             {
                 Player.m_localPlayer?.Message(MessageHud.MessageType.Center, spawnAbility.m_maxSummonReached);
                 yield break;

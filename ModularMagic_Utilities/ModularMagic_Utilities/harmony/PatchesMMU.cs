@@ -48,11 +48,17 @@ namespace ModularMagic_Utilities.Harmony
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(ItemStand), "SetVisualItem")]
-        public static void SetVisualItem_Postfix(ref ItemStand __instance, string itemName)
+        public static void SetVisualItem_Postfix(ref ItemStand __instance, int itemHash)
         {
             try
             {
-                if (__instance == null || itemName == null)
+                if (__instance == null || ObjectDB.instance == null)
+                    return;
+
+                // Valheim now passes the item prefab's stable hash instead of its name; 0 means an empty stand
+                string itemName = itemHash == 0 ? "" : ObjectDB.instance.GetItemPrefab(itemHash)?.name;
+
+                if (itemName == null)
                     return;
 
                 Transform weatherZoneTrans = __instance.transform?.parent?.Find("weatherzone");

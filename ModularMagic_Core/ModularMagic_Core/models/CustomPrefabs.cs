@@ -61,7 +61,5 @@ namespace ModularMagic_Core.Models
         public GameObject RuneRainGrausten;
         public GameObject RuneRainMarble;
         public GameObject RuneRainStone;
-
-        public GameObject HealStaff;
     }
 }

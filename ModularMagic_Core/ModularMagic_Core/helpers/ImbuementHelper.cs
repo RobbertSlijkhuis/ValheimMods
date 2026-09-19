@@ -34,24 +34,34 @@ namespace ModularMagic_Core.Helpers
         public static List<Imbuement> StringToList(string value)
         {
             List<Imbuement> imbuements = new List<Imbuement>();
-            string[] data = value.Split(';');
 
-            foreach (string item in data)
+            if (string.IsNullOrEmpty(value))
+                return imbuements;
+
+            foreach (string item in value.Split(';'))
             {
                 string[] properties = item.Split('|');
-                Imbuement imbuement = new Imbuement(
+
+                if (properties.Length < 9
+                    || !int.TryParse(properties[5], out int tier)
+                    || !int.TryParse(properties[6], out int level)
+                    || !bool.TryParse(properties[7], out bool saved))
+                {
+                    Jotunn.Logger.LogWarning($"[Imbuements] Skipping malformed imbuement entry: {item}");
+                    continue;
+                }
+
+                imbuements.Add(new Imbuement(
                     properties[0],
                     properties[1],
                     properties[2],
                     properties[3],
                     properties[4],
-                    int.Parse(properties[5]),
-                    int.Parse(properties[6]),
-                    bool.Parse(properties[7]),
+                    tier,
+                    level,
+                    saved,
                     properties[8]
-                );
-
-                imbuements.Add(imbuement);
+                ));
             }
 
             return imbuements;
@@ -59,17 +69,20 @@ namespace ModularMagic_Core.Helpers
 
         public static string ListToString(List<Imbuement> imbuements)
         {
-            string items = "";
+            List<string> items = new List<string>();
 
             foreach (Imbuement i in imbuements)
             {
-                items += $"{i.type}|{i.prefab}|{i.name}|{i.description}|{i.value}|{i.tier}|{i.level}|{i.saved}|{i.weaponType};";
+                items.Add($"{Clean(i.type)}|{Clean(i.prefab)}|{Clean(i.name)}|{Clean(i.description)}|{Clean(i.value)}|{i.tier}|{i.level}|{i.saved}|{Clean(i.weaponType)}");
             }
 
-            if (items != "")
-                items = items.Remove(items.Length - 1);
+            return string.Join(";", items);
+        }
 
-            return items;
+        // The delimiters of the saved string must not appear inside a field
+        private static string Clean(string value)
+        {
+            return value == null ? "" : value.Replace('|', '/').Replace(';', ',');
         }
     }
 }

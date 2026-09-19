@@ -53,14 +53,6 @@ namespace ModularMagic_Core
             ItemHelper.Create(prefabs.EitrCrude, PluginConfig.crudeEitr);
             ItemHelper.Create(prefabs.EitrFine, PluginConfig.fineEitr);
 
-            Jotunn.Configs.ItemConfig healStaff = new Jotunn.Configs.ItemConfig();
-            healStaff.Name = "Healing staff";
-            healStaff.Description = "Staff to heal";
-            healStaff.CraftingStation = CraftingStations.Workbench;
-            healStaff.AddRequirement("Wood", 10);
-
-            ItemManager.Instance.AddItem(new CustomItem(prefabs.HealStaff, true, healStaff));
-
             foreach (RuneEntry entry in RuneData.list)
             {
                 ImbuementRune imbuementRune = entry.prefab.AddComponent<ImbuementRune>();
@@ -217,9 +209,6 @@ namespace ModularMagic_Core
             materials.SpellBook = assetBundle.LoadAsset<Material>("Spellbook2_1_1_MMC");
             materials.SpellBookOff = assetBundle.LoadAsset<Material>("Spellbook2_1_1_off_MMC");
             materials.RuneGhost = assetBundle.LoadAsset<Material>("Rune_Ghost_MMC");
-
-            prefabs.HealStaff = assetBundle.LoadAsset<GameObject>("MMC_StaffHealing");
-            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(assetBundle.LoadAsset<SE_Stats>("Staff_healing_MMC"), true));
 
             /*
              * Notes:
