@@ -17,6 +17,9 @@ namespace ModularMagic_Core.components
             if (m_tableInteract.m_locked)
                 return "Waiting for action to finish...";
 
+            if (!m_tableInteract.m_imbuementTable.IsLocalEditor())
+                return "<color=yellow>This rune will be removed on save</color>\n" + m_tableInteract.m_imbuementTable.GetLockMessage();
+
             string imbuementName = "<color=yellow>This rune will be removed on save</color>\n";
             string inputUse = Localization.instance.Localize("[<color=yellow>$ui_hold $KEY_Use</color>] Reset");
             return imbuementName + inputUse;
@@ -38,7 +41,7 @@ namespace ModularMagic_Core.components
         }
         public bool Interact(Humanoid user, bool hold, bool alt)
         {
-            if (alt || !hold || m_tableInteract.m_locked)
+            if (alt || !hold || m_tableInteract.m_locked || !m_tableInteract.m_imbuementTable.IsLocalEditor())
                 return false;
 
             m_tableInteract.Reset();

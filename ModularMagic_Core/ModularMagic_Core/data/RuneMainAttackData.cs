@@ -13,6 +13,7 @@ namespace ModularMagic_Core.Data
             coneOptions.allowedWeapons = RuneData.EarthFireIceLightning;
             coneOptions.description = "Change the main ability of your weapon! This ability is different depending on the type of the weapon!";
             coneOptions.descriptionKey = LocaleKey.NoneDesc;
+            coneOptions.id = "Cone";
             coneOptions.name = "Rune: Cone";
             coneOptions.nameKey = LocaleKey.None;
             coneOptions.prefab = ModularMagic_Core.prefabs.RuneConeWood;

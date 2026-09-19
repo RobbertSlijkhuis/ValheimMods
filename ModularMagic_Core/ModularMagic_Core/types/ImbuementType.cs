@@ -1,19 +1,19 @@
-﻿namespace ModularMagic_Core.Types
+namespace ModularMagic_Core.Types
 {
-    internal class ImbuementType
+    public static class ImbuementType
     {
-        public static string AOE => "AOE";
-        public static string CreatureSpawn => "CreatureSpawn";
-        public static string DamageType => "DamageType";
-        public static string DamageRatio => "DamageRatio";
-        public static string EitrCost => "EitrCost";
-        public static string MaxQuality => "MaxQuality";
-        public static string None => "None";
-        public static string MainAttack => "MainAttack";
-        public static string ParryBonus => "ParryBonus";
-        public static string ProjectileAccuracy => "ProjectileAccuracy";
-        public static string ProjectileBurst => "ProjectileBurst";
-        public static string ProjectileVelocity => "ProjectileVelocity";
-        public static string SecondaryAttack => "SecondaryAttack";
+        public const string AOE = "AOE";
+        public const string CreatureSpawn = "CreatureSpawn";
+        public const string DamageType = "DamageType";
+        public const string DamageRatio = "DamageRatio";
+        public const string EitrCost = "EitrCost";
+        public const string MaxQuality = "MaxQuality";
+        public const string None = "None";
+        public const string MainAttack = "MainAttack";
+        public const string ParryBonus = "ParryBonus";
+        public const string ProjectileAccuracy = "ProjectileAccuracy";
+        public const string ProjectileBurst = "ProjectileBurst";
+        public const string ProjectileVelocity = "ProjectileVelocity";
+        public const string SecondaryAttack = "SecondaryAttack";
     }
 }

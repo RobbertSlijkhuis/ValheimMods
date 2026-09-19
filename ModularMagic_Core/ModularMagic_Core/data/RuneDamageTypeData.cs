@@ -13,6 +13,7 @@ namespace ModularMagic_Core.Data
             damageBluntOptions.allowedWeapons = RuneData.Ice;
             damageBluntOptions.description = "Change the physical damage to Blunt";
             damageBluntOptions.descriptionKey = LocaleKey.ItemDamageTypeBluntDesc;
+            damageBluntOptions.id = "DamageBlunt";
             damageBluntOptions.name = "Rune: Damage Blunt";
             damageBluntOptions.nameKey = LocaleKey.ItemDamageTypeBlunt;
             damageBluntOptions.prefab = ModularMagic_Core.prefabs.RuneDamageBluntWood;
@@ -43,6 +44,7 @@ namespace ModularMagic_Core.Data
             damagePierceOptions.allowedWeapons = RuneData.Earth;
             damagePierceOptions.description = "Change the physical damage to Pierce";
             damagePierceOptions.descriptionKey = LocaleKey.ItemDamageTypePierceDesc;
+            damagePierceOptions.id = "DamagePierce";
             damagePierceOptions.name = "Rune: Damage Pierce";
             damagePierceOptions.nameKey = LocaleKey.ItemDamageTypePierce;
             damagePierceOptions.prefab = ModularMagic_Core.prefabs.RuneDamagePierceWood;
@@ -73,6 +75,7 @@ namespace ModularMagic_Core.Data
             damageSlashOptions.allowedWeapons = RuneData.EarthIce;
             damageSlashOptions.description = "Change the physical damage to Slash";
             damageSlashOptions.descriptionKey = LocaleKey.ItemDamageTypeSlashDesc;
+            damageSlashOptions.id = "DamageSlash";
             damageSlashOptions.name = "Rune: Damage Slash";
             damageSlashOptions.nameKey = LocaleKey.ItemDamageTypeSlash;
             damageSlashOptions.prefab = ModularMagic_Core.prefabs.RuneDamageSlashWood;

@@ -13,6 +13,7 @@ namespace ModularMagic_Core.Data
             eitrCostOptions.allowedWeapons = RuneData.EarthFireIceLightning;
             eitrCostOptions.description = "Reduce Eitr cost of your weapon's main attack!";
             eitrCostOptions.descriptionKey = LocaleKey.ItemEitrCostDesc;
+            eitrCostOptions.id = "EitrCost";
             eitrCostOptions.name = "Rune: Eitr cost";
             eitrCostOptions.nameKey = LocaleKey.ItemEitrCost;
             eitrCostOptions.prefab = ModularMagic_Core.prefabs.RuneEitrCostWood;

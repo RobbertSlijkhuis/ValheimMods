@@ -1,11 +1,11 @@
-﻿namespace ModularMagic_Core.Types
+namespace ModularMagic_Core.Types
 {
-    internal class WeaponType
+    public static class WeaponType
     {
-        public static string MMES => "MMES";
-        public static string MMFS => "MMFS";
-        public static string MMIS => "MMIS";
-        public static string MMLS => "MMLS";
-        public static string None => "None";
+        public const string MMES = "MMES";
+        public const string MMFS = "MMFS";
+        public const string MMIS = "MMIS";
+        public const string MMLS = "MMLS";
+        public const string None = "None";
     }
 }

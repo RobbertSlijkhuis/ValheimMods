@@ -13,6 +13,7 @@ namespace ModularMagic_Core.Data
             accuracyOptions.allowedWeapons = RuneData.EarthIce;
             accuracyOptions.description = "Improve the accuracy of your weapon!";
             accuracyOptions.descriptionKey = LocaleKey.ItemRuneProjectileAccuracyDesc;
+            accuracyOptions.id = "ProjectileAccuracy";
             accuracyOptions.name = "Rune: Accuracy";
             accuracyOptions.nameKey = LocaleKey.ItemRuneProjectileAccuracy;
             accuracyOptions.prefab = ModularMagic_Core.prefabs.RuneProjectileAccuracyWood;
@@ -44,6 +45,7 @@ namespace ModularMagic_Core.Data
             burstOptions.allowedWeapons = RuneData.EarthIce;
             burstOptions.description = "Improve the attack speed of your weapon!";
             burstOptions.descriptionKey = LocaleKey.ItemRuneProjectileBurstDesc;
+            burstOptions.id = "ProjectileBurst";
             burstOptions.name = "Rune: Attack Speed";
             burstOptions.nameKey = LocaleKey.ItemRuneProjectileBurst;
             burstOptions.prefab = ModularMagic_Core.prefabs.RuneProjectileBurstWood;
@@ -75,6 +77,7 @@ namespace ModularMagic_Core.Data
             speedOptions.allowedWeapons = RuneData.EarthIce;
             speedOptions.description = "Improve the projectile speed of your weapon!";
             speedOptions.descriptionKey = LocaleKey.ItemRuneProjectileSpeedDesc;
+            speedOptions.id = "ProjectileSpeed";
             speedOptions.name = "Rune: Projectile Speed";
             speedOptions.nameKey = LocaleKey.ItemRuneProjectileSpeed;
             speedOptions.prefab = ModularMagic_Core.prefabs.RuneProjectileSpeedWood;

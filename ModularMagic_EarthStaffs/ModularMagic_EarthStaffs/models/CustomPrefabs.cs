@@ -11,6 +11,8 @@ namespace ModularMagic_EarthStaffs.Models
 
         public GameObject ProjectileMushroom;
         public GameObject ProjectileDefault;
+        public GameObject ProjectilePierce;
+        public GameObject ProjectileSlash;
         public GameObject ProjectileBoulder;
 
         public GameObject mainAttackCone;

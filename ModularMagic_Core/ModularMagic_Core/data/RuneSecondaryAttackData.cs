@@ -13,6 +13,7 @@ namespace ModularMagic_Core.Data
             creaturesOptions.allowedWeapons = RuneData.EarthFireIceLightning;
             creaturesOptions.description = "Add a secondary ability to your weapon! This ability is different depending on the type of the weapon!";
             creaturesOptions.descriptionKey = LocaleKey.NoneDesc;
+            creaturesOptions.id = "Creatures";
             creaturesOptions.name = "Rune: Summon";
             creaturesOptions.nameKey = LocaleKey.None;
             creaturesOptions.prefab = ModularMagic_Core.prefabs.RuneCreaturesStone;
@@ -38,6 +39,7 @@ namespace ModularMagic_Core.Data
             novaOptions.allowedWeapons = RuneData.EarthFireIceLightning;
             novaOptions.description = "Add a secondary ability to your weapon! This ability is different depending on the type of the weapon!";
             novaOptions.descriptionKey = LocaleKey.ItemRuneNovaDesc;
+            novaOptions.id = "Nova";
             novaOptions.name = "Rune: Nova";
             novaOptions.nameKey = LocaleKey.ItemRuneNova;
             novaOptions.prefab = ModularMagic_Core.prefabs.RuneNovaStone;
@@ -63,6 +65,7 @@ namespace ModularMagic_Core.Data
             rainOptions.allowedWeapons = RuneData.EarthFireIce;
             rainOptions.description = "Add a secondary ability to your weapon! This ability is different depending on the type of the weapon!";
             rainOptions.descriptionKey = LocaleKey.ItemRuneRainDesc;
+            rainOptions.id = "Rain";
             rainOptions.name = "Rune: Rain";
             rainOptions.nameKey = LocaleKey.ItemRuneRain;
             rainOptions.prefab = ModularMagic_Core.prefabs.RuneRainStone;

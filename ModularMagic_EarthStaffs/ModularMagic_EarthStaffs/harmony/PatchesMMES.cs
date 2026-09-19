@@ -4,6 +4,7 @@ using ModularMagic_EarthStaffs.Helpers;
 using System;
 using UnityEngine;
 using static ItemDrop;
+using CoreImbuementHelper = ModularMagic_Core.Helpers.ImbuementHelper;
 
 namespace ModularMagic_EarthStaffs.Harmony
 {
@@ -33,12 +34,10 @@ namespace ModularMagic_EarthStaffs.Harmony
                 if (__instance == null || !__instance.IsPlayer() || item == null || !ModularMagic_EarthStaffs.gameIsReady)
                     return;
 
-                string imbuementsString = item.m_customData.GetValueSafe(ModularMagic_EarthStaffs.imbuementDataKey);
-
-                if (imbuementsString == null)
+                if (!CoreImbuementHelper.HasImbuements(item) || !EarthImbuementHelper.IsEarthStaff(item))
                     return;
 
-                ImbuementHelper.ApplyImbuements(item, imbuementsString);
+                EarthImbuementHelper.ApplyImbuements(item);
             }
             catch (Exception e)
             {

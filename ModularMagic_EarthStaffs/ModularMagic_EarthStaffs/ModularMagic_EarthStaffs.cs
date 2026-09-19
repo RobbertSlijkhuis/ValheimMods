@@ -2,6 +2,8 @@ using BepInEx;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
+using ModularMagic_Core.Components;
+using ModularMagic_Core.Types;
 using ModularMagic_EarthStaffs.Components;
 using ModularMagic_EarthStaffs.Configs;
 using ModularMagic_EarthStaffs.Helpers;
@@ -30,7 +32,6 @@ namespace ModularMagic_EarthStaffs
         public static CustomStatusEffects effects = new CustomStatusEffects();
         public static CustomSprites sprites = new CustomSprites();
         public static ItemDataSnapshots snapshots = new ItemDataSnapshots();
-        public static readonly string imbuementDataKey = "Imbuements_MMC";
         public static bool gameIsReady = false;
 
         public void Awake()
@@ -60,21 +61,10 @@ namespace ModularMagic_EarthStaffs
         {
             try
             {
-                Imbuements imbuements0 = prefabs.StaffEarth0.AddComponent<Imbuements>();
-                imbuements0.m_slots = 1;
-                imbuements0.m_tier = 0;
-
-                Imbuements imbuements1 = prefabs.StaffEarth1.AddComponent<Imbuements>();
-                imbuements1.m_slots = 2;
-                imbuements1.m_tier = 1;
-
-                Imbuements imbuements2 = prefabs.StaffEarth2.AddComponent<Imbuements>();
-                imbuements2.m_slots = 3;
-                imbuements2.m_tier = 2;
-
-                Imbuements imbuements3 = prefabs.StaffEarth3.AddComponent<Imbuements>();
-                imbuements3.m_slots = 4;
-                imbuements3.m_tier = 4;
+                AddImbuementSlots(prefabs.StaffEarth0, 1, 0);
+                AddImbuementSlots(prefabs.StaffEarth1, 2, 1);
+                AddImbuementSlots(prefabs.StaffEarth2, 3, 2);
+                AddImbuementSlots(prefabs.StaffEarth3, 4, 4);
 
                 ItemHelper.CreateStaff(prefabs.StaffEarth0, PluginConfig.staffEarth0);
                 ItemHelper.CreateStaff(prefabs.StaffEarth1, PluginConfig.staffEarth1);
@@ -100,6 +90,14 @@ namespace ModularMagic_EarthStaffs
                 Jotunn.Logger.LogError("Something went wrong in adding the earth staffs: " + e);
                 PrefabManager.OnVanillaPrefabsAvailable -= AddEarthStaffs;
             }
+        }
+
+        private void AddImbuementSlots(GameObject prefab, int slots, int tier)
+        {
+            ImbuementSlots imbuementSlots = prefab.AddComponent<ImbuementSlots>();
+            imbuementSlots.m_slots = slots;
+            imbuementSlots.m_tier = tier;
+            imbuementSlots.m_weaponType = WeaponType.MMES;
         }
 
         private void InitStatusEffects()
@@ -144,8 +142,14 @@ namespace ModularMagic_EarthStaffs
             prefabs.StaffEarth1 = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth1");
             prefabs.StaffEarth2 = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth2");
             prefabs.StaffEarth3 = assetBundle.LoadAsset<GameObject>("MMES_StaffEarth3");
+            // The default projectile is the blunt one, slash and pierce are copies of it with their own visual
             prefabs.ProjectileDefault = assetBundle.LoadAsset<GameObject>("projectile_MMES");
+            ProjectileHelper.SetBlunt(prefabs.ProjectileDefault);
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ProjectileDefault, true));
+            prefabs.ProjectileSlash = ProjectileHelper.CreateVariant("projectile_MMES_slash", prefabs.ProjectileDefault, ProjectileHelper.SetSlash);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ProjectileSlash, true));
+            prefabs.ProjectilePierce = ProjectileHelper.CreateVariant("projectile_MMES_pierce", prefabs.ProjectileDefault, ProjectileHelper.SetPierce);
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ProjectilePierce, true));
 
             prefabs.ProjectileMushroom = assetBundle.LoadAsset<GameObject>("projectile_mushroom_MMES");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ProjectileMushroom, true));

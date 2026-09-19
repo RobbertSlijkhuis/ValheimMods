@@ -11,6 +11,7 @@ namespace ModularMagic_Core.Models
         public string craftingStation;
         public string description;
         public string descriptionKey;
+        public string id;
         public int level;
         public int minStationLevel;
         public string name;
@@ -27,6 +28,7 @@ namespace ModularMagic_Core.Models
             this.craftingStation = options.craftingStation;
             this.description = options.description;
             this.descriptionKey = options.descriptionKey;
+            this.id = options.id;
             this.level = options.level;
             this.minStationLevel = options.minStationLevel;
             this.name = $"{options.name} {options.level}";

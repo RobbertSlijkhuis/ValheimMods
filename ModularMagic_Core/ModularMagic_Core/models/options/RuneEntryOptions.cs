@@ -12,6 +12,7 @@ namespace ModularMagic_Core.Models
         public string craftingStation = CraftingStationType.RuneTable;
         public string description;
         public string descriptionKey;
+        public string id;
         public int level = 1;
         public int minStationLevel = 1;
         public string name;

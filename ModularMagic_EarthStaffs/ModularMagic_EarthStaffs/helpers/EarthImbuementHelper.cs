@@ -1,20 +1,30 @@
-﻿using HarmonyLib;
+using ModularMagic_Core.Types;
 using ModularMagic_EarthStaffs.Configs;
 using ModularMagic_EarthStaffs.Models;
-using ModularMagic_EarthStaffs.Types;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using static ItemDrop;
+using CoreImbuementHelper = ModularMagic_Core.Helpers.ImbuementHelper;
+using Imbuement = ModularMagic_Core.Models.Imbuement;
 
 namespace ModularMagic_EarthStaffs.Helpers
 {
-    internal class ImbuementHelper
+    /// <summary>
+    /// Applies the imbuements of an Earth staff (read through the shared Core API) to its item data.
+    /// What a rune does is specific to the staff type, so this stays in the staff mod.
+    /// </summary>
+    internal class EarthImbuementHelper
     {
-        public static void ApplyImbuements(ItemData itemData, string imbuementsString)
+        // Other staff mods share the imbuement API, so only handle the staffs of this mod
+        public static bool IsEarthStaff(ItemData itemData)
         {
-            List<Imbuement> imbuements = StringToList(imbuementsString);
+            return itemData != null && itemData.m_dropPrefab != null && GetItemDataSnapshot(itemData.m_dropPrefab.name) != null;
+        }
+
+        public static void ApplyImbuements(ItemData itemData)
+        {
+            List<Imbuement> imbuements = CoreImbuementHelper.Read(itemData);
             ApplyImbuements(itemData, imbuements);
         }
 
@@ -39,68 +49,50 @@ namespace ModularMagic_EarthStaffs.Helpers
             options.projectileVelocity = snapshot.projectileVelocity;
             options.mainAttack = snapshot.mainAttack;
 
-            GameObject projectileBlunt = ModularMagic_EarthStaffs.prefabs.ProjectileDefault.transform.Find("visual/blunt").gameObject;
-            GameObject projectileSlash = ModularMagic_EarthStaffs.prefabs.ProjectileDefault.transform.Find("visual/slash").gameObject;
-            GameObject projectilePierce = ModularMagic_EarthStaffs.prefabs.ProjectileDefault.transform.Find("visual/pierce").gameObject;
-            Projectile projectile = ModularMagic_EarthStaffs.prefabs.ProjectileDefault.GetComponent<Projectile>();
-            projectileBlunt.SetActive(true);
-            projectileSlash.SetActive(false);
-            projectilePierce.SetActive(false);
-            projectile.m_rotateVisual = 300f;
-            projectile.m_rotateVisualY = 0f;
-            projectile.m_rotateVisualZ = 0f;
-            projectile.m_visual = projectileBlunt;
+            // The projectile that shows the damage type. Every damage type has its own prefab, so all clients spawn the same visual
+            GameObject damageProjectile = null;
 
             foreach (Imbuement imbuement in imbuements)
             {
                 switch (imbuement.type)
                 {
-                    case nameof(ImbuementType.DamageType):
+                    case ImbuementType.DamageType:
                         if (imbuement.value == "Slash")
                         {
                             options.damageSlash = snapshot.damageBlunt;
                             options.damageSlashPerLevel = snapshot.damageBluntPerlevel;
-                            projectileSlash.SetActive(true);
-                            projectile.m_rotateVisual = 500f;
-                            projectile.m_rotateVisualY = 0f;
-                            projectile.m_rotateVisualZ = 10f;
-                            projectile.m_visual = projectileSlash;
+                            damageProjectile = ModularMagic_EarthStaffs.prefabs.ProjectileSlash;
                         }
                         else if (imbuement.value == "Pierce")
                         {
                             options.damagePierce = snapshot.damageBlunt;
                             options.damagePiercePerLevel = snapshot.damageBluntPerlevel;
-                            projectilePierce.SetActive(true);
-                            projectile.m_rotateVisual = 0f;
-                            projectile.m_rotateVisualY = 0f;
-                            projectile.m_rotateVisualZ = 500f;
-                            projectile.m_visual = projectilePierce;
+                            damageProjectile = ModularMagic_EarthStaffs.prefabs.ProjectilePierce;
                         }
 
                         options.damageBlunt = 0;
                         options.damageBluntPerLevel = 0;
-                        projectileBlunt.SetActive(false);
                         break;
-                    case nameof(ImbuementType.EitrCost):
+                    case ImbuementType.EitrCost:
                         options.attackEitr -= PluginConfig.imbuementConfig.EitrCost.Value * imbuement.level;
                         break;
-                    //case nameof(ImbuementType.ParryBonus):
+                    //case ImbuementType.ParryBonus:
                     //    options.timedBlockBonus += float.Parse(imbuement.value, CultureInfo.InvariantCulture);
                     //    break;
-                    case nameof(ImbuementType.ProjectileAccuracy):
+                    case ImbuementType.ProjectileAccuracy:
                         options.projectileAccuracy -= PluginConfig.imbuementConfig.ProjectileAccuracy.Value * imbuement.level;
                         break;
-                    case nameof(ImbuementType.ProjectileBurst):
+                    case ImbuementType.ProjectileBurst:
                         options.projectileBurst -= PluginConfig.imbuementConfig.ProjectileBurst.Value * imbuement.level;
                         break;
-                    case nameof(ImbuementType.ProjectileVelocity):
+                    case ImbuementType.ProjectileVelocity:
                         options.projectileVelocity += PluginConfig.imbuementConfig.ProjectileSpeed.Value * imbuement.level;
                         break;
-                    case nameof(ImbuementType.MainAttack):
+                    case ImbuementType.MainAttack:
                         if (imbuement.value == "Cone")
                             options.mainAttack = ModularMagic_EarthStaffs.prefabs.mainAttackCone.GetComponent<ItemDrop>().m_itemData;
                         break;
-                    case nameof(ImbuementType.SecondaryAttack):
+                    case ImbuementType.SecondaryAttack:
                         if (imbuement.value == "Nova")
                             options.secondaryAttack = ModularMagic_EarthStaffs.prefabs.SecondaryAttackNova.GetComponent<ItemDrop>().m_itemData;
                         else if (imbuement.value == "Rain")
@@ -111,23 +103,32 @@ namespace ModularMagic_EarthStaffs.Helpers
                 }
             }
 
+            // The cone main attack has its own projectile, so the damage type projectile only replaces the default one
+            if (damageProjectile != null && options.mainAttack == snapshot.mainAttack)
+                options.attackProjectile = damageProjectile;
+
             Jotunn.Logger.LogWarning("Damage (B, P, S): " + options.damageBlunt + ", " + options.damagePierce + ", " + options.damageSlash);
             Jotunn.Logger.LogWarning("Eitr cost: " + options.attackEitr);
             //Jotunn.Logger.LogWarning("ParryBonus: " + options.timedBlockBonus);
             Jotunn.Logger.LogWarning("Accuracy: " + options.projectileAccuracy);
             Jotunn.Logger.LogWarning("Burst: " + options.projectileBurst);
             Jotunn.Logger.LogWarning("Speed: " + options.projectileVelocity);
-            Jotunn.Logger.LogWarning("Main: " + options.mainAttack == null ? "null" : options.mainAttack?.m_shared?.m_attack?.m_attackProjectile?.name);
-            Jotunn.Logger.LogWarning("Secondary: " + options.secondaryAttack == null ? "null" : options.secondaryAttack?.m_shared?.m_attack?.m_attackProjectile?.name);
+            Jotunn.Logger.LogWarning("Projectile: " + (options.attackProjectile != null ? options.attackProjectile.name : "default"));
+            Jotunn.Logger.LogWarning("Main: " + (options.mainAttack == null ? "null" : options.mainAttack.m_shared?.m_attack?.m_attackProjectile?.name));
+            Jotunn.Logger.LogWarning("Secondary: " + (options.secondaryAttack == null ? "null" : options.secondaryAttack.m_shared?.m_attack?.m_attackProjectile?.name));
 
             StatusEffect ImbuementEffect = ScriptableObject.CreateInstance<StatusEffect>();
+            List<string> tooltipLines = new List<string>();
 
-            Imbuement last = imbuements.Last();
-            foreach (Imbuement imbuement in imbuements.FindAll(item => item.type != ImbuementType.None))
+            foreach (Imbuement imbuement in imbuements)
             {
-                ImbuementEffect.m_tooltip += $"<color=green>{imbuement.name} {(imbuement.level > 0 ? imbuement.level : "")} </color>{(imbuement.Equals(last) ? "" : "\n")}";
+                if (imbuement.type == ImbuementType.None)
+                    continue;
+
+                tooltipLines.Add($"<color=green>{imbuement.name} {(imbuement.level > 0 ? imbuement.level : "")} </color>");
             }
 
+            ImbuementEffect.m_tooltip = string.Join("\n", tooltipLines);
             ImbuementEffect.name = "Imbuements_MMES";
             ImbuementEffect.m_name = "Imbuements";
             options.equipStatusEffect = ImbuementEffect;
@@ -150,47 +151,6 @@ namespace ModularMagic_EarthStaffs.Helpers
                 default:
                     return null;
             }
-        }
-
-        public static List<Imbuement> StringToList(string value)
-        {
-            List<Imbuement> imbuements = new List<Imbuement>();
-            string[] data = value.Split(';');
-
-            foreach (string item in data)
-            {
-                string[] properties = item.Split('|');
-                Imbuement imbuement = new Imbuement(
-                    properties[0],
-                    properties[1],
-                    properties[2],
-                    properties[3],
-                    properties[4],
-                    int.Parse(properties[5]),
-                    int.Parse(properties[6]),
-                    bool.Parse(properties[7]),
-                    properties[8]
-                );
-
-                imbuements.Add(imbuement);
-            }
-
-            return imbuements;
-        }
-
-        public static string ListToString(List<Imbuement> imbuements)
-        {
-            string items = "";
-
-            foreach (Imbuement i in imbuements)
-            {
-                items += $"{i.type}|{i.prefab}|{i.name}|{i.description}|{i.value}|{i.tier}|{i.level}|{i.saved}|{i.weaponType};";
-            }
-
-            if (items != "")
-                items = items.Remove(items.Length - 1);
-
-            return items;
         }
     }
 }

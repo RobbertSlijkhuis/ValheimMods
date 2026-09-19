@@ -26,11 +26,11 @@ namespace ModularMagic_Core.components
         public Imbuement m_imbuement;
         public int m_index;
         public bool m_locked = false;
-        public ItemData m_itemNew;
         public string m_dropOldItem;
         public Color m_emission;
 
-        public void Init(Imbuement imbuement, int index, Color emission)
+        // replacedRune is a saved rune that was removed or replaced by the editor, it stays visible until the changes are saved
+        public void Init(Imbuement imbuement, int index, Color emission, ImbuementRune replacedRune)
         {
             m_transformNew = transform.Find("new");
             m_transformOld = transform.Find("old");
@@ -41,7 +41,6 @@ namespace ModularMagic_Core.components
             m_particleSystem = gameObject.GetComponent<ParticleSystem>();
             m_imbuementTable = transform.parent.parent.gameObject.GetComponent<RuneTable>();
             m_imbuementTable.m_onSave.AddListener(OnSave);
-            m_imbuementTable.m_onItemRemove.AddListener(OnRemove);
             m_imbuement = imbuement;
             m_index = index;
             m_emission = emission;
@@ -51,9 +50,53 @@ namespace ModularMagic_Core.components
             ParticleSystemRenderer particleRenderer = gameObject.GetComponent<ParticleSystemRenderer>();
             particleRenderer.materials[0].SetColor("_EmissionColor", emission);
 
-            GameObject prefab = PrefabManager.Instance.GetPrefab(m_imbuement.prefab);
-            UpdateRune(prefab);
+            ImbuementRune rune = m_imbuement.rune;
+            UpdateRune(rune != null ? rune.gameObject : null);
+
+            if (replacedRune != null)
+                RestoreReplacedRune(replacedRune);
+
             StartMoveIn();
+        }
+
+        // Shows the saved rune that is marked for removal, the same as it looks after marking it for removal
+        private void RestoreReplacedRune(ImbuementRune rune)
+        {
+            Transform attachTransform = rune.transform.Find("attach");
+
+            if (attachTransform == null)
+            {
+                Jotunn.Logger.LogError("Could not find attach for the replaced rune");
+                return;
+            }
+
+            GameObject attached = Instantiate(attachTransform.gameObject, m_transformOld);
+            Transform runeTransform = attached.transform.Find($"rune_{rune.m_level}");
+
+            if (runeTransform == null)
+            {
+                Jotunn.Logger.LogError("Could not find the rune transform of the replaced rune");
+                Destroy(attached);
+                return;
+            }
+
+            MeshRenderer meshRenderer = runeTransform.gameObject.GetComponent<MeshRenderer>();
+            meshRenderer.materials[0].SetColor("_EmissionColor", m_emission);
+            runeTransform.localRotation = TransformHelper.GenerateRotation(new Vector3(0, 0, 0));
+            runeTransform.localScale = new Vector3(1f, 1f, 1f);
+
+            attached.transform.localRotation = TransformHelper.GenerateRotation(new Vector3(0, 0, 0));
+            attached.transform.localPosition = new Vector3(0, 0, -40);
+
+            m_dropOldItem = rune.gameObject.name;
+            m_resetInteract = attached.AddComponent<RuneTableRuneResetInteract>();
+        }
+
+        // A rune that is taken out of a slot drops from that slot, just like a removed saved rune drops when the changes are saved
+        private void DropRune(ImbuementRune rune)
+        {
+            if (rune != null)
+                Instantiate(rune.gameObject, m_transformNew.position, m_transformNew.rotation);
         }
 
         private void UpdateRune(GameObject prefab)
@@ -103,6 +146,16 @@ namespace ModularMagic_Core.components
             if (m_locked)
                 return "Waiting for action to finish...";
 
+            if (!m_imbuementTable.IsLocalEditor())
+            {
+                string lockMessage = m_imbuementTable.GetLockMessage();
+
+                if (m_imbuement.type == ImbuementType.None)
+                    return $"<color=yellow>{m_imbuement.name}</color>\n{lockMessage}";
+
+                return $"<color=green>{m_imbuement.name} {(m_imbuement.level > 0 ? m_imbuement.level : "")}</color>\n{m_imbuement.description}\n{lockMessage}";
+            }
+
             if (m_imbuement.type == ImbuementType.None)
             {
                 string imbuementNameEmpty = $"<color=yellow>{m_imbuement.name}</color>\n";
@@ -130,6 +183,12 @@ namespace ModularMagic_Core.components
         {
             if (m_locked)
                 return false;
+
+            if (!m_imbuementTable.IsLocalEditor())
+            {
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, m_imbuementTable.GetLockMessage());
+                return false;
+            }
 
             if (m_imbuement.type != ImbuementType.None)
             {
@@ -175,23 +234,13 @@ namespace ModularMagic_Core.components
                 return false;
             }
 
-            string weaponTypeLower = m_imbuement.weaponType.ToLower();
-
             if (!Player.m_localPlayer.GetInventory().RemoveOneItem(item))
             {
                 Jotunn.Logger.LogError("Coudl not remove rune from inventory");
                 return false;
             }
 
-            m_itemNew = item;
-
-            m_imbuement.description = Localization.instance.Localize($"${imbuementRune.m_descriptionKey}_{weaponTypeLower}");
-            m_imbuement.level = imbuementRune.m_level;
-            m_imbuement.name = Localization.instance.Localize($"${imbuementRune.m_nameKey}_{weaponTypeLower}");
-            m_imbuement.prefab = prefab.name;
-            m_imbuement.saved = false;
-            m_imbuement.type = imbuementRune.m_type;
-            m_imbuement.value = imbuementRune.m_value;
+            m_imbuement.SetRune(imbuementRune);
 
             m_imbuementTable.m_onRuneActivation.Invoke();
 
@@ -202,25 +251,15 @@ namespace ModularMagic_Core.components
 
         public bool Interact(Humanoid user, bool hold, bool alt)
         {
-            if (alt || !hold || m_imbuement.type == ImbuementType.None || m_locked)
+            if (alt || !hold || m_imbuement.type == ImbuementType.None || m_locked || !m_imbuementTable.IsLocalEditor())
                 return false;
 
             if (m_imbuement.saved)
-            {
                 m_dropOldItem = m_imbuement.prefab;
-            }
             else
-            {
-                Player.m_localPlayer.GetInventory().AddItem(m_itemNew);
-                m_itemNew = null;
-            }
+                DropRune(m_imbuement.rune);
 
-            m_imbuement.description = "";
-            m_imbuement.name = "Empty";
-            m_imbuement.prefab = null;
-            m_imbuement.saved = false;
-            m_imbuement.type = ImbuementType.None;
-            m_imbuement.value = "";
+            m_imbuement.Clear();
 
             m_imbuementTable.m_onRuneActivation.Invoke();
 
@@ -233,7 +272,8 @@ namespace ModularMagic_Core.components
         {
             m_locked = true;
 
-            if (m_itemNew == null)
+            // The slot is empty, or it holds a new rune that is kicked out first
+            if (m_imbuement.type == ImbuementType.None)
             {
                 m_animatorOld.SetTrigger("Reset");
                 StartCoroutine(CompleteReset());
@@ -249,7 +289,7 @@ namespace ModularMagic_Core.components
         {
             yield return new WaitForSeconds(0.4f);
 
-            GameObject kicked = Instantiate(m_itemNew.m_dropPrefab, m_transformNew.position, m_transformNew.rotation);
+            GameObject kicked = Instantiate(m_imbuement.rune.gameObject, m_transformNew.position, m_transformNew.rotation);
             Rigidbody rigidbody = kicked.GetComponent<Rigidbody>();
             rigidbody.AddForce(kicked.transform.forward * 300);
 
@@ -271,21 +311,14 @@ namespace ModularMagic_Core.components
 
             GameObject prefab = PrefabManager.Instance.GetPrefab(m_dropOldItem);
             ImbuementRune imbuementRune = prefab.GetComponent<ImbuementRune>();
-            string weaponTypeLower = m_imbuement.weaponType.ToLower();
 
-            m_imbuement.description = Localization.instance.Localize($"${imbuementRune.m_descriptionKey}_{weaponTypeLower}");
-            m_imbuement.level = imbuementRune.m_level;
-            m_imbuement.name = Localization.instance.Localize($"${imbuementRune.m_nameKey}_{weaponTypeLower}");
-            m_imbuement.prefab = prefab.name;
+            m_imbuement.SetRune(imbuementRune);
             m_imbuement.saved = true;
-            m_imbuement.type = imbuementRune.m_type;
-            m_imbuement.value = imbuementRune.m_value;
 
             m_imbuementTable.m_onRuneActivation.Invoke();
 
             Destroy(m_resetInteract);
             m_dropOldItem = null;
-            m_itemNew = null;
             meshRenderer.enabled = false;
 
             m_locked = false;
@@ -323,11 +356,9 @@ namespace ModularMagic_Core.components
 
         public void OnSave()
         {
-            m_itemNew = null;
-
             if (m_imbuement.type != ImbuementType.None)
                 m_particleSystem.Play();
-            
+
             if (m_dropOldItem == null)
                 return;
 
@@ -345,18 +376,10 @@ namespace ModularMagic_Core.components
             m_dropOldItem = null;
         }
 
-        public void OnRemove()
-        {
-            if (m_itemNew == null)
-                return;
-
-            Player.m_localPlayer.GetInventory().AddItem(m_itemNew);
-            m_itemNew = null;
-        }
-
         public void StartMoveIn()
         {
-            if (m_imbuement.type == ImbuementType.None)
+            // The sparkles show that a rune is saved, so an empty slot and an unsaved rune do not have them
+            if (m_imbuement.type == ImbuementType.None || !m_imbuement.saved)
                 m_particleSystem.Stop();
 
             m_animatorRune.SetTrigger($"FlyIn{m_index}");

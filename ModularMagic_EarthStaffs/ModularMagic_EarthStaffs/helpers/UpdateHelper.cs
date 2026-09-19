@@ -24,7 +24,8 @@ namespace ModularMagic_EarthStaffs.Helpers
             if (itemData == null)
                 throw new Exception("ItemData is null");
             
-            if (options.mainAttack != null) { itemData.m_shared.m_attack = options.mainAttack.m_shared.m_attack; }
+            // Copy the attack, otherwise the item shares the attack object with the prefab (or the cone item) and the changes below leak into other staffs
+            if (options.mainAttack != null) { itemData.m_shared.m_attack = options.mainAttack.m_shared.m_attack.Clone(); }
 
             if (options.name != null) { itemData.m_shared.m_name = options.name; }
             if (options.description != null) { itemData.m_shared.m_description = options.description; }
@@ -46,6 +47,7 @@ namespace ModularMagic_EarthStaffs.Helpers
             if (options.damageSpiritPerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_spirit = (float)options.damageSpiritPerLevel; }
             if (options.equipStatusEffect == null || options.equipStatusEffect.name != "empty_MMES") { itemData.m_shared.m_equipStatusEffect = options.equipStatusEffect; }
             if (options.attackEitr != null) { itemData.m_shared.m_attack.m_attackEitr = (float)options.attackEitr; }
+            if (options.attackProjectile != null) { itemData.m_shared.m_attack.m_attackProjectile = options.attackProjectile; }
             if (options.projectileVelocity != null) { itemData.m_shared.m_attack.m_projectileVel = (float)options.projectileVelocity; }
             if (options.projectileAccuracy != null) { itemData.m_shared.m_attack.m_projectileAccuracy = (float)options.projectileAccuracy; }
             if (options.projectileBurst != null) { itemData.m_shared.m_attack.m_burstInterval = (float)options.projectileBurst; }
@@ -62,7 +64,7 @@ namespace ModularMagic_EarthStaffs.Helpers
             if (options.secondaryLaunchAngle != null) { itemData.m_shared.m_secondaryAttack.m_launchAngle = (float)options.secondaryLaunchAngle; }
             if (options.secondaryProjectileVelocity != null) { itemData.m_shared.m_secondaryAttack.m_projectileVel = (float)options.secondaryProjectileVelocity; }
             if (options.secondaryProjectileAccuracy != null) { itemData.m_shared.m_secondaryAttack.m_projectileAccuracy = (float)options.secondaryProjectileAccuracy; }
-            if (options.secondaryAttack != null) { itemData.m_shared.m_secondaryAttack = options.secondaryAttack.m_shared.m_attack; }
+            if (options.secondaryAttack != null) { itemData.m_shared.m_secondaryAttack = options.secondaryAttack.m_shared.m_attack.Clone(); }
         }
 
         public static void UpdateItemDataInHand(ItemData itemData, UpdateItemDataOptions options)

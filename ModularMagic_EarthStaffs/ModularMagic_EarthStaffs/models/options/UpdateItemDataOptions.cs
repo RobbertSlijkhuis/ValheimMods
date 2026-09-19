@@ -25,6 +25,7 @@ namespace ModularMagic_EarthStaffs.Models
         public float? damageSlashPerLevel = null;
         public float? damageSpiritPerLevel = null;
         public float? attackEitr = null;
+        public GameObject? attackProjectile = null;
         public float? secondaryAttackEitr = null;
         public StatusEffect? equipStatusEffect = ScriptableObject.CreateInstance<StatusEffect>();
         public ItemData? mainAttack;

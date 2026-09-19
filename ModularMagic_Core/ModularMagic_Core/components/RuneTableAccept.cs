@@ -29,6 +29,9 @@ namespace ModularMagic_Core.Components
             if (m_imbuementTable.m_imbuements.Count == 0)
                 return "Need magical item to imbue";
 
+            if (!m_imbuementTable.IsLocalEditor())
+                return m_imbuementTable.GetLockMessage();
+
             string canSave = m_imbuementTable.CanSave();
             string inputString = canSave == CanImbueType.Yes ? Localization.instance.Localize("[<color=yellow>$KEY_Use</color>] ") : "";
             string message = "";
@@ -65,7 +68,7 @@ namespace ModularMagic_Core.Components
 
         public bool Interact(Humanoid user, bool hold, bool alt)
         {
-            if (hold)
+            if (hold || !m_imbuementTable.IsLocalEditor())
                 return false;
 
             return m_imbuementTable.Save();

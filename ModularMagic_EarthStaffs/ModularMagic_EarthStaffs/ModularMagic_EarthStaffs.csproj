@@ -57,6 +57,15 @@
     <PackageReference Include="JotunnLib" Version="2.30.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Shared imbuement API from the built Core (build ModularMagic_Core first when its public API changes).
+         Core is loaded by BepInEx (see BepInDependency), so it must not be copied next to this mod -->
+    <Reference Include="ModularMagic_Core">
+      <HintPath>..\..\ModularMagic_Core\ModularMagic_Core\bin\$(Configuration)\net48\ModularMagic_Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
   <PropertyGroup>
     <VALHEIM_MANAGED>$(VALHEIM_INSTALL)/valheim_Data/Managed</VALHEIM_MANAGED>
     <UNITY_FOLDER>$(SolutionDir)ModularMagic_EarthStaffsUnity</UNITY_FOLDER>
