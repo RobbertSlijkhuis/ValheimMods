@@ -23,7 +23,8 @@ namespace ModularMagic_EarthStaffs.Components
             List<EffectList.EffectData> list = new List<EffectList.EffectData>();
             list.Add(hoeEffect);
 
-            if (!Player.m_localPlayer.InInterior())
+            // No local player (e.g. still loading in) means we can't tell if it is an interior, so skip the terrain effect
+            if (Player.m_localPlayer != null && !Player.m_localPlayer.InInterior())
                 list.Add(mudRoadEffect);
 
             m_terrainEffects.m_effectPrefabs = list.ToArray();

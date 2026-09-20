@@ -162,6 +162,7 @@ namespace ModularMagic_EarthStaffs
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ProjectilePierce, true));
 
             prefabs.ProjectileMushroom = assetBundle.LoadAsset<GameObject>("projectile_mushroom_MMES");
+            prefabs.ProjectileMushroom.AddComponent<MushroomProjectileVisual>();
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ProjectileMushroom, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_mushroom_projectile_hit_MMES"), true));
 

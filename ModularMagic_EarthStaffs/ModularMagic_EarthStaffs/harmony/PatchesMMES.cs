@@ -54,17 +54,6 @@ namespace ModularMagic_EarthStaffs.Harmony
                 if (__instance == null || character == null)
                     return true;
 
-                ItemData weapon = character.GetCurrentWeapon();
-
-                if (weapon == null || weapon.m_dropPrefab == null)
-                    return true;
-
-                if (weapon.m_dropPrefab.name == ModularMagic_EarthStaffs.prefabs.StaffEarth0.name)
-                {
-                    RandomizeMushroom();
-                    return true;
-                }
-
                 if (__instance.m_drawStaminaDrain != 8901)
                     return true;
 
@@ -117,60 +106,6 @@ namespace ModularMagic_EarthStaffs.Harmony
 
             character.Message(MessageHud.MessageType.Center, "The staff is still recharging!");
             return false;
-        }
-
-        private static void RandomizeMushroom()
-        {
-            Transform mushroom = ModularMagic_EarthStaffs.prefabs.ProjectileMushroom.transform.Find("visual/Mushroom");
-            Transform mushroomBlue = ModularMagic_EarthStaffs.prefabs.ProjectileMushroom.transform.Find("visual/MushroomBlue");
-            Transform mushroomYellow = ModularMagic_EarthStaffs.prefabs.ProjectileMushroom.transform.Find("visual/MushroomYellow");
-            Transform branch = ModularMagic_EarthStaffs.prefabs.ProjectileMushroom.transform.Find("visual/Branch");
-            Transform dandelion = ModularMagic_EarthStaffs.prefabs.ProjectileMushroom.transform.Find("visual/Dandelion");
-            Transform stone = ModularMagic_EarthStaffs.prefabs.ProjectileMushroom.transform.Find("visual/Stone");
-            Transform flint = ModularMagic_EarthStaffs.prefabs.ProjectileMushroom.transform.Find("visual/Flint");
-            Transform bush = ModularMagic_EarthStaffs.prefabs.ProjectileMushroom.transform.Find("visual/RaspberryBush");
-
-            mushroom.gameObject.SetActive(false);
-            mushroomBlue.gameObject.SetActive(false);
-            mushroomYellow.gameObject.SetActive(false);
-            branch.gameObject.SetActive(false);
-            dandelion.gameObject.SetActive(false);
-            stone.gameObject.SetActive(false);
-            flint.gameObject.SetActive(false);
-            bush.gameObject.SetActive(false);
-
-            int index = UnityEngine.Random.Range(0, 8);
-
-            switch (index)
-            {
-                case 0:
-                    mushroom.gameObject.SetActive(true);
-                    break;
-                case 1:
-                    mushroomBlue.gameObject.SetActive(true);
-                    break;
-                case 2:
-                    mushroomYellow.gameObject.SetActive(true);
-                    break;
-                case 3:
-                    branch.gameObject.SetActive(true);
-                    break;
-                case 4:
-                    dandelion.gameObject.SetActive(true);
-                    break;
-                case 5:
-                    stone.gameObject.SetActive(true);
-                    break;
-                case 6:
-                    flint.gameObject.SetActive(true);
-                    break;
-                case 7:
-                    bush.gameObject.SetActive(true);
-                    break;
-                default:
-                    mushroom.gameObject.SetActive(true);
-                    break;
-            }
         }
     }
 }
