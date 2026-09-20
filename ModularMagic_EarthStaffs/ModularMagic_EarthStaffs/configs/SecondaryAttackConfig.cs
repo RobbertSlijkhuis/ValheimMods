@@ -48,8 +48,12 @@ namespace ModularMagic_EarthStaffs.Configs
             useEitr = Config.Bind(new ConfigDefinition(options.sectionName, "Secondary attack eitr cost"), options.useEitr,
                 new ConfigDescription("The secondary attack eitr cost", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+            // The attack of this prefab is copied to the staff on equip, so this is the base eitr cost of the secondary attack
+            UpdateAttackEitr(options);
             useEitr.SettingChanged += (obj, attr) =>
             {
+                UpdateAttackEitr(options);
+
                 UpdateHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
                 {
                     secondaryAttackEitr = useEitr.Value,
@@ -450,6 +454,15 @@ namespace ModularMagic_EarthStaffs.Configs
                     });
                 };
             }
+        }
+
+        // Sets the eitr cost on the attack of the prefab itself. Only the prefab data is updated, not the staff in the hand
+        private void UpdateAttackEitr(SecondaryAttackConfigOptions options)
+        {
+            UpdateHelper.UpdateItemData(options.prefab.GetComponent<ItemDrop>().m_itemData, new UpdateItemDataOptions()
+            {
+                attackEitr = useEitr.Value,
+            });
         }
 
         private int HandleOrder()

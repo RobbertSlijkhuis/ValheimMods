@@ -9,6 +9,7 @@ namespace ModularMagic_EarthStaffs.configs
         public ConfigEntry<float> ProjectileAccuracy;
         public ConfigEntry<float> ProjectileBurst;
         public ConfigEntry<float> ProjectileSpeed;
+        public ConfigEntry<float> SecondaryAttackEitr;
 
         private int entryCount = 100;
 
@@ -30,6 +31,11 @@ namespace ModularMagic_EarthStaffs.configs
 
             ProjectileSpeed = Config.Bind(new ConfigDefinition(sectionName, "Projectile Speed Rune"), 1f,
                 new ConfigDescription("The amount of projectile speed improvement per level of the Projectile Speed rune", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+
+            SecondaryAttackEitr = Config.Bind(new ConfigDefinition(sectionName, "Secondary Attack Rune Eitr Reduction"), 0.125f,
+                new ConfigDescription("The part of the secondary attack eitr cost that is saved per level above 1 with the Nova, Rain and Summon runes (0.125 is 12.5%, so level 3 costs 75%)",
+                new AcceptableValueRange<float>(0f, 0.5f),
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
         }
 

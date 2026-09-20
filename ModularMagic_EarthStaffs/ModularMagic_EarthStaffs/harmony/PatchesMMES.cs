@@ -54,7 +54,7 @@ namespace ModularMagic_EarthStaffs.Harmony
                 if (__instance == null || character == null)
                     return true;
 
-                if (__instance.m_drawStaminaDrain != 8901)
+                if (!AttackHelper.IsSecondaryAttack(__instance))
                     return true;
 
                 return CheckForCooldown(character, __instance);
@@ -66,7 +66,21 @@ namespace ModularMagic_EarthStaffs.Harmony
             }
         }
 
-        private static bool CheckForCooldown(Character character, Attack attack)
+        /// <summary>
+        /// The game uses the eitr cost of the main attack of the weapon for every attack, also the secondary one.
+        /// The secondary attacks of the staffs use their own cost, so the eitr saving of the runes works.
+        /// </summary>
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Attack), nameof(Attack.GetAttackEitr), new[] { typeof(Character), typeof(ItemData) })]
+        public static void GetAttackEitr_Postfix(Attack __instance, Character character, ItemData weapon, ref float __result)
+        {
+            if (character == null || weapon == null || !AttackHelper.IsSecondaryAttack(__instance))
+                return;
+
+            __result = AttackHelper.GetSecondaryAttackEitr(__instance, character, weapon);
+        }
+
+        private static bool CheckForCooldown(Humanoid character, Attack attack)
         {
             float cooldownValue = 0f;
             float eitrValue = 0f;
@@ -77,13 +91,13 @@ namespace ModularMagic_EarthStaffs.Harmony
             {
                 case "projectile_spawn_boulder_MMES":
                     cooldownValue = PluginConfig.secondaryAttackRain.cooldown.Value;
-                    eitrValue = PluginConfig.secondaryAttackRain.useEitr.Value;
+                    eitrValue = AttackHelper.GetSecondaryAttackEitr(attack, character, character.GetCurrentWeapon());
                     statusEffect = ModularMagic_EarthStaffs.effects.BoulderCooldown;
                     hasEffect = character.GetSEMan().HaveStatusEffect(statusEffect.name.GetHashCode());
                     break;
                 case "script_roots_MMES":
                     cooldownValue = PluginConfig.secondaryAttackSummon.cooldown.Value;
-                    eitrValue = PluginConfig.secondaryAttackSummon.useEitr.Value;
+                    eitrValue = AttackHelper.GetSecondaryAttackEitr(attack, character, character.GetCurrentWeapon());
                     statusEffect = ModularMagic_EarthStaffs.effects.RootsCooldown;
                     hasEffect = character.GetSEMan().HaveStatusEffect(statusEffect.name.GetHashCode());
                     break;

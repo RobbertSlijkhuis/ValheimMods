@@ -99,6 +99,14 @@ namespace ModularMagic_EarthStaffs.Helpers
                             options.secondaryAttack = ModularMagic_EarthStaffs.prefabs.SecondaryAttackBoulder.GetComponent<ItemDrop>().m_itemData;
                         else if (imbuement.value == "Summon")
                             options.secondaryAttack = ModularMagic_EarthStaffs.prefabs.SecondaryAttackRoots.GetComponent<ItemDrop>().m_itemData;
+
+                        // Every level above 1 saves a part of the eitr cost. The base cost is the one of the attack itself,
+                        // which is read again on every equip, so a changed or synced config value is used
+                        if (options.secondaryAttack != null)
+                        {
+                            float saved = Mathf.Clamp01(PluginConfig.imbuementConfig.SecondaryAttackEitr.Value * (imbuement.level - 1));
+                            options.secondaryAttackEitr = options.secondaryAttack.m_shared.m_attack.m_attackEitr * (1f - saved);
+                        }
                         break;
                 }
             }
@@ -116,6 +124,7 @@ namespace ModularMagic_EarthStaffs.Helpers
             Jotunn.Logger.LogWarning("Projectile: " + (options.attackProjectile != null ? options.attackProjectile.name : "default"));
             Jotunn.Logger.LogWarning("Main: " + (options.mainAttack == null ? "null" : options.mainAttack.m_shared?.m_attack?.m_attackProjectile?.name));
             Jotunn.Logger.LogWarning("Secondary: " + (options.secondaryAttack == null ? "null" : options.secondaryAttack.m_shared?.m_attack?.m_attackProjectile?.name));
+            Jotunn.Logger.LogWarning("Secondary eitr cost: " + (options.secondaryAttackEitr == null ? "default" : options.secondaryAttackEitr.ToString()));
 
             StatusEffect ImbuementEffect = ScriptableObject.CreateInstance<StatusEffect>();
             List<string> tooltipLines = new List<string>();
