@@ -1,4 +1,3 @@
-using ModularMagic_Core.Locale;
 using ModularMagic_Core.Models;
 using ModularMagic_Core.Types;
 using System.Collections.Generic;
@@ -10,12 +9,9 @@ namespace ModularMagic_Core.Data
         public RuneMainAttackData(List<RuneEntry> list)
         {
             RuneEntryOptions coneOptions = new RuneEntryOptions();
-            coneOptions.allowedWeapons = RuneData.EarthFireIceLightning;
             coneOptions.description = "Change the main ability of your weapon! This ability is different depending on the type of the weapon!";
-            coneOptions.descriptionKey = LocaleKey.NoneDesc;
-            coneOptions.id = "Cone";
+            coneOptions.id = RuneId.Cone;
             coneOptions.name = "Rune: Cone";
-            coneOptions.nameKey = LocaleKey.None;
             coneOptions.prefab = ModularMagic_Core.prefabs.RuneCone;
             coneOptions.recipe = $"RoundLog:3, TrophyGreydwarfShaman:1, {ModularMagic_Core.prefabs.EitrCrude.name}:3";
             coneOptions.recipeUpgrade = coneOptions.recipe;

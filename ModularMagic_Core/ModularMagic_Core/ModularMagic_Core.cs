@@ -7,7 +7,6 @@ using ModularMagic_Core.Components;
 using ModularMagic_Core.Configs;
 using ModularMagic_Core.Data;
 using ModularMagic_Core.Helpers;
-using ModularMagic_Core.localization;
 using ModularMagic_Core.Models;
 using System.Reflection;
 using UnityEngine;
@@ -29,15 +28,10 @@ namespace ModularMagic_Core
         public static CustomPrefabs prefabs = new CustomPrefabs();
         public static CustomMaterials materials = new CustomMaterials();
 
-        // Use this class to add your own localization to the game
-        // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
-        public static CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();
-
         public void Awake()
         {
             Instance = this;
             InitAssetBundle();
-            LocaleEnglish.Init();
             RuneData.Init();
             PluginConfig.Init();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
@@ -70,7 +64,7 @@ namespace ModularMagic_Core
                 entry.prefab.GetComponent<ItemDrop>().m_itemData.m_shared.m_maxQuality = maxLevel;
 
                 ImbuementRune imbuementRune = entry.prefab.AddComponent<ImbuementRune>();
-                imbuementRune.Init(entry.id, entry.type, entry.value, maxLevel, entry.tiers, entry.allowedWeapons, entry.nameKey, entry.descriptionKey);
+                imbuementRune.Init(entry.id, entry.type, entry.value, maxLevel, entry.tiers, entry.name, entry.description);
                 ImbuementHelper.RegisterRune(imbuementRune);
 
                 Sprite[] icons = RuneIconHelper.Render(entry.prefab, maxLevel);

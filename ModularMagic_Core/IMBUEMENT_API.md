@@ -12,7 +12,8 @@ Core owns the rune table, the runes and the data that says which runes are on a 
 | **Level** | How strong a rune is. The level is the **quality** of the rune item (`ItemData.m_quality`, 1 up to the number of models the rune has), so a rune is upgraded like any item. A slotted rune is stored as its id and level. |
 | **Slot** | One place on a staff that holds one rune. A staff has a number of slots, a slot **tier** and a **weapon type**. |
 | **Tier** | A rune can only be slotted when the slot tier is at least the tier the rune needs for its level (`ImbuementRune.GetRequiredTier(level)`). |
-| **Weapon type** | `WeaponType.MMES`, `MMFS`, `MMIS` or `MMLS`. A rune lists the weapon types it is allowed on. |
+| **Weapon type** | `WeaponType.MMES`, `MMFS`, `MMIS` or `MMLS`. It is the suffix of the rune texts of the weapon (see [Localization](#localization)). |
+| **Supported runes** | The rune ids a weapon lists in `ImbuementSlots.m_allowedRunes` (see `RuneId`). The weapon decides this, a rune that is not listed can not be slotted on that weapon. |
 | **Saved runes** | The runes stored on the staff item, written when the player applies the changes on the table. |
 | **Draft** | The unsaved changes of the player who is editing. It is stored on the table, so it survives walking away and relogging. |
 | **Editor** | The player who put the staff on the table. Only that player can edit it. |
@@ -42,10 +43,11 @@ Core owns the rune table, the runes and the data that says which runes are on a 
    ImbuementSlots slots = staffPrefab.AddComponent<ImbuementSlots>();
    slots.m_slots = 2;                     // number of rune slots
    slots.m_tier = 1;                      // slot tier
-   slots.m_weaponType = WeaponType.MMFS;  // decides which runes are allowed
+   slots.m_weaponType = WeaponType.MMFS;  // the suffix of your rune texts
+   slots.m_allowedRunes = new List<string> { RuneId.EitrCost, RuneId.Cone, RuneId.Nova };  // the runes this weapon supports
    ```
 
-   A weapon is imbuable when its drop prefab has this component. Nothing has to be seeded into the item. `m_weaponType` defaults to `WeaponType.None`, and no rune is allowed on that, so a forgotten weapon type shows up as runes that can not be slotted.
+   A weapon is imbuable when its drop prefab has this component. Nothing has to be seeded into the item. `m_allowedRunes` is empty by default, so a forgotten list shows up as runes that can not be slotted. The weapon also decides how high it goes: a rune level can only be slotted when the slot tier (`m_tier`) is at least the tier that level needs (set per rune in Core, see `m_tiers`), so a low tier weapon can not take high level runes, and some runes not at all.
 
 4. **Apply the runes when the staff is equipped.** Patch `Humanoid.EquipItem` and read the runes with `ImbuementHelper.Read`:
 
@@ -78,13 +80,13 @@ Core owns the rune table, the runes and the data that says which runes are on a 
 
    `Read` always returns one entry per slot, an empty slot has `type == ImbuementType.None`.
 
-5. **Add rune names for your weapon type** (see [Localization](#localization)), otherwise the runes show a raw key on your staff.
+5. **Add the texts of your runes** (see [Localization](#localization)). Without them a rune shows its default English name and description.
 
 ## What a rune gives you
 
 `imbuement.type` and `imbuement.value` tell you what to do, `imbuement.level` says how strong it is. How much a level is worth is up to the staff mod. EarthStaffs uses its own config amounts multiplied by the level.
 
-| Rune id | `type` | `value` | Levels | Allowed on |
+| Rune id | `type` | `value` | Levels | Used to be allowed on (a starting point for your `m_allowedRunes`) |
 |---|---|---|---|---|
 | `DamageBlunt` | `DamageType` | `Blunt` | 1-4 | MMIS |
 | `DamagePierce` | `DamageType` | `Pierce` | 1-4 | MMES |
@@ -98,7 +100,7 @@ Core owns the rune table, the runes and the data that says which runes are on a 
 | `Nova` | `SecondaryAttack` | `Nova` | 1-3 | all four |
 | `Rain` | `SecondaryAttack` | `Rain` | 1-3 | MMES, MMFS, MMIS |
 
-The numeric `value`s are hints. EarthStaffs ignores them and uses its config. The allowed weapon types and the rune tiers are in `data/Rune*Data.cs` and `data/RuneData.cs`. To let a rune go on another staff type, add the weapon type to its `allowedWeapons` list there.
+The numeric `value`s are hints. EarthStaffs ignores them and uses its config. The tiers of the levels are in `data/Rune*Data.cs`. Which runes a weapon supports is set by the weapon: the Earth staffs list everything above except `DamageBlunt` (`EarthImbuementHelper.AllowedRunes`). The last column is what Core used to allow per weapon type, so a new staff mod can start from it.
 
 A staff can hold only one rune of each `type` at a time. The same rune also can not be slotted while the same rune is marked for removal in any slot, because it is still on the staff until the changes are saved. To change the level of a rune, remove it, apply the changes, and slot the new one.
 
@@ -106,16 +108,14 @@ Runes are upgraded with the normal upgrade screen at the rune table. The upgrade
 
 ## Localization
 
-The name and description of a rune are looked up when they are shown, with the weapon type of the slot:
+The staff mod owns the texts of its runes, since a rune can do something different on every weapon. The name and description of a rune are looked up when they are shown, with the rune id and the weapon type of the slot:
 
 ```
-$<nameKey>_<weapontype lowercase>          e.g. item_runedamagetypeslash_mmis
-$<descriptionKey>_<weapontype lowercase>   e.g. item_runedamagetypeslash_desc_mmis
+ImbuementHelper.GetNameKey(RuneId.Nova, WeaponType.MMES)          item_rune_nova_mmes
+ImbuementHelper.GetDescriptionKey(RuneId.Nova, WeaponType.MMES)   item_rune_nova_desc_mmes
 ```
 
-Core only ships English text for `mmes` (`localization/LocaleEnglish.cs`). For a new weapon type, add the same entries with your suffix (`_mmfs`, `_mmis`, `_mmls`) in that file, one name and one description per rune. The keys are in `localization/LocaleKey.cs`, which is internal to Core, so this is done inside Core. Without an entry the name shows up as a raw key.
-
-The Cone and Creatures runes currently use the placeholder keys `item_none` and `item_none_desc`.
+Add the texts in your mod with Jotunn (`CustomLocalization.AddTranslation`), using these two methods for the keys. See `localization/LocaleEnglish.cs` in EarthStaffs. When a weapon has no text for a rune, the rune shows its default English name and description from Core (`ImbuementRune.m_defaultName` and `m_defaultDescription`), so the runes are readable before a staff mod has its own texts.
 
 ## Rules for effects that work in multiplayer
 
@@ -129,20 +129,21 @@ The Cone and Creatures runes currently use the placeholder keys `item_none` and 
 
 Everything in the namespaces `ModularMagic_Core.Components`, `.Helpers`, `.Models` and `.Types` that is listed here is public. The rest of Core is internal.
 
-- **`ImbuementSlots`** (component): `m_slots`, `m_tier`, `m_weaponType`.
+- **`ImbuementSlots`** (component): `m_slots`, `m_tier`, `m_weaponType`, `m_allowedRunes`, `IsRuneAllowed(runeId)`.
 - **`ImbuementHelper`** (static):
   - `HasImbuements(ItemData)`: the weapon has an `ImbuementSlots` component.
   - `Read(ItemData)`: the runes of the weapon, one `Imbuement` per slot.
   - `GetSlots(ItemData)`: the `ImbuementSlots` of the weapon, or null.
   - `Serialize` / `Deserialize`: the saved string, see below.
   - `FindRune(id)` / `RegisterRune(rune)`: the rune registry (by id), Core fills it at startup.
+  - `GetNameKey(runeId, weaponType)` / `GetDescriptionKey(runeId, weaponType)`: the translation keys of the rune texts.
   - `IsRune(ItemDrop)`: the item is a rune.
   - `DropRune(rune, level, position, rotation)`: drops a rune item with the level as its quality.
   - `DataKey`, `EditorKey`, `DraftKey`: the custom data keys.
   - `GetEditor`, `GetDraft`, `SetEditor`, `SetDraft`, `GetUnsavedRunes`, `LoadItemFromZDO`: used by the table, most staff mods do not need them.
 - **`Imbuement`** (one slot): `type`, `value`, `name`, `description`, `prefab`, `level`, `runeId`, `tier`, `weaponType`, `rune`. `name` and `description` are localized when read.
-- **`ImbuementRune`** (component on every rune prefab): `m_id`, `m_type`, `m_value`, `m_maxLevel`, `m_tiers`, `m_allowedWeapons`, `GetRequiredTier(level)`, `IsValidLevel(level)`, `GetName(weaponType)`, `GetDescription(weaponType)`.
-- **`ImbuementType`**, **`WeaponType`**: `const string`s, so they work in `case` labels.
+- **`ImbuementRune`** (component on every rune prefab): `m_id`, `m_type`, `m_value`, `m_maxLevel`, `m_tiers`, `m_defaultName`, `m_defaultDescription`, `GetRequiredTier(level)`, `IsValidLevel(level)`, `GetName(weaponType)`, `GetDescription(weaponType)`.
+- **`ImbuementType`**, **`WeaponType`**, **`RuneId`**: `const string`s, so they work in `case` labels.
 
 ## Saved data
 
@@ -161,8 +162,8 @@ The version, a colon, and one entry per slot separated by commas. An entry is `r
 ## Adding a rune (in Core)
 
 1. Add one rune prefab to the asset bundle. It has an `attach` child with one model per level (`rune_1`, `rune_2`, ...), the number of models is the number of levels. Register it in `ModularMagic_Core.InitAssetBundle` with `AddRunePrefab("<prefab name>")` and add a field for it to `CustomPrefabs`. The name must be fixed and the same on every client.
-2. Add a `RuneEntryOptions` block in the matching `data/Rune*Data.cs` with an `id` (no `:`, `,` or `@`, and unique), `type`, `value`, `allowedWeapons`, the crafting `recipe`, the `recipeUpgrade` (the items of an upgrade, multiplied per level) and `tiers` (the slot tier a level needs, one entry per level).
-3. Add the name and description keys to `LocaleKey` and `LocaleEnglish` for every weapon type it is allowed on.
+2. Add the id to `RuneId` and a `RuneEntryOptions` block in the matching `data/Rune*Data.cs` with the `id` (no `:`, `,` or `@`, and unique), `type`, `value`, the English `name` and `description` (also the default text of the rune), the crafting `recipe`, the `recipeUpgrade` (the items of an upgrade, multiplied per level) and `tiers` (the slot tier a level needs, one entry per level).
+3. Add the id to `m_allowedRunes` of every weapon that should support it, and add its name and description in that staff mod's texts.
 4. Handle the new `type` or `value` in every staff mod that should support it.
 
 At startup Core sets the maximum quality of the item to the number of models, renders an icon per level, and logs a warning for a rune with a missing or invalid id, a duplicate id, or a different number of tiers than models. Look for `[Imbuements]` in the BepInEx log.

@@ -239,7 +239,10 @@ namespace ModularMagic_Core.components
                 return false;
             }
 
-            if (!imbuementRune.m_allowedWeapons.Contains(m_imbuement.weaponType))
+            // The weapon decides which runes it supports
+            ImbuementSlots slots = ImbuementHelper.GetSlots(m_imbuementTable.m_itemData);
+
+            if (slots == null || !slots.IsRuneAllowed(imbuementRune.m_id))
             {
                 Jotunn.Logger.LogWarning("This rune is not allowed on this weapon!");
                 return false;

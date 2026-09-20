@@ -1,4 +1,3 @@
-using ModularMagic_Core.Locale;
 using ModularMagic_Core.Models;
 using ModularMagic_Core.Types;
 using System.Collections.Generic;
@@ -11,12 +10,9 @@ namespace ModularMagic_Core.Data
         {
             // The secondary attack runes have three levels, they start at slot tier 2
             RuneEntryOptions creaturesOptions = new RuneEntryOptions();
-            creaturesOptions.allowedWeapons = RuneData.EarthFireIceLightning;
             creaturesOptions.description = "Add a secondary ability to your weapon! This ability is different depending on the type of the weapon!";
-            creaturesOptions.descriptionKey = LocaleKey.NoneDesc;
-            creaturesOptions.id = "Creatures";
+            creaturesOptions.id = RuneId.Creatures;
             creaturesOptions.name = "Rune: Summon";
-            creaturesOptions.nameKey = LocaleKey.None;
             creaturesOptions.prefab = ModularMagic_Core.prefabs.RuneCreatures;
             creaturesOptions.recipe = $"Stone:3, TrophySGolem:1, {ModularMagic_Core.prefabs.EitrFine.name}:6";
             creaturesOptions.recipeUpgrade = creaturesOptions.recipe;
@@ -26,12 +22,9 @@ namespace ModularMagic_Core.Data
             list.Add(new RuneEntry(creaturesOptions));
 
             RuneEntryOptions novaOptions = new RuneEntryOptions();
-            novaOptions.allowedWeapons = RuneData.EarthFireIceLightning;
             novaOptions.description = "Add a secondary ability to your weapon! This ability is different depending on the type of the weapon!";
-            novaOptions.descriptionKey = LocaleKey.ItemRuneNovaDesc;
-            novaOptions.id = "Nova";
+            novaOptions.id = RuneId.Nova;
             novaOptions.name = "Rune: Nova";
-            novaOptions.nameKey = LocaleKey.ItemRuneNova;
             novaOptions.prefab = ModularMagic_Core.prefabs.RuneNova;
             novaOptions.recipe = $"Stone:3, AtgeirIron:1, {ModularMagic_Core.prefabs.EitrFine.name}:6";
             novaOptions.recipeUpgrade = novaOptions.recipe;
@@ -41,12 +34,9 @@ namespace ModularMagic_Core.Data
             list.Add(new RuneEntry(novaOptions));
 
             RuneEntryOptions rainOptions = new RuneEntryOptions();
-            rainOptions.allowedWeapons = RuneData.EarthFireIce;
             rainOptions.description = "Add a secondary ability to your weapon! This ability is different depending on the type of the weapon!";
-            rainOptions.descriptionKey = LocaleKey.ItemRuneRainDesc;
-            rainOptions.id = "Rain";
+            rainOptions.id = RuneId.Rain;
             rainOptions.name = "Rune: Rain";
-            rainOptions.nameKey = LocaleKey.ItemRuneRain;
             rainOptions.prefab = ModularMagic_Core.prefabs.RuneRain;
             rainOptions.recipe = $"Stone:3, ArrowObsidian:200, {ModularMagic_Core.prefabs.EitrFine.name}:6";
             rainOptions.recipeUpgrade = rainOptions.recipe;

@@ -7,8 +7,10 @@ using ModularMagic_Core.Types;
 using ModularMagic_EarthStaffs.Components;
 using ModularMagic_EarthStaffs.Configs;
 using ModularMagic_EarthStaffs.Helpers;
+using ModularMagic_EarthStaffs.Locale;
 using ModularMagic_EarthStaffs.Models;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
@@ -37,6 +39,7 @@ namespace ModularMagic_EarthStaffs
         public void Awake()
         {
             Instance = this;
+            LocaleEnglish.Init();
             InitAssetBundle();
             PluginConfig.Init();
             InitStatusEffects();
@@ -108,6 +111,7 @@ namespace ModularMagic_EarthStaffs
             imbuementSlots.m_slots = slots;
             imbuementSlots.m_tier = tier;
             imbuementSlots.m_weaponType = WeaponType.MMES;
+            imbuementSlots.m_allowedRunes = new List<string>(EarthImbuementHelper.AllowedRunes);
         }
 
         private void InitStatusEffects()

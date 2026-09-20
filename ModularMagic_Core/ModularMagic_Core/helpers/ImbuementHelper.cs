@@ -1,6 +1,7 @@
 using HarmonyLib;
 using ModularMagic_Core.Components;
 using ModularMagic_Core.Models;
+using ModularMagic_Core.Types;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -54,6 +55,21 @@ namespace ModularMagic_Core.Helpers
 
             runes.TryGetValue(id, out ImbuementRune rune);
             return rune;
+        }
+
+        /// <summary>
+        /// The translation key of the name of a rune on a weapon type, for example "item_rune_nova_mmes". The staff mod adds
+        /// the text of its runes under these keys. Without a text the rune shows its default name.
+        /// </summary>
+        public static string GetNameKey(string runeId, string weaponType)
+        {
+            return $"item_rune_{runeId.ToLowerInvariant()}_{(weaponType ?? WeaponType.None).ToLowerInvariant()}";
+        }
+
+        // The translation key of the description of a rune on a weapon type, for example "item_rune_nova_desc_mmes"
+        public static string GetDescriptionKey(string runeId, string weaponType)
+        {
+            return $"item_rune_{runeId.ToLowerInvariant()}_desc_{(weaponType ?? WeaponType.None).ToLowerInvariant()}";
         }
 
         // Whether the item is a rune, runes have the ImbuementRune component on their prefab

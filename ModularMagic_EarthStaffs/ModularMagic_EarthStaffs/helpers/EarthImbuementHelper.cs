@@ -16,6 +16,13 @@ namespace ModularMagic_EarthStaffs.Helpers
     /// </summary>
     internal class EarthImbuementHelper
     {
+        // The runes the Earth staffs support. The weapon decides this, the rune only says what it is
+        public static readonly string[] AllowedRunes =
+        {
+            RuneId.DamagePierce, RuneId.DamageSlash, RuneId.EitrCost, RuneId.ProjectileAccuracy, RuneId.ProjectileBurst,
+            RuneId.ProjectileSpeed, RuneId.Cone, RuneId.Creatures, RuneId.Nova, RuneId.Rain,
+        };
+
         // Other staff mods share the imbuement API, so only handle the staffs of this mod
         public static bool IsEarthStaff(ItemData itemData)
         {
