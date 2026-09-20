@@ -56,7 +56,7 @@ namespace ModularMagic_Core
                     Jotunn.Logger.LogError($"[Imbuements] Rune '{entry.id}' has no models (attach/rune_1), skipping it");
                     continue;
                 }
-
+                
                 if (entry.tiers.Length != maxLevel)
                     Jotunn.Logger.LogWarning($"[Imbuements] Rune '{entry.id}' has {maxLevel} models but {entry.tiers.Length} tiers");
 

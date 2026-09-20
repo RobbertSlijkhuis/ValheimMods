@@ -34,6 +34,8 @@ namespace ModularMagic_Core.Components
         private long m_editorId;
         // The saved data string of the stand the last time it was synced
         private string m_standDataString;
+        // The unsaved changes (draft) of the stand the last time it was synced, null when there are none
+        private string m_standDraftString;
 
         public UnityEvent m_onItemAttach = new UnityEvent();
         public UnityEvent m_onItemRemove = new UnityEvent();
@@ -146,17 +148,21 @@ namespace ModularMagic_Core.Components
                 return;
             }
 
-            if (dataString == m_standDataString)
+            string draftString = ImbuementHelper.GetDraft(standItem);
+
+            // Neither the saved runes nor the unsaved changes changed
+            if (dataString == m_standDataString && draftString == m_standDraftString)
                 return;
 
             m_standDataString = dataString;
+            m_standDraftString = draftString;
 
             // The editor keeps their own working copy
             if (!IsLocalEditor())
                 StaffRefresh(dataString, standItem);
         }
 
-        // Shows the newly saved runes to a player that is not editing
+        // Shows the saved runes and the unsaved changes of the editor to a player that is not editing
         private void StaffRefresh(string imbuementsString, ItemData itemData)
         {
             ImbuementSlots slots = ImbuementHelper.GetSlots(itemData);
@@ -166,10 +172,13 @@ namespace ModularMagic_Core.Components
 
             RemoveRunes();
 
-            m_imbuements = ImbuementHelper.Deserialize(imbuementsString, slots);
-            m_savedImbuements = m_imbuements.Select(imbuement => imbuement.CopyRune()).ToList();
+            List<Imbuement> savedImbuements = ImbuementHelper.Deserialize(imbuementsString, slots);
+            string draft = ImbuementHelper.GetDraft(itemData);
+
+            m_savedImbuements = savedImbuements.Select(imbuement => imbuement.CopyRune()).ToList();
+            m_imbuements = draft != null ? ApplyDraft(draft, savedImbuements, slots) : savedImbuements;
             m_itemData = itemData;
-            m_imbuementsString = ImbuementHelper.Serialize(m_imbuements);
+            m_imbuementsString = ImbuementHelper.Serialize(savedImbuements);
             CreateRunes();
 
             m_onRuneActivation.Invoke();
@@ -194,9 +203,10 @@ namespace ModularMagic_Core.Components
             // Normalized, so an untouched staff (or one in an old format) reports no changes
             m_imbuementsString = ImbuementHelper.Serialize(savedImbuements);
 
-            // The editor continues with their unsaved changes, everyone else sees what is saved
+            // Everyone sees the unsaved changes of the editor, the editor continues with them
             string draft = ImbuementHelper.GetDraft(itemData);
-            m_imbuements = draft != null && IsLocalEditor() ? ApplyDraft(draft, savedImbuements, slots) : savedImbuements;
+            m_standDraftString = draft;
+            m_imbuements = draft != null ? ApplyDraft(draft, savedImbuements, slots) : savedImbuements;
             CreateRunes();
 
             m_onItemAttach.Invoke();
@@ -223,6 +233,7 @@ namespace ModularMagic_Core.Components
             m_imbuementsString = null;
             m_editorId = 0;
             m_standDataString = null;
+            m_standDraftString = null;
             RemoveRunes();
 
             m_onItemRemove.Invoke();
@@ -460,6 +471,8 @@ namespace ModularMagic_Core.Components
                 // There is nothing to remember when the working copy is the same as what is saved
                 ImbuementHelper.SetDraft(standItem, draftString == savedString ? null : draftString);
                 SaveToZDO(standItem, zdo);
+                // The other players see the unsaved changes too, let every client update its table
+                netView.InvokeRPC(ZNetView.Everybody, "RPC_UpdateVisual");
             }
             catch (Exception e)
             {

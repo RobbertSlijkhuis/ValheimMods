@@ -171,7 +171,7 @@ At startup Core sets the maximum quality of the item to the number of models, re
 ## How the table works with more than one player
 
 - Every client builds the table from what is on the stand, through a postfix on `ItemStand.SetVisualItem`. A player who arrives later sees the runes within a few seconds.
-- Only the editor can change anything. Everyone else sees the saved runes read-only with a lock message. To release a staff, take it off the stand and place it again.
+- Only the editor can change anything. Everyone else sees the same runes read-only with a lock message, including the editor's unsaved changes (the draft). To release a staff, take it off the stand and place it again.
 - Saving and the draft are sent to the owner of the stand, which checks the editor and writes the data.
 - Unsaved runes are kept in the draft. A rune that is taken out of a slot, or that is still unsaved when the staff leaves the stand, drops from its slot.
 
