@@ -43,6 +43,7 @@ namespace ModularMagic_EarthStaffs
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             PrefabManager.OnVanillaPrefabsAvailable += AddEarthStaffs;
+            PrefabManager.OnPrefabsRegistered += FixAndLogAudioMixers;
             // ItemManager.OnItemsRegistered += LogRecipes;
         }
 
@@ -78,10 +79,11 @@ namespace ModularMagic_EarthStaffs
 
                 prefabs.Nova.AddComponent<NovaTerrainEdit>();
 
-                snapshots.staffEarth0.Init(prefabs.StaffEarth0.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffEarth0);
-                snapshots.staffEarth1.Init(prefabs.StaffEarth1.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffEarth1);
-                snapshots.staffEarth2.Init(prefabs.StaffEarth2.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffEarth2);
-                snapshots.staffEarth3.Init(prefabs.StaffEarth3.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffEarth3);
+                // The config is bound in Awake, so it is ready here
+                snapshots.staffEarth0 = new ItemDataSnapShot(prefabs.StaffEarth0.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffEarth0);
+                snapshots.staffEarth1 = new ItemDataSnapShot(prefabs.StaffEarth1.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffEarth1);
+                snapshots.staffEarth2 = new ItemDataSnapShot(prefabs.StaffEarth2.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffEarth2);
+                snapshots.staffEarth3 = new ItemDataSnapShot(prefabs.StaffEarth3.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffEarth3);
 
                 PrefabManager.OnVanillaPrefabsAvailable -= AddEarthStaffs;
             }
@@ -90,6 +92,14 @@ namespace ModularMagic_EarthStaffs
                 Jotunn.Logger.LogError("Something went wrong in adding the earth staffs: " + e);
                 PrefabManager.OnVanillaPrefabsAvailable -= AddEarthStaffs;
             }
+        }
+
+        private void FixAndLogAudioMixers()
+        {
+            GameObject[] bundlePrefabs = assetBundle.LoadAllAssets<GameObject>();
+            AudioMixerHelper.FixMockedGroups(bundlePrefabs, "MMES");
+            AudioMixerDiagnostics.Log(bundlePrefabs, "MMES");
+            PrefabManager.OnPrefabsRegistered -= FixAndLogAudioMixers;
         }
 
         private void AddImbuementSlots(GameObject prefab, int slots, int tier)

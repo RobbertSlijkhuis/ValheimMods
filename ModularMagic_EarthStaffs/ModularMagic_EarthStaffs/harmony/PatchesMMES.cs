@@ -25,31 +25,6 @@ namespace ModularMagic_EarthStaffs.Harmony
             }
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(TerrainOp.Settings), nameof(TerrainOp.Settings.Deserialize))]
-        public static bool TerrainOpSettingsDeserialize_Prefix(ZPackage pkg, ref TerrainOp.Settings __result)
-        {
-            try
-            {
-                int position = pkg.GetPos();
-                int hash = pkg.ReadInt();
-
-                if (TerrainOpHelper.TryGetOwnTerrainOp(hash, out TerrainOp terrainOp))
-                {
-                    __result = terrainOp.m_settings;
-                    return false;
-                }
-
-                pkg.SetPos(position);
-                return true;
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Something went wrong in TerrainOpSettingsDeserialize_Prefix: " + e);
-                return true;
-            }
-        }
-
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Humanoid), "EquipItem")]
         public static void EquipItem_Postfix(ref Humanoid __instance, ItemData item)

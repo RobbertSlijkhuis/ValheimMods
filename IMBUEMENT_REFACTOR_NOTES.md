@@ -148,6 +148,14 @@ Eight findings. Outcome:
 - **Decided: no anti-cheat.** The save and draft requests are authorised by the editor id that the client sends, which anyone can read from the stand, and the owner does not check tier, allowed weapon or one-rune-per-type. A modified client can therefore overwrite runes or give itself runes. The user does not want protection against modified clients ("if they want to cheat that way so be it"). Do not add sender checks or extra validation for this. (If a sender check were ever added, the forwarded request would have to carry the original sender, because forwarding changes the sender.)
 - **Not done on purpose:** performance caching (`SyncFromStand` skipping on an unchanged data revision, caching the rune in `Imbuement`); the user does not want caching. Old-format migration (decided: none).
 
+## Code review (`/code-review high` on ModularMagic_EarthStaffs)
+
+Five findings. Outcome:
+
+- **Fixed (written, not yet built or tested):** the snapshots are no longer created empty as field initializers. `ItemDataSnapShot` now takes its item data and `StaffConfig` in the constructor, and the snapshots are created in `AddEarthStaffs`, after the config is bound. A staff without a snapshot (or a failed `AddEarthStaffs`) is not handled as an Earth staff (`IsEarthStaff` is false) instead of throwing on every equip.
+- **Removed at the user's request:** the Nova terrain-op workaround (`TerrainOp.Settings.Deserialize` prefix in `PatchesMMES` and `helpers/TerrainOpHelper.cs`). The user wants it properly fixed later, not patched. The `LevelTerrain` prefab registration and `NovaTerrainEdit` stay. Not fixed: `NovaTerrainEdit.Awake` still has no null check on `Player.m_localPlayer` (low risk).
+- **Dismissed:** "register the terrain op in `ObjectDB` instead" (already tried in-game, it did not work), and caching the terrain-op hash (the user does not want caching).
+
 ## Follow-ups (not done)
 
 - **Two-player test** of phases 2 and 3 (see the verification list in the plan file), including the `Missing prefab hash` check in the other client's log.

@@ -10,10 +10,10 @@ namespace ModularMagic_EarthStaffs.Models
     /// </summary>
     internal class ItemDataSnapShot
     {
-        private StaffConfig config;
+        private readonly StaffConfig config;
 
         // The item data of the staff prefab, its attack is copied for every equipped staff
-        public ItemData mainAttack;
+        public readonly ItemData mainAttack;
 
         public float? attackEitr => config.useEitr.Value;
         public float? damageBlunt => config.damageBlunt == null ? 0f : config.damageBlunt.Value;
@@ -22,7 +22,8 @@ namespace ModularMagic_EarthStaffs.Models
         public float? projectileBurst => config.projectileBurst == null ? 0f : config.projectileBurst.Value;
         public float? projectileVelocity => config.projectileVelocity == null ? 0f : config.projectileVelocity.Value;
 
-        public void Init(ItemData itemData, StaffConfig config)
+        // The config has to be bound before a snapshot is created
+        public ItemDataSnapShot(ItemData itemData, StaffConfig config)
         {
             this.config = config;
             mainAttack = itemData;
