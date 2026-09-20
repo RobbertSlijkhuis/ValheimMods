@@ -2,6 +2,7 @@ using HarmonyLib;
 using ModularMagic_Core.Components;
 using ModularMagic_Core.Helpers;
 using System;
+using UnityEngine;
 using static ItemDrop;
 
 namespace ModularMagic_Core.Harmony
@@ -55,6 +56,29 @@ namespace ModularMagic_Core.Harmony
             {
                 Jotunn.Logger.LogError("Something went wrong in DropItem_Prefix: " + e);
             }
+        }
+
+        /// <summary>
+        /// The game has one icon per item, a rune has an icon for every level. Used by the inventory, hotbar, drag icon and upgrade panel.
+        /// </summary>
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(ItemData), nameof(ItemData.GetIcon))]
+        public static void GetIcon_Postfix(ItemData __instance, ref Sprite __result)
+        {
+            if (RuneIconHelper.TryGetIcon(__instance, out Sprite icon))
+                __result = icon;
+        }
+
+        /// <summary>
+        /// Upgrading a rune to the next quality needs a station level of one higher per quality, but the rune table has no
+        /// station upgrades, so runes only need the level of their recipe. The costs are what limits the upgrades.
+        /// </summary>
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Recipe), nameof(Recipe.GetRequiredStationLevel))]
+        public static void GetRequiredStationLevel_Postfix(Recipe __instance, ref int __result)
+        {
+            if (ImbuementHelper.IsRune(__instance.m_item))
+                __result = Mathf.Max(1, __instance.m_minStationLevel);
         }
 
         /// <summary>

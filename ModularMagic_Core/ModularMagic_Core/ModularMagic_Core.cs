@@ -54,10 +54,27 @@ namespace ModularMagic_Core
 
             foreach (RuneEntry entry in RuneData.list)
             {
+                // The rune has a model per level, that is how many levels (qualities) the item has
+                int maxLevel = RuneModelHelper.CountModels(entry.prefab);
+
+                if (maxLevel < 1)
+                {
+                    Jotunn.Logger.LogError($"[Imbuements] Rune '{entry.id}' has no models (attach/rune_1), skipping it");
+                    continue;
+                }
+
+                if (entry.tiers.Length != maxLevel)
+                    Jotunn.Logger.LogWarning($"[Imbuements] Rune '{entry.id}' has {maxLevel} models but {entry.tiers.Length} tiers");
+
+                // Above 1 the game shows the quality and lets the item be upgraded
+                entry.prefab.GetComponent<ItemDrop>().m_itemData.m_shared.m_maxQuality = maxLevel;
+
                 ImbuementRune imbuementRune = entry.prefab.AddComponent<ImbuementRune>();
-                imbuementRune.Init(entry.id, entry.type, entry.value, entry.tier, entry.level, entry.allowedWeapons, entry.nameKey, entry.descriptionKey);
+                imbuementRune.Init(entry.id, entry.type, entry.value, maxLevel, entry.tiers, entry.allowedWeapons, entry.nameKey, entry.descriptionKey);
                 ImbuementHelper.RegisterRune(imbuementRune);
-                ItemHelper.Create(entry.prefab, entry.config, true);
+
+                Sprite[] icons = RuneIconHelper.Render(entry.prefab, maxLevel);
+                ItemHelper.Create(entry.prefab, entry.config, icons[0]);
             }
 
             PrefabManager.OnVanillaPrefabsAvailable -= AddItems;
@@ -97,6 +114,17 @@ namespace ModularMagic_Core
         }
 
         /**
+         * Loads and registers the prefab of a rune. The name is fixed and the same on every client, the level of the rune is the quality of the item
+         */
+        private GameObject AddRunePrefab(string name)
+        {
+            GameObject prefab = assetBundle.LoadAsset<GameObject>(name);
+            prefab.AddComponent<RuneItemModel>();
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefab, true));
+            return prefab;
+        }
+
+        /**
          * Initialise the asset bundle of the mod
          */
         private void InitAssetBundle()
@@ -112,98 +140,17 @@ namespace ModularMagic_Core
             prefabs.SaveFX = assetBundle.LoadAsset<GameObject>("fx_save_MMC");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.SaveFX, true));
 
-            prefabs.RuneDamageBluntWood = assetBundle.LoadAsset<GameObject>("MMC_Rune_DamageBlunt");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamageBluntWood, true));
-            prefabs.RuneDamageBluntStone = PrefabHelper.CreateClonedVariant("MMC_Rune_DamageBlunt_Stone", prefabs.RuneDamageBluntWood.name, 2);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamageBluntStone, true));
-            prefabs.RuneDamageBluntMarble = PrefabHelper.CreateClonedVariant("MMC_Rune_DamageBlunt_Marble", prefabs.RuneDamageBluntWood.name, 3);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamageBluntMarble, true));
-            prefabs.RuneDamageBluntGrausten = PrefabHelper.CreateClonedVariant("MMC_Rune_DamageBlunt_Grausten", prefabs.RuneDamageBluntWood.name, 4);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamageBluntGrausten, true));
-
-            prefabs.RuneDamagePierceWood = assetBundle.LoadAsset<GameObject>("MMC_Rune_DamagePierce");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamagePierceWood, true));
-            prefabs.RuneDamagePierceStone = PrefabHelper.CreateClonedVariant("MMC_Rune_DamagePierce_Stone", prefabs.RuneDamagePierceWood.name, 2);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamagePierceStone, true));
-            prefabs.RuneDamagePierceMarble = PrefabHelper.CreateClonedVariant("MMC_Rune_DamagePierce_Marble", prefabs.RuneDamagePierceWood.name, 3);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamagePierceMarble, true));
-            prefabs.RuneDamagePierceGrausten = PrefabHelper.CreateClonedVariant("MMC_Rune_DamagePierce_Grausten", prefabs.RuneDamagePierceWood.name, 4);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamagePierceGrausten, true));
-
-            prefabs.RuneDamageSlashWood = assetBundle.LoadAsset<GameObject>("MMC_Rune_DamageSlash");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamageSlashWood, true));
-            prefabs.RuneDamageSlashStone = PrefabHelper.CreateClonedVariant("MMC_Rune_DamageSlash_Stone", prefabs.RuneDamageSlashWood.name, 2);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamageSlashStone, true));
-            prefabs.RuneDamageSlashMarble = PrefabHelper.CreateClonedVariant("MMC_Rune_DamageSlash_Marble", prefabs.RuneDamageSlashWood.name, 3);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamageSlashMarble, true));
-            prefabs.RuneDamageSlashGrausten = PrefabHelper.CreateClonedVariant("MMC_Rune_DamageSlash_Grausten", prefabs.RuneDamageSlashWood.name, 4);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneDamageSlashGrausten, true));
-
-            prefabs.RuneEitrCostWood = assetBundle.LoadAsset<GameObject>("MMC_Rune_EitrCost");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneEitrCostWood, true));
-            prefabs.RuneEitrCostStone = PrefabHelper.CreateClonedVariant("MMC_Rune_EitrCost_Stone", prefabs.RuneEitrCostWood.name, 2);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneEitrCostStone, true));
-            prefabs.RuneEitrCostMarble = PrefabHelper.CreateClonedVariant("MMC_Rune_EitrCost_Marble", prefabs.RuneEitrCostWood.name, 3);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneEitrCostMarble, true));
-            prefabs.RuneEitrCostGrausten = PrefabHelper.CreateClonedVariant("MMC_Rune_EitrCost_Grausten", prefabs.RuneEitrCostWood.name, 4);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneEitrCostGrausten, true));
-
-            prefabs.RuneProjectileAccuracyWood = assetBundle.LoadAsset<GameObject>("MMC_Rune_ProjectileAccuracy");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneProjectileAccuracyWood, true));
-            prefabs.RuneProjectileAccuracyStone = PrefabHelper.CreateClonedVariant("MMC_Rune_ProjectileAccuracy_Stone", prefabs.RuneProjectileAccuracyWood.name, 2);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneProjectileAccuracyStone, true));
-            prefabs.RuneProjectileAccuracyMarble = PrefabHelper.CreateClonedVariant("MMC_Rune_ProjectileAccuracy_Marble", prefabs.RuneProjectileAccuracyWood.name, 3);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneProjectileAccuracyMarble, true));
-            prefabs.RuneProjectileAccuracyGrausten = PrefabHelper.CreateClonedVariant("MMC_Rune_ProjectileAccuracy_Grausten", prefabs.RuneProjectileAccuracyWood.name, 4);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneProjectileAccuracyGrausten, true));
-
-            prefabs.RuneProjectileBurstWood = assetBundle.LoadAsset<GameObject>("MMC_Rune_ProjectileBurst");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneProjectileBurstWood, true));
-            prefabs.RuneProjectileBurstStone = PrefabHelper.CreateClonedVariant("MMC_Rune_ProjectileBurst_Stone", prefabs.RuneProjectileBurstWood.name, 2);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneProjectileBurstStone, true));
-            prefabs.RuneProjectileBurstMarble = PrefabHelper.CreateClonedVariant("MMC_Rune_ProjectileBurst_Marble", prefabs.RuneProjectileBurstWood.name, 3);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneProjectileBurstMarble, true));
-            prefabs.RuneProjectileBurstGrausten = PrefabHelper.CreateClonedVariant("MMC_Rune_ProjectileBurst_Grausten", prefabs.RuneProjectileBurstWood.name, 4);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneProjectileBurstGrausten, true));
-
-            prefabs.RuneProjectileSpeedWood = assetBundle.LoadAsset<GameObject>("MMC_Rune_ProjectileSpeed");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneProjectileSpeedWood, true));
-            prefabs.RuneProjectileSpeedStone = PrefabHelper.CreateClonedVariant("MMC_Rune_ProjectileSpeed_Stone", prefabs.RuneProjectileSpeedWood.name, 2);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneProjectileSpeedStone, true));
-            prefabs.RuneProjectileSpeedMarble = PrefabHelper.CreateClonedVariant("MMC_Rune_ProjectileSpeed_Marble", prefabs.RuneProjectileSpeedWood.name, 3);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneProjectileSpeedMarble, true));
-            prefabs.RuneProjectileSpeedGrausten = PrefabHelper.CreateClonedVariant("MMC_Rune_ProjectileSpeed_Grausten", prefabs.RuneProjectileSpeedWood.name, 4);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneProjectileSpeedGrausten, true));
-
-            prefabs.RuneConeWood = assetBundle.LoadAsset<GameObject>("MMC_Rune_Cone");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneConeWood, true));
-            prefabs.RuneConeStone = PrefabHelper.CreateClonedVariant("MMC_Rune_Cone_Stone", prefabs.RuneConeWood.name, 2);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneConeStone, true));
-            prefabs.RuneConeMarble = PrefabHelper.CreateClonedVariant("MMC_Rune_Cone_Marble", prefabs.RuneConeWood.name, 3);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneConeMarble, true));
-            prefabs.RuneConeGrausten = PrefabHelper.CreateClonedVariant("MMC_Rune_Cone_Grausten", prefabs.RuneConeWood.name, 4);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneConeGrausten, true));
-
-            prefabs.RuneCreaturesStone = assetBundle.LoadAsset<GameObject>("MMC_Rune_Creatures");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneCreaturesStone, true));
-            prefabs.RuneCreaturesMarble = PrefabHelper.CreateClonedVariant("MMC_Rune_Creatures_Marble", prefabs.RuneCreaturesStone.name, 2);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneCreaturesMarble, true));
-            prefabs.RuneCreaturesGrausten = PrefabHelper.CreateClonedVariant("MMC_Rune_Creatures_Grausten", prefabs.RuneCreaturesStone.name, 3);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneCreaturesGrausten, true));
-
-            prefabs.RuneNovaStone = assetBundle.LoadAsset<GameObject>("MMC_Rune_Nova");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneNovaStone, true));
-            prefabs.RuneNovaMarble = PrefabHelper.CreateClonedVariant("MMC_Rune_Nova_Marble", prefabs.RuneNovaStone.name, 2);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneNovaMarble, true));
-            prefabs.RuneNovaGrausten = PrefabHelper.CreateClonedVariant("MMC_Rune_Nova_Grausten", prefabs.RuneNovaStone.name, 3);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneNovaGrausten, true));
-
-            prefabs.RuneRainStone = assetBundle.LoadAsset<GameObject>("MMC_Rune_Rain");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneRainStone, true));
-            prefabs.RuneRainMarble = PrefabHelper.CreateClonedVariant("MMC_Rune_Rain_Marble", prefabs.RuneRainStone.name, 2);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneRainMarble, true));
-            prefabs.RuneRainGrausten = PrefabHelper.CreateClonedVariant("MMC_Rune_Rain_Grausten", prefabs.RuneRainStone.name, 3);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneRainGrausten, true));
+            prefabs.RuneDamageBlunt = AddRunePrefab("MMC_Rune_DamageBlunt");
+            prefabs.RuneDamagePierce = AddRunePrefab("MMC_Rune_DamagePierce");
+            prefabs.RuneDamageSlash = AddRunePrefab("MMC_Rune_DamageSlash");
+            prefabs.RuneEitrCost = AddRunePrefab("MMC_Rune_EitrCost");
+            prefabs.RuneProjectileAccuracy = AddRunePrefab("MMC_Rune_ProjectileAccuracy");
+            prefabs.RuneProjectileBurst = AddRunePrefab("MMC_Rune_ProjectileBurst");
+            prefabs.RuneProjectileSpeed = AddRunePrefab("MMC_Rune_ProjectileSpeed");
+            prefabs.RuneCone = AddRunePrefab("MMC_Rune_Cone");
+            prefabs.RuneCreatures = AddRunePrefab("MMC_Rune_Creatures");
+            prefabs.RuneNova = AddRunePrefab("MMC_Rune_Nova");
+            prefabs.RuneRain = AddRunePrefab("MMC_Rune_Rain");
 
             materials.ImbuementTable = assetBundle.LoadAsset<Material>("Altar_MMC");
             materials.SpellBook = assetBundle.LoadAsset<Material>("Spellbook2_1_1_MMC");

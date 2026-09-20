@@ -7,7 +7,8 @@ namespace ModularMagic_Core.Helpers
 {
     internal class ItemHelper
     {
-        public static void Create(GameObject prefab, Configs.ItemConfig config, bool renderIcon = false)
+        // The icon is optional, without one the item uses the icon of the prefab
+        public static void Create(GameObject prefab, Configs.ItemConfig config, Sprite icon = null)
         {
             ItemConfig itemConfig = new ItemConfig();
             itemConfig.Name = config.name.Value;
@@ -16,15 +17,11 @@ namespace ModularMagic_Core.Helpers
             itemConfig.CraftingStation = config.craftingStation.Value;
             itemConfig.MinStationLevel = config.minStationLevel.Value;
 
-            if (renderIcon)
-            {
-                RenderManager.RenderRequest request = new RenderManager.RenderRequest(prefab);
-                request.Rotation = RenderManager.IsometricRotation;
-                // request.UseCache = true;
-                itemConfig.Icon = RenderManager.Instance.Render(request);
-            }
+            if (icon != null)
+                itemConfig.Icon = icon;
 
-            RequirementConfig[] requirements = RecipeHelper.GetAsRequirementConfigArray(config.recipe.Value, null, null);
+            // The upgrade costs only exist for items that can be upgraded
+            RequirementConfig[] requirements = RecipeHelper.GetAsRequirementConfigArray(config.recipe.Value, config.recipeUpgrade?.Value, config.recipeMultiplier?.Value);
 
             if (requirements == null || requirements.Length == 0)
                 Jotunn.Logger.LogError($"Could not resolve recipe for: {prefab.name}");

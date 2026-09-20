@@ -14,6 +14,8 @@ namespace ModularMagic_Core.Models
         public string? craftingStation;
         public int minStationLevel = 1;
         public string? recipe;
+        public string? recipeUpgrade;
+        public int recipeMultiplier = 1;
 
         public ItemConfigOptions(GameObject prefab, string name, string recipe)
         {

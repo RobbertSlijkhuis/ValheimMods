@@ -37,21 +37,42 @@ namespace ModularMagic_Core.Helpers
                 return;
             }
 
-            string key = RuneKey(rune.m_id, rune.m_level);
-
-            if (runes.ContainsKey(key))
+            if (runes.ContainsKey(rune.m_id))
             {
-                Jotunn.Logger.LogWarning($"[Imbuements] Duplicate rune '{key}', '{rune.gameObject.name}' conflicts with '{runes[key].gameObject.name}'");
+                Jotunn.Logger.LogWarning($"[Imbuements] Duplicate rune '{rune.m_id}', '{rune.gameObject.name}' conflicts with '{runes[rune.m_id].gameObject.name}'");
                 return;
             }
 
-            runes[key] = rune;
+            runes[rune.m_id] = rune;
         }
 
-        public static ImbuementRune FindRune(string id, int level)
+        // The level of a rune is not part of the rune, it is the quality of the rune item (see DropRune)
+        public static ImbuementRune FindRune(string id)
         {
-            runes.TryGetValue(RuneKey(id, level), out ImbuementRune rune);
+            if (string.IsNullOrEmpty(id))
+                return null;
+
+            runes.TryGetValue(id, out ImbuementRune rune);
             return rune;
+        }
+
+        // Whether the item is a rune, runes have the ImbuementRune component on their prefab
+        public static bool IsRune(ItemDrop itemDrop)
+        {
+            return itemDrop != null && itemDrop.GetComponent<ImbuementRune>() != null;
+        }
+
+        /// <summary>
+        /// Drops a rune item with the level as its quality. The rune models and icons show the level of the item.
+        /// </summary>
+        public static ItemDrop DropRune(ImbuementRune rune, int level, Vector3 position, Quaternion rotation)
+        {
+            ItemData itemData = rune.GetComponent<ItemDrop>().m_itemData.Clone();
+            // Only set on item instances, not on the item data of the prefab
+            itemData.m_dropPrefab = rune.gameObject;
+            itemData.m_quality = level;
+
+            return ItemDrop.DropItem(itemData, 1, position, rotation);
         }
 
         // A weapon is imbuable when its drop prefab has the ImbuementSlots component
@@ -96,21 +117,20 @@ namespace ModularMagic_Core.Helpers
         }
 
         /// <summary>
-        /// The runes of the draft that are not saved yet, with the slot they are in. These runes were taken from the
-        /// inventory of the editor, so they have to be dropped again when the staff leaves the table.
+        /// The runes of the draft that are not saved yet, with the slot they are in (the rune and its level are in the
+        /// imbuement). These runes were taken from the inventory of the editor, so they have to be dropped again when
+        /// the staff leaves the table.
         /// </summary>
-        public static List<KeyValuePair<int, ImbuementRune>> GetUnsavedRunes(string savedData, string draftData, ImbuementSlots slots)
+        public static List<KeyValuePair<int, Imbuement>> GetUnsavedRunes(string savedData, string draftData, ImbuementSlots slots)
         {
-            List<KeyValuePair<int, ImbuementRune>> unsaved = new List<KeyValuePair<int, ImbuementRune>>();
+            List<KeyValuePair<int, Imbuement>> unsaved = new List<KeyValuePair<int, Imbuement>>();
             List<Imbuement> saved = Deserialize(savedData, slots);
             List<Imbuement> draft = Deserialize(draftData, slots);
 
             for (int i = 0; i < draft.Count; i++)
             {
-                ImbuementRune rune = draft[i].rune;
-
-                if (rune != null && !draft[i].HasSameRune(saved[i]))
-                    unsaved.Add(new KeyValuePair<int, ImbuementRune>(i, rune));
+                if (draft[i].rune != null && !draft[i].HasSameRune(saved[i]))
+                    unsaved.Add(new KeyValuePair<int, Imbuement>(i, draft[i]));
             }
 
             return unsaved;
@@ -200,9 +220,11 @@ namespace ModularMagic_Core.Helpers
 
                 string id = entries[i].Substring(0, levelSeparator);
 
-                if (FindRune(id, level) == null)
+                ImbuementRune rune = FindRune(id);
+
+                if (rune == null || !rune.IsValidLevel(level))
                 {
-                    Jotunn.Logger.LogWarning($"[Imbuements] Skipping unknown rune: {entries[i]}");
+                    Jotunn.Logger.LogWarning($"[Imbuements] Skipping unknown rune or level: {entries[i]}");
                     continue;
                 }
 
@@ -212,11 +234,6 @@ namespace ModularMagic_Core.Helpers
             }
 
             return imbuements;
-        }
-
-        private static string RuneKey(string id, int level)
-        {
-            return $"{id}@{level}";
         }
     }
 }

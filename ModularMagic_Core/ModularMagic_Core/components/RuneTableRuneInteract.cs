@@ -26,11 +26,12 @@ namespace ModularMagic_Core.components
         public Imbuement m_imbuement;
         public int m_index;
         public bool m_locked = false;
-        public string m_dropOldItem;
+        // The saved rune (id and level) that was removed or replaced, it drops when the changes are saved
+        public Imbuement m_oldRune;
         public Color m_emission;
 
         // replacedRune is a saved rune that was removed or replaced by the editor, it stays visible until the changes are saved
-        public void Init(Imbuement imbuement, int index, Color emission, ImbuementRune replacedRune)
+        public void Init(Imbuement imbuement, int index, Color emission, Imbuement replacedRune)
         {
             m_transformNew = transform.Find("new");
             m_transformOld = transform.Find("old");
@@ -60,9 +61,10 @@ namespace ModularMagic_Core.components
         }
 
         // Shows the saved rune that is marked for removal, the same as it looks after marking it for removal
-        private void RestoreReplacedRune(ImbuementRune rune)
+        private void RestoreReplacedRune(Imbuement replaced)
         {
-            Transform attachTransform = rune.transform.Find("attach");
+            ImbuementRune rune = replaced.rune;
+            Transform attachTransform = rune != null ? rune.transform.Find("attach") : null;
 
             if (attachTransform == null)
             {
@@ -71,7 +73,7 @@ namespace ModularMagic_Core.components
             }
 
             GameObject attached = Instantiate(attachTransform.gameObject, m_transformOld);
-            Transform runeTransform = attached.transform.Find($"rune_{rune.m_level}");
+            Transform runeTransform = RuneModelHelper.ShowModel(attached.transform, replaced.level);
 
             if (runeTransform == null)
             {
@@ -88,7 +90,7 @@ namespace ModularMagic_Core.components
             attached.transform.localRotation = TransformHelper.GenerateRotation(new Vector3(0, 0, 0));
             attached.transform.localPosition = new Vector3(0, 0, -40);
 
-            m_dropOldItem = rune.gameObject.name;
+            m_oldRune = replaced;
             m_resetInteract = attached.AddComponent<RuneTableRuneResetInteract>();
         }
 
@@ -100,10 +102,10 @@ namespace ModularMagic_Core.components
         }
 
         // A rune that is taken out of a slot drops from that slot, just like a removed saved rune drops when the changes are saved
-        private void DropRune(ImbuementRune rune)
+        private void DropRune(Imbuement imbuement)
         {
-            if (rune != null)
-                Instantiate(rune.gameObject, m_transformNew.position, m_transformNew.rotation);
+            if (imbuement.rune != null)
+                ImbuementHelper.DropRune(imbuement.rune, imbuement.level, m_transformNew.position, m_transformNew.rotation);
         }
 
         private void UpdateRune(GameObject prefab)
@@ -115,7 +117,7 @@ namespace ModularMagic_Core.components
                 if (attachCloneTransform == null || m_transformOld == null)
                     return;
 
-                if (m_dropOldItem != null && m_transformOld.childCount == 0)
+                if (m_oldRune != null && m_transformOld.childCount == 0)
                     MarkForRemoval();
                 else
                     Destroy(attachCloneTransform.gameObject);
@@ -133,7 +135,7 @@ namespace ModularMagic_Core.components
             }
 
             GameObject attached = Instantiate(attachTransform.gameObject, m_transformNew);
-            Transform runeTransform = attached.transform.Find($"rune_{m_imbuement.level}");
+            Transform runeTransform = RuneModelHelper.ShowModel(attached.transform, m_imbuement.level);
 
             if (runeTransform == null)
             {
@@ -243,7 +245,16 @@ namespace ModularMagic_Core.components
                 return false;
             }
 
-            if (m_imbuement.tier < imbuementRune.m_tier)
+            // The level of the rune is the quality of the item
+            int level = item.m_quality;
+
+            if (!imbuementRune.IsValidLevel(level))
+            {
+                Jotunn.Logger.LogWarning($"Rune '{imbuementRune.m_id}' has no level {level}!");
+                return false;
+            }
+
+            if (m_imbuement.tier < imbuementRune.GetRequiredTier(level))
             {
                 Jotunn.Logger.LogWarning("This weapon is not high enough tier to slot this rune!");
                 return false;
@@ -255,7 +266,7 @@ namespace ModularMagic_Core.components
                 return false;
             }
 
-            m_imbuement.SetRune(imbuementRune);
+            m_imbuement.SetRune(imbuementRune, level);
 
             m_imbuementTable.m_onRuneActivation.Invoke();
 
@@ -270,9 +281,9 @@ namespace ModularMagic_Core.components
                 return false;
 
             if (m_imbuement.saved)
-                m_dropOldItem = m_imbuement.prefab;
+                m_oldRune = m_imbuement.CopyRune();
             else
-                DropRune(m_imbuement.rune);
+                DropRune(m_imbuement);
 
             m_imbuement.Clear();
 
@@ -304,7 +315,7 @@ namespace ModularMagic_Core.components
         {
             yield return new WaitForSeconds(0.4f);
 
-            GameObject kicked = Instantiate(m_imbuement.rune.gameObject, m_transformNew.position, m_transformNew.rotation);
+            ItemDrop kicked = ImbuementHelper.DropRune(m_imbuement.rune, m_imbuement.level, m_transformNew.position, m_transformNew.rotation);
             Rigidbody rigidbody = kicked.GetComponent<Rigidbody>();
             rigidbody.AddForce(kicked.transform.forward * 300);
 
@@ -324,16 +335,13 @@ namespace ModularMagic_Core.components
             m_animatorOld.Update(0f);
             m_particleSystem.Play();
 
-            GameObject prefab = PrefabManager.Instance.GetPrefab(m_dropOldItem);
-            ImbuementRune imbuementRune = prefab.GetComponent<ImbuementRune>();
-
-            m_imbuement.SetRune(imbuementRune);
+            m_imbuement.SetRune(m_oldRune.rune, m_oldRune.level);
             m_imbuement.saved = true;
 
             m_imbuementTable.m_onRuneActivation.Invoke();
 
             Destroy(m_resetInteract);
-            m_dropOldItem = null;
+            m_oldRune = null;
             meshRenderer.enabled = false;
 
             m_locked = false;
@@ -374,21 +382,19 @@ namespace ModularMagic_Core.components
             if (m_imbuement.type != ImbuementType.None)
                 m_particleSystem.Play();
 
-            if (m_dropOldItem == null)
+            if (m_oldRune == null)
                 return;
 
-            GameObject prefab = PrefabManager.Instance.GetPrefab(m_dropOldItem);
-
-            if (prefab == null)
+            if (m_oldRune.rune == null)
             {
-                Jotunn.Logger.LogError("Could not drop old rune, prefab is null");
+                Jotunn.Logger.LogError($"Could not drop old rune, unknown rune '{m_oldRune.runeId}'");
                 return;
             }
 
             Transform oldAttachTransform = m_transformOld.GetChild(0);
-            GameObject oldRune = Instantiate(prefab, oldAttachTransform.position, oldAttachTransform.rotation);
+            ImbuementHelper.DropRune(m_oldRune.rune, m_oldRune.level, oldAttachTransform.position, oldAttachTransform.rotation);
             Destroy(oldAttachTransform.gameObject);
-            m_dropOldItem = null;
+            m_oldRune = null;
         }
 
         public void StartMoveIn()

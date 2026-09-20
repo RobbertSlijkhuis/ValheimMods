@@ -8,9 +8,10 @@ Core owns the rune table, the runes and the data that says which runes are on a 
 
 | Term | Meaning |
 |---|---|
-| **Rune** | An item you slot into a staff on the rune table. A rune is identified by a rune **id** and a **level**, for example `DamageSlash` level 2. |
+| **Rune** | An item you slot into a staff on the rune table. There is one item per rune **id**, for example `DamageSlash`. |
+| **Level** | How strong a rune is. The level is the **quality** of the rune item (`ItemData.m_quality`, 1 up to the number of models the rune has), so a rune is upgraded like any item. A slotted rune is stored as its id and level. |
 | **Slot** | One place on a staff that holds one rune. A staff has a number of slots, a slot **tier** and a **weapon type**. |
-| **Tier** | A rune can only be slotted when the slot tier is at least the rune's tier. |
+| **Tier** | A rune can only be slotted when the slot tier is at least the tier the rune needs for its level (`ImbuementRune.GetRequiredTier(level)`). |
 | **Weapon type** | `WeaponType.MMES`, `MMFS`, `MMIS` or `MMLS`. A rune lists the weapon types it is allowed on. |
 | **Saved runes** | The runes stored on the staff item, written when the player applies the changes on the table. |
 | **Draft** | The unsaved changes of the player who is editing. It is stored on the table, so it survives walking away and relogging. |
@@ -101,6 +102,8 @@ The numeric `value`s are hints. EarthStaffs ignores them and uses its config. Th
 
 A staff can hold only one rune of each `type` at a time. The same rune also can not be slotted while the same rune is marked for removal in any slot, because it is still on the staff until the changes are saved. To change the level of a rune, remove it, apply the changes, and slot the new one.
 
+Runes are upgraded with the normal upgrade screen at the rune table. The upgrade costs are the "Upgrade costs" of the rune in the config, multiplied per level (1x, 2x and 4x for levels 2, 3 and 4), and the station level does not matter for runes. A rune drops with its level as its quality, and the model on the rune and in the slot and the inventory icon follow the level.
+
 ## Localization
 
 The name and description of a rune are looked up when they are shown, with the weapon type of the slot:
@@ -132,11 +135,13 @@ Everything in the namespaces `ModularMagic_Core.Components`, `.Helpers`, `.Model
   - `Read(ItemData)`: the runes of the weapon, one `Imbuement` per slot.
   - `GetSlots(ItemData)`: the `ImbuementSlots` of the weapon, or null.
   - `Serialize` / `Deserialize`: the saved string, see below.
-  - `FindRune(id, level)` / `RegisterRune(rune)`: the rune registry, Core fills it at startup.
+  - `FindRune(id)` / `RegisterRune(rune)`: the rune registry (by id), Core fills it at startup.
+  - `IsRune(ItemDrop)`: the item is a rune.
+  - `DropRune(rune, level, position, rotation)`: drops a rune item with the level as its quality.
   - `DataKey`, `EditorKey`, `DraftKey`: the custom data keys.
   - `GetEditor`, `GetDraft`, `SetEditor`, `SetDraft`, `GetUnsavedRunes`, `LoadItemFromZDO`: used by the table, most staff mods do not need them.
 - **`Imbuement`** (one slot): `type`, `value`, `name`, `description`, `prefab`, `level`, `runeId`, `tier`, `weaponType`, `rune`. `name` and `description` are localized when read.
-- **`ImbuementRune`** (component on every rune prefab): `m_id`, `m_type`, `m_value`, `m_tier`, `m_level`, `m_allowedWeapons`, `GetName(weaponType)`, `GetDescription(weaponType)`.
+- **`ImbuementRune`** (component on every rune prefab): `m_id`, `m_type`, `m_value`, `m_maxLevel`, `m_tiers`, `m_allowedWeapons`, `GetRequiredTier(level)`, `IsValidLevel(level)`, `GetName(weaponType)`, `GetDescription(weaponType)`.
 - **`ImbuementType`**, **`WeaponType`**: `const string`s, so they work in `case` labels.
 
 ## Saved data
@@ -150,17 +155,17 @@ The runes are stored in the custom data of the item under `Imbuements_MMC`:
 The version, a colon, and one entry per slot separated by commas. An entry is `runeId@level` and an empty slot is empty. The slot count, slot tier and weapon type come from `ImbuementSlots`, not from the string.
 
 - An unknown version, or the old `|` format, loads as empty slots and logs a warning.
-- An entry for a rune that does not exist is skipped and logged.
+- An entry for a rune that does not exist, or with a level the rune does not have, is skipped and logged.
 - Other keys on the same item: `MMC_Editor` (the player id of the editor) and `MMC_Draft` (the unsaved changes, same format).
 
 ## Adding a rune (in Core)
 
-1. Add the rune prefab (and its tier variants) to the asset bundle and register them in `ModularMagic_Core.InitAssetBundle`, like the existing runes. Names must be fixed and the same on every client.
-2. Add a `RuneEntryOptions` block in the matching `data/Rune*Data.cs` with an `id` (no `:`, `,` or `@`), `type`, `value`, `allowedWeapons` and a `tier` and `level` per variant. The pair `(id, level)` must be unique.
+1. Add one rune prefab to the asset bundle. It has an `attach` child with one model per level (`rune_1`, `rune_2`, ...), the number of models is the number of levels. Register it in `ModularMagic_Core.InitAssetBundle` with `AddRunePrefab("<prefab name>")` and add a field for it to `CustomPrefabs`. The name must be fixed and the same on every client.
+2. Add a `RuneEntryOptions` block in the matching `data/Rune*Data.cs` with an `id` (no `:`, `,` or `@`, and unique), `type`, `value`, `allowedWeapons`, the crafting `recipe`, the `recipeUpgrade` (the items of an upgrade, multiplied per level) and `tiers` (the slot tier a level needs, one entry per level).
 3. Add the name and description keys to `LocaleKey` and `LocaleEnglish` for every weapon type it is allowed on.
 4. Handle the new `type` or `value` in every staff mod that should support it.
 
-At startup Core logs a warning for a rune with a missing or invalid id and for a duplicate `(id, level)`. Look for `[Imbuements]` in the BepInEx log.
+At startup Core sets the maximum quality of the item to the number of models, renders an icon per level, and logs a warning for a rune with a missing or invalid id, a duplicate id, or a different number of tiers than models. Look for `[Imbuements]` in the BepInEx log.
 
 ## How the table works with more than one player
 
@@ -169,4 +174,4 @@ At startup Core logs a warning for a rune with a missing or invalid id and for a
 - Saving and the draft are sent to the owner of the stand, which checks the editor and writes the data.
 - Unsaved runes are kept in the draft. A rune that is taken out of a slot, or that is still unsaved when the staff leaves the stand, drops from its slot.
 
-This has been tested in single player. The multiplayer behavior has not been tested with a second player yet.
+This has been tested in single player and with two players. The quality-based runes (levels as item quality) are written but not tested yet.

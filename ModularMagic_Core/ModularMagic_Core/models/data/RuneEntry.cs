@@ -1,4 +1,4 @@
-﻿using ModularMagic_Core.Configs;
+using ModularMagic_Core.Configs;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,13 +12,12 @@ namespace ModularMagic_Core.Models
         public string description;
         public string descriptionKey;
         public string id;
-        public int level;
         public int minStationLevel;
         public string name;
         public string nameKey;
         public GameObject prefab;
         public string recipe;
-        public int tier;
+        public int[] tiers;
         public string type;
         public string value;
 
@@ -29,13 +28,12 @@ namespace ModularMagic_Core.Models
             this.description = options.description;
             this.descriptionKey = options.descriptionKey;
             this.id = options.id;
-            this.level = options.level;
             this.minStationLevel = options.minStationLevel;
-            this.name = $"{options.name} {options.level}";
+            this.name = options.name;
             this.nameKey = options.nameKey;
             this.prefab = options.prefab;
             this.recipe = options.recipe;
-            this.tier = options.tier;
+            this.tiers = options.tiers;
             this.type = options.type;
             this.value = options.value;
 
@@ -44,6 +42,8 @@ namespace ModularMagic_Core.Models
                 description = description,
                 craftingStation = craftingStation,
                 minStationLevel = minStationLevel,
+                recipeUpgrade = options.recipeUpgrade,
+                recipeMultiplier = options.recipeMultiplier,
             };
             config.GenerateConfig(itemConfigOptions);
         }

@@ -27,7 +27,7 @@ namespace ModularMagic_Core.Models
 
         public ImbuementRune rune
         {
-            get { return string.IsNullOrEmpty(runeId) ? null : ImbuementHelper.FindRune(runeId, level); }
+            get { return ImbuementHelper.FindRune(runeId); }
         }
 
         public string type
@@ -61,11 +61,22 @@ namespace ModularMagic_Core.Models
             return runeId == other.runeId && level == other.level;
         }
 
-        public void SetRune(ImbuementRune imbuementRune)
+        // The level is the quality of the rune item
+        public void SetRune(ImbuementRune imbuementRune, int level)
         {
             runeId = imbuementRune.m_id;
-            level = imbuementRune.m_level;
+            this.level = level;
             saved = false;
+        }
+
+        // A copy of the rune and level, without the state of the working copy
+        public Imbuement CopyRune()
+        {
+            Imbuement copy = new Imbuement(tier, weaponType);
+            copy.runeId = runeId;
+            copy.level = level;
+            copy.saved = saved;
+            return copy;
         }
 
         public void Clear()

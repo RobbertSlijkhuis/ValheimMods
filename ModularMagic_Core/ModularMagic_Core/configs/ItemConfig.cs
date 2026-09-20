@@ -17,6 +17,8 @@ namespace ModularMagic_Core.Configs
         public ConfigEntry<string> craftingStation;
         public ConfigEntry<int> minStationLevel;
         public ConfigEntry<string> recipe;
+        public ConfigEntry<string> recipeUpgrade;
+        public ConfigEntry<int> recipeMultiplier;
 
         private int entryCount = 100;
 
@@ -89,15 +91,33 @@ namespace ModularMagic_Core.Configs
             recipe = Config.Bind(new ConfigDefinition(options.sectionName, "Crafting costs"), options.recipe,
                 new ConfigDescription("The items required to craft", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
-            recipe.SettingChanged += (obj, attr) =>
+            recipe.SettingChanged += (obj, attr) => UpdateRecipe(options);
+
+            // Only items that can be upgraded have upgrade costs
+            if (options.recipeUpgrade == null)
+                return;
+
+            recipeUpgrade = Config.Bind(new ConfigDefinition(options.sectionName, "Upgrade costs"), options.recipeUpgrade,
+                new ConfigDescription("The items required to upgrade the item to the next level, the amounts are multiplied per level", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+            recipeUpgrade.SettingChanged += (obj, attr) => UpdateRecipe(options);
+
+            recipeMultiplier = Config.Bind(new ConfigDefinition(options.sectionName, "Upgrade costs multiplier"), options.recipeMultiplier,
+                new ConfigDescription("The multiplier applied to the upgrade costs", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+            recipeMultiplier.SettingChanged += (obj, attr) => UpdateRecipe(options);
+        }
+
+        private void UpdateRecipe(ItemConfigOptions options)
+        {
+            RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
             {
-                RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
-                {
-                    name = options.recipeName,
-                    updateType = RecipeUpdateType.RECIPE,
-                    requirements = recipe.Value,
-                });
-            };
+                name = options.recipeName,
+                updateType = RecipeUpdateType.RECIPE,
+                requirements = recipe.Value,
+                upgradeRequirements = recipeUpgrade?.Value,
+                upgradeMultiplier = recipeMultiplier?.Value,
+            });
         }
 
         private int HandleOrder()

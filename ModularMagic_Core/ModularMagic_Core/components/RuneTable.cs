@@ -27,8 +27,8 @@ namespace ModularMagic_Core.Components
         public ItemData m_itemData;
         // The saved imbuements (normalized), to see if there is anything to save
         public string m_imbuementsString;
-        // The runes that are saved in every slot, null for an empty slot
-        private List<ImbuementRune> m_savedRunes = new List<ImbuementRune>();
+        // The runes (id and level) that are saved in every slot, a slot without a rune is empty
+        private List<Imbuement> m_savedImbuements = new List<Imbuement>();
 
         // Player id of the character that put the weapon on the table, only this character may edit
         private long m_editorId;
@@ -167,7 +167,7 @@ namespace ModularMagic_Core.Components
             RemoveRunes();
 
             m_imbuements = ImbuementHelper.Deserialize(imbuementsString, slots);
-            m_savedRunes = m_imbuements.Select(imbuement => imbuement.rune).ToList();
+            m_savedImbuements = m_imbuements.Select(imbuement => imbuement.CopyRune()).ToList();
             m_itemData = itemData;
             m_imbuementsString = ImbuementHelper.Serialize(m_imbuements);
             CreateRunes();
@@ -190,7 +190,7 @@ namespace ModularMagic_Core.Components
             m_itemData = itemData;
             m_editorId = ImbuementHelper.GetEditor(itemData);
             m_standDataString = imbuementsString;
-            m_savedRunes = savedImbuements.Select(imbuement => imbuement.rune).ToList();
+            m_savedImbuements = savedImbuements.Select(imbuement => imbuement.CopyRune()).ToList();
             // Normalized, so an untouched staff (or one in an old format) reports no changes
             m_imbuementsString = ImbuementHelper.Serialize(savedImbuements);
 
@@ -218,7 +218,7 @@ namespace ModularMagic_Core.Components
             Invoke(nameof(EmissionStop), 0f);
 
             m_imbuements = new List<Imbuement>();
-            m_savedRunes = new List<ImbuementRune>();
+            m_savedImbuements = new List<Imbuement>();
             m_itemData = null;
             m_imbuementsString = null;
             m_editorId = 0;
@@ -279,25 +279,24 @@ namespace ModularMagic_Core.Components
         {
             for (int i = 0; i < m_imbuements.Count; i++)
             {
-                ImbuementRune replacedRune = GetReplacedRune(i);
+                Imbuement replacedRune = GetReplacedRune(i);
 
-                if (replacedRune != null && replacedRune.m_id == runeId)
+                if (replacedRune != null && replacedRune.runeId == runeId)
                     return true;
             }
 
             return false;
         }
 
-        // A saved rune that is removed or replaced in the working copy, it stays visible until the changes are saved
-        private ImbuementRune GetReplacedRune(int index)
+        // A saved rune (id and level) that is removed or replaced in the working copy, it stays visible until the changes are saved
+        private Imbuement GetReplacedRune(int index)
         {
-            if (index >= m_savedRunes.Count || m_savedRunes[index] == null)
+            if (index >= m_savedImbuements.Count || m_savedImbuements[index].rune == null)
                 return null;
 
-            ImbuementRune savedRune = m_savedRunes[index];
-            Imbuement working = m_imbuements[index];
+            Imbuement savedRune = m_savedImbuements[index];
 
-            return working.runeId == savedRune.m_id && working.level == savedRune.m_level ? null : savedRune;
+            return m_imbuements[index].HasSameRune(savedRune) ? null : savedRune;
         }
 
         public void RemoveRunes()
@@ -350,7 +349,7 @@ namespace ModularMagic_Core.Components
                 m_itemData.m_customData[ImbuementHelper.DataKey] = imbuementsString;
                 m_imbuementsString = imbuementsString;
                 m_standDataString = imbuementsString;
-                m_savedRunes = m_imbuements.Select(imbuement => imbuement.rune).ToList();
+                m_savedImbuements = m_imbuements.Select(imbuement => imbuement.CopyRune()).ToList();
                 m_onSave.Invoke();
                 // saveEffects.Create(m_staffTransform.position, m_staffTransform.rotation);
                 return true;
@@ -488,10 +487,10 @@ namespace ModularMagic_Core.Components
 
             string savedString = standItem.m_customData.GetValueSafe(ImbuementHelper.DataKey);
 
-            foreach (KeyValuePair<int, ImbuementRune> unsaved in ImbuementHelper.GetUnsavedRunes(savedString, draft, slots))
+            foreach (KeyValuePair<int, Imbuement> unsaved in ImbuementHelper.GetUnsavedRunes(savedString, draft, slots))
             {
                 GetRuneDropPoint(unsaved.Key, out Vector3 position, out Quaternion rotation);
-                Instantiate(unsaved.Value.gameObject, position, rotation);
+                ImbuementHelper.DropRune(unsaved.Value.rune, unsaved.Value.level, position, rotation);
             }
 
             ImbuementHelper.SetDraft(standItem, null);
