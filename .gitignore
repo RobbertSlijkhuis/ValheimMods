@@ -415,6 +415,10 @@ Environment.props
 # not the generated release zip for thunderstore
 */Package/*.zip
 
+# same, for mods whose Package folder is nested one level deeper (e.g. ModularMagic_X/ModularMagic_X/Package)
+**/Package/plugins/
+**/Package/*.zip
+
 /com.unity.textmeshpro-3.2.0-pre.5
 /SplashMeads/SplashMeads/assets/assets
 /SplashMeads/SplashMeads/assets/assets.manifest

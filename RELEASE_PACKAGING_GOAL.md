@@ -197,9 +197,30 @@ copy-pasting the script wholesale:
   the item 3/4 wrong-destination/unfiltered zip, and applied the item 9 `plugins\` recreate.
   Stripped a pre-existing UTF-8 BOM from both mods' `Package\manifest.json` and `Package\README.md`,
   and created `Package\CHANGELOG.md` with a stub `### 0.0.1` / "Initial release" entry so the first
-  Release build passes the version check. The `*/Package/*.zip` gitignore rule already existed in
-  the shared root `.gitignore`. **Left as follow-ups**: both `manifest.json` files are still the
-  placeholder (`name: "JotunnModStub"`, empty `description`/`website_url`); EarthStaffs'
-  `manifest.json` doesn't list ModularMagic_Core as a dependency although the plugin has a
-  `[BepInDependency]` on it; the Unix `publish_release.sh` wasn't touched.
+  Release build passes the version check. (The root `.gitignore` rules `*/Package/...` turned out
+  *not* to cover these mods — see the `**/Package/...` rules added in the next entry.)
+  EarthStaffs' `manifest.json` originally didn't list ModularMagic_Core as a dependency although
+  the plugin has a `[BepInDependency]` on it; fixed in the next entry. **Left as follow-up**: the
+  Unix `publish_release.sh` wasn't touched.
+- ✅ `ModularMagic_Armors`, `_FireStaffs`, `_Food`, `_IceStaffs`, `_LightningStaffs`, `_Utilities`
+  and `_BloodMagic` — done, same treatment as Core/EarthStaffs. The six root-level `publish.ps1`
+  files are byte-identical to Core's; BloodMagic's lives at `scripts\publish.ps1` (its Debug
+  branch/preamble differ, so only the Release branch was spliced in, LF endings kept). Each got
+  a BOM-stripped `Package\manifest.json`/`README.md` and a stub `### 0.0.1` `Package\CHANGELOG.md`.
+  **Gitignore correction**: the shared root `.gitignore` rules `*/Package/plugins/*` and
+  `*/Package/*.zip` are anchored one folder deep, so they never matched
+  `ModularMagic_X\ModularMagic_X\Package\...`; added `**/Package/plugins/` and `**/Package/*.zip`
+  (verified with `git check-ignore`). Ignore rules don't untrack files already committed —
+  Core's/EarthStaffs' zip + `plugins\` DLLs and Armors' `plugins\*.dll`/`.dll.mdb` are tracked and
+  would need a `git rm --cached` to drop. **Left as follow-ups, by explicit user choice**: all
+  seven `manifest.json` files are still the JotunnModStub placeholder (`name: "JotunnModStub"`,
+  empty `description`, old Jotunn 2.24.3/2.26.1 dependency) and the `Package\README.md` bodies
+  are still the template; the Unix `publish_release.sh` / `scripts\publish.sh` weren't touched.
+  **Core dependency**: every Modular Magic addon now depends on `ModularMagic_Core` (they use its
+  materials and runes). Each of the seven got `[BepInDependency("DeathWizsh.ModularMagic_Core")]`
+  in its main plugin file (EarthStaffs already had it), and all eight addon `manifest.json` files
+  (these seven + EarthStaffs) list `"DeathWizsh-ModularMagicCore-0.0.1"` in `dependencies`. The
+  `DeathWizsh` Thunderstore author segment is **assumed** from the plugin GUID prefix — confirm it
+  against the real Thunderstore team name, and keep the version in step with the published Core
+  release. No csproj references to Core's DLL were added.
 - ⬜ All other mods in this monorepo — not started.

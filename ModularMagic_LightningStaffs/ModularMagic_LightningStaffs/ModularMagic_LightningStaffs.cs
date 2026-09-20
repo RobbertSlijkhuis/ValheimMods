@@ -11,6 +11,7 @@ namespace ModularMagic_LightningStaffs
 {
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
+    [BepInDependency("DeathWizsh.ModularMagic_Core")]
     //[NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     internal class ModularMagic_LightningStaffs : BaseUnityPlugin
     {

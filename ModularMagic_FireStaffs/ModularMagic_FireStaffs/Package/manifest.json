@@ -1,10 +1,7 @@
-﻿{
-  "name": "JotunnModStub",
-  "description": "",
+{
+  "name": "ModularMagicFireStaffs",
+  "description": "Test version of my magic mod, fire staffs",
   "version_number": "0.0.1",
   "website_url": "",
-  "dependencies": [
-    "denikson-BepInExPack_Valheim-5.4.2202",
-    "ValheimModding-Jotunn-2.24.3"
-  ]
+  "dependencies": ["ValheimModding-Jotunn-2.30.1", "DeathWizsh-ModularMagicCore-0.0.1"]
 }
