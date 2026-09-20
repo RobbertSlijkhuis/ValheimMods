@@ -189,4 +189,17 @@ copy-pasting the script wholesale:
   `*/Package/*.zip` rule to the mod's own `.gitignore`. **Left as follow-ups**: `manifest.json` still
   has placeholder content (`name: "JotunnModStub"`, empty `description`/`website_url`), the
   `Package\README.md` body is still the template, and the Unix `scripts\publish.sh` wasn't touched.
+- ✅ `ModularMagic_Core` and `ModularMagic_EarthStaffs` — done. Both use a root-level
+  `publish.ps1` (like `UpgradeAntlerPickaxe`; the two scripts were byte-identical stock stubs and
+  are identical again), so the reference Release branch was spliced in as-is (`$name.cs` matches
+  each mod's main file). Fixed the item 2 README-clobbering bug (`Package\README.md` was being
+  overwritten from the root `README.MD`, which is a different, longer doc — both left untouched),
+  the item 3/4 wrong-destination/unfiltered zip, and applied the item 9 `plugins\` recreate.
+  Stripped a pre-existing UTF-8 BOM from both mods' `Package\manifest.json` and `Package\README.md`,
+  and created `Package\CHANGELOG.md` with a stub `### 0.0.1` / "Initial release" entry so the first
+  Release build passes the version check. The `*/Package/*.zip` gitignore rule already existed in
+  the shared root `.gitignore`. **Left as follow-ups**: both `manifest.json` files are still the
+  placeholder (`name: "JotunnModStub"`, empty `description`/`website_url`); EarthStaffs'
+  `manifest.json` doesn't list ModularMagic_Core as a dependency although the plugin has a
+  `[BepInDependency]` on it; the Unix `publish_release.sh` wasn't touched.
 - ⬜ All other mods in this monorepo — not started.
