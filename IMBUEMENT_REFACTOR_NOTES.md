@@ -94,7 +94,7 @@ The shared API is documented for staff-mod authors in `ModularMagic_Core/IMBUEME
 
 The approved plan is in `C:\Users\robbe\.claude\plans\lets-gather-information-first-deep-frog.md`.
 
-- **Phase 1 (shared model): written, not yet built or tested.**
+- **Phase 1 (shared model): done. Built and tested (single player and multiplayer).**
   - **Core:**
     - `ImbuementType` and `WeaponType` are public consts.
     - `ImbuementRune` has an `id`, and `ImbuementSlots` is new.
@@ -107,7 +107,7 @@ The approved plan is in `C:\Users\robbe\.claude\plans\lets-gather-information-fi
     - Reference to Core's built DLL (`HintPath` to `ModularMagic_Core\bin\$(Configuration)\net48`, `Private=false`). A `ProjectReference` was tried first but failed in Visual Studio with a NuGet restore error (NU1105: the Core project is not part of the EarthStaffs solution). **Build Core first whenever its public API changes.**
   - **Rune ids:** DamageBlunt, DamagePierce, DamageSlash, EitrCost, ProjectileAccuracy, ProjectileBurst, ProjectileSpeed, Cone, Creatures, Nova, Rain.
   - **Build order:** build Core first (the `bin\Debug\net48\ModularMagic_Core.dll` that exists now predates the public API), then EarthStaffs.
-- **Phase 2 (multiplayer table): written, not yet built or tested.** Core only, so only Core needs a rebuild.
+- **Phase 2 (multiplayer table): done. Built and tested with two players (2026-09-20).** Core only.
   - `PatchesMMC`: a postfix on the private `ItemStand.SetVisualItem` calls `RuneTable.SyncFromStand()` on every client (it also runs from the stand's own 4 s refresh, so late joiners and reloaded zones attach too). The old attach and remove postfixes are gone. `UseItem_Postfix` only stamps the editor on the queued item.
   - `RuneTable`:
     - `SyncFromStand()` reads the stand's ZDO through `ImbuementHelper.LoadItemFromZDO`, attaches, removes or refreshes the table, and works on the stand's own copy of the item instead of the detached inventory item.
@@ -119,28 +119,28 @@ The approved plan is in `C:\Users\robbe\.claude\plans\lets-gather-information-fi
     - Remote clients may see an attach or save up to about 4 s late if the stand's data arrives after the message. The stand's refresh covers it.
     - When a viewer's runes refresh after a save, the old runes fly out while the new ones fly in, so the animations overlap briefly.
     - The owner trusts the editor id sent with the save request (it cannot look up the sender's player id).
-- **Phase 5 (unsaved runes kept on the table): written, not yet built or tested.** Core only. It was added after single-player testing showed unsaved runes were lost on relog (the runes left the inventory when slotted and only lived in the editor's memory).
+- **Phase 5 (unsaved runes kept on the table): done. Built and tested. One known issue: drafts (unsaved runes) are not visible to other players (see Follow-ups).** Core only. It was added after single-player testing showed unsaved runes were lost on relog (the runes left the inventory when slotted and only lived in the editor's memory).
   - **Draft on the stand:** the editor's working copy is stored as `MMC_Draft` in the stand's item data. Every change (slot, take out, mark for removal, reset) sends it to the ZDO owner (`RPC_MMC_SaveDraft`, editor-checked). Save clears it. When the editor's table attaches it restores from the draft, including the visuals for a rune marked for removal or replaced (`RuneTableRuneInteract.RestoreReplacedRune`). "Apply changes" shows when the draft differs from the saved data.
   - **No inventory calls in the rune table.** `m_itemNew` and `OnRemove` are gone. Taking an unsaved rune out of a slot drops it from that slot (like a removed saved rune drops on save). A prefix on `ItemStand.DropItem` (owner only, also runs when the table is destroyed) drops the draft's unsaved runes from their slots and strips the draft from the staff's data, so it works when the editor is offline. The user chose this over returning runes to the inventory, to avoid two paths handing out the same rune.
   - **Remaining risk:** a very small duplication risk if a draft update message were lost after a rune was dropped. Messages are reliable, so this is unlikely.
   - **Also:** `SyncFromStand` now waits until the local player exists (the editor check needs the player id), and `UseItem_Postfix` clears any stale draft on the staff when it is placed.
-- **Phase 3 (projectile variants): written, not yet built or tested.** EarthStaffs only.
+- **Phase 3 (projectile variants): done. Built and tested in multiplayer (2026-09-20).** EarthStaffs only.
   - New `helpers/ProjectileHelper.cs`. At startup (in `InitAssetBundle`, so on every client) `projectile_MMES` is set to the blunt visual once, and `projectile_MMES_slash` and `projectile_MMES_pierce` are cloned from it (fixed names) and registered with `PrefabManager`. The rotation values are the ones that `ApplyImbuements` used before (blunt 300/0/0, slash 500/0/10, pierce 0/0/500).
   - `EarthImbuementHelper.ApplyImbuements` no longer toggles the projectile children. A Slash or Pierce rune sets `options.attackProjectile`, unless the Cone main attack is active (it has its own projectile, as before).
   - `UpdateHelper.UpdateItemData` now clones the attack (`Attack.Clone()`) when assigning `mainAttack` and `secondaryAttack`, and applies `attackProjectile` to that copy. Only `ApplyImbuements` sets those two options.
   - Note: `ApplyImbuements` only sets `options.secondaryAttack` when a secondary-attack rune is present, and `snapshot.secondaryAttack` is unused. This is not a bug in practice: runes can only be changed at the table, and taking a staff off the stand spawns a fresh item from the prefab with the default attacks. (This was first written up as a probable bug and the user confirmed in-game that removing or replacing the secondary works.)
-- **Phase 4 (cleanup): written, not yet built.**
+- **Phase 4 (cleanup): done. Built and tested.**
   - Removed `CanImbueType.No` (`CanSave()` never returned it, and `Save()` now checks `!= Yes`).
   - The unused `ImbuementType` constants (`AOE`, `CreatureSpawn`, `DamageRatio`, `MaxQuality`) were removed and then put back at the user's request. They are reserved names for possible future rune types.
   - Left on purpose: `ImbuementType.ParryBonus` and the commented-out ParryBonus code in `EarthImbuementHelper` (a paused feature), and `RuneTable.saveEffects` (built in `Awake`, its `Create` call is commented out, so it looks like a paused visual effect).
 
-**All four phases are written. Nothing has been built or tested yet.** Build order: Core first, then EarthStaffs.
+**All phases are done, built and tested, including a two-player multiplayer test (2026-09-20), which worked well.** The only issue found: drafts are not visible to other players (see Follow-ups). Build order: Core first, then EarthStaffs.
 
 ## Code review (`/code-review high` on ModularMagic_Core)
 
 Eight findings. Outcome:
 
-- **Fixed (written, not yet built or tested):**
+- **Fixed (built and tested):**
   - `ImbuementSlots.m_weaponType` now defaults to `WeaponType.None`, and `GetName`/`GetDescription`/`Imbuement` are null-safe, so a staff mod that forgets it no longer breaks every rune hover.
   - The same rune can not be slotted while the same rune is marked for removal in any slot (`RuneTable.IsRuneMarkedForRemoval`). This also closes a case where a rune could be lost: with the old rune marked for removal, slotting the same rune again made the working copy equal the saved copy, so no draft was stored and the consumed rune was not dropped. Consequence chosen by the user: changing a rune's level takes two applies (remove and apply, then slot the new one).
   - `RuneTableRuneInteract.OnDestroy` removes its `m_onSave` listener (they piled up on the table with every refresh or re-attach; this predates the refactor).
@@ -152,22 +152,38 @@ Eight findings. Outcome:
 
 Five findings. Outcome:
 
-- **Fixed (written, not yet built or tested):** the snapshots are no longer created empty as field initializers. `ItemDataSnapShot` now takes its item data and `StaffConfig` in the constructor, and the snapshots are created in `AddEarthStaffs`, after the config is bound. A staff without a snapshot (or a failed `AddEarthStaffs`) is not handled as an Earth staff (`IsEarthStaff` is false) instead of throwing on every equip.
-- **Removed at the user's request:** the Nova terrain-op workaround (`TerrainOp.Settings.Deserialize` prefix in `PatchesMMES` and `helpers/TerrainOpHelper.cs`). The user wants it properly fixed later, not patched. The `LevelTerrain` prefab registration and `NovaTerrainEdit` stay. Not fixed: `NovaTerrainEdit.Awake` still has no null check on `Player.m_localPlayer` (low risk).
+- **Fixed (built and tested):** the snapshots are no longer created empty as field initializers. `ItemDataSnapShot` now takes its item data and `StaffConfig` in the constructor, and the snapshots are created in `AddEarthStaffs`, after the config is bound. A staff without a snapshot (or a failed `AddEarthStaffs`) is not handled as an Earth staff (`IsEarthStaff` is false) instead of throwing on every equip.
+- **Removed at the user's request:** the Nova terrain-op workaround (`TerrainOp.Settings.Deserialize` prefix in `PatchesMMES` and `helpers/TerrainOpHelper.cs`). The user wants it properly fixed later, not patched. The `LevelTerrain` prefab registration and `NovaTerrainEdit` stay. `NovaTerrainEdit.Awake` now has a null check on `Player.m_localPlayer` (written 2026-09-20, not yet built): without a local player it skips the terrain effect.
 - **Dismissed:** "register the terrain op in `ObjectDB` instead" (already tried in-game, it did not work), and caching the terrain-op hash (the user does not want caching).
 
 ## Follow-ups (not done)
 
-- **Two-player test** of phases 2 and 3 (see the verification list in the plan file), including the `Missing prefab hash` check in the other client's log.
-- **Rune consolidation:** merge the tier variants into one rune with a level (needs Unity changes). The save format is already keyed by rune id and level.
-- **Startup attack tweaks / config sync: checked and fixed (not yet built or tested in-game).**
+- **Two-player test of phases 2 and 3: done (2026-09-20), it worked well.**
+- **Drafts are not visible to other players (open issue).** Unsaved runes (`MMC_Draft`) only show for the editor; other players see the saved runes only. Still to decide whether viewers should see the draft.
+- **Rune consolidation: level becomes the item's quality (design decided 2026-09-20, not started).**
+  - **Idea:** one base prefab per rune. The rune's level is the vanilla `ItemData.m_quality`, upgraded 1 to 4 like any item. The four tier prefabs (`_Stone/_Marble/_Grausten` clones) and their registration boilerplate go away. Set `m_maxQuality` (4) in code at startup, no Unity work. Runes are already unstackable (`m_maxStackSize` is 1 in Unity), so stacking never mixes levels.
+  - **Custom component stays for the definition only:** `ImbuementRune` keeps id, type, value, allowed weapons and the name/description keys. The level is no longer stored on it and is read from the item instead.
+  - **Where the code changes:** `RuneTableRuneInteract.UseItem` reads the level from the inventory item's `m_quality`. The drop paths (`DropRune`, the kicked rune, `RuneTable.DropDraftRunes`, `RestoreReplacedRune`) instantiate the base prefab and set its quality (`ItemDrop.SetQuality`). The rune registry is keyed by id only. The save format `RuneId@level` stays. The slot visual keeps switching on `rune_{level}` (the four models are already children of the base prefab).
+  - **Effects per level stay in the staff mods.** Stat runes (eitr cost, accuracy, burst, speed) already do config value x level. Planned: attack runes get a lower eitr/stamina cost per level in the first version, maybe bigger damage or radius later. Damage-type runes get something later (undecided).
+  - **First version: upgrade with the normal (vanilla) upgrade UI.** Vanilla upgrades use the same ingredients scaled per level (`m_amountPerLevel`) and the required station level rises by one per quality, so the current per-tier recipes (a different weapon and material each tier) are not kept. Existing rune items in inventories are lost (test items only, no migration).
+  - **Later: custom upgrade interaction on the RuneTable** (not built yet). Then block the normal upgrade: keep `m_maxQuality > 1` (so the vanilla quality number and tooltip line stay) and add a Harmony prefix on the private `InventoryGui.AddRecipeToList` that returns false when `item != null` (an upgrade entry) and the recipe's item is a rune, using a small `ImbuementHelper.IsRune(ItemData)` (~15 lines, no Unity work). Crafting a new rune (`item == null`) stays untouched. Setting `m_maxQuality = 1` instead was rejected: it blocks upgrades for free but hides the inventory quality number and tooltip line (the level would still show only in the hover text of a dropped item). The prefix does nothing until runes have `m_maxQuality > 1`. The custom upgrade should not put runes in the inventory (runes only leave the table by dropping, like saved and draft runes).
+  - **Next step:** the rune visuals (below), then make the runes work in the quality-based system.
+  - **Rune visuals (decided 2026-09-20, not started).** Each rune prefab has an `attach` child with the models `rune_1` to `rune_4` (attack runes Creatures/Nova/Rain only `rune_1` to `rune_3`), with only `rune_1` on by default. Today `PrefabHelper.CreateClonedVariant` clones the prefab per tier and switches one model on. With one prefab per rune the model is chosen per item from its quality, the same idea as the mushroom projectile: the quality is the per-instance data, and it already syncs (ZDO `s_quality`).
+    - **Item in the world:** a small component on the rune prefab reads `ItemDrop.m_itemData.m_quality` in `Start` (not `Awake`, so `ItemDrop` has loaded the ZDO) and shows `attach/rune_{quality}`, hiding the others.
+    - **Table slots:** `UpdateRune` and `RestoreReplacedRune` keep using `Find("rune_{level}")`, with the level taken from the item's quality.
+    - **Dropped or kicked runes:** instantiate the base prefab and call `ItemDrop.SetQuality(level)`. The component above then picks the model.
+    - **Max quality per rune:** count the `rune_N` children at startup (3 for attack runes, 4 for the others) instead of hardcoding it.
+    - **Inventory icon: per-quality icons (user's choice).** One prefab gives one icon, and vanilla picks the icon by variant, not quality (`ItemData.GetIcon()` is `m_shared.m_icons[m_variant]`, and the vanilla upgrade keeps the variant). So: render one icon per level at startup (`RenderManager`, with each `rune_N` switched on) and add a small Harmony patch on `ItemData.GetIcon` that returns the icon for the item's quality. `GetIcon` is used by the inventory grid, hotbar, drag icon and the upgrade panel. The craft panel reads `m_icons[...]` directly for a new craft, which is level 1 and correct. `GetIcon` runs per inventory element, so keep the lookup cheap (no caching layer, just the pre-rendered sprites).
+    - **Slot gating:** attack runes have tiers 2 to 4 for levels 1 to 3, so the slot tier check (`m_imbuement.tier < rune.m_tier`) needs an offset once the level is the quality.
+  - **Open:** what the levels do for damage-type and attack runes (attack runes: lower eitr/stamina cost per level in the first version). The Creatures, Nova and Rain base level is settled: they are levels 1 to 3.
+- **Startup attack tweaks / config sync: checked and fixed (built; multiplayer test passed).**
   - Jotunn applies server values by setting `ConfigEntry.BoxedValue` (`SynchronizationManager`, and again when disconnecting), which raises `SettingChanged`. Every entry in `StaffConfig` (28 of 28) and `SecondaryAttackConfig` (19 of 19) has a `SettingChanged` handler that re-applies the value to the prefab, so the startup tweaks (`AttackHelper.UpdateCone/Nova/Rain/Summon`, `CreateStaff`) are refreshed when a synced value arrives.
   - **Real gap found:** the staff snapshots (`ItemDataSnapShot`) copied the staff stats once at startup, and `ApplyImbuements` writes those copies onto the equipped staff on every equip. After a synced or changed config value, an imbued staff used the stale startup numbers (eitr cost, blunt damage and per level, accuracy, attack speed, projectile speed). This predates the refactor.
   - **Fix:** `ItemDataSnapShot.Init(itemData, config)` now keeps the `StaffConfig` and reads those values from it on every access. Four unused snapshot fields (pierce and slash damage, per level, and `secondaryAttack`) were removed.
   - **How to test in single player:** change a staff's eitr cost (or accuracy, damage) in the config manager, take the staff off and equip it again, and it should use the new value without a restart. To test the real sync: change a value on a server and join with a client that has the default config.
 - **`UpdateHelper` variants:** deliberately left as is. `UpdateHelper.cs` is a copy-paste pattern in 11 projects (Armors, Food, Utilities, PlantCart, SplashMeads, Testing, Fire, Ice, Lightning, EarthStaffs and Core's stub), with two families of options classes (`UpdateItemDataOptions` and `UpdateItemDropStatsOptions`). Revisit when a second staff mod adopts the imbuement API, and extract only the common item-data part into Core then.
 - **BloodMagic:** the `Awake` health write (see the section above).
-- **Mushroom projectile** on Staff 0 still randomizes per client.
+- **Mushroom projectile (Staff 0): fixed (written, not yet built or tested).** The random thrown item was toggled on the prefab asset of the shooter's client only. The new component `components/MushroomProjectileVisual.cs` (added to `projectile_mushroom_MMES` at startup in `InitAssetBundle`) rolls the item on the owner in `Start`, stores it in the ZDO (`MushroomVisual_MMES`), and every client shows the stored one. `RandomizeMushroom` and the Staff 0 branch in `AttackStart_Prefix` are removed. To test with two players: shoot the Forest Flinger several times and both players should see the same item on each shot.
 
 ## Uncommitted state
 
