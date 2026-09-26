@@ -32,11 +32,13 @@ namespace WizshBoneTwitchIntegration.Models
         public int cooldown = 0;
 
         // Display-only: which unit (see CooldownHelper) the wizard shows `cooldown` in. `cooldown`
-        // itself is always stored in seconds.
-        public string cooldownUnit = "seconds";
+        // itself is always stored in seconds. Hidden from GUI_OLD (see EditorHidden below) since
+        // its reflection-driven editor has no CooldownHelper conversion and would let this get out
+        // of sync with `cooldown`.
+        [EditorHidden] public string cooldownUnit = "seconds";
 
-        public int maxPerStream = 0;
-        public int maxPerUserPerStream = 0;
+        [EditorHidden] public int maxPerStream = 0;
+        [EditorHidden] public int maxPerUserPerStream = 0;
 
         [EditorLabel("Add condition")]
         [EditorTooltip("The global key that will enable this redeem.")]
