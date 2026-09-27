@@ -69,6 +69,10 @@ namespace WizshBoneTwitchIntegration
             PrefabManager.OnVanillaPrefabsAvailable += SetupPieces;
             PrefabManager.OnVanillaPrefabsAvailable += AddEffectLists;
             PrefabManager.OnPrefabsRegistered += AddPersistentComponents;
+            // ZNetScene.instance.GetPrefabNames() (used by RedeemPrefabCatalog's scans) isn't
+            // populated yet at OnVanillaPrefabsAvailable - OnPrefabsRegistered is the hook
+            // AddPersistentComponents above already relies on for the same reason.
+            PrefabManager.OnPrefabsRegistered += RedeemPrefabCatalog.BuildPrefabCatalogs;
             ItemManager.OnItemsRegistered += LogStatusEffects;
         }
 

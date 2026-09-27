@@ -41,7 +41,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (damageData.pierce != null) damages.m_pierce = (float)damageData.pierce;
             if (damageData.poison != null) damages.m_poison = (float)damageData.poison;
             if (damageData.slash != null) damages.m_slash = (float)damageData.slash;
-            if (damageData.spirit != null) damages.m_slash = (float)damageData.spirit;
+            if (damageData.spirit != null) damages.m_spirit = (float)damageData.spirit;
 
             return damages;
         }

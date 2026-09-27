@@ -121,7 +121,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_confirmButton.onClick.RemoveAllListeners();
             m_confirmButton.onClick.AddListener(() =>
             {
-                CloseOpenColorPicker();
+                GuiHelper.CloseOpenColorPicker();
 
                 string name  = m_nameInput.text.Trim();
                 string error = onConfirm?.Invoke(name, m_currentColor);
@@ -138,7 +138,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_cancelButton.onClick.RemoveAllListeners();
             m_cancelButton.onClick.AddListener(() =>
             {
-                CloseOpenColorPicker();
+                GuiHelper.CloseOpenColorPicker();
                 Hide();
             });
 
@@ -165,20 +165,6 @@ namespace WizshBoneTwitchIntegration.Gui
         }
 
         public bool IsVisible => m_panel != null && m_panel.activeSelf;
-
-        /// <summary>
-        /// Jötunn's <see cref="ColorPicker"/> is a scene-wide singleton (not a child of this
-        /// panel), so closing this dialog doesn't close it automatically - it would otherwise be
-        /// left open and unusable over whatever GUI shows next. <see cref="ColorPicker.Cancel"/>
-        /// reverts to the color the swatch had before the picker opened and closes it; that's
-        /// fine here since any live edits were already captured into <see cref="m_currentColor"/>
-        /// via the picker's onColorChanged callback before this runs.
-        /// </summary>
-        private static void CloseOpenColorPicker()
-        {
-            if (!ColorPicker.done)
-                ColorPicker.Cancel();
-        }
 
         private void RebuildColorSwatch(string hexValue)
         {

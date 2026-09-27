@@ -277,11 +277,11 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
                 // The toggle stays its usual fixed left-aligned width (see CreateBoolField) - only
                 // the reset button's position comes from FieldAndResetLayout here.
-                (_, _, float resetCenterX) = FieldAndResetLayout(width);
+                (_, _, float resetCenterX) = GuiHelper.FieldAndResetLayout(width);
                 Toggle toggle = GuiFieldBuilder.CreateBoolField(cell, new Vector2(0f, -56f), width - 24f, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
                 // Toggle.isOn is a no-op when already equal to the target value, so this only fires
                 // the listener above (and persists) when a reset actually changes anything.
-                CreateResetButton(cell, resetCenterX, () => toggle.isOn = f.Default);
+                GuiHelper.CreateResetButton(cell, resetCenterX, -58f, () => toggle.isOn = f.Default);
                 GuiHelper.CreateCardDescription(cell, f.Description, width - 24f);
             });
         }
@@ -294,9 +294,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 var f = fields[i];
                 GameObject cell = CreateCell(row, x, width);
                 GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
-                (float fieldWidth, float fieldCenterX, float resetCenterX) = FieldAndResetLayout(width);
+                (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(width);
                 InputField input = GuiFieldBuilder.CreateIntField(cell, new Vector2(fieldCenterX, -58f), fieldWidth, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
-                CreateResetButton(cell, resetCenterX, () => input.text = f.Default.ToString());
+                GuiHelper.CreateResetButton(cell, resetCenterX, -58f, () => input.text = f.Default.ToString());
                 GuiHelper.CreateCardDescription(cell, f.Description, width - 24f);
             });
         }
@@ -309,19 +309,14 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 var f = fields[i];
                 GameObject cell = CreateCell(row, x, width);
                 GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
-                (float fieldWidth, float fieldCenterX, float resetCenterX) = FieldAndResetLayout(width);
+                (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(width);
                 InputField input = GuiFieldBuilder.CreateFloatField(cell, new Vector2(fieldCenterX, -58f), fieldWidth, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
-                CreateResetButton(cell, resetCenterX, () => input.text = f.Default.ToString("G"));
+                GuiHelper.CreateResetButton(cell, resetCenterX, -58f, () => input.text = f.Default.ToString("G"));
                 GuiHelper.CreateCardDescription(cell, f.Description, width - 24f);
             });
         }
 
         private static readonly Color InvalidFieldColor = Color.red;
-
-        // Sits right of the field, sharing its row rather than a separate one - see
-        // FieldAndResetLayout below.
-        private const float ResetButtonWidth = 70f;
-        private const float ResetButtonGap = 8f;
 
         private void StringFieldRow(string title, string description, Func<string> get, Action<string> set, string defaultValue, int maxLength = 0, Func<string, bool> isValid = null)
         {
@@ -329,7 +324,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             GameObject cell = CreateCell(row, 0f, ScrollContentWidth);
             GuiHelper.CreateCardTitle(cell, title, ScrollContentWidth - 24f);
 
-            (float fieldWidth, float fieldCenterX, float resetCenterX) = FieldAndResetLayout(ScrollContentWidth);
+            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(ScrollContentWidth);
 
             InputField input = GuiFieldBuilder.CreateInputField(cell, new Vector2(fieldCenterX, -58f), fieldWidth, get(), maxLength: maxLength);
             Color normalColor = input.textComponent.color;
@@ -344,39 +339,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             // Setting InputField.text (rather than calling set()/Persist() directly) reuses the
             // onValueChanged listener above, so a reset gets the exact same persist + validity-color
             // behavior as typing the default value in by hand.
-            CreateResetButton(cell, resetCenterX, () => input.text = defaultValue);
+            GuiHelper.CreateResetButton(cell, resetCenterX, -58f, () => input.text = defaultValue);
 
             GuiHelper.CreateCardDescription(cell, description, ScrollContentWidth - 24f);
-        }
-
-        /// <summary>
-        /// Splits a cell's usable width (<paramref name="cellWidth"/> - 24f, matching every card's
-        /// title/description inset) into a left field slot and a right <see cref="ResetButtonWidth"/>
-        /// slot - shared by every *FieldRow method that needs a reset button next to its field, so
-        /// this split can't drift between them the way StringFieldRow's original inline version
-        /// would have if IntFieldRow/FloatFieldRow each grew their own copy.
-        /// </summary>
-        private static (float FieldWidth, float FieldCenterX, float ResetCenterX) FieldAndResetLayout(float cellWidth)
-        {
-            float totalWidth = cellWidth - 24f;
-            float leftEdge = -totalWidth / 2f;
-            float rightEdge = totalWidth / 2f;
-            float fieldWidth = totalWidth - ResetButtonWidth - ResetButtonGap;
-            return (fieldWidth, leftEdge + fieldWidth / 2f, rightEdge - ResetButtonWidth / 2f);
-        }
-
-        private static void CreateResetButton(GameObject cell, float centerX, Action onClick)
-        {
-            GameObject resetBtn = GuiHelper.CreateButton(
-                text: "Reset",
-                parent: cell.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(centerX, -58f),
-                width: ResetButtonWidth,
-                height: GuiFieldBuilder.FieldHeight);
-            resetBtn.SetActive(true);
-            resetBtn.GetComponent<Button>().onClick.AddListener(() => onClick());
         }
 
         /// <summary>

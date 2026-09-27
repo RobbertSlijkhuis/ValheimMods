@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Jotunn.GUI;
 using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.UI;
@@ -360,6 +361,63 @@ namespace WizshBoneTwitchIntegration.Gui
             Text label = CreateCardText(card, text, topY, fontSize, GUIManager.Instance.ValheimBeige, width, height);
             MakeDescriptionExpandDownward(label, topY);
             return label;
+        }
+
+        // ── reset-to-default plumbing ───────────────────────────────────────────────────────
+        //
+        // Originally SettingsTab-only; hoisted here once RedeemWizard step 2 needed the exact
+        // same "field + reset button" shape, so both share one implementation.
+
+        /// <summary>Sits right of the field, sharing its row rather than a separate one.</summary>
+        public const float ResetButtonWidth = 70f;
+        public const float ResetButtonGap = 8f;
+
+        /// <summary>
+        /// Splits a row's usable width into a left field slot and a right <see cref="ResetButtonWidth"/>
+        /// slot - shared by every field row that needs a reset button next to its field, so this
+        /// split can't drift between call sites. <paramref name="inset"/> defaults to 24f, matching
+        /// every card's title/description inset (SettingsTab's cells); callers with no such
+        /// surrounding card inset (RedeemWizard step 2's rows) pass 0f.
+        /// </summary>
+        public static (float FieldWidth, float FieldCenterX, float ResetCenterX) FieldAndResetLayout(float cellWidth, float inset = 24f)
+        {
+            float totalWidth = cellWidth - inset;
+            float leftEdge = -totalWidth / 2f;
+            float rightEdge = totalWidth / 2f;
+            float fieldWidth = totalWidth - ResetButtonWidth - ResetButtonGap;
+            return (fieldWidth, leftEdge + fieldWidth / 2f, rightEdge - ResetButtonWidth / 2f);
+        }
+
+        /// <summary>
+        /// Jötunn's <see cref="ColorPicker"/> is a scene-wide singleton (not a child of whatever
+        /// swatch/panel opened it), so navigating away from - or closing - whatever GUI opened it
+        /// doesn't close it automatically; it's otherwise left open and unusable, floating over
+        /// whatever shows next. <see cref="ColorPicker.Cancel"/> reverts to the color the swatch
+        /// had before the picker opened and closes it - safe to call any time a color swatch's
+        /// owning panel/step/dialog is about to be hidden or navigated away from, even if no
+        /// picker is currently open (<see cref="ColorPicker.done"/> guards that no-op case).
+        /// Originally ViewerEditDialog-only; hoisted here once RedeemWizard's step 2 needed the
+        /// same "close it when leaving" behavior for its own color-field rows.
+        /// </summary>
+        public static void CloseOpenColorPicker()
+        {
+            if (!ColorPicker.done)
+                ColorPicker.Cancel();
+        }
+
+        public static GameObject CreateResetButton(GameObject cell, float centerX, float y, Action onClick)
+        {
+            GameObject resetBtn = CreateButton(
+                text: "Reset",
+                parent: cell.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(centerX, y),
+                width: ResetButtonWidth,
+                height: GuiFieldBuilder.FieldHeight);
+            resetBtn.SetActive(true);
+            resetBtn.GetComponent<Button>().onClick.AddListener(() => onClick());
+            return resetBtn;
         }
 
         /// <summary>

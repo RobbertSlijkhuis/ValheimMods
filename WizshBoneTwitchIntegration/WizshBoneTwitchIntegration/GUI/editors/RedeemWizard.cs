@@ -51,6 +51,9 @@ namespace WizshBoneTwitchIntegration.Gui
 
         // Step 2
         private Text m_step2PlaceholderText;
+        private GameObject m_step2PlaceholderRoot;
+        private readonly Dictionary<string, IRedeemStep2Form> m_step2Forms = new Dictionary<string, IRedeemStep2Form>();
+        private readonly Dictionary<string, GameObject> m_step2FormRoots = new Dictionary<string, GameObject>();
 
         // Step 3
         private Image m_bgColorOverlay;
@@ -127,12 +130,21 @@ namespace WizshBoneTwitchIntegration.Gui
         // description; the step bodies start a RowGap under it.
         private const float StepIndicatorBottomY = StepDescriptionY - StepDescriptionHeight - StepIndicatorPadding;
         private const float StepIndicatorHeight  = -StepIndicatorBottomY - ContentMargin;
-        private const float BodyTopY             = StepIndicatorBottomY - RowGap;
+        // internal, not private: step-2 per-type forms start their own content at this same Y.
+        internal const float BodyTopY             = StepIndicatorBottomY - RowGap;
 
-        private const float FieldWidth  = 460f;
+        // internal, not private: reused by Step2RowLayout so every step-2 per-type form lines up
+        // with step 3's own field width/spacing instead of inventing its own constants.
+        internal const float FieldWidth  = 460f;
         private const float RowHeight   = 36f;
-        private const float LabelHeight = 20f;
-        private const float RowGap      = 14f;
+        internal const float LabelHeight = 20f;
+        internal const float RowGap      = 14f;
+
+        // internal, not private: step 2's own forms use this instead of the narrower FieldWidth
+        // above - matches StepRowWidth, the same width the step-indicator/"CONFIGURE PARAMETERS"
+        // card already spans, so step 2's fields use the same full width instead of a narrower
+        // centered column. Step 3 still uses FieldWidth/Step3Width for its own layout, unchanged.
+        internal const float Step2FieldWidth = StepRowWidth;
 
         // Step 3 spans nearly the full wizard card, not the narrow FieldWidth column steps 1/2 use
         // - RedesignUI.dc.html's step-3 content sits in a `flex:1` column (own 22px padding) inside
@@ -173,6 +185,12 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float TypeListWidth  = 220f;
         private const float TypeListHeight = ContentHeight - (BtnY + BtnHeight / 2f) - RowGap + BodyTopY;
         private const float TypeBtnHeight  = 34f;
+
+        // internal, not private: the same vertical span from BodyTopY down to a RowGap above the
+        // Back/Next buttons that TypeListHeight already computes for step 1's list - step 2's own
+        // per-type forms (and GeneralDamageTabSwitcher's two tab panes) reuse this exact value for
+        // their own ScrollableList containers so nothing needs to duplicate the formula.
+        internal const float Step2ContentHeight = TypeListHeight;
 
         // The preview column spans the rest of the same row the type list and step-indicator bars
         // already anchor to (StepRowLeftX/StepRowWidth), not the narrower FieldWidth (that's step
@@ -262,6 +280,11 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void Close(string toastMessage)
         {
+            // A color swatch on step 2 (Flashbang's flash color, a spawned creature's color, ...)
+            // may have a picker open - Jötunn's ColorPicker is a scene-wide singleton, not a child
+            // of this wizard, so hiding m_root doesn't close it and it's otherwise left open,
+            // floating over whatever GUI shows next.
+            GuiHelper.CloseOpenColorPicker();
             m_root.SetActive(false);
             OnFinished?.Invoke(toastMessage);
         }
@@ -413,15 +436,23 @@ namespace WizshBoneTwitchIntegration.Gui
                 hasType ? RedeemEffectCatalog.DescriptionFor(m_working.type) : "Select an effect on the left to see what it does in-game.");
         }
 
-        // ── step 2: configure parameters (placeholder this round) ──────────
+        // ── step 2: configure parameters ────────────────────────────────────
+        //
+        // One sub-root + one IRedeemStep2Form per real type, all built once up front here
+        // (mirroring how m_step1Root/m_step2Root/m_step3Root are themselves all built once in
+        // Create() and toggled via SetActive) and dispatched to by RefreshStep2Content based on
+        // m_working.type. SurpriseChest (no field decisions made yet - deliberately deferred) and
+        // the bare SpawnAbility type (removed from RedeemEffectCatalog entirely) have no registered
+        // form, so they keep falling through to the original inert placeholder text.
 
         private void BuildStep2()
         {
             m_step2Root = UIContainer.Create(m_root, "Step2");
 
+            m_step2PlaceholderRoot = UIContainer.Create(m_step2Root, "Placeholder");
             m_step2PlaceholderText = GUIManager.Instance.CreateText(
                 text: "",
-                parent: m_step2Root.transform,
+                parent: m_step2PlaceholderRoot.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
                 position: new Vector2(0f, BodyTopY),
@@ -430,7 +461,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 color: GUIManager.Instance.ValheimBeige,
                 outline: true,
                 outlineColor: Color.black,
-                width: FieldWidth,
+                width: Step2FieldWidth,
                 height: 60f,
                 addContentSizeFitter: false
             ).GetComponent<Text>();
@@ -441,12 +472,50 @@ namespace WizshBoneTwitchIntegration.Gui
             // there, putting it noticeably higher/tighter under the step bar than step 1's
             // (genuinely top-pivoted) content does.
             GuiHelper.PivotToTop(m_step2PlaceholderText.rectTransform, BodyTopY);
+
+            RegisterStep2Form(RedeemType.Flashbang, new FlashbangForm());
+            RegisterStep2Form(RedeemType.Mist, new MistForm());
+            RegisterStep2Form(RedeemType.TimeStop, new TimeStopForm());
+            RegisterStep2Form(RedeemType.Weather, new WeatherForm());
+            RegisterStep2Form(RedeemType.TerrainEdit, new TerrainEditForm());
+            RegisterStep2Form(RedeemType.Detonate, new DetonateForm());
+            RegisterStep2Form(RedeemType.Door, new DoorForm());
+            RegisterStep2Form(RedeemType.Windmill, new WindmillForm());
+            RegisterStep2Form(RedeemType.Smite, new SmiteForm());
+            RegisterStep2Form(RedeemType.Rain, new RainForm());
+            RegisterStep2Form(RedeemType.Meteor, new MeteorForm());
+            RegisterStep2Form(RedeemType.Trap, new TrapForm());
+            RegisterStep2Form(RedeemType.Root, new RootForm());
+            RegisterStep2Form(RedeemType.LogRain, new LogRainForm());
+            RegisterStep2Form(RedeemType.SpawnCreature, new SpawnCreatureForm());
+            RegisterStep2Form(RedeemType.StatusEffect, new StatusEffectForm());
         }
 
-        private void RefreshStep2Placeholder()
+        private void RegisterStep2Form(string type, IRedeemStep2Form form)
         {
-            string label = RedeemEffectCatalog.LabelFor(m_working.type);
-            m_step2PlaceholderText.text = $"{label} has no extra parameters yet - continue to set up the reward.\n(Per-effect configuration is coming in a future update.)";
+            GameObject formRoot = UIContainer.Create(m_step2Root, type + "Form");
+            form.Build(formRoot);
+            m_step2Forms[type] = form;
+            m_step2FormRoots[type] = formRoot;
+        }
+
+        private void RefreshStep2Content()
+        {
+            string type = m_working.type;
+            bool hasForm = m_step2Forms.TryGetValue(type, out IRedeemStep2Form form);
+
+            m_step2PlaceholderRoot.SetActive(!hasForm);
+            if (!hasForm)
+            {
+                string label = RedeemEffectCatalog.LabelFor(type);
+                m_step2PlaceholderText.text = $"{label} has no extra parameters yet - continue to set up the reward.\n(Per-effect configuration is coming in a future update.)";
+            }
+
+            foreach (var kvp in m_step2FormRoots)
+                kvp.Value.SetActive(hasForm && kvp.Key == type);
+
+            if (hasForm)
+                form.Populate(m_working);
         }
 
         // ── step 3: Twitch reward setup ──────────────────────────────────────
@@ -840,6 +909,15 @@ namespace WizshBoneTwitchIntegration.Gui
                 return;
             }
 
+            // Some types force certain sub-data values regardless of what step 2 showed (e.g.
+            // Windmill/Smite/Trap's locked prefab, TerrainEdit's always-on raise) - apply them now
+            // so the saved data (and anything that inspects it, like the redeem list or a
+            // hand-exported profile.yaml) reflects the true values immediately. Redundant with, but
+            // not a replacement for, SpawnAbilityHelper.Normalizers' own redemption-time
+            // re-enforcement of the same values for hand-edited YAML.
+            if (m_step2Forms.TryGetValue(m_working.type, out IRedeemStep2Form activeForm) && activeForm is IForcesValuesOnSave forcing)
+                forcing.ApplyForcedValues(m_working);
+
             bool success;
             string error;
             string successMessage;
@@ -868,6 +946,14 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void SetActiveStep(int step)
         {
+            // A step-2 color swatch (Flashbang's flash color, a spawned creature's color, ...) may
+            // have a picker open - it's a scene-wide singleton (see GuiHelper.CloseOpenColorPicker),
+            // so navigating away from step 2 (Back/Next, or re-selecting a type in step 1) doesn't
+            // close it on its own. Only matters when leaving step 2, but harmless (a no-op) to call
+            // on every transition rather than special-casing "was step 2" here.
+            if (m_step == 2 && step != 2)
+                GuiHelper.CloseOpenColorPicker();
+
             m_step = step;
 
             m_step1Root.SetActive(step == 1);
@@ -875,7 +961,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_step3Root.SetActive(step == 3);
 
             if (step == 2)
-                RefreshStep2Placeholder();
+                RefreshStep2Content();
             else if (step == 3)
                 PopulateStep3Fields();
 

@@ -22,12 +22,14 @@ namespace WizshBoneTwitchIntegration.Gui
     }
 
     /// <summary>
-    /// Single source of truth for the 18 selectable redeem effect types' display labels and
+    /// Single source of truth for the 17 selectable redeem effect types' display labels and
     /// descriptions - shared by <see cref="RedeemWizard"/>'s step-1 effect picker and
     /// <see cref="Tabs.RedeemsTab"/>'s list-row type-hover tooltip, rather than duplicating this
     /// text in both places. Order/membership matches GUI_OLD/tabs/RedeemsTab.cs's RedeemTypes
     /// array minus RedeemType.Undefined (that one has no redeem-facing meaning, so it's never a
-    /// choosable effect).
+    /// choosable effect) and minus RedeemType.SpawnAbility (the raw/generic type - only its 8
+    /// curated sub-types, e.g. Smite/Door/Windmill, are choosable here; SpawnAbility itself stays
+    /// editable only via GUI_OLD/F4 for existing redeems).
     /// </summary>
     internal static class RedeemEffectCatalog
     {
@@ -39,8 +41,6 @@ namespace WizshBoneTwitchIntegration.Gui
                 "Triggers a blinding flash and loud bang near the streamer, disorienting them briefly."),
             new RedeemEffectInfo(RedeemType.Mist, "Mist",
                 "Spawns a lingering mist cloud around the streamer."),
-            new RedeemEffectInfo(RedeemType.SpawnAbility, "Spawn Ability",
-                "Generic ability spawn effect - the base type shared by the effects below it."),
             new RedeemEffectInfo(RedeemType.Door, "Doors of Doom",
                 "Spawns a stack of doors around the streamer, boxing them in until they break out."),
             new RedeemEffectInfo(RedeemType.Windmill, "Windmills of Death",
