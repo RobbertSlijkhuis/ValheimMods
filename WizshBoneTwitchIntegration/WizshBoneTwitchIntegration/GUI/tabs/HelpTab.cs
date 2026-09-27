@@ -8,13 +8,13 @@ using WizshBoneTwitchIntegration.Configs;
 namespace WizshBoneTwitchIntegration.Gui.Tabs
 {
     /// <summary>
-    /// Help tab content (formerly "Debug") - a couple of fixed orientation lines (what "Redeems"
-    /// means is now covered by RedeemsTab's own under-title description instead of repeated here)
-    /// above the same card grid matching <see cref="HomeTab"/>'s card style (RedesignUI.dc.html
-    /// only mocks up the first card; the "Show safezone bounds" toggle is carried over from
-    /// GUI_OLD/tabs/DebugTab.cs, which the mockup didn't include), followed by a clickable topic
-    /// list explaining Profiles/Redeems/Viewers/Settings/Safezones. Purely client-local: nothing
-    /// here touches ZDOs or the network.
+    /// Help tab content (formerly "Debug") - a single under-title orientation line (same
+    /// TitleY/DescriptionY convention as SettingsTab/RedeemsTab), above the same card grid
+    /// matching <see cref="HomeTab"/>'s card style (RedesignUI.dc.html only mocks up the first
+    /// card; the "Show safezone bounds" toggle is carried over from GUI_OLD/tabs/DebugTab.cs,
+    /// which the mockup didn't include), followed by a clickable topic list explaining
+    /// Profiles/Redeems/Viewers/Settings/Safezones. Purely client-local: nothing here touches
+    /// ZDOs or the network.
     /// </summary>
     internal class HelpTab : IShellTabView
     {
@@ -22,11 +22,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private Toggle m_safeZoneDebugToggle;
         private Text m_safeZoneDebugStatusText;
 
-        private readonly Dictionary<string, (GameObject Btn, Image Bg, Text Label)> m_topicButtons = new Dictionary<string, (GameObject, Image, Text)>();
-        private Color m_topicButtonDefaultColor;
-        private Text m_topicPreviewTitle;
-        private Text m_topicDescriptionText;
-        private string m_selectedTopic;
+        private readonly SelectorList m_topicList = new SelectorList();
+        private readonly SelectorPreviewPanel m_topicPreview = new SelectorPreviewPanel();
 
         private static readonly string[] TopicOrder = { "Profiles", "Redeems", "Viewers", "Settings", "Safezones" };
 
@@ -52,15 +49,6 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 "bounds\" can visualize their bounds in-game as a wireframe outline.",
         };
 
-        private ToastType m_nextToastType = ToastType.Success;
-        private int m_toastCallCount;
-
-        private const string ToastLoremIpsum =
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut " +
-            "labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco " +
-            "laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in " +
-            "voluptate velit esse cillum dolore eu fugiat nulla pariatur.";
-
         private static readonly Color EnabledColor = new Color(0.95f, 0.65f, 0.2f, 1f);
 
         // ── layout constants (same 3-col card grid math as HomeTab.cs) ─────────────────────────
@@ -70,13 +58,10 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         private const float TitleY = -30f;
         private const float TitleWidth = 300f;
+        private const float DescriptionY = -50f;
 
-        // Fixed (non-scrolling) orientation lines between the title and the card grid.
-        private const float DescLine1Y = -55f;
-        private const float DescLine2Y = -78f;
-
-        // Pushed down from the old -57 to leave room for the 2 description lines above.
-        private const float GridTopY = -117f;
+        // Same 22px gap SettingsTab's ScrollTopInset leaves after its own DescriptionY.
+        private const float GridTopY = -72f;
         private const float CardGap = 14f;
         private const float RowGap = 14f;
         private const float CardWidth = (ContentWidth - 2f * ContentMargin - 2f * CardGap) / 3f;
@@ -96,20 +81,24 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private const float TopicPreviewWidth = (ContentWidth - 2f * ContentMargin) - TopicListWidth - TopicsGapX;
         private const float TopicPreviewX = LeftEdgeX + TopicListWidth + TopicsGapX + TopicPreviewWidth / 2f;
 
-        private const float TopicPreviewTitleY = TopicsBodyTopY;
-        private const float TopicPreviewDescriptionY = TopicPreviewTitleY - 30f;
+        // Total stacked height of the topic buttons - the list card and preview card are both
+        // built at this height so their top/bottom edges line up.
+        private static readonly float TopicsListHeight =
+            TopicOrder.Length * TopicBtnHeight + (TopicOrder.Length - 1) * TopicBtnGap;
+
+        private const float TopicPreviewPadding = 14f; // matches RedeemWizard's BoxPadding
 
         public GameObject Create(GameObject parent)
         {
             m_root = UIContainer.Create(parent, "HelpTab");
 
             GuiHelper.CreateTitle("Help", m_root, new Vector2(LeftEdgeX + TitleWidth / 2f, TitleY), width: TitleWidth);
-
-            BuildDescriptionLines();
+            GuiHelper.CreateTabDescription(
+                "Here you can find tools that can help with problems and information about the different aspects of the mod",
+                m_root, new Vector2(0f, DescriptionY), width: ContentWidth - 2f * ContentMargin);
 
             BuildSafezoneUnstuckCard(CardTopCenter(0, 0));
             BuildSafezoneBoundsCard(CardTopCenter(0, 1));
-            BuildToastPreviewCard(CardTopCenter(0, 2));
 
             BuildTopicsSection();
 
@@ -122,17 +111,6 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             // while this tab wasn't visible - matches GUI_OLD/tabs/DebugTab.cs's Refresh().
             if (m_safeZoneDebugToggle != null)
                 m_safeZoneDebugToggle.isOn = PluginConfig.configShowSafeZoneDebug.Value;
-        }
-
-        private void BuildDescriptionLines()
-        {
-            GuiHelper.CreateTabDescription(
-                "Each connected Twitch account keeps its own Profile - its own Redeems, Settings, and Creature groups.",
-                m_root, new Vector2(LeftEdgeX + (ContentWidth - 2f * ContentMargin) / 2f, DescLine1Y), width: ContentWidth - 2f * ContentMargin);
-
-            GuiHelper.CreateTabDescription(
-                "Settings save automatically - there's no Save button anywhere in this mod.",
-                m_root, new Vector2(LeftEdgeX + (ContentWidth - 2f * ContentMargin) / 2f, DescLine2Y), width: ContentWidth - 2f * ContentMargin);
         }
 
         private static Vector2 CardTopCenter(int row, int col)
@@ -163,106 +141,31 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             GuiHelper.CreateCardDescription(card, "Shows the bounds of active safezones (ships, wards, traders) in-game as a wireframe outline.", CardWidth - 24f, height: 38f);
         }
 
-        private void BuildToastPreviewCard(Vector2 topCenter)
-        {
-            GameObject card = GuiHelper.CreateCard(m_root, topCenter, CardWidth, CardHeight);
-            GuiHelper.CreateCardTitle(card, "Toast styles", CardWidth - 24f);
-            GuiHelper.CreateCardButton(card, "Show next toast", CardWidth, OnShowNextToast);
-            GuiHelper.CreateCardDescription(card, "Cycles through the success, warning and error toast styles.", CardWidth - 24f, height: 38f);
-        }
-
         private void BuildTopicsSection()
         {
             GuiHelper.CreateTabDescription(
                 "Learn more about:", m_root,
                 new Vector2(0f, TopicsHeaderY), width: ContentWidth - 2f * ContentMargin);
 
-            float yOffset = TopicsBodyTopY - TopicBtnHeight / 2f;
+            GameObject listCard = GuiHelper.CreateCard(
+                m_root, new Vector2(LeftEdgeX + TopicListWidth / 2f, TopicsBodyTopY), TopicListWidth, TopicsListHeight);
+
+            var items = new List<(string Key, string Label)>();
             foreach (string topic in TopicOrder)
-            {
-                GameObject btnObj = GuiHelper.CreateButton(
-                    text: topic,
-                    parent: m_root.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(LeftEdgeX + TopicListWidth / 2f, yOffset),
-                    width: TopicListWidth,
-                    height: TopicBtnHeight
-                );
-                btnObj.SetActive(true);
+                items.Add((topic, topic));
+            m_topicList.Build(listCard.transform, items, TopicListWidth, TopicBtnHeight, TopicBtnGap, SelectTopic);
 
-                Image bg = btnObj.GetComponent<Image>();
-                if (m_topicButtons.Count == 0)
-                    m_topicButtonDefaultColor = bg.color;
-                Text label = btnObj.GetComponentInChildren<Text>();
-                label.color = GUIManager.Instance.ValheimOrange;
-                label.alignment = TextAnchor.MiddleLeft;
-                RectTransform labelRt = label.rectTransform;
-                labelRt.offsetMin = new Vector2(labelRt.offsetMin.x + ListRow.LeftPadding, labelRt.offsetMin.y);
-
-                btnObj.GetComponent<Button>().onClick.AddListener(() => SelectTopic(topic));
-
-                m_topicButtons[topic] = (btnObj, bg, label);
-
-                yOffset -= TopicBtnHeight + TopicBtnGap;
-            }
-
-            m_topicPreviewTitle = GUIManager.Instance.CreateText(
-                text: "",
-                parent: m_root.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(TopicPreviewX, TopicPreviewTitleY),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 16,
-                color: GUIManager.Instance.ValheimOrange,
-                outline: true,
-                outlineColor: Color.black,
-                width: TopicPreviewWidth,
-                height: 24f,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-            m_topicPreviewTitle.alignment = TextAnchor.MiddleLeft;
-            GuiHelper.PivotToTop(m_topicPreviewTitle.rectTransform, TopicPreviewTitleY);
-
-            m_topicDescriptionText = GuiHelper.CreateTabDescription(
-                "", m_root, new Vector2(TopicPreviewX, TopicPreviewDescriptionY), width: TopicPreviewWidth);
-            GuiHelper.MakeDescriptionExpandDownward(m_topicDescriptionText, TopicPreviewDescriptionY);
+            m_topicPreview.Build(
+                m_root, new Vector2(TopicPreviewX, TopicsBodyTopY), TopicPreviewWidth, TopicsListHeight,
+                TopicPreviewPadding);
 
             SelectTopic(TopicOrder[0]);
         }
 
         private void SelectTopic(string topic)
         {
-            m_selectedTopic = topic;
-            RefreshTopicSelection();
-        }
-
-        private void RefreshTopicSelection()
-        {
-            foreach (var kvp in m_topicButtons)
-            {
-                bool selected = kvp.Key == m_selectedTopic;
-                kvp.Value.Bg.color = selected ? ShellSidebar.TabActiveColor : m_topicButtonDefaultColor;
-            }
-
-            m_topicPreviewTitle.text = m_selectedTopic;
-            m_topicDescriptionText.text = TopicDescriptions[m_selectedTopic];
-        }
-
-        private void OnShowNextToast()
-        {
-            ToastType type = m_nextToastType;
-            m_nextToastType = (ToastType)(((int)m_nextToastType + 1) % 3);
-
-            bool useLongText = m_toastCallCount % 2 == 1;
-            m_toastCallCount++;
-
-            string message = useLongText
-                ? $"This is a {type.ToString().ToLowerInvariant()} toast. {ToastLoremIpsum}"
-                : $"This is a {type.ToString().ToLowerInvariant()} toast.";
-
-            ToastNotifications.Show(message, type);
+            m_topicList.Select(topic);
+            m_topicPreview.UpdateContent(topic, TopicDescriptions[topic]);
         }
 
         private void OnSafeZoneDebugToggled(bool value)

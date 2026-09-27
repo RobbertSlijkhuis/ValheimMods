@@ -46,10 +46,8 @@ namespace WizshBoneTwitchIntegration.Gui
         private Text m_stepDescriptionText;
 
         // Step 1
-        private Text m_previewSelectedLabel;
-        private Text m_previewSelectedDescription;
-        private readonly Dictionary<string, (GameObject Btn, Image Bg, Text Label)> m_effectButtons = new Dictionary<string, (GameObject, Image, Text)>();
-        private Color m_typeButtonDefaultColor;
+        private readonly SelectorList m_effectList = new SelectorList();
+        private readonly SelectorPreviewPanel m_previewPanel = new SelectorPreviewPanel();
 
         // Step 2
         private Text m_step2PlaceholderText;
@@ -186,16 +184,22 @@ namespace WizshBoneTwitchIntegration.Gui
 
         // Reserved space for a future per-type image/video thumbnail (no actual media yet - see
         // PreviewImagePlaceholder in BuildStep1), sized/positioned per RedesignUI.dc.html's own
-        // step-1 preview box. The selected effect's title + description sit in a fixed-height card
-        // (same fill as step 3's cards, BoxPadding around the text) at the bottom of the column,
-        // ending level with the type list; the image placeholder takes all the height above it.
+        // step-1 preview box. When enabled, the selected effect's title + description sit in a
+        // fixed-height card (BoxPadding around the text) at the bottom of the column, ending level
+        // with the type list, and the image placeholder takes all the height above it.
+        //
+        // Not built this round - unclear whether an image preview ships in the first release - but
+        // the geometry below stays live so nothing shifts if/when it's re-enabled. While disabled,
+        // the text card takes over the full column (PreviewCardTopY/PreviewCardHeightActual)
+        // instead of just the bottom slice, so the preview isn't left with dead space above it.
+        private const bool EffectPreviewImageEnabled = false;
         private const float PreviewCardHeight  = 156f;
         private const float PreviewImageGap    = 14f; // matches RowGap's existing section-gap value
         private const float PreviewImageHeight = TypeListHeight - PreviewCardHeight - PreviewImageGap;
         private const float PreviewLabelTopY   = BodyTopY - PreviewImageHeight - PreviewImageGap;
 
-        private const float PreviewTextWidth  = PreviewWidth - 2f * BoxPadding;
-        private const float PreviewTextTopY   = PreviewLabelTopY - BoxPadding;
+        private const float PreviewCardTopY = EffectPreviewImageEnabled ? PreviewLabelTopY : BodyTopY;
+        private const float PreviewCardHeightActual = EffectPreviewImageEnabled ? PreviewCardHeight : TypeListHeight;
 
         // BtnY is the buttons' center measured up from the root's bottom edge: the section's bottom
         // margin plus half the button height, so the buttons' lower edge sits ContentMargin above
@@ -357,126 +361,56 @@ namespace WizshBoneTwitchIntegration.Gui
             GameObject listContent = ScrollableList.CreateFixed(
                 m_step1Root, "EffectTypeList",
                 anchoredPosition: new Vector2(StepRowLeftX + TypeListWidth / 2f, BodyTopY),
-                width: TypeListWidth, height: TypeListHeight);
+                width: TypeListWidth, height: TypeListHeight,
+                backgroundColor: GuiHelper.CardBackgroundColor);
 
-            float yOffset = -(TypeBtnHeight / 2f);
+            var items = new List<(string Key, string Label)>();
             foreach (RedeemEffectInfo info in RedeemEffectCatalog.All)
-            {
-                string capturedType = info.Type;
+                items.Add((info.Type, info.Label));
 
-                GameObject btnObj = GuiHelper.CreateButton(
-                    text: info.Label,
-                    parent: listContent.transform,
-                    anchorMin: new Vector2(0.5f, 1f),
-                    anchorMax: new Vector2(0.5f, 1f),
-                    position: new Vector2(0f, yOffset),
-                    width: TypeListWidth - ScrollableList.ScrollbarWidth - 8f,
-                    height: TypeBtnHeight
-                );
-                btnObj.SetActive(true);
-
-                Image bg = btnObj.GetComponent<Image>();
-                if (m_effectButtons.Count == 0)
-                    m_typeButtonDefaultColor = bg.color;
-                Text label = btnObj.GetComponentInChildren<Text>();
-                label.color = GUIManager.Instance.ValheimOrange;
-                label.alignment = TextAnchor.MiddleLeft;
-                RectTransform labelRt = label.rectTransform;
-                labelRt.offsetMin = new Vector2(labelRt.offsetMin.x + ListRow.LeftPadding, labelRt.offsetMin.y);
-
-                btnObj.GetComponent<Button>().onClick.AddListener(() =>
+            float listHeight = m_effectList.Build(
+                listContent.transform, items, TypeListWidth - ScrollableList.ScrollbarWidth - 8f, TypeBtnHeight, 4f,
+                onClick: type =>
                 {
-                    m_working.type = capturedType;
+                    m_working.type = type;
                     RefreshStep1Selection();
                     RefreshNavButtons();
                 });
+            ScrollableList.SetContentHeight(listContent, listHeight);
 
-                m_effectButtons[capturedType] = (btnObj, bg, label);
+            if (EffectPreviewImageEnabled)
+            {
+                // Reserved space for a future per-type image/video thumbnail - no media exists yet,
+                // so this is just a flat placeholder in the scrollbar track's own dark shade.
+                GameObject previewImagePlaceholder = new GameObject("PreviewImagePlaceholder");
+                previewImagePlaceholder.transform.SetParent(m_step1Root.transform, false);
 
-                yOffset -= TypeBtnHeight + 4f;
+                RectTransform previewImageRt = previewImagePlaceholder.AddComponent<RectTransform>();
+                previewImageRt.anchorMin = new Vector2(0.5f, 1f);
+                previewImageRt.anchorMax = new Vector2(0.5f, 1f);
+                previewImageRt.pivot = new Vector2(0.5f, 1f);
+                previewImageRt.sizeDelta = new Vector2(PreviewWidth, PreviewImageHeight);
+                previewImageRt.anchoredPosition = new Vector2(PreviewX, BodyTopY);
+
+                Image previewImageBg = previewImagePlaceholder.AddComponent<Image>();
+                // Fully opaque here, unlike ScrollableList.TrackColor's own alpha - that field stays
+                // translucent for the real scrollbar track, this placeholder just reuses its RGB.
+                Color trackColor = ScrollableList.TrackColor;
+                previewImageBg.color = new Color(trackColor.r, trackColor.g, trackColor.b, 1f);
             }
 
-            ScrollableList.SetContentHeight(listContent, Mathf.Abs(yOffset));
-
-            // Reserved space for a future per-type image/video thumbnail - no media exists yet, so
-            // this is just a flat placeholder in the scrollbar track's own dark shade.
-            GameObject previewImagePlaceholder = new GameObject("PreviewImagePlaceholder");
-            previewImagePlaceholder.transform.SetParent(m_step1Root.transform, false);
-
-            RectTransform previewImageRt = previewImagePlaceholder.AddComponent<RectTransform>();
-            previewImageRt.anchorMin = new Vector2(0.5f, 1f);
-            previewImageRt.anchorMax = new Vector2(0.5f, 1f);
-            previewImageRt.pivot = new Vector2(0.5f, 1f);
-            previewImageRt.sizeDelta = new Vector2(PreviewWidth, PreviewImageHeight);
-            previewImageRt.anchoredPosition = new Vector2(PreviewX, BodyTopY);
-
-            Image previewImageBg = previewImagePlaceholder.AddComponent<Image>();
-            // Fully opaque here, unlike ScrollableList.TrackColor's own alpha - that field stays
-            // translucent for the real scrollbar track, this placeholder just reuses its RGB.
-            Color trackColor = ScrollableList.TrackColor;
-            previewImageBg.color = new Color(trackColor.r, trackColor.g, trackColor.b, 1f);
-
-            // Built before the two texts below (siblings draw in creation order), so the card sits
-            // behind them.
-            GuiHelper.CreateCard(m_step1Root, new Vector2(PreviewX, PreviewLabelTopY), PreviewWidth, PreviewCardHeight);
-
-            m_previewSelectedLabel = GUIManager.Instance.CreateText(
-                text: "",
-                parent: m_step1Root.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(PreviewX, PreviewTextTopY),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 16,
-                color: GUIManager.Instance.ValheimOrange,
-                outline: true,
-                outlineColor: Color.black,
-                width: PreviewTextWidth,
-                height: 26f,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-            m_previewSelectedLabel.alignment = TextAnchor.MiddleLeft;
-            // Both this and m_previewSelectedDescription below default to a center pivot, so
-            // without re-pivoting, each one's box extends both above AND below its given Y - at
-            // PreviewTextTopY and PreviewTextTopY - 40f respectively, that put the label's bottom
-            // half and the description's top half on top of each other. PivotToTop makes
-            // PreviewTextTopY the label's top edge instead, so it only grows downward from there.
-            GuiHelper.PivotToTop(m_previewSelectedLabel.rectTransform, PreviewTextTopY);
-
-            m_previewSelectedDescription = GUIManager.Instance.CreateText(
-                text: "",
-                parent: m_step1Root.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(PreviewX, PreviewTextTopY - 40f),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: 13,
-                color: GUIManager.Instance.ValheimBeige,
-                outline: true,
-                outlineColor: Color.black,
-                width: PreviewTextWidth,
-                height: 100f,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-            m_previewSelectedDescription.alignment = TextAnchor.UpperLeft;
-            m_previewSelectedDescription.horizontalOverflow = HorizontalWrapMode.Wrap;
-            GuiHelper.MakeDescriptionExpandDownward(m_previewSelectedDescription, PreviewTextTopY - 40f);
+            m_previewPanel.Build(m_step1Root, new Vector2(PreviewX, PreviewCardTopY), PreviewWidth, PreviewCardHeightActual, BoxPadding);
         }
 
         private void RefreshStep1Selection()
         {
             bool hasType = !string.IsNullOrEmpty(m_working?.type) && m_working.type != RedeemType.Undefined;
 
-            foreach (var kvp in m_effectButtons)
-            {
-                bool selected = hasType && kvp.Key == m_working.type;
-                kvp.Value.Bg.color = selected ? ShellSidebar.TabActiveColor : m_typeButtonDefaultColor;
-            }
+            m_effectList.Select(hasType ? m_working.type : null);
 
-            m_previewSelectedLabel.text = hasType ? RedeemEffectCatalog.LabelFor(m_working.type) : "Choose an effect from the list";
-            m_previewSelectedDescription.text = hasType
-                ? RedeemEffectCatalog.DescriptionFor(m_working.type)
-                : "Select an effect on the left to see what it does in-game.";
+            m_previewPanel.UpdateContent(
+                hasType ? RedeemEffectCatalog.LabelFor(m_working.type) : "Choose an effect from the list",
+                hasType ? RedeemEffectCatalog.DescriptionFor(m_working.type) : "Select an effect on the left to see what it does in-game.");
         }
 
         // ── step 2: configure parameters (placeholder this round) ──────────
@@ -502,10 +436,10 @@ namespace WizshBoneTwitchIntegration.Gui
             ).GetComponent<Text>();
             m_step2PlaceholderText.alignment = TextAnchor.UpperCenter;
             m_step2PlaceholderText.horizontalOverflow = HorizontalWrapMode.Wrap;
-            // Same center-pivot fix as m_previewSelectedLabel/Description in BuildStep1 - without
-            // it, this box's top half sits above BodyTopY instead of starting there, putting it
-            // noticeably higher/tighter under the step bar than step 1's (genuinely top-pivoted)
-            // content does.
+            // Same center-pivot fix SelectorPreviewPanel applies to its own title/description in
+            // BuildStep1 - without it, this box's top half sits above BodyTopY instead of starting
+            // there, putting it noticeably higher/tighter under the step bar than step 1's
+            // (genuinely top-pivoted) content does.
             GuiHelper.PivotToTop(m_step2PlaceholderText.rectTransform, BodyTopY);
         }
 
