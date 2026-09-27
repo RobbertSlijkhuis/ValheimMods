@@ -22,7 +22,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private Toggle m_safeZoneDebugToggle;
         private Text m_safeZoneDebugStatusText;
 
-        private readonly Dictionary<string, Text> m_topicLinks = new Dictionary<string, Text>();
+        private readonly Dictionary<string, (GameObject Btn, Image Bg, Text Label)> m_topicButtons = new Dictionary<string, (GameObject, Image, Text)>();
+        private Color m_topicButtonDefaultColor;
+        private Text m_topicPreviewTitle;
         private Text m_topicDescriptionText;
         private string m_selectedTopic;
 
@@ -80,15 +82,22 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private const float CardWidth = (ContentWidth - 2f * ContentMargin - 2f * CardGap) / 3f;
         private const float CardHeight = 160f;
 
-        // Topic links row + description area, sat below the card grid (GridTopY - CardHeight is
-        // the grid's bottom edge).
-        private const float TopicsLabelY = GridTopY - CardHeight - 30f;
-        private const float TopicsLinkY = TopicsLabelY - 26f;
-        private const float TopicLinkWidth = 150f;
-        private const float TopicLinkHeight = 22f;
-        private const float TopicLinkGap = 20f;
-        private const float TopicsRowWidth = TopicLinkWidth * 5 + TopicLinkGap * 4;
-        private const float TopicDescriptionY = TopicsLinkY - TopicLinkHeight - 20f;
+        // Topic list + side preview, sat below the card grid (GridTopY - CardHeight is the grid's
+        // bottom edge). Vertical list on the left, selected topic's title+description in a preview
+        // column to the right - mirrors RedeemWizard.cs's step-1 effect-type selector.
+        private const float TopicsHeaderY = GridTopY - CardHeight - 30f;
+        private const float TopicsBodyTopY = TopicsHeaderY - 30f;
+
+        private const float TopicListWidth = 200f;
+        private const float TopicBtnHeight = 34f;
+        private const float TopicBtnGap = 4f;
+
+        private const float TopicsGapX = 20f;
+        private const float TopicPreviewWidth = (ContentWidth - 2f * ContentMargin) - TopicListWidth - TopicsGapX;
+        private const float TopicPreviewX = LeftEdgeX + TopicListWidth + TopicsGapX + TopicPreviewWidth / 2f;
+
+        private const float TopicPreviewTitleY = TopicsBodyTopY;
+        private const float TopicPreviewDescriptionY = TopicPreviewTitleY - 30f;
 
         public GameObject Create(GameObject parent)
         {
@@ -166,34 +175,79 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         {
             GuiHelper.CreateTabDescription(
                 "Learn more about:", m_root,
-                new Vector2(0f, TopicsLabelY), width: ContentWidth - 2f * ContentMargin);
+                new Vector2(0f, TopicsHeaderY), width: ContentWidth - 2f * ContentMargin);
 
-            float rowLeftEdge = -TopicsRowWidth / 2f;
-            for (int i = 0; i < TopicOrder.Length; i++)
+            float yOffset = TopicsBodyTopY - TopicBtnHeight / 2f;
+            foreach (string topic in TopicOrder)
             {
-                string topic = TopicOrder[i];
-                float x = rowLeftEdge + i * (TopicLinkWidth + TopicLinkGap) + TopicLinkWidth / 2f;
+                GameObject btnObj = GuiHelper.CreateButton(
+                    text: topic,
+                    parent: m_root.transform,
+                    anchorMin: new Vector2(0.5f, 1f),
+                    anchorMax: new Vector2(0.5f, 1f),
+                    position: new Vector2(LeftEdgeX + TopicListWidth / 2f, yOffset),
+                    width: TopicListWidth,
+                    height: TopicBtnHeight
+                );
+                btnObj.SetActive(true);
 
-                Text link = GuiHelper.CreateTextLink(m_root, topic, new Vector2(x, TopicsLinkY),
-                    TopicLinkWidth, TopicLinkHeight, () => OnTopicSelected(topic));
-                m_topicLinks[topic] = link;
+                Image bg = btnObj.GetComponent<Image>();
+                if (m_topicButtons.Count == 0)
+                    m_topicButtonDefaultColor = bg.color;
+                Text label = btnObj.GetComponentInChildren<Text>();
+                label.color = GUIManager.Instance.ValheimOrange;
+                label.alignment = TextAnchor.MiddleLeft;
+                RectTransform labelRt = label.rectTransform;
+                labelRt.offsetMin = new Vector2(labelRt.offsetMin.x + ListRow.LeftPadding, labelRt.offsetMin.y);
+
+                btnObj.GetComponent<Button>().onClick.AddListener(() => SelectTopic(topic));
+
+                m_topicButtons[topic] = (btnObj, bg, label);
+
+                yOffset -= TopicBtnHeight + TopicBtnGap;
             }
 
-            m_topicDescriptionText = GuiHelper.CreateTabDescription(
-                "", m_root, new Vector2(0f, TopicDescriptionY), width: ContentWidth - 2f * ContentMargin);
-            GuiHelper.MakeDescriptionExpandDownward(m_topicDescriptionText, TopicDescriptionY);
+            m_topicPreviewTitle = GUIManager.Instance.CreateText(
+                text: "",
+                parent: m_root.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(TopicPreviewX, TopicPreviewTitleY),
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: 16,
+                color: GUIManager.Instance.ValheimOrange,
+                outline: true,
+                outlineColor: Color.black,
+                width: TopicPreviewWidth,
+                height: 24f,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+            m_topicPreviewTitle.alignment = TextAnchor.MiddleLeft;
+            GuiHelper.PivotToTop(m_topicPreviewTitle.rectTransform, TopicPreviewTitleY);
 
-            OnTopicSelected(TopicOrder[0]);
+            m_topicDescriptionText = GuiHelper.CreateTabDescription(
+                "", m_root, new Vector2(TopicPreviewX, TopicPreviewDescriptionY), width: TopicPreviewWidth);
+            GuiHelper.MakeDescriptionExpandDownward(m_topicDescriptionText, TopicPreviewDescriptionY);
+
+            SelectTopic(TopicOrder[0]);
         }
 
-        private void OnTopicSelected(string topic)
+        private void SelectTopic(string topic)
         {
-            if (m_selectedTopic != null && m_topicLinks.TryGetValue(m_selectedTopic, out Text previous))
-                previous.color = GUIManager.Instance.ValheimOrange;
-
             m_selectedTopic = topic;
-            m_topicLinks[topic].color = GUIManager.Instance.ValheimBeige;
-            m_topicDescriptionText.text = TopicDescriptions[topic];
+            RefreshTopicSelection();
+        }
+
+        private void RefreshTopicSelection()
+        {
+            foreach (var kvp in m_topicButtons)
+            {
+                bool selected = kvp.Key == m_selectedTopic;
+                kvp.Value.Bg.color = selected ? ShellSidebar.TabActiveColor : m_topicButtonDefaultColor;
+            }
+
+            m_topicPreviewTitle.text = m_selectedTopic;
+            m_topicDescriptionText.text = TopicDescriptions[m_selectedTopic];
         }
 
         private void OnShowNextToast()

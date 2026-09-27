@@ -423,46 +423,6 @@ namespace WizshBoneTwitchIntegration.Gui
         }
 
         /// <summary>
-        /// Plain clickable orange text - no button chrome (no background/border), just a
-        /// <see cref="Button"/> riding on the label's own <see cref="Text"/> Graphic so it still
-        /// reports clicks and gets a faint hover/press tint. Used for HelpTab's topic list, where
-        /// a link reads better than a full button.
-        /// </summary>
-        public static Text CreateTextLink(GameObject parent, string text, Vector2 position, float width, float height, Action onClick, int fontSize = 13)
-        {
-            Text label = GUIManager.Instance.CreateText(
-                text: text,
-                parent: parent.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: position,
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: fontSize,
-                color: GUIManager.Instance.ValheimOrange,
-                outline: true,
-                outlineColor: Color.black,
-                width: width,
-                height: height,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-            label.alignment = TextAnchor.MiddleCenter;
-            label.raycastTarget = true; // Button's click needs a raycastable Graphic on the same GameObject
-
-            Button button = label.gameObject.AddComponent<Button>();
-            button.targetGraphic = label;
-            button.transition = Selectable.Transition.ColorTint;
-            ColorBlock colors = button.colors;
-            colors.normalColor = Color.white; // multiplies label.color - white leaves it unchanged
-            colors.highlightedColor = new Color(1.3f, 1.3f, 1.3f, 1f);
-            colors.pressedColor = new Color(0.7f, 0.7f, 0.7f, 1f);
-            colors.selectedColor = Color.white;
-            button.colors = colors;
-            button.onClick.AddListener(() => onClick());
-
-            return label;
-        }
-
-        /// <summary>
         /// Destroys all children of a container <see cref="GameObject"/>.
         /// </summary>
         public static void ClearContainer(GameObject container)
