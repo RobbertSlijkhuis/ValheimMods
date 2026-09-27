@@ -9,11 +9,12 @@ using WizshBoneTwitchIntegration.TwitchIntegration;
 namespace WizshBoneTwitchIntegration.Gui.Tabs
 {
     /// <summary>
-    /// Home tab content - built directly against RedesignUI.dc.html's structure: a 3x2 grid of
-    /// stat/quick-setting cards (Active profile, Redeem status, Chatting feature, Auto resolve,
-    /// Enable on login, Redemption log) plus a "Create a new redeem" button. No login/logout
-    /// controls here - unlike GUI_OLD/tabs/HomeTab.cs, that's already handled by
-    /// <see cref="ShellTopBar"/> (round 2), matching the mockup's Home tab having none either.
+    /// Home tab content - built directly against RedesignUI.dc.html's structure: originally a 3x2
+    /// grid of stat/quick-setting cards (Active profile, Redeem status, Chatting feature, Auto
+    /// resolve, Enable on login, Redemption log), now with a 7th "Redeem discount" card on its own
+    /// row underneath, plus a "Create a new redeem" button. No login/logout controls here - unlike
+    /// GUI_OLD/tabs/HomeTab.cs, that's already handled by <see cref="ShellTopBar"/> (round 2),
+    /// matching the mockup's Home tab having none either.
     ///
     /// Looks up TwitchAuth/TwitchCustomRewards/TwitchChatting itself via Game.instance.gameObject
     /// rather than having them threaded through <see cref="Create"/> - same "own its dependencies"
@@ -70,7 +71,10 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private const float RowGap = 14f;
         private const float CardWidth = (ContentWidth - 2f * ContentMargin - 2f * CardGap) / 3f;
         private const float CardHeight = 160f;
-        private const float ButtonRowY = GridTopY - 2f * CardHeight - RowGap - 30f;
+
+        // The discount card sits alone on a 3rd row (below the original 3x2 grid), so the button
+        // row's Y has to account for that extra row + gap on top of what the 2-row layout used.
+        private const float ButtonRowY = GridTopY - 2f * (CardHeight + RowGap) - CardHeight - 30f;
 
         public GameObject Create(GameObject parent)
         {
@@ -157,6 +161,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             BuildRedemptionLogCard(CardTopCenter(1, 2), customRewards);
 
+            BuildDiscountCard(CardTopCenter(2, 0), auth, customRewards);
+
             GameObject createBtnObj = GuiHelper.CreateButton(
                 text: "Create a new redeem",
                 parent: m_overviewRoot.transform,
@@ -206,6 +212,81 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             GuiHelper.CreateCardDescription(card, $"{totalRedeems} redeems configured", CardWidth - 24f);
         }
 
+        /// <summary>
+        /// Percent (0-100) knocked off every redeem's Twitch point cost. Editing the field only
+        /// updates ProfileSettingsData.redeemsDiscountPercent (persisted immediately, same as every
+        /// other field on this tab) - it does *not* re-push costs to Twitch on its own, since
+        /// existing rewards there aren't touched until <see cref="TwitchCustomRewards.SetRewards"/>
+        /// runs again. "Apply" is the explicit trigger for that, using the same logged-in +
+        /// redeems-enabled guard as ProfilesTab's Reload action, but calling SetRewards directly
+        /// rather than reloading from disk, since only the discount - not the redeem list itself -
+        /// changed.
+        /// </summary>
+        private void BuildDiscountCard(Vector2 topCenter, TwitchAuth auth, TwitchCustomRewards customRewards)
+        {
+            GameObject card = GuiHelper.CreateCard(m_overviewRoot, topCenter, CardWidth, CardHeight);
+            GuiHelper.CreateCardTitle(card, "Redeem discount", CardWidth - 24f);
+
+            const float rowY = -56f;
+            const float fieldWidth = 70f;
+            const float percentWidth = 20f;
+            const float gap = 10f;
+            const float buttonWidth = 100f;
+
+            // Left-aligned row, matching the title's own left edge (-CardWidth/2 + 12) rather than
+            // the field sitting centered in the card the way the first version of this card did.
+            float rowLeftEdge = -CardWidth / 2f + 12f;
+
+            float fieldX = rowLeftEdge + fieldWidth / 2f;
+            GuiFieldBuilder.CreateIntField(card, new Vector2(fieldX, rowY), fieldWidth,
+                ProfileSettingsHelper.Current.redeemsDiscountPercent,
+                v =>
+                {
+                    ProfileSettingsHelper.Current.redeemsDiscountPercent = Mathf.Clamp(v, 0, 100);
+                    ProfileSettingsPersistHelper.Persist();
+                },
+                emptyAsZero: true, maxLength: 3);
+
+            float percentX = rowLeftEdge + fieldWidth + gap + percentWidth / 2f;
+            GuiHelper.CreateCardText(card, "%", rowY, 16, GUIManager.Instance.ValheimBeige,
+                width: percentWidth, height: GuiFieldBuilder.FieldHeight, x: percentX);
+
+            float buttonLeftEdge = rowLeftEdge + fieldWidth + gap + percentWidth + gap;
+            float buttonX = buttonLeftEdge + buttonWidth / 2f;
+            // Same height as Redemption log's "View history" (GuiHelper.CreateCardButton's default),
+            // so every card's button reads the same size regardless of what else sits in its row.
+            const float buttonHeight = 40f;
+            GameObject applyBtnObj = GuiHelper.CreateButton(
+                text: "Apply",
+                parent: card.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                // Rounded to whole pixels - buttonX derives from CardWidth-based divisions that
+                // don't come out even, and legacy uGUI Text doesn't pixel-snap (see GuiHelper's
+                // CreateCard/CreateCardButton for the same fix); unlike CreateCardText/CreateInputField,
+                // the lower-level CreateButton this calls doesn't round internally.
+                position: new Vector2(Mathf.Round(buttonX), Mathf.Round(rowY)),
+                width: Mathf.Round(buttonWidth),
+                height: Mathf.Round(buttonHeight)
+            );
+            applyBtnObj.SetActive(true);
+            applyBtnObj.GetComponent<Button>().onClick.AddListener(() => ApplyDiscount(auth, customRewards));
+
+            GuiHelper.CreateCardDescription(card, "Percent off every redeem's Twitch point cost", CardWidth - 24f, height: 38f);
+        }
+
+        private void ApplyDiscount(TwitchAuth auth, TwitchCustomRewards customRewards)
+        {
+            if (auth == null || customRewards == null || !auth.m_loggedIn || !customRewards.m_enabled)
+            {
+                ToastNotifications.Show("Log in and enable redeems before applying the discount.", ToastType.Warning);
+                return;
+            }
+
+            customRewards.SetRewards();
+            ToastNotifications.Show("Discount applied to Twitch redeem costs.", ToastType.Success);
+        }
+
         private void BuildRedemptionLogCard(Vector2 topCenter, TwitchCustomRewards customRewards)
         {
             GameObject card = GuiHelper.CreateCard(m_overviewRoot, topCenter, CardWidth, CardHeight);
@@ -247,11 +328,21 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             float rightX = leftX + inputWidth + 12f;
 
             // Same fixed top edge every card's description uses (GuiHelper.CardDescriptionTopY) -
-            // Chatting has no description, so its input-fields row occupies that slot instead.
+            // Chatting has no description, so its caption+field rows occupy that slot instead.
+            // Captions sit above their field (a label over an input, not underneath it like a
+            // caption on a photo) so each column reads top-down: "radius (m)", then the box to type
+            // it into.
+            const float captionTopY = GuiHelper.CardDescriptionTopY;
+            const float captionHeight = 18f;
+            const float captionGap = 4f;
+
             // Jotunn's CreateInputField leaves Unity's default center pivot in place, so without
             // GuiHelper.PivotToTop the fields would sit vertically centered on fieldTopY instead of
-            // flush under the toggle row above them.
-            const float fieldTopY = GuiHelper.CardDescriptionTopY;
+            // flush under their caption.
+            const float fieldTopY = captionTopY - captionHeight - captionGap;
+
+            CreateFieldCaption(card, "radius (m)", leftX, inputWidth, captionTopY);
+            CreateFieldCaption(card, "interval (s)", rightX, inputWidth, captionTopY);
 
             InputField radiusField = GuiFieldBuilder.CreateFloatField(card, new Vector2(leftX, fieldTopY), inputWidth,
                 ProfileSettingsHelper.Current.chattingRadius,
@@ -262,14 +353,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 ProfileSettingsHelper.Current.chattingInterval,
                 v => { ProfileSettingsHelper.Current.chattingInterval = v; ProfileSettingsPersistHelper.Persist(); });
             GuiHelper.PivotToTop((RectTransform)intervalField.transform, fieldTopY);
-
-            const float captionGap = 6f;
-            float captionTopY = fieldTopY - GuiFieldBuilder.FieldHeight - captionGap;
-            CreateCaptionUnder(card, "radius (m)", leftX, inputWidth, captionTopY);
-            CreateCaptionUnder(card, "interval (s)", rightX, inputWidth, captionTopY);
         }
 
-        private static void CreateCaptionUnder(GameObject card, string text, float x, float width, float topY)
+        private static void CreateFieldCaption(GameObject card, string text, float x, float width, float topY)
         {
             Text caption = GUIManager.Instance.CreateText(
                 text: text,

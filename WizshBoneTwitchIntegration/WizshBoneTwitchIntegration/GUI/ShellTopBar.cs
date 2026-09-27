@@ -112,7 +112,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_loginButtonText = loginBtnObj.GetComponentInChildren<Text>();
 
             Text credit = GUIManager.Instance.CreateText(
-                text:                "Created by DeathWizsh",
+                text:                $"Created by <color=#{ColorUtility.ToHtmlStringRGB(GUIManager.Instance.ValheimOrange)}>DeathWizsh</color>",
                 parent:              root.transform,
                 anchorMin:           new Vector2(1f, 0.5f),
                 anchorMax:           new Vector2(1f, 0.5f),
@@ -127,6 +127,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 addContentSizeFitter: false
             ).GetComponent<Text>();
             credit.alignment = TextAnchor.MiddleRight;
+            credit.supportRichText = true;
 
             Text version = GUIManager.Instance.CreateText(
                 text:                "v" + WizshBoneTwitchIntegration.PluginVersion,

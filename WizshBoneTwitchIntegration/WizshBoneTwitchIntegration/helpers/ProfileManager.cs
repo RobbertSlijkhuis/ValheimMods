@@ -13,6 +13,15 @@ namespace WizshBoneTwitchIntegration.Helpers
         private static string ActiveProfileFile => ProfilesPath + "/active.txt";
         private const string DefaultProfileName = "Default";
         private const string RedeemsStem = "_redeems";
+
+        /// <summary>
+        /// Long profile names overflow the Profiles/Redeems tabs' fixed-width Name column and the
+        /// sidebar's "Profile: {name}" header - capped here so every entry point (Create/Copy/
+        /// Rename/Import) enforces it uniformly. GUI callers additionally cap the InputDialog's
+        /// input field to this length (see ProfilesTab.cs) so typing past it is prevented rather
+        /// than only rejected on Confirm.
+        /// </summary>
+        internal const int MaxProfileNameLength = 21;
         private static readonly System.Text.RegularExpressions.Regex TrailingDuplicateNumberRegex =
             new System.Text.RegularExpressions.Regex(@" ?\(\d+\)$");
 
@@ -375,6 +384,12 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (string.IsNullOrWhiteSpace(name))
             {
                 error = "Please enter a profile name.";
+                return false;
+            }
+
+            if (name.Length > MaxProfileNameLength)
+            {
+                error = $"Profile name must be {MaxProfileNameLength} characters or fewer.";
                 return false;
             }
 

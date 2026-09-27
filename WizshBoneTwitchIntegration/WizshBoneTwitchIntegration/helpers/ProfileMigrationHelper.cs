@@ -16,7 +16,12 @@ namespace WizshBoneTwitchIntegration.Helpers
     /// never get opened are upgraded on disk at startup by <see cref="MigrateAllProfilesOnDisk"/>.
     ///
     /// To add a future format change: bump <see cref="CurrentVersion"/> and add an
-    /// "if (data.version &lt; N)" step to <see cref="Migrate"/>.
+    /// "if (data.version &lt; N)" step to <see cref="Migrate"/> - and also update the
+    /// "version:" line in the embedded resources/profile.yaml seed, since
+    /// <see cref="ExtraConfigHelper.WriteDefaultRedeemsTo"/> copies it verbatim for brand-new
+    /// profiles rather than going through <see cref="ExtraConfigHelper.WriteRedeemsConfig"/>;
+    /// forgetting this makes every new profile look legacy and get needlessly migrated on
+    /// first read.
     /// </summary>
     internal static class ProfileMigrationHelper
     {

@@ -287,13 +287,37 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void DeserializeUserBlackList(string value)
         {
-            string[] data = value.Trim().Split(',');
             m_userBlacklist = new List<string>();
-            
-            foreach (string entry in data)
+
+            if (string.IsNullOrEmpty(value))
+                return;
+
+            foreach (string entry in value.Split(','))
             {
-                m_userBlacklist.Add(entry.ToLower().Trim());
+                string trimmed = entry.Trim();
+                if (trimmed.Length > 0)
+                    m_userBlacklist.Add(trimmed.ToLower());
             }
+        }
+
+        /// <summary>
+        /// A blank list (no entries) is valid - it just blacklists no one. Anything else is only
+        /// valid when every comma-separated entry has actual content once trimmed, so a trailing/
+        /// leading/double comma (an empty entry) is rejected - see <see cref="DeserializeUserBlackList"/>,
+        /// which silently drops those same empty entries rather than blacklisting an empty name.
+        /// </summary>
+        public static bool IsUserBlacklistValid(string value)
+        {
+            if (string.IsNullOrEmpty(value) || value.Trim().Length == 0)
+                return true;
+
+            foreach (string entry in value.Split(','))
+            {
+                if (entry.Trim().Length == 0)
+                    return false;
+            }
+
+            return true;
         }
     }
 }

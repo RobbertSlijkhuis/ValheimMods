@@ -134,7 +134,8 @@ namespace WizshBoneTwitchIntegration.Gui
             string suggestedValue,
             Func<string, string> onConfirm,
             string confirmText = "Confirm",
-            string cancelText  = "Cancel")
+            string cancelText  = "Cancel",
+            int maxLength = 0)
         {
             if (m_panel == null)
             {
@@ -146,6 +147,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_descriptionText.text   = description;
             m_confirmButtonText.text = confirmText;
             m_cancelButton.GetComponentInChildren<Text>().text = cancelText;
+            m_valueInput.characterLimit = maxLength; // 0 = unlimited, matches GuiFieldBuilder.CreateInputField's default
             m_valueInput.text        = suggestedValue;
             m_feedbackText.text      = "";
 

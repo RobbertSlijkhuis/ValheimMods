@@ -179,6 +179,16 @@ namespace WizshBoneTwitchIntegration.Gui
                     ShellTab from = m_activeTab;
                     SelectTab(ShellTab.Home);
                     m_historyReturnTab = from; // after SelectTab, which resets it
+
+                    // SelectTab(Home) above also highlighted Home in the sidebar (needed since
+                    // RedeemHistorySection lives inside HomeTab's GameObject tree, so Home's root
+                    // has to be the active one) - override that highlight back to the tab history
+                    // was actually opened from, so e.g. opening from Redeems doesn't visually look
+                    // like it navigated to Home. m_activeTab itself stays Home; only the sidebar's
+                    // highlight is overridden.
+                    if (from != ShellTab.Home)
+                        m_sidebar.SetActiveTab(from);
+
                     homeTab.ShowHistory();
                 };
 

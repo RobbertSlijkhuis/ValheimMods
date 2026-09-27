@@ -214,7 +214,9 @@ namespace WizshBoneTwitchIntegration.Gui
                 return;
 
             DropdownOption match = m_options.FirstOrDefault(o => o.Value == m_value);
-            m_toggleText.text = match.Value == m_value ? match.Label : (m_value ?? "");
+            string label = match.Value == m_value ? match.Label : (m_value ?? "");
+            float maxWidth = ((RectTransform)m_toggleText.transform).rect.width;
+            GuiHelper.SetTruncatedText(m_toggleText, label, maxWidth);
         }
 
         private void Open()
@@ -383,7 +385,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 rowBtn.onClick.AddListener(() => Select(capturedValue));
 
                 Text rowText = GUIManager.Instance.CreateText(
-                    text: option.Label,
+                    text: "",
                     parent: rowObj.transform,
                     anchorMin: new Vector2(0.5f, 0.5f),
                     anchorMax: new Vector2(0.5f, 0.5f),
@@ -399,6 +401,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 ).GetComponent<Text>();
                 rowText.alignment    = TextAnchor.MiddleLeft;
                 rowText.raycastTarget = false;
+                GuiHelper.SetTruncatedText(rowText, option.Label, rowWidth - 10f);
 
                 yOffset -= OptionItemHeight + OptionItemSpacing;
             }

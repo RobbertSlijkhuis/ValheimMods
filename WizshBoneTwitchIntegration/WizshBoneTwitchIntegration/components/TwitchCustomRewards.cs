@@ -376,7 +376,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         MaxPerUserPerStream = redeem.maxPerUserPerStream,
                         IsMaxPerUserPerStreamEnabled = redeem.maxPerUserPerStream > 0,
                         IsUserInputRequired = redeem.userInput,
-                        Cost = redeem.points,
+                        Cost = ApplyDiscount(redeem.points),
                         Prompt = redeem.description,
                         // The Twitch-facing (prefixed) title - RedeemData.title itself is stored
                         // prefix-free, see RedeemManager.GetFullTitle.
@@ -387,6 +387,21 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
 
             Twitch.API.ReplaceCustomRewards(listRewards.ToArray());
+        }
+
+        /// <summary>
+        /// Applies <see cref="ProfileSettingsData.redeemsDiscountPercent"/> to a redeem's configured
+        /// point cost before it's sent to Twitch. A 0-cost redeem is left as 0 (never floored to 1),
+        /// but any nonzero cost is never rounded down to 0 by the discount - that would silently
+        /// turn a paid redeem into a free one.
+        /// </summary>
+        private static int ApplyDiscount(int points)
+        {
+            if (points <= 0)
+                return points;
+
+            int discountPercent = Mathf.Clamp(ProfileSettingsHelper.Current.redeemsDiscountPercent, 0, 100);
+            return Mathf.Max(1, Mathf.RoundToInt(points * (100 - discountPercent) / 100f));
         }
 
         public TaskAwaiter ClearRewards()

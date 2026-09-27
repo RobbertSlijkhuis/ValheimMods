@@ -2,6 +2,8 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using WizshBoneTwitchIntegration.Helpers;
+using WizshBoneTwitchIntegration.Models;
+using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Gui.Tabs
 {
@@ -23,6 +25,11 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private GameObject m_root;
         private GameObject m_scrollContent;
         private float m_cursorY;
+
+        // Fresh, never-persisted instance used only to read each field's original default (for
+        // the reset button next to text fields) without duplicating the literals from
+        // ProfileSettingsData.cs here.
+        private static readonly ProfileSettingsData Defaults = new ProfileSettingsData();
 
         // ── layout constants (same derived-from-shell-size pattern as ProfilesTab.cs) ──────────
         private const float ContentWidth = WizshBoneShellGUI.PanelWidth - ShellSidebar.Width;
@@ -99,14 +106,17 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             BoolFieldRow(
                 ("Enable redeems on login", "Automatically turns redeems on when you connect",
                     () => ProfileSettingsHelper.Current.enableRedeemsOnLogin,
-                    v => ProfileSettingsHelper.Current.enableRedeemsOnLogin = v),
+                    v => ProfileSettingsHelper.Current.enableRedeemsOnLogin = v,
+                    Defaults.enableRedeemsOnLogin),
                 ("Auto resolve", "Whether the redeems are resolved automaticly",
                     () => ProfileSettingsHelper.Current.autoResolveRedeems,
-                    v => ProfileSettingsHelper.Current.autoResolveRedeems = v));
+                    v => ProfileSettingsHelper.Current.autoResolveRedeems = v,
+                    Defaults.autoResolveRedeems));
 
             StringFieldRow("Redeem prefix", "Added in front of every redeem title. No trailing space needed, it's added automatically. Max 6 characters.",
                 () => ProfileSettingsHelper.Current.redeemTitlePrefix,
                 v => ProfileSettingsHelper.Current.redeemTitlePrefix = v,
+                Defaults.redeemTitlePrefix,
                 maxLength: 6);
         }
 
@@ -117,30 +127,38 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             BoolFieldRow(
                 ("Enable in-game chatting feature", "Whether viewer chat messages are shown above creatures in-game",
                     () => ProfileSettingsHelper.Current.chattingEnabled,
-                    v => ProfileSettingsHelper.Current.chattingEnabled = v),
+                    v => ProfileSettingsHelper.Current.chattingEnabled = v,
+                    Defaults.chattingEnabled),
                 ("Ignore tames", "Excludes tamed creatures from the chat feature",
                     () => ProfileSettingsHelper.Current.chattingIgnoreTames,
-                    v => ProfileSettingsHelper.Current.chattingIgnoreTames = v));
+                    v => ProfileSettingsHelper.Current.chattingIgnoreTames = v,
+                    Defaults.chattingIgnoreTames));
 
             StringFieldRow("Chatting black list", "Prevents bots or viewers from being chosen for the chat feature",
                 () => ProfileSettingsHelper.Current.chattingBlackList,
-                v => ProfileSettingsHelper.Current.chattingBlackList = v);
+                v => ProfileSettingsHelper.Current.chattingBlackList = v,
+                Defaults.chattingBlackList,
+                isValid: TwitchChatting.IsUserBlacklistValid);
 
             IntFieldRow(
                 ("Claim duration", "0 means permanent",
                     () => ProfileSettingsHelper.Current.chattingClaimDuration,
-                    v => ProfileSettingsHelper.Current.chattingClaimDuration = v),
+                    v => ProfileSettingsHelper.Current.chattingClaimDuration = v,
+                    Defaults.chattingClaimDuration),
                 ("Max chat balloons", "Max balloons shown at once",
                     () => ProfileSettingsHelper.Current.chattingMaxTalkers,
-                    v => ProfileSettingsHelper.Current.chattingMaxTalkers = v));
+                    v => ProfileSettingsHelper.Current.chattingMaxTalkers = v,
+                    Defaults.chattingMaxTalkers));
 
             FloatFieldRow(
                 ("Scan radius", "Meters around player to scan for targets",
                     () => ProfileSettingsHelper.Current.chattingRadius,
-                    v => ProfileSettingsHelper.Current.chattingRadius = v),
+                    v => ProfileSettingsHelper.Current.chattingRadius = v,
+                    Defaults.chattingRadius),
                 ("Scan interval", "Seconds between chat scans",
                     () => ProfileSettingsHelper.Current.chattingInterval,
-                    v => ProfileSettingsHelper.Current.chattingInterval = v));
+                    v => ProfileSettingsHelper.Current.chattingInterval = v,
+                    Defaults.chattingInterval));
         }
 
         private void BuildCreaturesSection()
@@ -150,31 +168,38 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             BoolFieldRow(
                 ("Same faction", "Spawned creatures won't attack each other",
                     () => ProfileSettingsHelper.Current.creaturesSameFaction,
-                    v => ProfileSettingsHelper.Current.creaturesSameFaction = v),
+                    v => ProfileSettingsHelper.Current.creaturesSameFaction = v,
+                    Defaults.creaturesSameFaction),
                 ("Health/damage scaling", "Scale spawned creatures by biome tier",
                     () => ProfileSettingsHelper.Current.creaturesScaling,
-                    v => ProfileSettingsHelper.Current.creaturesScaling = v));
+                    v => ProfileSettingsHelper.Current.creaturesScaling = v,
+                    Defaults.creaturesScaling));
 
             FloatFieldRow(
                 ("Damage scaling per biome tier", "Multiplier added per biome tier",
                     () => ProfileSettingsHelper.Current.creaturesDamageScale,
-                    v => ProfileSettingsHelper.Current.creaturesDamageScale = v),
+                    v => ProfileSettingsHelper.Current.creaturesDamageScale = v,
+                    Defaults.creaturesDamageScale),
                 ("Health scaling per biome tier", "Multiplier added per biome tier",
                     () => ProfileSettingsHelper.Current.creaturesHealthScale,
-                    v => ProfileSettingsHelper.Current.creaturesHealthScale = v));
+                    v => ProfileSettingsHelper.Current.creaturesHealthScale = v,
+                    Defaults.creaturesHealthScale));
 
             FloatFieldRow(
                 ("Max creature amount", "Max creatures spawned by the mod at once",
                     () => ProfileSettingsHelper.Current.creaturesMaxAmount,
-                    v => ProfileSettingsHelper.Current.creaturesMaxAmount = v),
+                    v => ProfileSettingsHelper.Current.creaturesMaxAmount = v,
+                    Defaults.creaturesMaxAmount),
                 ("Max creature radius", "Meters from player creatures can spawn",
                     () => ProfileSettingsHelper.Current.creaturesMaxRadius,
-                    v => ProfileSettingsHelper.Current.creaturesMaxRadius = v));
+                    v => ProfileSettingsHelper.Current.creaturesMaxRadius = v,
+                    Defaults.creaturesMaxRadius));
 
             FloatFieldRow(
                 ("Friendly follow radius with emote", "Meters friendly creatures will follow when emoted at",
                     () => ProfileSettingsHelper.Current.creaturesFollowRadius,
-                    v => ProfileSettingsHelper.Current.creaturesFollowRadius = v));
+                    v => ProfileSettingsHelper.Current.creaturesFollowRadius = v,
+                    Defaults.creaturesFollowRadius));
         }
 
         private void BuildIndestructibleSection()
@@ -184,18 +209,22 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             BoolFieldRow(
                 ("Boats", "Makes boats indestructible",
                     () => ProfileSettingsHelper.Current.indestructibleBoats,
-                    v => ProfileSettingsHelper.Current.indestructibleBoats = v),
+                    v => ProfileSettingsHelper.Current.indestructibleBoats = v,
+                    Defaults.indestructibleBoats),
                 ("Chests", "Makes chests indestructible",
                     () => ProfileSettingsHelper.Current.indestructibleChests,
-                    v => ProfileSettingsHelper.Current.indestructibleChests = v));
+                    v => ProfileSettingsHelper.Current.indestructibleChests = v,
+                    Defaults.indestructibleChests));
 
             BoolFieldRow(
                 ("Portals", "Makes portals indestructible",
                     () => ProfileSettingsHelper.Current.indestructiblePortals,
-                    v => ProfileSettingsHelper.Current.indestructiblePortals = v),
+                    v => ProfileSettingsHelper.Current.indestructiblePortals = v,
+                    Defaults.indestructiblePortals),
                 ("Crops", "Makes crops indestructible",
                     () => ProfileSettingsHelper.Current.indestructibleVegetables,
-                    v => ProfileSettingsHelper.Current.indestructibleVegetables = v));
+                    v => ProfileSettingsHelper.Current.indestructibleVegetables = v,
+                    Defaults.indestructibleVegetables));
         }
 
         private void BuildSafezonesSection()
@@ -204,23 +233,29 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             StringFieldRow("Twitch Ward recipe", "Comma-separated item:amount pairs required to craft the ward",
                 () => ProfileSettingsHelper.Current.wardRecipe,
-                v => ProfileSettingsHelper.Current.wardRecipe = v);
+                v => ProfileSettingsHelper.Current.wardRecipe = v,
+                Defaults.wardRecipe,
+                isValid: v => RecipeHelper.GetAsPieceRequirementArray(v, null, null) != null);
 
             BoolFieldRow(
                 ("Ward burns spawned creatures", "Damages mod-spawned creatures that enter the ward",
                     () => ProfileSettingsHelper.Current.wardBurnCreatures,
-                    v => ProfileSettingsHelper.Current.wardBurnCreatures = v),
+                    v => ProfileSettingsHelper.Current.wardBurnCreatures = v,
+                    Defaults.wardBurnCreatures),
                 ("Ward pushes out spawned creatures", "Knocks mod-spawned creatures back outside the ward",
                     () => ProfileSettingsHelper.Current.wardPushCreatures,
-                    v => ProfileSettingsHelper.Current.wardPushCreatures = v));
+                    v => ProfileSettingsHelper.Current.wardPushCreatures = v,
+                    Defaults.wardPushCreatures));
 
             BoolFieldRow(
                 ("Add safezone to traders", "Creates a safezone around trader NPCs",
                     () => ProfileSettingsHelper.Current.safezoneTraders,
-                    v => ProfileSettingsHelper.Current.safezoneTraders = v),
+                    v => ProfileSettingsHelper.Current.safezoneTraders = v,
+                    Defaults.safezoneTraders),
                 ("Add safezone to boats", "Only for player-built boats",
                     () => ProfileSettingsHelper.Current.safezoneBoats,
-                    v => ProfileSettingsHelper.Current.safezoneBoats = v));
+                    v => ProfileSettingsHelper.Current.safezoneBoats = v,
+                    Defaults.safezoneBoats));
         }
 
         // ── generic row builders ────────────────────────────────────────────────────────────
@@ -232,7 +267,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             m_cursorY -= SectionHeaderHeight;
         }
 
-        private void BoolFieldRow(params (string Title, string Description, Func<bool> Get, Action<bool> Set)[] fields)
+        private void BoolFieldRow(params (string Title, string Description, Func<bool> Get, Action<bool> Set, bool Default)[] fields)
         {
             GameObject row = CreateRow();
             ForEachCell(fields.Length, (x, width, i) =>
@@ -240,12 +275,18 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 var f = fields[i];
                 GameObject cell = CreateCell(row, x, width);
                 GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
-                GuiFieldBuilder.CreateBoolField(cell, new Vector2(0f, -56f), width - 24f, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
+                // The toggle stays its usual fixed left-aligned width (see CreateBoolField) - only
+                // the reset button's position comes from FieldAndResetLayout here.
+                (_, _, float resetCenterX) = FieldAndResetLayout(width);
+                Toggle toggle = GuiFieldBuilder.CreateBoolField(cell, new Vector2(0f, -56f), width - 24f, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
+                // Toggle.isOn is a no-op when already equal to the target value, so this only fires
+                // the listener above (and persists) when a reset actually changes anything.
+                CreateResetButton(cell, resetCenterX, () => toggle.isOn = f.Default);
                 GuiHelper.CreateCardDescription(cell, f.Description, width - 24f);
             });
         }
 
-        private void IntFieldRow(params (string Title, string Description, Func<int> Get, Action<int> Set)[] fields)
+        private void IntFieldRow(params (string Title, string Description, Func<int> Get, Action<int> Set, int Default)[] fields)
         {
             GameObject row = CreateRow();
             ForEachCell(fields.Length, (x, width, i) =>
@@ -253,12 +294,14 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 var f = fields[i];
                 GameObject cell = CreateCell(row, x, width);
                 GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
-                GuiFieldBuilder.CreateIntField(cell, new Vector2(0f, -58f), width - 24f, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
+                (float fieldWidth, float fieldCenterX, float resetCenterX) = FieldAndResetLayout(width);
+                InputField input = GuiFieldBuilder.CreateIntField(cell, new Vector2(fieldCenterX, -58f), fieldWidth, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
+                CreateResetButton(cell, resetCenterX, () => input.text = f.Default.ToString());
                 GuiHelper.CreateCardDescription(cell, f.Description, width - 24f);
             });
         }
 
-        private void FloatFieldRow(params (string Title, string Description, Func<float> Get, Action<float> Set)[] fields)
+        private void FloatFieldRow(params (string Title, string Description, Func<float> Get, Action<float> Set, float Default)[] fields)
         {
             GameObject row = CreateRow();
             ForEachCell(fields.Length, (x, width, i) =>
@@ -266,19 +309,74 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 var f = fields[i];
                 GameObject cell = CreateCell(row, x, width);
                 GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
-                GuiFieldBuilder.CreateFloatField(cell, new Vector2(0f, -58f), width - 24f, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
+                (float fieldWidth, float fieldCenterX, float resetCenterX) = FieldAndResetLayout(width);
+                InputField input = GuiFieldBuilder.CreateFloatField(cell, new Vector2(fieldCenterX, -58f), fieldWidth, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
+                CreateResetButton(cell, resetCenterX, () => input.text = f.Default.ToString("G"));
                 GuiHelper.CreateCardDescription(cell, f.Description, width - 24f);
             });
         }
 
-        private void StringFieldRow(string title, string description, Func<string> get, Action<string> set, int maxLength = 0)
+        private static readonly Color InvalidFieldColor = Color.red;
+
+        // Sits right of the field, sharing its row rather than a separate one - see
+        // FieldAndResetLayout below.
+        private const float ResetButtonWidth = 70f;
+        private const float ResetButtonGap = 8f;
+
+        private void StringFieldRow(string title, string description, Func<string> get, Action<string> set, string defaultValue, int maxLength = 0, Func<string, bool> isValid = null)
         {
             GameObject row = CreateRow();
             GameObject cell = CreateCell(row, 0f, ScrollContentWidth);
             GuiHelper.CreateCardTitle(cell, title, ScrollContentWidth - 24f);
-            InputField input = GuiFieldBuilder.CreateInputField(cell, new Vector2(0f, -58f), ScrollContentWidth - 24f, get(), maxLength: maxLength);
-            input.onValueChanged.AddListener(v => { set(v); ProfileSettingsPersistHelper.Persist(); });
+
+            (float fieldWidth, float fieldCenterX, float resetCenterX) = FieldAndResetLayout(ScrollContentWidth);
+
+            InputField input = GuiFieldBuilder.CreateInputField(cell, new Vector2(fieldCenterX, -58f), fieldWidth, get(), maxLength: maxLength);
+            Color normalColor = input.textComponent.color;
+            input.onValueChanged.AddListener(v =>
+            {
+                set(v);
+                ProfileSettingsPersistHelper.Persist();
+                if (isValid != null)
+                    input.textComponent.color = isValid(v) ? normalColor : InvalidFieldColor;
+            });
+
+            // Setting InputField.text (rather than calling set()/Persist() directly) reuses the
+            // onValueChanged listener above, so a reset gets the exact same persist + validity-color
+            // behavior as typing the default value in by hand.
+            CreateResetButton(cell, resetCenterX, () => input.text = defaultValue);
+
             GuiHelper.CreateCardDescription(cell, description, ScrollContentWidth - 24f);
+        }
+
+        /// <summary>
+        /// Splits a cell's usable width (<paramref name="cellWidth"/> - 24f, matching every card's
+        /// title/description inset) into a left field slot and a right <see cref="ResetButtonWidth"/>
+        /// slot - shared by every *FieldRow method that needs a reset button next to its field, so
+        /// this split can't drift between them the way StringFieldRow's original inline version
+        /// would have if IntFieldRow/FloatFieldRow each grew their own copy.
+        /// </summary>
+        private static (float FieldWidth, float FieldCenterX, float ResetCenterX) FieldAndResetLayout(float cellWidth)
+        {
+            float totalWidth = cellWidth - 24f;
+            float leftEdge = -totalWidth / 2f;
+            float rightEdge = totalWidth / 2f;
+            float fieldWidth = totalWidth - ResetButtonWidth - ResetButtonGap;
+            return (fieldWidth, leftEdge + fieldWidth / 2f, rightEdge - ResetButtonWidth / 2f);
+        }
+
+        private static void CreateResetButton(GameObject cell, float centerX, Action onClick)
+        {
+            GameObject resetBtn = GuiHelper.CreateButton(
+                text: "Reset",
+                parent: cell.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: new Vector2(centerX, -58f),
+                width: ResetButtonWidth,
+                height: GuiFieldBuilder.FieldHeight);
+            resetBtn.SetActive(true);
+            resetBtn.GetComponent<Button>().onClick.AddListener(() => onClick());
         }
 
         /// <summary>

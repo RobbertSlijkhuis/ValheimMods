@@ -118,7 +118,17 @@ namespace WizshBoneTwitchIntegration.Helpers
             UnityEngine.GameObject guardStone = prefabManager?.GetPrefab("WBTI_guard_stone");
             Piece piece = guardStone?.GetComponent<Piece>();
             if (piece != null)
-                piece.m_resources = RecipeHelper.GetAsPieceRequirementArray(Current.wardRecipe, null, null);
+            {
+                // GetAsPieceRequirementArray returns null for an unparsable/unresolvable recipe
+                // string (e.g. a mid-edit or malformed value from the Settings tab's Twitch Ward
+                // recipe field). Assigning null to m_resources breaks the Hammer's build UI, so an
+                // invalid recipe is rejected here and the piece keeps whatever it was last using.
+                Piece.Requirement[] resources = RecipeHelper.GetAsPieceRequirementArray(Current.wardRecipe, null, null);
+                if (resources != null)
+                    piece.m_resources = resources;
+                else
+                    Jotunn.Logger.LogWarning($"[WBTI] Twitch Ward recipe '{Current.wardRecipe}' is invalid, keeping the previously applied recipe.");
+            }
         }
     }
 }

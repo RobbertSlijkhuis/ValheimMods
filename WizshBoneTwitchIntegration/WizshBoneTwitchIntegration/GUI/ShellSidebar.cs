@@ -173,13 +173,13 @@ namespace WizshBoneTwitchIntegration.Gui
         public void RefreshProfileGroupLabel()
         {
             if (m_profileGroupHeaderText != null)
-                m_profileGroupHeaderText.text = $"Profile: {ProfileManager.ActiveProfile}";
+                GuiHelper.SetTruncatedText(m_profileGroupHeaderText, $"Profile: {ProfileManager.ActiveProfile}", Width - 30f);
         }
 
         private float CreateGroup(GameObject root, string groupLabel, ShellTab[] tabs, float y, Action<ShellTab> onSelectTab, bool isProfileGroup)
         {
             Text header = GUIManager.Instance.CreateText(
-                text:                groupLabel,
+                text:                isProfileGroup ? "" : groupLabel,
                 parent:              root.transform,
                 anchorMin:           new Vector2(0.5f, 1f),
                 anchorMax:           new Vector2(0.5f, 1f),
@@ -196,7 +196,10 @@ namespace WizshBoneTwitchIntegration.Gui
             header.alignment = TextAnchor.MiddleLeft;
 
             if (isProfileGroup)
+            {
                 m_profileGroupHeaderText = header;
+                GuiHelper.SetTruncatedText(header, groupLabel, Width - 30f);
+            }
 
             y -= GroupHeaderHeight + GroupHeaderGap;
 

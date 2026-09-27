@@ -35,6 +35,13 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float BackgroundTint  = 0.10f; // 0 = plain preview color, 1 = full type color
         private const int   FontSize      = 14;
 
+        // Gap between the toast box and the text's own rect (ToastHeight - TextPadding is the
+        // text height at the original single-line ToastHeight) - kept as one named constant so the
+        // dynamic height calculation below reproduces the exact same padding for longer messages.
+        // 24 total = 12px top + 12px bottom, matching the ~12px inset other cards use elsewhere.
+        private const float TextPadding   = 24f;
+        private const float TextWidth     = ToastWidth - 20f;
+
         private static GameObject s_container;
 
         // Newest toast is inserted at index 0 and positioned closest to the bottom margin -
@@ -113,20 +120,28 @@ namespace WizshBoneTwitchIntegration.Gui
             Text text = GUIManager.Instance.CreateText(
                 text:                message,
                 parent:              toastObj.transform,
-                anchorMin:           Vector2.zero,
-                anchorMax:           Vector2.one,
+                anchorMin:           new Vector2(0.5f, 0.5f),
+                anchorMax:           new Vector2(0.5f, 0.5f),
                 position:            Vector2.zero,
                 font:                GUIManager.Instance.AveriaSerifBold,
                 fontSize:            FontSize,
                 color:               typeColor,
                 outline:             true,
                 outlineColor:        Color.black,
-                width:               ToastWidth - 20f,
-                height:              ToastHeight - 10f,
+                width:               TextWidth,
+                height:              ToastHeight - TextPadding,
                 addContentSizeFitter: false
             ).GetComponent<Text>();
             text.alignment = TextAnchor.MiddleCenter;
             text.horizontalOverflow = HorizontalWrapMode.Wrap;
+            text.verticalOverflow = VerticalWrapMode.Overflow;
+
+            // Long messages wrap past a single line - grow the box (and everything stretched to
+            // it: background, left bar, outline border) to fit, rather than clipping the text like
+            // the fixed ToastHeight used to.
+            TextGenerationSettings settings = text.GetGenerationSettings(new Vector2(TextWidth, 0f));
+            float textHeight = text.cachedTextGeneratorForLayout.GetPreferredHeight(message, settings) / text.pixelsPerUnit;
+            toastRt.sizeDelta = new Vector2(ToastWidth, Mathf.Max(ToastHeight, textHeight + TextPadding));
 
             s_activeToasts.Insert(0, toastObj);
             RepositionAll();
@@ -157,10 +172,12 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private static void RepositionAll()
         {
+            float cumulativeY = 0f;
             for (int i = 0; i < s_activeToasts.Count; i++)
             {
                 RectTransform rt = s_activeToasts[i].GetComponent<RectTransform>();
-                rt.anchoredPosition = new Vector2(0f, i * (ToastHeight + ToastSpacing));
+                rt.anchoredPosition = new Vector2(0f, cumulativeY);
+                cumulativeY += rt.sizeDelta.y + ToastSpacing;
             }
         }
     }

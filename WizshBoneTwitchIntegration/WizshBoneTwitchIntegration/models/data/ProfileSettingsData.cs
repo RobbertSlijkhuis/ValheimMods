@@ -40,6 +40,7 @@ namespace WizshBoneTwitchIntegration.Models
         public bool enableRedeemsOnLogin = true;
         public bool autoResolveRedeems = true;
         public string redeemTitlePrefix = "WBTI";
+        public int redeemsDiscountPercent = 0;
 
         // Twitchy Ward
         public string wardRecipe = "FineWood:5, GreydwarfEye:5, SurtlingCore:1";

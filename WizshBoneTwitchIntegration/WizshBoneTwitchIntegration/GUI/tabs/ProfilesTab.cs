@@ -409,7 +409,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 description: "Enter a name for the new profile.",
                 suggestedValue: "",
                 onConfirm: HandleCreateConfirm,
-                confirmText: "Create");
+                confirmText: "Create",
+                maxLength: ProfileManager.MaxProfileNameLength);
         }
 
         private string HandleCreateConfirm(string name)
@@ -432,7 +433,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 description: "Enter a name for the new profile copy.",
                 suggestedValue: suggestedName,
                 onConfirm: HandleCopyConfirm,
-                confirmText: "Copy");
+                confirmText: "Copy",
+                maxLength: ProfileManager.MaxProfileNameLength);
         }
 
         private string HandleCopyConfirm(string newName)
@@ -481,7 +483,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                     description: "Leave the name unchanged to update the existing profile.\nChange it to import as a new profile.",
                     suggestedValue: suggestedName,
                     onConfirm: newName => HandleImportConfirm(selectedFile, newName),
-                    confirmText: "Import");
+                    confirmText: "Import",
+                    maxLength: ProfileManager.MaxProfileNameLength);
             }
             catch (Exception e)
             {
@@ -589,7 +592,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 description: "Enter a new name for this profile.",
                 suggestedValue: name,
                 onConfirm: newName => HandleRenameConfirm(name, newName),
-                confirmText: "Rename");
+                confirmText: "Rename",
+                maxLength: ProfileManager.MaxProfileNameLength);
         }
 
         private string HandleRenameConfirm(string oldName, string newName)

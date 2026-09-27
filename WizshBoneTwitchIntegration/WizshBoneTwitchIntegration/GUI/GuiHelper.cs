@@ -293,6 +293,53 @@ namespace WizshBoneTwitchIntegration.Gui
         }
 
         /// <summary>
+        /// Sets <paramref name="text"/>'s content to <paramref name="fullText"/>, truncating with
+        /// a trailing "..." if it doesn't fit within <paramref name="maxWidth"/>. Forces single-line
+        /// <see cref="HorizontalWrapMode.Overflow"/> rather than the default Wrap - a wrapped
+        /// second line just gets silently dropped by Unity's default vertical Truncate overflow
+        /// (see <see cref="CreateCardText"/>'s note above) instead of showing the rest of the
+        /// text, which is what made long profile names disappear mid-word in the sidebar's
+        /// "Profile: {name}" header and the Redeems tab's profile dropdown before this existed.
+        /// Wires/unwires a <see cref="TooltipTrigger"/> showing <paramref name="fullText"/> on
+        /// <paramref name="text"/> itself whenever truncation actually happened, so hovering a
+        /// clipped label reveals the untruncated name - removed again if a later call (e.g. a
+        /// rename, or this same header's every-frame refresh) finds the text now fits unclipped.
+        /// </summary>
+        public static void SetTruncatedText(Text text, string fullText, float maxWidth)
+        {
+            text.horizontalOverflow = HorizontalWrapMode.Overflow;
+            fullText = fullText ?? "";
+            text.text = fullText;
+
+            bool truncated = fullText.Length != 0 && text.preferredWidth > maxWidth;
+            if (truncated)
+            {
+                int len = fullText.Length - 1;
+                for (; len > 0; len--)
+                {
+                    text.text = fullText.Substring(0, len) + "...";
+                    if (text.preferredWidth <= maxWidth)
+                        break;
+                }
+                if (len <= 0)
+                    text.text = "...";
+            }
+
+            TooltipTrigger tooltip = text.GetComponent<TooltipTrigger>();
+            if (truncated)
+            {
+                text.raycastTarget = true; // TooltipTrigger's pointer-enter/exit handlers need a raycastable Graphic here
+                if (tooltip == null)
+                    tooltip = text.gameObject.AddComponent<TooltipTrigger>();
+                tooltip.Init(fullText);
+            }
+            else if (tooltip != null)
+            {
+                UnityEngine.Object.Destroy(tooltip);
+            }
+        }
+
+        /// <summary>
         /// A card's description, always top-pivoted at the fixed <see cref="CardDescriptionTopY"/>
         /// and free to grow downward if it wraps (<see cref="MakeDescriptionExpandDownward"/>) - the
         /// shape every card description should use so a call site can't forget the top-pivot fix
@@ -373,6 +420,46 @@ namespace WizshBoneTwitchIntegration.Gui
             btnObj.GetComponent<Button>().onClick.AddListener(() => onClick());
 
             return btnObj;
+        }
+
+        /// <summary>
+        /// Plain clickable orange text - no button chrome (no background/border), just a
+        /// <see cref="Button"/> riding on the label's own <see cref="Text"/> Graphic so it still
+        /// reports clicks and gets a faint hover/press tint. Used for HelpTab's topic list, where
+        /// a link reads better than a full button.
+        /// </summary>
+        public static Text CreateTextLink(GameObject parent, string text, Vector2 position, float width, float height, Action onClick, int fontSize = 13)
+        {
+            Text label = GUIManager.Instance.CreateText(
+                text: text,
+                parent: parent.transform,
+                anchorMin: new Vector2(0.5f, 1f),
+                anchorMax: new Vector2(0.5f, 1f),
+                position: position,
+                font: GUIManager.Instance.AveriaSerifBold,
+                fontSize: fontSize,
+                color: GUIManager.Instance.ValheimOrange,
+                outline: true,
+                outlineColor: Color.black,
+                width: width,
+                height: height,
+                addContentSizeFitter: false
+            ).GetComponent<Text>();
+            label.alignment = TextAnchor.MiddleCenter;
+            label.raycastTarget = true; // Button's click needs a raycastable Graphic on the same GameObject
+
+            Button button = label.gameObject.AddComponent<Button>();
+            button.targetGraphic = label;
+            button.transition = Selectable.Transition.ColorTint;
+            ColorBlock colors = button.colors;
+            colors.normalColor = Color.white; // multiplies label.color - white leaves it unchanged
+            colors.highlightedColor = new Color(1.3f, 1.3f, 1.3f, 1f);
+            colors.pressedColor = new Color(0.7f, 0.7f, 0.7f, 1f);
+            colors.selectedColor = Color.white;
+            button.colors = colors;
+            button.onClick.AddListener(() => onClick());
+
+            return label;
         }
 
         /// <summary>

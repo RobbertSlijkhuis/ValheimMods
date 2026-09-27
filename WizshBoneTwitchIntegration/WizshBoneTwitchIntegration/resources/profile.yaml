@@ -1,5 +1,6 @@
 # In this file you can add and configure your redeems for the WizshBone Twitch Integration
 #
+version: 1
 redeems:
   - type: SpawnCreature
     title: "WBTI Special creature!"
