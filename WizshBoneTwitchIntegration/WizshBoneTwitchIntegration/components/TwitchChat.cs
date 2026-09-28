@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 
 namespace WizshBoneTwitchIntegration.TwitchIntegration
@@ -173,9 +174,10 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
             Jotunn.Logger.LogWarning($"{userName}: {chatMessage}");
 
-            if (m_chatting.GetChosenUser() == userName && chatMessage.Equals("!claim", StringComparison.OrdinalIgnoreCase))
+            if (chatMessage.Equals("!claim", StringComparison.OrdinalIgnoreCase)
+                && (ProfileSettingsHelper.Current.chattingClaimFreeForAll ? m_chatting.HasOpenClaim() : m_chatting.GetChosenUser() == userName))
             {
-                m_chatting.AcceptClaim();
+                m_chatting.AcceptClaim(userName);
                 return;
             }
 

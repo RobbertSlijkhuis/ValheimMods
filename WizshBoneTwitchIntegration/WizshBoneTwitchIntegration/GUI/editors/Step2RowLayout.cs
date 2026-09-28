@@ -1,179 +1,193 @@
 using System;
 using System.Collections.Generic;
-using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
-    /// Stacks label+field+description rows top-down inside a redeem wizard step-2 per-type form,
-    /// tracking its own Y cursor so per-type form classes don't hand-compute row offsets the way
-    /// <see cref="RedeemWizard"/>'s step 3 still does. Construct one fresh instance per form
-    /// "page" (a type's General tab, its Damage tab, an entry-list card, ...) each time that page
-    /// is (re)built - this class holds no state beyond the current Y cursor, so there's nothing to
-    /// reset between builds.
-    ///
-    /// Every row shows an always-visible description under its field (no hover-only tooltip/"?"
-    /// icon - removed entirely from this page) and a "Reset" button that writes
-    /// <c>defaultValue</c> back into the field, reusing <see cref="GuiHelper"/>'s reset-button
-    /// plumbing (originally built for SettingsTab). Because descriptions vary from none to full
-    /// sentences that wrap 2-3 lines at <see cref="RedeemWizard.FieldWidth"/>, each row's height is
-    /// measured rather than fixed - see <see cref="CreateDescription"/>.
+    /// Lays out one bordered card per field, top-down, inside a redeem wizard step-2 per-type
+    /// form - the same visual shape <see cref="Tabs.SettingsTab"/> uses (<see cref="GuiHelper.CreateCard"/>,
+    /// title at <see cref="GuiHelper.CardTitleY"/>, field+reset below, description growing downward
+    /// from <see cref="GuiHelper.CardDescriptionTopY"/>) - except each card's height is measured
+    /// from its own description length rather than Settings' fixed 120px row height, since step-2
+    /// descriptions vary from one clause to several sentences. Construct one fresh instance per
+    /// form "page" each time that page is (re)built - this class holds no state beyond the current
+    /// Y cursor and pairing scratch state, so there's nothing to reset between builds.
     /// </summary>
     internal class Step2RowLayout
     {
+        private const float CardInset = 24f;
+        private const float FieldOffsetY = -58f;
+        private const float BottomPadding = 14f;
+        private const float PairGap = 0f;
+        private static readonly float MinCardHeight = -FieldOffsetY + GuiFieldBuilder.FieldHeight / 2f + BottomPadding;
+
         private readonly GameObject m_parent;
         private readonly float m_width;
         private float m_y;
+
+        // Current cell a *Row method builds its card into - (0, m_width) for a normal full-width
+        // row, narrowed to a half-width slot while inside PairRow.
+        private float m_cellX;
+        private float m_cellWidth;
+        private bool m_pairing;
+        private readonly List<(GameObject Card, float Height)> m_pairEntries = new List<(GameObject, float)>();
 
         public Step2RowLayout(GameObject parent, float topY, float width = RedeemWizard.Step2FieldWidth - ScrollableList.ScrollbarWidth)
         {
             m_parent = parent;
             m_width = width;
             m_y = topY;
+            m_cellX = 0f;
+            m_cellWidth = width;
         }
 
         /// <summary>Y the next row would start at - lets a caller size a scroll container after laying out all its rows.</summary>
         public float CurrentY => m_y;
 
-        private void CreateLabel(string label, float y)
+        private static void ResizeCard(GameObject card, float height)
         {
-            Text text = GUIManager.Instance.CreateText(
-                text: label,
-                parent: m_parent.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(0f, y),
-                font: GUIManager.Instance.AveriaSerifBold,
-                fontSize: GuiFieldBuilder.FieldFontSize,
-                color: GUIManager.Instance.ValheimBeige,
-                outline: true,
-                outlineColor: Color.black,
-                width: m_width,
-                height: RedeemWizard.LabelHeight,
-                addContentSizeFitter: false
-            ).GetComponent<Text>();
-            text.alignment = TextAnchor.MiddleLeft;
-            GuiHelper.PivotToTop(text.rectTransform, y);
+            RectTransform rt = (RectTransform)card.transform;
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, Mathf.Round(height));
+        }
+
+        /// <summary>Creates this row's card (at the current cell) and its title - every <c>*Row</c> method starts here.</summary>
+        private GameObject BeginFieldCard(string label, out float fieldY)
+        {
+            GameObject card = GuiHelper.CreateCard(m_parent, new Vector2(m_cellX, m_y), m_cellWidth, MinCardHeight);
+            GuiHelper.CreateCardTitle(card, label, m_cellWidth - CardInset);
+            fieldY = FieldOffsetY;
+            return card;
         }
 
         /// <summary>
-        /// Draws an always-visible description below the field (skipped entirely when
-        /// <paramref name="description"/> is null/empty) and returns the height it actually needs
-        /// once wrapped at this row's width - measured via <see cref="Text.preferredHeight"/>
-        /// (which computes the wrapped-text-generator height against the Text's current rect width
-        /// immediately, no layout-pass/frame delay needed) so the row cursor can advance past
-        /// however many lines a long description wraps to, instead of assuming a fixed height.
+        /// Draws the description (if any), measures the card's real required height, and either
+        /// resizes+advances immediately (normal single row) or - while inside <see cref="PairRow"/> -
+        /// records the card for the pair to resize together once both sides are known.
         /// </summary>
-        private float CreateDescription(string description, float topY)
+        private void EndFieldCard(GameObject card, string description)
         {
-            if (string.IsNullOrEmpty(description))
-                return 0f;
+            float descHeight = 0f;
+            if (!string.IsNullOrEmpty(description))
+            {
+                Text text = GuiHelper.CreateCardDescription(card, description, m_cellWidth - CardInset);
+                descHeight = text.preferredHeight;
+            }
 
-            Text text = GuiHelper.CreateCardDescription(m_parent, description, topY, m_width, height: 18f);
-            return text.preferredHeight;
+            float cardHeight = Mathf.Max(MinCardHeight, -GuiHelper.CardDescriptionTopY + descHeight + BottomPadding);
+
+            if (m_pairing)
+            {
+                m_pairEntries.Add((card, cardHeight));
+                return;
+            }
+
+            ResizeCard(card, cardHeight);
+            m_y -= cardHeight + RedeemWizard.RowGap;
         }
 
-        /// <summary>Advances the row cursor past a field row of <paramref name="fieldBottomY"/> plus however tall its description measured.</summary>
-        private void FinishRow(float fieldBottomY, float descriptionHeight)
+        /// <summary>
+        /// Splits the current row into two half-width cards and runs <paramref name="left"/>/
+        /// <paramref name="right"/> into them (each just calls one of this class's own <c>*Row</c>
+        /// methods) - both cards end up the shared max height so the row looks level, then the
+        /// cursor advances once. Mixed field types (e.g. a float paired with a bool) work fine since
+        /// pairing only cares about card geometry, not the field's own type. For a pair where one
+        /// side is conditionally hidden (e.g. SpawnCreature's Commandable only when Friendly is on),
+        /// the caller should call the plain single-field <c>*Row</c> method instead of <see cref="PairRow"/>
+        /// when the condition is false, rather than leaving an empty half - see SpawnCreatureForm.
+        /// </summary>
+        public void PairRow(Action left, Action right)
         {
-            float afterDescriptionY = descriptionHeight > 0f ? fieldBottomY - descriptionHeight : fieldBottomY;
-            m_y = afterDescriptionY - RedeemWizard.RowGap;
-        }
+            float halfWidth = (m_width - PairGap) / 2f;
+            float leftCenterX = -halfWidth / 2f - PairGap / 2f;
+            float rightCenterX = halfWidth / 2f + PairGap / 2f;
 
-        /// <summary>Advances the row cursor and draws the row's label + description without building a field - for a custom widget the caller builds itself (e.g. a multi-part row). No reset button, since there's no single field value here to reset.</summary>
-        public float LabelOnlyRow(string label, string description)
-        {
-            float labelY = m_y;
-            float fieldY = labelY - RedeemWizard.LabelHeight;
-            CreateLabel(label, labelY);
-            float descHeight = CreateDescription(description, fieldY);
-            FinishRow(fieldY, descHeight);
-            return fieldY;
+            m_pairing = true;
+            m_pairEntries.Clear();
+
+            m_cellX = leftCenterX;
+            m_cellWidth = halfWidth;
+            left();
+
+            m_cellX = rightCenterX;
+            m_cellWidth = halfWidth;
+            right();
+
+            m_pairing = false;
+            m_cellX = 0f;
+            m_cellWidth = m_width;
+
+            if (m_pairEntries.Count == 0)
+                return;
+
+            float maxHeight = 0f;
+            foreach ((GameObject _, float height) in m_pairEntries)
+                maxHeight = Mathf.Max(maxHeight, height);
+            foreach ((GameObject entryCard, float _) in m_pairEntries)
+                ResizeCard(entryCard, maxHeight);
+
+            m_y -= maxHeight + RedeemWizard.RowGap;
         }
 
         public InputField TextRow(string label, string description, string value, string placeholder, Action<string> onChanged, string defaultValue = "")
         {
-            float labelY = m_y;
-            float fieldY = labelY - RedeemWizard.LabelHeight;
-            CreateLabel(label, labelY);
+            GameObject card = BeginFieldCard(label, out float fieldY);
 
-            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(m_width, inset: 0f);
-            InputField field = GuiFieldBuilder.CreateInputField(m_parent, new Vector2(fieldCenterX, fieldY), fieldWidth, value ?? "", placeholder ?? "");
+            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(m_cellWidth);
+            InputField field = GuiFieldBuilder.CreateInputField(card, new Vector2(fieldCenterX, fieldY), fieldWidth, value ?? "", placeholder ?? "");
             field.onValueChanged.AddListener(v => onChanged?.Invoke(v));
-            GuiHelper.PivotToTop((RectTransform)field.transform, fieldY);
-            GameObject resetBtn = GuiHelper.CreateResetButton(m_parent, resetCenterX, fieldY, () => field.text = defaultValue ?? "");
-            GuiHelper.PivotToTop((RectTransform)resetBtn.transform, fieldY);
+            GuiHelper.CreateResetButton(card, resetCenterX, fieldY, () => field.text = defaultValue ?? "");
 
-            float descHeight = CreateDescription(description, fieldY - GuiFieldBuilder.FieldHeight);
-            FinishRow(fieldY - GuiFieldBuilder.FieldHeight, descHeight);
+            EndFieldCard(card, description);
             return field;
         }
 
         public InputField IntRow(string label, string description, int value, Action<int> onChanged, int defaultValue = 0, int maxLength = 9)
         {
-            float labelY = m_y;
-            float fieldY = labelY - RedeemWizard.LabelHeight;
-            CreateLabel(label, labelY);
+            GameObject card = BeginFieldCard(label, out float fieldY);
 
-            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(m_width, inset: 0f);
-            InputField field = GuiFieldBuilder.CreateIntField(m_parent, new Vector2(fieldCenterX, fieldY), fieldWidth, value, onChanged, emptyAsZero: true, maxLength: maxLength);
-            GuiHelper.PivotToTop((RectTransform)field.transform, fieldY);
-            GameObject resetBtn = GuiHelper.CreateResetButton(m_parent, resetCenterX, fieldY, () => field.text = defaultValue.ToString());
-            GuiHelper.PivotToTop((RectTransform)resetBtn.transform, fieldY);
+            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(m_cellWidth);
+            InputField field = GuiFieldBuilder.CreateIntField(card, new Vector2(fieldCenterX, fieldY), fieldWidth, value, onChanged, emptyAsZero: true, maxLength: maxLength);
+            GuiHelper.CreateResetButton(card, resetCenterX, fieldY, () => field.text = defaultValue.ToString());
 
-            float descHeight = CreateDescription(description, fieldY - GuiFieldBuilder.FieldHeight);
-            FinishRow(fieldY - GuiFieldBuilder.FieldHeight, descHeight);
+            EndFieldCard(card, description);
             return field;
         }
 
         public InputField FloatRow(string label, string description, float value, Action<float> onChanged, float defaultValue = 0f)
         {
-            float labelY = m_y;
-            float fieldY = labelY - RedeemWizard.LabelHeight;
-            CreateLabel(label, labelY);
+            GameObject card = BeginFieldCard(label, out float fieldY);
 
-            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(m_width, inset: 0f);
-            InputField field = GuiFieldBuilder.CreateFloatField(m_parent, new Vector2(fieldCenterX, fieldY), fieldWidth, value, onChanged);
-            GuiHelper.PivotToTop((RectTransform)field.transform, fieldY);
-            GameObject resetBtn = GuiHelper.CreateResetButton(m_parent, resetCenterX, fieldY, () => field.text = defaultValue.ToString("G"));
-            GuiHelper.PivotToTop((RectTransform)resetBtn.transform, fieldY);
+            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(m_cellWidth);
+            InputField field = GuiFieldBuilder.CreateFloatField(card, new Vector2(fieldCenterX, fieldY), fieldWidth, value, onChanged);
+            GuiHelper.CreateResetButton(card, resetCenterX, fieldY, () => field.text = defaultValue.ToString("G"));
 
-            float descHeight = CreateDescription(description, fieldY - GuiFieldBuilder.FieldHeight);
-            FinishRow(fieldY - GuiFieldBuilder.FieldHeight, descHeight);
+            EndFieldCard(card, description);
             return field;
         }
 
         public Toggle ToggleRow(string label, string description, bool value, Action<bool> onChanged, bool defaultValue = false)
         {
-            float labelY = m_y;
-            float fieldY = labelY - RedeemWizard.LabelHeight;
-            CreateLabel(label, labelY);
+            GameObject card = BeginFieldCard(label, out float fieldY);
 
-            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(m_width, inset: 0f);
-            Toggle toggle = GuiFieldBuilder.CreateBoolField(m_parent, new Vector2(fieldCenterX, fieldY), fieldWidth, value, onChanged);
-            GuiHelper.PivotToTop((RectTransform)toggle.transform, fieldY);
+            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(m_cellWidth);
+            Toggle toggle = GuiFieldBuilder.CreateBoolField(card, new Vector2(fieldCenterX, fieldY), fieldWidth, value, onChanged);
             // Toggle.isOn is a no-op when already equal to the target value, so this only fires the
             // listener above (and persists) when a reset actually changes anything.
-            GameObject resetBtn = GuiHelper.CreateResetButton(m_parent, resetCenterX, fieldY, () => toggle.isOn = defaultValue);
-            GuiHelper.PivotToTop((RectTransform)resetBtn.transform, fieldY);
+            GuiHelper.CreateResetButton(card, resetCenterX, fieldY, () => toggle.isOn = defaultValue);
 
-            float descHeight = CreateDescription(description, fieldY - GuiFieldBuilder.FieldHeight);
-            FinishRow(fieldY - GuiFieldBuilder.FieldHeight, descHeight);
+            EndFieldCard(card, description);
             return toggle;
         }
 
         public GameObject ColorRow(string label, string description, string hexValue, Action<string> onChanged, string defaultValue = "#ffffff")
         {
-            float labelY = m_y;
-            float fieldY = labelY - RedeemWizard.LabelHeight;
-            CreateLabel(label, labelY);
+            GameObject card = BeginFieldCard(label, out float fieldY);
 
-            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(m_width, inset: 0f);
-            GameObject swatch = GuiFieldBuilder.CreateColorField(m_parent, new Vector2(fieldCenterX, fieldY), fieldWidth, hexValue, label, onChanged);
-            GuiHelper.PivotToTop((RectTransform)swatch.transform, fieldY);
-            GameObject resetBtn = GuiHelper.CreateResetButton(m_parent, resetCenterX, fieldY, () =>
+            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(m_cellWidth);
+            GameObject swatch = GuiFieldBuilder.CreateColorField(card, new Vector2(fieldCenterX, fieldY), fieldWidth, hexValue, label, onChanged);
+            GuiHelper.CreateResetButton(card, resetCenterX, fieldY, () =>
             {
                 // CreateColorField's swatch has no exposed "set color" API (only the picker click
                 // callback repaints it) - reach the same overlay Image the picker paints on directly.
@@ -182,25 +196,20 @@ namespace WizshBoneTwitchIntegration.Gui
                     overlay.color = c;
                 onChanged?.Invoke(defaultValue);
             });
-            GuiHelper.PivotToTop((RectTransform)resetBtn.transform, fieldY);
 
-            float descHeight = CreateDescription(description, fieldY - GuiFieldBuilder.FieldHeight);
-            FinishRow(fieldY - GuiFieldBuilder.FieldHeight, descHeight);
+            EndFieldCard(card, description);
             return swatch;
         }
 
         public SearchableDropdown DropdownRow(string label, string description, List<DropdownOption> options, string value, Action<string> onChanged, string defaultValue = null, bool showSearch = true)
         {
-            float labelY = m_y;
-            float fieldY = labelY - RedeemWizard.LabelHeight;
-            CreateLabel(label, labelY);
+            GameObject card = BeginFieldCard(label, out float fieldY);
 
-            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(m_width, inset: 0f);
+            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(m_cellWidth);
             SearchableDropdown dropdown = new SearchableDropdown();
-            GameObject dropdownObj = dropdown.Build(m_parent, new Vector2(fieldCenterX, fieldY), fieldWidth, GuiFieldBuilder.FieldHeight, options, value, showSearch);
-            GuiHelper.PivotToTop((RectTransform)dropdownObj.transform, fieldY);
+            dropdown.Build(card, new Vector2(fieldCenterX, fieldY), fieldWidth, GuiFieldBuilder.FieldHeight, options, value, showSearch);
             dropdown.OnValueChanged += v => onChanged?.Invoke(v);
-            GameObject resetBtn = GuiHelper.CreateResetButton(m_parent, resetCenterX, fieldY, () =>
+            GuiHelper.CreateResetButton(card, resetCenterX, fieldY, () =>
             {
                 // Value's setter only repaints the toggle label, it doesn't raise OnValueChanged
                 // (see SearchableDropdown.cs) - invoke the callback explicitly so a reset actually
@@ -208,25 +217,20 @@ namespace WizshBoneTwitchIntegration.Gui
                 dropdown.Value = defaultValue;
                 onChanged?.Invoke(defaultValue);
             });
-            GuiHelper.PivotToTop((RectTransform)resetBtn.transform, fieldY);
 
-            float descHeight = CreateDescription(description, fieldY - GuiFieldBuilder.FieldHeight);
-            FinishRow(fieldY - GuiFieldBuilder.FieldHeight, descHeight);
+            EndFieldCard(card, description);
             return dropdown;
         }
 
         public SearchableChecklist ChecklistRow(string label, string description, List<DropdownOption> options, List<string> values, Action<List<string>> onChanged, List<string> defaultValues = null)
         {
-            float labelY = m_y;
-            float fieldY = labelY - RedeemWizard.LabelHeight;
-            CreateLabel(label, labelY);
+            GameObject card = BeginFieldCard(label, out float fieldY);
 
-            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(m_width, inset: 0f);
+            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(m_cellWidth);
             SearchableChecklist checklist = new SearchableChecklist();
-            GameObject checklistObj = checklist.Build(m_parent, new Vector2(fieldCenterX, fieldY), fieldWidth, GuiFieldBuilder.FieldHeight, options, values);
-            GuiHelper.PivotToTop((RectTransform)checklistObj.transform, fieldY);
+            checklist.Build(card, new Vector2(fieldCenterX, fieldY), fieldWidth, GuiFieldBuilder.FieldHeight, options, values);
             checklist.OnSelectionChanged += v => onChanged?.Invoke(v);
-            GameObject resetBtn = GuiHelper.CreateResetButton(m_parent, resetCenterX, fieldY, () =>
+            GuiHelper.CreateResetButton(card, resetCenterX, fieldY, () =>
             {
                 List<string> resetValues = defaultValues != null ? new List<string>(defaultValues) : new List<string>();
                 // SetOptions doesn't raise OnSelectionChanged either (mirrors SearchableDropdown) -
@@ -234,10 +238,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 checklist.SetOptions(options, resetValues);
                 onChanged?.Invoke(resetValues);
             });
-            GuiHelper.PivotToTop((RectTransform)resetBtn.transform, fieldY);
 
-            float descHeight = CreateDescription(description, fieldY - GuiFieldBuilder.FieldHeight);
-            FinishRow(fieldY - GuiFieldBuilder.FieldHeight, descHeight);
+            EndFieldCard(card, description);
             return checklist;
         }
     }

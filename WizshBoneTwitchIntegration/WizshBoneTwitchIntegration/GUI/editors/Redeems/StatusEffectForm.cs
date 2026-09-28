@@ -6,10 +6,10 @@ namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
     /// Step-2 form for StatusEffect - full multi-entry list support via
-    /// <see cref="EntryListEditor{TEntry}"/>. The <c>playerScale</c> sub-fields are only shown when
-    /// Name is exactly "PlayerShrink"/"PlayerGrow", matching <c>StatusEffectEntry</c>'s own
-    /// <c>[EditorVisibleWhen]</c> attribute; the underlying data is preserved (not reset) when Name
-    /// is switched away and back, per an explicit decision on this exact scenario.
+    /// <see cref="EntryListEditor{TEntry}"/>. The 7 <c>playerScale</c> sub-fields (shown only for
+    /// PlayerShrink/PlayerGrow in the old form) are now hidden always, regardless of Name - each
+    /// one's class-level default in <c>SE_PlayerScaleData</c> already matches the old form's
+    /// defaults, so this is transparent. Persists through death+Renew are paired.
     /// </summary>
     internal class StatusEffectForm : IRedeemStep2Form
     {
@@ -30,9 +30,6 @@ namespace WizshBoneTwitchIntegration.Gui
             return name == "PlayerShrink" || name == "PlayerGrow";
         }
 
-        // Name gates both the Duration tooltip's wording and whether the 7 playerScale fields show
-        // at all - re-runs this whole entry form on Name change (also re-reads Duration, since
-        // OnNameChanged's real-effect TTL auto-fill needs to show immediately).
         private void BuildEntryFields(GameObject cardRoot, StatusEffectEntry entry)
         {
             GuiHelper.ClearContainer(cardRoot);
@@ -53,29 +50,15 @@ namespace WizshBoneTwitchIntegration.Gui
                     ? "How long the scale/speed change lasts, in seconds. Both -1 and 0 fall back to a fixed 30s for this effect, not the general -1=default/0=infinite convention."
                     : "Duration in seconds. -1 = the effect's own default duration, 0 = infinite.",
                 entry.duration, v => entry.duration = v, defaultValue: -1f);
-            layout.ToggleRow("Persists through death", "Whether this status effect survives the player dying.",
-                entry.persistsThroughDeath, v => entry.persistsThroughDeath = v, defaultValue: false);
-            layout.ToggleRow("Renew", "Whether re-applying this redeem while already active resets its duration.",
-                entry.renew, v => entry.renew = v, defaultValue: false);
+            layout.PairRow(
+                () => layout.ToggleRow("Persists through death", "Whether this status effect survives the player dying.",
+                    entry.persistsThroughDeath, v => entry.persistsThroughDeath = v, defaultValue: false),
+                () => layout.ToggleRow("Renew", "Whether re-applying this redeem while already active resets its duration.",
+                    entry.renew, v => entry.renew = v, defaultValue: false));
 
-            if (isPlayerScale)
-            {
-                SE_PlayerScaleData scale = entry.playerScale ?? (entry.playerScale = new SE_PlayerScaleData());
-                layout.FloatRow("Scale delta", "Amount to change the player's scale by (stacks across repeated redemptions).",
-                    scale.scaleDelta, v => scale.scaleDelta = v, defaultValue: 0.3f);
-                layout.FloatRow("Scale min", "Minimum scale the player can be reduced to.",
-                    scale.scaleMin, v => scale.scaleMin = v, defaultValue: 0.4f);
-                layout.FloatRow("Scale max", "Maximum scale the player can be increased to.",
-                    scale.scaleMax, v => scale.scaleMax = v, defaultValue: 4f);
-                layout.FloatRow("Scale duration", "Duration of the scale change's visual transition, in seconds.",
-                    scale.scaleDuration, v => scale.scaleDuration = v, defaultValue: 0.5f);
-                layout.FloatRow("Speed multiplier delta", "Amount to change the player's speed/jump multiplier by (stacks across repeated redemptions).",
-                    scale.speedMultiplierDelta, v => scale.speedMultiplierDelta = v, defaultValue: 0.125f);
-                layout.FloatRow("Speed multiplier min", "Minimum speed/jump multiplier the player can be reduced to.",
-                    scale.speedMultiplierMin, v => scale.speedMultiplierMin = v, defaultValue: 0.75f);
-                layout.FloatRow("Speed multiplier max", "Maximum speed/jump multiplier the player can be increased to.",
-                    scale.speedMultiplierMax, v => scale.speedMultiplierMax = v, defaultValue: 2.25f);
-            }
+            // Runs on every (re)build of this card, including the Name-dropdown-triggered rebuild
+            // above, so the scroll range always matches the currently rendered rows.
+            ScrollableList.SetContentHeight(cardRoot, Mathf.Abs(layout.CurrentY));
         }
 
         public void Populate(RedeemData working)

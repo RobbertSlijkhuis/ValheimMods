@@ -362,7 +362,9 @@ namespace WizshBoneTwitchIntegration.Gui
                     m_stepBars[i].color = stepNumber <= m_step ? GUIManager.Instance.ValheimOrange : new Color(1f, 1f, 1f, 0.15f);
             }
 
-            string[] titles = { "", "CHOOSE AN EFFECT", "CONFIGURE PARAMETERS", "SETUP CHANNEL POINT REWARD" };
+            bool hasType = !string.IsNullOrEmpty(m_working?.type) && m_working.type != RedeemType.Undefined;
+            string step2Title = hasType ? RedeemEffectCatalog.LabelFor(m_working.type).ToUpperInvariant() : "CONFIGURE PARAMETERS";
+            string[] titles = { "", "CHOOSE AN EFFECT", step2Title, "SETUP CHANNEL POINT REWARD" };
             string[] descriptions =
             {
                 "",

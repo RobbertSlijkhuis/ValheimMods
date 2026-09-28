@@ -210,12 +210,10 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (baseAI == null || creatureClaim != null)
                     continue;
 
-                if (ProfileSettingsHelper.Current.chattingIgnoreTames && character != null && character.m_tamed)
+                // Tamed creatures are never eligible for the auto-scan offer, regardless of settings -
+                // viewers should never be able to accidentally claim someone's tame this way.
+                if (character != null && character.m_tamed)
                     continue;
-
-                List<string> users = m_chat.GetUsersInChatHistory();
-                List<string> assignedUsers = m_creatureAssignments.Select(item => item.userName).ToList();
-                users.RemoveAll(item => assignedUsers.Contains(item));
 
                 if (forceClaim)
                 {
@@ -224,6 +222,20 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     newCreatureClaimn.Init(forceClaimUserName ?? (customRewards.m_alias ?? "DeathWizsh"));
                     return;
                 }
+
+                // Free-for-all: no user is pre-selected - the creature just becomes claimable by
+                // whoever types "!claim" first (see AcceptClaim/TwitchChat's dispatch).
+                if (ProfileSettingsHelper.Current.chattingClaimFreeForAll)
+                {
+                    m_chosenUser = null;
+                    m_chosenPrefab = obj.gameObject;
+                    m_chat.Send($"A {CreatureHelper.StripColorTags(Localization.instance.Localize(character.m_name))} is up for claiming! Type \"!claim\" to claim it!");
+                    break;
+                }
+
+                List<string> users = m_chat.GetUsersInChatHistory();
+                List<string> assignedUsers = m_creatureAssignments.Select(item => item.userName).ToList();
+                users.RemoveAll(item => assignedUsers.Contains(item));
 
                 if (users.Count == 0)
                 {
@@ -242,15 +254,23 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 m_chosenUser = chosenUser;
                 m_chosenPrefab = obj.gameObject;
-                m_chat.Send($"{chosenUser} you have been selected to become a {Localization.instance.Localize(character.m_name)}! Type \"!claim\" to accept.");
+                m_chat.Send($"{chosenUser} you have been selected to become a {CreatureHelper.StripColorTags(Localization.instance.Localize(character.m_name))}! Type \"!claim\" to accept.");
                 break;
             }
         }
 
-        public void AcceptClaim()
+        // userName is the actual chatter who typed "!claim" - TwitchChat.cs has already gated on
+        // whether that's allowed to trigger this at all (only m_chosenUser, unless free-for-all).
+        public void AcceptClaim(string userName)
         {
-            if (m_chosenUser == null || m_chosenPrefab == null)
+            if (m_chosenPrefab == null)
+                return;
+
+            // Free-for-all: a user who already has a claim just falls through, leaving the offer
+            // open for someone else's "!claim" instead of stealing/duplicating their own claim.
+            if (ContainsCreatureAssignment(userName))
             {
+                Jotunn.Logger.LogWarning($"[WBTI] AcceptClaim: {userName} already has a claim, ignoring.");
                 return;
             }
 
@@ -259,17 +279,17 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             // on top of one that already exists (which would silently steal/corrupt an existing claim).
             if (m_chosenPrefab.GetComponent<TwitchCreatureClaim>() != null)
             {
-                Jotunn.Logger.LogWarning($"[WBTI] AcceptClaim: {m_chosenUser} tried to claim a creature that's already claimed, ignoring.");
+                Jotunn.Logger.LogWarning($"[WBTI] AcceptClaim: {userName} tried to claim a creature that's already claimed, ignoring.");
                 m_chosenUser = null;
                 m_chosenPrefab = null;
                 return;
             }
 
             Character character = m_chosenPrefab.GetComponent<Character>();
-            m_chat.Send($"Creature {Localization.instance.Localize(character.m_name)} is now claimed by {m_chosenUser}!");
+            m_chat.Send($"Creature {CreatureHelper.StripColorTags(Localization.instance.Localize(character.m_name))} is now claimed by {userName}!");
 
             TwitchCreatureClaim newCreatureClaimn = m_chosenPrefab.AddComponent<TwitchCreatureClaim>();
-            newCreatureClaimn.Init(m_chosenUser);
+            newCreatureClaimn.Init(userName);
 
             m_chosenUser = null;
             m_chosenPrefab = null;
@@ -278,6 +298,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public string GetChosenUser()
         {
             return m_chosenUser;
+        }
+
+        // Whether there's a pending auto-scan claim offer waiting to be accepted - used by the
+        // free-for-all "!claim" dispatch in TwitchChat.cs, which has no single pre-selected user
+        // to compare against.
+        public bool HasOpenClaim()
+        {
+            return m_chosenPrefab != null;
         }
 
         public List<string> GetUserBlacklist()

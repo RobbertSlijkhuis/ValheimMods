@@ -14,7 +14,8 @@ namespace WizshBoneTwitchIntegration.Gui
     /// RedeemWizard step 1), but the right panel is an *editable* field card instead of read-only
     /// text. Left: entry list + "+ Add". Right: the selected entry's fields (built by the caller's
     /// <c>buildEntryForm</c> delegate) + "Delete this entry". A "random" toggle sits above both,
-    /// always built but only shown once there are 2+ entries.
+    /// always shown regardless of entry count - with 0-1 entries it has no observable effect, but
+    /// hiding it bought nothing and complicated the layout.
     /// </summary>
     internal class EntryListEditor<TEntry> where TEntry : CloneableData, new()
     {
@@ -22,7 +23,6 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float ColumnGap = 20f;
         private const float ListItemHeight = 32f;
         private const float ListItemGap = 4f;
-        private const float ListHeight = 380f;
         private const float ActionButtonHeight = 36f;
         private const float CardPadding = 14f;
 
@@ -39,8 +39,8 @@ namespace WizshBoneTwitchIntegration.Gui
         private Action<GameObject, TEntry> m_buildEntryForm;
         private int m_selectedIndex;
 
-        /// <summary>Usable width for the caller's entry-form Step2RowLayout (the card's own width minus padding on both sides).</summary>
-        public float CardContentWidth => CardWidth - 2f * CardPadding;
+        /// <summary>Usable width for the caller's entry-form Step2RowLayout (the card's own scrollable-viewport width minus padding on both sides).</summary>
+        public float CardContentWidth => CardWidth - ScrollableList.ScrollbarWidth - 2f * CardPadding;
 
         /// <summary>Top Y (relative to the card's own top edge) the caller's entry-form Step2RowLayout should start at.</summary>
         public float CardContentTopY => -CardPadding;
@@ -58,43 +58,61 @@ namespace WizshBoneTwitchIntegration.Gui
             m_itemLabel = itemLabel;
             m_buildEntryForm = buildEntryForm;
 
-            var toggleLayout = new Step2RowLayout(parent, topY);
+            // Full Step2FieldWidth, not Step2RowLayout's own scrollbar-inset default - that default
+            // is for rows inside a ScrollableList's content area; this toggle sits directly on the
+            // step-2 root, alongside the full-width list/card row below it.
+            var toggleLayout = new Step2RowLayout(parent, topY, RedeemWizard.Step2FieldWidth);
             m_randomToggle = toggleLayout.ToggleRow(
                 "Pick one at random",
                 "If enabled, one entry from the list below is chosen at random each time this redeem fires. Otherwise every entry is used.",
                 false, v => m_setRandom?.Invoke(v));
 
-            float listTopY = toggleLayout.CurrentY;
             float listX = -RedeemWizard.Step2FieldWidth / 2f + ListWidth / 2f;
-            m_listContent = ScrollableList.CreateFixed(parent, "EntryList", new Vector2(listX, listTopY), ListWidth, ListHeight, backgroundColor: GuiHelper.CardBackgroundColor);
+            CardWidth = RedeemWizard.Step2FieldWidth - ListWidth - ColumnGap;
+            float cardX = listX + ListWidth / 2f + ColumnGap + CardWidth / 2f;
+
+            // Add/Delete buttons sit directly below the toggle row, above the list/card.
+            float buttonRowTopY = toggleLayout.CurrentY;
+            float buttonCenterY = buttonRowTopY - ActionButtonHeight / 2f;
 
             GameObject addBtnObj = GuiHelper.CreateButton(
                 text: "+ Add",
                 parent: parent.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(listX, listTopY - ListHeight - RedeemWizard.RowGap - ActionButtonHeight / 2f),
+                position: new Vector2(listX, buttonCenterY),
                 width: ListWidth,
                 height: ActionButtonHeight
             );
             addBtnObj.SetActive(true);
             addBtnObj.GetComponent<Button>().onClick.AddListener(OnAddClicked);
 
-            CardWidth = RedeemWizard.Step2FieldWidth - ListWidth - ColumnGap;
-            float cardX = listX + ListWidth / 2f + ColumnGap + CardWidth / 2f;
-            m_cardRoot = GuiHelper.CreateCard(parent, new Vector2(cardX, listTopY), CardWidth, ListHeight);
-
             GameObject deleteBtnObj = GuiHelper.CreateButton(
                 text: "Delete this entry",
                 parent: parent.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(cardX, listTopY - ListHeight - RedeemWizard.RowGap - ActionButtonHeight / 2f),
+                position: new Vector2(cardX, buttonCenterY),
                 width: CardWidth,
                 height: ActionButtonHeight
             );
             deleteBtnObj.SetActive(true);
             deleteBtnObj.GetComponent<Button>().onClick.AddListener(OnDeleteClicked);
+
+            // List/card starts a RowGap below the button row; height is whatever's left down to
+            // Step2ContentHeight's floor (RowGap above the Back/Next row) - not a hardcoded
+            // constant, so the whole toggle+buttons+list/card stack always fits.
+            float listTopY = buttonRowTopY - ActionButtonHeight - RedeemWizard.RowGap;
+            float bottomY = topY - RedeemWizard.Step2ContentHeight;
+            float listCardHeight = listTopY - bottomY;
+
+            m_listContent = ScrollableList.CreateFixed(parent, "EntryList", new Vector2(listX, listTopY), ListWidth, listCardHeight, backgroundColor: GuiHelper.CardBackgroundColor);
+
+            // A scroll view rather than a plain GuiHelper.CreateCard panel - an entry's field count
+            // (e.g. SpawnCreature's Friendly-gated Commandable row) can exceed listCardHeight, and
+            // the card needs to scroll internally rather than spill out of the wizard body.
+            m_cardRoot = ScrollableList.CreateFixed(parent, "EntryCard", new Vector2(cardX, listTopY), CardWidth, listCardHeight,
+                backgroundColor: GuiHelper.CardBackgroundColor, autoHideScrollbar: true);
         }
 
         /// <summary>
@@ -110,7 +128,6 @@ namespace WizshBoneTwitchIntegration.Gui
             m_setRandom = setRandom;
             m_selectedIndex = m_entries.Count > 0 ? Mathf.Clamp(m_selectedIndex, 0, m_entries.Count - 1) : 0;
 
-            m_randomToggle.gameObject.SetActive(m_entries.Count >= 2);
             m_randomToggle.isOn = m_getRandom();
 
             RefreshList();
@@ -121,7 +138,6 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             m_entries.Add(new TEntry());
             m_selectedIndex = m_entries.Count - 1;
-            m_randomToggle.gameObject.SetActive(m_entries.Count >= 2);
             RefreshList();
             RefreshCard();
         }
@@ -133,7 +149,6 @@ namespace WizshBoneTwitchIntegration.Gui
 
             m_entries.RemoveAt(m_selectedIndex);
             m_selectedIndex = m_entries.Count > 0 ? Mathf.Clamp(m_selectedIndex, 0, m_entries.Count - 1) : 0;
-            m_randomToggle.gameObject.SetActive(m_entries.Count >= 2);
             RefreshList();
             RefreshCard();
         }

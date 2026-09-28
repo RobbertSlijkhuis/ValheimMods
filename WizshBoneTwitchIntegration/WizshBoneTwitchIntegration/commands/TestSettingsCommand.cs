@@ -85,7 +85,7 @@ namespace WizshBoneTwitchIntegration.Commands
                 chattingInterval      = 22.5f,
                 chattingRadius        = 33.5f,
                 chattingMaxTalkers    = 9,
-                chattingIgnoreTames   = true,
+                chattingClaimFreeForAll = true,
 
                 creaturesSameFaction  = false,
                 creaturesMaxAmount    = 200f,
@@ -175,7 +175,7 @@ namespace WizshBoneTwitchIntegration.Commands
                 && a.chattingInterval == b.chattingInterval
                 && a.chattingRadius == b.chattingRadius
                 && a.chattingMaxTalkers == b.chattingMaxTalkers
-                && a.chattingIgnoreTames == b.chattingIgnoreTames
+                && a.chattingClaimFreeForAll == b.chattingClaimFreeForAll
                 && a.creaturesSameFaction == b.creaturesSameFaction
                 && a.creaturesMaxAmount == b.creaturesMaxAmount
                 && a.creaturesMaxRadius == b.creaturesMaxRadius

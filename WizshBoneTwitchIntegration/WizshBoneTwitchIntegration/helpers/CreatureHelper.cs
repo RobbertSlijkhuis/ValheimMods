@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using Jotunn.Managers;
 using System.Collections.Generic;
 using TwitchSDK.Interop;
@@ -111,6 +111,19 @@ namespace WizshBoneTwitchIntegration.Helpers
         public static ValheimCreature GetValheimCreature(string name)
         {
             return valheimCreatures.GetValueSafe(name.Replace("(Clone)", ""));
+        }
+
+        // A handful of vanilla creature names (e.g. some Ashlands mobs) embed a "<color=orange>...
+        // </color>" rich-text tag in m_name. That renders fine in in-game hover text (which supports
+        // Unity rich text), but leaks through wherever a localized creature name is shown somewhere
+        // that doesn't: Twitch chat echoes the literal tag as text, and it makes affected entries
+        // stand out inconsistently in the creature prefab picker. Strip it for any such display use.
+        private static readonly System.Text.RegularExpressions.Regex ColorTagPattern =
+            new System.Text.RegularExpressions.Regex("</?color[^>]*>", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        public static string StripColorTags(string name)
+        {
+            return string.IsNullOrEmpty(name) ? name : ColorTagPattern.Replace(name, "");
         }
 
         public static void HandleSpawnCreatureRedeem(RedeemData redeem, CustomRewardEvent customRewardEvent, TwitchChat chat)
@@ -235,7 +248,7 @@ namespace WizshBoneTwitchIntegration.Helpers
         }
 
         public static void SpawnCreatures(CreatureData creatureData, Transform transform, CustomRewardEvent customRewardEvent, bool ignoreWard = false, float force = 0f)
-        {                
+        {
             for (int i = 0; i < creatureData.amount; i++)
             {
                 SpawnCreature(creatureData, transform, customRewardEvent, ignoreWard, force);

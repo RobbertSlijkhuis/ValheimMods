@@ -7,14 +7,13 @@ namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
     /// Step-2 form for Windmill ("Windmills of Death") - field set ported from
-    /// <c>models/views/WindmillView.cs</c>'s curation. Implements <see cref="IForcesValuesOnSave"/>
-    /// since the prefab is always the dedicated "Windmill_WBTI" clone, never user-editable.
+    /// <c>models/views/WindmillView.cs</c>'s curation, all 7 fields kept. Implements
+    /// <see cref="IForcesValuesOnSave"/> since the prefab is always the dedicated "Windmill_WBTI"
+    /// clone, never user-editable. Damage tab hidden for now (no tabs at all).
     /// </summary>
     internal class WindmillForm : IRedeemStep2Form, IForcesValuesOnSave
     {
         private RedeemData m_working;
-        private readonly GeneralDamageTabSwitcher m_tabs = new GeneralDamageTabSwitcher();
-        private readonly DamageTabForm m_damageTab = new DamageTabForm();
 
         private InputField m_announceMessage;
         private InputField m_duration;
@@ -26,26 +25,30 @@ namespace WizshBoneTwitchIntegration.Gui
 
         public void Build(GameObject parent)
         {
-            m_tabs.Build(parent);
-            var layout = new Step2RowLayout(m_tabs.GeneralRoot, m_tabs.ContentTopY);
+            GameObject content = ScrollableList.CreateFixed(parent, "WindmillScroll",
+                new Vector2(0f, RedeemWizard.BodyTopY), RedeemWizard.Step2FieldWidth, RedeemWizard.Step2ContentHeight,
+                backgroundColor: Color.clear, autoHideScrollbar: true);
+            var layout = new Step2RowLayout(content, 0f);
 
             m_announceMessage = layout.TextRow("Announcement message", "Shown on screen when triggered. {{user}} is replaced with the redeemer's name.",
                 "", "Optional announcement", v => m_working.spawnAbilityData.announceMessage = v, defaultValue: "");
-            m_duration = layout.IntRow("Duration", "How long the effect lasts, in seconds (0 = indefinite).",
-                0, v => m_working.spawnAbilityData.duration = v, defaultValue: 0);
-            m_minToSpawn = layout.IntRow("Min to spawn", "Minimum number of windmills spawned.",
-                1, v => m_working.spawnAbilityData.minToSpawn = v, defaultValue: 1);
-            m_maxToSpawn = layout.IntRow("Max to spawn", "Upper bound on windmills spawned (exclusive - the actual count is randomized below this).",
-                3, v => m_working.spawnAbilityData.maxToSpawn = v, defaultValue: 3);
-            m_spawnDelay = layout.FloatRow("Spawn delay", "Delay in seconds before each windmill is spawned.",
-                0f, v => m_working.spawnAbilityData.spawnDelay = v, defaultValue: 0f);
-            m_spawnRadius = layout.FloatRow("Spawn radius", "Radius around the target the windmills can spawn within, in meters.",
-                5f, v => m_working.spawnAbilityData.spawnRadius = v, defaultValue: 5f);
-            m_rotationSpeed = layout.FloatRow("Windmill rotation speed", "Rotation speed applied to spawned windmills (0 = disabled, clamped 0-10 at runtime).",
-                0f, v => m_working.spawnAbilityData.windmillRotationSpeed = v, defaultValue: 0f);
+            layout.PairRow(
+                () => m_duration = layout.IntRow("Duration", "How long the effect lasts, in seconds (0 = indefinite).",
+                    0, v => m_working.spawnAbilityData.duration = v, defaultValue: 0),
+                () => m_rotationSpeed = layout.FloatRow("Windmill rotation speed", "Rotation speed applied to spawned windmills (0 = disabled, clamped 0-10 at runtime).",
+                    0f, v => m_working.spawnAbilityData.windmillRotationSpeed = v, defaultValue: 0f));
+            layout.PairRow(
+                () => m_minToSpawn = layout.IntRow("Min to spawn", "Minimum number of windmills spawned.",
+                    1, v => m_working.spawnAbilityData.minToSpawn = v, defaultValue: 1),
+                () => m_maxToSpawn = layout.IntRow("Max to spawn", "Upper bound on windmills spawned (exclusive - the actual count is randomized below this).",
+                    3, v => m_working.spawnAbilityData.maxToSpawn = v, defaultValue: 3));
+            layout.PairRow(
+                () => m_spawnDelay = layout.FloatRow("Spawn delay", "Delay in seconds before each windmill is spawned.",
+                    0f, v => m_working.spawnAbilityData.spawnDelay = v, defaultValue: 0f),
+                () => m_spawnRadius = layout.FloatRow("Spawn radius", "Radius around the target the windmills can spawn within, in meters.",
+                    5f, v => m_working.spawnAbilityData.spawnRadius = v, defaultValue: 5f));
 
-            m_tabs.SetGeneralContentHeight(layout.CurrentY);
-            m_damageTab.Build(m_tabs, new DamageData());
+            ScrollableList.SetContentHeight(content, Mathf.Abs(layout.CurrentY));
         }
 
         public void Populate(RedeemData working)
@@ -60,10 +63,6 @@ namespace WizshBoneTwitchIntegration.Gui
             m_spawnDelay.text = (data.spawnDelay ?? 0f).ToString("G");
             m_spawnRadius.text = (data.spawnRadius ?? 5f).ToString("G");
             m_rotationSpeed.text = data.windmillRotationSpeed.ToString("G");
-
-            if (data.damage == null)
-                data.damage = new DamageData();
-            m_damageTab.Populate(data.damage);
         }
 
         public void ApplyForcedValues(RedeemData working)

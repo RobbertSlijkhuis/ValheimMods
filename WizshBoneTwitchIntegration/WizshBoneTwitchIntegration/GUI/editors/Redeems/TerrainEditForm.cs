@@ -28,19 +28,21 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             GameObject content = ScrollableList.CreateFixed(parent, "TerrainEditScroll",
                 new Vector2(0f, RedeemWizard.BodyTopY), RedeemWizard.Step2FieldWidth, RedeemWizard.Step2ContentHeight,
-                autoHideScrollbar: true);
+                backgroundColor: Color.clear, autoHideScrollbar: true);
             var layout = new Step2RowLayout(content, 0f);
 
             m_announceMessage = layout.TextRow("Announcement message", "Shown on screen when triggered. {{user}} is replaced with the redeemer's name.",
                 "", "Optional announcement", v => m_working.terrainEditData.announceMessage = v, defaultValue: "");
-            m_duration = layout.FloatRow("Duration", "How long before the terrain resets, in seconds (0 = permanent).",
-                0f, v => m_working.terrainEditData.duration = v, defaultValue: 0f);
-            m_noFallDamage = layout.ToggleRow("No fall damage", "Whether to protect the player from fall damage during the terrain edit.",
-                true, v => m_working.terrainEditData.noFallDamage = v, defaultValue: true);
-            m_raiseDelta = layout.FloatRow("Raise delta", "How much the terrain is raised (negative values dig down instead).",
-                -6f, v => m_working.terrainEditData.raiseDelta = v, defaultValue: -6f);
-            m_raisePower = layout.FloatRow("Raise power", "The power of the terrain raise.",
-                0f, v => m_working.terrainEditData.raisePower = v, defaultValue: 0f);
+            layout.PairRow(
+                () => m_duration = layout.FloatRow("Duration", "How long before the terrain resets, in seconds (0 = permanent).",
+                    0f, v => m_working.terrainEditData.duration = v, defaultValue: 0f),
+                () => m_noFallDamage = layout.ToggleRow("No fall damage", "Whether to protect the player from fall damage during the terrain edit.",
+                    true, v => m_working.terrainEditData.noFallDamage = v, defaultValue: true));
+            layout.PairRow(
+                () => m_raiseDelta = layout.FloatRow("Raise delta", "How much the terrain is raised (negative values dig down instead).",
+                    -6f, v => m_working.terrainEditData.raiseDelta = v, defaultValue: -6f),
+                () => m_raisePower = layout.FloatRow("Raise power", "The power of the terrain raise.",
+                    0f, v => m_working.terrainEditData.raisePower = v, defaultValue: 0f));
             m_raiseRadius = layout.FloatRow("Raise radius", "The radius of the terrain raise, in meters.",
                 8f, v => m_working.terrainEditData.raiseRadius = v, defaultValue: 8f);
 

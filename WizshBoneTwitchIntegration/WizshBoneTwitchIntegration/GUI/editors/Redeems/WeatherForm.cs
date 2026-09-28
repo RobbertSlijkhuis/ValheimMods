@@ -5,7 +5,7 @@ using WizshBoneTwitchIntegration.Models;
 
 namespace WizshBoneTwitchIntegration.Gui
 {
-    /// <summary>Step-2 form for Weather - all 6 fields are live, nothing to cut. Items uses the SearchableChecklist widget sourced from RedeemPrefabCatalog.WeatherNames.</summary>
+    /// <summary>Step-2 form for Weather - all 6 fields are live, nothing to cut. Height+Radius and Duration+Force paired. Items uses the SearchableChecklist widget sourced from RedeemPrefabCatalog.WeatherNames.</summary>
     internal class WeatherForm : IRedeemStep2Form
     {
         private RedeemData m_working;
@@ -21,19 +21,21 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             GameObject content = ScrollableList.CreateFixed(parent, "WeatherScroll",
                 new Vector2(0f, RedeemWizard.BodyTopY), RedeemWizard.Step2FieldWidth, RedeemWizard.Step2ContentHeight,
-                autoHideScrollbar: true);
+                backgroundColor: Color.clear, autoHideScrollbar: true);
             var layout = new Step2RowLayout(content, 0f);
 
             m_announceMessage = layout.TextRow("Announcement message", "Shown on screen when triggered. {{user}} is replaced with the redeemer's name.",
                 "", "Optional announcement", v => m_working.weatherData.announceMessage = v, defaultValue: "");
-            m_duration = layout.IntRow("Duration", "How long the weather event lasts, in seconds (0 = indefinite).",
-                60, v => m_working.weatherData.duration = v, defaultValue: 60);
-            m_force = layout.ToggleRow("Force", "Whether to force this weather event to take over immediately.",
-                false, v => m_working.weatherData.force = v, defaultValue: false);
-            m_height = layout.FloatRow("Height", "Vertical size of the weather zone, in meters.",
-                50f, v => m_working.weatherData.height = v, defaultValue: 50f);
-            m_radius = layout.FloatRow("Radius", "Horizontal size of the weather zone, in meters.",
-                200f, v => m_working.weatherData.radius = v, defaultValue: 200f);
+            layout.PairRow(
+                () => m_duration = layout.IntRow("Duration", "How long the weather event lasts, in seconds (0 = indefinite).",
+                    60, v => m_working.weatherData.duration = v, defaultValue: 60),
+                () => m_force = layout.ToggleRow("Force", "Whether to force this weather event to take over immediately.",
+                    false, v => m_working.weatherData.force = v, defaultValue: false));
+            layout.PairRow(
+                () => m_height = layout.FloatRow("Height", "Vertical size of the weather zone, in meters.",
+                    50f, v => m_working.weatherData.height = v, defaultValue: 50f),
+                () => m_radius = layout.FloatRow("Radius", "Horizontal size of the weather zone, in meters.",
+                    200f, v => m_working.weatherData.radius = v, defaultValue: 200f));
             m_items = layout.ChecklistRow("Weathers", "Which weather types can be randomly picked when this redeem fires.",
                 RedeemPrefabCatalog.WeatherNames, new List<string>(), v => m_working.weatherData.items = v, defaultValues: new List<string>());
 

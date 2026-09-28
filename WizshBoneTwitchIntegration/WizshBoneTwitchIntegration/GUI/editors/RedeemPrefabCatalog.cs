@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Jotunn.Managers;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Gui
 {
@@ -104,7 +105,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 if (humanoid != null && monsterAI != null)
                 {
                     string creatureLabel = !string.IsNullOrEmpty(humanoid.m_name)
-                        ? Localization.instance.Localize(humanoid.m_name)
+                        ? CreatureHelper.StripColorTags(Localization.instance.Localize(humanoid.m_name))
                         : name;
                     creatures.Add(new DropdownOption(name, creatureLabel));
                 }

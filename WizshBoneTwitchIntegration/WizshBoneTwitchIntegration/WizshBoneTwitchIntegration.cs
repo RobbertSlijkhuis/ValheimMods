@@ -460,8 +460,9 @@ namespace WizshBoneTwitchIntegration
 
             prefabs.DetectFish = assetBundle.LoadAsset<GameObject>("Detect_Fish_WBTI");
             prefabs.FishRainScript = assetBundle.LoadAsset<GameObject>("spawn_fish_WBTI");
-            prefabs.Flashbang = assetBundle.LoadAsset<GameObject>("Flashbang_WBTI");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.FishRainScript, true));
+            prefabs.Flashbang = assetBundle.LoadAsset<GameObject>("Flashbang_WBTI");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.Flashbang, true));
             prefabs.GuardStone = assetBundle.LoadAsset<GameObject>("WBTI_guard_stone");
             prefabs.TerrainEdit = assetBundle.LoadAsset<GameObject>("TerrainEdit_WBTI");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.TerrainEdit, true));

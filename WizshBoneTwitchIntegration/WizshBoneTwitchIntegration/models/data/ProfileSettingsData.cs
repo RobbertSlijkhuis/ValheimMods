@@ -19,7 +19,7 @@ namespace WizshBoneTwitchIntegration.Models
         public float chattingInterval = 30f;
         public float chattingRadius = 30f;
         public int chattingMaxTalkers = 5;
-        public bool chattingIgnoreTames = false;
+        public bool chattingClaimFreeForAll = false;
 
         // Creatures
         public bool creaturesSameFaction = true;

@@ -62,12 +62,6 @@ namespace WizshBoneTwitchIntegration.GuiOld
         public BoundField<int> chattingMaxTalkers = new BoundField<int>(
             () => ProfileSettingsHelper.Current.chattingMaxTalkers,
             v => { ProfileSettingsHelper.Current.chattingMaxTalkers = v; RulesSettingsViewHelper.Persist(); });
-
-        [EditorLabel("Ignore tamed creatures")]
-        [EditorTooltip("Wether the chatting scan skips creatures that are already tamed, so viewers can't accidentally claim someone's tame")]
-        public BoundField<bool> chattingIgnoreTames = new BoundField<bool>(
-            () => ProfileSettingsHelper.Current.chattingIgnoreTames,
-            v => { ProfileSettingsHelper.Current.chattingIgnoreTames = v; RulesSettingsViewHelper.Persist(); });
     }
 
     internal sealed class CreaturesSettingsView

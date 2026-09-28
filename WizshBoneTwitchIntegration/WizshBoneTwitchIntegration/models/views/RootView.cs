@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using WizshBoneTwitchIntegration.GuiOld;
 using WizshBoneTwitchIntegration.Models;
 
@@ -68,6 +69,12 @@ namespace WizshBoneTwitchIntegration.Models.Views
                 v => real.announceMessage = v);
 
             damage = real.damage ?? (real.damage = new DamageData());
+
+            // No other vanilla prefab fits "roots on the line" - hardcode TentaRoot rather than
+            // trusting the generic spawns list, so editing the YAML by hand (or leaving it unset,
+            // which previously fell back to SpawnAbilityHelper's fish-rain default) can't point
+            // this redeem at an arbitrary/broken prefab.
+            real.spawns = new List<string> { "TentaRoot" };
         }
     }
 }

@@ -129,10 +129,10 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                     () => ProfileSettingsHelper.Current.chattingEnabled,
                     v => ProfileSettingsHelper.Current.chattingEnabled = v,
                     Defaults.chattingEnabled),
-                ("Ignore tames", "Excludes tamed creatures from the chat feature",
-                    () => ProfileSettingsHelper.Current.chattingIgnoreTames,
-                    v => ProfileSettingsHelper.Current.chattingIgnoreTames = v,
-                    Defaults.chattingIgnoreTames));
+                ("Free-for-all claiming", "First viewer to type !claim gets the creature, instead of only the selected user",
+                    () => ProfileSettingsHelper.Current.chattingClaimFreeForAll,
+                    v => ProfileSettingsHelper.Current.chattingClaimFreeForAll = v,
+                    Defaults.chattingClaimFreeForAll));
 
             StringFieldRow("Chatting black list", "Prevents bots or viewers from being chosen for the chat feature",
                 () => ProfileSettingsHelper.Current.chattingBlackList,

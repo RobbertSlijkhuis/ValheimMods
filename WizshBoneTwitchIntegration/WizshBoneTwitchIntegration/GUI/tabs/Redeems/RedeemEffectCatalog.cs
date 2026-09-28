@@ -47,7 +47,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 "Spawns spinning windmill blades around the streamer."),
             new RedeemEffectInfo(RedeemType.Smite, "Smite",
                 "Calls down a lightning strike on the streamer."),
-            new RedeemEffectInfo(RedeemType.Rain, "Rain",
+            new RedeemEffectInfo(RedeemType.Rain, "Fish Rain",
                 "Drops a damaging rain effect around the streamer."),
             new RedeemEffectInfo(RedeemType.LogRain, "Log Rain",
                 "Drops a shower of logs from the sky above the streamer."),

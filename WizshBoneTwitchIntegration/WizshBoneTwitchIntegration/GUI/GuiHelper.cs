@@ -216,6 +216,28 @@ namespace WizshBoneTwitchIntegration.Gui
             text.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
         }
 
+        /// <summary>
+        /// A plain, non-clipping, top-anchored container of a fixed width and unbounded height -
+        /// for step-2 forms short enough (under 4 card rows - a per-type judgment call, not
+        /// measured) to never need scrolling at all, so they can skip <see cref="ScrollableList"/>
+        /// entirely and use the full <c>Step2FieldWidth</c> instead of reserving
+        /// <see cref="ScrollableList.ScrollbarWidth"/> for a scrollbar that would never appear.
+        /// </summary>
+        public static GameObject CreateFixedWidthContainer(GameObject parent, string name, Vector2 anchoredPosition, float width)
+        {
+            GameObject container = new GameObject(name);
+            container.transform.SetParent(parent.transform, false);
+
+            RectTransform rt = container.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 1f);
+            rt.anchorMax = new Vector2(0.5f, 1f);
+            rt.pivot = new Vector2(0.5f, 1f);
+            rt.sizeDelta = new Vector2(width, 0f);
+            rt.anchoredPosition = anchoredPosition;
+
+            return container;
+        }
+
         // ── shared card shape ───────────────────────────────────────────────────────────────
         //
         // The one "card" component HomeTab.cs and HelpTab.cs both build from - title always at

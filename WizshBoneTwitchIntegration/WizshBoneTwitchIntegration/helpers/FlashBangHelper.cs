@@ -281,8 +281,6 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 candidate.y = height;
 
-                Jotunn.Logger.LogWarning($"[WBTI] FlashBangHelper: spawning ring explosion {i} at {candidate} (foundGround={foundGround}, indoor={indoor})");
-
                 GameObject explosionInstance = UnityEngine.Object.Instantiate(explosionFX, candidate, Quaternion.identity);
                 GameObject soundInstance = UnityEngine.Object.Instantiate(explosionSFX, candidate, Quaternion.identity);
 
@@ -298,14 +296,6 @@ namespace WizshBoneTwitchIntegration.Helpers
                 {
                     zsfx.m_maxVol = soundVolume;
                     zsfx.m_minVol = soundVolume;
-                }
-
-                if (i == 0)
-                {
-                    Component[] fxComponents = explosionInstance.GetComponentsInChildren<Component>(true);
-                    Component[] sfxComponents = soundInstance.GetComponentsInChildren<Component>(true);
-                    Jotunn.Logger.LogWarning($"[WBTI] FlashBangHelper: explosionFX components: {string.Join(", ", System.Array.ConvertAll(fxComponents, c => c.GetType().Name))}");
-                    Jotunn.Logger.LogWarning($"[WBTI] FlashBangHelper: explosionSFX components: {string.Join(", ", System.Array.ConvertAll(sfxComponents, c => c.GetType().Name))} (aoeCount={aoes.Length}, zsfxFound={zsfx != null})");
                 }
             }
         }
