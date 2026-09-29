@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.Gui
@@ -25,8 +27,8 @@ namespace WizshBoneTwitchIntegration.Gui
     /// Single source of truth for the 17 selectable redeem effect types' display labels and
     /// descriptions - shared by <see cref="RedeemWizard"/>'s step-1 effect picker and
     /// <see cref="Tabs.RedeemsTab"/>'s list-row type-hover tooltip, rather than duplicating this
-    /// text in both places. Order/membership matches GUI_OLD/tabs/RedeemsTab.cs's RedeemTypes
-    /// array minus RedeemType.Undefined (that one has no redeem-facing meaning, so it's never a
+    /// text in both places. <see cref="All"/> is sorted alphabetically by label. Membership matches
+    /// GUI_OLD/tabs/RedeemsTab.cs's RedeemTypes array minus RedeemType.Undefined (that one has no redeem-facing meaning, so it's never a
     /// choosable effect) and minus RedeemType.SpawnAbility (the raw/generic type - only its 8
     /// curated sub-types, e.g. Smite/Door/Windmill, are choosable here; SpawnAbility itself stays
     /// editable only via GUI_OLD/F4 for existing redeems).
@@ -35,8 +37,9 @@ namespace WizshBoneTwitchIntegration.Gui
     {
         public static readonly List<RedeemEffectInfo> All = new List<RedeemEffectInfo>
         {
-            new RedeemEffectInfo(RedeemType.Detonate, "Detonate",
-                "Spawns an explosive charge on the streamer that detonates after a short fuse, dealing area damage."),
+            // Declaration order doesn't matter - All is sorted alphabetically by label below.
+            new RedeemEffectInfo(RedeemType.Detonate, "Detonate Fish",
+                "Blows up any fish (fish creatures and fish items) within a radius around the streamer."),
             new RedeemEffectInfo(RedeemType.Flashbang, "Flashbang",
                 "Triggers a blinding flash and loud bang near the streamer, disorienting them briefly."),
             new RedeemEffectInfo(RedeemType.Mist, "Mist",
@@ -49,6 +52,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 "Calls down a lightning strike on the streamer."),
             new RedeemEffectInfo(RedeemType.Rain, "Fish Rain",
                 "Drops a damaging rain effect around the streamer."),
+            new RedeemEffectInfo(RedeemType.BoatRain, "Boat Rain",
+                "Drops a downpour of boats from the sky above the streamer."),
             new RedeemEffectInfo(RedeemType.LogRain, "Log Rain",
                 "Drops a shower of logs from the sky above the streamer."),
             new RedeemEffectInfo(RedeemType.Meteor, "Meteors",
@@ -57,7 +62,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 "Spawns a hidden trap near the streamer."),
             new RedeemEffectInfo(RedeemType.Root, "Roots",
                 "Entangles the streamer in roots, temporarily immobilizing them."),
-            new RedeemEffectInfo(RedeemType.SpawnCreature, "Spawn Creature",
+            new RedeemEffectInfo(RedeemType.SpawnCreature, "Spawn Creature(s)",
                 "Spawns one or more creatures from a chosen group near the streamer."),
             new RedeemEffectInfo(RedeemType.StatusEffect, "Status Effect",
                 "Applies a status effect to the streamer."),
@@ -69,7 +74,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 "Temporarily freezes creatures and objects in place around the streamer."),
             new RedeemEffectInfo(RedeemType.Weather, "Weather",
                 "Changes the weather around the streamer."),
-        };
+        }.OrderBy(info => info.Label, StringComparer.OrdinalIgnoreCase).ToList();
 
         private static readonly Dictionary<string, RedeemEffectInfo> ByType = BuildLookup();
 

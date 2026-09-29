@@ -9,7 +9,8 @@ namespace WizshBoneTwitchIntegration.Gui
     /// <see cref="EntryListEditor{TEntry}"/>. The 7 <c>playerScale</c> sub-fields (shown only for
     /// PlayerShrink/PlayerGrow in the old form) are now hidden always, regardless of Name - each
     /// one's class-level default in <c>SE_PlayerScaleData</c> already matches the old form's
-    /// defaults, so this is transparent. Persists through death+Renew are paired.
+    /// defaults, so this is transparent. Persists through death+Renew are paired. A fresh list
+    /// starts with one default entry, and a list row's label follows the entry's name as it's edited.
     /// </summary>
     internal class StatusEffectForm : IRedeemStep2Form
     {
@@ -22,7 +23,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private static string ItemLabel(StatusEffectEntry entry)
         {
-            return string.IsNullOrEmpty(entry.name) ? "New status effect" : entry.name;
+            return string.IsNullOrEmpty(entry.name) ? "New status effect" : RedeemPrefabCatalog.GetStatusEffectDisplayName(entry.name);
         }
 
         private static bool IsPlayerScaleEffect(string name)
@@ -40,6 +41,7 @@ namespace WizshBoneTwitchIntegration.Gui
             {
                 entry.name = v;
                 entry.duration = RedeemPrefabCatalog.LookupStatusEffectTTL(v);
+                m_list.RefreshListLabels();
                 BuildEntryFields(cardRoot, entry);
             },
             defaultValue: null);
@@ -57,13 +59,19 @@ namespace WizshBoneTwitchIntegration.Gui
                     entry.renew, v => entry.renew = v, defaultValue: false));
 
             // Runs on every (re)build of this card, including the Name-dropdown-triggered rebuild
-            // above, so the scroll range always matches the currently rendered rows.
-            ScrollableList.SetContentHeight(cardRoot, Mathf.Abs(layout.CurrentY));
+            // above, so the card and page scroll range always match the currently rendered rows.
+            m_list.SetCardContentHeight(Mathf.Abs(layout.CurrentY));
         }
 
         public void Populate(RedeemData working)
         {
             StatusEffectData data = working.statusEffectData;
+
+            // A redeem with no status effects does nothing, so a fresh (or emptied) list starts
+            // with one default entry - same as SpawnCreatureForm.
+            if (data.list.Count == 0)
+                data.list.Add(new StatusEffectEntry());
+
             m_list.Populate(data.list, () => data.random, v => data.random = v);
         }
     }

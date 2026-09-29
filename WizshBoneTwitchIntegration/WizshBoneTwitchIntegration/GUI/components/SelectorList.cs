@@ -18,6 +18,8 @@ namespace WizshBoneTwitchIntegration.Gui
     {
         private readonly Dictionary<string, (GameObject Btn, Image Bg, Text Label)> m_buttons =
             new Dictionary<string, (GameObject, Image, Text)>();
+        private const float LabelRightPadding = 8f;
+
         private Color m_defaultColor;
 
         public string SelectedKey { get; private set; }
@@ -59,6 +61,10 @@ namespace WizshBoneTwitchIntegration.Gui
                 btnLabel.alignment = TextAnchor.MiddleLeft;
                 RectTransform labelRt = btnLabel.rectTransform;
                 labelRt.offsetMin = new Vector2(labelRt.offsetMin.x + ListRow.LeftPadding, labelRt.offsetMin.y);
+
+                // A label wider than its button gets a trailing "..." and a hover tooltip with the
+                // full text (same helper as the sidebar's profile header).
+                GuiHelper.SetTruncatedText(btnLabel, label, itemWidth - ListRow.LeftPadding - LabelRightPadding);
 
                 string capturedKey = key;
                 btnObj.GetComponent<Button>().onClick.AddListener(() => onClick(capturedKey));

@@ -36,4 +36,17 @@ namespace WizshBoneTwitchIntegration.Gui
     {
         void ApplyForcedValues(RedeemData working);
     }
+
+    /// <summary>
+    /// Implemented by a form whose type wants non-class-default starting values for a fresh
+    /// selection (e.g. Door's 100 doors / 60s duration). Called by <see cref="RedeemWizard"/> only
+    /// when the user picks this type in step 1 from a different one - never when re-entering step 2
+    /// or opening an existing redeem - so a saved redeem's own values are never overwritten. Needed
+    /// for fields that can't be defaulted in <see cref="IRedeemStep2Form.Populate"/> because a
+    /// non-nullable value (e.g. <c>duration</c>) can't tell "unset" from an intentional 0.
+    /// </summary>
+    internal interface IAppliesDefaultsOnSelect
+    {
+        void ApplyDefaults(RedeemData working);
+    }
 }

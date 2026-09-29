@@ -206,11 +206,11 @@ namespace WizshBoneTwitchIntegration.Gui
         // fixed-height card (BoxPadding around the text) at the bottom of the column, ending level
         // with the type list, and the image placeholder takes all the height above it.
         //
-        // Not built this round - unclear whether an image preview ships in the first release - but
-        // the geometry below stays live so nothing shifts if/when it's re-enabled. While disabled,
-        // the text card takes over the full column (PreviewCardTopY/PreviewCardHeightActual)
-        // instead of just the bottom slice, so the preview isn't left with dead space above it.
-        private const bool EffectPreviewImageEnabled = false;
+        // Enabled as a flat placeholder with a "coming in a future update" message - no media
+        // exists yet. Disabling it again is safe: the text card then takes over the full column
+        // (PreviewCardTopY/PreviewCardHeightActual) instead of just the bottom slice, so the
+        // preview isn't left with dead space above it.
+        private const bool EffectPreviewImageEnabled = true;
         private const float PreviewCardHeight  = 156f;
         private const float PreviewImageGap    = 14f; // matches RowGap's existing section-gap value
         private const float PreviewImageHeight = TypeListHeight - PreviewCardHeight - PreviewImageGap;
@@ -397,7 +397,20 @@ namespace WizshBoneTwitchIntegration.Gui
                 listContent.transform, items, TypeListWidth - ScrollableList.ScrollbarWidth - 8f, TypeBtnHeight, 4f,
                 onClick: type =>
                 {
+                    // Door/Windmill/Smite/Rain/Meteor/Trap/Root/LogRain all share one
+                    // SpawnAbilityData, so switching between them would otherwise carry the previous
+                    // type's spawns/isBiomeList/etc. into the new form (e.g. a LogRain log showing
+                    // up in the Door prefab list). Start the new type from a clean slate instead.
+                    bool typeChanged = m_working.type != type;
+                    if (typeChanged
+                        && RedeemType.SpawnAbilityFamily.Contains(m_working.type)
+                        && RedeemType.SpawnAbilityFamily.Contains(type))
+                        m_working.spawnAbilityData = new SpawnAbilityData();
+
                     m_working.type = type;
+                    if (typeChanged && m_step2Forms.TryGetValue(type, out IRedeemStep2Form selectedForm)
+                        && selectedForm is IAppliesDefaultsOnSelect withDefaults)
+                        withDefaults.ApplyDefaults(m_working);
                     RefreshStep1Selection();
                     RefreshNavButtons();
                 });
@@ -422,6 +435,25 @@ namespace WizshBoneTwitchIntegration.Gui
                 // translucent for the real scrollbar track, this placeholder just reuses its RGB.
                 Color trackColor = ScrollableList.TrackColor;
                 previewImageBg.color = new Color(trackColor.r, trackColor.g, trackColor.b, 1f);
+
+                Text previewImageText = GUIManager.Instance.CreateText(
+                    text: "Preview video's coming in future update!",
+                    parent: previewImagePlaceholder.transform,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: Vector2.zero,
+                    font: GUIManager.Instance.AveriaSerifBold,
+                    fontSize: 18,
+                    color: GUIManager.Instance.ValheimBeige,
+                    outline: true,
+                    outlineColor: Color.black,
+                    width: PreviewWidth - 2f * BoxPadding,
+                    height: 60f,
+                    addContentSizeFitter: false
+                ).GetComponent<Text>();
+                previewImageText.alignment = TextAnchor.MiddleCenter;
+                previewImageText.horizontalOverflow = HorizontalWrapMode.Wrap;
+                previewImageText.raycastTarget = false;
             }
 
             m_previewPanel.Build(m_step1Root, new Vector2(PreviewX, PreviewCardTopY), PreviewWidth, PreviewCardHeightActual, BoxPadding);
@@ -489,6 +521,7 @@ namespace WizshBoneTwitchIntegration.Gui
             RegisterStep2Form(RedeemType.Trap, new TrapForm());
             RegisterStep2Form(RedeemType.Root, new RootForm());
             RegisterStep2Form(RedeemType.LogRain, new LogRainForm());
+            RegisterStep2Form(RedeemType.BoatRain, new BoatRainForm());
             RegisterStep2Form(RedeemType.SpawnCreature, new SpawnCreatureForm());
             RegisterStep2Form(RedeemType.StatusEffect, new StatusEffectForm());
         }

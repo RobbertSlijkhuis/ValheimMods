@@ -13,8 +13,15 @@ namespace WizshBoneTwitchIntegration.Gui
     /// force-reset here, so a redeem previously configured via GUI_OLD's fuller editor doesn't
     /// silently lose that configuration just from being opened in this narrower form.
     /// </summary>
-    internal class TerrainEditForm : IRedeemStep2Form, IForcesValuesOnSave
+    internal class TerrainEditForm : IRedeemStep2Form, IForcesValuesOnSave, IAppliesDefaultsOnSelect
     {
+        private const string DefaultAnnounceMessage = "Terrain data corrupted. Cause: {{user}}!";
+        private const float DefaultDuration = 300f;
+        private const bool DefaultNoFallDamage = true;
+        private const float DefaultRaiseDelta = -6f;
+        private const float DefaultRaisePower = 0.2f;
+        private const float DefaultRaiseRadius = 10f;
+
         private RedeemData m_working;
 
         private InputField m_announceMessage;
@@ -32,19 +39,19 @@ namespace WizshBoneTwitchIntegration.Gui
             var layout = new Step2RowLayout(content, 0f);
 
             m_announceMessage = layout.TextRow("Announcement message", "Shown on screen when triggered. {{user}} is replaced with the redeemer's name.",
-                "", "Optional announcement", v => m_working.terrainEditData.announceMessage = v, defaultValue: "");
+                "", "Optional announcement", v => m_working.terrainEditData.announceMessage = v, defaultValue: DefaultAnnounceMessage);
             layout.PairRow(
                 () => m_duration = layout.FloatRow("Duration", "How long before the terrain resets, in seconds (0 = permanent).",
-                    0f, v => m_working.terrainEditData.duration = v, defaultValue: 0f),
+                    DefaultDuration, v => m_working.terrainEditData.duration = v, defaultValue: DefaultDuration),
                 () => m_noFallDamage = layout.ToggleRow("No fall damage", "Whether to protect the player from fall damage during the terrain edit.",
-                    true, v => m_working.terrainEditData.noFallDamage = v, defaultValue: true));
+                    DefaultNoFallDamage, v => m_working.terrainEditData.noFallDamage = v, defaultValue: DefaultNoFallDamage));
             layout.PairRow(
                 () => m_raiseDelta = layout.FloatRow("Raise delta", "How much the terrain is raised (negative values dig down instead).",
-                    -6f, v => m_working.terrainEditData.raiseDelta = v, defaultValue: -6f),
-                () => m_raisePower = layout.FloatRow("Raise power", "The power of the terrain raise.",
-                    0f, v => m_working.terrainEditData.raisePower = v, defaultValue: 0f));
+                    DefaultRaiseDelta, v => m_working.terrainEditData.raiseDelta = v, defaultValue: DefaultRaiseDelta),
+                () => m_raisePower = layout.FloatRow("Raise power", "How steep the walls are at the edge, 0 = vertical.",
+                    DefaultRaisePower, v => m_working.terrainEditData.raisePower = v, defaultValue: DefaultRaisePower));
             m_raiseRadius = layout.FloatRow("Raise radius", "The radius of the terrain raise, in meters.",
-                8f, v => m_working.terrainEditData.raiseRadius = v, defaultValue: 8f);
+                DefaultRaiseRadius, v => m_working.terrainEditData.raiseRadius = v, defaultValue: DefaultRaiseRadius);
 
             ScrollableList.SetContentHeight(content, Mathf.Abs(layout.CurrentY));
         }
@@ -60,6 +67,17 @@ namespace WizshBoneTwitchIntegration.Gui
             m_raiseDelta.text = data.raiseDelta.ToString("G");
             m_raisePower.text = data.raisePower.ToString("G");
             m_raiseRadius.text = data.raiseRadius.ToString("G");
+        }
+
+        public void ApplyDefaults(RedeemData working)
+        {
+            TerrainEditData data = working.terrainEditData;
+            data.announceMessage = DefaultAnnounceMessage;
+            data.duration = DefaultDuration;
+            data.noFallDamage = DefaultNoFallDamage;
+            data.raiseDelta = DefaultRaiseDelta;
+            data.raisePower = DefaultRaisePower;
+            data.raiseRadius = DefaultRaiseRadius;
         }
 
         public void ApplyForcedValues(RedeemData working)

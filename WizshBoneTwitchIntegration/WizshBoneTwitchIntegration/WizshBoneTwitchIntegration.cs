@@ -445,6 +445,7 @@ namespace WizshBoneTwitchIntegration
             CommandManager.Instance.AddConsoleCommand(new SetAliasCommand());
             CommandManager.Instance.AddConsoleCommand(new SetQuickRedeemCommand());
             CommandManager.Instance.AddConsoleCommand(new TestCommand());
+            CommandManager.Instance.AddConsoleCommand(new TestWeatherCommand());
             CommandManager.Instance.AddConsoleCommand(new UseRedeemCommand());
             CommandManager.Instance.AddConsoleCommand(new ScanCommand());
             CommandManager.Instance.AddConsoleCommand(new ClaimCommand());

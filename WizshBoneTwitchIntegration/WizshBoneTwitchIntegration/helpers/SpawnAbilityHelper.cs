@@ -28,6 +28,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             { RedeemType.Smite,    data => new SmiteView(data) },
             { RedeemType.Rain,     data => new RainView(data) },
             { RedeemType.LogRain,  data => new LogRainView(data) },
+            { RedeemType.BoatRain, data => new RainView(data) },
             { RedeemType.Meteor,   data => new MeteorView(data) },
             { RedeemType.Trap,     data => new TrapView(data) },
             { RedeemType.Root,     data => new RootView(data) },

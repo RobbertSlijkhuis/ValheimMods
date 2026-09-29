@@ -8,10 +8,22 @@ namespace WizshBoneTwitchIntegration.Gui
     /// <summary>
     /// Step-2 form for Trap - field set ported from <c>models/views/TrapView.cs</c>'s curation, all
     /// 4 fields kept. Implements <see cref="IForcesValuesOnSave"/> since the prefab is always
-    /// "fuling_trap". Damage tab hidden for now (no tabs at all).
+    /// "fuling_trap". Duration/Allow drops/Break on destroy/Ground offset/Snap to terrain and the
+    /// Damage tab are hidden (no tabs at all) and only ever set by <see cref="ApplyDefaults"/> -
+    /// none of the class-level defaults match what a trap field needs.
     /// </summary>
-    internal class TrapForm : IRedeemStep2Form, IForcesValuesOnSave
+    internal class TrapForm : IRedeemStep2Form, IForcesValuesOnSave, IAppliesDefaultsOnSelect
     {
+        private const string DefaultAnnounceMessage = "Minor inconveniences deployed by {{user}}!";
+        private const bool DefaultAllowDrops = false;
+        private const bool DefaultBreakOnDestroy = true;
+        private const int DefaultDuration = 300;
+        private const float DefaultGroundOffset = 0f;
+        private const int DefaultMinToSpawn = 300;
+        private const int DefaultMaxToSpawn = 300;
+        private const float DefaultSpawnDelay = 0.0001f;
+        private const float DefaultSpawnRadius = 25f;
+
         private RedeemData m_working;
 
         private InputField m_announceMessage;
@@ -29,17 +41,17 @@ namespace WizshBoneTwitchIntegration.Gui
             var layout = new Step2RowLayout(content, 0f, RedeemWizard.Step2FieldWidth);
 
             m_announceMessage = layout.TextRow("Announcement message", "Shown on screen when triggered. {{user}} is replaced with the redeemer's name.",
-                "", "Optional announcement", v => m_working.spawnAbilityData.announceMessage = v, defaultValue: "");
+                "", "Optional announcement", v => m_working.spawnAbilityData.announceMessage = v, defaultValue: DefaultAnnounceMessage);
             layout.PairRow(
                 () => m_minToSpawn = layout.IntRow("Min to spawn", "Minimum number of traps spawned.",
-                    1, v => m_working.spawnAbilityData.minToSpawn = v, defaultValue: 1),
-                () => m_maxToSpawn = layout.IntRow("Max to spawn", "Upper bound on traps spawned (exclusive - the actual count is randomized below this).",
-                    3, v => m_working.spawnAbilityData.maxToSpawn = v, defaultValue: 3));
+                    DefaultMinToSpawn, v => m_working.spawnAbilityData.minToSpawn = v, defaultValue: DefaultMinToSpawn),
+                () => m_maxToSpawn = layout.IntRow("Max to spawn", "Max allowed to spawn (count is randomized if Min is less).",
+                    DefaultMaxToSpawn, v => m_working.spawnAbilityData.maxToSpawn = v, defaultValue: DefaultMaxToSpawn));
             layout.PairRow(
-                () => m_spawnDelay = layout.FloatRow("Spawn delay", "Delay in seconds before each trap is placed.",
-                    0f, v => m_working.spawnAbilityData.spawnDelay = v, defaultValue: 0f),
+                () => m_spawnDelay = layout.FloatRow("Spawn delay", "Time in seconds between each trap being placed.",
+                    DefaultSpawnDelay, v => m_working.spawnAbilityData.spawnDelay = v, defaultValue: DefaultSpawnDelay),
                 () => m_spawnRadius = layout.FloatRow("Spawn radius", "Radius around the target the traps can spawn within, in meters.",
-                    5f, v => m_working.spawnAbilityData.spawnRadius = v, defaultValue: 5f));
+                    DefaultSpawnRadius, v => m_working.spawnAbilityData.spawnRadius = v, defaultValue: DefaultSpawnRadius));
         }
 
         public void Populate(RedeemData working)
@@ -48,10 +60,26 @@ namespace WizshBoneTwitchIntegration.Gui
             SpawnAbilityData data = working.spawnAbilityData;
 
             m_announceMessage.text = data.announceMessage ?? "";
-            m_minToSpawn.text = (data.minToSpawn ?? 1).ToString();
-            m_maxToSpawn.text = (data.maxToSpawn ?? 3).ToString();
-            m_spawnDelay.text = (data.spawnDelay ?? 0f).ToString("G");
-            m_spawnRadius.text = (data.spawnRadius ?? 5f).ToString("G");
+            m_minToSpawn.text = (data.minToSpawn ?? DefaultMinToSpawn).ToString();
+            m_maxToSpawn.text = (data.maxToSpawn ?? DefaultMaxToSpawn).ToString();
+            m_spawnDelay.text = (data.spawnDelay ?? DefaultSpawnDelay).ToString("G");
+            m_spawnRadius.text = (data.spawnRadius ?? DefaultSpawnRadius).ToString("G");
+        }
+
+        public void ApplyDefaults(RedeemData working)
+        {
+            SpawnAbilityData data = working.spawnAbilityData;
+            data.announceMessage = DefaultAnnounceMessage;
+            data.allowDrops = DefaultAllowDrops;
+            data.breakOnDestroy = DefaultBreakOnDestroy;
+            data.duration = DefaultDuration;
+            data.groundOffset = DefaultGroundOffset;
+            data.snapToterrain = true;
+            data.minToSpawn = DefaultMinToSpawn;
+            data.maxToSpawn = DefaultMaxToSpawn;
+            data.spawnDelay = DefaultSpawnDelay;
+            data.spawnRadius = DefaultSpawnRadius;
+            data.damage = new DamageData { blunt = 50f, pierce = 50f, basedOnMaxHealthAndArmor = true, maxHealthPercentage = 0.35f };
         }
 
         public void ApplyForcedValues(RedeemData working)

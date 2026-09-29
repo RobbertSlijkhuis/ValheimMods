@@ -380,6 +380,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         private void OnSelectProfile(string name)
         {
+            GuiHelper.PlayClickSound();
             ProfileManager.SelectProfile(name);
             RefreshList();
         }

@@ -87,6 +87,7 @@ namespace WizshBoneTwitchIntegration.Models
             { RedeemType.Trap,               nameof(spawnAbilityData) },
             { RedeemType.Root,               nameof(spawnAbilityData) },
             { RedeemType.LogRain,            nameof(spawnAbilityData) },
+            { RedeemType.BoatRain,           nameof(spawnAbilityData) },
             { RedeemType.SurpriseChest,      nameof(chestData)        },
             { RedeemType.StatusEffect,       nameof(statusEffectData) },
             { RedeemType.TerrainEdit,        nameof(terrainEditData)  },

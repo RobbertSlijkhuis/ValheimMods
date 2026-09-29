@@ -35,7 +35,27 @@ namespace WizshBoneTwitchIntegration.Gui
         public static List<DropdownOption> DoorPrefabs { get; private set; } = new List<DropdownOption>();
         public static List<DropdownOption> PlaceablePieces { get; private set; } = new List<DropdownOption>();
         public static List<string> LogPrefabs { get; private set; } = new List<string>();
-        public static List<DropdownOption> StatusEffects { get; private set; } = new List<DropdownOption>();
+        private static List<DropdownOption> s_statusEffects = new List<DropdownOption>();
+
+        /// <summary>
+        /// Built eagerly in <see cref="BuildPrefabCatalogs"/>, but <c>ObjectDB.instance</c> isn't
+        /// guaranteed to exist yet at that point - so while the list is still empty, each access
+        /// retries the scan (cheap no-op until ObjectDB is ready). A non-empty result is never
+        /// rescanned, so this can't cache an incomplete list.
+        /// </summary>
+        public static List<DropdownOption> StatusEffects
+        {
+            get
+            {
+                if (s_statusEffects.Count == 0 && ObjectDB.instance != null)
+                {
+                    s_statusEffects = BuildStatusEffectOptions();
+                    Jotunn.Logger.LogWarning($"[WBTI] RedeemPrefabCatalog: status effect catalog (re)built with {s_statusEffects.Count} entries.");
+                }
+                return s_statusEffects;
+            }
+        }
+
         public static List<DropdownOption> WeatherNames { get; private set; } = new List<DropdownOption>();
 
         private static bool s_weatherBuilt;
@@ -104,9 +124,13 @@ namespace WizshBoneTwitchIntegration.Gui
                 MonsterAI monsterAI = prefab.GetComponent<MonsterAI>();
                 if (humanoid != null && monsterAI != null)
                 {
-                    string creatureLabel = !string.IsNullOrEmpty(humanoid.m_name)
-                        ? CreatureHelper.StripColorTags(Localization.instance.Localize(humanoid.m_name))
-                        : name;
+                    // Some creatures have an empty m_name, or one that localizes to nothing / an
+                    // unresolved "[token]" - use the prefab name for those.
+                    string creatureLabel = string.IsNullOrEmpty(humanoid.m_name)
+                        ? null
+                        : CreatureHelper.StripColorTags(Localization.instance.Localize(humanoid.m_name))?.Trim();
+                    if (string.IsNullOrEmpty(creatureLabel) || (creatureLabel.StartsWith("[") && creatureLabel.EndsWith("]")))
+                        creatureLabel = name;
                     creatures.Add(new DropdownOption(name, creatureLabel));
                 }
 
@@ -131,9 +155,9 @@ namespace WizshBoneTwitchIntegration.Gui
             DoorPrefabs = doors;
             PlaceablePieces = pieces;
             LogPrefabs = LogPrefabCandidates.Where(name => PrefabManager.Instance.GetPrefab(name) != null).ToList();
-            StatusEffects = BuildStatusEffectOptions();
+            s_statusEffects = BuildStatusEffectOptions();
 
-            Jotunn.Logger.LogWarning($"[WBTI] RedeemPrefabCatalog built: {creatures.Count} creatures, {doors.Count} doors, {pieces.Count} placeable pieces, {LogPrefabs.Count} log prefabs, {StatusEffects.Count} status effects.");
+            Jotunn.Logger.LogWarning($"[WBTI] RedeemPrefabCatalog built: {creatures.Count} creatures, {doors.Count} doors, {pieces.Count} placeable pieces, {LogPrefabs.Count} log prefabs, {s_statusEffects.Count} status effects.");
         }
 
         /// <summary>
@@ -171,7 +195,6 @@ namespace WizshBoneTwitchIntegration.Gui
 
             WeatherNames = names.Select(n => new DropdownOption(n, n)).ToList();
             s_weatherBuilt = true;
-            Jotunn.Logger.LogWarning($"[WBTI] RedeemPrefabCatalog: weather catalog built with {WeatherNames.Count} entries.");
         }
 
         /// <summary>
@@ -250,6 +273,24 @@ namespace WizshBoneTwitchIntegration.Gui
                     return option.Label;
             }
             return prefabName;
+        }
+
+        /// <summary>
+        /// Resolves a status effect's display label from <see cref="StatusEffects"/>, falling back
+        /// to the raw name if it's not in the catalog - used by StatusEffectForm's entry-list row
+        /// labels so they match the Name dropdown.
+        /// </summary>
+        public static string GetStatusEffectDisplayName(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return name;
+
+            foreach (DropdownOption option in StatusEffects)
+            {
+                if (option.Value == name)
+                    return option.Label;
+            }
+            return name;
         }
 
         /// <summary>

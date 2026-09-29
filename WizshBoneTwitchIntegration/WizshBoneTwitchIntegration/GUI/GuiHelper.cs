@@ -613,6 +613,19 @@ namespace WizshBoneTwitchIntegration.Gui
         }
 
         /// <summary>
+        /// Plays the same "sfx_gui_button" click sound buttons use, for clickable things that aren't
+        /// a Jötunn button/toggle (e.g. a whole list row wired with a bare Button). Instantiated
+        /// directly rather than via a ButtonSfx component so it still plays when the click handler
+        /// rebuilds/destroys the clicked element.
+        /// </summary>
+        public static void PlayClickSound()
+        {
+            GameObject sfx = PrefabManager.Cache.GetPrefab<GameObject>("sfx_gui_button");
+            if (sfx != null)
+                UnityEngine.Object.Instantiate(sfx);
+        }
+
+        /// <summary>
         /// Adds a thin border frame near a panel's outer edge - four flat-colored bars built the
         /// same way as the sidebar/topbar/content regions (<see cref="CreateRegion"/>/
         /// <see cref="AddBackground"/>), added as the panel's last children so they draw on top of
