@@ -51,18 +51,22 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 // SWAMP
                 { ValheimCreatureType.Abomination, new ValheimCreature(3.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Bat_Swamp, new ValheimCreature(3.0f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Blob, new ValheimCreature(3.0f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.BlobElite, new ValheimCreature(3.0f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Bonemass, new ValheimCreature(3.6f, e.SpawnEffectMedium) },
                 { ValheimCreatureType.Draugr, new ValheimCreature(3.2f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Draugr_Elite, new ValheimCreature(3.2f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Draugr_Ranged, new ValheimCreature(3.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.BogWitchKvastur, new ValheimCreature(3.4f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Leech, new ValheimCreature(3.0f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Surtling, new ValheimCreature(3.5f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Wraith, new ValheimCreature(3.6f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Writhan, new ValheimCreature(3.2f, e.SpawnEffectSmall) },
 
                 // MOUNTAIN
                 { ValheimCreatureType.Bat, new ValheimCreature(4.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.BlobFrost, new ValheimCreature(4.2f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Fenring, new ValheimCreature(4.3f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Fenring_Cultist, new ValheimCreature(4.6f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Hatchling, new ValheimCreature(4.2f, e.SpawnEffectSmall) },
@@ -74,6 +78,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 // PLAINS
                 { ValheimCreatureType.Deathsquito, new ValheimCreature(5.2f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Goblin, new ValheimCreature(5.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.GoblinArcher, new ValheimCreature(5.2f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.GoblinBrute, new ValheimCreature(5.6f, e.SpawnEffectMedium) },
                 { ValheimCreatureType.GoblinShaman, new ValheimCreature(5.4f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.BlobTar, new ValheimCreature(5.3f, e.SpawnEffectSmall) },
@@ -84,7 +89,11 @@ namespace WizshBoneTwitchIntegration.Helpers
                 // MISTLANDS
                 { ValheimCreatureType.Dverger, new ValheimCreature(6.4f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.DvergerMage, new ValheimCreature(6.4f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.DvergerMageFire, new ValheimCreature(6.4f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.DvergerMageIce, new ValheimCreature(6.4f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.DvergerMageSupport, new ValheimCreature(6.4f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Gjall, new ValheimCreature(6.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Mistile, new ValheimCreature(6.0f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Queen, new ValheimCreature(6.6f, e.SpawnEffectMedium) },
                 { ValheimCreatureType.Seeker, new ValheimCreature(6.3f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.SeekerBrood, new ValheimCreature(6.2f, e.SpawnEffectSmall) },
@@ -100,17 +109,84 @@ namespace WizshBoneTwitchIntegration.Helpers
                 { ValheimCreatureType.Charred_Mage, new ValheimCreature(7.4f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Charred_Twitcher, new ValheimCreature(7.2f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Charred_Twitcher_Summoned, new ValheimCreature(7.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.DvergerAshlands, new ValheimCreature(7.2f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.Fader, new ValheimCreature(7.6f, e.SpawnEffectMedium) },
                 { ValheimCreatureType.LordReto, new ValheimCreature(7.6f, e.SpawnEffectMedium) },
                 { ValheimCreatureType.Morgen, new ValheimCreature(7.6f, e.SpawnEffectMedium) },
                 { ValheimCreatureType.FallenValkyrie, new ValheimCreature(7.6f, e.SpawnEffectMedium) },
                 { ValheimCreatureType.Volture, new ValheimCreature(7.3f, e.SpawnEffectMedium) },
+
+                // DEEP NORTH
+                { ValheimCreatureType.Barka, new ValheimCreature(8.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.BlobMork, new ValheimCreature(8.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.BlobMorkMini, new ValheimCreature(8.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Bjorn_spiritcaller, new ValheimCreature(8.0f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Boar_spiritcaller, new ValheimCreature(8.0f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Moose_spiritcaller, new ValheimCreature(8.0f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Wolf_spiritcaller, new ValheimCreature(8.0f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Elaking, new ValheimCreature(8.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.ElakingLantern, new ValheimCreature(8.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.ElakingMole, new ValheimCreature(8.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.DvergerDeepNorth, new ValheimCreature(8.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.FallenWarrior, new ValheimCreature(8.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.FrostWisp, new ValheimCreature(8.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.FrozenKing, new ValheimCreature(8.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.FrozenKing_p2, new ValheimCreature(8.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.FrozenKing_p3, new ValheimCreature(8.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Frysling, new ValheimCreature(8.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.GoblinDeepNorth, new ValheimCreature(8.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Ghost_old, new ValheimCreature(8.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Ghost_Void, new ValheimCreature(8.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.JotunWarrior, new ValheimCreature(8.4f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.JotunWarriorDualWield, new ValheimCreature(8.4f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.JotunWitch, new ValheimCreature(8.4f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Moose, new ValheimCreature(1.0f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.TrollFrost, new ValheimCreature(8.6f, e.SpawnEffectMedium) },
+
+                // HILDIR'S CHEST BOSSES
+                { ValheimCreatureType.Skeleton_Hildir, new ValheimCreature(2.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Skeleton_Hildir_nochest, new ValheimCreature(2.2f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.GoblinShaman_Hildir, new ValheimCreature(5.4f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.GoblinShaman_Hildir_nochest, new ValheimCreature(5.4f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.GoblinBrute_Hildir, new ValheimCreature(5.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.GoblinBruteBros, new ValheimCreature(5.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.GoblinBruteBros_nochest, new ValheimCreature(5.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Fenring_Cultist_Hildir, new ValheimCreature(4.6f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Fenring_Cultist_Hildir_nochest, new ValheimCreature(4.6f, e.SpawnEffectSmall) },
+
+                // ROOTS
+                { ValheimCreatureType.TentaRoot, new ValheimCreature(3.0f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.TentaRoot_wild, new ValheimCreature(3.0f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Tendril, new ValheimCreature(3.0f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Tendril_back, new ValheimCreature(3.0f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.SummonedRoot, new ValheimCreature(3.0f, e.SpawnEffectSmall) },
+
+                // ASPECTS
+                { ValheimCreatureType.Aspect_Bonemass, new ValheimCreature(3.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Aspect_Eikthyr, new ValheimCreature(1.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Aspect_Elder, new ValheimCreature(2.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Aspect_Fader, new ValheimCreature(7.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Aspect_Moder, new ValheimCreature(4.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Aspect_SeekerQueen, new ValheimCreature(6.6f, e.SpawnEffectMedium) },
+                { ValheimCreatureType.Aspect_TentaRoot, new ValheimCreature(3.0f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Aspect_Yagluth, new ValheimCreature(5.6f, e.SpawnEffectMedium) },
             };
         }
 
         public static ValheimCreature GetValheimCreature(string name)
         {
             return valheimCreatures.GetValueSafe(name.Replace("(Clone)", ""));
+        }
+
+        /// <summary>
+        /// Called for every creature prefab the RedeemPrefabCatalog scan finds - warns when it has no
+        /// entry in <see cref="valheimCreatures"/>, so missing creatures (which get no tier/spawn
+        /// effect) can be spotted in the log and added.
+        /// </summary>
+        public static void LogIfMissingValheimCreature(string prefabName, string displayName)
+        {
+            if (!valheimCreatures.ContainsKey(prefabName))
+                Jotunn.Logger.LogWarning($"[WBTI] Creature missing from CreatureHelper.valheimCreatures: prefab '{prefabName}', display name '{displayName}'");
         }
 
         // A handful of vanilla creature names (e.g. some Ashlands mobs) embed a "<color=orange>...

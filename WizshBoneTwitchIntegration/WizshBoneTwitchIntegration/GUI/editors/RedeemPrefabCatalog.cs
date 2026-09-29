@@ -37,6 +37,10 @@ namespace WizshBoneTwitchIntegration.Gui
         public static List<string> LogPrefabs { get; private set; } = new List<string>();
         private static List<DropdownOption> s_statusEffects = new List<DropdownOption>();
 
+        // Prefab name -> plain localized creature name (no "(prefab)" suffix), for the narrow
+        // entry-list rows.
+        private static Dictionary<string, string> s_creatureNames = new Dictionary<string, string>();
+
         /// <summary>
         /// Built eagerly in <see cref="BuildPrefabCatalogs"/>, but <c>ObjectDB.instance</c> isn't
         /// guaranteed to exist yet at that point - so while the list is still empty, each access
@@ -111,6 +115,7 @@ namespace WizshBoneTwitchIntegration.Gui
             HashSet<string> placeableNames = GetPlaceablePrefabNames();
 
             var creatures = new List<DropdownOption>();
+            var creatureNames = new Dictionary<string, string>();
             var doors = new List<DropdownOption>();
             var pieces = new List<DropdownOption>();
 
@@ -131,7 +136,13 @@ namespace WizshBoneTwitchIntegration.Gui
                         : CreatureHelper.StripColorTags(Localization.instance.Localize(humanoid.m_name))?.Trim();
                     if (string.IsNullOrEmpty(creatureLabel) || (creatureLabel.StartsWith("[") && creatureLabel.EndsWith("]")))
                         creatureLabel = name;
-                    creatures.Add(new DropdownOption(name, creatureLabel));
+                    creatureNames[name] = creatureLabel;
+
+                    // Several creatures share a localized name, so the dropdown also shows the
+                    // prefab name (skipped when the label already fell back to it).
+                    string dropdownLabel = creatureLabel == name ? name : $"{creatureLabel} ({name})";
+                    creatures.Add(new DropdownOption(name, dropdownLabel));
+                    CreatureHelper.LogIfMissingValheimCreature(name, creatureLabel);
                 }
 
                 if (placeableNames.Contains(name))
@@ -152,6 +163,7 @@ namespace WizshBoneTwitchIntegration.Gui
             pieces.Sort((a, b) => string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase));
 
             CreaturePrefabs = creatures;
+            s_creatureNames = creatureNames;
             DoorPrefabs = doors;
             PlaceablePieces = pieces;
             LogPrefabs = LogPrefabCandidates.Where(name => PrefabManager.Instance.GetPrefab(name) != null).ToList();
@@ -267,12 +279,7 @@ namespace WizshBoneTwitchIntegration.Gui
             if (string.IsNullOrEmpty(prefabName))
                 return prefabName;
 
-            foreach (DropdownOption option in CreaturePrefabs)
-            {
-                if (option.Value == prefabName)
-                    return option.Label;
-            }
-            return prefabName;
+            return s_creatureNames.TryGetValue(prefabName, out string label) ? label : prefabName;
         }
 
         /// <summary>

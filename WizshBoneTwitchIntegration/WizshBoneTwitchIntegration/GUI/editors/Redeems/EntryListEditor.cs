@@ -252,13 +252,15 @@ namespace WizshBoneTwitchIntegration.Gui
         }
 
         // Brings the selected row into the list panel's visible range (used after adding an entry,
-        // which lands at the bottom of a possibly-overflowing list).
+        // which lands at the top of a possibly-scrolled list).
         private void ScrollListToSelected()
         {
             if (m_entries.Count == 0)
                 return;
 
-            float itemTop = m_selectedIndex * (ListItemHeight + ListItemGap);
+            // The list renders newest-first, so the row's position is counted from the end.
+            int displayIndex = m_entries.Count - 1 - m_selectedIndex;
+            float itemTop = displayIndex * (ListItemHeight + ListItemGap);
             float itemBottom = itemTop + ListItemHeight;
             if (itemTop < m_listScroll)
                 m_listScroll = itemTop;
@@ -355,7 +357,8 @@ namespace WizshBoneTwitchIntegration.Gui
         private void RefreshList()
         {
             var items = new List<(string Key, string Label)>();
-            for (int i = 0; i < m_entries.Count; i++)
+            // Entries are stored in add order but rendered newest-first; keys stay the data index.
+            for (int i = m_entries.Count - 1; i >= 0; i--)
                 items.Add((i.ToString(), m_itemLabel(m_entries[i]) ?? $"Entry {i + 1}"));
 
             // Old buttons are cleared (Destroy is end-of-frame, same as the card) so a rebuild

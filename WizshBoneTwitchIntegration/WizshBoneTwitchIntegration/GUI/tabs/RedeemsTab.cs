@@ -30,6 +30,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private readonly RedeemWizard m_redeemWizard = new RedeemWizard();
 
         private SearchableDropdown m_profileDropdown;
+        private Text m_titleText;
+        private Button m_newRedeemBtn;
 
         private readonly ColumnSortState m_sortState = new ColumnSortState("title");
         private readonly List<(string Text, string SortKey, Text Label)> m_sortableHeaders = new List<(string, string, Text)>();
@@ -128,7 +130,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             // m_listRoot and the (still-closed) wizard root inactive, i.e. showing nothing.
             m_listRoot = UIContainer.Create(m_root, "RedeemListView", startActive: true);
 
-            GuiHelper.CreateTitle("Redeems", m_listRoot, new Vector2(LeftEdgeX + TitleWidth / 2f, TitleY), width: TitleWidth);
+            m_titleText = GuiHelper.CreateTitle("Redeems", m_listRoot, new Vector2(LeftEdgeX + TitleWidth / 2f, TitleY), width: TitleWidth);
             GuiHelper.CreateTabDescription(
                 "These are your channel point rewards. Twitch allows a maximum of 50 enabled at once - keep an eye on how many you have active.",
                 m_listRoot, new Vector2(0f, DescriptionY), width: ContentWidth - 2f * ContentMargin);
@@ -162,6 +164,22 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             RefreshList();
         }
 
+        /// <summary>
+        /// Called when a profile sync replaced the active profile's redeems on disk. An open
+        /// wizard was working on the old data (and, for a profile that just became synced, would
+        /// still allow saving over it), so it is closed without saving before the list refreshes.
+        /// </summary>
+        public void OnActiveProfileReplaced()
+        {
+            bool wizardWasOpen = m_redeemWizard.IsOpen;
+            m_redeemWizard.ForceClose();   // its OnFinished refreshes the list
+
+            if (wizardWasOpen)
+                ToastNotifications.Show("This profile was just updated by a sync - the editor was closed without saving.", ToastType.Warning);
+            else
+                RefreshList();
+        }
+
         // ── toolbar / column headers ────────────────────────────────────────
 
         private void BuildToolbar()
@@ -171,7 +189,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             searchField.onValueChanged.AddListener(OnSearchChanged);
 
             float cursor = LeftEdgeX + SearchWidth;
-            CreateToolbarButton("+ New redeem", NewRedeemBtnWidth, cursor, OpenCreate);
+            m_newRedeemBtn = CreateToolbarButton("+ New redeem", NewRedeemBtnWidth, cursor, OpenCreate);
             cursor += ToolbarButtonSpacing + NewRedeemBtnWidth;
             CreateToolbarButton("View history",HistoryBtnWidth, cursor, () => OnOpenHistoryRequested?.Invoke());
 
@@ -200,7 +218,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             m_profileDropdown.OnValueChanged += OnProfileSelected;
         }
 
-        private void CreateToolbarButton(string text, float width, float cursorX, UnityEngine.Events.UnityAction onClick)
+        private Button CreateToolbarButton(string text, float width, float cursorX, UnityEngine.Events.UnityAction onClick)
         {
             float centerX = cursorX + ToolbarButtonSpacing + width / 2f;
 
@@ -214,7 +232,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 height: 36f
             );
             btnObj.SetActive(true);
-            btnObj.GetComponent<Button>().onClick.AddListener(onClick);
+            Button button = btnObj.GetComponent<Button>();
+            button.onClick.AddListener(onClick);
+            return button;
         }
 
         private void BuildColumnHeaders()
@@ -326,6 +346,15 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             GuiHelper.ClearContainer(m_redeemListContainer);
             RefreshHeaderIndicators();
 
+            // Total redeems in the active profile - deliberately not the search-filtered count.
+            // CreateTitle upper-cases its text, so match that here.
+            m_titleText.text = $"REDEEMS ({RedeemHelper.redeems.Count})";
+
+            // A synced profile is read-only here: no new redeems, no toggling/deleting, and Edit
+            // becomes a view-only "Show" (see BuildRow).
+            bool isSynced = IsActiveProfileSynced();
+            m_newRedeemBtn.interactable = !isSynced;
+
             float yOffset = -(ListRow.ListTopPadding + ListRow.ItemHeight / 2f);
             int rowIndex = 0;
 
@@ -338,7 +367,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                     && redeem.type.IndexOf(m_searchText, StringComparison.OrdinalIgnoreCase) < 0)
                     continue;
 
-                BuildRow(redeem, yOffset, rowIndex);
+                BuildRow(redeem, yOffset, rowIndex, isSynced);
                 yOffset -= ListRow.ItemHeight + ListRow.ItemSpacing;
                 rowIndex++;
             }
@@ -347,7 +376,26 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             contentRt.sizeDelta = new Vector2(contentRt.sizeDelta.x, Mathf.Abs(yOffset) + ListRow.ItemHeight / 2f);
         }
 
-        private void BuildRow(RedeemData redeem, float yOffset, int rowIndex)
+        private static bool IsActiveProfileSynced()
+        {
+            return ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile);
+        }
+
+        /// <summary>
+        /// Guards every action that would change a synced profile's redeems. The buttons are
+        /// already disabled/hidden for synced profiles (see <see cref="BuildRow"/>); this is the
+        /// backstop for entry points that aren't a button on this tab (Home's "Create a new redeem").
+        /// </summary>
+        private static bool BlockedBySync()
+        {
+            if (!IsActiveProfileSynced())
+                return false;
+
+            ToastNotifications.Show("This profile is synced and read-only - only the owner can change it.", ToastType.Warning);
+            return true;
+        }
+
+        private void BuildRow(RedeemData redeem, float yOffset, int rowIndex, bool isSynced)
         {
             RedeemData captured = redeem;
 
@@ -357,6 +405,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             Color toggleColor = captured.enabled ? new Color(0.2f, 0.8f, 0.2f) : new Color(0.8f, 0.2f, 0.2f);
             GameObject toggleBtn = ListRow.CreateActionButton(row, captured.enabled ? "On" : "Off", ColOnX - 5f, ColOnTextW - 10f, ListRow.ItemHeight, toggleColor, () => OnToggleRedeem(captured));
             toggleBtn.SetActive(true);
+            // Still shows On/Off on a synced profile, just can't be flipped.
+            toggleBtn.GetComponent<Button>().interactable = !isSynced;
 
             // Shows the Twitch-facing (prefixed) title - RedeemData.title itself is stored
             // prefix-free, see RedeemManager.GetFullTitle.
@@ -419,14 +469,21 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             testBtn.AddComponent<TooltipTrigger>().Init("Test redeem", "Executes the redeem so you can see how it works in-game.");
             revealOnHover.Add(testBtn);
 
-            GameObject editBtn = ListRow.CreateActionButton(row, "Edit", BtnEditX, ActionBtnWidth, ListRow.ItemHeight, Color.cyan, () => OpenEdit(captured));
+            // A synced profile can be looked at but not changed: "Show" opens the wizard view-only.
+            GameObject editBtn = isSynced
+                ? ListRow.CreateActionButton(row, "Show", BtnEditX, ActionBtnWidth, ListRow.ItemHeight, GUIManager.Instance.ValheimBeige, () => OpenView(captured))
+                : ListRow.CreateActionButton(row, "Edit", BtnEditX, ActionBtnWidth, ListRow.ItemHeight, Color.cyan, () => OpenEdit(captured));
             revealOnHover.Add(editBtn);
 
             GameObject copyBtn = ListRow.CreateActionButton(row, "Copy", BtnCopyX, ActionBtnWidth, ListRow.ItemHeight, GUIManager.Instance.ValheimBeige, () => OnCopyRedeem(captured));
             revealOnHover.Add(copyBtn);
 
-            GameObject deleteBtn = ListRow.CreateActionButton(row, "X", BtnDeleteX, DeleteBtnWidth, ListRow.ItemHeight, Color.red, () => OnDeleteRedeem(captured));
-            deleteBtn.SetActive(true);
+            // No Delete on a synced profile (hidden rather than disabled, like the old GUI).
+            if (!isSynced)
+            {
+                GameObject deleteBtn = ListRow.CreateActionButton(row, "X", BtnDeleteX, DeleteBtnWidth, ListRow.ItemHeight, Color.red, () => OnDeleteRedeem(captured));
+                deleteBtn.SetActive(true);
+            }
 
             ListRow.AttachHoverReveal(row, rowBackground, revealOnHover, ListRow.ZebraColor(rowIndex));
         }
@@ -440,14 +497,26 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         /// </summary>
         public void OpenCreate()
         {
+            if (BlockedBySync())
+                return;
+
             m_listRoot.SetActive(false);
             m_redeemWizard.OpenCreate();
         }
 
         private void OpenEdit(RedeemData redeem)
         {
+            if (BlockedBySync())
+                return;
+
             m_listRoot.SetActive(false);
             m_redeemWizard.OpenEdit(redeem);
+        }
+
+        private void OpenView(RedeemData redeem)
+        {
+            m_listRoot.SetActive(false);
+            m_redeemWizard.OpenView(redeem);
         }
 
         private void OnWizardFinished(string toastMessage)
@@ -463,6 +532,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         private void OnToggleRedeem(RedeemData redeem)
         {
+            if (BlockedBySync())
+                return;
+
             TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
             string fullTitle = RedeemManager.GetFullTitle(redeem);
 
@@ -560,6 +632,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         private void OnDeleteRedeem(RedeemData redeem)
         {
+            if (BlockedBySync())
+                return;
+
             string fullTitle = RedeemManager.GetFullTitle(redeem);
 
             m_confirmDialog.Show(

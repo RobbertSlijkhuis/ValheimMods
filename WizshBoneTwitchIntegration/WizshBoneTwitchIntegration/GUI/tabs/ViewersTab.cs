@@ -95,7 +95,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             GuiHelper.CreateTitle("Viewers", m_root, new Vector2(LeftEdgeX + TitleWidth / 2f, TitleY), width: TitleWidth);
             GuiHelper.CreateTabDescription(
-                "Register viewers here to give them cosmetics, like a name color, and later effects and other perks.",
+                "Register Viewers here to give them cosmetics, like a creature color. This will be expanded on in future updates!",
                 m_root, new Vector2(0f, DescriptionY), width: ContentWidth - 2f * ContentMargin);
 
             BuildToolbar();
@@ -407,6 +407,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             if (string.IsNullOrEmpty(name))
                 return "Name is required.";
 
+            name = name.ToLowerInvariant();
+
             List<ViewerEntry> viewers = LoadViewers();
             if (viewers.Exists(v => string.Equals(v.name, name, StringComparison.OrdinalIgnoreCase)))
                 return $"A viewer named '{name}' already exists.";
@@ -433,6 +435,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         {
             if (string.IsNullOrEmpty(newName))
                 return "Name is required.";
+
+            newName = newName.ToLowerInvariant();
 
             List<ViewerEntry> viewers = LoadViewers();
             ViewerEntry entry = viewers.Find(v => string.Equals(v.name, originalName, StringComparison.OrdinalIgnoreCase));

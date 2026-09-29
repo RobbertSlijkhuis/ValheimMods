@@ -64,5 +64,76 @@
         public static string Wolf => "Wolf";
         public static string Wraith => "Wraith";
         public static string Yagluth => "GoblinKing";
+
+        // Variants of the creatures above
+        public static string Bat_Swamp => "Bat_Swamp";
+        public static string Bjorn_spiritcaller => "Bjorn_spiritcaller";
+        public static string Boar_spiritcaller => "Boar_spiritcaller";
+        public static string Moose_spiritcaller => "Moose_spiritcaller";
+        public static string Wolf_spiritcaller => "Wolf_spiritcaller";
+        public static string DvergerMageFire => "DvergerMageFire";
+        public static string DvergerMageIce => "DvergerMageIce";
+        public static string DvergerMageSupport => "DvergerMageSupport";
+        public static string DvergerAshlands => "DvergerAshlands";
+        public static string GoblinArcher => "GoblinArcher";
+
+        // Hildir's chest bosses
+        public static string Skeleton_Hildir => "Skeleton_Hildir";
+        public static string Skeleton_Hildir_nochest => "Skeleton_Hildir_nochest";
+        public static string GoblinShaman_Hildir => "GoblinShaman_Hildir";
+        public static string GoblinShaman_Hildir_nochest => "GoblinShaman_Hildir_nochest";
+        public static string GoblinBrute_Hildir => "GoblinBrute_Hildir";
+        public static string GoblinBruteBros => "GoblinBruteBros";
+        public static string GoblinBruteBros_nochest => "GoblinBruteBros_nochest";
+        public static string Fenring_Cultist_Hildir => "Fenring_Cultist_Hildir";
+        public static string Fenring_Cultist_Hildir_nochest => "Fenring_Cultist_Hildir_nochest";
+
+        // Other creatures
+        public static string Hen => "Hen";
+        public static string Moose => "Moose";
+        public static string Barka => "Barka";
+        public static string BogWitchKvastur => "BogWitchKvastur";
+        public static string FeoTheHistorian => "FeoTheHistorian_WBTI";
+
+        // Roots
+        public static string TentaRoot => "TentaRoot";
+        public static string TentaRoot_wild => "TentaRoot_wild";
+        public static string Tendril => "Tendril";
+        public static string Tendril_back => "Tendril_back";
+        public static string SummonedRoot => "staff_greenroots_tentaroot";
+
+        // Aspects
+        public static string Aspect_Bonemass => "Aspect_Bonemass";
+        public static string Aspect_Eikthyr => "Aspect_Eikthyr";
+        public static string Aspect_Elder => "Aspect_Elder";
+        public static string Aspect_Fader => "Aspect_Fader";
+        public static string Aspect_Moder => "Aspect_Moder";
+        public static string Aspect_SeekerQueen => "Aspect_SeekerQueen";
+        public static string Aspect_TentaRoot => "Aspect_TentaRoot";
+        public static string Aspect_Yagluth => "Aspect_Yagluth";
+
+        // Deep North
+        public static string FallenWarrior => "FallenWarrior";
+        public static string Mistile => "Mistile";
+        public static string Writhan => "Writhan";
+        public static string Frysling => "Frysling";
+        public static string FrostWisp => "FrostWisp";
+        public static string Elaking => "Elaking";
+        public static string ElakingLantern => "ElakingLantern";
+        public static string ElakingMole => "ElakingMole";
+        public static string FrozenKing => "FrozenKing";
+        public static string FrozenKing_p2 => "FrozenKing_p2";
+        public static string FrozenKing_p3 => "FrozenKing_p3";
+        public static string TrollFrost => "TrollFrost";
+        public static string JotunWarrior => "JotunWarrior";
+        public static string JotunWarriorDualWield => "JotunWarriorDualWield";
+        public static string JotunWitch => "JotunWitch";
+        public static string DvergerDeepNorth => "DvergerDeepNorth";
+        public static string GoblinDeepNorth => "GoblinDeepNorth";
+        public static string BlobFrost => "BlobFrost";
+        public static string BlobMork => "BlobMork";
+        public static string BlobMorkMini => "BlobMorkMini";
+        public static string Ghost_old => "Ghost_old";
+        public static string Ghost_Void => "Ghost_Void";
     }
 }

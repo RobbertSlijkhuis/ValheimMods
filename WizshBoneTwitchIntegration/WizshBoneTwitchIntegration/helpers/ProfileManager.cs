@@ -379,7 +379,11 @@ namespace WizshBoneTwitchIntegration.Helpers
             return true;
         }
 
-        private static bool IsValidProfileName(string name, out string error)
+        /// <summary>
+        /// internal (not private): <see cref="ProfileSyncHelper"/> also runs a name received from
+        /// another player through this before using it in a path.
+        /// </summary>
+        internal static bool IsValidProfileName(string name, out string error)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -396,6 +400,15 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
             {
                 error = "Profile name contains invalid characters.";
+                return false;
+            }
+
+            // Path separators are already rejected above, but "." and ".." (and, on Windows, a
+            // trailing dot/space, which the OS silently drops) would still resolve to the profiles
+            // folder itself or its parent instead of a profile folder of their own.
+            if (name.Trim('.', ' ').Length == 0 || name != name.TrimEnd('.', ' '))
+            {
+                error = "Profile name cannot be only dots or end with a dot or space.";
                 return false;
             }
 

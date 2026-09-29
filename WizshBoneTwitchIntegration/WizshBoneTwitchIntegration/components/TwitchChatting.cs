@@ -168,10 +168,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 .Any(item => item.creature == creature);
         }
 
-        public void InvokeRepeatingScan()
+        // Delay before the first scan after the scan timer is restarted because the interval setting
+        // changed - keeps a settings edit from triggering an instant scan.
+        public const float RestartGracePeriod = 10f;
+
+        public void InvokeRepeatingScan(float initialDelay = 0f)
         {
             CancelInvoke(nameof(ChattingScan));
-            InvokeRepeating(nameof(ChattingScan), 0f, m_scanInterval);
+            InvokeRepeating(nameof(ChattingScan), initialDelay, m_scanInterval);
         }
 
         public void ChattingScan()
@@ -264,7 +268,10 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public void AcceptClaim(string userName)
         {
             if (m_chosenPrefab == null)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] AcceptClaim: {userName} typed !claim but the offered creature no longer exists, ignoring.");
                 return;
+            }
 
             // Free-for-all: a user who already has a claim just falls through, leaving the offer
             // open for someone else's "!claim" instead of stealing/duplicating their own claim.

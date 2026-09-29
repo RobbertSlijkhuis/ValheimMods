@@ -103,8 +103,14 @@ namespace WizshBoneTwitchIntegration.Helpers
                 chatting.m_enabled = Current.chattingEnabled;
                 chatting.DeserializeUserBlackList(Current.chattingBlackList);
                 chatting.m_scanRadius = Current.chattingRadius;
-                chatting.m_scanInterval = Current.chattingInterval;
-                chatting.InvokeRepeatingScan();
+
+                // Only the interval is baked into the running InvokeRepeating timer - enabled and
+                // radius are read fresh on every scan, so anything else changing needs no restart.
+                if (chatting.m_scanInterval != Current.chattingInterval)
+                {
+                    chatting.m_scanInterval = Current.chattingInterval;
+                    chatting.InvokeRepeatingScan(TwitchChatting.RestartGracePeriod);
+                }
             }
 
             TwitchCustomRewards customRewards = Game.instance?.gameObject.GetComponent<TwitchCustomRewards>();

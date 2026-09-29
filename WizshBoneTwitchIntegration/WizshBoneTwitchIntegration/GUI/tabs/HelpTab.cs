@@ -30,15 +30,18 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private static readonly Dictionary<string, string> TopicDescriptions = new Dictionary<string, string>
         {
             ["Profiles"] =
-                "Each connected Twitch account keeps its own Profile - its own Redeems, Settings, and Creature groups. " +
-                "Switch profiles from the Profiles tab to swap your whole setup at once.",
+                "Each profile holds all the configuration for Redeems and Settings. Switching profiles allows you to " +
+                "switch the entire setup at once. You can Import/Export, Copy and even Sync profiles. This allows you " +
+                "to share your profiles, make copies to adjust it slightly or make sure you got the same Redeems and " +
+                "Settings. Synced profiles are locked for other players than the owner, meaning only the owner can " +
+                "push changes!",
             ["Redeems"] =
-                "Redeems are your channel point rewards. Each one triggers an in-game effect - spawning a creature, " +
-                "changing terrain, dealing damage, and more - when a viewer redeems it on Twitch. Twitch allows a " +
-                "maximum of 50 enabled at once, so keep an eye on how many you have active.",
+                "Redeems are your channel point rewards. Each one triggers an in-game effect, spawning a creature, " +
+                "changing terrain, dealing damage, and more. When a viewer redeems it on Twitch. Twitch allows a " +
+                "maximum of 50 custom channel point rewards at once, so keep an eye on how many you have active.",
             ["Viewers"] =
                 "Viewers are the Twitch chatters and redeemers you choose to register. Registering a viewer lets you " +
-                "give them cosmetics, like a name color, with more perks and effects planned for later.",
+                "give them cosmetics, like a creature color, with more perks and effects planned for later.",
             ["Settings"] =
                 "Settings control this profile's overall behavior - things like auto-resolving redeems and whether " +
                 "chatting keeps working while you're not logged in. Settings save automatically, so there's no Save " +
@@ -94,7 +97,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             GuiHelper.CreateTitle("Help", m_root, new Vector2(LeftEdgeX + TitleWidth / 2f, TitleY), width: TitleWidth);
             GuiHelper.CreateTabDescription(
-                "Here you can find tools that can help with problems and information about the different aspects of the mod",
+                "Welcome to the help section! Here you can find tools to deal with potential problems and more information about things in the mod!",
                 m_root, new Vector2(0f, DescriptionY), width: ContentWidth - 2f * ContentMargin);
 
             BuildSafezoneUnstuckCard(CardTopCenter(0, 0));
@@ -143,9 +146,10 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         private void BuildTopicsSection()
         {
-            GuiHelper.CreateTabDescription(
-                "Learn more about:", m_root,
-                new Vector2(0f, TopicsHeaderY), width: ContentWidth - 2f * ContentMargin);
+            // Same title style as the tab's own "Help" title (orange, upper-case, left-aligned).
+            GuiHelper.CreateTitle(
+                "Learn more about", m_root,
+                new Vector2(LeftEdgeX + TitleWidth / 2f, TopicsHeaderY), width: TitleWidth);
 
             GameObject listCard = GuiHelper.CreateCard(
                 m_root, new Vector2(LeftEdgeX + TopicListWidth / 2f, TopicsBodyTopY), TopicListWidth, TopicsListHeight);

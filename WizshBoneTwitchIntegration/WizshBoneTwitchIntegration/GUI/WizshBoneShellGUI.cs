@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Jotunn.Managers;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Gui.Tabs;
+using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Gui
@@ -226,7 +227,24 @@ namespace WizshBoneTwitchIntegration.Gui
 
             GuiHelper.AddPanelBorder(m_panel, inset: 0f, thickness: GuiHelper.PanelBorderThickness, color: GuiHelper.PanelBorderColor);
 
+            // BuildGUI runs once per shell, so this subscribes once.
+            ProfileSyncHelper.ProfileReceived += OnProfileSynced;
+
             SelectTab(ShellTab.Home);
+        }
+
+        /// <summary>
+        /// A synced profile just landed on disk. If it replaced the active profile, close any
+        /// editor open on the old data, then re-read whatever tab is showing (the others refresh
+        /// themselves when selected) - so nothing on screen keeps showing or editing stale data.
+        /// </summary>
+        private void OnProfileSynced(string profileName)
+        {
+            if (profileName == ProfileManager.ActiveProfile && m_tabViews[ShellTab.Redeems] is RedeemsTab redeemsTab)
+                redeemsTab.OnActiveProfileReplaced();
+
+            if (IsVisible)
+                m_tabViews[m_activeTab].Refresh();
         }
 
         private void SelectTab(ShellTab tab)

@@ -26,6 +26,19 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private GameObject m_scrollContent;
         private float m_cursorY;
 
+        // On a synced profile, the settings that affect redeems and game mechanics (redeem prefix,
+        // creatures, indestructible, safezones) are view-only: CreateRow puts a CanvasGroup with
+        // `interactable` off on each such row, which disables every input/toggle/reset button in it
+        // while keeping the values visible. Which rows get it is decided per section (see
+        // m_lockNewRows) - the chatting settings and the login/auto-resolve toggles don't affect
+        // any of that, so they stay editable for everyone.
+        private bool m_isSynced;
+        private bool m_lockNewRows;
+        private Text m_descriptionText;
+
+        private const string DescriptionNormal = "Settings are specific to each profile.";
+        private const string DescriptionSynced = "This profile is synced - settings that affect redeems and gameplay are view only, only the owner can change them.";
+
         // Fresh, never-persisted instance used only to read each field's original default (for
         // the reset button next to text fields) without duplicating the literals from
         // ProfileSettingsData.cs here.
@@ -63,8 +76,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             float leftEdgeX = -(ContentWidth / 2f) + ContentMargin;
             GuiHelper.CreateTitle("Settings", m_root, new Vector2(leftEdgeX + TitleWidth / 2f, TitleY), width: TitleWidth);
-            GuiHelper.CreateTabDescription(
-                "Settings are specific to each profile.",
+            m_descriptionText = GuiHelper.CreateTabDescription(
+                DescriptionNormal,
                 m_root, new Vector2(0f, DescriptionY), width: ContentWidth - 2f * ContentMargin);
 
             m_scrollContent = ScrollableList.CreateStretched(
@@ -88,6 +101,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             GuiHelper.ClearContainer(m_scrollContent);
             m_cursorY = -ListTopPadding;
 
+            m_isSynced = ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile);
+            m_descriptionText.text = m_isSynced ? DescriptionSynced : DescriptionNormal;
+
             BuildRedeemsSection();
             BuildChattingSection();
             BuildCreaturesSection();
@@ -103,6 +119,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         {
             SectionHeader("Redeems");
 
+            // Login and auto-resolve are personal preferences - they stay editable when synced.
+            m_lockNewRows = false;
             BoolFieldRow(
                 ("Enable redeems on login", "Automatically turns redeems on when you connect",
                     () => ProfileSettingsHelper.Current.enableRedeemsOnLogin,
@@ -113,6 +131,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                     v => ProfileSettingsHelper.Current.autoResolveRedeems = v,
                     Defaults.autoResolveRedeems));
 
+            // The prefix is part of every redeem's Twitch title, so it belongs to the synced data.
+            m_lockNewRows = m_isSynced;
             StringFieldRow("Redeem prefix", "Added in front of every redeem title. No trailing space needed, it's added automatically. Max 6 characters.",
                 () => ProfileSettingsHelper.Current.redeemTitlePrefix,
                 v => ProfileSettingsHelper.Current.redeemTitlePrefix = v,
@@ -124,6 +144,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         {
             SectionHeader("Chatting");
 
+            // Chatting doesn't affect redeems or game mechanics - editable on a synced profile.
+            m_lockNewRows = false;
             BoolFieldRow(
                 ("Enable in-game chatting feature", "Whether viewer chat messages are shown above creatures in-game",
                     () => ProfileSettingsHelper.Current.chattingEnabled,
@@ -164,6 +186,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private void BuildCreaturesSection()
         {
             SectionHeader("Creatures");
+            m_lockNewRows = m_isSynced;
 
             BoolFieldRow(
                 ("Same faction", "Spawned creatures won't attack each other",
@@ -205,6 +228,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private void BuildIndestructibleSection()
         {
             SectionHeader("Indestructible");
+            m_lockNewRows = m_isSynced;
 
             BoolFieldRow(
                 ("Boats", "Makes boats indestructible",
@@ -230,6 +254,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private void BuildSafezonesSection()
         {
             SectionHeader("Safezones");
+            m_lockNewRows = m_isSynced;
 
             StringFieldRow("Twitch Ward recipe", "Comma-separated item:amount pairs required to craft the ward",
                 () => ProfileSettingsHelper.Current.wardRecipe,
@@ -373,6 +398,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             rt.pivot = new Vector2(0.5f, 1f);
             rt.sizeDelta = new Vector2(ScrollContentWidth, RowHeight);
             rt.anchoredPosition = new Vector2(0f, m_cursorY);
+
+            if (m_lockNewRows)
+                row.AddComponent<CanvasGroup>().interactable = false;
 
             m_cursorY -= RowHeight + RowSpacing;
             return row;

@@ -137,7 +137,12 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             int totalRedeems = RedeemHelper.redeems.Count;
             int enabledRedeems = RedeemHelper.redeems.Count(r => r.enabled);
 
-            BuildActiveProfileCard(CardTopCenter(0, 0), totalRedeems);
+            // A synced profile's redeems are read-only - only its owner can change and re-sync
+            // them. Every Home setting (chatting, auto-resolve, enable-on-login, discount) stays
+            // editable; on Home only "Create a new redeem" is locked.
+            bool isSynced = ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile);
+
+            BuildActiveProfileCard(CardTopCenter(0, 0), totalRedeems, isSynced);
 
             BuildToggleCard(
                 CardTopCenter(0, 1), "Redeem status",
@@ -173,7 +178,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 height: 40f
             );
             createBtnObj.SetActive(true);
-            createBtnObj.GetComponent<Button>().onClick.AddListener(() => OnCreateRedeemRequested?.Invoke());
+            Button createBtn = createBtnObj.GetComponent<Button>();
+            createBtn.onClick.AddListener(() => OnCreateRedeemRequested?.Invoke());
+            createBtn.interactable = !isSynced;
         }
 
         private static Vector2 CardTopCenter(int row, int col)
@@ -203,13 +210,13 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         // ── card builders ────────────────────────────────────────────────────────────────────
 
-        private void BuildActiveProfileCard(Vector2 topCenter, int totalRedeems)
+        private void BuildActiveProfileCard(Vector2 topCenter, int totalRedeems, bool isSynced)
         {
             GameObject card = GuiHelper.CreateCard(m_overviewRoot, topCenter, CardWidth, CardHeight);
 
             GuiHelper.CreateCardTitle(card, "Active profile", CardWidth - 24f);
             GuiHelper.CreateCardText(card, ProfileManager.ActiveProfile, -54f, 22, GUIManager.Instance.ValheimOrange, CardWidth - 24f, height: 30f);
-            GuiHelper.CreateCardDescription(card, $"{totalRedeems} redeems configured", CardWidth - 24f);
+            GuiHelper.CreateCardDescription(card, $"{totalRedeems} redeems configured" + (isSynced ? " - synced, read-only" : ""), CardWidth - 24f);
         }
 
         /// <summary>
@@ -375,7 +382,10 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 height: 18f,
                 addContentSizeFitter: false
             ).GetComponent<Text>();
-            caption.alignment = TextAnchor.MiddleCenter;
+            // Left- and top-aligned like a card description (its box also starts at the card's
+            // 12px inset and at CardDescriptionTopY), so the caption starts where the description
+            // text does and lines up with its field's left edge instead of floating centered.
+            caption.alignment = TextAnchor.UpperLeft;
             GuiHelper.PivotToTop(caption.rectTransform, topY);
         }
     }

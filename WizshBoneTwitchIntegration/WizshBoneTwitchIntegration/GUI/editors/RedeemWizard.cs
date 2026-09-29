@@ -30,7 +30,7 @@ namespace WizshBoneTwitchIntegration.Gui
     {
         /// <summary>
         /// Invoked whenever the wizard closes - with a toast message on a successful save, or
-        /// <c>null</c> on Cancel/Back-past-the-floor-step. The owning tab switches back to the
+        /// <c>null</c> on Cancel. The owning tab switches back to the
         /// list view either way and shows the toast if one was given.
         /// </summary>
         public Action<string> OnFinished;
@@ -81,13 +81,22 @@ namespace WizshBoneTwitchIntegration.Gui
 
         // Nav
         private Button m_backBtn;
-        private Text m_backBtnText;
+        private Button m_cancelBtn;
+        private Text m_cancelBtnText;
         private Button m_nextBtn;
         private Text m_nextBtnText;
 
         private RedeemData m_editingOriginal;
         private RedeemData m_working;
         private bool m_isEdit;
+
+        // View-only mode (a redeem in a synced profile): every step's fields are shown but can't
+        // be changed, and nothing can be saved. Done with one CanvasGroup per step root whose
+        // `interactable` is switched off - that disables every Selectable underneath (inputs,
+        // toggles, buttons, dropdowns, color swatches), including ones step-2 forms build later,
+        // while the nav row (a sibling of the step roots) keeps working.
+        private bool m_readOnly;
+        private CanvasGroup[] m_stepGroups;
         private int m_step;
         private int m_floorStep;
 
@@ -138,6 +147,8 @@ namespace WizshBoneTwitchIntegration.Gui
         internal const float FieldWidth  = 460f;
         private const float RowHeight   = 36f;
         internal const float LabelHeight = 20f;
+        // Breathing room between a step-3 field label and the input under it.
+        private const float LabelInputGap = 3f;
         internal const float RowGap      = 14f;
 
         // internal, not private: step 2's own forms use this instead of the narrower FieldWidth
@@ -156,29 +167,40 @@ namespace WizshBoneTwitchIntegration.Gui
         // one card matching RedesignUI.dc.html's step-3 layout.
         private const float BoxPadding          = 14f;
         private const float BoxRowGap           = 6f;
-        private const float BoxPointsColumnWidth = 90f;
+        private const float CooldownNumberWidth = 100f;
 
         // Same 10f-per-side text inset Jotunn's CreateInputField gives every input (text width is
         // width - 20f), so the prefix badge's text sits as far from its border as the title's does.
         private const float PrefixTextPadding = 20f;
         private const float PrefixGap         = 4f;
 
-        // Step 3's cooldown, toggles and conditions cards (BuildStep3) - same padding as the
-        // preview card, with a fixed gap between the two halves of a row and a fixed-width unit
-        // dropdown beside the cooldown number.
+        // Step 3's limits, conditions and toggles cards (BuildStep3) - same padding as the
+        // preview card, with a fixed gap between the two halves of a row.
         // Longest typed count (points, cooldown, limits) - keeps int.Parse from overflowing.
         private const int   CountMaxLength     = 9;
         private const float CardColumnGap      = 20f;
+
+        // Temporarily hides the "Limit per stream" / "Limit per user per stream" card. The card is
+        // still built (its fields keep their values and saved limits are left untouched); flip to
+        // true to bring it back.
+        private const bool  LimitsCardEnabled  = false;
+
+        // The reward card's right-hand column: Points on top, and beneath it the cooldown - a
+        // fixed-width number beside a fixed-width unit dropdown. The column is exactly as wide as
+        // that pair, so Points spans the same edges.
         private const float CooldownUnitWidth  = 130f;
+        private const float PointsColumnWidth  = CooldownNumberWidth + BoxRowGap + CooldownUnitWidth;
 
         // The conditions card's one-line description (BuildStep3) and the gap under it.
         private const float ConditionDescriptionHeight = 20f;
         private const float ConditionDescriptionGap    = 10f;
 
-        // A toggle's label is centered this far below the toggle's `position.y` - the same offset
-        // GuiHelper.CreateToggleStatusRow uses (toggle at -56, status word at -60) for Home's cards,
-        // so the label reads as vertically centered on the toggle graphic, not sitting under it.
-        private const float ToggleLabelYOffset = 4f;
+        // A toggle's label is centered this far below the toggle's `position.y`. That matches where
+        // GuiFieldBuilder.CreateBoolField actually draws the toggle circle's center (~1px below
+        // `position.y`, see the toggles card in BuildStep3), so the label is vertically centered on
+        // the toggle graphic. (Was 4f, copied from Home's toggle/status-word pair, which left the
+        // label ~3px too low here.)
+        private const float ToggleLabelYOffset = 1f;
 
         // The type list runs from BodyTopY down to a RowGap above the Back/Next buttons' top edge,
         // so step 1's body fills the same vertical space step 3's cards do.
@@ -225,8 +247,11 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float BtnWidth  = 160f;
         private const float BtnHeight = 44f;
         private const float BtnY      = ContentMargin + BtnHeight / 2f;
-        private const float BackBtnX  = -150f;
-        private const float NextBtnX  =  150f;
+        // Back and Next sit at the content row's left/right edges (level with the step indicator
+        // and cards above); Cancel is always centered between them.
+        private const float BackBtnX   = StepRowLeftX + BtnWidth / 2f;
+        private const float CancelBtnX = 0f;
+        private const float NextBtnX   = -BackBtnX;
 
         /// <summary>
         /// Builds the wizard's root as a child of <paramref name="parent"/>, hidden until
@@ -243,12 +268,20 @@ namespace WizshBoneTwitchIntegration.Gui
             BuildStep3();
             BuildNavRow();
 
+            m_stepGroups = new[]
+            {
+                m_step1Root.AddComponent<CanvasGroup>(),
+                m_step2Root.AddComponent<CanvasGroup>(),
+                m_step3Root.AddComponent<CanvasGroup>(),
+            };
+
             m_root.SetActive(false);
             return m_root;
         }
 
         public void OpenCreate()
         {
+            SetReadOnly(false);
             m_editingOriginal = null;
             m_working = new RedeemData();
             m_isEdit = false;
@@ -261,6 +294,41 @@ namespace WizshBoneTwitchIntegration.Gui
 
         public void OpenEdit(RedeemData redeem)
         {
+            OpenExisting(redeem, readOnly: false);
+        }
+
+        /// <summary>
+        /// Opens <paramref name="redeem"/> like <see cref="OpenEdit"/>, but view-only: every field
+        /// is visible and can be browsed (Back/Next, scrolling), yet nothing can be changed or
+        /// saved. Used for redeems in a synced profile.
+        /// </summary>
+        public void OpenView(RedeemData redeem)
+        {
+            OpenExisting(redeem, readOnly: true);
+        }
+
+        public bool IsOpen => m_root != null && m_root.activeSelf;
+
+        /// <summary>
+        /// Closes the wizard without saving (same as Cancel) if it is open - for when the data it
+        /// was working on is replaced underneath it, e.g. by a profile sync.
+        /// </summary>
+        public void ForceClose()
+        {
+            if (IsOpen)
+                Close(null);
+        }
+
+        private void SetReadOnly(bool readOnly)
+        {
+            m_readOnly = readOnly;
+            foreach (CanvasGroup group in m_stepGroups)
+                group.interactable = !readOnly;
+        }
+
+        private void OpenExisting(RedeemData redeem, bool readOnly)
+        {
+            SetReadOnly(readOnly);
             m_editingOriginal = redeem;
             m_working = redeem.DeepClone<RedeemData>();
             m_isEdit = true;
@@ -374,7 +442,7 @@ namespace WizshBoneTwitchIntegration.Gui
             };
             bool validStep = m_step >= 1 && m_step <= 3;
             m_stepTitleText.text = validStep ? titles[m_step] : "";
-            m_stepDescriptionText.text = validStep ? descriptions[m_step] : "";
+            m_stepDescriptionText.text = validStep ? (m_readOnly ? "View only (synced profile) - " : "") + descriptions[m_step] : "";
         }
 
         // ── step 1: choose effect ────────────────────────────────────────────
@@ -561,107 +629,114 @@ namespace WizshBoneTwitchIntegration.Gui
 
             float y = BodyTopY;
 
-            // Reward preview card - color swatch + title/description column + points column, all
-            // in one dark card, matching RedesignUI.dc.html's step-3 "live preview tile". One label
-            // row on top ("Color" / "Title and description" / "Points"), same label style as the
-            // cooldown/rest cards below; the content rows start under it at contentTopY.
+            // Reward preview card - color swatch + title/description column + points/cooldown
+            // column, all in one dark card, matching RedesignUI.dc.html's step-3 "live preview
+            // tile". Two label-over-input rows: "Title" / "Points" on top, "Description" /
+            // "Cooldown" beneath, with the swatch spanning both rows. Same label style as the
+            // cards below; the first input row starts under the label row at contentTopY.
             float labelRowY = -BoxPadding;
-            float contentTopY = labelRowY - LabelHeight;
-            float boxContentHeight = 2f * RowHeight + BoxRowGap;
-            float boxHeight = 2f * BoxPadding + LabelHeight + boxContentHeight;
+            float contentTopY = labelRowY - LabelHeight - LabelInputGap;
+            float secondLabelRowY = contentTopY - RowHeight - BoxRowGap;
+            float secondContentTopY = secondLabelRowY - LabelHeight - LabelInputGap;
+            float boxContentHeight = 2f * RowHeight + BoxRowGap + LabelHeight + LabelInputGap;
+            float boxHeight = 2f * BoxPadding + LabelHeight + LabelInputGap + boxContentHeight;
             GameObject rewardBox = GuiHelper.CreateCard(m_step3Root, new Vector2(0f, y), Step3Width, boxHeight);
 
             // Swatch - PopulateStep3Fields keeps its overlay in sync with m_working.backgroundColor
             // on every step-3 entry (the picker's own onChanged callback keeps m_working in sync
             // the other way).
-            // Square sized to span both stacked inputs (title row + gap + description row), so its
-            // top/bottom edges line up with them.
+            // Square sized to span both input rows (title input down to the description input,
+            // including the second row's label), so its top/bottom edges line up with them.
             float swatchSize = boxContentHeight;
             float swatchX = -Step3Width / 2f + BoxPadding + swatchSize / 2f;
             float swatchY = contentTopY - swatchSize / 2f;
             GameObject bgSwatch = GuiFieldBuilder.CreateColorField(rewardBox, new Vector2(swatchX, swatchY), swatchSize, "#a970ff", "Redeem background color", v => m_working.backgroundColor = v, swatchSize);
             m_bgColorOverlay = bgSwatch.transform.Find("ColorOverlay").GetComponent<Image>();
 
-            // Points column - flush with the box's right edge, top-aligned with the title row.
-            float pointsX = Step3Width / 2f - BoxPadding - BoxPointsColumnWidth / 2f;
+            // Right column - flush with the box's right edge: points on the title row, cooldown
+            // (number + unit dropdown) on the description row.
+            float pointsX = Step3Width / 2f - BoxPadding - PointsColumnWidth / 2f;
             float pointsInputY = contentTopY - RowHeight / 2f;
-            m_costInput = GuiFieldBuilder.CreateIntField(rewardBox, new Vector2(pointsX, pointsInputY), BoxPointsColumnWidth, 0, v => m_working.points = Mathf.Max(0, v), emptyAsZero: true, maxLength: CountMaxLength);
+            m_costInput = GuiFieldBuilder.CreateIntField(rewardBox, new Vector2(pointsX, pointsInputY), PointsColumnWidth, 0, v => m_working.points = Mathf.Max(0, v), emptyAsZero: true, maxLength: CountMaxLength);
 
-            // Middle column: title row (prefix badge + input), description row directly beneath it.
+            // Middle column: title row (prefix badge + input), description row beneath it.
             float middleLeftX = swatchX + swatchSize / 2f + BoxPadding;
-            float middleRightX = pointsX - BoxPointsColumnWidth / 2f - BoxPadding;
+            float middleRightX = pointsX - PointsColumnWidth / 2f - BoxPadding;
             float middleWidth = middleRightX - middleLeftX;
             float middleCenterX = (middleLeftX + middleRightX) / 2f;
 
             CreateRowLabel(rewardBox, "Color", labelRowY, swatchSize, swatchX);
-            CreateRowLabel(rewardBox, "Title and description", labelRowY, middleWidth, middleCenterX);
-            CreateRowLabel(rewardBox, "Points", labelRowY, BoxPointsColumnWidth, pointsX);
+            CreateRowLabel(rewardBox, "Title", labelRowY, middleWidth, middleCenterX);
+            CreateRowLabel(rewardBox, "Points", labelRowY, PointsColumnWidth, pointsX);
+            CreateRowLabel(rewardBox, "Description", secondLabelRowY, middleWidth, middleCenterX);
+            CreateRowLabel(rewardBox, "Cooldown", secondLabelRowY, PointsColumnWidth, pointsX);
 
             float titleRowY = contentTopY - RowHeight / 2f;
             m_titleRowLeftX = middleLeftX;
             m_titleRowWidth = middleWidth;
 
-            // Prefix: a disabled-looking input sitting directly in front of the title input. Both
-            // are created at placeholder sizes here and sized for real by LayoutTitleRow, which
-            // also re-runs whenever step 3 is entered (the prefix can differ per profile).
+            // Prefix: a read-only input sitting directly in front of the title input. Both are
+            // created at placeholder sizes here and sized for real by LayoutTitleRow, which also
+            // re-runs whenever step 3 is entered (the prefix can differ per profile).
+            // readOnly (not interactable = false) so it keeps the normal, undimmed input colors;
+            // its graphics stop being raycast targets so it can't be clicked or focused either.
             m_prefixInput = GuiFieldBuilder.CreateInputField(rewardBox, new Vector2(middleLeftX, titleRowY), 100f);
-            m_prefixInput.interactable = false;
+            m_prefixInput.readOnly = true;
+            foreach (Graphic graphic in m_prefixInput.GetComponentsInChildren<Graphic>(true))
+                graphic.raycastTarget = false;
             m_prefixInput.textComponent.alignment = TextAnchor.MiddleCenter;
 
             m_titleInput = GuiFieldBuilder.CreateInputField(rewardBox, new Vector2(middleCenterX, titleRowY), middleWidth, placeholderText: "Reward title");
             m_titleInput.onValueChanged.AddListener(OnTitleInputChanged);
             LayoutTitleRow();
 
-            float descriptionRowY = titleRowY - RowHeight - BoxRowGap;
+            float descriptionRowY = secondContentTopY - RowHeight / 2f;
             m_descriptionInput = GuiFieldBuilder.CreateInputField(rewardBox, new Vector2(middleCenterX, descriptionRowY), middleWidth, placeholderText: "Description shown to viewers when they open the reward");
             m_descriptionInput.onValueChanged.AddListener(v => m_working.description = v);
 
+            // Cooldown: number on the left, unit dropdown on the right, sharing the points column.
+            float cooldownNumberX = pointsX - PointsColumnWidth / 2f + CooldownNumberWidth / 2f;
+            float cooldownUnitX = pointsX + PointsColumnWidth / 2f - CooldownUnitWidth / 2f;
+
+            m_cooldownInput = GuiFieldBuilder.CreateIntField(rewardBox, new Vector2(cooldownNumberX, secondContentTopY), CooldownNumberWidth, 0, _ => OnCooldownChanged(), emptyAsZero: true, maxLength: CountMaxLength);
+            GuiHelper.PivotToTop((RectTransform)m_cooldownInput.transform, secondContentTopY);
+
+            m_cooldownUnitDropdown = new SearchableDropdown();
+            GameObject cooldownUnitToggle = m_cooldownUnitDropdown.Build(rewardBox, new Vector2(cooldownUnitX, secondContentTopY), CooldownUnitWidth, GuiFieldBuilder.FieldHeight, GetCooldownUnitOptions(), CooldownHelper.Seconds, showSearch: false);
+            GuiHelper.PivotToTop((RectTransform)cooldownUnitToggle.transform, secondContentTopY);
+            m_cooldownUnitDropdown.OnValueChanged += _ => OnCooldownChanged();
+
             y -= boxHeight + RowGap;
 
-            // Both cards below share the same two-column grid inside their own BoxPadding inset.
+            // The limits, conditions and toggles cards below share the same two-column grid inside their own BoxPadding inset.
             float halfWidth = (Step3Width - 2f * BoxPadding - CardColumnGap) / 2f;
             float leftHalfX = -Step3Width / 2f + BoxPadding + halfWidth / 2f;
             float rightHalfX = Step3Width / 2f - BoxPadding - halfWidth / 2f;
 
-            // Cooldown card: one row of three equal columns - cooldown (number + unit dropdown),
-            // limit per stream, limit per user per stream. 0/empty means "off" for all three
-            // (SetRewards only enables the Twitch-side flag for values above 0).
-            float cooldownCardHeight = 2f * BoxPadding + LabelHeight + RowHeight;
-            GameObject cooldownCard = GuiHelper.CreateCard(m_step3Root, new Vector2(0f, y), Step3Width, cooldownCardHeight);
+            // Limits card: limit per stream and limit per user per stream, one per column. 0/empty
+            // means "off" for both (SetRewards only enables the Twitch-side flag for values above 0).
+            float limitsCardHeight = 2f * BoxPadding + LabelHeight + LabelInputGap + RowHeight;
+            GameObject limitsCard = GuiHelper.CreateCard(m_step3Root, new Vector2(0f, y), Step3Width, limitsCardHeight);
 
-            float thirdWidth = (Step3Width - 2f * BoxPadding - 2f * CardColumnGap) / 3f;
-            float firstThirdX = -Step3Width / 2f + BoxPadding + thirdWidth / 2f;
-            float secondThirdX = firstThirdX + thirdWidth + CardColumnGap;
-            float thirdThirdX = secondThirdX + thirdWidth + CardColumnGap;
+            float limitsRowY = -BoxPadding;
+            CreateRowLabel(limitsCard, "Limit per stream", limitsRowY, halfWidth, leftHalfX);
+            CreateRowLabel(limitsCard, "Limit per user per stream", limitsRowY, halfWidth, rightHalfX);
+            float limitsInputY = limitsRowY - LabelHeight - LabelInputGap;
+            m_maxPerStreamInput = GuiFieldBuilder.CreateIntField(limitsCard, new Vector2(leftHalfX, limitsInputY), halfWidth, 0, v => m_working.maxPerStream = Mathf.Max(0, v), emptyAsZero: true, maxLength: CountMaxLength);
+            GuiHelper.PivotToTop((RectTransform)m_maxPerStreamInput.transform, limitsInputY);
+            m_maxPerUserPerStreamInput = GuiFieldBuilder.CreateIntField(limitsCard, new Vector2(rightHalfX, limitsInputY), halfWidth, 0, v => m_working.maxPerUserPerStream = Mathf.Max(0, v), emptyAsZero: true, maxLength: CountMaxLength);
+            GuiHelper.PivotToTop((RectTransform)m_maxPerUserPerStreamInput.transform, limitsInputY);
 
-            float cooldownRowY = -BoxPadding;
-            CreateRowLabel(cooldownCard, "Cooldown", cooldownRowY, thirdWidth, firstThirdX);
-
-            float cooldownNumberWidth = thirdWidth - CooldownUnitWidth - BoxRowGap;
-            float cooldownNumberX = firstThirdX - thirdWidth / 2f + cooldownNumberWidth / 2f;
-            float cooldownUnitX = firstThirdX + thirdWidth / 2f - CooldownUnitWidth / 2f;
-
-            m_cooldownInput = GuiFieldBuilder.CreateIntField(cooldownCard, new Vector2(cooldownNumberX, cooldownRowY - LabelHeight), cooldownNumberWidth, 0, _ => OnCooldownChanged(), emptyAsZero: true, maxLength: CountMaxLength);
-            GuiHelper.PivotToTop((RectTransform)m_cooldownInput.transform, cooldownRowY - LabelHeight);
-
-            m_cooldownUnitDropdown = new SearchableDropdown();
-            GameObject cooldownUnitToggle = m_cooldownUnitDropdown.Build(cooldownCard, new Vector2(cooldownUnitX, cooldownRowY - LabelHeight), CooldownUnitWidth, GuiFieldBuilder.FieldHeight, GetCooldownUnitOptions(), CooldownHelper.Seconds, showSearch: false);
-            GuiHelper.PivotToTop((RectTransform)cooldownUnitToggle.transform, cooldownRowY - LabelHeight);
-            m_cooldownUnitDropdown.OnValueChanged += _ => OnCooldownChanged();
-
-            CreateRowLabel(cooldownCard, "Limit per stream", cooldownRowY, thirdWidth, secondThirdX);
-            CreateRowLabel(cooldownCard, "Limit per user per stream", cooldownRowY, thirdWidth, thirdThirdX);
-            m_maxPerStreamInput = GuiFieldBuilder.CreateIntField(cooldownCard, new Vector2(secondThirdX, cooldownRowY - LabelHeight), thirdWidth, 0, v => m_working.maxPerStream = Mathf.Max(0, v), emptyAsZero: true, maxLength: CountMaxLength);
-            GuiHelper.PivotToTop((RectTransform)m_maxPerStreamInput.transform, cooldownRowY - LabelHeight);
-            m_maxPerUserPerStreamInput = GuiFieldBuilder.CreateIntField(cooldownCard, new Vector2(thirdThirdX, cooldownRowY - LabelHeight), thirdWidth, 0, v => m_working.maxPerUserPerStream = Mathf.Max(0, v), emptyAsZero: true, maxLength: CountMaxLength);
-            GuiHelper.PivotToTop((RectTransform)m_maxPerUserPerStreamInput.transform, cooldownRowY - LabelHeight);
-
-            y -= cooldownCardHeight + RowGap;
+            // Hidden for now (see LimitsCardEnabled) - still built so its fields and
+            // PopulateStep3Fields keep working, but the cards below close up the gap.
+            limitsCard.SetActive(LimitsCardEnabled);
+            if (LimitsCardEnabled)
+                y -= limitsCardHeight + RowGap;
 
             // Conditions card: a one-line description on top, then the add/remove condition
             // dropdowns. Single line only - the card's height is fixed, and a description that
             // wrapped would be dropped entirely by Unity's vertical-truncate on a too-short box.
-            float conditionCardHeight = 2f * BoxPadding + ConditionDescriptionHeight + ConditionDescriptionGap + LabelHeight + RowHeight;
+            float conditionCardHeight = 2f * BoxPadding + ConditionDescriptionHeight + ConditionDescriptionGap + LabelHeight + LabelInputGap + RowHeight;
             GameObject conditionCard = GuiHelper.CreateCard(m_step3Root, new Vector2(0f, y), Step3Width, conditionCardHeight);
 
             GuiHelper.CreateCardDescription(
@@ -678,12 +753,13 @@ namespace WizshBoneTwitchIntegration.Gui
             CreateRowLabel(conditionCard, "Add condition", conditionRowY, halfWidth, leftHalfX);
             CreateRowLabel(conditionCard, "Remove condition", conditionRowY, halfWidth, rightHalfX);
             m_addConditionDropdown = new SearchableDropdown();
-            GameObject addConditionToggle = m_addConditionDropdown.Build(conditionCard, new Vector2(leftHalfX, conditionRowY - LabelHeight), halfWidth, GuiFieldBuilder.FieldHeight, GetAvailableGlobalKeyOptions(), "");
-            GuiHelper.PivotToTop((RectTransform)addConditionToggle.transform, conditionRowY - LabelHeight);
+            float conditionInputY = conditionRowY - LabelHeight - LabelInputGap;
+            GameObject addConditionToggle = m_addConditionDropdown.Build(conditionCard, new Vector2(leftHalfX, conditionInputY), halfWidth, GuiFieldBuilder.FieldHeight, GetAvailableGlobalKeyOptions(), "");
+            GuiHelper.PivotToTop((RectTransform)addConditionToggle.transform, conditionInputY);
             m_addConditionDropdown.OnValueChanged += v => m_working.globalKeyAdd = v;
             m_removeConditionDropdown = new SearchableDropdown();
-            GameObject removeConditionToggle = m_removeConditionDropdown.Build(conditionCard, new Vector2(rightHalfX, conditionRowY - LabelHeight), halfWidth, GuiFieldBuilder.FieldHeight, GetAvailableGlobalKeyOptions(), "");
-            GuiHelper.PivotToTop((RectTransform)removeConditionToggle.transform, conditionRowY - LabelHeight);
+            GameObject removeConditionToggle = m_removeConditionDropdown.Build(conditionCard, new Vector2(rightHalfX, conditionInputY), halfWidth, GuiFieldBuilder.FieldHeight, GetAvailableGlobalKeyOptions(), "");
+            GuiHelper.PivotToTop((RectTransform)removeConditionToggle.transform, conditionInputY);
             m_removeConditionDropdown.OnValueChanged += v => m_working.globalKeyRemove = v;
 
             y -= conditionCardHeight + RowGap;
@@ -892,8 +968,21 @@ namespace WizshBoneTwitchIntegration.Gui
             );
             backBtnObj.SetActive(true);
             m_backBtn = backBtnObj.GetComponent<Button>();
-            m_backBtnText = backBtnObj.GetComponentInChildren<Text>();
             m_backBtn.onClick.AddListener(OnBack);
+
+            GameObject cancelBtnObj = GuiHelper.CreateButton(
+                text: "Cancel",
+                parent: m_root.transform,
+                anchorMin: new Vector2(0.5f, 0f),
+                anchorMax: new Vector2(0.5f, 0f),
+                position: new Vector2(CancelBtnX, BtnY),
+                width: BtnWidth,
+                height: BtnHeight
+            );
+            cancelBtnObj.SetActive(true);
+            m_cancelBtn = cancelBtnObj.GetComponent<Button>();
+            m_cancelBtnText = cancelBtnObj.GetComponentInChildren<Text>();
+            m_cancelBtn.onClick.AddListener(() => Close(null));
 
             GameObject nextBtnObj = GuiHelper.CreateButton(
                 text: "Next",
@@ -912,11 +1001,9 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void OnBack()
         {
+            // Back is disabled at the floor step (RefreshNavButtons); Cancel is the way out.
             if (m_step <= m_floorStep)
-            {
-                Close(null);
                 return;
-            }
 
             SetActiveStep(m_step - 1);
         }
@@ -938,6 +1025,11 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void Finish()
         {
+            // Defensive - the Save button is hidden in view-only mode, and the step roots are
+            // non-interactable, so nothing should reach here.
+            if (m_readOnly)
+                return;
+
             if (string.IsNullOrEmpty(m_titleInput.text.Trim()))
             {
                 ToastNotifications.Show("Title is required.", ToastType.Warning);
@@ -1000,13 +1092,37 @@ namespace WizshBoneTwitchIntegration.Gui
             else if (step == 3)
                 PopulateStep3Fields();
 
+            if (m_readOnly)
+                KeepScrollbarsInteractive(step == 2 ? m_step2Root : step == 3 ? m_step3Root : m_step1Root);
+
             RefreshStepIndicator();
             RefreshNavButtons();
         }
 
+        /// <summary>
+        /// The step roots' CanvasGroups disable every Selectable below them, scrollbars included -
+        /// which would stop a long list being dragged in view-only mode (the mouse wheel would still
+        /// scroll). A child CanvasGroup that ignores its parents' groups keeps just the scrollbars
+        /// live; safe to call repeatedly (step-2 forms can build scrollbars lazily).
+        /// </summary>
+        private static void KeepScrollbarsInteractive(GameObject stepRoot)
+        {
+            foreach (Scrollbar scrollbar in stepRoot.GetComponentsInChildren<Scrollbar>(true))
+            {
+                CanvasGroup group = scrollbar.GetComponent<CanvasGroup>();
+                if (group == null)
+                    group = scrollbar.gameObject.AddComponent<CanvasGroup>();
+                group.ignoreParentGroups = true;
+            }
+        }
+
         private void RefreshNavButtons()
         {
-            m_backBtnText.text = m_step <= m_floorStep ? "Cancel" : "Back";
+            m_cancelBtnText.text = m_readOnly ? "Close" : "Cancel";
+            // View-only has nothing to save, so the last step's Save button goes away entirely.
+            m_nextBtn.gameObject.SetActive(!(m_readOnly && m_step == 3));
+
+            m_backBtn.interactable = m_step > m_floorStep;
 
             bool hasType = !string.IsNullOrEmpty(m_working?.type) && m_working.type != RedeemType.Undefined;
             m_nextBtn.interactable = !(m_step == 1 && !hasType);
