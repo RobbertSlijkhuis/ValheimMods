@@ -25,7 +25,7 @@ namespace WizshBoneTwitchIntegration
     {
         public const string PluginGUID = "DeathWizsh.WizshBoneTwitchIntegration";
         public const string PluginName = "WizshBoneTwitchIntegration";
-        public const string PluginVersion = "0.0.1";
+        public const string PluginVersion = "1.0.0";
         public static WizshBoneTwitchIntegration Instance;
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
 
@@ -95,6 +95,17 @@ namespace WizshBoneTwitchIntegration
 
                 bool guiVisible = newUI.IsVisible;
 
+                if (IsVanillaHideUiCombo())
+                {
+                    // Vanilla's hide-UI toggle never touches the shell (it lives on Jotunn's canvas and
+                    // blocks game input), so close it on the combo instead of letting it stay up. A closed
+                    // shell is left alone, so the combo never opens it.
+                    if (guiVisible && Input.GetKeyDown(PluginConfig.configWizshBoneWindow.Value.MainKey))
+                        newUI.CloseShell();
+
+                    return;
+                }
+
                 // ZInput is blocked while the GUI is open, so fall back to raw Unity input
                 // via KeyboardShortcut.IsDown() which bypasses the ZInput block entirely.
                 bool togglePressed = guiVisible
@@ -113,6 +124,28 @@ namespace WizshBoneTwitchIntegration
             {
                 Jotunn.Logger.LogWarning($"[WBTI] Could not show new WizshBone UI: {e}");
             }
+        }
+
+        /// <summary>
+        /// True while Ctrl is held and the window key is F3 (without Ctrl being part of the configured
+        /// shortcut itself). Vanilla's Ctrl+F3 "hide UI" shares our F3 key, and neither
+        /// KeyboardShortcut.IsDown() nor Jotunn's ZInput button check rejects extra modifiers, so
+        /// without this the hide-UI combo would also toggle the shell. The caller handles the combo
+        /// itself (closing an open shell) instead of falling through to the normal toggle.
+        /// </summary>
+        private static bool IsVanillaHideUiCombo()
+        {
+            var shortcut = PluginConfig.configWizshBoneWindow.Value;
+            if (shortcut.MainKey != KeyCode.F3)
+                return false;
+
+            foreach (KeyCode modifier in shortcut.Modifiers)
+            {
+                if (modifier == KeyCode.LeftControl || modifier == KeyCode.RightControl)
+                    return false;
+            }
+
+            return Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
         }
 
         private void HandleQuickTestRedeemInput()

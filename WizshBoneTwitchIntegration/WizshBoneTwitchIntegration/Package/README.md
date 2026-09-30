@@ -7,7 +7,7 @@ channel to the game: viewers can spend channel points on redeems that trigger ef
 
 1. Install the mod and its dependencies.
 2. Start Valheim, load into a world and open the mod's window (default F3).
-3. Click **Twitch Login** in the top bar. Your main browser opens, where you log in to Twitch and authorize the mod.
+3. Click **Twitch Login** in the top bar. Your main browser opens, where you log in to Twitch and authorize the mod. (You need to do this twice currently seperate for the mod and chat)
 4. Turn on redeems from the Home tab. Your redeems are created as custom channel point rewards on your channel.
 
 Twitch only offers channel points (and custom rewards) to Affiliates and Partners, and allows at most 50 custom rewards per channel, including any you already have.
@@ -66,6 +66,7 @@ can arise. Please report any problems you run into.
 
 ## Known issues
 
+- Login requires you to authorize twice, once for the mod and once for chat. I am looking into this.
 - Creature recoloring is not finished: bosses and creatures from the Ashlands onwards can't be recolored yet.
 - Multiplayer has not been tested thoroughly (see above).
 
@@ -83,3 +84,7 @@ Select the modding role and post your feedback or bug report there!
 - Surprise chests that can turn out to be a mimic or spawn other redeems
 - A new cooldown system with shared cooldowns
 - More commands for viewers to control the creatures they claimed or spawned
+
+## Screenshots
+
+Soon™

@@ -5,6 +5,18 @@ namespace WizshBoneTwitchIntegration.Helpers
     internal class HudHelper
     {
         /// <summary>
+        /// True once the local player has spawned in this game session - set by the
+        /// Player.OnSpawned patch (harmony/HudPatchesWBTI.cs) and cleared again by
+        /// WizshBoneGUI.OnDestroy when the session ends. Unlike Player.m_localPlayer it stays true
+        /// through death and respawn, so the status panel doesn't disappear with the player object.
+        /// </summary>
+        public static bool PlayerHasSpawned { get; private set; }
+
+        public static void MarkPlayerSpawned() => PlayerHasSpawned = true;
+
+        public static void ResetPlayerSpawned() => PlayerHasSpawned = false;
+
+        /// <summary>
         /// Generate hud game objects to display more stars
         /// </summary>
         /// <param name="hudBase"></param>

@@ -1,0 +1,9 @@
+<Project>
+  <!--
+    Intentionally empty. ILRepack.Lib.MSBuild.Task ships its own "ILRepack" target that runs after
+    every Release build and merges EVERY dll in the output folder (BepInEx, Harmony, Jotunn, ...)
+    into the plugin - unless the project has an ILRepack.targets file, which replaces that default
+    behavior. Only TwitchSDK.dll is meant to be merged, which the "ILRepacker" target in
+    WizshBoneTwitchIntegration.csproj already does for every configuration.
+  -->
+</Project>

@@ -12,6 +12,7 @@ namespace WizshBoneTwitchIntegration.Helpers
         private static string ProfilesPath => ConfigPathHelper.GetEffectiveRoot() + "/profiles";
         private static string ActiveProfileFile => ProfilesPath + "/active.txt";
         private const string DefaultProfileName = "Default";
+        private const string ChattingOnlyProfileName = "Chatting only";
         private const string RedeemsStem = "_redeems";
 
         /// <summary>
@@ -76,6 +77,9 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static void Init()
         {
+            // Captured before the folder is created: a missing profiles folder means a fresh install.
+            bool firstRun = !Directory.Exists(ProfilesPath);
+
             Directory.CreateDirectory(ProfilesPath);
 
             ActiveProfile = File.Exists(ActiveProfileFile)
@@ -84,6 +88,12 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             if (!Directory.Exists($"{ProfilesPath}/{ActiveProfile}"))
                 CreateProfile(ActiveProfile, out _);
+
+            if (firstRun && !ProfileExists(ChattingOnlyProfileName))
+            {
+                Directory.CreateDirectory($"{ProfilesPath}/{ChattingOnlyProfileName}");
+                ExtraConfigHelper.WriteChattingOnlyProfileTo(GetRedeemPath(ChattingOnlyProfileName));
+            }
 
             ProfileMigrationHelper.MigrateAllProfilesOnDisk();
         }

@@ -1,0 +1,35 @@
+version: 1
+settings:
+  chattingEnabled: true
+  chattingBlackList: Nightbot, StreamElements
+  chattingClaimDuration: 0
+  chattingCullingRange: 50
+  chattingInterval: 30
+  chattingRadius: 60
+  chattingMaxTalkers: 5
+  chattingClaimFreeForAll: false
+  creaturesSameFaction: false
+  creaturesMaxAmount: 100
+  creaturesMaxRadius: 100
+  creaturesScaling: false
+  creaturesDamageScale: 0.15
+  creaturesHealthScale: 0.15
+  creaturesFollowRadius: 30
+  indestructibleBoats: false
+  indestructibleChests: false
+  indestructiblePortals: false
+  indestructibleVegetables: false
+  enableRedeemsOnLogin: false
+  autoResolveRedeems: false
+  redeemTitlePrefix: WBTI
+  redeemsDiscountPercent: 0
+  wardRecipe: FineWood:5, GreydwarfEye:5, SurtlingCore:1
+  wardBurnCreatures: false
+  wardPushCreatures: false
+  wardPushForce: 2000
+  safezoneTraders: false
+  safezoneBoats: false
+  hudPosition: BottomRight
+  hudOffsetX: 0
+  hudOffsetY: 0
+redeems:

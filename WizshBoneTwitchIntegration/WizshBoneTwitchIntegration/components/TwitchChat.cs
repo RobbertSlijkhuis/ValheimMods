@@ -21,7 +21,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private int m_historyLength = 30;
         private int m_messageRelevanceTimer = 120;
 
-        private string tcpClientSecret = "kqfpjddbg5945on7ip7wuj08faps5m";
+        private Coroutine m_authRoutine;
         private string tcpClientId = "8i260qk16tmvumfssr2h4klu99frjb";
         private string m_sOAuth;
         private string m_channel;
@@ -83,11 +83,15 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void GetOAuth(params string[] scopes)
         {
-            new TwitchOAuthGetter(tcpClientId, tcpClientSecret, OnOAuthTokenRecieved, scopes);
+            if (m_authRoutine != null)
+                StopCoroutine(m_authRoutine);
+
+            m_authRoutine = StartCoroutine(TwitchDeviceFlow.Authorize(tcpClientId, scopes, OnOAuthTokenRecieved));
         }
 
         private void OnOAuthTokenRecieved(ApiCodeTokenResponse response)
         {
+            m_authRoutine = null;
             m_sOAuth = response.access_token;
             LogIn();
         }

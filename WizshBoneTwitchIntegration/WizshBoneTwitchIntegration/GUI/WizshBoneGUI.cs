@@ -1,6 +1,7 @@
 using Jotunn.Managers;
 using System;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Gui
@@ -99,6 +100,9 @@ namespace WizshBoneTwitchIntegration.Gui
             // carry over into the next session (see InputBlockGate.Reset).
             GUIManager.OnCustomGUIAvailable -= OnGUIAvailable;
             InputBlockGate.Reset();
+
+            // The next session starts with the status panel hidden again until its player spawns.
+            HudHelper.ResetPlayerSpawned();
         }
 
         /// <summary>

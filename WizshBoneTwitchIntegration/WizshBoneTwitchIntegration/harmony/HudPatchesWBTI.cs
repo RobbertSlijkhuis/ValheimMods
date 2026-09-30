@@ -11,6 +11,23 @@ namespace WizshBoneTwitchIntegration.Harmony
     [HarmonyPatch]
     public class HudPatchesWBTI
     {
+        // Game.SpawnPlayer calls OnSpawned on the local player only (after SetLocalPlayer), on the
+        // first spawn and on every respawn - HudHelper keeps the flag set once it has fired.
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Player), "OnSpawned")]
+        public static void OnSpawned_Postfix(Player __instance)
+        {
+            try
+            {
+                if (__instance == Player.m_localPlayer)
+                    HudHelper.MarkPlayerSpawned();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in HudPatchesWBTI.OnSpawned_Postfix: " + e);
+            }
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Character), "GetHoverText")]
         public static void GetHoverText_Postfix(ref Character __instance, ref string __result)

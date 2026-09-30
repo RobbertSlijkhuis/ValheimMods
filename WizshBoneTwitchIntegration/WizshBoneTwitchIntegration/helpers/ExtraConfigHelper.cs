@@ -240,6 +240,15 @@ namespace WizshBoneTwitchIntegration.Helpers
         }
 
         /// <summary>
+        /// Seeds the extra "Chatting only" profile (no redeems, nothing that affects the game) on a
+        /// fresh install - see ProfileManager.Init.
+        /// </summary>
+        public static void WriteChattingOnlyProfileTo(string path)
+        {
+            WriteFromEmbeddedResourceTo("WizshBoneTwitchIntegration.resources.profile_chatting_only.yaml", path);
+        }
+
+        /// <summary>
         /// Serializes a profile's settings + creatureGroups + redeems to its profile.yaml,
         /// matching the hand-formatted layout (settings/creatureGroups preambles, type banners,
         /// sorted groups) that the in-game editor produces. Shared by RedeemsTab.OnSave,

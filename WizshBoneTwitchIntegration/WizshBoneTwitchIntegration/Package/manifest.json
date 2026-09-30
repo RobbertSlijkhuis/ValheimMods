@@ -1,7 +1,7 @@
 {
   "name": "WizshBoneTwitchIntegration",
-  "description": "Let your Twitch chat turn your Valheim world into chaos! WizshBone Twitch Integration connects your channel to the game: viewers can spend channel points on redeems that trigger effects around you, and chatters can even take control of the creatures in your world!",
+  "description": "Let your Twitch chat turn your Valheim world into chaos! WizshBone Twitch Integration connects your channel to the game: viewers can spend channel points on redeems that trigger effects around you!",
   "version_number": "1.0.0",
-  "dependencies": [ "ValheimModding-Jotunn-2.30.0", "ValheimModding-YamlDotNet-16.3.1" ],
+  "dependencies": [ "ValheimModding-Jotunn-2.30.2", "ValheimModding-YamlDotNet-16.3.1" ],
   "website_url": ""
 }

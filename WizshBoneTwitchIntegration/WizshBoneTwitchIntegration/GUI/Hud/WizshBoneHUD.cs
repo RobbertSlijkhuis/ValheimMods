@@ -98,7 +98,19 @@ namespace WizshBoneTwitchIntegration.Gui
             ).GetComponent<Text>();
 
             RepositionHUD();
-            hudPanel.SetActive(true);
+            hudPanel.SetActive(ShouldBeVisible());
+        }
+
+        /// <summary>
+        /// Only once the local player has spawned, so the panel stays hidden during the world
+        /// loading screen - this panel lives on Jotunn's own canvas, which vanilla's loading screen
+        /// doesn't cover. It stays visible through death and respawn (see
+        /// <see cref="HudHelper.PlayerHasSpawned"/>). Also follows vanilla's Ctrl+F3 "hide UI"
+        /// toggle, which vanilla's Hud never applies to that canvas either.
+        /// </summary>
+        private static bool ShouldBeVisible()
+        {
+            return HudHelper.PlayerHasSpawned && !Hud.IsUserHidden();
         }
 
         public void UpdateHUD()
@@ -106,9 +118,7 @@ namespace WizshBoneTwitchIntegration.Gui
             if (hudPanel == null)
                 return;
 
-            // Follow vanilla's Ctrl+F3 "hide UI" toggle - this panel lives on Jotunn's own canvas,
-            // which vanilla's Hud never touches.
-            hudPanel.SetActive(!Hud.IsUserHidden());
+            hudPanel.SetActive(ShouldBeVisible());
 
             m_loginStatusCircle.color = auth.m_loggedIn ? ColorLoggedIn : ColorLoggedOut;
 

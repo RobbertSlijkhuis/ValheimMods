@@ -10,8 +10,9 @@ namespace WizshBoneTwitchIntegration.Gui
     /// Modal panel showing the embedded news (title plus heading/body sections in a scroll view),
     /// shown via <see cref="Show"/>. Unlike <see cref="ConfirmDialog"/> it sits on a full-screen dim
     /// blocker, because it can open unprompted over the shell and nothing under it (sidebar, tabs,
-    /// the shell's own Close button) should be clickable until it's dismissed. The single Close
-    /// button hides it and then invokes the caller's callback (which records the news as seen).
+    /// the shell's own Close button) should be clickable until it's dismissed. The Close button
+    /// hides it and then invokes the caller's callback (which records the news as seen); the Join
+    /// Discord button just opens the invite in the browser and leaves the dialog open.
     /// </summary>
     internal class NewsDialog
     {
@@ -32,6 +33,9 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float BtnY          = 40f;
         private const float BtnWidth      = 160f;
         private const float BtnHeight     = 50f;
+        private const float BtnGap        = 20f;
+
+        private const string DiscordInviteUrl = "https://discord.gg/M3BrRskQEd";
 
         private const float TextPadding    = 12f;
         private const float HeadingSize    = 16f;
@@ -87,12 +91,27 @@ namespace WizshBoneTwitchIntegration.Gui
 
             m_content = ScrollableList.CreateFixed(panel, "News", new Vector2(0f, ScrollY), ScrollWidth, ScrollHeight);
 
+            float btnOffsetX = (BtnWidth + BtnGap) / 2f;
+
+            GameObject discordBtn = GuiHelper.CreateButton(
+                text:      "Join Discord",
+                parent:    panel.transform,
+                anchorMin: new Vector2(0.5f, 0f),
+                anchorMax: new Vector2(0.5f, 0f),
+                position:  new Vector2(-btnOffsetX, BtnY),
+                width:     BtnWidth,
+                height:    BtnHeight
+            );
+            discordBtn.SetActive(true);
+            discordBtn.GetComponentInChildren<Text>().color = GUIManager.Instance.ValheimOrange;
+            discordBtn.GetComponent<Button>().onClick.AddListener(() => Application.OpenURL(DiscordInviteUrl));
+
             GameObject closeBtn = GuiHelper.CreateButton(
                 text:      "Close",
                 parent:    panel.transform,
                 anchorMin: new Vector2(0.5f, 0f),
                 anchorMax: new Vector2(0.5f, 0f),
-                position:  new Vector2(0f, BtnY),
+                position:  new Vector2(btnOffsetX, BtnY),
                 width:     BtnWidth,
                 height:    BtnHeight
             );
