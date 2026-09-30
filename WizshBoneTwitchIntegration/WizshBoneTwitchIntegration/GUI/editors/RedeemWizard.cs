@@ -204,7 +204,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         // The type list runs from BodyTopY down to a RowGap above the Back/Next buttons' top edge,
         // so step 1's body fills the same vertical space step 3's cards do.
-        private const float TypeListWidth  = 220f;
+        internal const float TypeListWidth  = 220f;
         private const float TypeListHeight = ContentHeight - (BtnY + BtnHeight / 2f) - RowGap + BodyTopY;
         private const float TypeBtnHeight  = 34f;
 
@@ -543,9 +543,8 @@ namespace WizshBoneTwitchIntegration.Gui
         // One sub-root + one IRedeemStep2Form per real type, all built once up front here
         // (mirroring how m_step1Root/m_step2Root/m_step3Root are themselves all built once in
         // Create() and toggled via SetActive) and dispatched to by RefreshStep2Content based on
-        // m_working.type. SurpriseChest (no field decisions made yet - deliberately deferred) and
-        // the bare SpawnAbility type (removed from RedeemEffectCatalog entirely) have no registered
-        // form, so they keep falling through to the original inert placeholder text.
+        // m_working.type. The bare SpawnAbility type (removed from RedeemEffectCatalog entirely)
+        // has no registered form, so it keeps falling through to the original inert placeholder text.
 
         private void BuildStep2()
         {
@@ -592,6 +591,7 @@ namespace WizshBoneTwitchIntegration.Gui
             RegisterStep2Form(RedeemType.BoatRain, new BoatRainForm());
             RegisterStep2Form(RedeemType.SpawnCreature, new SpawnCreatureForm());
             RegisterStep2Form(RedeemType.StatusEffect, new StatusEffectForm());
+            RegisterStep2Form(RedeemType.SurpriseChest, new SurpriseChestForm());
         }
 
         private void RegisterStep2Form(string type, IRedeemStep2Form form)

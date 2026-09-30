@@ -35,11 +35,21 @@ namespace WizshBoneTwitchIntegration.Gui
         public static List<DropdownOption> DoorPrefabs { get; private set; } = new List<DropdownOption>();
         public static List<DropdownOption> PlaceablePieces { get; private set; } = new List<DropdownOption>();
         public static List<string> LogPrefabs { get; private set; } = new List<string>();
+
+        /// <summary>
+        /// Real, holdable items (an <see cref="ItemDrop"/> prefab with at least one inventory icon).
+        /// Monster attacks are also ItemDrop prefabs (Humanoid wields them as weapons) but have no
+        /// icon and can't be picked up if spawned, so they're excluded - see <see cref="BuildPrefabCatalogs"/>.
+        /// </summary>
+        public static List<DropdownOption> ItemPrefabs { get; private set; } = new List<DropdownOption>();
         private static List<DropdownOption> s_statusEffects = new List<DropdownOption>();
 
         // Prefab name -> plain localized creature name (no "(prefab)" suffix), for the narrow
         // entry-list rows.
         private static Dictionary<string, string> s_creatureNames = new Dictionary<string, string>();
+
+        // Same, for item prefabs.
+        private static Dictionary<string, string> s_itemNames = new Dictionary<string, string>();
 
         /// <summary>
         /// Built eagerly in <see cref="BuildPrefabCatalogs"/>, but <c>ObjectDB.instance</c> isn't
@@ -118,12 +128,31 @@ namespace WizshBoneTwitchIntegration.Gui
             var creatureNames = new Dictionary<string, string>();
             var doors = new List<DropdownOption>();
             var pieces = new List<DropdownOption>();
+            var items = new List<DropdownOption>();
+            var itemNames = new Dictionary<string, string>();
 
             foreach (string name in ZNetScene.instance.GetPrefabNames())
             {
                 GameObject prefab = PrefabManager.Instance.GetPrefab(name);
                 if (prefab == null)
                     continue;
+
+                ItemDrop itemDrop = prefab.GetComponent<ItemDrop>();
+                if (itemDrop != null && itemDrop.m_itemData?.m_shared != null)
+                {
+                    ItemDrop.ItemData.SharedData shared = itemDrop.m_itemData.m_shared;
+                    // Monster attacks are icon-less ItemDrops, not real items - skip them.
+                    if (shared.m_icons != null && shared.m_icons.Length > 0)
+                    {
+                        string itemLabel = string.IsNullOrEmpty(shared.m_name)
+                            ? null
+                            : CreatureHelper.StripColorTags(Localization.instance.Localize(shared.m_name))?.Trim();
+                        if (string.IsNullOrEmpty(itemLabel) || (itemLabel.StartsWith("[") && itemLabel.EndsWith("]")))
+                            itemLabel = name;
+                        itemNames[name] = itemLabel;
+                        items.Add(new DropdownOption(name, itemLabel == name ? name : $"{itemLabel} ({name})"));
+                    }
+                }
 
                 Humanoid humanoid = prefab.GetComponent<Humanoid>();
                 MonsterAI monsterAI = prefab.GetComponent<MonsterAI>();
@@ -161,11 +190,14 @@ namespace WizshBoneTwitchIntegration.Gui
             creatures.Sort((a, b) => string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase));
             doors.Sort((a, b) => string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase));
             pieces.Sort((a, b) => string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase));
+            items.Sort((a, b) => string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase));
 
             CreaturePrefabs = creatures;
             s_creatureNames = creatureNames;
             DoorPrefabs = doors;
             PlaceablePieces = pieces;
+            ItemPrefabs = items;
+            s_itemNames = itemNames;
             LogPrefabs = LogPrefabCandidates.Where(name => PrefabManager.Instance.GetPrefab(name) != null).ToList();
             s_statusEffects = BuildStatusEffectOptions();
 
@@ -280,6 +312,19 @@ namespace WizshBoneTwitchIntegration.Gui
                 return prefabName;
 
             return s_creatureNames.TryGetValue(prefabName, out string label) ? label : prefabName;
+        }
+
+        /// <summary>
+        /// Resolves an item prefab's plain localized name (no "(prefab)" suffix) from
+        /// <see cref="ItemPrefabs"/>, falling back to the raw prefab name - used by
+        /// SurpriseChestForm's entry-list row labels.
+        /// </summary>
+        public static string GetItemDisplayName(string prefabName)
+        {
+            if (string.IsNullOrEmpty(prefabName))
+                return prefabName;
+
+            return s_itemNames.TryGetValue(prefabName, out string label) ? label : prefabName;
         }
 
         /// <summary>

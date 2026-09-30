@@ -17,6 +17,9 @@ namespace WizshBoneTwitchIntegration.Components
         // animation/effect fires exactly once locally, no matter which client actually set the flag.
         private bool m_openHandledLocally;
 
+        // How long the chest lingers after its last piece of loot has come out, before removing itself.
+        private const float DespawnDelayAfterLoot = 10f;
+
         private string m_redeemerName;
         private string m_redeemTitle;
         private int m_amount;
@@ -145,13 +148,13 @@ namespace WizshBoneTwitchIntegration.Components
             TriggerChestOpeningEffect();
         }
 
+        // The despawn effect is NOT played from here: OnDestroy also runs when the chest merely
+        // unloads (owner walks away) or is deleted by WBTIRemoveChests, and by this point the ZDO is
+        // already reset so ownership can't be checked. DespawnAfterDelay plays it on a real despawn.
         public void OnDestroy()
         {
             try
             {
-                if (m_netView != null && m_netView.IsOwner() && despawnEffect != null)
-                    despawnEffect.Create(transform.position, transform.rotation);
-
                 if (m_mapPin != null && Minimap.instance != null)
                     Minimap.instance.RemovePin(m_mapPin);
             }
@@ -218,25 +221,76 @@ namespace WizshBoneTwitchIntegration.Components
                     m_amount = eligibleItems.Count;
 
                 float timeOffset = 0f;
+                float lastSpawnAt = 0f;
 
                 for (int index = 0; index < m_amount; index++)
                 {
                     float angleChange = ChangeAngleByIndex(index);
                     float force = m_yeetChance > 0 && Random.Range(0, 100) <= m_yeetChance ? 1000f : m_force;
-                    SurpriseChestSpawnData spawnData = m_random ? eligibleItems[Random.Range(0, eligibleItems.Count)] : eligibleItems[index];
+                    SurpriseChestSpawnData spawnData = m_random ? PickWeighted(eligibleItems) : eligibleItems[index];
 
                     StartCoroutine(SpawnItem(spawnData, force, angleChange, timeOffset));
+                    lastSpawnAt = timeOffset;
                     timeOffset += m_spawnDelay;
                 }
 
-                TimedDestruction timedDestruction = gameObject.AddComponent<TimedDestruction>();
-                timedDestruction.m_timeout = 10f;
-                timedDestruction.Trigger();
+                // Counted from when the last item comes out, so a long Amount x Spawn delay can't
+                // remove the chest (and the loot coroutines living on it) before everything spawned.
+                StartCoroutine(DespawnAfterDelay(lastSpawnAt + DespawnDelayAfterLoot));
             }
             catch (System.Exception e)
             {
                 Jotunn.Logger.LogError("Something went wrong in spawning suprise chest items " + e);
             }
+        }
+
+        // Runs on the client that opened the chest (TryTriggerOpen made it the owner). Plays the
+        // despawn effect while the ZDO still exists, then removes the chest for everyone.
+        private IEnumerator DespawnAfterDelay(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+
+            try
+            {
+                TriggerDespawnEffects();
+                ZNetViewHelper.Destroy(gameObject);
+            }
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchSurpriseChest.DespawnAfterDelay failed: " + e);
+            }
+        }
+
+        /// <summary>
+        /// Picks one entry with probability proportional to its <see cref="SurpriseChestSpawnData.weight"/>
+        /// (weights &lt;= 0 are never picked). Falls back to a uniform pick if every weight is 0, so a
+        /// misconfigured chest still spawns something instead of nothing.
+        /// </summary>
+        private static SurpriseChestSpawnData PickWeighted(List<SurpriseChestSpawnData> candidates)
+        {
+            float total = 0f;
+            foreach (SurpriseChestSpawnData candidate in candidates)
+                total += Mathf.Max(0f, candidate.weight);
+
+            if (total <= 0f)
+                return candidates[Random.Range(0, candidates.Count)];
+
+            float roll = Random.value * total;
+            SurpriseChestSpawnData lastPickable = null;
+
+            foreach (SurpriseChestSpawnData candidate in candidates)
+            {
+                if (candidate.weight <= 0f)
+                    continue;
+
+                lastPickable = candidate;
+                roll -= candidate.weight;
+                if (roll < 0f)
+                    return candidate;
+            }
+
+            // Float rounding can leave the roll just above zero after the last entry.
+            return lastPickable;
         }
 
         /// <summary>

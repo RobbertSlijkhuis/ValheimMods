@@ -28,7 +28,8 @@ namespace WizshBoneTwitchIntegration.Gui
     /// </summary>
     internal class EntryListEditor<TEntry> where TEntry : CloneableData, new()
     {
-        private const float ListWidth = 160f;
+        // Same width as step 1's effect-type list, so the two lists line up across wizard steps.
+        private const float ListWidth = RedeemWizard.TypeListWidth;
         private const float ColumnGap = 20f;
         private const float ListItemHeight = 32f;
         private const float ListItemGap = 4f;
@@ -49,6 +50,11 @@ namespace WizshBoneTwitchIntegration.Gui
         private float m_minPanelHeight;
         private float m_listHeight;
         private float m_formHeight;
+
+        // A header (caller rows above the toggle) puts the list far down the page, so switching
+        // entries must keep the current scroll position instead of jumping back to the very top.
+        private bool m_hasHeader;
+        private float m_totalContentHeight;
 
         // Once the page scrolls past the Add/Delete row, that row pins to the top of the viewport
         // and the list panel pins directly beneath it while the (taller) form scrolls past. All
@@ -98,10 +104,21 @@ namespace WizshBoneTwitchIntegration.Gui
         /// list's row text; <paramref name="buildEntryForm"/> fills the right card for whichever
         /// entry is currently selected (called on every selection change, add, or delete).
         /// </summary>
-        public void Build(GameObject parent, float topY, Func<TEntry, string> itemLabel, Action<GameObject, TEntry> buildEntryForm)
+        /// <param name="buildHeader">
+        /// Optional. Lays out extra rows in the same outer scroll view, ABOVE the random toggle
+        /// (e.g. a form's own chest-level settings). Receives the scroll content and the row width,
+        /// and returns the absolute Y the rows ended at (its <c>Step2RowLayout.CurrentY</c>). The
+        /// scaffold then starts below that, so the page scrolls as one - the pinned button row /
+        /// list math already works off wherever the toggle row lands.
+        /// </param>
+        /// <param name="randomLabel">Optional override for the random toggle's title.</param>
+        /// <param name="randomDescription">Optional override for the random toggle's description.</param>
+        public void Build(GameObject parent, float topY, Func<TEntry, string> itemLabel, Action<GameObject, TEntry> buildEntryForm,
+            Func<GameObject, float, float> buildHeader = null, string randomLabel = null, string randomDescription = null)
         {
             m_itemLabel = itemLabel;
             m_buildEntryForm = buildEntryForm;
+            m_hasHeader = buildHeader != null;
 
             // One outer scroll view holds everything (toggle, buttons, list, card) - everything
             // below is laid out inside it at natural height, so the Step2RowLayout defaults (width
@@ -111,10 +128,11 @@ namespace WizshBoneTwitchIntegration.Gui
                 backgroundColor: Color.clear, autoHideScrollbar: true);
             float contentWidth = RedeemWizard.Step2FieldWidth - ScrollableList.ScrollbarWidth;
 
-            var toggleLayout = new Step2RowLayout(m_scrollContent, 0f, contentWidth);
+            float toggleTopY = m_hasHeader ? buildHeader(m_scrollContent, contentWidth) : 0f;
+            var toggleLayout = new Step2RowLayout(m_scrollContent, toggleTopY, contentWidth);
             m_randomToggle = toggleLayout.ToggleRow(
-                "Pick one at random",
-                "If enabled, one entry from the list below is chosen at random each time this redeem fires. Otherwise every entry is used.",
+                randomLabel ?? "Pick one at random",
+                randomDescription ?? "If enabled, one entry from the list below is chosen at random each time this redeem fires. Otherwise every entry is used.",
                 false, v => m_setRandom?.Invoke(v));
 
             float listX = -contentWidth / 2f + ListWidth / 2f;
@@ -223,7 +241,8 @@ namespace WizshBoneTwitchIntegration.Gui
             ScrollableList.SetContentHeight(m_listContent, m_listPanelHeight);
             ScrollableList.SetContentHeight(m_listItems, m_listHeight);
             ScrollableList.SetContentHeight(m_cardRoot, panelHeight);
-            ScrollableList.SetContentHeight(m_scrollContent, m_panelsTopOffset + panelHeight);
+            m_totalContentHeight = m_panelsTopOffset + panelHeight;
+            ScrollableList.SetContentHeight(m_scrollContent, m_totalContentHeight);
 
             m_listScroll = Mathf.Clamp(m_listScroll, 0f, ListScrollRange);
             ApplyListScroll();
@@ -291,9 +310,21 @@ namespace WizshBoneTwitchIntegration.Gui
 
         // Jump back to the top when the shown entry changes - otherwise a shorter form could
         // leave the page scrolled past its own content.
-        private void ResetScroll()
+        private void ResetScroll(bool forceTop = false)
         {
-            ((RectTransform)m_scrollContent.transform).anchoredPosition = Vector2.zero;
+            var rt = (RectTransform)m_scrollContent.transform;
+
+            // With a header, only pull the scroll back inside the (possibly shorter) new content
+            // range - the user is working on the list far below the top, so don't yank them up.
+            // (A fresh Populate still starts from the top.)
+            float y = 0f;
+            if (m_hasHeader && !forceTop)
+            {
+                float maxScroll = Mathf.Max(0f, m_totalContentHeight - RedeemWizard.Step2ContentHeight);
+                y = Mathf.Clamp(rt.anchoredPosition.y, 0f, maxScroll);
+            }
+
+            rt.anchoredPosition = new Vector2(rt.anchoredPosition.x, y);
             UpdatePins();
         }
 
@@ -314,7 +345,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             RefreshList();
             RefreshCard();
-            ResetScroll();
+            ResetScroll(forceTop: true);
         }
 
         private void OnAddClicked()

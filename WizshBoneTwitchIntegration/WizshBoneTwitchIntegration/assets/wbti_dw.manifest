@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 2736131152
+CRC: 2399042346
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: bc7c05dd8499998e061e6fbdefd82086
+    Hash: fd98e255f40f8027c2925b1b2af573b6
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 822c61affb26662082abbdcaa5a3bfca
+    Hash: f49716bc6dbed3b9606588c207b73212
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: bc7c05dd8499998e061e6fbdefd82086
+    Hash: fd98e255f40f8027c2925b1b2af573b6
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -57,8 +57,6 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
 - Class: 114
-  Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-- Class: 114
   Script: {fileID: 1137906148, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: -1383431051, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
@@ -92,6 +90,8 @@ ClassTypes:
   Script: {fileID: 313648218, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: -917656959, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
 - Class: 115
   Script: {instanceID: 0}
 - Class: 134
@@ -146,25 +146,31 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: LevelEffects/LevelSetup
 Assets:
-- Assets/Custom/Creatures/Greydwarf/RootSword_recolor_WBTI.mat
-- Assets/Custom/Creatures/Bjorn/Bjorn_recolor_zebra_WBTI.mat
+- Assets/Custom/Creatures/FulingShaman/FulingShaman_recolor_WBTI.mat
+- Assets/Custom/Creatures/Bear/Bjorn_recolor_zebra_WBTI.mat
 - Assets/Custom/PrefabInstance/Chest/ChestIron_WBTI.prefab
 - Assets/Custom/Creatures/Blob/BlobSlime_recolor_WBTI.mat
-- Assets/Custom/PrefabInstance/Redeems/spawn_fish_WBTI.prefab
+- Assets/Custom/Creatures/StoneGolem/StoneGolem_recolor_WBTI.mat
 - Assets/Custom/PrefabInstance/Redeems/TerrainEdit_WBTI.prefab
+- Assets/Custom/PrefabInstance/Redeems/spawn_fish_WBTI.prefab
 - Assets/Custom/PrefabInstance/Redeems/EnvZone_WBTI.prefab
 - Assets/Custom/Creatures/Cultist/Cultist_recolor_WBTI.mat
 - Assets/Custom/Monobehaviour/NoFallDamage_WBTI.asset
+- Assets/Custom/Creatures/Tick/Tick_recolor_WBTI.mat
+- Assets/Custom/Creatures/Seeker/SeekerBrood_recolor_WBTI.mat
 - Assets/Custom/Creatures/Leech/Leech_recolor_WBTI.mat
+- Assets/Custom/Creatures/Vile/Vile_recolor_WBTI.mat
 - Assets/Custom/Creatures/Skeleton/Skeleton_recolor_WBTI.mat
 - Assets/Custom/Creatures/Fuling/Fuling_armor_recolor_WBTI.mat
 - Assets/Custom/Creatures/Cultist/CultistCape_recolor_WBTI.mat
+- Assets/Custom/Creatures/FulingBrute/FulingBrute_recolor_WBTI.mat
 - Assets/Custom/Monobehaviour/Burning_WBTI.asset
 - Assets/Custom/PrefabInstance/Redeems/Flashbang_WBTI.prefab
 - Assets/Custom/Creatures/Greydwarf/Greydwarf_recolor_WBTI.mat
 - Assets/Custom/Sprite/MiniMeSprite_WBTI.png
 - Assets/Custom/Creatures/Abomination/Abomination_recolor_WBTI.mat
 - Assets/Custom/Creatures/Hatchling/Hatchling_recolor_WBTI.mat
+- Assets/Custom/Creatures/SeekerBrute/SeekerBrute_recolor_WBTI.mat
 - Assets/Custom/Creatures/Blob/Blob_recolor_WBTI.mat
 - Assets/Custom/Creatures/Deer/Deer_antlers_recolor_WBTI.mat
 - Assets/Custom/Creatures/Ulv/Ulv_recolor_WBTI.mat
@@ -183,10 +189,12 @@ Assets:
 - Assets/Custom/Creatures/Deer/Deer_recolor_WBTI.mat
 - Assets/Custom/PrefabInstance/FeoTheHistorian/FeoTheHistorian_WBTI.prefab
 - Assets/Custom/Creatures/Wraith/Wraith_recolor_WBTI.mat
-- Assets/Custom/Creatures/Bjorn/Bjorn_recolor_WBTI.mat
+- Assets/Custom/Creatures/Bear/Bjorn_recolor_WBTI.mat
+- Assets/Custom/Creatures/Seeker/Seeker_recolor_WBTI.mat
 - Assets/Custom/Monobehaviour/Poison_WBTI.asset
 - Assets/Custom/Creatures/Bat/Bat_recolor_WBTI.mat
 - Assets/Custom/Creatures/Boar/BoarTusk_recolor_WBTI.mat
+- Assets/Custom/Creatures/FulingShaman/FulingShaman_cape_recolor_WBTI.mat
 - Assets/Custom/Creatures/Deathsquito/Deathsquito_recolor_WBTI.mat
 - Assets/Custom/Sprite/BigMeSprite_WBTI.png
 - Assets/Custom/Creatures/Fenring/Fenring_recolor_WBTI.mat
@@ -196,6 +204,7 @@ Assets:
 - Assets/Custom/Creatures/Troll/Troll_recolor_WBTI.mat
 - Assets/Custom/PrefabInstance/Redeems/TimeStopZone_WBTI.prefab
 - Assets/Custom/PrefabInstance/WBTI_guard_stone.prefab
+- Assets/Custom/Creatures/Gjall/Gjall_recolor_WBTI.mat
 - Assets/Custom/Creatures/Lox/Lox_recolor_WBTI.mat
-- Assets/Custom/Creatures/StoneGolem/StoneGolem_recolor_WBTI.mat
+- Assets/Custom/Creatures/Greydwarf/RootSword_recolor_WBTI.mat
 Dependencies: []

@@ -23,7 +23,11 @@ namespace WizshBoneTwitchIntegration.Models
         public Material RecolorFenring;
         public Material RecolorFuling;
         public Material RecolorFulingArmor;
+        public Material RecolorFulingBrute;
+        public Material RecolorFulingShaman;
+        public Material RecolorFulingShamanCape;
         public Material RecolorGhost;
+        public Material RecolorGjall;
         public Material RecolorGreydwarf;
         public Material RecolorGreydwarfShaman;
         public Material RecolorGreydwarfRootsword;
@@ -31,14 +35,19 @@ namespace WizshBoneTwitchIntegration.Models
         public Material RecolorLeech;
         public Material RecolorLox;
         public Material RecolorNeck;
+        public Material RecolorSeeker;
+        public Material RecolorSeekerBrute;
+        public Material RecolorSeekerBrood;
         public Material RecolorSerpent;
         public Material RecolorSkeleton;
         public Material RecolorStoneGolem;
         public Material RecolorStoneGolemClubs;
         public Material RecolorSurtling;
+        public Material RecolorTick;
         public Material RecolorTroll;
         public Material RecolorWolf;
         public Material RecolorUlv;
+        public Material RecolorVile;
         public Material RecolorWraith;
         public Material RecolorWraithZebra;
     }
