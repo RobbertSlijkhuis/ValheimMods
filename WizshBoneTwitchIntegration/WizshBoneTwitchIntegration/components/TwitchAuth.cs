@@ -6,7 +6,6 @@ using TwitchSDK;
 using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Gui;
-using WizshBoneTwitchIntegration.GuiOld;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 
@@ -27,14 +26,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public bool m_waitingForCode = false;
         private DateTime m_waitingForCodeSince;
 
-        public WizshBoneSettingsGUI m_settingsGUI;
-
-        // GuiOld is still `using`d in this file for WizshBoneSettingsGUI (F4's own panel, kept
-        // as-is - see wbti_guiold_decoupling). LogoutProgressHUD is the one Gui.* panel that
-        // still lives here - Show/UpdateMessage/Hide are called directly from this class's own
-        // logout/quit sequence below, unlike WizshBoneHUD/ConfirmDialog which moved to
-        // WizshBoneGUI (see its own doc comment). No naming collision with GuiOld to qualify
-        // around here: GuiOld's equivalent kept its old name, LogoutProgressPanel.
+        // LogoutProgressHUD is the one Gui.* panel that still lives here - Show/UpdateMessage/Hide
+        // are called directly from this class's own logout/quit sequence below, unlike
+        // WizshBoneHUD/ConfirmDialog which moved to WizshBoneGUI (see its own doc comment).
         public LogoutProgressHUD m_logoutProgressHUD = new LogoutProgressHUD();
 
         public void Awake()
@@ -43,8 +37,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             {
                 m_chat = gameObject.GetComponent<TwitchChat>();
                 m_customRewards = gameObject.GetComponent<TwitchCustomRewards>();
-
-                m_settingsGUI = new WizshBoneSettingsGUI(this);
 
                 GUIManager.OnCustomGUIAvailable += OnGUIAvailable;
             }
@@ -74,15 +66,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             InvokeRepeating(nameof(InitLoginProcess), 0f, 1f);
         }
 
-        private void UpdateAllGUI()
-        {
-            m_settingsGUI.RefreshHomeTab();
-        }
-
         public void ToggleRedeems()
         {
             m_customRewards.SetEnableRedeems(!m_customRewards.m_enabled);
-            UpdateAllGUI();
         }
 
         public void ToggleChatting()
@@ -120,7 +106,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (ProfileSettingsHelper.Current.enableRedeemsOnLogin)
                     m_customRewards.SetEnableRedeems(true);
 
-                UpdateAllGUI();
                 CancelInvoke(nameof(InitLoginProcess));
                 InvokeRepeating(nameof(TrackAuthRepeating), 0, 60f);
             }
@@ -188,7 +173,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     m_loggedinInTime = DateTime.Now;
                     m_loggedIn = true;
                     m_waitingForCode = false;
-                    UpdateAllGUI();
                     return;
                 }
 
@@ -201,7 +185,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     m_waitingForCode = false;
                     m_authInfo = null;
                     m_userInfo = null;
-                    UpdateAllGUI();
                     return;
                 }
 
@@ -224,7 +207,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     Application.OpenURL($"{authInfo.Uri}");
                     m_waitingForCode = true;
                     m_waitingForCodeSince = DateTime.Now;
-                    UpdateAllGUI();
                     return;
                 }
             }
@@ -271,7 +253,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             m_waitingForCode = false;
             m_authInfo = null;
             Twitch.API.LogOut();
-            UpdateAllGUI();
         }
 
         public void Logout()

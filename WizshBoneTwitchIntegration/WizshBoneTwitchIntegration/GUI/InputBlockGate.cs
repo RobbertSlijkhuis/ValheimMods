@@ -17,6 +17,21 @@ namespace WizshBoneTwitchIntegration.Gui
     {
         private static int s_count;
 
+        /// <summary>Number of openers currently holding the gate (the shell itself counts as one).</summary>
+        public static int Count => s_count;
+
+        /// <summary>
+        /// Drops every outstanding push. Jötunn zeroes its own request counter on every scene load,
+        /// so if a scene change (disconnect, kick, logout) destroys the UI while it holds pushes, the
+        /// static count here would stay inflated for the rest of the process - and the next session's
+        /// first <see cref="Push"/> would then never reach BlockInput(true).
+        /// </summary>
+        public static void Reset()
+        {
+            while (s_count > 0)
+                Pop();
+        }
+
         public static void Push()
         {
             s_count++;

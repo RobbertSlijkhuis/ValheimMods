@@ -18,6 +18,7 @@ namespace WizshBoneTwitchIntegration.Gui
     internal class SafeZoneHUD
     {
         private GameObject m_text;
+        private bool m_wantVisible;
 
         private const string MessageText = "Streamer is in a safe zone!";
 
@@ -51,14 +52,26 @@ namespace WizshBoneTwitchIntegration.Gui
 
         public void Show()
         {
-            if (m_text != null)
-                m_text.SetActive(true);
+            m_wantVisible = true;
+            SyncVisibility();
         }
 
         public void Hide()
         {
+            m_wantVisible = false;
+            SyncVisibility();
+        }
+
+        /// <summary>
+        /// Applies the wanted visible state, additionally hidden while vanilla's Ctrl+F3 "hide UI"
+        /// toggle is on (this label lives on Jotunn's own canvas, which vanilla's Hud never touches).
+        /// Called every frame by <see cref="WizshBoneGUI"/> so toggling Ctrl+F3 takes effect
+        /// immediately even while the player stays in the safe zone.
+        /// </summary>
+        public void SyncVisibility()
+        {
             if (m_text != null)
-                m_text.SetActive(false);
+                m_text.SetActive(m_wantVisible && !Hud.IsUserHidden());
         }
     }
 }

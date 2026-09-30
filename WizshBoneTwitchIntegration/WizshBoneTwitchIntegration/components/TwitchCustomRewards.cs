@@ -162,12 +162,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     throw new RedeemException("Game is paused or menu is visible", ExceptionType.Warning);
                 }
 
-                if (m_auth?.m_settingsGUI?.IsAnyGUIVisible == true && !WizshBoneTwitchIntegration.useRedeemCommand)
-                {
-                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is currently in the settings menu! {m_refundMessage}");
-                    throw new RedeemException("WizshBone GUI is open", ExceptionType.Warning);
-                }
-
                 if (Player.m_localPlayer.IsSleeping())
                 {
                     m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is currently sleeping and can't react! {m_refundMessage}");

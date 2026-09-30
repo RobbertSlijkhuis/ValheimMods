@@ -32,6 +32,7 @@
     <None Remove="assets\wbti_dw" />
     <None Remove="assets\wbti_dw.manifest" />
     <None Remove="resources\banned.txt" />
+    <None Remove="resources\news.yaml" />
     <None Remove="resources\viewers.yaml" />
     <None Remove="resources\WizehBoneMatteGradient.png" />
     <None Remove="resources\WizehBone_Gradient.png" />
@@ -47,6 +48,7 @@
     <EmbeddedResource Include="assets\wbti_dw" />
     <EmbeddedResource Include="assets\wbti_dw.manifest" />
     <EmbeddedResource Include="resources\banned.txt" />
+    <EmbeddedResource Include="resources\news.yaml" />
     <EmbeddedResource Include="resources\profile.yaml" />
     <EmbeddedResource Include="resources\viewers.yaml" />
     <EmbeddedResource Include="resources\WizehBone_Gradient.png" />

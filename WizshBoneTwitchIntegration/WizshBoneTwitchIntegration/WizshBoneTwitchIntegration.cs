@@ -35,7 +35,6 @@ namespace WizshBoneTwitchIntegration
         public CustomStatusEffects effects = new CustomStatusEffects();
         public CustomSprites sprites = new CustomSprites();
         public CustomEffectLists effectLists = new CustomEffectLists();
-        private ButtonConfig wizshBoneWindowButtonOld;
         private ButtonConfig wizshBoneWindowButton;
         private ButtonConfig quickTestRedeemButton;
         public static bool useRedeemCommand = false;
@@ -49,6 +48,7 @@ namespace WizshBoneTwitchIntegration
         // actually started - see ConfigPathHelper.GetEffectiveRoot().
         public static string bannedPath => ConfigPathHelper.GetEffectiveRoot() + "/banned.txt";
         public static string viewersPath => ConfigPathHelper.GetEffectiveRoot() + "/viewers.yaml";
+        public static string newsSeenPath => ConfigPathHelper.GetEffectiveRoot() + "/newsSeen.yaml";
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -78,39 +78,8 @@ namespace WizshBoneTwitchIntegration
 
         public void Update()
         {
-            HandleWizshBoneWindowInput();
             HandleNewUIWindowInput();
             HandleQuickTestRedeemInput();
-        }
-
-        private void HandleWizshBoneWindowInput()
-        {
-            try
-            {
-                if (ZInput.instance == null || wizshBoneWindowButtonOld == null || !Player.m_localPlayer)
-                    return;
-
-                TwitchAuth authComp = Game.instance.gameObject.GetComponent<TwitchAuth>();
-                bool guiVisible = authComp.m_settingsGUI.IsAnyGUIVisible;
-
-                // ZInput is blocked while the GUI is open, so fall back to raw Unity input
-                // via KeyboardShortcut.IsDown() which bypasses the ZInput block entirely.
-                bool togglePressed = guiVisible
-                    ? PluginConfig.configWizshBoneWindowOld.Value.IsDown()
-                    : ZInput.GetButtonDown(wizshBoneWindowButtonOld.Name);
-
-                if (!togglePressed)
-                    return;
-
-                if (guiVisible)
-                    authComp.m_settingsGUI.CloseGUI();
-                else
-                    authComp.m_settingsGUI.ShowSettings();
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Could not show WizshBone settings GUI: " + e);
-            }
         }
 
         private void HandleNewUIWindowInput()
@@ -126,7 +95,8 @@ namespace WizshBoneTwitchIntegration
 
                 bool guiVisible = newUI.IsVisible;
 
-                // Same ZInput-blocked-while-GUI-open gotcha as HandleWizshBoneWindowInput above.
+                // ZInput is blocked while the GUI is open, so fall back to raw Unity input
+                // via KeyboardShortcut.IsDown() which bypasses the ZInput block entirely.
                 bool togglePressed = guiVisible
                     ? PluginConfig.configWizshBoneWindow.Value.IsDown()
                     : ZInput.GetButtonDown(wizshBoneWindowButton.Name);
@@ -393,14 +363,6 @@ namespace WizshBoneTwitchIntegration
         {
             try
             {
-                wizshBoneWindowButtonOld = new ButtonConfig
-                {
-                    Name = "WizshBone Window (Old)",
-                    ShortcutConfig = PluginConfig.configWizshBoneWindowOld,
-                };
-
-                InputManager.Instance.AddButton(PluginGUID, wizshBoneWindowButtonOld);
-
                 wizshBoneWindowButton = new ButtonConfig
                 {
                     Name = "WizshBone Window",

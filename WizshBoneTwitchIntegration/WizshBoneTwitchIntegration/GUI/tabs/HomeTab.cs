@@ -290,6 +290,26 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 return;
             }
 
+            // SetRewards removes the current Twitch rewards and re-creates them with the new costs,
+            // and Twitch can only resolve redemptions against the reward that created them - so any
+            // still-unresolved history entries could no longer be fulfilled/refunded afterwards.
+            if (customRewards.HasUnresolvedRedeems())
+            {
+                m_confirmDialog.Show(
+                    title: "Apply Discount",
+                    description: "Auto-resolve is off. Applying the discount re-creates the Twitch redeems, so pending redeems can no longer be resolved afterwards. Are you sure?",
+                    onConfirm: () => PushDiscount(customRewards),
+                    confirmText: "Continue",
+                    cancelText: "Open history",
+                    onCancel: ShowHistory);
+                return;
+            }
+
+            PushDiscount(customRewards);
+        }
+
+        private static void PushDiscount(TwitchCustomRewards customRewards)
+        {
             customRewards.SetRewards();
             ToastNotifications.Show("Discount applied to Twitch redeem costs.", ToastType.Success);
         }

@@ -17,12 +17,12 @@ namespace WizshBoneTwitchIntegration.Models
         public int chattingClaimDuration = 300;
         public float chattingCullingRange = 50f;
         public float chattingInterval = 30f;
-        public float chattingRadius = 30f;
+        public float chattingRadius = 60f;
         public int chattingMaxTalkers = 5;
         public bool chattingClaimFreeForAll = false;
 
         // Creatures
-        public bool creaturesSameFaction = true;
+        public bool creaturesSameFaction = false;
         public float creaturesMaxAmount = 100f;
         public float creaturesMaxRadius = 100f;
         public bool creaturesScaling = true;

@@ -106,6 +106,10 @@ namespace WizshBoneTwitchIntegration.Gui
             if (hudPanel == null)
                 return;
 
+            // Follow vanilla's Ctrl+F3 "hide UI" toggle - this panel lives on Jotunn's own canvas,
+            // which vanilla's Hud never touches.
+            hudPanel.SetActive(!Hud.IsUserHidden());
+
             m_loginStatusCircle.color = auth.m_loggedIn ? ColorLoggedIn : ColorLoggedOut;
 
             m_redeemsValueText.text = GetRedeemsValueText();

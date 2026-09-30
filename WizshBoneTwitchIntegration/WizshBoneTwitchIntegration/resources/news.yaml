@@ -1,0 +1,41 @@
+# Shown in the News dialog (automatically on the first open after "version" goes up, or any time
+# via the sidebar's News button). Bump "version" only when a release has something to say.
+# Avoid angle brackets in the text - the dialog's Text components have rich text enabled.
+# Bodies use ">-" (folded): the line breaks in this file are NOT shown in-game, the dialog wraps
+# the text itself. A blank line starts a new paragraph. Use "|-" instead where line breaks matter
+# (e.g. the list below).
+version: 1
+title: Welcome to WizshBone Twitch Integration
+sections:
+  - heading: Thank you!
+    body: >-
+      Thank you so much for downloading WizshBone Twitch Integration! I hope it brings you and
+      your chat plenty of chaos and fun moments. It's been a pleasure to work on this mod, and I hope you enjoy it as much as I enjoyed making it.
+
+
+      Please take some time to look around in the mod's different tabs, especially the Help tab. If you have
+      any questions or feedback, feel free to reach out to me on Discord (you can find the link
+      on the mod page).
+  - heading: Known issues
+    body: >-
+      The mod is still young, so there are a few rough edges that I'm working on. It's by far not completed yet, but I feel I need to release it now or
+      else it will be in development forever! I feel it is stable enough for release, but if something behaves strangely, the Help tab has tools for some problems.
+      Please reach out to me on Discord if you run into major issues (you can find the link on the mod page).
+
+
+      - Creature recoloring is not finished yet: bosses and creatures from the Ashlands onwards can't be recolored so far.
+      - Multiplayer is not fully supported yet: the mod is designed with multiplayer in mind but has not been thoroughly tested in multiplayer, so some issues can arise. If you encounter any problems, please let me know.
+  - heading: Future plans
+    body: |-
+      I'm not done with the mod yet, there is still a lot more to come:
+
+      - More default profiles with different levels of chaos and difficulty!
+      - Leaderboards: who killed you the most, which redeems are used the most, points spent and more
+      - More redeem types, like dropping your inventory, inverted movement, rearranging your hotbar and much more       
+      - A periodic vote that lets viewers decide your fate by voting on a random redeem to be used on you
+      - Surprise chests that can turn out to be a mimic or spawn other redeems
+      - A new cooldown system with shared cooldowns
+      - More commands for viewers to control the creatures they claimed or spawned
+
+
+      And much more! If you have any ideas or suggestions, please reach out to me on Discord (you can find the link on the mod page).

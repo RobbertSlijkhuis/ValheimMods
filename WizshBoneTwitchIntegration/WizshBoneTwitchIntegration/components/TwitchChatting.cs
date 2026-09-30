@@ -273,9 +273,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 return;
             }
 
-            // Free-for-all: a user who already has a claim just falls through, leaving the offer
-            // open for someone else's "!claim" instead of stealing/duplicating their own claim.
-            if (ContainsCreatureAssignment(userName))
+            // Free-for-all skips this check on purpose: first to type "!claim" wins, regardless of
+            // how many claims they already hold. Only the non-free-for-all path limits one per user.
+            if (!ProfileSettingsHelper.Current.chattingClaimFreeForAll && ContainsCreatureAssignment(userName))
             {
                 Jotunn.Logger.LogWarning($"[WBTI] AcceptClaim: {userName} already has a claim, ignoring.");
                 return;

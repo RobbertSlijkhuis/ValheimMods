@@ -140,7 +140,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 { ValheimCreatureType.JotunWarrior, new ValheimCreature(8.4f, e.SpawnEffectMedium) },
                 { ValheimCreatureType.JotunWarriorDualWield, new ValheimCreature(8.4f, e.SpawnEffectMedium) },
                 { ValheimCreatureType.JotunWitch, new ValheimCreature(8.4f, e.SpawnEffectMedium) },
-                { ValheimCreatureType.Moose, new ValheimCreature(1.0f, e.SpawnEffectSmall) },
+                { ValheimCreatureType.Moose, new ValheimCreature(8.4f, e.SpawnEffectSmall) },
                 { ValheimCreatureType.TrollFrost, new ValheimCreature(8.6f, e.SpawnEffectMedium) },
 
                 // HILDIR'S CHEST BOSSES

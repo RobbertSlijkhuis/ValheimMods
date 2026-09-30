@@ -60,6 +60,7 @@ namespace WizshBoneTwitchIntegration.Gui
             // Unlike the shell (only refreshed while its panel is visible), the corner HUD is
             // always on-screen, so it updates every frame regardless of IsVisible.
             m_hud.UpdateHUD();
+            m_safeZoneHUD.SyncVisibility();
 
             if (m_shell.IsVisible)
             {
@@ -73,6 +74,7 @@ namespace WizshBoneTwitchIntegration.Gui
             try
             {
                 m_shell.Show(m_auth, m_customRewards);
+                m_shell.ShowNewsIfUnseen();
             }
             catch (Exception e)
             {
@@ -82,7 +84,21 @@ namespace WizshBoneTwitchIntegration.Gui
 
         public void CloseShell()
         {
+            // F3 (the only caller) is ignored while any dialog is up, so the shell never closes
+            // underneath it (e.g. the News dialog's own Close button records the news as seen).
+            if (m_shell.IsModalOpen)
+                return;
+
             m_shell.Close();
+        }
+
+        private void OnDestroy()
+        {
+            // A scene change (logout, disconnect, kick) destroys this component while the shell or a
+            // dialog may still hold InputBlockGate pushes - release them so the static count doesn't
+            // carry over into the next session (see InputBlockGate.Reset).
+            GUIManager.OnCustomGUIAvailable -= OnGUIAvailable;
+            InputBlockGate.Reset();
         }
 
         /// <summary>

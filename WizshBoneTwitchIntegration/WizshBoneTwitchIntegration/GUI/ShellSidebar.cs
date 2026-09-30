@@ -77,6 +77,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float ButtonHeight      = 44f;
         private const float ButtonSpacing     = 6f;
         private const float GroupGap          = 16f;
+        private const float CloseButtonY      = 40f;
 
         private readonly Dictionary<ShellTab, TabButtonVisual> m_tabButtons = new Dictionary<ShellTab, TabButtonVisual>();
         private Color m_tabDefaultColor;
@@ -87,7 +88,8 @@ namespace WizshBoneTwitchIntegration.Gui
         /// </summary>
         /// <param name="onSelectTab">Invoked with the clicked tab.</param>
         /// <param name="onClose">Invoked when the Close button is clicked.</param>
-        public GameObject Create(GameObject panel, Action<ShellTab> onSelectTab, Action onClose)
+        /// <param name="onNews">Invoked when the News button (pinned above Close) is clicked.</param>
+        public GameObject Create(GameObject panel, Action<ShellTab> onSelectTab, Action onClose, Action onNews)
         {
             // ShellSidebar is a readonly field of WizshBoneShellGUI, reused (not reconstructed)
             // if the shell panel is ever torn down and rebuilt - reset every piece of mutable
@@ -133,12 +135,17 @@ namespace WizshBoneTwitchIntegration.Gui
             y = CreateGroup(root, "General", GeneralGroupTabs, y, onSelectTab, isProfileGroup: false);
             y = CreateGroup(root, $"Profile: {ProfileManager.ActiveProfile}", ProfileGroupTabs, y, onSelectTab, isProfileGroup: true);
 
+            // An action button rather than a tab: opens the News dialog, never highlighted as active.
+            // Pinned to the bottom, directly above Close.
+            CreateStockButton(root, "News", CloseButtonY + ButtonHeight + ButtonSpacing, anchorBottom: true)
+                .Button.onClick.AddListener(() => onNews());
+
             GameObject closeBtnObj = GuiHelper.CreateButton(
                 text:      "Close",
                 parent:    root.transform,
                 anchorMin: new Vector2(0.5f, 0f),
                 anchorMax: new Vector2(0.5f, 0f),
-                position:  new Vector2(0f, 40f),
+                position:  new Vector2(0f, CloseButtonY),
                 width:     Width - 30f,
                 height:    44f
             );
@@ -222,11 +229,27 @@ namespace WizshBoneTwitchIntegration.Gui
         /// </summary>
         private TabButtonVisual CreateStockTabButton(GameObject root, ShellTab tab, float y, Action<ShellTab> onSelectTab)
         {
+            TabButtonVisual visual = CreateStockButton(root, tab.Label(), y);
+            visual.Button.onClick.AddListener(() => onSelectTab(tab));
+            return visual;
+        }
+
+        /// <summary>
+        /// Same stock button as a tab's, with no click handler wired - also used directly for
+        /// action buttons (e.g. News) that aren't tabs and so never get registered in
+        /// <see cref="m_tabButtons"/> or highlighted as active. <paramref name="y"/> is measured
+        /// down from the sidebar's top edge, or up from its bottom edge when
+        /// <paramref name="anchorBottom"/> is set.
+        /// </summary>
+        private TabButtonVisual CreateStockButton(GameObject root, string labelText, float y, bool anchorBottom = false)
+        {
+            float anchorY = anchorBottom ? 0f : 1f;
+
             GameObject btnObj = GuiHelper.CreateButton(
-                text:      tab.Label(),
+                text:      labelText,
                 parent:    root.transform,
-                anchorMin: new Vector2(0.5f, 1f),
-                anchorMax: new Vector2(0.5f, 1f),
+                anchorMin: new Vector2(0.5f, anchorY),
+                anchorMax: new Vector2(0.5f, anchorY),
                 position:  new Vector2(0f, y),
                 width:     Width - 30f,
                 height:    ButtonHeight
@@ -240,8 +263,6 @@ namespace WizshBoneTwitchIntegration.Gui
 
             Text label = btnObj.GetComponentInChildren<Text>();
             label.color = GUIManager.Instance.ValheimOrange;
-
-            button.onClick.AddListener(() => onSelectTab(tab));
 
             return new TabButtonVisual { Button = button, Background = background, Label = label };
         }

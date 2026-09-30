@@ -4,6 +4,7 @@ using Jotunn.Managers;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Gui.Tabs;
 using WizshBoneTwitchIntegration.Helpers;
+using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Gui
@@ -29,6 +30,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private readonly ShellSidebar m_sidebar = new ShellSidebar();
         private readonly ShellTopBar m_topBar = new ShellTopBar();
+        private readonly NewsDialog m_newsDialog = new NewsDialog();
 
         private readonly Dictionary<ShellTab, IShellTabView> m_tabViews = new Dictionary<ShellTab, IShellTabView>
         {
@@ -59,6 +61,15 @@ namespace WizshBoneTwitchIntegration.Gui
         private ShellTab m_historyReturnTab = ShellTab.Home;
 
         public bool IsVisible => m_panel != null && m_panel.activeSelf;
+
+        /// <summary>
+        /// True while any modal dialog (News, Confirm, Input, Copy, Viewer edit) is up over the
+        /// shell - <see cref="WizshBoneGUI.CloseShell"/> ignores F3 then, so the shell never closes
+        /// underneath it. The dialogs are parented to CustomGUIFront rather than the shell panel, so
+        /// hiding the shell wouldn't hide them. Detected through <see cref="InputBlockGate"/>, which
+        /// every dialog pushes to: anything beyond the shell's own push is an open dialog.
+        /// </summary>
+        public bool IsModalOpen => m_blockingInput && InputBlockGate.Count > 1;
 
         public void Show(TwitchAuth auth, TwitchCustomRewards customRewards)
         {
@@ -144,9 +155,41 @@ namespace WizshBoneTwitchIntegration.Gui
             m_openHistory?.Invoke();
         }
 
+        /// <summary>
+        /// Shows the News dialog over the shell if the embedded news is newer than the last one the
+        /// player closed. Called by <see cref="WizshBoneGUI.ShowShell"/> (the F3 open, which always
+        /// starts on Home) - deliberately not from <see cref="Show"/>/<see cref="ShowHistory"/>, so
+        /// opening straight onto History never shows it.
+        /// </summary>
+        public void ShowNewsIfUnseen()
+        {
+            if (!IsVisible)
+                return;
+
+            if (NewsHelper.TryGetUnseenNews(out NewsData news))
+                ShowNews(news);
+        }
+
+        private void OpenNews()
+        {
+            NewsData news = NewsHelper.LoadNews();
+            if (news == null)
+            {
+                ToastNotifications.Show("No news available.", ToastType.Warning);
+                return;
+            }
+
+            ShowNews(news);
+        }
+
+        private void ShowNews(NewsData news)
+        {
+            m_newsDialog.Show(news, () => NewsHelper.MarkSeen(news));
+        }
+
         private void BuildGUI(TwitchAuth auth, TwitchCustomRewards customRewards)
         {
-            m_sidebar.Create(m_panel, SelectTab, Close);
+            m_sidebar.Create(m_panel, SelectTab, Close, OpenNews);
             m_topBar.Create(m_panel, ShellSidebar.Width, auth, customRewards);
             ToastNotifications.Init(m_panel);
 
@@ -226,6 +269,8 @@ namespace WizshBoneTwitchIntegration.Gui
             }
 
             GuiHelper.AddPanelBorder(m_panel, inset: 0f, thickness: GuiHelper.PanelBorderThickness, color: GuiHelper.PanelBorderColor);
+
+            m_newsDialog.Init();
 
             // BuildGUI runs once per shell, so this subscribes once.
             ProfileSyncHelper.ProfileReceived += OnProfileSynced;

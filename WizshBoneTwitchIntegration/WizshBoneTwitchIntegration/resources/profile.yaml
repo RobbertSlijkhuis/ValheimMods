@@ -1,49 +1,1007 @@
-# In this file you can add and configure your redeems for the WizshBone Twitch Integration
-#
 version: 1
+settings:
+  chattingEnabled: true
+  chattingBlackList: Nightbot, StreamElements
+  chattingClaimDuration: 0
+  chattingCullingRange: 50
+  chattingInterval: 30
+  chattingRadius: 60
+  chattingMaxTalkers: 5
+  chattingClaimFreeForAll: false
+  creaturesSameFaction: false
+  creaturesMaxAmount: 100
+  creaturesMaxRadius: 100
+  creaturesScaling: true
+  creaturesDamageScale: 0.15
+  creaturesHealthScale: 0.15
+  creaturesFollowRadius: 30
+  indestructibleBoats: true
+  indestructibleChests: true
+  indestructiblePortals: true
+  indestructibleVegetables: true
+  enableRedeemsOnLogin: false
+  autoResolveRedeems: false
+  redeemTitlePrefix: WBTI
+  redeemsDiscountPercent: 0
+  wardRecipe: FineWood:5, GreydwarfEye:5, SurtlingCore:1
+  wardBurnCreatures: false
+  wardPushCreatures: true
+  wardPushForce: 2000
+  safezoneTraders: true
+  safezoneBoats: false
+  hudPosition: BottomRight
+  hudOffsetX: 0
+  hudOffsetY: 0
 redeems:
-  - type: SpawnCreature
-    title: "WBTI Special creature!"
-    points: 1000000000
-    globalKeyAdd: defeated_fader
-    backgroundColor: "#ff0000"
-    creatureData:
-      list:
-        - prefabName: Neck
-          level: 2
-          friendly: true
-          commandable: true
-          size: 50
-#######################################################
-# Weather
-#######################################################
-  - type: SpawnWeather
-    title: "WBTI Weather: Random"
-    points: 10
-    weatherData:
-      announceMessage: "{{user}} is changing the skybox!"
+  #######################
+  # BoatRain
+  #######################
+  - title: 'Spawn: BOATPOCALYPSE'
+    description: Rain down Karves around the streamer!
+    points: 300
+    backgroundColor: '#c7915b'
+    cooldown: 300
+    type: BoatRain
+    spawnAbilityData:
+      accuracy: 1
+      allowDrops: false
+      announceMessage: 'Current weather forecast: 100% chance of BOATPOCALYPSE (sponsored by {{user}})'
+      damage:
+        blunt: 50
+        basedOnMaxHealthAndArmor: true
+        maxHealthPercentage: 0.4
+      duration: 60
+      groundOffset: 50
+      maxToSpawn: 50
+      minToSpawn: 50
+      spawnRadius: 15
+      spawns:
+      - Karve
+  #######################
+  # Detonate
+  #######################
+  - title: Detonate Fizsh!
+    description: Detonate fish around the streamer!
+    points: 300
+    backgroundColor: '#FF0000'
+    cooldown: 300
+    ignoreWard: true
+    type: Detonate
+    detonateData:
+      announceMessage: '{{user}} made things a bit more explosive!'
+      radius: 40
+      damageData:
+        blunt: 70
+        chop: 160
+        fire: 30
+        pickaxe: 160
+        basedOnMaxHealthAndArmor: true
+      damageTerrain: false
+  #######################
+  # Door
+  #######################
+  - title: 'Spawn: Doors of DOOM!'
+    description: Spawn doors around the streamer!
+    points: 300
+    backgroundColor: '#1a3813'
+    cooldown: 300
+    type: Door
+    spawnAbilityData:
+      allowDrops: false
+      announceMessage: '{{user}} proudly presents, the Doors of DOOM!'
+      duration: 60
+      doorInterval: 1
+      groundOffset: 1.5
+      maxToSpawn: 300
+      minToSpawn: 300
+      snapToterrain: true
+      spawnDelay: 0.0001
+      spawnRadius: 30
+      spawns:
+      - piece_hexagonal_door
+  #######################
+  # Flashbang
+  #######################
+  - title: Flashbang!
+    description: Flash bang the streamer so he cannot see anything for a moment, not even his UI!
+    points: 300
+    backgroundColor: '#ffffff'
+    cooldown: 180
+    ignoreWard: true
+    type: Flashbang
+    flashbangData:
+      flashColor: '#262626'
+  #######################
+  # LogRain
+  #######################
+  - title: 'Spawn: Log Rain'
+    description: Give the streamer "senpai" some well deserved hard wood!
+    points: 265
+    backgroundColor: '#734624'
+    cooldown: 300
+    type: LogRain
+    spawnAbilityData:
+      accuracy: 1
+      announceMessage: '{{user}} is sending you some building materials: HARD WOOD!'
+      damage:
+        blunt: 50
+        basedOnMaxHealthAndArmor: true
+        maxHealthPercentage: 0.3
+      dropVelocity: -25
       duration: 300
-      force: false
-      radius: 300
-      height: 300
+      groundOffset: 50
+      isBiomeList: true
+      maxToSpawn: 75
+      minToSpawn: 75
+      spawnRadius: 15
+      spawns:
+      - beech_log_half
+      - PineTree_log_half
+      - SwampTree1_log
+      - FirTree_log_half
+      - Birch_log_half
+      - yggashoot_log_half
+      - AshlandsTreeLogHalf2
+      - Oak_log_half
+  #######################
+  # Meteor
+  #######################
+  - title: 'Spawn: Fader Meteors'
+    description: Rain down Fader meteors around the streamer!
+    points: 300
+    backgroundColor: '#00644c'
+    cooldown: 300
+    type: Meteor
+    spawnAbilityData:
+      accuracy: 20
+      announceMessage: Fader was called forth by {{user}} and is delivering a slightly crispy message!
+      damage:
+        blunt: 40
+        chop: 0
+        fire: 120
+        pickaxe: 0
+        basedOnMaxHealthAndArmor: true
+        maxHealthPercentage: 0.3
+      groundOffset: 50
+      maxToSpawn: 15
+      minToSpawn: 15
+      isOwner: false
+      prefabName: spawn_fader_meteors
+      spawnRadius: 15
+      targetType: Position
+  - title: 'Spawn: Meteors'
+    description: Rain down Yagluth meteors around the streamer!
+    points: 265
+    backgroundColor: '#FF0056'
+    cooldown: 300
+    type: Meteor
+    spawnAbilityData:
+      accuracy: 20
+      announceMessage: '{{user}} wished on a falling star, extinction event initiated!'
+      damage:
+        blunt: 40
+        chop: 0
+        fire: 120
+        pickaxe: 0
+        basedOnMaxHealthAndArmor: true
+        maxHealthPercentage: 0.3
+      groundOffset: 50
+      maxToSpawn: 15
+      minToSpawn: 15
+      isOwner: false
+      prefabName: spawn_meteors
+      spawnRadius: 15
+      targetType: Position
+  #######################
+  # Mist
+  #######################
+  - title: Mist
+    description: Spawn in Mistlands mist to cover the vision of the streamer... and for some creatures!
+    points: 300
+    backgroundColor: '#8f6bd6'
+    cooldown: 180
+    ignoreWard: true
+    type: Mist
+    mistData:
+      announceMessage: '{{user}} made things slightly harder to see!'
+      duration: 90
+      radius: 65
+  #######################
+  # Rain
+  #######################
+  - title: 'Spawn: Fizsh!'
+    description: Spawn random fish around the streamer, what could this possible be used for?
+    points: 300
+    backgroundColor: '#cfdbab'
+    cooldown: 180
+    type: Rain
+    spawnAbilityData:
+      announceMessage: '{{user}} believes something is smelling.... fizshy!'
+      duration: 1800
+      groundOffset: 0
+      maxToSpawn: 50
+      minToSpawn: 50
+      snapToterrain: true
+      spawnDelay: 0
+      spawnRadius: 40
+  #######################
+  # Root
+  #######################
+  - title: 'Spawn: Roots'
+    description: Spawn batches of roots close to the player that will slap them!
+    points: 300
+    backgroundColor: '#351E01'
+    cooldown: 300
+    type: Root
+    spawnAbilityData:
+      announceMessage: Major inconveniences deployed by {{user}}!
+      damage:
+        blunt: 100
+        basedOnMaxHealthAndArmor: true
+        maxHealthPercentage: 0.3
+      duration: 60
+      groundOffset: 0
+      maxToSpawn: 75
+      minToSpawn: 75
+      snapToterrain: true
+      batchSize: 4
+      spawnDelay: 3
+      spawnRadius: 4
+      spawns:
+      - TentaRoot
+  #######################
+  # Smite
+  #######################
+  - title: 'Spawn: Thou shall be smited!'
+    description: Bring pain to the streamer or make his screen shake violently!
+    points: 300
+    backgroundColor: '#b8d3e6'
+    cooldown: 300
+    type: Smite
+    spawnAbilityData:
+      accuracy: 1
+      announceMessage: '{{user}} has summoned the wrath of Thor!'
+      damage:
+        lightning: 50
+        basedOnMaxHealthAndArmor: true
+        maxHealthPercentage: 0.3
+      groundOffset: 0
+      maxToSpawn: 50
+      noSpawnEffect: true
+      minToSpawn: 50
+      snapToterrain: true
+      spawnRadius: 20
+      spawns:
+      - lightningAOE
+  #######################
+  # SpawnCreature
+  #######################
+  - title: 'Creatures: Helpers'
+    description: Spawn in random creatures to help the streamer
+    points: 150
+    backgroundColor: '#00A9FF'
+    type: SpawnCreature
+    creatureData:
+      random: true
+      list:
+      - amount: 3
+        commandable: true
+        color: '#FF410A'
+        friendly: true
+        prefabName: Abomination
+        size: 0.3
+      - amount: 3
+        commandable: true
+        color: '#FF410A'
+        friendly: true
+        prefabName: Fenring_Cultist
+        size: 5
+  - title: 'Random creature: Heavy'
+    description: Spawn a random heavy creature like a Troll, Abomination, StoneGolem, Lox, Gjall, Morgen etc.
+    points: 250
+    backgroundColor: '#ff2424'
+    type: SpawnCreature
+    creatureData:
+      random: true
+      list:
+      - prefabName: Troll
+      - prefabName: Abomination
+      - prefabName: StoneGolem
+      - prefabName: Lox
+      - prefabName: Unbjorn
+      - prefabName: SeekerBrute
+      - prefabName: Gjall
+      - prefabName: Charred_Melee
+      - prefabName: Charred_Mage
+      - prefabName: FallenValkyrie
+      - color: '#FFFFFF'
+        prefabName: Morgen
+      - prefabName: Barka
+      - prefabName: TrollFrost
+      - prefabName: ElakingMole
+  - title: 'Random creature: Light'
+    description: Spawn a random light creature like a Bats, ticks, Voltures etc.
+    points: 150
+    backgroundColor: '#ff9191'
+    type: SpawnCreature
+    creatureData:
+      random: true
+      list:
+      - prefabName: BlobLava
+      - amount: 5
+        prefabName: Bat
+      - amount: 5
+        prefabName: Tick
+      - prefabName: Ulv
+      - amount: 2
+        prefabName: Volture
+      - amount: 5
+        prefabName: Bat_Swamp
+      - prefabName: BlobMorkMini
+  - title: 'Random creature: Medium'
+    description: Spawn a random medium creature like Wolf, Fenring, Tarblobs, Asksvin etc.
+    points: 200
+    backgroundColor: '#ff5454'
+    type: SpawnCreature
+    creatureData:
+      random: true
+      list:
+      - prefabName: Fenring
+      - prefabName: Fenring_Cultist
+      - prefabName: Wolf
+      - prefabName: BlobTar
+      - prefabName: Deathsquito
+      - prefabName: Seeker
+      - prefabName: Charred_Archer
+      - prefabName: Charred_Twitcher
+      - prefabName: Asksvin
+      - prefabName: BlobMork
+      - prefabName: JotunWarrior
+      - prefabName: JotunWarriorDualWield
+      - prefabName: JotunWitch
+      - prefabName: FallenWarrior
+      - prefabName: GoblinDeepNorth
+      - prefabName: DvergerDeepNorth
+      - prefabName: Moose
+  #######################
+  # StatusEffect
+  #######################
+  - title: 'Status: Gone with the wind!'
+    description: Give the streamer a 10 minute buff of Ratatosk and Lightfoot meads!
+    points: 120
+    backgroundColor: '#74bd66'
+    cooldown: 60
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      list:
+      - name: Potion_hasty
+      - name: Potion_LightFoot
+  - title: 'Status: Grow Streamer'
+    description: Grow the streamer, increasing his movement speed and jump height!
+    points: 115
+    backgroundColor: '#3480eb'
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      list:
+      - name: PlayerGrow
+        duration: 180
+  - title: 'Status: Heal/Energize/Eitrify Streamer!'
+    description: Save that streamer from certain death by giving back health, stamina and Eitr!
+    points: 100
+    backgroundColor: '#ff0062'
+    cooldown: 30
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      list:
+      - name: Potion_health_medium
+        duration: 30
+      - name: Potion_stamina_medium
+        duration: 30
+      - name: Potion_eitr_minor
+        duration: 30
+  - title: 'Status: Random Boss Power!'
+    description: Give a random boss power to the streamer!
+    points: 110
+    backgroundColor: '#ff6f00'
+    cooldown: 15
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      random: true
+      list:
+      - name: GP_Eikthyr
+      - name: GP_TheElder
+      - name: GP_Bonemass
+      - name: GP_Moder
+      - name: GP_Yagluth
+      - name: GP_Queen
+      - name: GP_Fader
+  - title: 'Status: Random buff/debuff!'
+    description: Give a random buff or debuff to the streamer!
+    points: 110
+    backgroundColor: '#ff6f00'
+    cooldown: 15
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      random: true
+      list:
+      - name: BarleyWine
+        renew: true
+      - name: Burning_WBTI
+        renew: true
+      - name: MeadFrostResist
+        renew: true
+      - name: Freezing_WBTI
+        renew: true
+      - name: MeadPoisonResist
+        renew: true
+      - name: Poison_WBTI
+        renew: true
+      - name: MeadHasty
+        renew: true
+      - name: Puke
+        renew: true
+      - name: MeadBzerker
+        renew: true
+      - name: Wet
+        renew: true
+      - name: MeadLightfoot
+        renew: true
+      - name: Tared
+        renew: true
+      - name: Rested
+        renew: true
+      - name: PlayerShrink
+        duration: 300
+        renew: true
+      - name: PlayerGrow
+        duration: 300
+        renew: true
+      - name: GP_Eikthyr
+      - name: GP_TheElder
+      - name: GP_Bonemass
+      - name: GP_Moder
+      - name: GP_Yagluth
+      - name: GP_Queen
+      - name: GP_Fader
+  - title: 'Status: Rested!'
+    description: Give the streamer a short rested buff!
+    points: 120
+    backgroundColor: '#74bd66'
+    cooldown: 60
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      list:
+      - name: Rested
+        duration: 600
+  - title: 'Status: Shield!'
+    description: Protect the streamer with a shield!
+    points: 120
+    backgroundColor: '#74bd66'
+    cooldown: 60
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      list:
+      - name: Staff_shield
+        duration: 600
+  - title: 'Status: Shrink Streamer'
+    description: Shrinks the streamer, reducing his movement speed and jump height!
+    points: 115
+    backgroundColor: '#3480eb'
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      list:
+      - name: PlayerShrink
+        duration: 180
+  #######################
+  # SurpriseChest
+  #######################
+  - title: 'Surprise Chest: Ashlands'
+    description: Give the streamer a random suprise, food, meads or... monsters!
+    points: 350
+    backgroundColor: '#ffb300'
+    cooldown: 180
+    globalKeyAdd: defeated_queen
+    ignoreWard: true
+    type: SurpriseChest
+    chestData:
+      amount: 5
+      announceMessage: '{{user}} has sent you a surprise!'
       items:
-        - Clear
-        - LightRain
-        - Rain
-        - Misty
-        - ThunderStorm
-        - nofogts
-        - SwampRain
-        #- Snow
-        #- SnowStorm
-        - Mistlands_clear
-        - Mistlands_rain
-        - Mistlands_thunder
-        - Twilight_clear
-        #- Twilight_Snow
-        #- Twilight_SnowStorm
-        - Eikthyr
-        - GDKing
-        - Bonemass
-        #- Ghosts
-        #- CavesHildir
+      - itemData:
+          prefabName: MashedMeat
+          stackSize: 3
+      - itemData:
+          prefabName: FierySvinstew
+          stackSize: 3
+      - itemData:
+          prefabName: PiquantPie
+          stackSize: 3
+      - itemData:
+          prefabName: MeadHealthLingering
+          stackSize: 3
+      - itemData:
+          prefabName: SparklingShroomshake
+          stackSize: 3
+      - itemData:
+          prefabName: MeadStaminaLingering
+      - itemData:
+          prefabName: MarinatedGreens
+          stackSize: 3
+      - itemData:
+          prefabName: MeadEitrLingering
+          stackSize: 3
+      - itemData:
+          prefabName: SpicyMarmalade
+          stackSize: 3
+      - itemData:
+          prefabName: ScorchingMedley
+          stackSize: 3
+      - itemData:
+          prefabName: RoastedCrustPie
+          stackSize: 3
+      - itemData:
+          prefabName: SizzlingBerryBroth
+          stackSize: 3
+      - itemData:
+          prefabName: BombSmoke
+          stackSize: 3
+      - itemData:
+          prefabName: BombLava
+          stackSize: 3
+      - itemData:
+          prefabName: BombBile
+          stackSize: 3
+      - creatureData:
+        - allowDrops: true
+          prefabName: Morgen
+      - creatureData:
+        - allowDrops: true
+          prefabName: Asksvin
+      - creatureData:
+        - allowDrops: true
+          prefabName: Charred_Mage
+      - creatureData:
+        - allowDrops: true
+          prefabName: Charred_Melee
+      - creatureData:
+        - prefabName: Charred_Archer
+      - creatureData:
+        - allowDrops: true
+          prefabName: Charred_Twitcher
+      - creatureData:
+        - allowDrops: true
+          prefabName: FallenValkyrie
+      type: Gold
+      yeetChance: 5
+  - title: 'Surprise Chest: Black Forest'
+    description: Give the streamer a random suprise, food, meads or... monsters!
+    points: 350
+    backgroundColor: '#8c8c8c'
+    cooldown: 180
+    globalKeyAdd: defeated_eikthyr
+    globalKeyRemove: defeated_gdking
+    ignoreWard: true
+    type: SurpriseChest
+    chestData:
+      amount: 5
+      announceMessage: '{{user}} has sent you a surprise!'
+      items:
+      - itemData:
+          prefabName: MinceMeatSauce
+          stackSize: 3
+        weight: 2
+      - itemData:
+          prefabName: QueensJam
+          stackSize: 3
+        weight: 2
+      - itemData:
+          prefabName: CarrotSoup
+          stackSize: 3
+        weight: 2
+      - itemData:
+          prefabName: DeerStew
+          stackSize: 3
+        weight: 2
+      - creatureData:
+        - allowDrops: true
+          prefabName: Bjorn
+      - creatureData:
+        - allowDrops: true
+          prefabName: Troll
+      - creatureData:
+        - allowDrops: true
+          prefabName: Greydwarf_Shaman
+      - creatureData:
+        - allowDrops: true
+          prefabName: Greydwarf_Elite
+      - creatureData:
+        - allowDrops: true
+          prefabName: Greydwarf
+      yeetChance: 5
+  - title: 'Surprise Chest: Meadows'
+    description: Give the streamer a random suprise, food, meads or... monsters!
+    points: 350
+    cooldown: 180
+    globalKeyRemove: defeated_eikthyr
+    ignoreWard: true
+    type: SurpriseChest
+    chestData:
+      amount: 5
+      announceMessage: '{{user}} has sent you a surprise!'
+      items:
+      - itemData:
+          prefabName: CookedDeerMeat
+          stackSize: 3
+        weight: 2
+      - itemData:
+          prefabName: CookedMeat
+          stackSize: 3
+        weight: 2
+      - itemData:
+          prefabName: Honey
+          stackSize: 3
+        weight: 2
+      - itemData:
+          prefabName: Raspberry
+          stackSize: 3
+        weight: 2
+      - itemData:
+          prefabName: Mushroom
+          stackSize: 3
+        weight: 2
+      - creatureData:
+        - allowDrops: true
+          prefabName: Boar
+      - creatureData:
+        - allowDrops: true
+          prefabName: Greyling
+      - creatureData:
+        - allowDrops: true
+          prefabName: Neck
+      yeetChance: 5
+  - title: 'Surprise Chest: Mistlands'
+    description: Give the streamer a random suprise, food, meads or... monsters!
+    points: 350
+    backgroundColor: '#ffb300'
+    cooldown: 180
+    globalKeyAdd: defeated_goblinking
+    globalKeyRemove: defeated_queen
+    ignoreWard: true
+    type: SurpriseChest
+    chestData:
+      amount: 5
+      announceMessage: '{{user}} has sent you a surprise!'
+      items:
+      - itemData:
+          prefabName: Meatplatter
+          stackSize: 3
+      - itemData:
+          prefabName: MushroomOmelette
+          stackSize: 3
+      - itemData:
+          prefabName: YggdrasilPorridge
+          stackSize: 3
+      - itemData:
+          prefabName: MeadHealthLingering
+          stackSize: 3
+      - itemData:
+          prefabName: MeadStaminaLingering
+          stackSize: 3
+      - itemData:
+          prefabName: MeadEitrLingering
+          stackSize: 3
+      - itemData:
+          prefabName: Mistharesupreme
+          stackSize: 3
+      - itemData:
+          prefabName: FishAndBread
+          stackSize: 3
+      - itemData:
+          prefabName: SeekerAspic
+          stackSize: 3
+      - creatureData:
+        - allowDrops: true
+          prefabName: Gjall
+      - creatureData:
+        - allowDrops: true
+          prefabName: Seeker
+      - creatureData:
+        - allowDrops: true
+          prefabName: Tick
+      - creatureData:
+        - allowDrops: true
+          prefabName: SeekerBrute
+      - creatureData:
+        - allowDrops: true
+          prefabName: DvergerMage
+      - creatureData:
+        - allowDrops: true
+          prefabName: Dverger
+      - itemData:
+          prefabName: BombBile
+          stackSize: 3
+      type: Gold
+      yeetChance: 5
+  - title: 'Surprise Chest: Mountain'
+    description: Give the streamer a random suprise, food, meads or... monsters!
+    points: 350
+    backgroundColor: '#8c8c8c'
+    cooldown: 180
+    globalKeyAdd: defeated_bonemass
+    globalKeyRemove: defeated_dragon
+    ignoreWard: true
+    type: SurpriseChest
+    chestData:
+      amount: 5
+      announceMessage: '{{user}} has sent you a surprise!'
+      items:
+      - itemData:
+          prefabName: Wolfjerky
+          stackSize: 3
+        weight: 2
+      - itemData:
+          prefabName: OnionSoup
+          stackSize: 3
+        weight: 2
+      - itemData:
+          prefabName: WolfMeatSkewer
+          stackSize: 3
+        weight: 2
+      - itemData:
+          prefabName: Eyescream
+          stackSize: 3
+        weight: 2
+      - creatureData:
+        - allowDrops: true
+          prefabName: StoneGolem
+      - creatureData:
+        - allowDrops: true
+          prefabName: Fenring
+      - creatureData:
+        - allowDrops: true
+          prefabName: Hatchling
+      - creatureData:
+        - allowDrops: true
+          prefabName: Wolf
+      - creatureData:
+        - allowDrops: true
+          prefabName: Ulv
+      - itemData:
+          prefabName: BombOoze
+          stackSize: 3
+        weight: 2
+      yeetChance: 5
+  - title: 'Surprise Chest: Plains'
+    description: Give the streamer a random suprise, food, meads or... monsters!
+    points: 350
+    backgroundColor: '#ffb300'
+    cooldown: 180
+    globalKeyAdd: defeated_dragon
+    globalKeyRemove: defeated_goblinking
+    ignoreWard: true
+    type: SurpriseChest
+    chestData:
+      amount: 5
+      announceMessage: '{{user}} has sent you a surprise!'
+      items:
+      - itemData:
+          prefabName: BloodPudding
+          stackSize: 3
+        weight: 2
+      - itemData:
+          prefabName: LoxPie
+          stackSize: 3
+        weight: 2
+      - itemData:
+          prefabName: FishWraps
+          stackSize: 3
+        weight: 2
+      - itemData:
+          prefabName: Bread
+          stackSize: 3
+        weight: 2
+      - creatureData:
+        - allowDrops: true
+          prefabName: Lox
+      - creatureData:
+        - allowDrops: true
+          prefabName: Unbjorn
+      - creatureData:
+        - allowDrops: true
+          prefabName: Goblin
+      - creatureData:
+        - allowDrops: true
+          prefabName: Deathsquito
+      - creatureData:
+        - allowDrops: true
+          prefabName: BlobTar
+      - itemData:
+          prefabName: BombOoze
+          stackSize: 3
+        weight: 2
+      type: Gold
+      yeetChance: 5
+  - title: 'Surprise Chest: Swamp'
+    description: Give the streamer a random suprise, food, meads or... monsters!
+    points: 350
+    backgroundColor: '#8c8c8c'
+    cooldown: 180
+    globalKeyAdd: defeated_gdking
+    globalKeyRemove: defeated_bonemass
+    ignoreWard: true
+    type: SurpriseChest
+    chestData:
+      amount: 5
+      announceMessage: '{{user}} has sent you a surprise!'
+      items:
+      - itemData:
+          prefabName: TurnipStew
+          stackSize: 3
+        weight: 2
+      - itemData:
+          prefabName: Sausages
+          stackSize: 3
+        weight: 2
+      - itemData:
+          prefabName: ShocklateSmoothie
+          stackSize: 3
+        weight: 2
+      - itemData:
+          prefabName: BlackSoup
+          stackSize: 3
+        weight: 2
+      - creatureData:
+        - allowDrops: true
+          prefabName: Abomination
+      - creatureData:
+        - allowDrops: true
+          prefabName: Wraith
+      - creatureData:
+        - allowDrops: true
+          prefabName: Draugr
+      - creatureData:
+        - allowDrops: true
+          prefabName: Blob
+      - creatureData:
+        - allowDrops: true
+          prefabName: Writhan
+  #######################
+  # TerrainEdit
+  #######################
+  - title: 'Terrain: Remove the Country!'
+    description: Remove the ground under the streamer and watch him panic!
+    points: 350
+    backgroundColor: '#40240f'
+    cooldown: 300
+    type: TerrainEdit
+    terrainEditData:
+      announceMessage: 'Terrain data corrupted. Cause: {{user}}!'
+      raiseDelta: -10
+      raisePower: 0.2
+      raiseRadius: 15
+      duration: 300
+  #######################
+  # TimeStop
+  #######################
+  - title: Timestop
+    description: Stops time for the streamer and monsters in the area.
+    points: 300
+    backgroundColor: '#D3FFA9'
+    cooldown: 600
+    ignoreWard: true
+    type: TimeStop
+    timeStopData:
+      duration: 10
+      freezePlayer: true
+      announceMessage: '{{user}} has stopped time for you!'
+  #######################
+  # Trap
+  #######################
+  - title: 'Spawn: Trap Field!'
+    description: Spawn traps around the streamer!
+    points: 300
+    backgroundColor: '#1a3813'
+    cooldown: 300
+    type: Trap
+    spawnAbilityData:
+      allowDrops: false
+      announceMessage: Minor inconveniences deployed by {{user}}!
+      breakOnDestroy: true
+      damage:
+        blunt: 50
+        pierce: 50
+        basedOnMaxHealthAndArmor: true
+        maxHealthPercentage: 0.35
+      duration: 300
+      groundOffset: 0
+      maxToSpawn: 300
+      minToSpawn: 300
+      snapToterrain: true
+      spawnDelay: 0.0001
+      spawnRadius: 25
+      spawns:
+      - fuling_trap
+  #######################
+  # Weather
+  #######################
+  - title: Weather Random
+    description: Spawn random weather in the area the Streamer is in right now!
+    points: 120
+    backgroundColor: '#70FFEA'
+    ignoreWard: true
+    type: Weather
+    weatherData:
+      announceMessage: '{{user}} is changing the skybox!'
+      duration: 300
+      height: 100
+      radius: 300
+      items:
+      - Clear
+      - LightRain
+      - Rain
+      - Misty
+      - ThunderStorm
+      - nofogts
+      - SwampRain
+      - Mistlands_clear
+      - Mistlands_rain
+      - Mistlands_thunder
+      - Heath clear
+      - Eikthyr
+      - GDKing
+      - Bonemass
+      - GoblinKing
+      - Queen
+      - Fader
+      - Ghosts
+      - Caves
+      - Ashlands_storm
+      - Ashlands_SeaStorm
+      - Ashlands_misty
+      - Ashlands_meteorshower
+      - Ashlands_CinderRain
+      - Ashlands_ashrain_clear
+      - Ashlands_ashrain
+      - Crypt
+      - Darklands_dark
+      - DeepForest Mist
+      - Eikthyr_no_lightning
+      - InfectedMine
+      - Morkhalla
+      - SunkenCrypt
+      - TheHollow
+  #######################
+  # Windmill
+  #######################
+  - title: 'Spawn: Windmills of DEATH'
+    description: Spawn posessed windmills around the streamer!
+    points: 300
+    backgroundColor: '#5E4F35'
+    cooldown: 300
+    type: Windmill
+    spawnAbilityData:
+      allowDrops: false
+      announceMessage: The bane of Shuki_NL... spawned by {{user}}!
+      breakOnDestroy: true
+      damage:
+        blunt: 100
+        basedOnMaxHealthAndArmor: true
+        maxHealthPercentage: 0.15
+      duration: 60
+      windmillRotationSpeed: 10
+      groundOffset: -3
+      maxToSpawn: 100
+      minToSpawn: 100
+      snapToterrain: true
+      spawnDelay: 0.001
+      spawnRadius: 30
+      spawns:
+      - Windmill_WBTI

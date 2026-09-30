@@ -13,7 +13,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
     /// matching <see cref="HomeTab"/>'s card style (RedesignUI.dc.html only mocks up the first
     /// card; the "Show safezone bounds" toggle is carried over from GUI_OLD/tabs/DebugTab.cs,
     /// which the mockup didn't include), followed by a clickable topic list explaining
-    /// Profiles/Redeems/Viewers/Settings/Safezones. Purely client-local: nothing here touches
+    /// Login/Profiles/Redeems/Viewers/Settings/Safezones. Purely client-local: nothing here touches
     /// ZDOs or the network.
     /// </summary>
     internal class HelpTab : IShellTabView
@@ -25,31 +25,46 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private readonly SelectorList m_topicList = new SelectorList();
         private readonly SelectorPreviewPanel m_topicPreview = new SelectorPreviewPanel();
 
-        private static readonly string[] TopicOrder = { "Profiles", "Redeems", "Viewers", "Settings", "Safezones" };
+        private static readonly string[] TopicOrder = { "Login", "Profiles", "Redeems", "Viewers", "Settings", "Safezones" };
 
         private static readonly Dictionary<string, string> TopicDescriptions = new Dictionary<string, string>
         {
+            ["Login"] =
+                "You can log in with the \"Twitch Login\" button in the top bar. It opens your main browser, where " +
+                "you need to log in to Twitch and authorize the mod." +
+                "\n\nIf the login goes wrong for some reason, try logging out or restarting the world. " +
+                "This can happen sometimes.",
             ["Profiles"] =
-                "Each profile holds all the configuration for Redeems and Settings. Switching profiles allows you to " +
-                "switch the entire setup at once. You can Import/Export, Copy and even Sync profiles. This allows you " +
-                "to share your profiles, make copies to adjust it slightly or make sure you got the same Redeems and " +
-                "Settings. Synced profiles are locked for other players than the owner, meaning only the owner can " +
-                "push changes!",
+                "Each profile holds all the configuration for Redeems and Settings, so switching profiles switches " +
+                "your entire setup at once. You can Import/Export, Copy and even Sync profiles. That lets you share " +
+                "a profile, make a copy to adjust it slightly, or make sure you and your friends have the same " +
+                "Redeems and Settings." +
+                "\n\nSynced profiles are read-only for everyone except the owner, so only the owner can push changes. " +
+                "This prevents drift: some redeems read values from their configuration, and those must be the same for everyone!",
             ["Redeems"] =
-                "Redeems are your channel point rewards. Each one triggers an in-game effect, spawning a creature, " +
-                "changing terrain, dealing damage, and more. When a viewer redeems it on Twitch. Twitch allows a " +
-                "maximum of 50 custom channel point rewards at once, so keep an eye on how many you have active.",
+                "Redeems are your custom channel point rewards. Each one triggers an in-game effect, like spawning " +
+                "creatures, raining logs, placing traps and more. Keep in mind that Twitch allows a maximum of 50 " +
+                "custom channel point rewards per channel, including the ones you already have set up." +
+                "\n\nTo create a new redeem, open the Redeems tab, click \"+ New redeem\" and follow the wizard. " +
+                "Step 1: choose an effect. Step 2: configure the chosen effect. Step 3: set up the channel point reward.",
             ["Viewers"] =
                 "Viewers are the Twitch chatters and redeemers you choose to register. Registering a viewer lets you " +
-                "give them cosmetics, like a creature color, with more perks and effects planned for later.",
+                "give them cosmetics, like a creature color, with more perks and effects planned in a later update." +
+                "\n\nRight now you can add viewers manually by name and give them a color. Creatures claimed or spawned will " +
+                "then be colored with their configured color!",
             ["Settings"] =
-                "Settings control this profile's overall behavior - things like auto-resolving redeems and whether " +
-                "chatting keeps working while you're not logged in. Settings save automatically, so there's no Save " +
-                "button anywhere in this mod.",
+                "Settings control this profile's overall behavior. They are grouped into:" +
+                "\n- Redeems: enable redeems on login, auto-resolve redeems and the redeem title prefix" +
+                "\n- Chatting: show viewer chat above creatures, claiming creatures with !claim and how often and how far to scan" +
+                "\n- Creatures: same faction, scaling by biome tier, and limits on how many spawn and how far away" +
+                "\n- Indestructible: make boats, chests, portals and crops indestructible" +
+                "\n- Safezones: the Twitch Ward recipe and behavior, and safezones on traders and boats" +
+                "\n\nSettings save automatically; there's no Save button anywhere in this mod.",
             ["Safezones"] =
-                "Safezones - ships, wards, and traders - block certain negative redeem effects while a player is " +
-                "inside them. If one ever seems stuck, use the \"Unstuck safezones\" button below; \"Show safezone " +
-                "bounds\" can visualize their bounds in-game as a wireframe outline.",
+                "Safezones can be put on ships, wards, and traders. While a player is inside one, redeem effects " +
+                "are blocked, unless \"Ignore safezone\" is enabled on that redeem. " +
+                "If a safezone ever seems stuck, use the \"Unstuck safezones\" button above. " +
+                "\"Show safezone bounds\" visualizes their bounds in-game as a wireframe outline.",
         };
 
         private static readonly Color EnabledColor = new Color(0.95f, 0.65f, 0.2f, 1f);
@@ -84,10 +99,13 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private const float TopicPreviewWidth = (ContentWidth - 2f * ContentMargin) - TopicListWidth - TopicsGapX;
         private const float TopicPreviewX = LeftEdgeX + TopicListWidth + TopicsGapX + TopicPreviewWidth / 2f;
 
-        // Total stacked height of the topic buttons - the list card and preview card are both
-        // built at this height so their top/bottom edges line up.
-        private static readonly float TopicsListHeight =
-            TopicOrder.Length * TopicBtnHeight + (TopicOrder.Length - 1) * TopicBtnGap;
+        // Height of both the list card and the preview card, so their top/bottom edges line up.
+        // At least the topic buttons' total stacked height, but taller than that so the longest
+        // description (Settings, ~10 lines at 13pt) fits inside the preview card - the description
+        // text just grows downward and is never clipped, so it would spill out of a shorter card.
+        private static readonly float TopicsListHeight = Mathf.Max(
+            TopicOrder.Length * TopicBtnHeight + (TopicOrder.Length - 1) * TopicBtnGap,
+            240f);
 
         private const float TopicPreviewPadding = 14f; // matches RedeemWizard's BoxPadding
 
@@ -128,7 +146,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             GameObject card = GuiHelper.CreateCard(m_root, topCenter, CardWidth, CardHeight);
             GuiHelper.CreateCardTitle(card, "Safezone Unstuck", CardWidth - 24f);
             GuiHelper.CreateCardButton(card, "Unstuck safezones", CardWidth, OnUnstuckSafezones);
-            GuiHelper.CreateCardDescription(card, "Use if Safezone appears to be stuck", CardWidth - 24f, height: 38f);
+            GuiHelper.CreateCardDescription(card, "Use if a safezone appears to be stuck", CardWidth - 24f, height: 38f);
         }
 
         private void BuildSafezoneBoundsCard(Vector2 topCenter)
