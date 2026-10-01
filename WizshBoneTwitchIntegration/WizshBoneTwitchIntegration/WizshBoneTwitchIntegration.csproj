@@ -43,6 +43,7 @@
     <None Remove="resources\WizshBone_Original.png" />
     <None Remove="resources\WizshBone_Outlined.png" />
     <None Remove="resources\WizshBone_Simple.png" />
+    <None Remove="resources\WizshBone_Simple_512.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -53,10 +54,7 @@
     <EmbeddedResource Include="resources\profile.yaml" />
     <EmbeddedResource Include="resources\profile_chatting_only.yaml" />
     <EmbeddedResource Include="resources\viewers.yaml" />
-    <EmbeddedResource Include="resources\WizehBone_Gradient.png" />
-    <EmbeddedResource Include="resources\WizshBone_Original.png" />
-    <EmbeddedResource Include="resources\WizshBone_Outlined.png" />
-    <EmbeddedResource Include="resources\WizshBone_Simple.png" />
+    <EmbeddedResource Include="resources\WizshBone_Simple_512.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -77,7 +75,6 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <None Include="README.md" />
   </ItemGroup>
 
   <ItemGroup>

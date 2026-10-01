@@ -1,58 +1,90 @@
-# JötunnModStub
+# WizshBone Twitch Integration
 
-A Valheim mod stub project using [Jötunn](https://github.com/Valheim-Modding/Jotunn) including build tools and a basic Unity project stub.
-There is no actual plugin content included, just a minimum plugin class. 
+Let your Twitch chat turn your Valheim world into chaos! WizshBone Twitch Integration connects your
+channel to the game: viewers can spend channel points on redeems that trigger effects around you, and chatters can even take control of the creatures in your world!
 
-#  Setup Guide
+## Getting started
 
-Please see [Jötunn Docs](https://valheim-modding.github.io/Jotunn/guides/overview.html) detailed documentation and setup.
+1. Install the mod and its dependencies.
+2. Start Valheim, load into a world and open the mod's window (default F3).
+3. Click **Twitch Login** in the top bar. Your main browser opens, where you log in to Twitch and authorize the mod. (You need to do this twice currently seperate for the mod and chat)
+4. Turn on redeems from the Home tab. Your redeems are created as custom channel point rewards on your channel.
 
-### Post Build automations
+Twitch only offers channel points (and custom rewards) to Affiliates and Partners, and allows at most 50 custom rewards per channel, including any you already have.
 
-Included in this repo is a PowerShell script `publish.ps1`.
-The script is referenced in the project file as a post-build event.
-Depending on the chosen configuration in Visual Studio the script executes the following actions.
+## Features
 
-### Building Debug
+### Channel point redeems
+Every redeem triggers an in-game effect around the streamer. The redeem wizard walks you through
+choosing an effect, configuring it and setting up the channel point reward. Available effects:
 
-The compiled dll and a dll.mdb debug file are copied to `<ValheimDir>\BepInEx\plugins` (or the path set in MOD_DEPLOYPATH).
+- **Spawn creature(s)** from a creature group you define
+- **Surprise chest** with random loot or unpleasant surprises!
+- **Status effect** applied to you, positive or negative
+- **Weather** changes for the vibes!
+- **Time stop**, freezing creatures and objects around you
+- **Terrain edit**, spawning sinkholes to trap the unsuspecting streamer
+- **Smite** (lightning), **Meteors**, **Roots**, **Traps**
+- **Fish rain**, **Log rain** and **Boat rain**
+- **Doors of Doom** and **Windmills of Death**
+- **Mist**, **Flashbang** and **Detonate fish**
 
-### Building Release
+A redeem requires at least a point cost and a title. You can also add cooldowns, and make redeems appear or disappear as you progress and defeat bosses. You can apply a percentage discount to all redeem costs, and choose whether redeems are resolved automatically
+or by hand from the redeem history.
 
-A compressed file with the binaries is created in `<JotunnModStub>\Packages`ready for upload to ThunderStore.
-Dont forget to include your information in the manifest.json and to change the project's readme file.
+### Chatting and claiming creatures
+- Chat messages can show up above nearby creatures.
+- Viewers are offered nearby creatures to claim with `!claim`, either to a randomly chosen chatter
+  or as a free-for-all where the first to type it wins.
+- Claimed creatures carry the viewer's name and can be released with `!unclaim`.
 
-## Developing Assets with Unity
+### Viewers
+Register the chatters and redeemers you care about to give them perks, like a creature color.
 
-New Assets can be created with Unity and imported into Valheim using the mod.
-A Unity project is included in this repository under `<JotunnModStub>\JotunnModUnity`.
+### Profiles
+A profile holds all your redeems and settings. Switch, copy, rename, import and
+export profiles to share a setup, or sync a profile so you and your friends run the exact same
+configuration. Synced profiles are read-only for everyone except the owner.
 
-### Unity Editor Setup
+### Settings
+Everything below is configured per profile and saves automatically:
+- Chatting: claim duration, scan interval and radius, blacklist, free-for-all claiming
+- Creatures: same faction, scaling by biome tier, spawn limits, follow radius
+- Indestructible boats, chests, portals and crops
+- Twitch Ward recipe and behavior
+- Safezones on traders and boats
 
-1. [Download](https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.exe) UnityHub directly from Unity or install it with the Visual Studio Installer via `Individual Components` -> `Visual Studio Tools for Unity`
-2. You will need an Unity account to register your PC and get a free licence. Create the account, login with it in Unity Hub and get your licence via `Settings` -> `Licence Management`
-3. Install Unity Editor version 2022.3.17f
-4. Compile the project. This copies all assemblies into `<JotunnModStub>\JotunnModUnity\Assets\Assemblies`. Don't open Unity yet before this step, it will remove assembly references.
-5. **Warning:** These assembly files are copyrighted material and you can theoretically get into trouble when you distribute them in your github repository. To avoid that there is a .gitignore file in the Unity project folder. Keep that when you clone or copy this repository
-6. Open Unity Hub and add the JotunnModUnity project
-7. Open the project in Unity
-8. Install the `AssetBundle Browser` package in the Unity Editor via `Window`-> `Package Manager` for easy bundle creation
+### Safezones
+Safezones (Twitch Wards, ships and traders) block redeem effects while you are inside them, unless a
+redeem is set to ignore safezones.
 
-## Debugging
+## Multiplayer
 
-See the Wiki page [Debugging Plugins via IDE](https://github.com/Valheim-Modding/Wiki/wiki/Debugging-Plugins-via-IDE) for more information
+The mod is designed with multiplayer in mind, so redeem effects should work for everyone in the
+world, not just the streamer. It has **NOT** been thoroughly tested in multiplayer yet, so some issues
+can arise. Please report any problems you run into.
 
-## Actions after a game update
+## Known issues
 
-When Valheim updates it is likely that parts of the assembly files change.
-If this is the case, the references to the assembly files must be renewed in Visual Studio and Unity.
+- Login requires you to authorize twice, once for the mod and once for chat. I am looking into this.
+- Creature recoloring is not finished: bosses and creatures from the Ashlands onwards can't be recolored yet.
+- Multiplayer has not been tested thoroughly (see above).
 
-### Prebuild actions
+## Bugs & Suggestions
 
-1. There is a file called DoPrebuild.props included in the solution. When you set its only value to true, Jötunn will automatically generate publicized assemblies for you. Otherwise you have to do this step manually.
+Found a bug or have a suggestion? Join my Discord: https://discord.gg/M3BrRskQEd  
+Select the modding role and post your feedback or bug report there!
 
-### Unity actions
+## Planned
 
-1. Copy all `assembly_*.dll` from `<ValheimDir>\valheim_Data\Managed` into `<JotunnModStub>\JotunnModUnity\Assets\Assemblies`. <br />
-  **Do this directly in the filesystem - don't import the dlls in Unity**.
-2. Go to Unity Editor and press `Ctrl+R`. This reloads all files from the filesystem and "re-imports" the copied dlls into the project.
+- More default profiles with different levels of chaos and difficulty
+- Leaderboards (who killed you the most, most used redeems, points spent and more)
+- More redeem types, like dropping your inventory, inverted movement and rearranging your hotbar
+- A periodic vote that lets viewers decide your fate with a random redeem
+- Surprise chests that can turn out to be a mimic or spawn other redeems
+- A new cooldown system with shared cooldowns
+- More commands for viewers to control the creatures they claimed or spawned
+
+## Screenshots
+
+Soon™

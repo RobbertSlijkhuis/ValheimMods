@@ -50,7 +50,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float TitleLogoWidth   = 200f;
         private const float TitleLogoHeight  = 50f;
 
-        private const string TitleLogoResource = "WizshBoneTwitchIntegration.resources.WizshBone_Simple.png";
+        private const string TitleLogoResource = "WizshBoneTwitchIntegration.resources.WizshBone_Simple_512.png";
 
         // DividerRightInset pulls the title divider bar in from the sidebar's right edge.
         private const float DividerThickness = 2f;
