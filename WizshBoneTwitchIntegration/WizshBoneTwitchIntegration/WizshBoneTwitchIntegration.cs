@@ -25,7 +25,7 @@ namespace WizshBoneTwitchIntegration
     {
         public const string PluginGUID = "DeathWizsh.WizshBoneTwitchIntegration";
         public const string PluginName = "WizshBoneTwitchIntegration";
-        public const string PluginVersion = "1.0.0";
+        public const string PluginVersion = "1.0.1";
         public static WizshBoneTwitchIntegration Instance;
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
 
