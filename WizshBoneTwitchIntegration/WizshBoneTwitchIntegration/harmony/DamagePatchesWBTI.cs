@@ -190,13 +190,11 @@ namespace WizshBoneTwitchIntegration.Harmony
 
                 if (ship != null && !persistentDamage.m_damageShips)
                 {
-                    //Jotunn.Logger.LogWarning("Prevent AOE damage to ship!");
                     __result = false;
                 }
 
                 else if (wearNTear != null && !persistentDamage.m_damageStructures)
                 {
-                    //Jotunn.Logger.LogWarning("Prevent AOE damage to structures!");
                     __result = false;
                 }
             }
@@ -247,13 +245,11 @@ namespace WizshBoneTwitchIntegration.Harmony
 
                 if (ship != null && !persistentDamage.m_damageShips)
                 {
-                    // Jotunn.Logger.LogWarning("Prevent IMPACT damage to ship! " + gameObject.name);
                     return false;
                 }
 
                 else if (wearNTear != null && !persistentDamage.m_damageStructures)
                 {
-                    // Jotunn.Logger.LogWarning("Prevent IMPACT damage to structures! " + gameObject.name);
                     return false;
                 }
 

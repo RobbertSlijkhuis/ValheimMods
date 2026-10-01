@@ -22,6 +22,10 @@ namespace WizshBoneTwitchIntegration.Gui
     {
         public const float FieldHeight = 36f;
 
+        /// <summary>Default bounds for number fields that don't pass their own min/max.</summary>
+        public const int DefaultMin = -1000;
+        public const int DefaultMax = 1000;
+
         public const int FieldFontSize = 13;
         public const int PlaceholderFontSize = 14;
 
@@ -81,33 +85,63 @@ namespace WizshBoneTwitchIntegration.Gui
         /// fires for values that actually parse as an int - or, with <paramref name="emptyAsZero"/>,
         /// also for an emptied box, reported as 0 (otherwise clearing the box leaves the previous
         /// value in place). <paramref name="maxLength"/> caps the typed length (0 = no cap).
+        ///
+        /// <paramref name="onChanged"/> always receives a value clamped to
+        /// [<paramref name="min"/>, <paramref name="max"/>]. The box text itself is only snapped
+        /// to the clamped value once editing ends, so typing e.g. "30" into a field with a minimum
+        /// of 5 isn't rewritten to "5" after the first digit.
         /// </summary>
-        public static InputField CreateIntField(GameObject parent, Vector2 position, float width, int currentValue, Action<int> onChanged, bool emptyAsZero = false, int maxLength = 0)
+        public static InputField CreateIntField(GameObject parent, Vector2 position, float width, int currentValue, Action<int> onChanged, bool emptyAsZero = false, int maxLength = 0, int min = DefaultMin, int max = DefaultMax)
         {
             InputField input = CreateInputField(parent, position, width, currentValue.ToString(), maxLength: maxLength);
             input.contentType = InputField.ContentType.IntegerNumber;
             input.onValueChanged.AddListener(val =>
             {
                 if (int.TryParse(val, out int result))
-                    onChanged?.Invoke(result);
+                    onChanged?.Invoke(Mathf.Clamp(result, min, max));
                 else if (emptyAsZero && string.IsNullOrEmpty(val))
-                    onChanged?.Invoke(0);
+                    onChanged?.Invoke(Mathf.Clamp(0, min, max));
+            });
+            input.onEndEdit.AddListener(val =>
+            {
+                int result;
+                if (!int.TryParse(val, out result))
+                {
+                    if (!(emptyAsZero && string.IsNullOrEmpty(val)))
+                        return;
+                    result = 0;
+                }
+
+                string clamped = Mathf.Clamp(result, min, max).ToString();
+                if (input.text != clamped)
+                    input.text = clamped;
             });
             return input;
         }
 
         /// <summary>
         /// Creates a decimal-only <see cref="InputField"/>; <paramref name="onChanged"/> only
-        /// fires for values that actually parse as a float.
+        /// fires for values that actually parse as a float, clamped to
+        /// [<paramref name="min"/>, <paramref name="max"/>]. The box text is snapped to the
+        /// clamped value once editing ends (see <see cref="CreateIntField"/>).
         /// </summary>
-        public static InputField CreateFloatField(GameObject parent, Vector2 position, float width, float currentValue, Action<float> onChanged)
+        public static InputField CreateFloatField(GameObject parent, Vector2 position, float width, float currentValue, Action<float> onChanged, float min = DefaultMin, float max = DefaultMax)
         {
             InputField input = CreateInputField(parent, position, width, currentValue.ToString("G"));
             input.contentType = InputField.ContentType.DecimalNumber;
             input.onValueChanged.AddListener(val =>
             {
                 if (float.TryParse(val, out float result))
-                    onChanged?.Invoke(result);
+                    onChanged?.Invoke(Mathf.Clamp(result, min, max));
+            });
+            input.onEndEdit.AddListener(val =>
+            {
+                if (!float.TryParse(val, out float result))
+                    return;
+
+                string clamped = Mathf.Clamp(result, min, max).ToString("G");
+                if (input.text != clamped)
+                    input.text = clamped;
             });
             return input;
         }

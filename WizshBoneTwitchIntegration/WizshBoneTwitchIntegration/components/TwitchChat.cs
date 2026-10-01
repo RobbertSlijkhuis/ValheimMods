@@ -176,8 +176,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             splitPoint = message.IndexOf(":", 1);
             string chatMessage = message.Substring(splitPoint + 1);
 
-            Jotunn.Logger.LogWarning($"{userName}: {chatMessage}");
-
             if (chatMessage.Trim().Equals("!claim", StringComparison.OrdinalIgnoreCase))
             {
                 bool freeForAll = ProfileSettingsHelper.Current.chattingClaimFreeForAll;
@@ -190,8 +188,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     m_chatting.AcceptClaim(userName);
                     return;
                 }
-
-                Jotunn.Logger.LogWarning($"[WBTI] !claim from {userName} ignored: freeForAll={freeForAll}, openClaim={m_chatting.HasOpenClaim()}, chosenUser={m_chatting.GetChosenUser() ?? "none"}");
             }
 
             // Resolved centrally here (once per message) rather than broadcast to every claimed

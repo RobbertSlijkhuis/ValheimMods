@@ -84,12 +84,11 @@ namespace WizshBoneTwitchIntegration.Helpers
                             entry.Status = TargetState;
                             Twitch.API.ResolveCustomReward(entry, TargetState);
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             // Swallow and continue: one bad entry must not stop the rest of an
                             // unattended background batch from draining (it keeps running even
                             // after the GUI that triggered it closes).
-                            Jotunn.Logger.LogWarning($"[WBTI] BulkRedeemResolveHelper: failed to resolve '{entry.CustomRewardTitle}' for {entry.RedeemerName}: {e}");
                         }
                     }
 

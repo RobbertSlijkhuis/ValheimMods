@@ -60,7 +60,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             layout.PairRow(
                 () => layout.IntRow("Level", "Star level of the creature (1 = none, up to 10 = max).",
-                    creature.level, v => creature.level = v, defaultValue: 1),
+                    creature.level, v => creature.level = v, defaultValue: 1, min: 1, max: 10),
                 () => layout.FloatRow("Size", "Overall size multiplier of the creature.",
                     creature.size, v => creature.size = v, defaultValue: 1f));
 

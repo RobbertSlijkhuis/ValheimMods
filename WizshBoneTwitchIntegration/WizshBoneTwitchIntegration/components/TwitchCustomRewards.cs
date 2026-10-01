@@ -126,13 +126,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (m_alias != null && (customRewardEvent.RedeemerName == m_auth?.m_userInfo?.displayName || WizshBoneTwitchIntegration.useRedeemCommand))
                 {
-                    //Jotunn.Logger.LogWarning($"{m_auth?.m_userInfo?.displayName} pretending to be {m_alias}");
                     customRewardEvent.RedeemerName = m_alias;
                 }
 
-                //Jotunn.Logger.LogWarning($"{customRewardEvent.RedeemerName} has bought {customRewardEvent.CustomRewardTitle} for {customRewardEvent.CustomRewardCost}!");
-                //Jotunn.Logger.LogWarning($"Time: {customRewardEvent.RedeemedAt}");
-                //Jotunn.Logger.LogWarning($"Status: {customRewardEvent.Status}");
 
                 m_refundMessage = $"Your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points has been refunded!";
 
@@ -344,7 +340,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void SetRewards(List<RedeemData> redeems = null, bool isEnabled = true)
         {
-            //Jotunn.Logger.LogWarning("SetRewards()");
             List<CustomRewardDefinition> listRewards = new List<CustomRewardDefinition>();
 
             if (redeems == null)
@@ -400,7 +395,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public TaskAwaiter ClearRewards()
         {
-            //Jotunn.Logger.LogWarning("ClearRewards()");
             List<CustomRewardDefinition> list = new List<CustomRewardDefinition>();
             GameTask gameTask = Twitch.API.ReplaceCustomRewards(list.ToArray());
             return gameTask.GetAwaiter();

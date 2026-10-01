@@ -197,7 +197,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     entry.weight = v;
                     m_list.RefreshListLabels();
                 },
-                defaultValue: 1f);
+                defaultValue: 1f, min: 0f);
 
             if (isItem)
                 BuildItemFields(layout, entry);

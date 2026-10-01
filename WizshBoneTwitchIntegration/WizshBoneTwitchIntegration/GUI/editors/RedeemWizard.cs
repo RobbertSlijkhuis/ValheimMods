@@ -178,6 +178,7 @@ namespace WizshBoneTwitchIntegration.Gui
         // preview card, with a fixed gap between the two halves of a row.
         // Longest typed count (points, cooldown, limits) - keeps int.Parse from overflowing.
         private const int   CountMaxLength     = 9;
+        private const int   CountMax           = 999_999_999; // largest value that fits CountMaxLength digits
         private const float CardColumnGap      = 20f;
 
         // Temporarily hides the "Limit per stream" / "Limit per user per stream" card. The card is
@@ -657,7 +658,7 @@ namespace WizshBoneTwitchIntegration.Gui
             // (number + unit dropdown) on the description row.
             float pointsX = Step3Width / 2f - BoxPadding - PointsColumnWidth / 2f;
             float pointsInputY = contentTopY - RowHeight / 2f;
-            m_costInput = GuiFieldBuilder.CreateIntField(rewardBox, new Vector2(pointsX, pointsInputY), PointsColumnWidth, 0, v => m_working.points = Mathf.Max(0, v), emptyAsZero: true, maxLength: CountMaxLength);
+            m_costInput = GuiFieldBuilder.CreateIntField(rewardBox, new Vector2(pointsX, pointsInputY), PointsColumnWidth, 0, v => m_working.points = v, emptyAsZero: true, maxLength: CountMaxLength, min: 0, max: CountMax);
 
             // Middle column: title row (prefix badge + input), description row beneath it.
             float middleLeftX = swatchX + swatchSize / 2f + BoxPadding;
@@ -698,7 +699,7 @@ namespace WizshBoneTwitchIntegration.Gui
             float cooldownNumberX = pointsX - PointsColumnWidth / 2f + CooldownNumberWidth / 2f;
             float cooldownUnitX = pointsX + PointsColumnWidth / 2f - CooldownUnitWidth / 2f;
 
-            m_cooldownInput = GuiFieldBuilder.CreateIntField(rewardBox, new Vector2(cooldownNumberX, secondContentTopY), CooldownNumberWidth, 0, _ => OnCooldownChanged(), emptyAsZero: true, maxLength: CountMaxLength);
+            m_cooldownInput = GuiFieldBuilder.CreateIntField(rewardBox, new Vector2(cooldownNumberX, secondContentTopY), CooldownNumberWidth, 0, _ => OnCooldownChanged(), emptyAsZero: true, maxLength: CountMaxLength, min: 0, max: CountMax);
             GuiHelper.PivotToTop((RectTransform)m_cooldownInput.transform, secondContentTopY);
 
             m_cooldownUnitDropdown = new SearchableDropdown();
@@ -722,9 +723,9 @@ namespace WizshBoneTwitchIntegration.Gui
             CreateRowLabel(limitsCard, "Limit per stream", limitsRowY, halfWidth, leftHalfX);
             CreateRowLabel(limitsCard, "Limit per user per stream", limitsRowY, halfWidth, rightHalfX);
             float limitsInputY = limitsRowY - LabelHeight - LabelInputGap;
-            m_maxPerStreamInput = GuiFieldBuilder.CreateIntField(limitsCard, new Vector2(leftHalfX, limitsInputY), halfWidth, 0, v => m_working.maxPerStream = Mathf.Max(0, v), emptyAsZero: true, maxLength: CountMaxLength);
+            m_maxPerStreamInput = GuiFieldBuilder.CreateIntField(limitsCard, new Vector2(leftHalfX, limitsInputY), halfWidth, 0, v => m_working.maxPerStream = v, emptyAsZero: true, maxLength: CountMaxLength, min: 0, max: CountMax);
             GuiHelper.PivotToTop((RectTransform)m_maxPerStreamInput.transform, limitsInputY);
-            m_maxPerUserPerStreamInput = GuiFieldBuilder.CreateIntField(limitsCard, new Vector2(rightHalfX, limitsInputY), halfWidth, 0, v => m_working.maxPerUserPerStream = Mathf.Max(0, v), emptyAsZero: true, maxLength: CountMaxLength);
+            m_maxPerUserPerStreamInput = GuiFieldBuilder.CreateIntField(limitsCard, new Vector2(rightHalfX, limitsInputY), halfWidth, 0, v => m_working.maxPerUserPerStream = v, emptyAsZero: true, maxLength: CountMaxLength, min: 0, max: CountMax);
             GuiHelper.PivotToTop((RectTransform)m_maxPerUserPerStreamInput.transform, limitsInputY);
 
             // Hidden for now (see LimitsCardEnabled) - still built so its fields and

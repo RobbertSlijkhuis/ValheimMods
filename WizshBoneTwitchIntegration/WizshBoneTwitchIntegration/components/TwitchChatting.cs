@@ -32,9 +32,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 DeserializeUserBlackList(ProfileSettingsHelper.Current.chattingBlackList);
 
-                foreach (string entry in m_userBlacklist)
-                    Jotunn.Logger.LogWarning(entry);
-
                 InvokeRepeatingScan();
             }
             catch (System.Exception e)
@@ -243,7 +240,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (users.Count == 0)
                 {
-                    Jotunn.Logger.LogWarning("No authors found");
                     return;
                 }
 
@@ -252,7 +248,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (ContainsCreatureAssignment(chosenUser))
                 {
-                    Jotunn.Logger.LogWarning("User already has a claim, going for next user");
                     continue;
                 }
 
@@ -269,7 +264,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             if (m_chosenPrefab == null)
             {
-                Jotunn.Logger.LogWarning($"[WBTI] AcceptClaim: {userName} typed !claim but the offered creature no longer exists, ignoring.");
                 return;
             }
 
@@ -277,7 +271,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             // how many claims they already hold. Only the non-free-for-all path limits one per user.
             if (!ProfileSettingsHelper.Current.chattingClaimFreeForAll && ContainsCreatureAssignment(userName))
             {
-                Jotunn.Logger.LogWarning($"[WBTI] AcceptClaim: {userName} already has a claim, ignoring.");
                 return;
             }
 
@@ -286,7 +279,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             // on top of one that already exists (which would silently steal/corrupt an existing claim).
             if (m_chosenPrefab.GetComponent<TwitchCreatureClaim>() != null)
             {
-                Jotunn.Logger.LogWarning($"[WBTI] AcceptClaim: {userName} tried to claim a creature that's already claimed, ignoring.");
                 m_chosenUser = null;
                 m_chosenPrefab = null;
                 return;

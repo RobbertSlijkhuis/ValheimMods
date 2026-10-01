@@ -143,24 +143,24 @@ namespace WizshBoneTwitchIntegration.Gui
             return field;
         }
 
-        public InputField IntRow(string label, string description, int value, Action<int> onChanged, int defaultValue = 0, int maxLength = 9)
+        public InputField IntRow(string label, string description, int value, Action<int> onChanged, int defaultValue = 0, int maxLength = 9, int min = GuiFieldBuilder.DefaultMin, int max = GuiFieldBuilder.DefaultMax)
         {
             GameObject card = BeginFieldCard(label, out float fieldY);
 
             (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(m_cellWidth);
-            InputField field = GuiFieldBuilder.CreateIntField(card, new Vector2(fieldCenterX, fieldY), fieldWidth, value, onChanged, emptyAsZero: true, maxLength: maxLength);
+            InputField field = GuiFieldBuilder.CreateIntField(card, new Vector2(fieldCenterX, fieldY), fieldWidth, value, onChanged, emptyAsZero: true, maxLength: maxLength, min: min, max: max);
             GuiHelper.CreateResetButton(card, resetCenterX, fieldY, () => field.text = defaultValue.ToString());
 
             EndFieldCard(card, description);
             return field;
         }
 
-        public InputField FloatRow(string label, string description, float value, Action<float> onChanged, float defaultValue = 0f)
+        public InputField FloatRow(string label, string description, float value, Action<float> onChanged, float defaultValue = 0f, float min = GuiFieldBuilder.DefaultMin, float max = GuiFieldBuilder.DefaultMax)
         {
             GameObject card = BeginFieldCard(label, out float fieldY);
 
             (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(m_cellWidth);
-            InputField field = GuiFieldBuilder.CreateFloatField(card, new Vector2(fieldCenterX, fieldY), fieldWidth, value, onChanged);
+            InputField field = GuiFieldBuilder.CreateFloatField(card, new Vector2(fieldCenterX, fieldY), fieldWidth, value, onChanged, min: min, max: max);
             GuiHelper.CreateResetButton(card, resetCenterX, fieldY, () => field.text = defaultValue.ToString("G"));
 
             EndFieldCard(card, description);

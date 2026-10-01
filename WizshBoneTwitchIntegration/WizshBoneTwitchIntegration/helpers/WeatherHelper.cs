@@ -41,7 +41,6 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
 
             string weather = weatherData.items[Random.Range(0, weatherData.items.Count)];
-            Jotunn.Logger.LogWarning("Chosen weather: " + weather);
 
             GameObject gameObject = ZNetViewHelper.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.EnvZone, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
             _activeWeatherZone = gameObject;

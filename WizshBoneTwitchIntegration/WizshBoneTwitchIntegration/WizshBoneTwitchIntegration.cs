@@ -175,12 +175,8 @@ namespace WizshBoneTwitchIntegration
 
         private void LogStatusEffects()
         {
-            //Jotunn.Logger.LogWarning("LogStatusEffects");
             //foreach (var effect in ObjectDB.m_instance.m_StatusEffects)
             //{
-            //    Jotunn.Logger.LogWarning("========================================");
-            //    Jotunn.Logger.LogWarning("Name: " + effect.name);
-            //    Jotunn.Logger.LogWarning("NameHash(): " + effect.NameHash());
             //}
             ItemManager.OnItemsRegistered -= LogStatusEffects;
         }

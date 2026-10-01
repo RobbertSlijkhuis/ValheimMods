@@ -249,10 +249,10 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 ProfileSettingsHelper.Current.redeemsDiscountPercent,
                 v =>
                 {
-                    ProfileSettingsHelper.Current.redeemsDiscountPercent = Mathf.Clamp(v, 0, 100);
+                    ProfileSettingsHelper.Current.redeemsDiscountPercent = v;
                     ProfileSettingsPersistHelper.Persist();
                 },
-                emptyAsZero: true, maxLength: 3);
+                emptyAsZero: true, maxLength: 3, min: 0, max: 100);
 
             float percentX = rowLeftEdge + fieldWidth + gap + percentWidth / 2f;
             GuiHelper.CreateCardText(card, "%", rowY, 16, GUIManager.Instance.ValheimBeige,

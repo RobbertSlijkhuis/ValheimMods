@@ -16,7 +16,6 @@ namespace WizshBoneTwitchIntegration.Extensions
 
                 if (maxRange > 0f && Vector3.Distance(Player.m_localPlayer.transform.position, creature.transform.position) > maxRange)
                 {
-                    Jotunn.Logger.LogWarning("Out of range?");
                     continue;
                 }
 

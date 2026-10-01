@@ -122,7 +122,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             try
             {
                 TimeSpan timeSpan = DateTime.Now.Subtract(m_loggedinInTime);
-                Jotunn.Logger.LogWarning(timeSpan.TotalMinutes);
 
                 if (timeSpan.TotalMinutes > m_logOutTime)
                     Player.m_localPlayer.Message(MessageHud.MessageType.Center, "You will be logged out from Twitch in 15 minutes!", 10);
@@ -162,8 +161,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     Jotunn.Logger.LogError("Current auth state is null");
                     return;
                 }
-
-                Jotunn.Logger.LogWarning(m_authState.MaybeResult.Status);
 
                 if (m_authState.MaybeResult.Status == AuthStatus.LoggedIn && !m_loggedIn)
                 {
@@ -248,7 +245,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         private void ResetLoginProcess()
         {
-            Jotunn.Logger.LogWarning("[WBTI] TwitchAuth: Login timed out waiting for browser authorization, resetting.");
             CancelInvoke(nameof(InitLoginProcess));
             m_waitingForCode = false;
             m_authInfo = null;
@@ -277,7 +273,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             Twitch.API.LogOut();
             CancelInvoke(nameof(TrackAuthRepeating));
             GetAuthState();
-            Jotunn.Logger.LogWarning("Logged out.., recalling: OnLogoutYes");
             StartCoroutine(DelayedLogout());
         }
 
@@ -301,7 +296,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             Twitch.API.LogOut();
             CancelInvoke(nameof(TrackAuthRepeating));
             GetAuthState();
-            Jotunn.Logger.LogWarning("Logged out.., recalling: OnQuitYes");
             StartCoroutine(DelayedQuit());
         }
 
@@ -314,7 +308,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void GetBitsLeaderboard()
         {
-            Jotunn.Logger.LogWarning("Checking logged in status...");
             Twitch.API.GetBitsLeaderboard();
         }
     }

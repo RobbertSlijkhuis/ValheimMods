@@ -178,17 +178,6 @@ namespace WizshBoneTwitchIntegration.Helpers
             return valheimCreatures.GetValueSafe(name.Replace("(Clone)", ""));
         }
 
-        /// <summary>
-        /// Called for every creature prefab the RedeemPrefabCatalog scan finds - warns when it has no
-        /// entry in <see cref="valheimCreatures"/>, so missing creatures (which get no tier/spawn
-        /// effect) can be spotted in the log and added.
-        /// </summary>
-        public static void LogIfMissingValheimCreature(string prefabName, string displayName)
-        {
-            if (!valheimCreatures.ContainsKey(prefabName))
-                Jotunn.Logger.LogWarning($"[WBTI] Creature missing from CreatureHelper.valheimCreatures: prefab '{prefabName}', display name '{displayName}'");
-        }
-
         // A handful of vanilla creature names (e.g. some Ashlands mobs) embed a "<color=orange>...
         // </color>" rich-text tag in m_name. That renders fine in in-game hover text (which supports
         // Unity rich text), but leaks through wherever a localized creature name is shown somewhere
@@ -339,7 +328,6 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static void ScaleHitDamage(ref HitData hit, float scale)
         {
-            //Jotunn.Logger.LogWarning(hit.GetTotalDamage());
 
             hit.m_damage.m_blunt *= scale;
             hit.m_damage.m_slash *= scale;
@@ -351,7 +339,6 @@ namespace WizshBoneTwitchIntegration.Helpers
             hit.m_damage.m_poison *= scale;
             hit.m_damage.m_spirit *= scale;
 
-            //Jotunn.Logger.LogWarning(hit.GetTotalDamage());
         }
 
         /// <summary>

@@ -64,7 +64,6 @@ namespace WizshBoneTwitchIntegration.Gui
                 if (s_statusEffects.Count == 0 && ObjectDB.instance != null)
                 {
                     s_statusEffects = BuildStatusEffectOptions();
-                    Jotunn.Logger.LogWarning($"[WBTI] RedeemPrefabCatalog: status effect catalog (re)built with {s_statusEffects.Count} entries.");
                 }
                 return s_statusEffects;
             }
@@ -171,7 +170,6 @@ namespace WizshBoneTwitchIntegration.Gui
                     // prefab name (skipped when the label already fell back to it).
                     string dropdownLabel = creatureLabel == name ? name : $"{creatureLabel} ({name})";
                     creatures.Add(new DropdownOption(name, dropdownLabel));
-                    CreatureHelper.LogIfMissingValheimCreature(name, creatureLabel);
                 }
 
                 if (placeableNames.Contains(name))
@@ -200,8 +198,6 @@ namespace WizshBoneTwitchIntegration.Gui
             s_itemNames = itemNames;
             LogPrefabs = LogPrefabCandidates.Where(name => PrefabManager.Instance.GetPrefab(name) != null).ToList();
             s_statusEffects = BuildStatusEffectOptions();
-
-            Jotunn.Logger.LogWarning($"[WBTI] RedeemPrefabCatalog built: {creatures.Count} creatures, {doors.Count} doors, {pieces.Count} placeable pieces, {LogPrefabs.Count} log prefabs, {s_statusEffects.Count} status effects.");
         }
 
         /// <summary>

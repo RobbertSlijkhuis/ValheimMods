@@ -26,8 +26,6 @@ namespace WizshBoneTwitchIntegration.Harmony
             GameObject root = __instance.transform.root.gameObject;
             TwitchPhysicsFreezeData freezeData = root.GetComponent<TwitchPhysicsFreezeData>() ?? root.AddComponent<TwitchPhysicsFreezeData>();
             freezeData.FreezeDamage();
-
-            Jotunn.Logger.LogWarning($"[WBTI] Aoe.Awake froze damage on {root.name} at {__instance.transform.position}");
         }
 
         // Block player input while frozen so the movement system can't fight the frozen rigidbody.

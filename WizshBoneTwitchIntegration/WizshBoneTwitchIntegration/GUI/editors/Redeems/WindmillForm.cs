@@ -48,8 +48,8 @@ namespace WizshBoneTwitchIntegration.Gui
             layout.PairRow(
                 () => m_duration = layout.IntRow("Duration", "How long the spawned windmills last before they clean themselves up, in seconds (0 = indefinite).",
                     DefaultDuration, v => m_working.spawnAbilityData.duration = v, defaultValue: DefaultDuration),
-                () => m_rotationSpeed = layout.FloatRow("Windmill rotation speed", "Rotation speed applied to spawned windmills (0 = disabled, clamped 0-10 at runtime).",
-                    DefaultRotationSpeed, v => m_working.spawnAbilityData.windmillRotationSpeed = v, defaultValue: DefaultRotationSpeed));
+                () => m_rotationSpeed = layout.FloatRow("Windmill rotation speed", "Rotation speed applied to spawned windmills (0 = disabled, 0-10).",
+                    DefaultRotationSpeed, v => m_working.spawnAbilityData.windmillRotationSpeed = v, defaultValue: DefaultRotationSpeed, min: 0f, max: 10f));
             layout.PairRow(
                 () => m_minToSpawn = layout.IntRow("Min to spawn", "Minimum number of windmills spawned.",
                     DefaultMinToSpawn, v => m_working.spawnAbilityData.minToSpawn = v, defaultValue: DefaultMinToSpawn),

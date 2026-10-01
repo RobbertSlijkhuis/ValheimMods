@@ -51,7 +51,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (request.result != UnityWebRequest.Result.Success)
                 {
-                    Jotunn.Logger.LogError($"[WBTI] Twitch device code request failed: {request.error} {request.downloadHandler?.text}");
+                    string deviceBody = request.downloadHandler?.text;
+                    TwitchErrorResponse deviceError = string.IsNullOrEmpty(deviceBody) ? null : JsonUtility.FromJson<TwitchErrorResponse>(deviceBody);
+                    Jotunn.Logger.LogError($"[WBTI] Twitch device code request failed: {request.error} {deviceError?.message}");
                     yield break;
                 }
 
@@ -64,7 +66,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 yield break;
             }
 
-            Jotunn.Logger.LogWarning($"[WBTI] Twitch chat login: opening {device.verification_uri} (code {device.user_code}, expires in {device.expires_in}s)");
             Application.OpenURL(device.verification_uri);
 
             float deadline = Time.realtimeSinceStartup + device.expires_in;
@@ -99,12 +100,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                     // Transient network errors: keep polling until the code expires.
                     if (request.result == UnityWebRequest.Result.ConnectionError)
-                    {
-                        Jotunn.Logger.LogWarning($"[WBTI] Twitch token poll connection error, retrying: {request.error}");
                         continue;
-                    }
 
-                    Jotunn.Logger.LogError($"[WBTI] Twitch device login failed: {request.error} {body}");
+                    Jotunn.Logger.LogError($"[WBTI] Twitch device login failed: {request.error} {error?.message}");
                     yield break;
                 }
             }
