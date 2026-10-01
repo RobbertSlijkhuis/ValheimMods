@@ -173,7 +173,9 @@ namespace WizshBoneTwitchIntegration.Components
         {
             try
             {
-                if (m_redeemerName != null && RecolorHelper.CanRecolorCreature(m_redeemerName, gameObject.name, m_colorOverride))
+                if (m_redeemerName != null && RecolorHelper.CanRecolorPetRock(m_redeemerName, gameObject))
+                    RecolorHelper.RecolorPetRock(m_redeemerName, gameObject);
+                else if (m_redeemerName != null && RecolorHelper.CanRecolorCreature(m_redeemerName, gameObject.name, m_colorOverride))
                     RecolorHelper.RecolorCreature(m_redeemerName, gameObject, m_colorOverride, m_forceColorOverride);
             }
             catch (Exception e)

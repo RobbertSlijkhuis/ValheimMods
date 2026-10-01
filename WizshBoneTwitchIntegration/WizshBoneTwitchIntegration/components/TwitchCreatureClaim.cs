@@ -87,7 +87,7 @@ namespace WizshBoneTwitchIntegration.Components
             // the *previous* claimant's name instead of the true original once unclaimed/expired.
             if (m_originalName == null)
             {
-                m_originalName = m_character.m_name;
+                m_originalName = GetOriginalName();
 
                 // Tameable.GetHoverName() prefers this ZDO field over Character.m_name whenever it's
                 // non-empty, so resetting only m_character.m_name isn't enough to actually change what
@@ -97,7 +97,10 @@ namespace WizshBoneTwitchIntegration.Components
                     m_originalTamedName = m_netView.GetZDO().GetString(ZDOVars.s_tamedName, "");
             }
 
-            m_character.m_name = userName;
+            // Null for a non-creature claim (e.g. a Rocky) - its name lives only in the Tameable's ZDO
+            // field, which the vanilla SetText that triggered this claim is already writing.
+            if (m_character != null)
+                m_character.m_name = userName;
 
             if (ProfileSettingsHelper.Current.chattingClaimDuration == 0 && !(gameObject.GetComponent<TwitchBasePersistentData>()?.IsRedeemSpawn ?? false))
             {
@@ -115,7 +118,14 @@ namespace WizshBoneTwitchIntegration.Components
             // stick around if the new name isn't a special viewer - reset to original in that case.
             // RecolorCreature always replaces the material outright, so no reset is needed when the
             // new name does recolor.
-            if (RecolorHelper.CanRecolorCreature(m_assignment.userName, m_assignment.creature.name))
+            if (RecolorHelper.IsPetRock(gameObject))
+            {
+                if (RecolorHelper.CanRecolorPetRock(m_assignment.userName, gameObject))
+                    RecolorHelper.RecolorPetRock(m_assignment.userName, gameObject);
+                else
+                    RecolorHelper.UnColorPetRock(gameObject);
+            }
+            else if (RecolorHelper.CanRecolorCreature(m_assignment.userName, m_assignment.creature.name))
             {
                 RecolorHelper.RecolorCreature(m_assignment.userName, gameObject);
                 CreatureHelper.GetValheimCreature(m_assignment.creature.name)?.spawnEffects.Create(transform.position, transform.rotation);
@@ -159,11 +169,24 @@ namespace WizshBoneTwitchIntegration.Components
             // Null-safe like Init(CreatureData, CustomRewardEvent)'s equivalent line - some
             // rehydration paths (see TwitchCreaturePersistentData.Awake) have no Character component,
             // so m_character is genuinely null here.
-            m_originalName = m_character?.m_name;
+            m_originalName = GetOriginalName();
+
+            // A manually-claimed non-creature (e.g. a Rocky) has no Character.m_name to restore, only
+            // the Tameable's ZDO name - which is the claimed name by now. Its unclaimed default is
+            // empty, so restore that on release instead of leaving the claimant's name stuck.
+            if (!isSpawn && m_character == null)
+                m_originalTamedName = "";
 
             m_chatting.AddCreatureAssignment(m_assignment);
             SetupNpcTalk(creatureData);
             m_chatting.onNewMessage.AddListener(CheckChatForMessage);
+        }
+
+        // Character.m_name for creatures; the Piece name for a non-creature claim (e.g. a Rocky) so
+        // "!unclaim <name>" can still match it by its species name.
+        private string GetOriginalName()
+        {
+            return m_character != null ? m_character.m_name : gameObject.GetComponent<Piece>()?.m_name;
         }
 
         public void OnDestroy()
@@ -178,7 +201,9 @@ namespace WizshBoneTwitchIntegration.Components
                 if (m_creatureInteract != null)
                     Destroy(m_creatureInteract);
 
-                if (m_assignment?.creature != null && RecolorHelper.CanRecolorCreature(m_assignment.userName, m_assignment.creature.name))
+                if (m_assignment?.creature != null && RecolorHelper.CanRecolorPetRock(m_assignment.userName, m_assignment.creature))
+                    RecolorHelper.UnColorPetRock(m_assignment.creature);
+                else if (m_assignment?.creature != null && RecolorHelper.CanRecolorCreature(m_assignment.userName, m_assignment.creature.name))
                     RecolorHelper.UnColorCreature(m_assignment.creature);
 
                 if (m_assignment != null)
@@ -323,7 +348,33 @@ namespace WizshBoneTwitchIntegration.Components
             if (Chat.instance == null)
                 return;
 
-            Chat.instance.SetNpcText(gameObject, Vector3.up * 2f, ProfileSettingsHelper.Current.chattingCullingRange, 10f, "", text, large: false);
+            Chat.instance.SetNpcText(gameObject, Vector3.up * GetBubbleHeight(),ProfileSettingsHelper.Current.chattingCullingRange, 10f, "", text, large: false);
+        }
+
+        // Creatures keep the fixed 2m anchor. A non-creature claim (e.g. a Rocky) can be far smaller, so
+        // anchor just above the top of its meshes instead of floating a couple of meters over it.
+        private float GetBubbleHeight()
+        {
+            if (m_character != null)
+                return 2f;
+
+            Bounds bounds = default;
+            bool hasBounds = false;
+
+            foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
+            {
+                if (!(renderer is MeshRenderer) && !(renderer is SkinnedMeshRenderer))
+                    continue;
+
+                if (!hasBounds)
+                    bounds = renderer.bounds;
+                else
+                    bounds.Encapsulate(renderer.bounds);
+
+                hasBounds = true;
+            }
+
+            return hasBounds ? Mathf.Max(0.5f, bounds.max.y - transform.position.y + 0.5f) : 2f;
         }
 
         private void CheckChatForMessage(TwitchChatMessage message)
@@ -441,11 +492,14 @@ namespace WizshBoneTwitchIntegration.Components
         // a claim:-renamed tame needs both written or the bracket silently wouldn't show.
         public void SetDisplayIndex(int? index)
         {
-            if (m_isSpawn || m_character == null)
+            if (m_isSpawn)
                 return;
 
             string displayName = index.HasValue ? $"{m_assignment.userName} [{index}]" : m_assignment.userName;
-            m_character.m_name = displayName;
+
+            if (m_character != null)
+                m_character.m_name = displayName;
+
             SetTameableText(displayName);
         }
 

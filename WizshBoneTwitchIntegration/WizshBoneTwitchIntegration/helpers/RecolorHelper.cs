@@ -612,6 +612,245 @@ namespace WizshBoneTwitchIntegration.Helpers
             mat.color = color;
         }
 
+        // Rocky (the buildable stone with a face) is a Pet piece, not a creature - no Character, no
+        // "Visual" child, and no entry in creatureList - so it can't use the per-prefab transform
+        // table above. Detected by component instead of prefab name so it keeps working whichever
+        // prefab variant carries Pet.
+        public static bool IsPetRock(GameObject obj)
+        {
+            return obj != null && obj.GetComponent<Pet>() != null;
+        }
+
+        public static bool CanRecolorPetRock(string name, GameObject obj)
+        {
+            return IsPetRock(obj) && IsRedeemerSpecialViewer(name);
+        }
+
+        // Suffix on the per-instance tinted material copies, so a re-tint/un-tint can tell its own
+        // copies apart from the shared prefab materials (which must never be destroyed or modified).
+        private const string PetRockTintSuffix = " (WBTI tint)";
+
+        // How far (0-1) the viewer's color is blended toward white before tinting a Rocky. Raise for
+        // brighter/paler, lower for a more saturated/darker result.
+        private const float PetRockBrighten = 0.35f;
+
+        // Strength of the emission layer (tint color x main texture x this). 0 = no glow.
+        private const float PetRockEmission = 1.4f;
+
+        // A Rocky's whole mesh is a single material slot whose material IS the face - Pet.SetFace /
+        // MaterialVariation swap that slot between a list of shared per-face materials. Tinting the
+        // slot's current material would be undone by the next face change (and tinting the shared
+        // asset would recolor every Rocky in the world), so instead this replaces every entry in THIS
+        // instance's MaterialVariation list with a tinted copy: whatever face is picked from then on
+        // is already tinted, with no per-frame re-tinting needed. The current face is swapped in
+        // directly. Any other (non-face) material slot on the rock is tinted in place. Renderers under
+        // an ItemStand attach point are skipped, so an item displayed on the Rocky isn't tinted.
+        public static void RecolorPetRock(string redeemerName, GameObject rock)
+        {
+            ViewerEntry viewerEntry = GetViewer(redeemerName);
+
+            if (viewerEntry == null)
+                return;
+
+            viewerEntry.Init();
+            // The Standard shader multiplies this into the rock's grey albedo texture, so the raw viewer
+            // color ends up noticeably darker than it looks in the viewers list - blend it toward white.
+            Color color = Color.Lerp(viewerEntry.parsedColor1, Color.white, PetRockBrighten);
+            GameObject original = PrefabManager.Instance.GetPrefab(rock.name.Replace("(Clone)", ""));
+            int tinted = 0;
+
+            foreach (MaterialVariation variation in rock.GetComponentsInChildren<MaterialVariation>(true))
+            {
+                MaterialVariation originalVariation = GetOriginalPetRockVariation(original, rock, variation);
+
+                for (int i = 0; i < variation.m_materials.Count; i++)
+                {
+                    MaterialVariation.MaterialEntry entry = variation.m_materials[i];
+
+                    // Always copy from the prefab's untouched material so re-claiming never stacks tints.
+                    Material source = originalVariation != null && i < originalVariation.m_materials.Count
+                        ? originalVariation.m_materials[i].m_material
+                        : entry.m_material;
+
+                    if (source == null || !source.HasProperty("_Color"))
+                        continue;
+
+                    DestroyPetRockTintCopy(entry.m_material);
+
+                    Material copy = new Material(source) { name = source.name + PetRockTintSuffix };
+                    ApplyPetRockTint(copy, color);
+                    entry.m_material = copy;
+                    tinted++;
+                }
+
+                ApplyPetRockCurrentFace(variation);
+            }
+
+            foreach (Renderer renderer in GetPetRockRenderers(rock))
+            {
+                Material[] materials = renderer.materials;
+
+                for (int i = 0; i < materials.Length; i++)
+                {
+                    if (IsPetRockFaceSlot(renderer, i) || materials[i] == null || !materials[i].HasProperty("_Color"))
+                        continue;
+
+                    ApplyPetRockTint(materials[i], color);
+                    tinted++;
+                }
+            }
+
+            if (tinted == 0)
+                Jotunn.Logger.LogWarning($"[WBTI] Rocky recolor for {redeemerName} found nothing to tint on {rock.name}");
+        }
+
+        public static void UnColorPetRock(GameObject rock)
+        {
+            GameObject original = PrefabManager.Instance.GetPrefab(rock.name.Replace("(Clone)", ""));
+
+            if (original == null)
+                return;
+
+            foreach (MaterialVariation variation in rock.GetComponentsInChildren<MaterialVariation>(true))
+            {
+                MaterialVariation originalVariation = GetOriginalPetRockVariation(original, rock, variation);
+
+                if (originalVariation == null)
+                    continue;
+
+                for (int i = 0; i < variation.m_materials.Count && i < originalVariation.m_materials.Count; i++)
+                {
+                    DestroyPetRockTintCopy(variation.m_materials[i].m_material);
+                    variation.m_materials[i].m_material = originalVariation.m_materials[i].m_material;
+                }
+
+                ApplyPetRockCurrentFace(variation);
+            }
+
+            foreach (Renderer renderer in GetPetRockRenderers(rock))
+            {
+                string path = GetRelativePath(rock.transform, renderer.transform);
+                Transform originalTransform = path == "" ? original.transform : original.transform.Find(path);
+                Renderer originalRenderer = originalTransform != null ? originalTransform.GetComponent<Renderer>() : null;
+
+                if (originalRenderer == null)
+                    continue;
+
+                Material[] materials = renderer.materials;
+                Material[] originalMaterials = originalRenderer.sharedMaterials;
+
+                for (int i = 0; i < materials.Length && i < originalMaterials.Length; i++)
+                {
+                    if (IsPetRockFaceSlot(renderer, i) || materials[i] == null || originalMaterials[i] == null)
+                        continue;
+
+                    if (materials[i].HasProperty("_Color") && originalMaterials[i].HasProperty("_Color"))
+                        materials[i].color = originalMaterials[i].color;
+                }
+            }
+        }
+
+        // Albedo tint plus an emission layer that reuses the material's own main texture (same
+        // pattern, so the face detail still reads) - light-colored areas glow in the viewer's color,
+        // fully dark pixels (eyes/mouth) emit nothing.
+        private static void ApplyPetRockTint(Material material, Color color)
+        {
+            material.color = color;
+
+            Texture mainTexture = material.mainTexture;
+
+            if (mainTexture == null || !material.HasProperty("_EmissionColor"))
+                return;
+
+            material.SetTexture("_EmissionMap", mainTexture);
+            material.SetColor("_EmissionColor", color * PetRockEmission);
+            material.EnableKeyword("_EMISSION");
+            material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+        }
+
+        // MaterialVariation.UpdateMaterial is private and only re-runs for a face change - after
+        // swapping the list entries, put the face currently shown into the renderer slot directly
+        // (sharedMaterials, so no extra material instances are created). GetMaterial() is -1 until
+        // MaterialVariation has picked a face; its own CheckMaterial then uses the swapped list.
+        private static void ApplyPetRockCurrentFace(MaterialVariation variation)
+        {
+            int face = variation.GetMaterial();
+            Renderer renderer = variation.GetComponent<Renderer>();
+
+            if (renderer == null || face < 0 || face >= variation.m_materials.Count)
+                return;
+
+            Material[] materials = renderer.sharedMaterials;
+
+            if (variation.m_materialIndex >= materials.Length)
+                return;
+
+            materials[variation.m_materialIndex] = variation.m_materials[face].m_material;
+            renderer.sharedMaterials = materials;
+        }
+
+        private static MaterialVariation GetOriginalPetRockVariation(GameObject original, GameObject rock, MaterialVariation variation)
+        {
+            if (original == null)
+                return null;
+
+            string path = GetRelativePath(rock.transform, variation.transform);
+            Transform originalTransform = path == "" ? original.transform : original.transform.Find(path);
+
+            return originalTransform != null ? originalTransform.GetComponent<MaterialVariation>() : null;
+        }
+
+        private static void DestroyPetRockTintCopy(Material material)
+        {
+            if (material != null && material.name.EndsWith(PetRockTintSuffix))
+                UnityEngine.Object.Destroy(material);
+        }
+
+        private static List<Renderer> GetPetRockRenderers(GameObject rock)
+        {
+            ItemStand itemStand = rock.GetComponent<ItemStand>();
+            Transform attach = itemStand != null ? itemStand.m_attachOther : null;
+            List<Renderer> renderers = new List<Renderer>();
+
+            foreach (Renderer renderer in rock.GetComponentsInChildren<Renderer>(true))
+            {
+                if (!(renderer is MeshRenderer) && !(renderer is SkinnedMeshRenderer))
+                    continue;
+
+                if (attach != null && renderer.transform.IsChildOf(attach))
+                    continue;
+
+                renderers.Add(renderer);
+            }
+
+            return renderers;
+        }
+
+        private static bool IsPetRockFaceSlot(Renderer renderer, int slot)
+        {
+            foreach (MaterialVariation variation in renderer.GetComponents<MaterialVariation>())
+            {
+                if (variation.m_materialIndex == slot)
+                    return true;
+            }
+
+            return false;
+        }
+
+        // Path of 'child' relative to 'root' in Transform.Find format ("" if they're the same object).
+        private static string GetRelativePath(Transform root, Transform child)
+        {
+            if (child == root)
+                return "";
+
+            string path = child.name;
+
+            for (Transform parent = child.parent; parent != null && parent != root; parent = parent.parent)
+                path = parent.name + "/" + path;
+
+            return path;
+        }
+
         public static void ReloadViewersConfig()
         {
             // The viewers file went missing after we already had it loaded once - the in-memory
