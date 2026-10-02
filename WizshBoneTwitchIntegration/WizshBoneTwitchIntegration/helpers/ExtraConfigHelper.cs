@@ -128,6 +128,9 @@ namespace WizshBoneTwitchIntegration.Helpers
             ViewerData data = DeserializeYaml<ViewerData>(WizshBoneTwitchIntegration.viewersPath);
             List<ViewerEntry> viewers = data?.viewers ?? new List<ViewerEntry>();
 
+            foreach (ViewerEntry viewer in viewers)
+                viewer.MigrateLegacyFields();
+
             EnsureRequiredViewers(viewers);
 
             return viewers;
@@ -142,7 +145,7 @@ namespace WizshBoneTwitchIntegration.Helpers
         private static ViewerEntry RequiredViewerDefault => new ViewerEntry
         {
             name = RequiredViewerName,
-            color1 = "#3489EB",
+            color = "#3489EB",
             effects = new List<string> { "lightning" }
         };
 
@@ -169,8 +172,8 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             ViewerEntry defaults = RequiredViewerDefault;
 
-            if (string.IsNullOrEmpty(existing.color1))
-                existing.color1 = defaults.color1;
+            if (string.IsNullOrEmpty(existing.color))
+                existing.color = defaults.color;
 
             if (existing.effects == null || existing.effects.Count == 0)
                 existing.effects = defaults.effects;

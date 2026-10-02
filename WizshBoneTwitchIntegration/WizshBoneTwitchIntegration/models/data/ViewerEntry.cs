@@ -12,23 +12,51 @@ namespace WizshBoneTwitchIntegration.Models
         public string name;
 
         [EditorLabel("Creature color")]
-        [EditorTooltip("The color of the creature in hex format (e.g. #ffffff for white).")]
+        [EditorTooltip("The color of the creature's main texture in hex format (e.g. #ffffff for white).")]
         [ColorPicker]
-        public string color1 = "#ffffff";
+        public string color = "#ffffff";
+
+        [EditorLabel("Creature emission color")]
+        [EditorTooltip("The color of the creature's glow in hex format. Leave empty to use the creature color.")]
+        [ColorPicker]
+        public string emissionColor = "";
 
         [EditorHidden] public List<string> effects = new List<string>();
-        [EditorHidden] public Color parsedColor1;
-            
+        [EditorHidden] public Color parsedColor;
+        [EditorHidden] public Color parsedEmissionColor;
+
+        // Read-only legacy key: viewers.yaml used to store the creature color as "color1". It is only
+        // ever deserialized (never written back) so MigrateLegacyFields can carry it over to color.
+        [EditorHidden] public string color1;
+
         private static readonly HashSet<string> SkippedFields = new HashSet<string>
         {
-            nameof(parsedColor1)
+            nameof(parsedColor),
+            nameof(parsedEmissionColor),
+            nameof(color1)
         };
 
         public ViewerEntry() { }
 
         public void Init()
         {
-            ColorUtility.TryParseHtmlString(color1, out parsedColor1);
+            ColorUtility.TryParseHtmlString(color, out parsedColor);
+
+            if (string.IsNullOrEmpty(emissionColor) || !ColorUtility.TryParseHtmlString(emissionColor, out parsedEmissionColor))
+                parsedEmissionColor = parsedColor;
+        }
+
+        /// <summary>
+        /// Carries a pre-<see cref="color"/> "color1" value over to <see cref="color"/>, then clears it
+        /// so the next save writes the new key. A no-op for entries that don't have the legacy key.
+        /// </summary>
+        public void MigrateLegacyFields()
+        {
+            if (string.IsNullOrEmpty(color1))
+                return;
+
+            color = color1;
+            color1 = null;
         }
 
         /// <summary>

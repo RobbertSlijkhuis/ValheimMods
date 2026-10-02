@@ -56,31 +56,39 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private const float ToolbarButtonSpacing = 10f;
         private const float NewViewerBtnWidth = 150f;
 
-        private const float ColNameW    = 340f;
-        private const float ColColorW   = 220f;
-        private const float ColEffectsW = 190f;
-        private const float ColActionsW = 150f;
+        private const float ColNameW     = 280f;
+        private const float ColColorW    = 160f;
+        private const float ColEmissionW = ColColorW;
+        private const float ColEffectsW  = 150f;
+        private const float ColActionsW  = 150f;
 
         // Name is the only column flush with the list's true left edge - inset just its text,
-        // not the column boundary itself, so ColColorX/ColEffectsX/ColActionsX (all derived from
-        // ColNameW) don't shift.
+        // not the column boundary itself, so ColColorX/ColEmissionX/ColEffectsX/ColActionsX (all
+        // derived from ColNameW) don't shift.
         private const float ColNameTextW = ColNameW - ListRow.LeftPadding;
-        private const float ColNameX    = LeftEdgeX + ListRow.LeftPadding + ColNameTextW / 2f;
-        private const float ColColorX   = LeftEdgeX + ColNameW + ColColorW / 2f;
-        private const float ColEffectsX = LeftEdgeX + ColNameW + ColColorW + ColEffectsW / 2f;
-        private const float ColActionsX = RightEdgeX - ColActionsW / 2f;
+        private const float ColNameX     = LeftEdgeX + ListRow.LeftPadding + ColNameTextW / 2f;
+        private const float ColColorX    = LeftEdgeX + ColNameW + ColColorW / 2f;
+        private const float ColEmissionX = LeftEdgeX + ColNameW + ColColorW + ColEmissionW / 2f;
+        private const float ColEffectsX  = LeftEdgeX + ColNameW + ColColorW + ColEmissionW + ColEffectsW / 2f;
+        private const float ColActionsX  = RightEdgeX - ColActionsW / 2f;
 
-        // Color cell = a small swatch square + the hex value, left-aligned within the Color column.
+        // Color cell = a small swatch square + the hex value, left-aligned within its column
+        // (used by both the Color and the Emission column, which share a width).
         private const float SwatchSize  = 16f;
         private const float SwatchInset = 10f;
         private const float SwatchGap   = 8f;
         private const float HexTextWidth = ColColorW - SwatchSize - SwatchInset - SwatchGap - 10f;
 
-        // The "Color" header text otherwise starts flush at the column's left edge, while
-        // BuildColorCell insets the actual swatch by SwatchInset - shift/shrink the header to
-        // start at the same X the swatch does, so the label lines up with what's beneath it.
+        // The header text otherwise starts flush at the column's left edge, while BuildColorCell
+        // insets the actual swatch by SwatchInset - shift/shrink the header to start at the same X
+        // the swatch does, so the label lines up with what's beneath it.
         private const float ColColorHeaderW = ColColorW - SwatchInset;
         private const float ColColorHeaderX = ColColorX - ColColorW / 2f + SwatchInset + ColColorHeaderW / 2f;
+        private const float ColEmissionHeaderX = ColEmissionX - ColEmissionW / 2f + SwatchInset + ColColorHeaderW / 2f;
+
+        // Shown instead of a hex value in the Emission column while the viewer has no separate
+        // emission color (ViewerEntry.emissionColor is empty).
+        private const string SameAsColorLabel = "same";
 
         private const float EditBtnWidth = 70f;
         private const float BtnDeleteX = RightEdgeX - ListRow.ItemHeight / 2f;
@@ -146,7 +154,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private void BuildColumnHeaders()
         {
             CreateSortableHeader("Name", ColNameX, ColNameTextW, TextAnchor.MiddleLeft, "name");
-            CreateSortableHeader("Color", ColColorHeaderX, ColColorHeaderW, TextAnchor.MiddleLeft, "color1");
+            CreateSortableHeader("Color", ColColorHeaderX, ColColorHeaderW, TextAnchor.MiddleLeft, "color");
+            CreateSortableHeader("Emission", ColEmissionHeaderX, ColColorHeaderW, TextAnchor.MiddleLeft, "emissionColor");
             CreateSortableHeader("Effects", ColEffectsX, ColEffectsW, TextAnchor.MiddleLeft, "effects");
             CreateSortableHeader("Actions", ColActionsX, ColActionsW, TextAnchor.MiddleRight, null);
         }
@@ -210,8 +219,11 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             Comparison<ViewerEntry> comparison;
             switch (m_sortState.Key)
             {
-                case "color1":
-                    comparison = (a, b) => CompareByHue(a.color1, b.color1);
+                case "color":
+                    comparison = (a, b) => CompareByHue(a.color, b.color);
+                    break;
+                case "emissionColor":
+                    comparison = (a, b) => CompareByHue(EffectiveEmissionColor(a), EffectiveEmissionColor(b));
                     break;
                 case "effects":
                     comparison = (a, b) => (a.effects?.Count ?? 0).CompareTo(b.effects?.Count ?? 0);
@@ -245,6 +257,12 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             int satCompare = satA.CompareTo(satB);
             return satCompare != 0 ? satCompare : valA.CompareTo(valB);
+        }
+
+        // The emission color the viewer actually gets: empty means "same as color".
+        private static string EffectiveEmissionColor(ViewerEntry viewer)
+        {
+            return string.IsNullOrEmpty(viewer.emissionColor) ? viewer.color : viewer.emissionColor;
         }
 
         private static Color ParseColor(string hex)
@@ -306,7 +324,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             ).GetComponent<Text>();
             nameText.alignment = TextAnchor.MiddleLeft;
 
-            BuildColorCell(row, viewer.color1);
+            BuildColorCell(row, ColColorX, viewer.color);
+            BuildColorCell(row, ColEmissionX, EffectiveEmissionColor(viewer),
+                labelOverride: string.IsNullOrEmpty(viewer.emissionColor) ? SameAsColorLabel : null);
 
             string effectsLabel = viewer.effects != null && viewer.effects.Count > 0
                 ? string.Join(", ", viewer.effects)
@@ -345,16 +365,17 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         /// <summary>
         /// A non-interactive color square (the new element this tab introduces to a list row) +
-        /// its hex text, left-aligned within the Color column - matches the mockup's swatch+hex
-        /// pair. Deliberately not built via <see cref="GuiFieldBuilder.CreateColorField"/> - that
+        /// its hex text (or <paramref name="labelOverride"/>), left-aligned within the column
+        /// centered on <paramref name="columnX"/> - matches the mockup's swatch+hex pair.
+        /// Deliberately not built via <see cref="GuiFieldBuilder.CreateColorField"/> - that
         /// factory creates a *clickable* button that opens the color picker (used by
         /// <see cref="ViewerEditDialog"/>'s edit form); this is just read-only row content.
         /// </summary>
-        private static void BuildColorCell(GameObject row, string colorHex)
+        private static void BuildColorCell(GameObject row, float columnX, string colorHex, string labelOverride = null)
         {
             Color swatchColor = ParseColor(colorHex);
 
-            float colorLeftEdge = ColColorX - ColColorW / 2f;
+            float colorLeftEdge = columnX - ColColorW / 2f;
             float swatchX = colorLeftEdge + SwatchInset + SwatchSize / 2f;
             float hexTextX = swatchX + SwatchSize / 2f + SwatchGap + HexTextWidth / 2f;
 
@@ -372,7 +393,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             GuiHelper.AddBorder(swatch, Color.black);
 
             Text hexText = GUIManager.Instance.CreateText(
-                text: string.IsNullOrEmpty(colorHex) ? "-" : colorHex,
+                text: labelOverride ?? (string.IsNullOrEmpty(colorHex) ? "-" : colorHex),
                 parent: row.transform,
                 anchorMin: new Vector2(0.5f, 0.5f),
                 anchorMax: new Vector2(0.5f, 0.5f),
@@ -395,14 +416,15 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         {
             m_viewerEditDialog.Show(
                 title: "New Viewer",
-                description: "Enter a name and color for the new viewer.",
+                description: "Enter a name and colors for the new viewer.",
                 suggestedName: "",
                 suggestedColor: "#ffffff",
+                suggestedEmissionColor: "",
                 onConfirm: HandleCreateConfirm,
                 confirmText: "+ Add");
         }
 
-        private string HandleCreateConfirm(string name, string color)
+        private string HandleCreateConfirm(string name, string color, string emissionColor)
         {
             if (string.IsNullOrEmpty(name))
                 return "Name is required.";
@@ -413,7 +435,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             if (viewers.Exists(v => string.Equals(v.name, name, StringComparison.OrdinalIgnoreCase)))
                 return $"A viewer named '{name}' already exists.";
 
-            viewers.Add(new ViewerEntry { name = name, color1 = color });
+            viewers.Add(new ViewerEntry { name = name, color = color, emissionColor = emissionColor });
             Save(viewers, $"'{name}' added.");
             return null;
         }
@@ -424,14 +446,15 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             m_viewerEditDialog.Show(
                 title: "Edit Viewer",
-                description: "Update this viewer's name and color.",
+                description: "Update this viewer's name and colors.",
                 suggestedName: viewer.name,
-                suggestedColor: string.IsNullOrEmpty(viewer.color1) ? "#ffffff" : viewer.color1,
-                onConfirm: (name, color) => HandleEditConfirm(originalName, name, color),
+                suggestedColor: string.IsNullOrEmpty(viewer.color) ? "#ffffff" : viewer.color,
+                suggestedEmissionColor: viewer.emissionColor,
+                onConfirm: (name, color, emissionColor) => HandleEditConfirm(originalName, name, color, emissionColor),
                 confirmText: "Save");
         }
 
-        private string HandleEditConfirm(string originalName, string newName, string color)
+        private string HandleEditConfirm(string originalName, string newName, string color, string emissionColor)
         {
             if (string.IsNullOrEmpty(newName))
                 return "Name is required.";
@@ -449,7 +472,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 return $"A viewer named '{newName}' already exists.";
 
             entry.name = newName;
-            entry.color1 = color;
+            entry.color = color;
+            entry.emissionColor = emissionColor;
             Save(viewers, $"'{newName}' updated.");
             return null;
         }

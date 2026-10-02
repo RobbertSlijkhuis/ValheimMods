@@ -110,7 +110,7 @@ namespace WizshBoneTwitchIntegration.GuiOld
                 ColumnHeaders = new List<ColumnHeaderSpec>
                 {
                     new ColumnHeaderSpec("Name", ColNameX, ColNameW, TextAnchor.MiddleLeft, sortKey: "name"),
-                    new ColumnHeaderSpec("Color", ColColor1X, ColColor1W, TextAnchor.MiddleCenter, sortKey: "color1"),
+                    new ColumnHeaderSpec("Color", ColColor1X, ColColor1W, TextAnchor.MiddleCenter, sortKey: "color"),
                     new ColumnHeaderSpec("Effects", ColEffectsX, ColEffectsW, TextAnchor.MiddleLeft, sortKey: "effects"),
                     new ColumnHeaderSpec("Actions", ActionsClusterCenterX, ActionsClusterWidth, TextAnchor.MiddleCenter),
                 },
@@ -146,8 +146,8 @@ namespace WizshBoneTwitchIntegration.GuiOld
             Comparison<ViewerEntry> comparison;
             switch (m_sortState.Key)
             {
-                case "color1":
-                    comparison = (a, b) => string.Compare(a.color1, b.color1, StringComparison.OrdinalIgnoreCase);
+                case "color":
+                    comparison = (a, b) => string.Compare(a.color, b.color, StringComparison.OrdinalIgnoreCase);
                     break;
                 case "effects":
                     comparison = (a, b) => (a.effects?.Count ?? 0).CompareTo(b.effects?.Count ?? 0);
@@ -220,11 +220,11 @@ namespace WizshBoneTwitchIntegration.GuiOld
                 nameText.alignment = TextAnchor.MiddleLeft;
 
                 Color swatchColor = Color.white;
-                if (!string.IsNullOrEmpty(viewer.color1))
-                    ColorUtility.TryParseHtmlString(viewer.color1, out swatchColor);
+                if (!string.IsNullOrEmpty(viewer.color))
+                    ColorUtility.TryParseHtmlString(viewer.color, out swatchColor);
 
                 Text color1Text = GUIManager.Instance.CreateText(
-                    text: string.IsNullOrEmpty(viewer.color1) ? "-" : viewer.color1,
+                    text: string.IsNullOrEmpty(viewer.color) ? "-" : viewer.color,
                     parent: row.transform,
                     anchorMin: new Vector2(0.5f, 0.5f),
                     anchorMax: new Vector2(0.5f, 0.5f),

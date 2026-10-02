@@ -234,24 +234,42 @@ namespace WizshBoneTwitchIntegration.Helpers
             RecolorCreature(redeemerName, creature);
         }
 
+        /// <summary>
+        /// The two colors a recolor applies: <see cref="Main"/> tints the main texture, while
+        /// <see cref="Emission"/> drives everything that glows (emission colors, lights, particles).
+        /// </summary>
+        public readonly struct RecolorColors
+        {
+            public readonly Color Main;
+            public readonly Color Emission;
+
+            public RecolorColors(Color main, Color emission)
+            {
+                Main = main;
+                Emission = emission;
+            }
+
+            public RecolorColors(Color both) : this(both, both) { }
+        }
+
         public static void RecolorCreature(string redeemerName, GameObject creature, string colorOverride = null, bool forceColor = false)
         {
             ViewerEntry viewerEntry = GetViewer(redeemerName);
 
-            Color resolvedColor;
+            RecolorColors colors;
 
             if (forceColor && colorOverride != null && ColorUtility.TryParseHtmlString(colorOverride, out Color parsedForceOverride))
             {
-                resolvedColor = parsedForceOverride;
+                colors = new RecolorColors(parsedForceOverride);
             }
             else if (viewerEntry != null)
             {
                 viewerEntry.Init();
-                resolvedColor = viewerEntry.parsedColor1;
+                colors = new RecolorColors(viewerEntry.parsedColor, viewerEntry.parsedEmissionColor);
             }
             else if (colorOverride != null && ColorUtility.TryParseHtmlString(colorOverride, out Color parsedOverride))
             {
-                resolvedColor = parsedOverride;
+                colors = new RecolorColors(parsedOverride);
             }
             else
             {
@@ -264,7 +282,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             {
                 if (recolorCreatureData.isGear)
                 {
-                    RecolorGear(creature, recolorCreatureData, resolvedColor);
+                    RecolorGear(creature, recolorCreatureData, colors);
                     continue;
                 }
 
@@ -290,7 +308,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 if (recolorCreatureData.isLight)
                 {
                     Light light = transform.gameObject.GetComponent<Light>();
-                    light.color = resolvedColor;
+                    light.color = colors.Emission;
                     continue;
                 }
 
@@ -303,14 +321,14 @@ namespace WizshBoneTwitchIntegration.Helpers
                         ParticleSystemRenderer particleRenderder = particleSystem.gameObject.GetComponent<ParticleSystemRenderer>();
                         recolorCreatureData.material.FixReferences();
                         particleRenderder.materials = new Material[1] { recolorCreatureData.material };
-                        Recolor(recolorCreatureData, resolvedColor, particleRenderder.materials[0], recolorCreatureData.emissiveMultiplier);
+                        Recolor(recolorCreatureData, colors, particleRenderder.materials[0], recolorCreatureData.emissiveMultiplier);
                     }
                     else
                     {
                         ParticleSystem.MainModule main = particleSystem.main;
                         float h, s, v;
 
-                        Color.RGBToHSV(resolvedColor, out h, out s, out v);
+                        Color.RGBToHSV(colors.Emission, out h, out s, out v);
                         Color newColor = Color.HSVToRGB(h, s, recolorCreatureData.particleAlpha);
                         main.startColor = newColor;
                     }
@@ -325,14 +343,14 @@ namespace WizshBoneTwitchIntegration.Helpers
                         for (int i = 0; i < keys1.Length; i++)
                         {
                             float decrease = 1f - (0.15f * i);
-                            keys1[i].color = resolvedColor * decrease;
+                            keys1[i].color = colors.Emission * decrease;
                         }
 
                         GradientColorKey[] keys2 = gradient2.gradient.colorKeys;
                         for (int i = 0; i < keys2.Length; i++)
                         {
                             float decrease = 1f - (0.15f * i);
-                            keys2[i].color = resolvedColor * decrease;
+                            keys2[i].color = colors.Emission * decrease;
                         }
 
                         gradient1.gradient.colorKeys = keys1;
@@ -396,7 +414,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                     }
                 }
 
-                Recolor(recolorCreatureData, resolvedColor, mat, recolorCreatureData.emissiveMultiplier);
+                Recolor(recolorCreatureData, colors, mat, recolorCreatureData.emissiveMultiplier);
             }
         }
 
@@ -521,7 +539,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             return instances;
         }
 
-        private static void RecolorGear(GameObject creature, RecolorCreatureData recolorCreatureData, Color color)
+        private static void RecolorGear(GameObject creature, RecolorCreatureData recolorCreatureData, RecolorColors colors)
         {
             VisEquipment visEquipment = creature.GetComponent<VisEquipment>();
 
@@ -549,7 +567,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                     {
                         SetupMaterials(skinnedMeshRenderer, meshRenderer, recolorCreatureData.material, i);
                         Material mat = skinnedMeshRenderer != null ? skinnedMeshRenderer.materials[i] : meshRenderer.materials[i];
-                        Recolor(recolorCreatureData, color, mat, recolorCreatureData.emissiveMultiplier);
+                        Recolor(recolorCreatureData, colors, mat, recolorCreatureData.emissiveMultiplier);
                     }
                 }
             }
@@ -596,20 +614,23 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
         }
 
-        public static void Recolor(RecolorCreatureData recolorCreatureData, Color color, Material mat, float multiplier = 2f)
+        public static void Recolor(RecolorCreatureData recolorCreatureData, RecolorColors colors, Material mat, float multiplier = 2f)
         {
             if (recolorCreatureData.emissive)
             {
-                mat.SetColor("_EmissionColor", new Color(color.r * multiplier, color.g * multiplier, color.b * multiplier));
+                Color emission = colors.Emission;
+                Color emissionScaled = new Color(emission.r * multiplier, emission.g * multiplier, emission.b * multiplier);
+
+                mat.SetColor("_EmissionColor", emissionScaled);
                 mat.EnableKeyword("_EMISSION");
                 mat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
 
-                mat.SetColor("_EmissiveColor", new Color(color.r * multiplier, color.g * multiplier, color.b * multiplier));
-                mat.SetColor("_FlowColor", color);
-                mat.SetColor("_SSS", color);
+                mat.SetColor("_EmissiveColor", emissionScaled);
+                mat.SetColor("_FlowColor", emission);
+                mat.SetColor("_SSS", colors.Main);
             }
 
-            mat.color = color;
+            mat.color = colors.Main;
         }
 
         // Rocky (the buildable stone with a face) is a Pet piece, not a creature - no Character, no
@@ -634,7 +655,7 @@ namespace WizshBoneTwitchIntegration.Helpers
         // brighter/paler, lower for a more saturated/darker result.
         private const float PetRockBrighten = 0.35f;
 
-        // Strength of the emission layer (tint color x main texture x this). 0 = no glow.
+        // Strength of the emission layer (emission color x main texture x this). 0 = no glow.
         private const float PetRockEmission = 1.4f;
 
         // A Rocky's whole mesh is a single material slot whose material IS the face - Pet.SetFace /
@@ -653,9 +674,12 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return;
 
             viewerEntry.Init();
-            // The Standard shader multiplies this into the rock's grey albedo texture, so the raw viewer
-            // color ends up noticeably darker than it looks in the viewers list - blend it toward white.
-            Color color = Color.Lerp(viewerEntry.parsedColor1, Color.white, PetRockBrighten);
+            // The Standard shader multiplies the color into the rock's grey albedo texture, so the raw
+            // viewer color ends up noticeably darker than it looks in the viewers list - blend it toward
+            // white. The emission layer is texture x emission color, so it needs the same lift.
+            RecolorColors colors = new RecolorColors(
+                Color.Lerp(viewerEntry.parsedColor, Color.white, PetRockBrighten),
+                Color.Lerp(viewerEntry.parsedEmissionColor, Color.white, PetRockBrighten));
             GameObject original = PrefabManager.Instance.GetPrefab(rock.name.Replace("(Clone)", ""));
             int tinted = 0;
 
@@ -678,7 +702,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                     DestroyPetRockTintCopy(entry.m_material);
 
                     Material copy = new Material(source) { name = source.name + PetRockTintSuffix };
-                    ApplyPetRockTint(copy, color);
+                    ApplyPetRockTint(copy, colors);
                     entry.m_material = copy;
                     tinted++;
                 }
@@ -695,7 +719,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                     if (IsPetRockFaceSlot(renderer, i) || materials[i] == null || !materials[i].HasProperty("_Color"))
                         continue;
 
-                    ApplyPetRockTint(materials[i], color);
+                    ApplyPetRockTint(materials[i], colors);
                     tinted++;
                 }
             }
@@ -751,11 +775,11 @@ namespace WizshBoneTwitchIntegration.Helpers
         }
 
         // Albedo tint plus an emission layer that reuses the material's own main texture (same
-        // pattern, so the face detail still reads) - light-colored areas glow in the viewer's color,
-        // fully dark pixels (eyes/mouth) emit nothing.
-        private static void ApplyPetRockTint(Material material, Color color)
+        // pattern, so the face detail still reads) - light-colored areas glow in the viewer's emission
+        // color, fully dark pixels (eyes/mouth) emit nothing.
+        private static void ApplyPetRockTint(Material material, RecolorColors colors)
         {
-            material.color = color;
+            material.color = colors.Main;
 
             Texture mainTexture = material.mainTexture;
 
@@ -763,7 +787,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return;
 
             material.SetTexture("_EmissionMap", mainTexture);
-            material.SetColor("_EmissionColor", color * PetRockEmission);
+            material.SetColor("_EmissionColor", colors.Emission * PetRockEmission);
             material.EnableKeyword("_EMISSION");
             material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
         }
