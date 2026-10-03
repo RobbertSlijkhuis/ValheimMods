@@ -1,5 +1,5 @@
 viewers:
   - name: deathwizsh
-    color1: "#3489EB"
+    color: "#3489EB"
     effects:
       - lightning

@@ -364,12 +364,13 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         }
 
         /// <summary>
-        /// A non-interactive color square (the new element this tab introduces to a list row) +
+        /// A color square (the new element this tab introduces to a list row) +
         /// its hex text (or <paramref name="labelOverride"/>), left-aligned within the column
         /// centered on <paramref name="columnX"/> - matches the mockup's swatch+hex pair.
+        /// Clicking the square or the text copies the hex to the clipboard.
         /// Deliberately not built via <see cref="GuiFieldBuilder.CreateColorField"/> - that
-        /// factory creates a *clickable* button that opens the color picker (used by
-        /// <see cref="ViewerEditDialog"/>'s edit form); this is just read-only row content.
+        /// factory creates a button that opens the color picker (used by
+        /// <see cref="ViewerEditDialog"/>'s edit form); this is just row content.
         /// </summary>
         private static void BuildColorCell(GameObject row, float columnX, string colorHex, string labelOverride = null)
         {
@@ -408,6 +409,29 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 addContentSizeFitter: false
             ).GetComponent<Text>();
             hexText.alignment = TextAnchor.MiddleLeft;
+
+            if (!string.IsNullOrEmpty(colorHex))
+            {
+                MakeCopyOnClick(swatch, colorHex);
+                MakeCopyOnClick(hexText.gameObject, colorHex);
+            }
+        }
+
+        /// <summary>
+        /// Makes <paramref name="target"/> (which must already have a raycast-target graphic) copy
+        /// <paramref name="hex"/> to the clipboard on click. Uses a Button with no visual
+        /// transition so the cell looks unchanged; the row's hover highlight still works because
+        /// pointer enter/exit bubble up to the row background.
+        /// </summary>
+        private static void MakeCopyOnClick(GameObject target, string hex)
+        {
+            Button button = target.AddComponent<Button>();
+            button.transition = Selectable.Transition.None;
+            button.onClick.AddListener(() =>
+            {
+                GUIUtility.systemCopyBuffer = hex;
+                ToastNotifications.Show($"Copied {hex}", ToastType.Success);
+            });
         }
 
         // ── create / edit / delete ───────────────────────────────────────────

@@ -420,10 +420,18 @@ namespace WizshBoneTwitchIntegration.Gui
         /// picker is currently open (<see cref="ColorPicker.done"/> guards that no-op case).
         /// Originally ViewerEditDialog-only; hoisted here once RedeemWizard's step 2 needed the
         /// same "close it when leaving" behavior for its own color-field rows.
+        /// A picker opened with <c>applyLive</c> (see <see cref="GuiFieldBuilder.CreateColorField"/>)
+        /// has already committed every change, so it's closed with <see cref="ColorPicker.Done"/>
+        /// instead - Cancel would revert it.
         /// </summary>
         public static void CloseOpenColorPicker()
         {
-            if (!ColorPicker.done)
+            if (ColorPicker.done)
+                return;
+
+            if (GuiFieldBuilder.OpenPickerAppliesLive)
+                ColorPicker.Done();
+            else
                 ColorPicker.Cancel();
         }
 

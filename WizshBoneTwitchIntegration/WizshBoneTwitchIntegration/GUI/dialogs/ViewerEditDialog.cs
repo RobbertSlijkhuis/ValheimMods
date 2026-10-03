@@ -197,7 +197,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             m_colorSwatch = GuiFieldBuilder.CreateColorField(
                 m_panel, new Vector2(ColorX, ColorSwatchY), ColorWidth, m_currentColor,
-                "Pick Viewer Color", OnColorPicked);
+                "Pick Viewer Color", OnColorPicked, applyLive: true);
         }
 
         private void RebuildEmissionSwatch(string hexValue)
@@ -209,7 +209,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             m_emissionSwatch = GuiFieldBuilder.CreateColorField(
                 m_panel, new Vector2(EmissionX, ColorSwatchY), ColorWidth, m_currentEmissionColor,
-                "Pick Viewer Emission Color", OnEmissionColorPicked);
+                "Pick Viewer Emission Color", OnEmissionColorPicked, applyLive: true);
         }
 
         private void OnColorPicked(string hex)

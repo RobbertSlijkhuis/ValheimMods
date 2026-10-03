@@ -1,4 +1,5 @@
 using System;
+using Jotunn.GUI;
 using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.UI;
@@ -186,9 +187,15 @@ namespace WizshBoneTwitchIntegration.Gui
         /// Creates a color swatch button that opens Jötunn's own <see cref="GUIManager.CreateColorPicker"/>
         /// on click. <paramref name="currentHexValue"/>/the callback use the same "#RRGGBB" hex
         /// string format the redeem/creature data models already store colors as.
+        /// When <paramref name="singleCloseButton"/> is true the picker's Done/Cancel pair is replaced
+        /// by one "Close" button that runs the Done action, i.e. it always keeps the current color.
+        /// <paramref name="applyLive"/> commits every change as it happens (the picker stays open, but
+        /// nothing - including <see cref="GuiHelper.CloseOpenColorPicker"/> - can revert it) and
+        /// implies <paramref name="singleCloseButton"/>, since there's nothing left to cancel.
         /// </summary>
-        public static GameObject CreateColorField(GameObject parent, Vector2 position, float width, string currentHexValue, string pickerTitle, Action<string> onChanged, float height = FieldHeight)
+        public static GameObject CreateColorField(GameObject parent, Vector2 position, float width, string currentHexValue, string pickerTitle, Action<string> onChanged, float height = FieldHeight, bool singleCloseButton = false, bool applyLive = false)
         {
+            singleCloseButton |= applyLive;
             Color initialColor = ParseHexColor(currentHexValue);
 
             // Button - keeps its default Valheim style so borders are visible
@@ -237,9 +244,125 @@ namespace WizshBoneTwitchIntegration.Gui
                         onChanged?.Invoke("#" + ColorUtility.ToHtmlStringRGB(c));
                     }
                 );
+                OpenPickerAppliesLive = applyLive;
+                EnsureLiveHexInput();
+                ApplyPickerButtonLayout(singleCloseButton);
             });
 
             return swatchBtn;
+        }
+
+        /// <summary>True while the most recently opened picker was opened with <c>applyLive</c>.</summary>
+        public static bool OpenPickerAppliesLive { get; private set; }
+
+        // The picker prefab is a reused singleton, so the first-seen Done/Cancel layout is kept and
+        // restored on every open before (optionally) collapsing it to a single Close button.
+        private static Button s_doneButton;
+        private static Button s_cancelButton;
+        private static Text s_doneLabel;
+        private static string s_doneLabelText;
+        private static Vector2 s_doneAnchoredPos;
+        private static Vector2 s_doneSizeDelta;
+
+        private static void ApplyPickerButtonLayout(bool singleCloseButton)
+        {
+            Transform pickerTransform = GUIManager.CustomGUIFront?.transform.Find("ColorPicker");
+            if (pickerTransform == null)
+                return;
+
+            if (s_doneButton == null || s_cancelButton == null)
+            {
+                foreach (Button btn in pickerTransform.GetComponentsInChildren<Button>(true))
+                {
+                    string method = btn.onClick.GetPersistentEventCount() > 0 ? btn.onClick.GetPersistentMethodName(0) : "";
+                    string label = btn.GetComponentInChildren<Text>(true)?.text ?? "";
+                    string key = (method + "|" + btn.name + "|" + label).ToLowerInvariant();
+                    if (key.Contains("done"))
+                        s_doneButton = btn;
+                    else if (key.Contains("cancel"))
+                        s_cancelButton = btn;
+                }
+
+                if (s_doneButton == null || s_cancelButton == null)
+                {
+                    Jotunn.Logger.LogWarning("[WBTI] ColorPicker Done/Cancel buttons not found, can't customize them");
+                    s_doneButton = null;
+                    s_cancelButton = null;
+                    return;
+                }
+
+                RectTransform doneRt = (RectTransform)s_doneButton.transform;
+                s_doneLabel = s_doneButton.GetComponentInChildren<Text>(true);
+                s_doneLabelText = s_doneLabel != null ? s_doneLabel.text : null;
+                s_doneAnchoredPos = doneRt.anchoredPosition;
+                s_doneSizeDelta = doneRt.sizeDelta;
+            }
+
+            RectTransform done = (RectTransform)s_doneButton.transform;
+            RectTransform cancel = (RectTransform)s_cancelButton.transform;
+
+            // Restore defaults first (a previous open may have collapsed it)
+            done.anchoredPosition = s_doneAnchoredPos;
+            done.sizeDelta = s_doneSizeDelta;
+            if (s_doneLabel != null)
+                s_doneLabel.text = s_doneLabelText;
+            s_cancelButton.gameObject.SetActive(true);
+
+            if (!singleCloseButton)
+                return;
+
+            // Span the area both buttons covered (only well-defined when they share anchors/parent)
+            if (done.parent == cancel.parent && done.anchorMin == cancel.anchorMin && done.anchorMax == cancel.anchorMax)
+            {
+                float left = Mathf.Min(done.anchoredPosition.x - done.sizeDelta.x * done.pivot.x, cancel.anchoredPosition.x - cancel.sizeDelta.x * cancel.pivot.x);
+                float right = Mathf.Max(done.anchoredPosition.x + done.sizeDelta.x * (1f - done.pivot.x), cancel.anchoredPosition.x + cancel.sizeDelta.x * (1f - cancel.pivot.x));
+                done.sizeDelta = new Vector2(right - left, done.sizeDelta.y);
+                done.anchoredPosition = new Vector2(left + done.sizeDelta.x * done.pivot.x, done.anchoredPosition.y);
+            }
+
+            if (s_doneLabel != null)
+                s_doneLabel.text = "Close";
+            s_cancelButton.gameObject.SetActive(false);
+        }
+
+        private static InputField s_hookedHexInput;
+
+        /// <summary>
+        /// Jötunn's picker only applies its hex box on end-edit (Enter), so typing a hex and then
+        /// clicking Done silently kept the old color. Hooks the (singleton, reused) picker's hex
+        /// input once so a complete "RRGGBB" applies as soon as it's typed or pasted.
+        /// </summary>
+        private static void EnsureLiveHexInput()
+        {
+            Transform pickerTransform = GUIManager.CustomGUIFront?.transform.Find("ColorPicker");
+            ColorPicker picker = pickerTransform != null ? pickerTransform.GetComponent<ColorPicker>() : null;
+            InputField hex = picker != null ? picker.hexaComponent : null;
+            if (hex == null || hex == s_hookedHexInput)
+                return;
+
+            s_hookedHexInput = hex;
+
+            // Leave room for a pasted leading '#', otherwise a 6-digit limit would truncate the
+            // last digit before the listener below gets a chance to strip the '#'.
+            if (hex.characterLimit > 0 && hex.characterLimit < 7)
+                hex.characterLimit = 7;
+
+            hex.onValueChanged.AddListener(val =>
+            {
+                if (val == null)
+                    return;
+
+                string cleaned = val.Trim().TrimStart('#');
+                if (cleaned != val)
+                {
+                    // Re-fires this listener with the cleaned text.
+                    hex.text = cleaned;
+                    return;
+                }
+
+                if (cleaned.Length == 6)
+                    picker.SetHexa(cleaned);
+            });
         }
 
         private static Color ParseHexColor(string hex)
