@@ -32,6 +32,8 @@ namespace RestingRockFace.Gui
         float buttonHeight = 50f;
         float buttonYoffset = 42f;
 
+        public bool IsVisible => panel != null && panel.activeInHierarchy;
+
         public RockyGUI(RockyControls rockyControls)
         {
             this.rockyControls = rockyControls;
@@ -64,11 +66,12 @@ namespace RestingRockFace.Gui
 
             currentForm = new RockyGuiResult(rockyControls.m_tameable.GetName(), rockyControls.m_face == -1 ? (int)RockyFaceEnum.NoFeeling : rockyControls.m_face);
             panel.SetActive(false);
+            ClearGUI();
             CreateGUI();
 
+            RockyGuiState.SetGui(this);
             panel.SetActive(true);
             GUIManager.BlockInput(true);
-            RockyGuiState.IsOpen = true;
         }
 
         public void Close()
@@ -76,7 +79,6 @@ namespace RestingRockFace.Gui
             onClose.Invoke();
             panel.SetActive(false);
             GUIManager.BlockInput(false);
-            RockyGuiState.IsOpen = false;
         }
 
         public void Accept()
@@ -85,7 +87,6 @@ namespace RestingRockFace.Gui
             onClose.Invoke();
             panel.SetActive(false);
             GUIManager.BlockInput(false);
-            RockyGuiState.IsOpen = false;
         }
 
         public void SetName(string value)
@@ -100,12 +101,16 @@ namespace RestingRockFace.Gui
 
         public void UpdateGUI()
         {
+            ClearGUI();
+            CreateGUI();
+        }
+
+        private void ClearGUI()
+        {
             foreach (Transform child in panel.transform)
             {
                 GameObject.Destroy(child.gameObject);
             }
-
-            CreateGUI();
         }
 
         private void CreateGUI()

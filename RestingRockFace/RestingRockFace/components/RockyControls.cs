@@ -89,6 +89,7 @@ namespace RestingRockFace.Components
         {
             if (m_netView.IsValid() && m_netView.IsOwner())
             {
+                m_face = face;
                 UpdateFace(face);
 
                 materialVar.SetMaterial(face);

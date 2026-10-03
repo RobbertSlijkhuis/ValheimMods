@@ -41,6 +41,15 @@ namespace RestingRockFace.Harmony
             return !(RockyGuiState.IsOpen && ZInput.GetMouseScrollWheel() != 0f);
         }
 
+        // Close the Rocky panel when the local player dies so it (and Jötunn's input block) doesn't linger.
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Player), nameof(Player.OnDeath))]
+        public static void OnDeath_Postfix(Player __instance)
+        {
+            if (__instance == Player.m_localPlayer)
+                RockyGuiState.CloseOpenPanel();
+        }
+
         [HarmonyPrefix]
         [HarmonyPatch(typeof(Pet), "SetFace")]
         public static bool SetFace_Prefix(ref Tameable __instance, int index)
