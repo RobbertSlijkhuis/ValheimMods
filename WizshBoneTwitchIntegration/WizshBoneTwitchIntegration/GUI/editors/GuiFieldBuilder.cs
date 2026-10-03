@@ -227,6 +227,11 @@ namespace WizshBoneTwitchIntegration.Gui
 
             swatchBtn.GetComponent<Button>().onClick.AddListener(() =>
             {
+                // Jötunn's Create() only closes (Done) an already-open picker and opens nothing, so
+                // close it ourselves first - that fires its own close cleanup - and then open this
+                // one. Cancels (reverts) it, except an applyLive picker, which keeps its changes.
+                GuiHelper.CloseOpenColorPicker();
+
                 GUIManager.Instance.CreateColorPicker(
                     anchorMin: new Vector2(0.5f, 0.5f),
                     anchorMax: new Vector2(0.5f, 0.5f),
@@ -242,8 +247,13 @@ namespace WizshBoneTwitchIntegration.Gui
                     {
                         overlayImage.color = c;
                         onChanged?.Invoke("#" + ColorUtility.ToHtmlStringRGB(c));
+                        OnOwnPickerClosed();
                     }
                 );
+
+                // Every close (Done, Close, Cancel, CloseOpenColorPicker) runs onColorSelected, so
+                // the setup below is always undone by OnOwnPickerClosed.
+                s_ownPickerOpen = true;
                 OpenPickerAppliesLive = applyLive;
                 EnsureLiveHexInput();
                 ApplyPickerButtonLayout(singleCloseButton);
@@ -252,7 +262,7 @@ namespace WizshBoneTwitchIntegration.Gui
             return swatchBtn;
         }
 
-        /// <summary>True while the most recently opened picker was opened with <c>applyLive</c>.</summary>
+        /// <summary>True while the picker currently open was opened with <c>applyLive</c>.</summary>
         public static bool OpenPickerAppliesLive { get; private set; }
 
         // The picker prefab is a reused singleton, so the first-seen Done/Cancel layout is kept and
@@ -311,8 +321,11 @@ namespace WizshBoneTwitchIntegration.Gui
             if (!singleCloseButton)
                 return;
 
-            // Span the area both buttons covered (only well-defined when they share anchors/parent)
-            if (done.parent == cancel.parent && done.anchorMin == cancel.anchorMin && done.anchorMax == cancel.anchorMax)
+            // Span the area both buttons covered. sizeDelta is only a real width for point anchors,
+            // so skip the stretch (Close just keeps Done's size) for anything else.
+            if (done.parent == cancel.parent
+                && done.anchorMin == done.anchorMax && cancel.anchorMin == cancel.anchorMax
+                && done.anchorMin == cancel.anchorMin)
             {
                 float left = Mathf.Min(done.anchoredPosition.x - done.sizeDelta.x * done.pivot.x, cancel.anchoredPosition.x - cancel.sizeDelta.x * cancel.pivot.x);
                 float right = Mathf.Max(done.anchoredPosition.x + done.sizeDelta.x * (1f - done.pivot.x), cancel.anchoredPosition.x + cancel.sizeDelta.x * (1f - cancel.pivot.x));
@@ -326,43 +339,78 @@ namespace WizshBoneTwitchIntegration.Gui
         }
 
         private static InputField s_hookedHexInput;
+        private static int s_hexOriginalCharLimit;
+        // True only while a picker opened through CreateColorField is up, so the shared picker
+        // behaves exactly like Jötunn's for any other mod that opens it.
+        private static bool s_ownPickerOpen;
 
         /// <summary>
         /// Jötunn's picker only applies its hex box on end-edit (Enter), so typing a hex and then
         /// clicking Done silently kept the old color. Hooks the (singleton, reused) picker's hex
-        /// input once so a complete "RRGGBB" applies as soon as it's typed or pasted.
+        /// input once so a complete "RRGGBB" applies as soon as it's typed or pasted - but only
+        /// while <see cref="s_ownPickerOpen"/> (the picker is never opened with alpha here).
         /// </summary>
         private static void EnsureLiveHexInput()
         {
             Transform pickerTransform = GUIManager.CustomGUIFront?.transform.Find("ColorPicker");
             ColorPicker picker = pickerTransform != null ? pickerTransform.GetComponent<ColorPicker>() : null;
             InputField hex = picker != null ? picker.hexaComponent : null;
-            if (hex == null || hex == s_hookedHexInput)
+            if (hex == null)
                 return;
 
-            s_hookedHexInput = hex;
+            if (hex != s_hookedHexInput)
+            {
+                s_hookedHexInput = hex;
+                hex.onValueChanged.AddListener(val =>
+                {
+                    if (!s_ownPickerOpen || val == null)
+                        return;
+
+                    string cleaned = val.Trim().TrimStart('#');
+                    if (cleaned != val)
+                    {
+                        // Re-fires this listener with the cleaned text.
+                        hex.text = cleaned;
+                        return;
+                    }
+
+                    // Only a complete, valid value - SetHexa resets the box to the old color on junk
+                    if (cleaned.Length == 6 && IsHexDigits(cleaned))
+                        picker.SetHexa(cleaned);
+                });
+            }
 
             // Leave room for a pasted leading '#', otherwise a 6-digit limit would truncate the
-            // last digit before the listener below gets a chance to strip the '#'.
+            // last digit before the listener above gets a chance to strip the '#'.
+            s_hexOriginalCharLimit = hex.characterLimit;
             if (hex.characterLimit > 0 && hex.characterLimit < 7)
                 hex.characterLimit = 7;
+        }
 
-            hex.onValueChanged.AddListener(val =>
+        private static bool IsHexDigits(string s)
+        {
+            foreach (char c in s)
             {
-                if (val == null)
-                    return;
+                if (!Uri.IsHexDigit(c))
+                    return false;
+            }
+            return true;
+        }
 
-                string cleaned = val.Trim().TrimStart('#');
-                if (cleaned != val)
-                {
-                    // Re-fires this listener with the cleaned text.
-                    hex.text = cleaned;
-                    return;
-                }
+        /// <summary>
+        /// Undoes everything CreateColorField customized on the shared picker (button layout, hex
+        /// character limit, live flags). Runs from the picker's own close callback.
+        /// </summary>
+        private static void OnOwnPickerClosed()
+        {
+            s_ownPickerOpen = false;
+            OpenPickerAppliesLive = false;
 
-                if (cleaned.Length == 6)
-                    picker.SetHexa(cleaned);
-            });
+            if (s_hookedHexInput != null)
+                s_hookedHexInput.characterLimit = s_hexOriginalCharLimit;
+
+            if (s_doneButton != null && s_cancelButton != null)
+                ApplyPickerButtonLayout(false);
         }
 
         private static Color ParseHexColor(string hex)

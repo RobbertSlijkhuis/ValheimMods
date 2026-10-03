@@ -427,6 +427,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         {
             Button button = target.AddComponent<Button>();
             button.transition = Selectable.Transition.None;
+            // No keyboard/controller selection, otherwise a clicked cell stays selected and
+            // Enter/Space/A would re-copy it.
+            button.navigation = new Navigation { mode = Navigation.Mode.None };
             button.onClick.AddListener(() =>
             {
                 GUIUtility.systemCopyBuffer = hex;
