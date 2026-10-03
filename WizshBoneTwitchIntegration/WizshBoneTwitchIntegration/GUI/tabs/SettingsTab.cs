@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using WizshBoneTwitchIntegration.Configs;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
@@ -9,8 +12,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 {
     /// <summary>
     /// Settings tab content - built directly against RedesignUI.dc.html's structure: a title +
-    /// one scrollable body (mirrors GUI_OLD/tabs/RulesTab.cs's shape) holding 5 sections in a
-    /// fixed order (Redeems, Chatting, Creatures, Indestructible, Safezones), each a header
+    /// one scrollable body (mirrors GUI_OLD/tabs/RulesTab.cs's shape) holding 6 sections in a
+    /// fixed order (Redeems, Chatting, Creatures, Indestructible, Safezones, Status HUD), each a header
     /// followed by 1- or 2-column field cards. Every field writes straight through
     /// ProfileSettingsHelper.Current + <see cref="ProfileSettingsPersistHelper.Persist"/> on
     /// change, same as GUI_OLD's per-field RulesSettingsViewHelper.Persist() calls - no Save
@@ -18,7 +21,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
     /// than GUI_OLD/editors/ObjectEditor's reflection dispatcher, which stays deferred to
     /// whichever round edits RedeemData/CreatureData (see the round-2 "field widget factory"
     /// decision). Fields the mockup doesn't show (chattingCullingRange, wardPushForce, the
-    /// whole HUD section, allowRedeemsOnBoats) are intentionally omitted, matching the mockup.
+    /// allowRedeemsOnBoats) are intentionally omitted, matching the mockup. The Status HUD section
+    /// is not in the mockup - it was dropped by mistake and re-added so the HUD position stays
+    /// configurable.
     /// </summary>
     internal class SettingsTab : IShellTabView
     {
@@ -109,6 +114,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             BuildCreaturesSection();
             BuildIndestructibleSection();
             BuildSafezonesSection();
+            BuildHudSection();
 
             ScrollableList.SetContentHeight(m_scrollContent, Mathf.Abs(m_cursorY));
         }
@@ -138,6 +144,52 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 v => ProfileSettingsHelper.Current.redeemTitlePrefix = v,
                 Defaults.redeemTitlePrefix,
                 maxLength: 6);
+        }
+
+        private void BuildHudSection()
+        {
+            SectionHeader("Status HUD");
+
+            // The HUD is a purely local display preference - editable on a synced profile. Persist
+            // runs ApplyToLiveComponents, which repositions the live HUD immediately.
+            m_lockNewRows = false;
+
+            List<DropdownOption> positionOptions = Enum.GetValues(typeof(HudPosition))
+                .Cast<HudPosition>()
+                .Select(p => new DropdownOption(p.ToString(), HudPositionLabel(p)))
+                .ToList();
+
+            EnumFieldRow("HUD position", "Where the status HUD is shown. Set to Custom to use the X and Y offset below.",
+                positionOptions,
+                () => ProfileSettingsHelper.Current.hudPosition.ToString(),
+                v =>
+                {
+                    if (Enum.TryParse(v, out HudPosition position))
+                        ProfileSettingsHelper.Current.hudPosition = position;
+                },
+                Defaults.hudPosition.ToString());
+
+            FloatFieldRow(
+                ("HUD custom offset X", "Horizontal offset from the screen center when HUD position is Custom",
+                    () => ProfileSettingsHelper.Current.hudOffsetX,
+                    v => ProfileSettingsHelper.Current.hudOffsetX = v,
+                    Defaults.hudOffsetX),
+                ("HUD custom offset Y", "Vertical offset from the screen center when HUD position is Custom",
+                    () => ProfileSettingsHelper.Current.hudOffsetY,
+                    v => ProfileSettingsHelper.Current.hudOffsetY = v,
+                    Defaults.hudOffsetY));
+        }
+
+        private static string HudPositionLabel(HudPosition position)
+        {
+            switch (position)
+            {
+                case HudPosition.BottomRight: return "Bottom right";
+                case HudPosition.BottomLeft: return "Bottom left";
+                case HudPosition.AboveMinimap: return "Above minimap";
+                case HudPosition.UnderMinimap: return "Under minimap";
+                default: return "Custom";
+            }
         }
 
         private void BuildChattingSection()
@@ -339,6 +391,30 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 GuiHelper.CreateResetButton(cell, resetCenterX, -58f, () => input.text = f.Default.ToString("G"));
                 GuiHelper.CreateCardDescription(cell, f.Description, width - 24f);
             });
+        }
+
+        private void EnumFieldRow(string title, string description, List<DropdownOption> options, Func<string> get, Action<string> set, string defaultValue)
+        {
+            GameObject row = CreateRow();
+            GameObject cell = CreateCell(row, 0f, ScrollContentWidth);
+            GuiHelper.CreateCardTitle(cell, title, ScrollContentWidth - 24f);
+
+            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(ScrollContentWidth);
+
+            SearchableDropdown dropdown = new SearchableDropdown();
+            dropdown.Build(cell, new Vector2(fieldCenterX, -58f), fieldWidth, GuiFieldBuilder.FieldHeight, options, get(), showSearch: false);
+            dropdown.OnValueChanged += v => { set(v); ProfileSettingsPersistHelper.Persist(); };
+
+            // SearchableDropdown.Value only repaints the label and doesn't raise OnValueChanged, so
+            // a reset writes back and persists explicitly (same as Step2RowLayout.DropdownRow).
+            GuiHelper.CreateResetButton(cell, resetCenterX, -58f, () =>
+            {
+                dropdown.Value = defaultValue;
+                set(defaultValue);
+                ProfileSettingsPersistHelper.Persist();
+            });
+
+            GuiHelper.CreateCardDescription(cell, description, ScrollContentWidth - 24f);
         }
 
         private static readonly Color InvalidFieldColor = Color.red;
