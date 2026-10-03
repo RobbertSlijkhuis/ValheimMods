@@ -1,5 +1,6 @@
 ﻿using Jotunn.Managers;
 using RestingRockFace.Components;
+using RestingRockFace.Helpers;
 using RestingRockFace.Models;
 using RestingRockFace.Types;
 using System.Collections.Generic;
@@ -38,8 +39,6 @@ namespace RestingRockFace.Gui
 
         public void ShowGUI()
         {
-            Jotunn.Logger.LogWarning("ShowGUI()");
-
             if (GUIManager.Instance == null)
             {
                 Jotunn.Logger.LogError("GUIManager instance is null");
@@ -63,12 +62,13 @@ namespace RestingRockFace.Gui
                     draggable: false
                 );
 
-            currentForm = new RockyGuiResult(rockyControls.m_name, rockyControls.m_face == -1 ? (int)RockyFaceEnum.NoFeeling : rockyControls.m_face);
+            currentForm = new RockyGuiResult(rockyControls.m_tameable.GetName(), rockyControls.m_face == -1 ? (int)RockyFaceEnum.NoFeeling : rockyControls.m_face);
             panel.SetActive(false);
             CreateGUI();
 
             panel.SetActive(true);
             GUIManager.BlockInput(true);
+            RockyGuiState.IsOpen = true;
         }
 
         public void Close()
@@ -76,6 +76,7 @@ namespace RestingRockFace.Gui
             onClose.Invoke();
             panel.SetActive(false);
             GUIManager.BlockInput(false);
+            RockyGuiState.IsOpen = false;
         }
 
         public void Accept()
@@ -84,17 +85,16 @@ namespace RestingRockFace.Gui
             onClose.Invoke();
             panel.SetActive(false);
             GUIManager.BlockInput(false);
+            RockyGuiState.IsOpen = false;
         }
 
         public void SetName(string value)
         {
-            Jotunn.Logger.LogWarning("SetName(), " + value);
             currentForm.name = value;
         }
 
         public void SetFace(int value)
         {
-            Jotunn.Logger.LogWarning("SetFace(), " + value);
             currentForm.face = GetRockyFace(value);
         }
 
@@ -175,6 +175,8 @@ namespace RestingRockFace.Gui
             });
             faceDropdown.value = GetDropdownValue(currentForm.face);
             faceDropdown.onValueChanged.AddListener(SetFace);
+            ScrollRect faceScroll = faceDropdown.template.GetComponent<ScrollRect>();
+            if (faceScroll != null) faceScroll.scrollSensitivity = 1000f;
 
             GameObject cancelButtonObj = GUIManager.Instance.CreateButton(
                 text: "Close",

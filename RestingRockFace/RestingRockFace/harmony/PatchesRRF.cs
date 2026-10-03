@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using RestingRockFace.Components;
+using RestingRockFace.Helpers;
 using RestingRockFace.Types;
 using System;
 
@@ -31,6 +32,15 @@ namespace RestingRockFace.Harmony
             }
         }
 
+        // GameCamera.UpdateCamera applies the mouse wheel to the zoom distance. While the Rocky panel
+        // is open, skip it only on frames where the wheel moved so it only scrolls the dropdown.
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(GameCamera), "UpdateCamera")]
+        public static bool UpdateCamera_Prefix()
+        {
+            return !(RockyGuiState.IsOpen && ZInput.GetMouseScrollWheel() != 0f);
+        }
+
         [HarmonyPrefix]
         [HarmonyPatch(typeof(Pet), "SetFace")]
         public static bool SetFace_Prefix(ref Tameable __instance, int index)
@@ -42,8 +52,6 @@ namespace RestingRockFace.Harmony
 
                 if (__instance.gameObject.name != "Placeable_HardRock(Clone)")
                     return true;
-
-                Jotunn.Logger.LogWarning("Harmony SetFace: " + index);
 
                 RockyControls rockyControls = __instance.gameObject.GetComponent<RockyControls>();
 
