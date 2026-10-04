@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
+using WizshBoneTwitchIntegration.Gui;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
@@ -15,6 +16,16 @@ namespace WizshBoneTwitchIntegration.Harmony
         private static readonly FieldInfo s_instancesField = AccessTools.Field(typeof(ZNetScene), "m_instances");
         private static float s_nextStaleInstanceScanTime;
         private const float StaleInstanceScanInterval = 1f;
+
+        // GameCamera.UpdateCamera applies the mouse wheel to the zoom distance. While a WBTI panel is
+        // open, skip it only on frames where the wheel moved so it only scrolls the UI. Same fix as
+        // RestingRockFace's Rocky panel.
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(GameCamera), "UpdateCamera")]
+        public static bool UpdateCamera_Prefix()
+        {
+            return !(InputBlockGate.IsBlocking && ZInput.GetMouseScrollWheel() != 0f);
+        }
 
         // Defensive + diagnostic. ZNetScene.RemoveObjects() NREs (UnityEngine.Component.get_gameObject(),
         // called on m_instances.Values) whenever m_instances still holds a ZNetView whose GameObject was

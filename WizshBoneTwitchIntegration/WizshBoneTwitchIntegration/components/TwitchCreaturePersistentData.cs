@@ -24,6 +24,7 @@ namespace WizshBoneTwitchIntegration.Components
         private string m_actualPrefabName = "";
 
         private string m_colorOverride;
+        private string m_emissionColorOverride;
         private bool m_forceColorOverride;
         public bool m_ignoreWard;
         public bool m_isFollowing;
@@ -134,6 +135,7 @@ namespace WizshBoneTwitchIntegration.Components
         private void ApplyCreatureData(CreatureData creatureData)
         {
             m_colorOverride = creatureData.color;
+            m_emissionColorOverride = creatureData.emissionColor;
             m_forceColorOverride = creatureData.forceColor;
 
             ApplyVariables(creatureData);
@@ -174,8 +176,8 @@ namespace WizshBoneTwitchIntegration.Components
             {
                 if (m_redeemerName != null && RecolorHelper.CanRecolorPetRock(m_redeemerName, gameObject))
                     RecolorHelper.RecolorPetRock(m_redeemerName, gameObject);
-                else if (m_redeemerName != null && RecolorHelper.CanRecolorCreature(m_redeemerName, gameObject.name, m_colorOverride))
-                    RecolorHelper.RecolorCreature(m_redeemerName, gameObject, m_colorOverride, m_forceColorOverride);
+                else if (m_redeemerName != null && RecolorHelper.CanRecolorCreature(m_redeemerName, gameObject.name, m_colorOverride, m_emissionColorOverride))
+                    RecolorHelper.RecolorCreature(m_redeemerName, gameObject, m_colorOverride, m_forceColorOverride, m_emissionColorOverride);
             }
             catch (Exception e)
             {
@@ -190,6 +192,7 @@ namespace WizshBoneTwitchIntegration.Components
             m_ignoreWard      = ignoreWard;
             m_savedPrefabName = creatureData?.prefabName ?? "";
             m_colorOverride   = creatureData?.color;
+            m_emissionColorOverride = creatureData?.emissionColor;
             m_forceColorOverride = creatureData?.forceColor ?? false;
 
             // isFollowing defaults to commandable for new spawns

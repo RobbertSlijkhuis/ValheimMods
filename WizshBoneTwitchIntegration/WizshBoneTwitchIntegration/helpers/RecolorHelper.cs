@@ -285,24 +285,44 @@ namespace WizshBoneTwitchIntegration.Helpers
             public RecolorColors(Color both) : this(both, both) { }
         }
 
-        public static void RecolorCreature(string redeemerName, GameObject creature, string colorOverride = null, bool forceColor = false)
+        // A redeem's color/emission override strings, parsed like a viewer's colors: a missing
+        // emission follows the main color, and a missing color is white when only an emission is set.
+        private static bool TryParseColorOverride(string colorOverride, string emissionColorOverride, out RecolorColors colors)
+        {
+            Color main = Color.white;
+            bool hasColor = !string.IsNullOrEmpty(colorOverride) && ColorUtility.TryParseHtmlString(colorOverride, out main);
+
+            if (!hasColor)
+                main = Color.white;
+
+            Color emission = main;
+            bool hasEmission = !string.IsNullOrEmpty(emissionColorOverride) && ColorUtility.TryParseHtmlString(emissionColorOverride, out emission);
+
+            if (!hasEmission)
+                emission = main;
+
+            colors = new RecolorColors(main, emission);
+            return hasColor || hasEmission;
+        }
+
+        public static void RecolorCreature(string redeemerName, GameObject creature, string colorOverride = null, bool forceColor = false, string emissionColorOverride = null)
         {
             ViewerEntry viewerEntry = GetViewer(redeemerName);
 
             RecolorColors colors;
 
-            if (forceColor && colorOverride != null && ColorUtility.TryParseHtmlString(colorOverride, out Color parsedForceOverride))
+            if (forceColor && TryParseColorOverride(colorOverride, emissionColorOverride, out RecolorColors forcedColors))
             {
-                colors = new RecolorColors(parsedForceOverride);
+                colors = forcedColors;
             }
             else if (viewerEntry != null)
             {
                 viewerEntry.Init();
                 colors = new RecolorColors(viewerEntry.parsedColor, viewerEntry.parsedEmissionColor);
             }
-            else if (colorOverride != null && ColorUtility.TryParseHtmlString(colorOverride, out Color parsedOverride))
+            else if (TryParseColorOverride(colorOverride, emissionColorOverride, out RecolorColors overrideColors))
             {
-                colors = new RecolorColors(parsedOverride);
+                colors = overrideColors;
             }
             else
             {
@@ -936,9 +956,9 @@ namespace WizshBoneTwitchIntegration.Helpers
             m_hasLoadedOnce = true;
         }
 
-        public static bool CanRecolorCreature(string name, string creature, string colorOverride = null)
+        public static bool CanRecolorCreature(string name, string creature, string colorOverride = null, string emissionColorOverride = null)
         {
-            return IsCreatureInList(creature) && (IsRedeemerSpecialViewer(name) || colorOverride != null);
+            return IsCreatureInList(creature) && (IsRedeemerSpecialViewer(name) || colorOverride != null || !string.IsNullOrEmpty(emissionColorOverride));
         }
 
         public static bool IsRedeemerSpecialViewer(string name)

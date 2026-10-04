@@ -15,6 +15,11 @@ namespace WizshBoneTwitchIntegration.Models
         [EditorTooltip("Overrides the creature's color in hex format (e.g. #ffffff for white). Leave blank for default.")]
         [ColorPicker]
         public string color = null;
+
+        [EditorLabel("Creature emission color")]
+        [EditorTooltip("Overrides the color of the creature's glow in hex format. Leave blank to use the creature color.")]
+        [ColorPicker]
+        public string emissionColor = null;
         public float damageScale = 0;
         public bool friendly = false;
         public string globalKeyAdd = "";

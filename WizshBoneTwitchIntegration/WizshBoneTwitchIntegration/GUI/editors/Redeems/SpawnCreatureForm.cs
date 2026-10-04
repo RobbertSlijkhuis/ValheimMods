@@ -10,10 +10,10 @@ namespace WizshBoneTwitchIntegration.Gui
     /// CreatureGroup reference) is deliberately not exposed - CreatureGroups is still a stub in
     /// the new UI and gets its own future round. Speed multiplier and Rename are hidden (both match
     /// <see cref="CreatureData"/>'s own class defaults, so hiding them is transparent).
-    /// Amount+Color, Friendly+Commandable, and Level+Size are paired; Commandable is always shown
-    /// (its tooltip notes it only has an effect when Friendly is on). Allow drops + Is boss are
-    /// paired on a row below (<see cref="CreatureData.allowDrops"/>/<see cref="CreatureData.isBoss"/>,
-    /// both default off; already applied at spawn by TwitchCreaturePersistentData). A fresh list starts with one
+    /// The rows themselves live in <see cref="CreatureEntryFields"/>: Amount+Allow drops,
+    /// Friendly+Commandable, Level+Size, Is boss+Name, Position+Position radius and (last)
+    /// Color+Emission color are paired, with Position offset on its own row. Commandable is always shown (its
+    /// tooltip notes it only has an effect when Friendly is on). A fresh list starts with one
     /// default entry, and a list row's label follows the entry's prefab/amount as they're edited.
     /// </summary>
     internal class SpawnCreatureForm : IRedeemStep2Form

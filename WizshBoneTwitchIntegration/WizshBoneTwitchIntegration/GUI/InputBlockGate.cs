@@ -21,6 +21,12 @@ namespace WizshBoneTwitchIntegration.Gui
         public static int Count => s_count;
 
         /// <summary>
+        /// True while any new-UI panel/dialog is open. Read by the GameCamera.UpdateCamera patch so
+        /// the mouse wheel scrolls the UI instead of zooming the game camera.
+        /// </summary>
+        public static bool IsBlocking => s_count > 0;
+
+        /// <summary>
         /// Drops every outstanding push. Jötunn zeroes its own request counter on every scene load,
         /// so if a scene change (disconnect, kick, logout) destroys the UI while it holds pushes, the
         /// static count here would stay inflated for the rest of the process - and the next session's

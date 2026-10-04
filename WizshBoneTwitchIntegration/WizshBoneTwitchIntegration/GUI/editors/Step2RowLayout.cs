@@ -167,6 +167,45 @@ namespace WizshBoneTwitchIntegration.Gui
             return field;
         }
 
+        /// <summary>
+        /// Three float fields (X, Y, Z - left to right) sharing one card's field slot, with one Reset
+        /// for all three (back to 0). <paramref name="onChanged"/> receives the full vector whenever
+        /// any axis changes. The card title/description should name the axis order, as the fields
+        /// carry no labels of their own.
+        /// </summary>
+        public InputField[] Vector3Row(string label, string description, Vector3 value, Action<Vector3> onChanged)
+        {
+            const float axisGap = 6f;
+
+            GameObject card = BeginFieldCard(label, out float fieldY);
+
+            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(m_cellWidth);
+            float axisWidth = (fieldWidth - 2f * axisGap) / 3f;
+            float firstCenterX = fieldCenterX - fieldWidth / 2f + axisWidth / 2f;
+
+            Vector3 current = value;
+            InputField[] fields = new InputField[3];
+
+            for (int i = 0; i < 3; i++)
+            {
+                int axis = i;
+                fields[i] = GuiFieldBuilder.CreateFloatField(card, new Vector2(firstCenterX + i * (axisWidth + axisGap), fieldY), axisWidth, value[axis], v =>
+                {
+                    current[axis] = v;
+                    onChanged?.Invoke(current);
+                });
+            }
+
+            GuiHelper.CreateResetButton(card, resetCenterX, fieldY, () =>
+            {
+                foreach (InputField field in fields)
+                    field.text = "0";
+            });
+
+            EndFieldCard(card, description);
+            return fields;
+        }
+
         public Toggle ToggleRow(string label, string description, bool value, Action<bool> onChanged, bool defaultValue = false)
         {
             GameObject card = BeginFieldCard(label, out float fieldY);
