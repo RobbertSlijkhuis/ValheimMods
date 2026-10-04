@@ -593,7 +593,7 @@ namespace WizshBoneTwitchIntegration.GuiOld
 
             if (targetProfile == ProfileManager.ActiveProfile)
             {
-                bool copiedWithin = RedeemManager.CopyRedeemWithinActiveProfile(redeem, newTitle, out string withinError);
+                bool copiedWithin = RedeemManager.CopyRedeemWithinProfile(redeem, newTitle, out string withinError);
                 if (!copiedWithin)
                     return withinError;
 

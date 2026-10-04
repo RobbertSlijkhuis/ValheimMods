@@ -31,9 +31,19 @@ namespace WizshBoneTwitchIntegration.Commands
             }
         }
 
+        /// <summary>
+        /// Banner logged first thing in a run, so the output of self-tests run back to back
+        /// doesn't blur together.
+        /// </summary>
+        public void LogHeader(string subject)
+        {
+            Jotunn.Logger.LogWarning($"[{m_tag}] ================ {subject} self-test: START ================");
+        }
+
         public void LogSummary(string subject)
         {
             Jotunn.Logger.LogWarning($"[{m_tag}] {subject} self-test complete: {Passed} passed, {Failed} failed.");
+            Jotunn.Logger.LogWarning($"[{m_tag}] ================ {subject} self-test: END ================");
         }
     }
 }

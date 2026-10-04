@@ -22,6 +22,8 @@ namespace WizshBoneTwitchIntegration.Gui
         private Button     m_cancelButton;
         private Text       m_confirmButtonText;
         private Text       m_cancelButtonText;
+        private Button     m_extraButton;
+        private Text       m_extraButtonText;
         private bool       m_blockingInput;
 
         private const float PanelWidth   = 420f;
@@ -33,6 +35,12 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float BtnY         =  40f;
         private const float BtnWidth     =  160f;
         private const float BtnHeight    =  50f;
+
+        // Three-button mode (Show's extraText): wide enough for three BtnWidth buttons.
+        private const float WidePanelWidth = 580f;
+        private const float WideConfirmBtnX = -190f;
+        private const float WideExtraBtnX   =    0f;
+        private const float WideCancelBtnX  =  190f;
 
         /// <summary>
         /// Creates the panel once and hides it. Call <see cref="Show"/> to display it.
@@ -94,6 +102,10 @@ namespace WizshBoneTwitchIntegration.Gui
             m_cancelButton     = CreateButton(CancelBtnX, GUIManager.Instance.ValheimBeige);
             m_cancelButtonText = m_cancelButton.GetComponentInChildren<Text>();
 
+            m_extraButton     = CreateButton(WideExtraBtnX, GUIManager.Instance.ValheimBeige);
+            m_extraButtonText = m_extraButton.GetComponentInChildren<Text>();
+            m_extraButton.gameObject.SetActive(false);
+
             m_panel.SetActive(false);
         }
 
@@ -106,13 +118,20 @@ namespace WizshBoneTwitchIntegration.Gui
         /// <param name="onCancel">Invoked when the user clicks the cancel button. May be <c>null</c>.</param>
         /// <param name="confirmText">Label for the confirm button. Defaults to "Confirm".</param>
         /// <param name="cancelText">Label for the cancel button. Defaults to "Cancel".</param>
+        /// <param name="extraText">When non-null, shows a third button between confirm and cancel
+        /// (the panel widens to fit it). Null keeps the standard two-button layout.</param>
+        /// <param name="onExtra">Invoked when the user clicks the extra button. May be <c>null</c>.</param>
+        /// <param name="confirmEnabled">False greys out the confirm button so it can't be clicked.</param>
         public void Show(
             string title,
             string description,
             Action onConfirm,
             Action onCancel      = null,
             string confirmText   = "Confirm",
-            string cancelText    = "Cancel")
+            string cancelText    = "Cancel",
+            string extraText     = null,
+            Action onExtra       = null,
+            bool confirmEnabled  = true)
         {
             if (m_panel == null)
             {
@@ -124,6 +143,20 @@ namespace WizshBoneTwitchIntegration.Gui
             m_descriptionText.text = description;
             m_confirmButtonText.text = confirmText;
             m_cancelButtonText.text  = cancelText;
+
+            ApplyLayout(extraText != null);
+            m_confirmButton.interactable = confirmEnabled;
+
+            if (extraText != null)
+            {
+                m_extraButtonText.text = extraText;
+                m_extraButton.onClick.RemoveAllListeners();
+                m_extraButton.onClick.AddListener(() =>
+                {
+                    Hide();
+                    onExtra?.Invoke();
+                });
+            }
 
             m_confirmButton.onClick.RemoveAllListeners();
             m_confirmButton.onClick.AddListener(() =>
@@ -162,6 +195,29 @@ namespace WizshBoneTwitchIntegration.Gui
         }
 
         public bool IsVisible => m_panel != null && m_panel.activeSelf;
+
+        /// <summary>
+        /// Applied on every Show so a previous three-button call never leaks its width or button
+        /// positions into the next (two-button) one.
+        /// </summary>
+        private void ApplyLayout(bool threeButtons)
+        {
+            float panelWidth = threeButtons ? WidePanelWidth : PanelWidth;
+
+            m_panel.GetComponent<RectTransform>().sizeDelta = new Vector2(panelWidth, PanelHeight);
+            m_titleText.rectTransform.sizeDelta = new Vector2(panelWidth - 40f, m_titleText.rectTransform.sizeDelta.y);
+            m_descriptionText.rectTransform.sizeDelta = new Vector2(panelWidth - 40f, m_descriptionText.rectTransform.sizeDelta.y);
+
+            SetButtonX(m_confirmButton, threeButtons ? WideConfirmBtnX : ConfirmBtnX);
+            SetButtonX(m_cancelButton, threeButtons ? WideCancelBtnX : CancelBtnX);
+            m_extraButton.gameObject.SetActive(threeButtons);
+        }
+
+        private static void SetButtonX(Button button, float x)
+        {
+            RectTransform rt = button.GetComponent<RectTransform>();
+            rt.anchoredPosition = new Vector2(x, rt.anchoredPosition.y);
+        }
 
         private Button CreateButton(float posX, Color textColor)
         {

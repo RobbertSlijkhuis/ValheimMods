@@ -54,11 +54,36 @@ namespace WizshBoneTwitchIntegration.Helpers
                 Current = new ProfileSettingsData();
             }
 
-            if (!string.IsNullOrEmpty(Current.redeemTitlePrefix) && Current.redeemTitlePrefix.Length > 6)
-                Current.redeemTitlePrefix = Current.redeemTitlePrefix.Substring(0, 6);
+            Current.redeemTitlePrefix = ClampPrefix(Current.redeemTitlePrefix);
 
             ApplyToLiveComponents();
             return true;
+        }
+
+        private const int MaxPrefixLength = 6;
+
+        private static string ClampPrefix(string prefix)
+        {
+            return !string.IsNullOrEmpty(prefix) && prefix.Length > MaxPrefixLength
+                ? prefix.Substring(0, MaxPrefixLength)
+                : prefix;
+        }
+
+        /// <summary>
+        /// The Twitch title prefix of <paramref name="profileName"/> (null = the active profile).
+        /// The active profile's comes from <see cref="Current"/>; any other profile's is read from
+        /// its profile.yaml on disk (null/empty if the profile or its settings don't exist).
+        /// </summary>
+        public static string GetRedeemTitlePrefix(string profileName = null)
+        {
+            if (string.IsNullOrEmpty(profileName) || profileName == ProfileManager.ActiveProfile)
+                return Current.redeemTitlePrefix;
+
+            string path = ProfileManager.GetRedeemPath(profileName);
+            if (!File.Exists(path))
+                return null;
+
+            return ClampPrefix(ExtraConfigHelper.ReadRedeemsConfig(path)?.settings?.redeemTitlePrefix);
         }
 
         /// <summary>

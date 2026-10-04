@@ -28,6 +28,28 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static string ActiveProfile { get; private set; } = DefaultProfileName;
 
+        /// <summary>Why the active profile's redeems/settings were just replaced.</summary>
+        public enum ActiveProfileChange { Sync, Switch, Import, Reload }
+
+        /// <summary>
+        /// Raised after the active profile's data was replaced wholesale (switched to another
+        /// profile, imported over, reloaded from disk, or overwritten by a sync). Anything holding
+        /// a working copy of the old data (e.g. an open redeem editor) must drop it.
+        /// </summary>
+        public static event System.Action<ActiveProfileChange> ActiveProfileDataReplaced;
+
+        internal static void RaiseActiveProfileDataReplaced(ActiveProfileChange reason)
+        {
+            try
+            {
+                ActiveProfileDataReplaced?.Invoke(reason);
+            }
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogWarning("[WBTI] ActiveProfileDataReplaced handler failed: " + e);
+            }
+        }
+
         public static string GetActiveRedeemPath()
         {
             return GetRedeemPath(ActiveProfile);
@@ -159,19 +181,19 @@ namespace WizshBoneTwitchIntegration.Helpers
         }
 
         /// <summary>
-        /// Copies the active profile's profile.yaml (settings and all, since they now live in
-        /// the same file) into a new profile with the given name. The .synced marker is
-        /// intentionally not copied so the clone is locally owned. Fails if the name is invalid
-        /// or a profile with that name already exists.
+        /// Copies a profile's profile.yaml (settings and all, since they now live in the same
+        /// file) into a new profile with the given name. <paramref name="sourceProfile"/> defaults
+        /// to the active profile. The .synced marker is intentionally not copied so the clone is
+        /// locally owned. Fails if the name is invalid or a profile with that name already exists.
         /// </summary>
-        public static bool CopyProfileTo(string newProfileName, out string error)
+        public static bool CopyProfileTo(string newProfileName, out string error, string sourceProfile = null)
         {
             error = null;
-            string sourcePath = GetActiveRedeemPath();
+            string sourcePath = GetRedeemPath(sourceProfile ?? ActiveProfile);
 
             if (!File.Exists(sourcePath))
             {
-                error = "Copy failed: active profile file not found.";
+                error = "Copy failed: profile file not found.";
                 return false;
             }
 
@@ -227,6 +249,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             File.WriteAllText(ActiveProfileFile, name);
             RedeemHelper.Reload();
             ProfileSettingsHelper.Reload();
+            RaiseActiveProfileDataReplaced(ActiveProfileChange.Switch);
             return true;
         }
 
@@ -285,13 +308,12 @@ namespace WizshBoneTwitchIntegration.Helpers
         }
 
         /// <summary>
-        /// Imports a yaml file into the given target profile name. If a profile with that
-        /// name already exists it is updated (overwritten) - this is intentional, it's how
-        /// a user re-imports into the same profile. Otherwise a new profile is created.
+        /// The checks <see cref="ImportProfileTo"/> would reject on. Callers that need to do
+        /// something irreversible before importing (e.g. turning redeems off) run this first so
+        /// a doomed import doesn't cost the user anything.
         /// </summary>
-        public static bool ImportProfileTo(string sourceFilePath, string targetProfileName, out bool profileCreated, out string error)
+        public static bool ValidateImport(string sourceFilePath, string targetProfileName, out string error)
         {
-            profileCreated = false;
             error = null;
 
             if (!File.Exists(sourceFilePath))
@@ -308,6 +330,21 @@ namespace WizshBoneTwitchIntegration.Helpers
                 error = $"Cannot import into '{targetProfileName}' - it is a synced (read-only) profile.";
                 return false;
             }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Imports a yaml file into the given target profile name. If a profile with that
+        /// name already exists it is updated (overwritten) - this is intentional, it's how
+        /// a user re-imports into the same profile. Otherwise a new profile is created.
+        /// </summary>
+        public static bool ImportProfileTo(string sourceFilePath, string targetProfileName, out bool profileCreated, out string error)
+        {
+            profileCreated = false;
+
+            if (!ValidateImport(sourceFilePath, targetProfileName, out error))
+                return false;
 
             string profilePath = $"{ProfilesPath}/{targetProfileName}";
             if (!Directory.Exists(profilePath))
@@ -327,6 +364,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             {
                 RedeemHelper.Reload();
                 ProfileSettingsHelper.Reload();
+                RaiseActiveProfileDataReplaced(ActiveProfileChange.Import);
             }
 
             return true;
@@ -462,12 +500,13 @@ namespace WizshBoneTwitchIntegration.Helpers
         }
 
         /// <summary>
-        /// Copies the active profile's profile.yaml to the given destination path. Settings
-        /// travel along for free since they're embedded in the same file (see ModData.settings).
+        /// Copies a profile's profile.yaml to the given destination path (<paramref name="sourceProfile"/>
+        /// defaults to the active profile). Settings travel along for free since they're embedded
+        /// in the same file (see ModData.settings).
         /// </summary>
-        public static bool ExportProfile(string destFilePath)
+        public static bool ExportProfile(string destFilePath, string sourceProfile = null)
         {
-            string sourcePath = GetActiveRedeemPath();
+            string sourcePath = GetRedeemPath(sourceProfile ?? ActiveProfile);
 
             if (!File.Exists(sourcePath))
                 return false;

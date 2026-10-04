@@ -12,7 +12,7 @@ namespace WizshBoneTwitchIntegration.Commands
     /// Automated self-test of profile settings persistence (see helpers/ProfileSettingsHelper.cs
     /// and models/data/ProfileSettingsData.cs) - Save/Reload round-trip across every field type,
     /// non-interference with redeem edits, and the live-component push - run entirely against a
-    /// disposable "__wbti_test_settings_*" profile created by the test itself. Never reads,
+    /// disposable "__wbti_s_*" profile created by the test itself. Never reads,
     /// writes, or assumes anything about the player's real profiles - the only real-world value
     /// touched is the active profile's *name*, captured once at the start and restored at the
     /// end. Safe to run repeatedly.
@@ -22,9 +22,9 @@ namespace WizshBoneTwitchIntegration.Commands
         public override string Name => "WBTITestSettings";
         public override string Help => "Runs an automated self-test of profile settings persistence (Save/Reload round-trip, redeem-edit non-interference, live component push) against a disposable test profile only. Usage: WBTITestSettings [--keep] - pass --keep to leave the test profile on disk afterward for inspection instead of deleting it.";
 
-        // Own non-overlapping "__wbti_test_settings_" prefix - see TestProfilesCommand's Prefix
+        // Own non-overlapping "__wbti_s_" prefix - see TestProfilesCommand's Prefix
         // comment for why every WBTITest* command needs one that isn't a prefix of another's.
-        private const string Prefix = "__wbti_test_settings_";
+        private const string Prefix = "__wbti_s_";
         private const string TestProfile = Prefix + "home";
 
         private SelfTestReport m_report;
@@ -32,6 +32,7 @@ namespace WizshBoneTwitchIntegration.Commands
         public override void Run(string[] args)
         {
             m_report = new SelfTestReport("WBTI");
+            m_report.LogHeader("Settings");
 
             bool keepProfile = args.Any(a => a.Equals("--keep", StringComparison.OrdinalIgnoreCase));
 
@@ -220,7 +221,7 @@ namespace WizshBoneTwitchIntegration.Commands
         }
 
         /// <summary>
-        /// Best-effort removal of any "__wbti_test_settings_*" profile left behind by a previous
+        /// Best-effort removal of any "__wbti_s_*" profile left behind by a previous
         /// run that crashed before its own cleanup ran. Never touches a real profile.
         /// </summary>
         private static void CleanupLeftoverTestProfiles(string originalActive)

@@ -10,7 +10,7 @@ namespace WizshBoneTwitchIntegration.Commands
 {
     /// <summary>
     /// Automated self-test of every Profiles-tab flow (create/select/copy/export/import/
-    /// rename/delete + guard rails), run entirely against disposable "__wbti_test_*" profiles
+    /// rename/delete + guard rails), run entirely against disposable "__wbti_p_*" profiles
     /// created by the test itself. Never reads, writes, or assumes anything about the player's
     /// real profiles - the only real-world value touched is the active profile's *name*,
     /// captured once at the start and restored at the end. Safe to run repeatedly.
@@ -20,11 +20,12 @@ namespace WizshBoneTwitchIntegration.Commands
         public override string Name => "WBTITestProfiles";
         public override string Help => "Runs an automated self-test of profile create/select/copy/export/import/rename/delete flows against disposable test profiles only. Usage: WBTITestProfiles [--keep] - pass --keep to leave the test profiles on disk afterward for inspection instead of deleting them.";
 
-        // Not just "__wbti_test_" - that would also match (and get cleaned up by) other
-        // WBTITest* commands' own "__wbti_test_<subject>_..." profiles, e.g. TestRedeemsCommand's
-        // "__wbti_test_redeems_*". Every self-test command should use its own non-overlapping
-        // "__wbti_test_<subject>_" prefix so none of them can ever sweep up another's profiles.
-        private const string Prefix = "__wbti_test_profiles_";
+        // Not just "__wbti_" - that would also match (and get cleaned up by) other WBTITest*
+        // commands' own "__wbti_<letter>_..." profiles, e.g. TestRedeemsCommand's "__wbti_r_*".
+        // Every self-test command should use its own non-overlapping "__wbti_<letter>_" prefix so
+        // none of them can ever sweep up another's profiles. Kept this short on purpose: profile
+        // names are capped at ProfileManager.MaxProfileNameLength (21) including the prefix.
+        private const string Prefix = "__wbti_p_";
 
         private static readonly List<string> m_testProfiles = new List<string>();
         private static SelfTestReport m_report;
@@ -32,6 +33,7 @@ namespace WizshBoneTwitchIntegration.Commands
         public override void Run(string[] args)
         {
             m_report = new SelfTestReport("WBTI");
+            m_report.LogHeader("Profile");
             m_testProfiles.Clear();
 
             bool keepProfiles = args.Any(a => a.Equals("--keep", StringComparison.OrdinalIgnoreCase));
@@ -81,7 +83,7 @@ namespace WizshBoneTwitchIntegration.Commands
             m_report.Check(!ProfileManager.CreateProfile(invalidCreateName, out _), "Create: invalid name rejected");
 
             // 2. GetUniqueProfileName
-            string uniqueBase = NewTestName("unique");
+            string uniqueBase = NewTestName("uq");
             string firstSuggestion = ProfileManager.GetUniqueProfileName(uniqueBase);
             m_report.Check(firstSuggestion == $"{uniqueBase} - copy 1", "GetUniqueProfileName: first suggestion is '- copy 1'");
             m_report.Check(ProfileManager.CreateProfile(firstSuggestion, out _), "GetUniqueProfileName: create suggested copy");
@@ -91,7 +93,7 @@ namespace WizshBoneTwitchIntegration.Commands
 
             // 3. Select a dedicated test profile as active - every "active profile" scenario
             // below operates on this (or another test profile), never a real one.
-            string source = NewTestName("source");
+            string source = NewTestName("src");
             m_report.Check(ProfileManager.CreateProfile(source, out _), "Select: create source profile");
             Track(source);
             m_report.Check(ProfileManager.SelectProfile(source), "Select: source profile becomes active");
@@ -123,6 +125,36 @@ namespace WizshBoneTwitchIntegration.Commands
                 ExtraConfigHelper.ReadRedeemsConfig(exportPath)?.settings?.chattingClaimDuration == SourceClaimDuration,
                 "Export: settings travel with the file");
 
+            // 5b. Copy/Export of a profile that is NOT active - the row actions act on their own
+            // profile, never the active one. The profile gets its own distinguishing setting so a
+            // wrongly-picked active source would show up as a content mismatch.
+            const int OtherClaimDuration = 54321;
+            string otherSource = NewTestName("other_src");
+            m_report.Check(ProfileManager.CreateProfile(otherSource, out _), "Non-active source: create profile");
+            Track(otherSource);
+            ExtraConfigHelper.WriteRedeemsConfig(
+                ProfileManager.GetRedeemPath(otherSource),
+                new ProfileSettingsData { chattingClaimDuration = OtherClaimDuration },
+                null,
+                new List<RedeemData>());
+
+            string otherCopy = NewTestName("other_copy");
+            m_report.Check(ProfileManager.CopyProfileTo(otherCopy, out _, otherSource), "Non-active source: copy succeeds");
+            Track(otherCopy);
+            m_report.Check(
+                File.ReadAllText(ProfileManager.GetRedeemPath(otherCopy)) == File.ReadAllText(ProfileManager.GetRedeemPath(otherSource))
+                    && File.ReadAllText(ProfileManager.GetRedeemPath(otherCopy)) != File.ReadAllText(ProfileManager.GetActiveRedeemPath()),
+                "Non-active source: copy matches the given profile, not the active one");
+            m_report.Check(!ProfileManager.CopyProfileTo(otherCopy, out _, otherSource), "Non-active source: existing target name rejected");
+            m_report.Check(!ProfileManager.CopyProfileTo(NewTestName("other_nope"), out _, NewTestName("nope")), "Non-active source: missing source profile rejected");
+
+            string otherExportPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.yaml");
+            m_report.Check(ProfileManager.ExportProfile(otherExportPath, otherSource), "Non-active source: export succeeds");
+            m_report.Check(
+                ExtraConfigHelper.ReadRedeemsConfig(otherExportPath)?.settings?.chattingClaimDuration == OtherClaimDuration,
+                "Non-active source: export holds the given profile's data, not the active one's");
+            File.Delete(otherExportPath);
+
             // 6. Import - brand-new profile
             string importNewName = NewTestName("import_new");
             bool importedNew = ProfileManager.ImportProfileTo(exportPath, importNewName, out bool createdNew, out _);
@@ -133,7 +165,7 @@ namespace WizshBoneTwitchIntegration.Commands
                 "Import (new): settings carried over from imported file");
 
             // 7. Import - overwrite an existing, non-active profile
-            string overwriteTarget = NewTestName("import_overwrite");
+            string overwriteTarget = NewTestName("import_over");
             m_report.Check(ProfileManager.CreateProfile(overwriteTarget, out _), "Import (overwrite): create target profile");
             Track(overwriteTarget);
             bool importedOver = ProfileManager.ImportProfileTo(exportPath, overwriteTarget, out bool createdOver, out _);
@@ -176,10 +208,34 @@ namespace WizshBoneTwitchIntegration.Commands
                 "Select/Reload: ProfileSettingsHelper reflects copyTarget's settings");
             m_report.Check(ProfileManager.SelectProfile(source), "Select/Reload: switch back to source");
 
+            // 10b. ActiveProfileDataReplaced fires exactly when the active profile's data is replaced
+            // (it is what closes an open redeem editor) and never for a non-active profile.
+            var replacements = new List<ProfileManager.ActiveProfileChange>();
+            Action<ProfileManager.ActiveProfileChange> recordReplacement = replacements.Add;
+            ProfileManager.ActiveProfileDataReplaced += recordReplacement;
+            try
+            {
+                ProfileManager.SelectProfile(copyTarget);
+                m_report.Check(replacements.SequenceEqual(new[] { ProfileManager.ActiveProfileChange.Switch }), "Event: switching profile raises Switch");
+
+                ProfileManager.ImportProfileTo(exportPath, overwriteTarget, out _, out _);
+                m_report.Check(replacements.Count == 1, "Event: importing into a non-active profile raises nothing");
+
+                ProfileManager.ImportProfileTo(exportPath, copyTarget, out _, out _);
+                m_report.Check(
+                    replacements.Count == 2 && replacements[1] == ProfileManager.ActiveProfileChange.Import,
+                    "Event: importing over the active profile raises Import");
+            }
+            finally
+            {
+                ProfileManager.ActiveProfileDataReplaced -= recordReplacement;
+            }
+            m_report.Check(ProfileManager.SelectProfile(source), "Event: switch back to source");
+
             // 11. Legacy redeems.yaml -> profile.yaml filename migration - a profile still on the
             // old filename should have it renamed transparently the first time its path is
             // resolved, no matter which caller triggers the resolve.
-            string filenameLegacyName = NewTestName("filename_legacy");
+            string filenameLegacyName = NewTestName("fname_legacy");
             m_report.Check(ProfileManager.CreateProfile(filenameLegacyName, out _), "Filename migration: create profile");
             Track(filenameLegacyName);
             string newPath = ProfileManager.GetRedeemPath(filenameLegacyName);
@@ -216,7 +272,7 @@ namespace WizshBoneTwitchIntegration.Commands
             m_report.Check(ProfileManager.SelectProfile(source), "Legacy: switch back to source");
 
             // 13. Rename
-            string renameTarget = NewTestName("rename_target");
+            string renameTarget = NewTestName("ren");
             m_report.Check(ProfileManager.CreateProfile(renameTarget, out _), "Rename: create target profile");
             Track(renameTarget);
             string renameTargetNew = renameTarget + "_renamed";
@@ -267,7 +323,17 @@ namespace WizshBoneTwitchIntegration.Commands
             }
         }
 
-        private static string NewTestName(string suffix) => Prefix + suffix;
+        // Fails loudly instead of letting ProfileManager.IsValidProfileName reject the name: a name
+        // over the limit makes "Create succeeds" fail and "duplicate/invalid/missing is rejected"
+        // pass for the wrong reason.
+        private static string NewTestName(string suffix)
+        {
+            string name = Prefix + suffix;
+            if (name.Length > ProfileManager.MaxProfileNameLength)
+                throw new InvalidOperationException($"Test profile name '{name}' is longer than ProfileManager.MaxProfileNameLength ({ProfileManager.MaxProfileNameLength}) - shorten it.");
+
+            return name;
+        }
 
         private static void Track(string profileName) => m_testProfiles.Add(profileName);
 
@@ -281,7 +347,7 @@ namespace WizshBoneTwitchIntegration.Commands
         }
 
         /// <summary>
-        /// Best-effort removal of any "__wbti_test_*" profile left behind by a previous run that
+        /// Best-effort removal of any "__wbti_p_*" profile left behind by a previous run that
         /// crashed before its own cleanup ran. Never touches a real profile.
         /// </summary>
         private static void CleanupLeftoverTestProfiles(string originalActive)

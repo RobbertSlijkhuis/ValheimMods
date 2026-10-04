@@ -268,25 +268,42 @@ namespace WizshBoneTwitchIntegration.Gui
                 redeemsTab.OnOpenHistoryRequested = openHistory;
             }
 
+            // ProfilesTab's switch-profile confirm dialog offers "Open history" too.
+            if (m_tabViews[ShellTab.Profiles] is ProfilesTab profilesTab)
+                profilesTab.OnOpenHistoryRequested = openHistory;
+
             GuiHelper.AddPanelBorder(m_panel, inset: 0f, thickness: GuiHelper.PanelBorderThickness, color: GuiHelper.PanelBorderColor);
 
             m_newsDialog.Init();
 
-            // BuildGUI runs once per shell, so this subscribes once.
+            // BuildGUI runs once per shell, so these subscribe once.
             ProfileSyncHelper.ProfileReceived += OnProfileSynced;
+            ProfileManager.ActiveProfileDataReplaced += OnActiveProfileDataReplaced;
 
             SelectTab(ShellTab.Home);
         }
 
         /// <summary>
-        /// A synced profile just landed on disk. If it replaced the active profile, close any
-        /// editor open on the old data, then re-read whatever tab is showing (the others refresh
-        /// themselves when selected) - so nothing on screen keeps showing or editing stale data.
+        /// A synced profile just landed on disk. Re-reads whatever tab is showing (the others
+        /// refresh themselves when selected). If it replaced the active profile, the open editor
+        /// was already closed by <see cref="OnActiveProfileDataReplaced"/>.
         /// </summary>
         private void OnProfileSynced(string profileName)
         {
-            if (profileName == ProfileManager.ActiveProfile && m_tabViews[ShellTab.Redeems] is RedeemsTab redeemsTab)
-                redeemsTab.OnActiveProfileReplaced();
+            if (IsVisible)
+                m_tabViews[m_activeTab].Refresh();
+        }
+
+        /// <summary>
+        /// The active profile's redeems/settings were replaced wholesale (switch, import, reload,
+        /// sync). Closes any redeem editor open on the old data - from whichever tab triggered it -
+        /// then re-reads whatever tab is showing, so nothing on screen keeps showing or editing
+        /// stale data.
+        /// </summary>
+        private void OnActiveProfileDataReplaced(ProfileManager.ActiveProfileChange reason)
+        {
+            if (m_tabViews[ShellTab.Redeems] is RedeemsTab redeemsTab)
+                redeemsTab.OnActiveProfileReplaced(reason);
 
             if (IsVisible)
                 m_tabViews[m_activeTab].Refresh();

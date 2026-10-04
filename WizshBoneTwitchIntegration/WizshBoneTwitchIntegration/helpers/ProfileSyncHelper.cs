@@ -17,7 +17,8 @@ namespace WizshBoneTwitchIntegration.Helpers
         /// <summary>
         /// Raised (on the main thread) after a synced profile has been written to disk and, if it
         /// is the active one, hot-reloaded - argument is the profile name. The GUI uses it to
-        /// refresh whatever it is showing and close an editor that was open on the old data.
+        /// refresh whatever it is showing (an editor open on replaced active-profile data is closed
+        /// by <see cref="ProfileManager.ActiveProfileDataReplaced"/>).
         /// </summary>
         public static event System.Action<string> ProfileReceived;
 
@@ -35,14 +36,22 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static void SendActiveProfileToAll()
         {
+            SendProfileToAll(ProfileManager.ActiveProfile);
+        }
+
+        /// <summary>
+        /// Sends the named profile to every connected peer. It doesn't have to be the active one:
+        /// the receiver keys everything off the name in the package, not off the sender's profile.
+        /// </summary>
+        public static void SendProfileToAll(string profileName)
+        {
             if (m_rpc == null)
             {
                 Jotunn.Logger.LogError("ProfileSyncHelper: RPC not initialised, call Init() first.");
                 return;
             }
 
-            string profileName = ProfileManager.ActiveProfile;
-            string yamlPath    = ProfileManager.GetRedeemPath(profileName);
+            string yamlPath = ProfileManager.GetRedeemPath(profileName);
 
             if (!File.Exists(yamlPath))
             {
@@ -108,10 +117,12 @@ namespace WizshBoneTwitchIntegration.Helpers
                 ProfileManager.MarkAsSynced(profileName);
 
                 // Hot-reload if this is the currently active profile
-                if (profileName == ProfileManager.ActiveProfile)
+                bool replacedActive = profileName == ProfileManager.ActiveProfile;
+                if (replacedActive)
                 {
                     RedeemHelper.Reload();
                     ProfileSettingsHelper.Reload();
+                    ProfileManager.RaiseActiveProfileDataReplaced(ProfileManager.ActiveProfileChange.Sync);
                 }
 
                 Jotunn.Logger.LogInfo($"ProfileSyncHelper: Received and saved synced profile '{profileName}' from peer {sender}.");

@@ -31,6 +31,14 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private readonly ColumnSortState m_sortState = new ColumnSortState("name");
         private readonly List<(string Text, string SortKey, Text Label)> m_sortableHeaders = new List<(string, string, Text)>();
 
+        /// <summary>
+        /// Wired up by <see cref="WizshBoneShellGUI"/> right after construction (same pattern as
+        /// <see cref="RedeemsTab.OnOpenHistoryRequested"/>) so the switch-profile confirm dialog's
+        /// "Open history" option can open the redeem history without this class needing a
+        /// reference to the shell itself.
+        /// </summary>
+        public Action OnOpenHistoryRequested;
+
         // ── layout constants ────────────────────────────────────────────────
         // Derived from the shell's actual content-region size rather than guessed, so this
         // stays correct if the shell panel/sidebar/topbar dimensions ever change.
@@ -371,39 +379,28 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         // ── row/toolbar action handlers ─────────────────────────────────────
 
-        private void EnsureActive(string name)
-        {
-            if (name == ProfileManager.ActiveProfile)
-                return;
-
-            ProfileManager.SelectProfile(name);
-            RefreshList();
-        }
-
         private void OnSelectProfile(string name)
         {
             GuiHelper.PlayClickSound();
-            ProfileManager.SelectProfile(name);
-            RefreshList();
+            // With redeems live this asks first (see LiveRedeemsPrompt). The row list needs no
+            // reset when the switch doesn't happen - it still shows the profile that is active.
+            LiveRedeemsPrompt.Request(
+                m_confirmDialog,
+                title: "Switch Profile",
+                actionDescription: "Switching profiles now can break them",
+                perform: () => ProfileManager.SelectProfile(name) ? null : $"Could not switch to '{name}'.",
+                onOpenHistory: () => OnOpenHistoryRequested?.Invoke(),
+                onDone: RefreshList,
+                onNotDone: null,
+                liveSuccessToast: $"Switched to '{name}'. Redeems turned off.");
         }
 
-        private void OnRowCopy(string name)
-        {
-            EnsureActive(name);
-            OnCopyProfile();
-        }
+        // Copy/Export/Sync act on the row's own profile - they never change the active profile.
+        private void OnRowCopy(string name) => OnCopyProfile(name);
 
-        private void OnRowExport(string name)
-        {
-            EnsureActive(name);
-            OnExportProfile();
-        }
+        private void OnRowExport(string name) => OnExportProfile(name);
 
-        private void OnRowSync(string name)
-        {
-            EnsureActive(name);
-            OnSyncProfile();
-        }
+        private void OnRowSync(string name) => OnSyncProfile(name);
 
         private void OnCreateProfile()
         {
@@ -429,35 +426,33 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             return null;
         }
 
-        private void OnCopyProfile()
+        private void OnCopyProfile(string sourceProfile)
         {
-            string suggestedName = ProfileManager.GetUniqueProfileName(ProfileManager.ActiveProfile);
+            string suggestedName = ProfileManager.GetUniqueProfileName(sourceProfile);
 
             m_inputDialog.Show(
                 title: "Copy Profile",
                 description: "Enter a name for the new profile copy.",
                 suggestedValue: suggestedName,
-                onConfirm: HandleCopyConfirm,
+                onConfirm: newName => HandleCopyConfirm(sourceProfile, newName),
                 confirmText: "Copy",
                 maxLength: ProfileManager.MaxProfileNameLength);
         }
 
-        private string HandleCopyConfirm(string newName)
+        private string HandleCopyConfirm(string sourceProfile, string newName)
         {
-            bool copied = ProfileManager.CopyProfileTo(newName, out string error);
+            bool copied = ProfileManager.CopyProfileTo(newName, out string error, sourceProfile);
             if (!copied)
                 return error;
 
-            ToastNotifications.Show($"Copied '{ProfileManager.ActiveProfile}' to '{newName}'.", ToastType.Success);
+            ToastNotifications.Show($"Copied '{sourceProfile}' to '{newName}'.", ToastType.Success);
             RefreshList();
             return null;
         }
 
         /// <summary>
-        /// Shared Import flow, used both by the toolbar's Import button (no specific row
-        /// selected first) and each row's Import action (<see cref="OnRowImport"/> calls
-        /// <see cref="EnsureActive"/> first) - the actual import target always comes from the
-        /// dialog's name field either way, not from which row (if any) triggered this.
+        /// Import flow behind the toolbar's Import button - the actual import target always comes
+        /// from the dialog's name field, not from any selected row.
         /// </summary>
         private void BeginImport()
         {
@@ -502,6 +497,40 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         {
             try
             {
+                // Importing over the active profile while redeems are live replaces the redeems
+                // under their Twitch rewards, so it asks first (see LiveRedeemsPrompt). Validated
+                // up front: a rejected import must not turn redeems off. Returning null closes the
+                // input dialog; the prompt takes over from here.
+                if (targetName == ProfileManager.ActiveProfile && LiveRedeemsHelper.AreRedeemsLive())
+                {
+                    if (!ProfileManager.ValidateImport(selectedFile, targetName, out string validationError))
+                        return validationError;
+
+                    LiveRedeemsPrompt.Request(
+                        m_confirmDialog,
+                        title: "Import Profile",
+                        actionDescription: $"Importing over '{targetName}' now can break them",
+                        perform: () => ImportAndReport(selectedFile, targetName),
+                        onOpenHistory: () => OnOpenHistoryRequested?.Invoke(),
+                        onDone: null,
+                        onNotDone: null);
+                    return null;
+                }
+
+                return ImportAndReport(selectedFile, targetName);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogWarning("[WBTI] Profile import failed: " + e);
+                return "Import failed: " + e.Message;
+            }
+        }
+
+        /// <summary>Runs the import and shows the success toast. Returns an error message, or null on success.</summary>
+        private string ImportAndReport(string selectedFile, string targetName)
+        {
+            try
+            {
                 bool imported = ProfileManager.ImportProfileTo(selectedFile, targetName, out bool profileCreated, out string error);
                 if (!imported)
                     return error;
@@ -519,14 +548,14 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             }
         }
 
-        private void OnExportProfile()
+        private void OnExportProfile(string sourceProfile)
         {
             string downloadsPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 "Downloads"
             );
 
-            string defaultFileName = $"{ProfileManager.ActiveProfile}.yaml";
+            string defaultFileName = $"{sourceProfile}.yaml";
             string fileBuffer      = defaultFileName + new string('\0', 260 - defaultFileName.Length);
 
             OpenFileName ofn = new OpenFileName();
@@ -545,9 +574,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             try
             {
                 string destPath = ofn.lpstrFile.TrimEnd('\0');
-                bool exported = ProfileManager.ExportProfile(destPath);
+                bool exported = ProfileManager.ExportProfile(destPath, sourceProfile);
                 ToastNotifications.Show(exported
-                    ? $"Exported '{ProfileManager.ActiveProfile}' to {Path.GetFileName(destPath)}."
+                    ? $"Exported '{sourceProfile}' to {Path.GetFileName(destPath)}."
                     : "Export failed: profile file not found.", exported ? ToastType.Success : ToastType.Error);
             }
             catch (Exception e)
@@ -557,7 +586,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             }
         }
 
-        private void OnSyncProfile()
+        private void OnSyncProfile(string sourceProfile)
         {
             if (ZNet.instance == null || ZNet.instance.GetPeers().Count == 0)
             {
@@ -565,18 +594,22 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 return;
             }
 
-            if (ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile))
+            if (ProfileManager.IsSyncedProfile(sourceProfile))
             {
                 ToastNotifications.Show("Only the original owner can sync this profile.", ToastType.Warning);
                 return;
             }
 
-            ProfileSyncHelper.SendActiveProfileToAll();
-            ToastNotifications.Show($"Profile '{ProfileManager.ActiveProfile}' synced to all online players.", ToastType.Success);
+            ProfileSyncHelper.SendProfileToAll(sourceProfile);
+            ToastNotifications.Show($"Profile '{sourceProfile}' synced to all online players.", ToastType.Success);
         }
 
         private void OnReloadProfile(string name)
         {
+            // Reload re-reads the active profile; the button only exists on the active row.
+            if (name != ProfileManager.ActiveProfile)
+                return;
+
             TwitchCustomRewards customRewards = Game.instance?.gameObject?.GetComponent<TwitchCustomRewards>();
 
             bool reloaded = customRewards != null
@@ -584,6 +617,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 : RedeemHelper.Reload();
 
             reloaded &= ProfileSettingsHelper.Reload();
+
+            if (reloaded)
+                ProfileManager.RaiseActiveProfileDataReplaced(ProfileManager.ActiveProfileChange.Reload);
 
             ToastNotifications.Show(reloaded
                 ? $"Profile '{name}' reloaded."

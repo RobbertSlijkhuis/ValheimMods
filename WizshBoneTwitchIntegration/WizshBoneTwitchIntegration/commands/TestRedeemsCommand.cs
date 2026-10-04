@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Jotunn.Entities;
 using WizshBoneTwitchIntegration.Helpers;
@@ -10,7 +11,7 @@ namespace WizshBoneTwitchIntegration.Commands
     /// <summary>
     /// Automated self-test of redeem add/update/toggle/copy/delete (see helpers/RedeemManager.cs
     /// and ProfileManager.CopyRedeemToOtherProfile), run entirely against disposable
-    /// "__wbti_test_redeems_*" profiles created by the test itself. Never reads, writes, or
+    /// "__wbti_r_*" profiles created by the test itself. Never reads, writes, or
     /// assumes anything about the player's real profiles - the only real-world value touched is
     /// the active profile's *name*, captured once at the start and restored at the end. Safe to
     /// run repeatedly.
@@ -20,9 +21,9 @@ namespace WizshBoneTwitchIntegration.Commands
         public override string Name => "WBTITestRedeems";
         public override string Help => "Runs an automated self-test of redeem add/update/toggle/copy/delete flows against disposable test profiles only. Usage: WBTITestRedeems [--keep] - pass --keep to leave the test profiles on disk afterward for inspection instead of deleting them.";
 
-        // Own non-overlapping "__wbti_test_redeems_" prefix - see TestProfilesCommand's Prefix
+        // Own non-overlapping "__wbti_r_" prefix - see TestProfilesCommand's Prefix
         // comment for why every WBTITest* command needs one that isn't a prefix of another's.
-        private const string Prefix = "__wbti_test_redeems_";
+        private const string Prefix = "__wbti_r_";
         private const string HomeProfile = Prefix + "home";
         private const string TargetProfile = Prefix + "target";
 
@@ -31,6 +32,7 @@ namespace WizshBoneTwitchIntegration.Commands
         public override void Run(string[] args)
         {
             m_report = new SelfTestReport("WBTI");
+            m_report.LogHeader("Redeem");
 
             bool keepProfiles = args.Any(a => a.Equals("--keep", StringComparison.OrdinalIgnoreCase));
 
@@ -119,12 +121,12 @@ namespace WizshBoneTwitchIntegration.Commands
             m_report.Check(RedeemManager.SetEnabled(toEnable, true, out _), "SetEnabled: re-enable succeeds");
             m_report.Check(RedeemHelper.redeems.Find(r => r.title == redeemB.title)?.enabled == true, "SetEnabled: re-enabled state persisted");
 
-            // 4. CopyRedeemWithinActiveProfile
+            // 4. CopyRedeemWithinProfile (active)
             RedeemData toCopy = RedeemHelper.redeems.First(r => r.title == redeemB.title);
             const string copyTitle = "WBTI Test Redeem B - copy";
-            m_report.Check(RedeemManager.CopyRedeemWithinActiveProfile(toCopy, copyTitle, out _), "Copy: within active profile succeeds");
+            m_report.Check(RedeemManager.CopyRedeemWithinProfile(toCopy, copyTitle, out _), "Copy: within active profile succeeds");
             m_report.Check(RedeemHelper.redeems.Exists(r => r.title == copyTitle), "Copy: copy present after reload");
-            m_report.Check(!RedeemManager.CopyRedeemWithinActiveProfile(toCopy, copyTitle, out _), "Copy: duplicate target title rejected");
+            m_report.Check(!RedeemManager.CopyRedeemWithinProfile(toCopy, copyTitle, out _), "Copy: duplicate target title rejected");
 
             // 5. CopyRedeemToOtherProfile (cross-profile) + copy independence
             m_report.Check(ProfileManager.CreateProfile(TargetProfile, out _), "CopyToOtherProfile: create target profile");
@@ -165,8 +167,70 @@ namespace WizshBoneTwitchIntegration.Commands
 
             m_report.Check(ProfileManager.SelectProfile(HomeProfile), "CopyToOtherProfile: switch active back to home profile");
 
-            // 6. Delete - last on purpose: doubles as the run's actual teardown (unless --keep).
+            // 6. Edits addressed to a non-active profile (home is active, target is not)
+            TestNonActiveEdits();
+
+            // 7. Delete - last on purpose: doubles as the run's actual teardown (unless --keep).
             TestDelete(originalActive, keepProfiles, new[] { redeemA.title, redeemB.title, copyTitle, redeemC.title });
+        }
+
+        /// <summary>
+        /// RedeemManager's profileName parameter with a profile that is NOT active: edits must land
+        /// in that profile's file only, leaving the active profile's in-memory list and file alone.
+        /// Expects HomeProfile active and TargetProfile (holding at least one redeem) inactive.
+        /// </summary>
+        private void TestNonActiveEdits()
+        {
+            string homePath = ProfileManager.GetRedeemPath(HomeProfile);
+            string homeFileBefore = File.ReadAllText(homePath);
+            int liveCountBefore = RedeemHelper.redeems.Count;
+
+            var redeemD = new RedeemData { title = "WBTI Test Redeem D", points = 10 };
+            const string copyTitle = "WBTI Test Redeem D - copy";
+
+            m_report.Check(RedeemManager.AddRedeem(redeemD, out _, TargetProfile), "NonActive Add: succeeds");
+            m_report.Check(RedeemManager.GetRedeems(TargetProfile).Exists(r => r.title == redeemD.title), "NonActive Add: persisted to the target profile's file");
+            m_report.Check(!RedeemManager.AddRedeem(new RedeemData { title = redeemD.title }, out _, TargetProfile), "NonActive Add: duplicate title rejected");
+
+            RedeemData fromDisk = RedeemManager.GetRedeems(TargetProfile).First(r => r.title == redeemD.title);
+            RedeemData updated = fromDisk.DeepClone<RedeemData>();
+            updated.points = 77;
+            m_report.Check(RedeemManager.UpdateRedeem(fromDisk, updated, out _, TargetProfile), "NonActive Update: field change succeeds");
+            m_report.Check(RedeemManager.GetRedeems(TargetProfile).Find(r => r.title == redeemD.title)?.points == 77, "NonActive Update: change persisted");
+
+            RedeemData collidingRename = updated.DeepClone<RedeemData>();
+            collidingRename.title = RedeemManager.GetRedeems(TargetProfile).First(r => r.title != redeemD.title).title;
+            m_report.Check(!RedeemManager.UpdateRedeem(updated, collidingRename, out _, TargetProfile), "NonActive Update: rename colliding with another title rejected");
+
+            fromDisk = RedeemManager.GetRedeems(TargetProfile).First(r => r.title == redeemD.title);
+            m_report.Check(RedeemManager.SetEnabled(fromDisk, false, out _, TargetProfile), "NonActive SetEnabled: disable succeeds");
+            m_report.Check(
+                RedeemManager.GetRedeems(TargetProfile).Find(r => r.title == redeemD.title)?.enabled == false && !fromDisk.enabled,
+                "NonActive SetEnabled: persisted and caller's copy kept in step");
+
+            m_report.Check(RedeemManager.CopyRedeemWithinProfile(fromDisk, copyTitle, out _, TargetProfile), "NonActive Copy: within the target profile succeeds");
+            m_report.Check(RedeemManager.GetRedeems(TargetProfile).Exists(r => r.title == copyTitle), "NonActive Copy: copy present in the target profile");
+            m_report.Check(!RedeemManager.CopyRedeemWithinProfile(fromDisk, copyTitle, out _, TargetProfile), "NonActive Copy: duplicate title rejected");
+
+            m_report.Check(!RedeemManager.AddRedeem(new RedeemData { title = "x" }, out _, Prefix + "missing"), "NonActive: missing profile rejected");
+            m_report.Check(!ProfileManager.ProfileExists(Prefix + "missing"), "NonActive: missing profile is not created");
+
+            // Prefix of a non-active profile comes from its own file, not from the active settings.
+            ModData targetData = ExtraConfigHelper.ReadRedeemsConfig(ProfileManager.GetRedeemPath(TargetProfile));
+            ExtraConfigHelper.WriteRedeemsConfig(
+                ProfileManager.GetRedeemPath(TargetProfile),
+                new ProfileSettingsData { redeemTitlePrefix = "[T]" },
+                targetData.creatureGroups,
+                targetData.redeems);
+            m_report.Check(RedeemManager.GetFullTitle(redeemD, TargetProfile) == "[T] " + redeemD.title, "NonActive GetFullTitle: uses the target profile's prefix");
+            m_report.Check(RedeemManager.GetFullTitle(redeemD) != "[T] " + redeemD.title, "NonActive GetFullTitle: active overload unaffected");
+
+            m_report.Check(RedeemManager.DeleteRedeem(fromDisk, out _, TargetProfile), "NonActive Delete: removes the redeem");
+            m_report.Check(RedeemManager.DeleteRedeem(RedeemManager.GetRedeems(TargetProfile).First(r => r.title == copyTitle), out _, TargetProfile), "NonActive Delete: removes the copy");
+            m_report.Check(!RedeemManager.DeleteRedeem(fromDisk, out _, TargetProfile), "NonActive Delete: already-removed redeem reported as not found");
+
+            m_report.Check(RedeemHelper.redeems.Count == liveCountBefore, "NonActive: active profile's in-memory list untouched");
+            m_report.Check(File.ReadAllText(homePath) == homeFileBefore, "NonActive: active profile's file untouched");
         }
 
         /// <summary>
@@ -208,7 +272,7 @@ namespace WizshBoneTwitchIntegration.Commands
         }
 
         /// <summary>
-        /// Best-effort removal of any "__wbti_test_redeems_*" profile left behind by a previous
+        /// Best-effort removal of any "__wbti_r_*" profile left behind by a previous
         /// run that crashed before its own cleanup ran. Never touches a real profile.
         /// </summary>
         private static void CleanupLeftoverTestProfiles(string originalActive)

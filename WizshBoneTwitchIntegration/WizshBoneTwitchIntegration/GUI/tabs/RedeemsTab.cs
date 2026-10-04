@@ -165,19 +165,31 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         }
 
         /// <summary>
-        /// Called when a profile sync replaced the active profile's redeems on disk. An open
-        /// wizard was working on the old data (and, for a profile that just became synced, would
-        /// still allow saving over it), so it is closed without saving before the list refreshes.
+        /// Called when the active profile's redeems were replaced (sync, switch, import or reload).
+        /// An open wizard was working on the old data - saving it would fail, or add the redeem to
+        /// the wrong profile - and for a profile that just became synced would still allow saving
+        /// over it, so it is closed without saving before the list refreshes.
         /// </summary>
-        public void OnActiveProfileReplaced()
+        public void OnActiveProfileReplaced(ProfileManager.ActiveProfileChange reason)
         {
             bool wizardWasOpen = m_redeemWizard.IsOpen;
             m_redeemWizard.ForceClose();   // its OnFinished refreshes the list
 
             if (wizardWasOpen)
-                ToastNotifications.Show("This profile was just updated by a sync - the editor was closed without saving.", ToastType.Warning);
+                ToastNotifications.Show($"{DescribeReplacement(reason)} - the editor was closed without saving.", ToastType.Warning);
             else
                 RefreshList();
+        }
+
+        private static string DescribeReplacement(ProfileManager.ActiveProfileChange reason)
+        {
+            switch (reason)
+            {
+                case ProfileManager.ActiveProfileChange.Sync:   return "This profile was just updated by a sync";
+                case ProfileManager.ActiveProfileChange.Switch: return "The active profile was switched";
+                case ProfileManager.ActiveProfileChange.Import: return "This profile was just replaced by an import";
+                default:                                        return "This profile was reloaded from disk";
+            }
         }
 
         // ── toolbar / column headers ────────────────────────────────────────
@@ -300,15 +312,19 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             if (selected == ProfileManager.ActiveProfile)
                 return;
 
-            bool switched = ProfileManager.SelectProfile(selected);
-            if (!switched)
-            {
-                // Defensive only - the dropdown only ever lists ProfileManager.GetProfiles().
-                m_profileDropdown.SetOptions(ProfileManager.GetProfiles(), ProfileManager.ActiveProfile);
-                return;
-            }
-
-            RefreshList();
+            // With redeems live this asks first (see LiveRedeemsPrompt). Whenever the switch
+            // doesn't happen - cancelled, Open history, or a failed switch (defensive only, the
+            // dropdown only ever lists ProfileManager.GetProfiles()) - the dropdown has already
+            // displayed the picked name, so snap it back to the profile that is actually active.
+            LiveRedeemsPrompt.Request(
+                m_confirmDialog,
+                title: "Switch Profile",
+                actionDescription: "Switching profiles now can break them",
+                perform: () => ProfileManager.SelectProfile(selected) ? null : $"Could not switch to '{selected}'.",
+                onOpenHistory: () => OnOpenHistoryRequested?.Invoke(),
+                onDone: RefreshList,
+                onNotDone: () => m_profileDropdown.SetOptions(ProfileManager.GetProfiles(), ProfileManager.ActiveProfile),
+                liveSuccessToast: $"Switched to '{selected}'. Redeems turned off.");
         }
 
         // ── row list ─────────────────────────────────────────────────────────
@@ -614,7 +630,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             if (targetProfile == ProfileManager.ActiveProfile)
             {
-                bool copiedWithin = RedeemManager.CopyRedeemWithinActiveProfile(redeem, newTitle, out string withinError);
+                bool copiedWithin = RedeemManager.CopyRedeemWithinProfile(redeem, newTitle, out string withinError);
                 if (!copiedWithin)
                     return withinError;
 
