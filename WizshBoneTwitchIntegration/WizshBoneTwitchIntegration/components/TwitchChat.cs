@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,12 +22,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private int m_historyLength = 30;
         private int m_messageRelevanceTimer = 120;
 
-        private Coroutine m_authRoutine;
-        private string tcpClientId = "8i260qk16tmvumfssr2h4klu99frjb";
-        private string m_sOAuth;
+        private Coroutine m_connectRoutine;
         private string m_channel;
-        private string m_loginMessage = "Welcome, GLHF!";
-        public bool m_loggedIn = false;
 
         public void Update()
         {
@@ -36,7 +33,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("TwitchChat.Update failed: " + e);
+                // Drop the connection so a dead socket doesn't log this every frame.
+                Jotunn.Logger.LogError("TwitchChat.Update failed, closing chat connection: " + e);
+                Disconnect();
             }
         }
 
@@ -44,7 +43,10 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             try
             {
-                GetOAuth(new string[] { "chat:read", "chat:edit", "channel:bot" });
+                if (m_connectRoutine != null)
+                    StopCoroutine(m_connectRoutine);
+
+                m_connectRoutine = StartCoroutine(ConnectWhenTokenCaptured());
             }
             catch (Exception e)
             {
@@ -58,12 +60,17 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             {
                 m_auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
 
-                if (m_sOAuth == null || m_sOAuth == "")
+                string accessToken = TwitchTokenCapture.AccessToken;
+
+                if (string.IsNullOrEmpty(accessToken))
                     return;
 
+                // Re-logins land here too - close the previous connection instead of leaking it.
+                CloseConnection();
+
                 string userName = "WizshBoneBot".ToLower();
-                string password = "oauth:" + m_sOAuth;
-                m_channel = m_auth.m_userInfo.displayName.ToLower();
+                string password = "oauth:" + accessToken;
+                m_channel = (string.IsNullOrEmpty(m_auth.m_userInfo.loginName) ? m_auth.m_userInfo.displayName : m_auth.m_userInfo.loginName).ToLower();
 
                 tcpClient = new TcpClient("irc.chat.twitch.tv", 6667);
                 reader = new StreamReader(tcpClient.GetStream());
@@ -81,18 +88,46 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
         }
 
-        public void GetOAuth(params string[] scopes)
+        /// <summary>Stops any pending connect and closes the chat connection (logout, expiry).</summary>
+        public void Disconnect()
         {
-            if (m_authRoutine != null)
-                StopCoroutine(m_authRoutine);
+            if (m_connectRoutine != null)
+            {
+                StopCoroutine(m_connectRoutine);
+                m_connectRoutine = null;
+            }
 
-            m_authRoutine = StartCoroutine(TwitchDeviceFlow.Authorize(tcpClientId, scopes, OnOAuthTokenRecieved));
+            CloseConnection();
         }
 
-        private void OnOAuthTokenRecieved(ApiCodeTokenResponse response)
+        private void CloseConnection()
         {
-            m_authRoutine = null;
-            m_sOAuth = response.access_token;
+            // Closing the client closes its stream, so the reader/writer only need nulling out.
+            try { tcpClient?.Close(); } catch (Exception) { }
+
+            tcpClient = null;
+            reader = null;
+            writer = null;
+        }
+
+        // Chat reuses the access token of the Twitch SDK login (see TwitchTokenCapture) rather than
+        // running its own authorization. The SDK has normally already made an authenticated call by
+        // the time Connect() runs, but give it a few seconds in case it hasn't.
+        private IEnumerator ConnectWhenTokenCaptured()
+        {
+            float deadline = Time.realtimeSinceStartup + 10f;
+
+            while (string.IsNullOrEmpty(TwitchTokenCapture.AccessToken) && Time.realtimeSinceStartup < deadline)
+                yield return new WaitForSecondsRealtime(0.5f);
+
+            m_connectRoutine = null;
+
+            if (string.IsNullOrEmpty(TwitchTokenCapture.AccessToken))
+            {
+                Jotunn.Logger.LogWarning("[WBTI] Chat not connected: no Twitch access token was captured from the SDK login.");
+                yield break;
+            }
+
             LogIn();
         }
 
@@ -132,8 +167,17 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             if (writer == null) return;
 
-            writer.WriteLine($"PRIVMSG #{m_channel} :{announce} WBTI: {message}");
-            writer.Flush();
+            // Callers are redeem handlers - a dead socket must not throw into them.
+            try
+            {
+                writer.WriteLine($"PRIVMSG #{m_channel} :{announce} WBTI: {message}");
+                writer.Flush();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Could not send chat message, closing chat connection: {e.Message}");
+                CloseConnection();
+            }
         }
 
         private void Read()
@@ -143,6 +187,13 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
             string message = reader.ReadLine();
 
+            if (message == null)
+            {
+                Jotunn.Logger.LogWarning("[WBTI] Chat connection was closed by Twitch.");
+                CloseConnection();
+                return;
+            }
+
             if (message.Contains("PING"))
             {
                 writer.WriteLine("PONG :tmi.twitch.tv\r\n");
@@ -150,9 +201,11 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 return;
             }
 
-            if (message.Contains(m_loginMessage))
+            // Sent when the token is invalid or lacks the chat scopes (e.g. a login saved before chat reused it).
+            if (message.Contains("Login authentication failed"))
             {
-                m_loggedIn = true;
+                Jotunn.Logger.LogWarning("[WBTI] Twitch rejected the chat login. Log out and back in to Twitch to renew it.");
+                CloseConnection();
                 return;
             }
 

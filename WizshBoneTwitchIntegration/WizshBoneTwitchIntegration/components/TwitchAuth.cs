@@ -17,12 +17,23 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public TwitchCustomRewards m_customRewards;
         private GameTask<AuthenticationInfo> m_authInfo;
         private GameTask<AuthState> m_authState;
-        private string m_scopes = $"{TwitchOAuthScope.Bits.Read.Scope} {TwitchOAuthScope.Channel.ManageRedemptions.Scope} {TwitchOAuthScope.User.ReadSubscriptions.Scope}";
+        private string m_scopes = $"{TwitchOAuthScope.Bits.Read.Scope} {TwitchOAuthScope.Channel.ManageRedemptions.Scope} {TwitchOAuthScope.User.ReadSubscriptions.Scope} {TwitchTokenCapture.ChatScopes}";
         public TwitchUserInfo m_userInfo;
         public bool m_loggedIn = false;
+        // UTC so a clock/daylight-saving change mid-session can't skew the countdown.
         private DateTime m_loggedinInTime;
-        private int m_logOutTime = 225;
-        // private int m_logOutTime = 1;
+        private Coroutine m_trackRoutine;
+        private Coroutine m_loginRoutine;
+        private bool m_loginPolling;
+        // Twitch access tokens last 4 hours.
+        private const int TokenLifetimeMinutes = 240;
+        // private const int TokenLifetimeMinutes = 16;
+        // Minutes-remaining marks at which the player is warned, once each per login (descending).
+        private static readonly int[] WarnAtMinutesRemaining = { 15, 10, 5, 1 };
+        private int m_lastWarnedMark = int.MaxValue;
+        // Set by the deliberate logout paths below so GetAuthState can tell them apart from the
+        // session dropping on its own (token expiry) and only warn about the latter.
+        private bool m_logoutRequested;
         public bool m_waitingForCode = false;
         private DateTime m_waitingForCodeSince;
 
@@ -61,9 +72,42 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void InvokeAuth()
         {
-            CancelInvoke(nameof(InitLoginProcess));
             m_waitingForCode = false;
-            InvokeRepeating(nameof(InitLoginProcess), 0f, 1f);
+            StartLoginPolling();
+        }
+
+        // Realtime coroutine rather than InvokeRepeating (scaled time), so the login is still picked up
+        // while a single-player menu pauses the game. The flag - not just StopCoroutine - ends the loop,
+        // because InitLoginProcess stops its own polling from inside the loop.
+        private void StartLoginPolling()
+        {
+            StopLoginPolling();
+            m_loginPolling = true;
+            m_loginRoutine = StartCoroutine(LoginLoop());
+        }
+
+        private void StopLoginPolling()
+        {
+            m_loginPolling = false;
+
+            if (m_loginRoutine == null)
+                return;
+
+            StopCoroutine(m_loginRoutine);
+            m_loginRoutine = null;
+        }
+
+        private IEnumerator LoginLoop()
+        {
+            while (m_loginPolling)
+            {
+                InitLoginProcess();
+
+                if (!m_loginPolling)
+                    break;
+
+                yield return new WaitForSecondsRealtime(1f);
+            }
         }
 
         public void ToggleRedeems()
@@ -106,14 +150,39 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (ProfileSettingsHelper.Current.enableRedeemsOnLogin)
                     m_customRewards.SetEnableRedeems(true);
 
-                CancelInvoke(nameof(InitLoginProcess));
-                InvokeRepeating(nameof(TrackAuthRepeating), 0, 60f);
+                StopLoginPolling();
+                StartTracking();
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Something went wrong while loggin in: " + e);
-                CancelInvoke(nameof(InitLoginProcess));
-                CancelInvoke(nameof(TrackAuthRepeating));
+                StopLoginPolling();
+                StopTracking();
+            }
+        }
+
+        // Realtime rather than InvokeRepeating (scaled time), which stops while a single-player menu pauses the game.
+        private void StartTracking()
+        {
+            StopTracking();
+            m_trackRoutine = StartCoroutine(TrackAuthLoop());
+        }
+
+        private void StopTracking()
+        {
+            if (m_trackRoutine == null)
+                return;
+
+            StopCoroutine(m_trackRoutine);
+            m_trackRoutine = null;
+        }
+
+        private IEnumerator TrackAuthLoop()
+        {
+            while (true)
+            {
+                TrackAuthRepeating();
+                yield return new WaitForSecondsRealtime(60f);
             }
         }
 
@@ -121,10 +190,22 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             try
             {
-                TimeSpan timeSpan = DateTime.Now.Subtract(m_loggedinInTime);
+                double minutesRemaining = TokenLifetimeMinutes - DateTime.UtcNow.Subtract(m_loggedinInTime).TotalMinutes;
 
-                if (timeSpan.TotalMinutes > m_logOutTime)
-                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, "You will be logged out from Twitch in 15 minutes!", 10);
+                // Smallest mark we've now passed but not yet warned about, so each mark fires once.
+                int dueMark = int.MaxValue;
+                foreach (int mark in WarnAtMinutesRemaining)
+                {
+                    if (minutesRemaining <= mark && mark < m_lastWarnedMark)
+                        dueMark = mark;
+                }
+
+                if (dueMark != int.MaxValue)
+                {
+                    m_lastWarnedMark = dueMark;
+                    int minutes = Math.Max(1, (int)Math.Ceiling(minutesRemaining));
+                    ShowCenterMessage($"You will be logged out from Twitch in {minutes} minute{(minutes == 1 ? "" : "s")}!");
+                }
 
                 StartCoroutine(TrackAuthState());
             }
@@ -138,7 +219,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             GetBitsLeaderboard();
 
-            yield return new WaitForSeconds(5f);
+            yield return new WaitForSecondsRealtime(5f);
 
             try
             {
@@ -164,10 +245,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 if (m_authState.MaybeResult.Status == AuthStatus.LoggedIn && !m_loggedIn)
                 {
-                    if (m_loggedIn)
-                        return;
-
-                    m_loggedinInTime = DateTime.Now;
+                    m_loggedinInTime = DateTime.UtcNow;
+                    m_lastWarnedMark = int.MaxValue;
+                    m_logoutRequested = false;
                     m_loggedIn = true;
                     m_waitingForCode = false;
                     return;
@@ -182,6 +262,20 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     m_waitingForCode = false;
                     m_authInfo = null;
                     m_userInfo = null;
+                    TwitchTokenCapture.Clear();
+
+                    if (!m_logoutRequested)
+                    {
+                        // The session dropped by itself (token expired): stop the per-minute poll and
+                        // close the chat connection that was using the same token.
+                        StopTracking();
+                        if (m_chat)
+                            m_chat.Disconnect();
+                        Jotunn.Logger.LogWarning("[WBTI] Twitch session ended unexpectedly (access token expired).");
+                        ShowCenterMessage("You have been logged out from Twitch (login expired). Redeems and chat are inactive until you log in again.", 15);
+                    }
+
+                    m_logoutRequested = false;
                     return;
                 }
 
@@ -189,7 +283,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 {
                     if (m_waitingForCode)
                     {
-                        if ((DateTime.Now - m_waitingForCodeSince).TotalSeconds > 60)
+                        if ((DateTime.UtcNow - m_waitingForCodeSince).TotalSeconds > 60)
                             ResetLoginProcess();
 
                         return;
@@ -203,14 +297,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                     Application.OpenURL($"{authInfo.Uri}");
                     m_waitingForCode = true;
-                    m_waitingForCodeSince = DateTime.Now;
+                    m_waitingForCodeSince = DateTime.UtcNow;
                     return;
                 }
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Something went wrong while getting auth state: " + e);
-                CancelInvoke(nameof(InitLoginProcess));
+                StopLoginPolling();
             }
         }
 
@@ -226,11 +320,12 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 m_userInfo = new TwitchUserInfo();
                 m_userInfo.broadcasterType = userInfo.BroadcasterType;
                 m_userInfo.displayName = userInfo.DisplayName;
+                m_userInfo.loginName = userInfo.LoginName;
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Something went wrong while getting user info: " + e);
-                CancelInvoke(nameof(InitLoginProcess));
+                StopLoginPolling();
             }
         }
 
@@ -243,9 +338,15 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
         }
 
+        private static void ShowCenterMessage(string message, int seconds = 10)
+        {
+            if (Player.m_localPlayer != null)
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, message, seconds);
+        }
+
         private void ResetLoginProcess()
         {
-            CancelInvoke(nameof(InitLoginProcess));
+            StopLoginPolling();
             m_waitingForCode = false;
             m_authInfo = null;
             Twitch.API.LogOut();
@@ -256,8 +357,19 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             m_customRewards.ClearRewards();
             m_customRewards.UnSubscribeFromRedeemEvents();
 
+            LogOutOfTwitch();
+        }
+
+        // Shared by every deliberate logout. m_logoutRequested keeps GetAuthState from reporting it as an expiry.
+        private void LogOutOfTwitch()
+        {
+            m_logoutRequested = true;
+
+            if (m_chat)
+                m_chat.Disconnect();
+
             Twitch.API.LogOut();
-            CancelInvoke(nameof(TrackAuthRepeating));
+            StopTracking();
             GetAuthState();
         }
 
@@ -270,9 +382,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         private void OnLogoutBackToMainMenu()
         {
-            Twitch.API.LogOut();
-            CancelInvoke(nameof(TrackAuthRepeating));
-            GetAuthState();
+            LogOutOfTwitch();
             StartCoroutine(DelayedLogout());
         }
 
@@ -293,9 +403,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void ShowQuitMessage()
         {
-            Twitch.API.LogOut();
-            CancelInvoke(nameof(TrackAuthRepeating));
-            GetAuthState();
+            LogOutOfTwitch();
             StartCoroutine(DelayedQuit());
         }
 
