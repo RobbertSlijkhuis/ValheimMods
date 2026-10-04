@@ -87,6 +87,20 @@ namespace WizshBoneTwitchIntegration.Helpers
             return $"{ProfilesPath}/{profileName}/settings.yaml";
         }
 
+        /// <summary>
+        /// Folder holding a profile's per-world leaderboard stats (see <see cref="LeaderboardHelper"/>).
+        /// Deliberately outside profile.yaml, so Copy/Export/Import/Sync never carry it.
+        /// </summary>
+        internal static string GetLeaderboardsFolder(string profileName)
+        {
+            return $"{ProfilesPath}/{profileName}/leaderboards";
+        }
+
+        internal static string GetProfileFolder(string profileName)
+        {
+            return $"{ProfilesPath}/{profileName}";
+        }
+
         public static List<string> GetProfiles()
         {
             if (!Directory.Exists(ProfilesPath))
@@ -266,6 +280,10 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (!Directory.Exists(profilePath))
                 return false;
 
+            // A cached, still-unflushed leaderboard for this profile must not be written back into
+            // the folder after it's gone.
+            LeaderboardHelper.FlushAndForget();
+
             Directory.Delete(profilePath, recursive: true);
             return true;
         }
@@ -401,6 +419,10 @@ namespace WizshBoneTwitchIntegration.Helpers
                 error = $"Profile '{oldName}' not found.";
                 return false;
             }
+
+            // Same as DeleteProfile: flush + drop the leaderboard cache so a pending write can't
+            // recreate the old folder after the move.
+            LeaderboardHelper.FlushAndForget();
 
             Directory.Move(oldPath, $"{ProfilesPath}/{newName}");
 

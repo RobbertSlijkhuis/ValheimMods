@@ -270,20 +270,12 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     WeatherHelper.SpawnWeather(redeem.weatherData, customRewardEvent);
                 }
 
-                if (ProfileSettingsHelper.Current.autoResolveRedeems)
-                {
-                    if (Player.m_localPlayer != null)
-                        Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft, $"{customRewardEvent.CustomRewardTitle} fullfilled");
-
-                    customRewardEvent.Status = CustomRewardRedemptionState.Fulfilled;
-
-                    // A test/command-triggered redeem (or any redeem processed before we're
-                    // actually logged in) has no real reward ID behind it - resolving it would
-                    // either be a pointless real API call or, if Twitch.API hasn't been
-                    // initialized yet, throw trying to bootstrap one from scratch.
-                    if (IsLoggedIn)
-                        Twitch.API.ResolveCustomReward(customRewardEvent, CustomRewardRedemptionState.Fulfilled);
-                }
+                // The surprise chest is the one redeem that isn't done yet here: it re-checks the safe
+                // zone after a delay and can still cancel, so it finishes itself afterwards (see
+                // SpawnSurpriseChestWithDelay) - resolving it now would mark it Fulfilled on Twitch
+                // before that cancel/refund could happen.
+                if (redeem.type != RedeemType.SurpriseChest)
+                    FinishRedeem(customRewardEvent, redeem);
 
                 if (WizshBoneTwitchIntegration.useRedeemCommand)
                     WizshBoneTwitchIntegration.useRedeemCommand = false;
@@ -291,6 +283,31 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             catch (RedeemException e)
             {
                 HandleRedeemException(e, customRewardEvent);
+            }
+        }
+
+        /// <summary>
+        /// The point where a redeem counts as carried out: counts it on the leaderboard, then
+        /// auto-resolves it if that's enabled. Reached once every check has passed - a manual
+        /// refund afterwards doesn't undo the leaderboard entry.
+        /// </summary>
+        private void FinishRedeem(CustomRewardEvent customRewardEvent, RedeemData redeem)
+        {
+            LeaderboardHelper.RecordRedeem(customRewardEvent, redeem);
+
+            if (ProfileSettingsHelper.Current.autoResolveRedeems)
+            {
+                if (Player.m_localPlayer != null)
+                    Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft, $"{customRewardEvent.CustomRewardTitle} fullfilled");
+
+                customRewardEvent.Status = CustomRewardRedemptionState.Fulfilled;
+
+                // A test/command-triggered redeem (or any redeem processed before we're
+                // actually logged in) has no real reward ID behind it - resolving it would
+                // either be a pointless real API call or, if Twitch.API hasn't been
+                // initialized yet, throw trying to bootstrap one from scratch.
+                if (IsLoggedIn)
+                    Twitch.API.ResolveCustomReward(customRewardEvent, CustomRewardRedemptionState.Fulfilled);
             }
         }
 
@@ -335,7 +352,10 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             yield return new WaitForSeconds(3f);
 
             if (!IsPlayerInSafeZone(customRewardEvent, redeem.ignoreWard))
+            {
                 SurpriseChestHelper.SpawnSupriseChest(prefab, redeem.chestData, customRewardEvent);
+                FinishRedeem(customRewardEvent, redeem);
+            }
         }
 
         public void SetRewards(List<RedeemData> redeems = null, bool isEnabled = true)

@@ -21,6 +21,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                 Game.instance.gameObject.AddComponent<TwitchAuth>();
                 Game.instance.gameObject.AddComponent<TwitchChatting>();
                 Game.instance.gameObject.AddComponent<StatusEffectManager>();
+                Game.instance.gameObject.AddComponent<LeaderboardFlusher>();
                 Game.instance.gameObject.AddComponent<WizshBoneGUI>();
 
                 TwitchSafeZone.ResetLocalPlayerZoneCount();

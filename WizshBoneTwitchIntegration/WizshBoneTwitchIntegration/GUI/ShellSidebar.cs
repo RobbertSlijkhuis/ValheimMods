@@ -89,7 +89,8 @@ namespace WizshBoneTwitchIntegration.Gui
         /// <param name="onSelectTab">Invoked with the clicked tab.</param>
         /// <param name="onClose">Invoked when the Close button is clicked.</param>
         /// <param name="onNews">Invoked when the News button (pinned above Close) is clicked.</param>
-        public GameObject Create(GameObject panel, Action<ShellTab> onSelectTab, Action onClose, Action onNews)
+        /// <param name="onLeaderboards">Invoked when the Leaderboards button (last in the Profile group) is clicked.</param>
+        public GameObject Create(GameObject panel, Action<ShellTab> onSelectTab, Action onClose, Action onNews, Action onLeaderboards)
         {
             // ShellSidebar is a readonly field of WizshBoneShellGUI, reused (not reconstructed)
             // if the shell panel is ever torn down and rebuilt - reset every piece of mutable
@@ -133,7 +134,9 @@ namespace WizshBoneTwitchIntegration.Gui
             float y = FirstGroupY;
 
             y = CreateGroup(root, "General", GeneralGroupTabs, y, onSelectTab, isProfileGroup: false);
-            y = CreateGroup(root, $"Profile: {ProfileManager.ActiveProfile}", ProfileGroupTabs, y, onSelectTab, isProfileGroup: true);
+            // Leaderboards are per profile, so its (non-tab) action button sits last in the Profile group.
+            y = CreateGroup(root, $"Profile: {ProfileManager.ActiveProfile}", ProfileGroupTabs, y, onSelectTab, isProfileGroup: true,
+                actionLabel: "Leaderboards", onAction: onLeaderboards);
 
             // An action button rather than a tab: opens the News dialog, never highlighted as active.
             // Pinned to the bottom, directly above Close.
@@ -183,7 +186,12 @@ namespace WizshBoneTwitchIntegration.Gui
                 GuiHelper.SetTruncatedText(m_profileGroupHeaderText, $"Profile: {ProfileManager.ActiveProfile}", Width - 30f);
         }
 
-        private float CreateGroup(GameObject root, string groupLabel, ShellTab[] tabs, float y, Action<ShellTab> onSelectTab, bool isProfileGroup)
+        /// <param name="actionLabel">
+        /// Optional extra button after the tabs that runs <paramref name="onAction"/> instead of
+        /// selecting a tab (never highlighted as active, like the News button).
+        /// </param>
+        private float CreateGroup(GameObject root, string groupLabel, ShellTab[] tabs, float y, Action<ShellTab> onSelectTab, bool isProfileGroup,
+            string actionLabel = null, Action onAction = null)
         {
             Text header = GUIManager.Instance.CreateText(
                 text:                isProfileGroup ? "" : groupLabel,
@@ -217,6 +225,12 @@ namespace WizshBoneTwitchIntegration.Gui
                 TabButtonVisual visual = CreateStockTabButton(root, capturedTab, y, onSelectTab);
                 m_tabButtons[tab] = visual;
 
+                y -= ButtonHeight + ButtonSpacing;
+            }
+
+            if (actionLabel != null)
+            {
+                CreateStockButton(root, actionLabel, y).Button.onClick.AddListener(() => onAction?.Invoke());
                 y -= ButtonHeight + ButtonSpacing;
             }
 

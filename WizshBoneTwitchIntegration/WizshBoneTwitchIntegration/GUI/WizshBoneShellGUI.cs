@@ -31,6 +31,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private readonly ShellSidebar m_sidebar = new ShellSidebar();
         private readonly ShellTopBar m_topBar = new ShellTopBar();
         private readonly NewsDialog m_newsDialog = new NewsDialog();
+        private readonly LeaderboardsDialog m_leaderboardsDialog = new LeaderboardsDialog();
 
         private readonly Dictionary<ShellTab, IShellTabView> m_tabViews = new Dictionary<ShellTab, IShellTabView>
         {
@@ -187,9 +188,14 @@ namespace WizshBoneTwitchIntegration.Gui
             m_newsDialog.Show(news, () => NewsHelper.MarkSeen(news));
         }
 
+        private void OpenLeaderboards()
+        {
+            m_leaderboardsDialog.Show();
+        }
+
         private void BuildGUI(TwitchAuth auth, TwitchCustomRewards customRewards)
         {
-            m_sidebar.Create(m_panel, SelectTab, Close, OpenNews);
+            m_sidebar.Create(m_panel, SelectTab, Close, OpenNews, OpenLeaderboards);
             m_topBar.Create(m_panel, ShellSidebar.Width, auth, customRewards);
             ToastNotifications.Init(m_panel);
 
@@ -275,6 +281,7 @@ namespace WizshBoneTwitchIntegration.Gui
             GuiHelper.AddPanelBorder(m_panel, inset: 0f, thickness: GuiHelper.PanelBorderThickness, color: GuiHelper.PanelBorderColor);
 
             m_newsDialog.Init();
+            m_leaderboardsDialog.Init();
 
             // BuildGUI runs once per shell, so these subscribe once.
             ProfileSyncHelper.ProfileReceived += OnProfileSynced;
