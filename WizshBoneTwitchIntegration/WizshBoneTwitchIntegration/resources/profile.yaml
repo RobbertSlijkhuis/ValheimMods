@@ -29,7 +29,7 @@ settings:
   wardPushForce: 2000
   safezoneTraders: true
   safezoneBoats: false
-  hudPosition: BottomRight
+  hudPosition: UnderMinimap
   hudOffsetX: 0
   hudOffsetY: 0
 redeems:

@@ -53,7 +53,7 @@ namespace WizshBoneTwitchIntegration.Models
         public bool safezoneBoats = false;
 
         // HUD
-        public HudPosition hudPosition = HudPosition.BottomRight;
+        public HudPosition hudPosition = HudPosition.UnderMinimap;
         public float hudOffsetX;
         public float hudOffsetY;
     }

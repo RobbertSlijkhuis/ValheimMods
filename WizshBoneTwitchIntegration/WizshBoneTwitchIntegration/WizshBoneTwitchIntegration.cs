@@ -396,6 +396,9 @@ namespace WizshBoneTwitchIntegration
                 {
                     Name = "WizshBone Window",
                     ShortcutConfig = PluginConfig.configWizshBoneWindow,
+                    // Without this Jötunn gates the button on Player.TakeInput(), which is false while
+                    // the Esc menu (and so the single-player pause) or another vanilla GUI is open.
+                    ActiveInGUI = true,
                 };
 
                 InputManager.Instance.AddButton(PluginGUID, wizshBoneWindowButton);

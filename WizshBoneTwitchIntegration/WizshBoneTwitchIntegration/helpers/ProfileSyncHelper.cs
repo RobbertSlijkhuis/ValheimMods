@@ -91,7 +91,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             try
             {
-                // Checked before CreateProfile, which would create a default profile.yaml and make
+                // Checked before CreateProfile, which would create an empty profile.yaml and make
                 // every name look like it already existed. A local (not previously synced) profile
                 // with this name is about to be replaced, so keep its file as a one-deep backup.
                 string existingPath = ProfileManager.GetRedeemPath(profileName);

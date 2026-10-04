@@ -1,3 +1,4 @@
+using System;
 using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -16,18 +17,30 @@ namespace WizshBoneTwitchIntegration.Gui
     /// </summary>
     internal class TooltipTrigger : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
-        private const float TextWidth     = 260f;
+        private const float TextWidth     = 260f; // max text width - shorter text gets a narrower box
         private const float Padding       = 8f;
         private const float MinTextHeight = 20f;
 
         private string m_text;
+        private Func<string> m_textProvider;
         private GameObject m_tooltipObj;
+        private RectTransform m_tooltipRt;
         private Canvas m_rootCanvas;
         private RectTransform m_rootCanvasRt;
 
         public void Init(string text)
         {
             m_text = text;
+            m_textProvider = null;
+        }
+
+        /// <summary>
+        /// Overload for a tooltip whose text depends on live state (e.g. the HUD's connection
+        /// dot) - the provider is evaluated each time the tooltip opens.
+        /// </summary>
+        public void Init(Func<string> textProvider)
+        {
+            m_textProvider = textProvider;
         }
 
         /// <summary>
@@ -41,6 +54,7 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             string titleHex = ColorUtility.ToHtmlStringRGB(GUIManager.Instance.ValheimOrange);
             m_text = $"<b><color=#{titleHex}>{title}</color></b>\n{description}";
+            m_textProvider = null;
         }
 
         public void OnPointerEnter(PointerEventData eventData)
@@ -61,7 +75,8 @@ namespace WizshBoneTwitchIntegration.Gui
             m_tooltipObj.transform.SetParent(rootCanvas.transform, false);
 
             RectTransform tooltipRt = m_tooltipObj.GetComponent<RectTransform>();
-            tooltipRt.pivot     = new Vector2(0f, 0f);
+            m_tooltipRt = tooltipRt;
+            tooltipRt.pivot    = new Vector2(0f, 0f);
             tooltipRt.anchorMin = new Vector2(0f, 0f);
             tooltipRt.anchorMax = new Vector2(0f, 0f);
 
@@ -76,7 +91,7 @@ namespace WizshBoneTwitchIntegration.Gui
             background.raycastTarget = false;
 
             Text tooltipText = GUIManager.Instance.CreateText(
-                text: m_text,
+                text: m_textProvider != null ? m_textProvider() : m_text,
                 parent: m_tooltipObj.transform,
                 anchorMin: new Vector2(0.5f, 0.5f),
                 anchorMax: new Vector2(0.5f, 0.5f),
@@ -96,9 +111,16 @@ namespace WizshBoneTwitchIntegration.Gui
             tooltipText.raycastTarget      = false;
             tooltipText.supportRichText    = true;
 
+            // Width fits the longest line, capped at TextWidth (beyond which the text wraps). Measured
+            // unwrapped first; the small slack keeps float rounding from wrapping a line that fits.
+            tooltipText.horizontalOverflow = HorizontalWrapMode.Overflow;
+            float textWidth = Mathf.Min(TextWidth, Mathf.Ceil(tooltipText.preferredWidth) + 2f);
+            tooltipText.horizontalOverflow = HorizontalWrapMode.Wrap;
+            tooltipText.rectTransform.sizeDelta = new Vector2(textWidth, MinTextHeight);
+
             float textHeight = Mathf.Max(MinTextHeight, tooltipText.preferredHeight);
-            tooltipText.rectTransform.sizeDelta = new Vector2(TextWidth, textHeight);
-            tooltipRt.sizeDelta = new Vector2(TextWidth + Padding * 2f, textHeight + Padding * 2f);
+            tooltipText.rectTransform.sizeDelta = new Vector2(textWidth, textHeight);
+            tooltipRt.sizeDelta = new Vector2(textWidth + Padding * 2f, textHeight + Padding * 2f);
 
             PositionAtMouse();
         }
@@ -119,8 +141,26 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             Camera cam = m_rootCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : m_rootCanvas.worldCamera;
 
-            if (RectTransformUtility.ScreenPointToWorldPointInRectangle(m_rootCanvasRt, Input.mousePosition, cam, out Vector3 worldPoint))
-                m_tooltipObj.transform.position = worldPoint;
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(m_rootCanvasRt, Input.mousePosition, cam, out Vector2 local))
+                return;
+
+            // The tooltip is anchored to the canvas's bottom-left (see OnPointerEnter), so its
+            // anchoredPosition is the cursor's offset from the canvas rect's min corner.
+            Rect bounds = m_rootCanvasRt.rect;
+            Vector2 size = m_tooltipRt.sizeDelta;
+            Vector2 pos = local - bounds.min;
+
+            // Default is up-and-right of the cursor; flip to the other side when that would run off
+            // the screen, then clamp for the case where neither side fits.
+            if (pos.x + size.x > bounds.width)
+                pos.x -= size.x;
+            if (pos.y + size.y > bounds.height)
+                pos.y -= size.y;
+
+            pos.x = Mathf.Clamp(pos.x, 0f, Mathf.Max(0f, bounds.width - size.x));
+            pos.y = Mathf.Clamp(pos.y, 0f, Mathf.Max(0f, bounds.height - size.y));
+
+            m_tooltipRt.anchoredPosition = pos;
         }
 
         private void DestroyTooltip()
@@ -129,6 +169,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 GameObject.Destroy(m_tooltipObj);
 
             m_tooltipObj   = null;
+            m_tooltipRt    = null;
             m_rootCanvas   = null;
             m_rootCanvasRt = null;
         }

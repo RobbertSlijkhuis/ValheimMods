@@ -86,8 +86,13 @@ namespace WizshBoneTwitchIntegration.Helpers
                 ? File.ReadAllText(ActiveProfileFile).Trim()
                 : DefaultProfileName;
 
-            if (!Directory.Exists($"{ProfilesPath}/{ActiveProfile}"))
-                CreateProfile(ActiveProfile, out _);
+            // The one place a profile is seeded with the stock default redeems (CreateProfile
+            // makes empty profiles).
+            if (!Directory.Exists($"{ProfilesPath}/{ActiveProfile}") && IsValidProfileName(ActiveProfile, out _))
+            {
+                Directory.CreateDirectory($"{ProfilesPath}/{ActiveProfile}");
+                ExtraConfigHelper.WriteDefaultRedeemsTo(GetRedeemPath(ActiveProfile));
+            }
 
             if (firstRun && !ProfileExists(ChattingOnlyProfileName))
             {
@@ -98,7 +103,14 @@ namespace WizshBoneTwitchIntegration.Helpers
             ProfileMigrationHelper.MigrateAllProfilesOnDisk();
         }
 
-        public static bool CreateProfile(string name, out string error)
+        /// <summary>
+        /// Creates a profile. With no <paramref name="sourceProfile"/> it is empty (no redeems or
+        /// creature groups, default settings); otherwise it is a copy of that profile's
+        /// profile.yaml (redeems, creature groups and settings), which needn't be the active
+        /// profile. The .synced marker is not copied, so the new profile is locally owned.
+        /// The stock default redeems are only seeded by <see cref="Init"/>.
+        /// </summary>
+        public static bool CreateProfile(string name, out string error, string sourceProfile = null)
         {
             error = null;
 
@@ -113,11 +125,34 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return false;
             }
 
+            bool copyFromSource = !string.IsNullOrEmpty(sourceProfile);
+            string sourcePath = null;
+
+            if (copyFromSource)
+            {
+                if (!ProfileExists(sourceProfile))
+                {
+                    error = $"Profile '{sourceProfile}' not found.";
+                    return false;
+                }
+
+                sourcePath = GetRedeemPath(sourceProfile);
+
+                if (!File.Exists(sourcePath))
+                {
+                    error = $"Profile '{sourceProfile}' has no profile file to copy.";
+                    return false;
+                }
+            }
+
             Directory.CreateDirectory(profilePath);
 
-            ExtraConfigHelper.WriteDefaultRedeemsTo(GetRedeemPath(name));
+            if (copyFromSource)
+                File.Copy(sourcePath, GetRedeemPath(name));
+            else
+                ExtraConfigHelper.WriteRedeemsConfig(GetRedeemPath(name), null, null, new List<RedeemData>());
 
-            // No settings block is written here - a profile.yaml with no "settings:" key is
+            // No settings block is written when empty - a profile.yaml with no "settings:" key is
             // treated as "use ProfileSettingsData defaults" by ProfileSettingsHelper.Reload().
 
             return true;

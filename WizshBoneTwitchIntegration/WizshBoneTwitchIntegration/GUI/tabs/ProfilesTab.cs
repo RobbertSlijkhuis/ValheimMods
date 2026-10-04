@@ -26,6 +26,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         private readonly ConfirmDialog m_confirmDialog = new ConfirmDialog();
         private readonly InputDialog m_inputDialog = new InputDialog();
+        private readonly NewProfileDialog m_newProfileDialog = new NewProfileDialog();
 
         private readonly ColumnSortState m_sortState = new ColumnSortState("name");
         private readonly List<(string Text, string SortKey, Text Label)> m_sortableHeaders = new List<(string, string, Text)>();
@@ -129,6 +130,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             m_confirmDialog.Init();
             m_inputDialog.Init();
+            m_newProfileDialog.Init();
 
             GuiHelper.CreateTitle("Profiles", m_root, new Vector2(LeftEdgeX + TitleWidth / 2f, TitleY), width: TitleWidth);
             GuiHelper.CreateTabDescription(
@@ -405,22 +407,24 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         private void OnCreateProfile()
         {
-            m_inputDialog.Show(
+            m_newProfileDialog.Show(
                 title: "New Profile",
                 description: "Enter a name for the new profile.",
-                suggestedValue: "",
+                profiles: ProfileManager.GetProfiles().OrderBy(p => p, StringComparer.OrdinalIgnoreCase).ToList(),
                 onConfirm: HandleCreateConfirm,
                 confirmText: "Create",
                 maxLength: ProfileManager.MaxProfileNameLength);
         }
 
-        private string HandleCreateConfirm(string name)
+        private string HandleCreateConfirm(string name, string sourceProfile)
         {
-            bool created = ProfileManager.CreateProfile(name, out string error);
+            bool created = ProfileManager.CreateProfile(name, out string error, sourceProfile);
             if (!created)
                 return error;
 
-            ToastNotifications.Show($"Profile '{name}' created!", ToastType.Success);
+            ToastNotifications.Show(sourceProfile == null
+                ? $"Profile '{name}' created!"
+                : $"Profile '{name}' created from '{sourceProfile}'.", ToastType.Success);
             RefreshList();
             return null;
         }

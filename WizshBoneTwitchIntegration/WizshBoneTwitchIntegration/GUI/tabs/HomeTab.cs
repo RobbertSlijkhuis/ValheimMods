@@ -162,7 +162,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 CardTopCenter(1, 1), "Enable redeems on login",
                 () => ProfileSettingsHelper.Current.enableRedeemsOnLogin,
                 v => { ProfileSettingsHelper.Current.enableRedeemsOnLogin = v; ProfileSettingsPersistHelper.Persist(); },
-                "Automatically turns redeems on when you connect");
+                "Automatically turns redeems on when you connect to Twitch");
 
             BuildRedemptionLogCard(CardTopCenter(1, 2), customRewards);
 
