@@ -531,6 +531,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         {
             string path = WizshBoneTwitchIntegration.viewersPath;
             string backupPath = path + ".bak";
+            bool saved = false;
 
             try
             {
@@ -542,7 +543,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 ExtraConfigHelper.WriteViewersConfig(viewers);
 
                 RecolorHelper.ReloadViewersConfig();
-                ToastNotifications.Show(successMessage, ToastType.Success);
+                saved = true;
             }
             catch (Exception ex)
             {
@@ -554,8 +555,14 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                     RecolorHelper.ReloadViewersConfig();
                 }
 
-                ToastNotifications.Show("Save failed! Restored previous viewers file.", ToastType.Error);
             }
+
+            // Outside the try: a toast problem must never be mistaken for a failed save (which
+            // would roll back a file that was written fine).
+            if (saved)
+                ToastNotifications.Show(successMessage, ToastType.Success);
+            else
+                ToastNotifications.Show("Save failed! Restored previous viewers file.", ToastType.Error);
 
             RefreshList();
         }

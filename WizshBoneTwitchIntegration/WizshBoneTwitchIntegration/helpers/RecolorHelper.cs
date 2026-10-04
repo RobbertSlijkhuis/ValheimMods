@@ -66,6 +66,15 @@ namespace WizshBoneTwitchIntegration.Helpers
                 new RecolorCreatureData("Visual/Fangs 005") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorBoarTusk, emissive = true },
                 new RecolorCreatureData("Visual/Fangs 006") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorBoarTusk, emissive = true },
             }},
+            { "Bonemass", new List<RecolorCreatureData>() {
+                new RecolorCreatureData("Visual/model/bonemass") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorBonemassBones },
+                new RecolorCreatureData("Visual/model/bonemass") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorBonemass, materialIndex = 1, emissive = true, emissiveMultiplier = 1.5f },
+                new RecolorCreatureData("Visual/model/heads") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorBonemassBones },
+                new RecolorCreatureData("Visual/Point light") { isLight = true },
+                new RecolorCreatureData("Visual/particles/ooz") { isParticle = true },
+                new RecolorCreatureData("Visual/particles/wetsplsh") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorBlobSlime, emissive = true, emissiveMultiplier = 0.5f, isParticle = true },
+                new RecolorCreatureData("Visual/particles/wetsplsh_local") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorBlobSlime, emissive = true, emissiveMultiplier = 0.5f, isParticle = true },
+            }},
             { "Deathsquito", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/Cube") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorDeathsquito, emissive = true },
             }},
@@ -74,6 +83,9 @@ namespace WizshBoneTwitchIntegration.Helpers
                 new RecolorCreatureData("Visual/CG/Pelvis/Spine/Spine1/Spine2/Neck/Neck1/Head/Antlers 01") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorDeerAntlers, emissive = true },
                 new RecolorCreatureData("Visual/CG/Pelvis/Spine/Spine1/Spine2/Neck/Neck1/Head/Antlers 04") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorDeerAntlers, emissive = true },
                 new RecolorCreatureData("Visual/CG/Pelvis/Spine/Spine1/Spine2/Neck/Neck1/Head/Antlers 05") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorDeerAntlers, emissive = true },
+            }},
+            { "Dragon", new List<RecolorCreatureData>() {
+                new RecolorCreatureData("Visual/DragonQueen") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorModer, emissive = true },
             }},
             { "Draugr", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/_draugr_base/Cube.001") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorDraugr, emissive = true },
@@ -84,12 +96,23 @@ namespace WizshBoneTwitchIntegration.Helpers
             { "Draugr_Ranged", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/_draugr_base/Cube.001") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorDraugrFem, emissive = true },
             }},
+            { "Eikthyr", new List<RecolorCreatureData>() {
+                new RecolorCreatureData("Visual/Deer") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorEikthyr, emissive = true },
+                new RecolorCreatureData("Visual/chains") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorEikthyr, emissive = true },
+                new RecolorCreatureData("Visual/extrafur") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorEikthyrHair, emissive = true },
+                new RecolorCreatureData("Visual/mane") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorEikthyr, emissive = true },
+            }},
             { "Fenring", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/Fenring.001") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorFenring, emissive = true },
             }},
             { "Fenring_Cultist", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/Fenring.001") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorCultist, emissive = true },
                 new RecolorCreatureData("Visual/Fenring.001") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorCultistCape, materialIndex = 1, emissive = true },
+            }},
+            { "gd_king", new List<RecolorCreatureData>() {
+                new RecolorCreatureData("Visual/gd_king") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorGDKing, emissive = true },
+                new RecolorCreatureData("Visual/Armature/root/spine1/spine2/spine3/head/Cube") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorGDKingEye, emissive = true },
+                new RecolorCreatureData("Visual/Armature/root/spine1/spine2/spine3/head/Cube (2)") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorGDKingEye, emissive = true },
             }},
             { "Ghost", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/Body") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorGhost, emissive = true },
@@ -218,6 +241,16 @@ namespace WizshBoneTwitchIntegration.Helpers
                 new RecolorCreatureData("Visual/wraith/chain") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorWraith, emissive = true },
                 new RecolorCreatureData("Visual/wraith/RagPlanes") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorWraith, emissive = false },
                 new RecolorCreatureData("Visual/wraith/Armature/root/spine1/spine2/spine3/neck/head/Point light") { isLight = true },
+            }},
+             { "GoblinKing", new List<RecolorCreatureData>() {
+                new RecolorCreatureData("Visual/Yagluth") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorYagluth, emissive = true },
+                new RecolorCreatureData("Visual/Yagluth") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorYagluth, materialIndex = 1, emissive = true },
+                new RecolorCreatureData("Visual/Yagluth_Hair") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorYagluthHair, emissive = true },
+                new RecolorCreatureData("Visual/Armature/Root/Root2/Hip/Spine1/Spine2/Spine3/Point light") { isLight = true },
+                new RecolorCreatureData("Visual/Armature/Root/Root2/Hip/Spine1/Spine2/Spine3/Particle System (2)") { isParticle = true },
+                new RecolorCreatureData("Visual/Armature/Root/Root2/Hip/Spine1/Spine2/Spine3/Neck/Bone.007/Point light (2)") { isLight = true },
+                new RecolorCreatureData("Visual/Armature/Root/Root2/Hip/Spine1/Spine2/Spine3/Neck/Bone.007/Particle System") { isParticle = true },
+                new RecolorCreatureData("Visual/Armature/Root/Root2/Hip/Spine1/Spine2/Spine3/Neck/Bone.007/Particle System (1)") { isParticle = true },
             }},
         };
 
@@ -368,14 +401,20 @@ namespace WizshBoneTwitchIntegration.Helpers
                     continue;
                 }
 
-                if (redeemerName == "yummyzebracakes" && recolorCreatureData.zebraMaterial != null)
+                Material recolorMaterial = redeemerName == "yummyzebracakes" && recolorCreatureData.zebraMaterial != null
+                    ? recolorCreatureData.zebraMaterial
+                    : recolorCreatureData.material;
+
+                // creatureList captures Instance.materials.* once, in a static initializer - a null
+                // here means that material was missing from the asset bundle (or not loaded yet when
+                // RecolorHelper was first touched), so skip this entry instead of throwing.
+                if (recolorMaterial == null)
                 {
-                    SetupMaterials(skinnedMeshRenderer, meshRenderer, recolorCreatureData.zebraMaterial, recolorCreatureData.materialIndex);
+                    Jotunn.Logger.LogWarning($"[WBTI] Recolor material is null for {creature.name}: {recolorCreatureData.transformPath}, skipping");
+                    continue;
                 }
-                else
-                {
-                    SetupMaterials(skinnedMeshRenderer, meshRenderer, recolorCreatureData.material, recolorCreatureData.materialIndex);
-                }
+
+                SetupMaterials(skinnedMeshRenderer, meshRenderer, recolorMaterial, recolorCreatureData.materialIndex);
 
                 // Get the material from the renderer as its now a copy
                 Material mat = null;
@@ -621,7 +660,11 @@ namespace WizshBoneTwitchIntegration.Helpers
                 Color emission = colors.Emission;
                 Color emissionScaled = new Color(emission.r * multiplier, emission.g * multiplier, emission.b * multiplier);
 
-                mat.SetColor("_EmissionColor", emissionScaled);
+                // Creature.shader's [HDR] _EmissionColor appears not to get Unity's usual gamma->linear
+                // conversion on SetColor (a #FF004C emission showed up magenta-pink on Creature-shader
+                // creatures but correct on Bonemass/Blob, which use _EmissiveColor/_FlowColor instead),
+                // so convert it ourselves.
+                mat.SetColor("_EmissionColor", emissionScaled.linear);
                 mat.EnableKeyword("_EMISSION");
                 mat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
 

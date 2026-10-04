@@ -97,12 +97,11 @@ namespace WizshBoneTwitchIntegration.Components
                     return;
                 }
 
-                List<CreatureData> resolvedList = RedeemHelper.GetResolvedCreatureList(redeem.creatureData);
-                CreatureData lookupData = resolvedList.Find(c => c.prefabName == m_savedPrefabName);
+                CreatureData lookupData = RedeemHelper.FindRedeemCreatureData(redeem, m_savedPrefabName);
 
                 if (lookupData == null)
                 {
-                    Jotunn.Logger.LogError($"Could not find creature '{m_savedPrefabName}' in resolved list for redeem '{m_redeemTitle}'");
+                    Jotunn.Logger.LogError($"Could not find creature '{m_savedPrefabName}' in redeem '{m_redeemTitle}'");
                     return;
                 }
 

@@ -396,8 +396,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (redeem == null)
                 return false;
 
-            List<CreatureData> resolvedList = RedeemHelper.GetResolvedCreatureList(redeem.creatureData);
-            CreatureData found = resolvedList.Find(c => c.prefabName == ownerData.SavedPrefabName);
+            CreatureData found = RedeemHelper.FindRedeemCreatureData(redeem, ownerData.SavedPrefabName);
 
             if (found == null)
                 return false;

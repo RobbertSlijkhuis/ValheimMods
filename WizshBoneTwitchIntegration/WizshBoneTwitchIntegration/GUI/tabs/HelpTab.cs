@@ -11,7 +11,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
     /// Help tab content (formerly "Debug") - a single under-title orientation line (same
     /// TitleY/DescriptionY convention as SettingsTab/RedeemsTab), above the same card grid
     /// matching <see cref="HomeTab"/>'s card style (RedesignUI.dc.html only mocks up the first
-    /// card; the "Show safezone bounds" toggle is carried over from GUI_OLD/tabs/DebugTab.cs,
+    /// card; the "Clear Toasts" card is a safety net for stuck toasts, and the "Show safezone bounds" toggle is carried over from GUI_OLD/tabs/DebugTab.cs,
     /// which the mockup didn't include), followed by a clickable topic list explaining
     /// Login/Profiles/Redeems/Viewers/Settings/Safezones. Purely client-local: nothing here touches
     /// ZDOs or the network.
@@ -120,6 +120,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             BuildSafezoneUnstuckCard(CardTopCenter(0, 0));
             BuildSafezoneBoundsCard(CardTopCenter(0, 1));
+            BuildClearToastsCard(CardTopCenter(0, 2));
 
             BuildTopicsSection();
 
@@ -160,6 +161,14 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             m_safeZoneDebugStatusText = row.Status;
 
             GuiHelper.CreateCardDescription(card, "Shows the bounds of active safezones (ships, wards, traders) in-game as a wireframe outline.", CardWidth - 24f, height: 38f);
+        }
+
+        private void BuildClearToastsCard(Vector2 topCenter)
+        {
+            GameObject card = GuiHelper.CreateCard(m_root, topCenter, CardWidth, CardHeight);
+            GuiHelper.CreateCardTitle(card, "Clear Toasts", CardWidth - 24f);
+            GuiHelper.CreateCardButton(card, "Clear toasts", CardWidth, ToastNotifications.ClearAll);
+            GuiHelper.CreateCardDescription(card, "Use if toast notifications get stuck on screen", CardWidth - 24f, height: 38f);
         }
 
         private void BuildTopicsSection()

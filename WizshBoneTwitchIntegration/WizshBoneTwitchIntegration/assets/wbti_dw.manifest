@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 1038713736
+CRC: 4108082686
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: fd54a943036b8c8c4df6d9fd546ecffe
+    Hash: 67ef9ed2a491025224fefb90988e7424
   TypeTreeHash:
     serializedVersion: 2
     Hash: 74b660a8b100fb947c34e69338d98a43
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: fd54a943036b8c8c4df6d9fd546ecffe
+    Hash: 67ef9ed2a491025224fefb90988e7424
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -121,18 +121,22 @@ Assets:
 - Assets/Custom/Creatures/StoneGolem/StoneGolem_recolor_WBTI.mat
 - Assets/Custom/PrefabInstance/Redeems/TerrainEdit_WBTI.prefab
 - Assets/Custom/PrefabInstance/Redeems/spawn_fish_WBTI.prefab
+- Assets/Custom/Creatures/TheElder/Elder_recolor_WBTI.mat
 - Assets/Custom/PrefabInstance/Redeems/EnvZone_WBTI.prefab
 - Assets/Custom/Creatures/Cultist/Cultist_recolor_WBTI.mat
 - Assets/Custom/Monobehaviour/NoFallDamage_WBTI.asset
 - Assets/Custom/Creatures/Tick/Tick_recolor_WBTI.mat
+- Assets/Custom/Creatures/Moder/Moder_recolor_WBTI.mat
 - Assets/Custom/Creatures/Seeker/SeekerBrood_recolor_WBTI.mat
 - Assets/Custom/Creatures/Leech/Leech_recolor_WBTI.mat
+- Assets/Custom/Creatures/TheElder/Elder_eye_recolor_WBTI.mat
 - Assets/Custom/Creatures/Vile/Vile_recolor_WBTI.mat
 - Assets/Custom/Creatures/Skeleton/Skeleton_recolor_WBTI.mat
 - Assets/Custom/Creatures/Fuling/Fuling_armor_recolor_WBTI.mat
 - Assets/Custom/Creatures/Cultist/CultistCape_recolor_WBTI.mat
 - Assets/Custom/Creatures/FulingBrute/FulingBrute_recolor_WBTI.mat
 - Assets/Custom/Monobehaviour/Burning_WBTI.asset
+- Assets/Custom/Creatures/Bonemass/Bonemass_bones_recolor_WBTI.mat
 - Assets/Custom/PrefabInstance/Redeems/Flashbang_WBTI.prefab
 - Assets/Custom/Creatures/Greydwarf/Greydwarf_recolor_WBTI.mat
 - Assets/Custom/Sprite/MiniMeSprite_WBTI.png
@@ -141,20 +145,23 @@ Assets:
 - Assets/Custom/Creatures/SeekerBrute/SeekerBrute_recolor_WBTI.mat
 - Assets/Custom/Creatures/Blob/Blob_recolor_WBTI.mat
 - Assets/Custom/Creatures/Deer/Deer_antlers_recolor_WBTI.mat
+- Assets/Custom/Creatures/Eikthyr/Eikthyr_hair_recolor_WBTI.mat
 - Assets/Custom/Creatures/Ulv/Ulv_recolor_WBTI.mat
 - Assets/Custom/Creatures/Neck/Neck_recolor_WBTI.mat
 - Assets/Custom/Creatures/Greydwarf/Greydwarf_Shaman_recolor_WBTI.mat
-- Assets/Custom/Creatures/Eikthyr/EikthyrShedding_recolor_WBTI.mat
 - Assets/Custom/Creatures/Wraith/Wraith_recolor_zebra_WBTI.mat
 - Assets/Custom/Creatures/Fuling/Fuling_recolor_WBTI.mat
 - Assets/Custom/Creatures/Surtling/Surtling_recolor_WBTI.mat
+- Assets/Custom/Creatures/Yagluth/Yagluth_hair_recolor_WBTI.mat
+- Assets/Custom/Creatures/Yagluth/Yagluth_recolor_WBTI.mat
 - Assets/Custom/Creatures/Draugr/Draugr_Ranged_recolor_WBTI.mat
 - Assets/Custom/Creatures/StoneGolem/StoneGolemClubs_recolor_WBTI.mat
 - Assets/Custom/Creatures/Boar/Boar_recolor_WBTI.mat
 - Assets/Custom/Creatures/Ghost/Ghost_recolor_WBTI.mat
+- Assets/Custom/Creatures/Bonemass/Bonemass_recolor_WBTI.mat
 - Assets/Custom/Monobehaviour/Freezing_WBTI.asset
 - Assets/Custom/Creatures/Draugr/Draugr_recolor_WBTI.mat
-- Assets/Custom/Creatures/Eikthyr/Eikthyr_reoclor_WBTI.mat
+- Assets/Custom/Creatures/Eikthyr/Eikthyr_recolor_WBTI.mat
 - Assets/Custom/Creatures/Draugr/Draugr_Elite_recolor_WBTI.mat
 - Assets/Custom/Creatures/Deer/Deer_recolor_WBTI.mat
 - Assets/Custom/Creatures/Wraith/Wraith_recolor_WBTI.mat

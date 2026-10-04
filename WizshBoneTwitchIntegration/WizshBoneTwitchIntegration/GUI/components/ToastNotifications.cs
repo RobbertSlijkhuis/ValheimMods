@@ -58,6 +58,10 @@ namespace WizshBoneTwitchIntegration.Gui
             if (s_container != null)
                 return;
 
+            // The previous container (and every toast under it) was destroyed along with its panel,
+            // but this static list outlives it - drop the dangling references.
+            s_activeToasts.Clear();
+
             s_container = new GameObject("ToastContainer");
             s_container.transform.SetParent(panel.transform, false);
 
@@ -150,6 +154,23 @@ namespace WizshBoneTwitchIntegration.Gui
             timer.BeginExpiry(DisplaySeconds, () => Remove(toastObj));
         }
 
+        /// <summary>
+        /// Dismisses every toast immediately. Escape hatch for toasts that got stuck on screen
+        /// (e.g. an exception interrupted a toast's expiry) - also sweeps the container's children
+        /// directly, so it still works if <see cref="s_activeToasts"/> got out of sync with what's
+        /// actually on screen.
+        /// </summary>
+        public static void ClearAll()
+        {
+            s_activeToasts.Clear();
+
+            if (s_container == null)
+                return;
+
+            for (int i = s_container.transform.childCount - 1; i >= 0; i--)
+                GameObject.Destroy(s_container.transform.GetChild(i).gameObject);
+        }
+
         private static Color GetBorderColor(ToastType type)
         {
             switch (type)
@@ -172,6 +193,10 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private static void RepositionAll()
         {
+            // Defensive: a toast destroyed outside Remove() (e.g. its parent was torn down) would
+            // otherwise NRE on GetComponent below, and break every later Show() call.
+            s_activeToasts.RemoveAll(t => t == null);
+
             float cumulativeY = 0f;
             for (int i = 0; i < s_activeToasts.Count; i++)
             {

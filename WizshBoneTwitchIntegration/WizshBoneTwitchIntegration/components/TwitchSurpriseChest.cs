@@ -351,7 +351,7 @@ namespace WizshBoneTwitchIntegration.Components
                             continue;
 
                         if (creature.amount > 0)
-                            CreatureHelper.SpawnCreatures(creature, m_spawnPoint, new CustomRewardEvent() { RedeemerName = m_redeemerName }, false, force);
+                            CreatureHelper.SpawnCreatures(creature, m_spawnPoint, new CustomRewardEvent() { RedeemerName = m_redeemerName, CustomRewardTitle = m_redeemTitle }, false, force);
                     }
                 }
 
