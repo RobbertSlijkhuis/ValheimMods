@@ -98,6 +98,7 @@ namespace WizshBoneTwitchIntegration.Components
             ApplyChestData(chestData);
 
             m_netView.GetZDO().Set(chestDataHash, $"{m_redeemerName}|{m_redeemTitle}");
+            RedeemerTagHelper.Apply(gameObject, customRewardEvent);
             m_mapPin = Minimap.instance.AddPin(transform.position, Minimap.PinType.Icon3, "Surprise Chest", false, false);
 
             TriggerSpawnEffects();
@@ -345,13 +346,17 @@ namespace WizshBoneTwitchIntegration.Components
 
                 if (spawnData.creatureData != null)
                 {
+                    // The loot creatures credit the chest redeem's redeemer (tag read from this chest's base data).
+                    TwitchBasePersistentData chestTag = gameObject.GetComponent<TwitchBasePersistentData>();
+                    string chestRedeemerId = chestTag != null && chestTag.HasRedeemer ? chestTag.RedeemerId : null;
+
                     foreach (CreatureData creature in spawnData.creatureData)
                     {
                         if (!ProgressionHelper.IsAllowedByGlobalKeys(creature.globalKeyAdd, creature.globalKeyRemove))
                             continue;
 
                         if (creature.amount > 0)
-                            CreatureHelper.SpawnCreatures(creature, m_spawnPoint, new CustomRewardEvent() { RedeemerName = m_redeemerName, CustomRewardTitle = m_redeemTitle }, false, force);
+                            CreatureHelper.SpawnCreatures(creature, m_spawnPoint, new CustomRewardEvent() { RedeemerName = m_redeemerName, RedeemerId = chestRedeemerId, CustomRewardTitle = m_redeemTitle }, false, force);
                     }
                 }
 

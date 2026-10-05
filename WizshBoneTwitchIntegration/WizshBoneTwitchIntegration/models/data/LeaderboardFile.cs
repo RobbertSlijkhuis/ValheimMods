@@ -25,15 +25,21 @@ namespace WizshBoneTwitchIntegration.Models
         public List<string> previousNames = new List<string>();
 
         public long pointsSpent;
-        public int redeemCount;
 
         /// <summary>
-        /// Raw (prefix-free) redeem title to how often this viewer used it. Never pruned against
-        /// the profile - a deleted/renamed redeem keeps its old counts. The "favourite" tie-break
-        /// ("first entry wins") relies on this Dictionary keeping insertion order through a
-        /// YamlDotNet save/load round-trip.
+        /// Raw (prefix-free) redeem title to how often this viewer used it and how many of the
+        /// streamer's deaths it caused. Never pruned against the profile - a deleted/renamed redeem
+        /// keeps its old counts. The total redeem count and total deaths are derived from this map
+        /// (one source of truth), and the "favourite" tie-break ("first entry wins") relies on this
+        /// Dictionary keeping insertion order through a YamlDotNet save/load round-trip.
         /// </summary>
-        public Dictionary<string, int> redeems = new Dictionary<string, int>();
+        public Dictionary<string, RedeemStats> redeems = new Dictionary<string, RedeemStats>();
+    }
+
+    internal class RedeemStats
+    {
+        public int uses;
+        public int deaths;
     }
 
     /// <summary>One world's stats as handed to the Leaderboards window.</summary>
@@ -53,7 +59,11 @@ namespace WizshBoneTwitchIntegration.Models
         public List<string> previousNames = new List<string>();
         public long points;
         public int redeemCount;
+        public int deaths;
         public string favouriteTitle;
         public int favouriteCount;
+
+        /// <summary>Redeem title to deaths it caused (only redeems with at least one death).</summary>
+        public Dictionary<string, int> deathsByRedeem = new Dictionary<string, int>();
     }
 }

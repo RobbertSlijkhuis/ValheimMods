@@ -115,6 +115,9 @@ namespace WizshBoneTwitchIntegration.Components
             baseData?.SetFlag(PersistentComponentFlags.HazardDamage, true);
 
             fire.gameObject.AddComponent<TwitchPersistentDamage>();
+
+            // The lingering fire credits the same redeemer as the hazard that lit it.
+            RedeemerTagHelper.Copy(gameObject, fire.gameObject);
         }
 
         public void ApplyDamageData(DamageData damageData)

@@ -26,7 +26,7 @@ namespace WizshBoneTwitchIntegration.Helpers
         private const int FormatVersion = 1;
         private const int MaxPreviousNames = 10;
         private const float FlushDelaySeconds = 10f;
-        private const string SeedIdPrefix = "seed-";
+        internal const string SeedIdPrefix = "seed-";
 
         private static readonly ISerializer s_serializer = new SerializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
@@ -138,15 +138,54 @@ namespace WizshBoneTwitchIntegration.Helpers
             UpdateName(viewer, displayName);
 
             viewer.pointsSpent += cost;
-            viewer.redeemCount++;
-
-            if (!string.IsNullOrEmpty(redeemTitle))
-            {
-                viewer.redeems.TryGetValue(redeemTitle, out int count);
-                viewer.redeems[redeemTitle] = count + 1;
-            }
+            GetOrAddStats(viewer, redeemTitle).uses++;
 
             MarkDirty();
+        }
+
+        private static RedeemStats GetOrAddStats(LeaderboardViewer viewer, string redeemTitle)
+        {
+            string key = redeemTitle ?? "";
+
+            if (!viewer.redeems.TryGetValue(key, out RedeemStats stats))
+            {
+                stats = new RedeemStats();
+                viewer.redeems[key] = stats;
+            }
+
+            return stats;
+        }
+
+        /// <summary>
+        /// Counts one death of the streamer against a viewer's redeem (see
+        /// <see cref="DeathCreditHelper"/>). The viewer normally already exists, since the redeem
+        /// that killed the streamer was counted when it was carried out; if the stats were cleared
+        /// since, a nameless entry is created (<see cref="BuildRows"/> falls back to the id until
+        /// the viewer redeems again).
+        /// </summary>
+        public static void RecordDeath(string redeemerId, string rawRedeemTitle)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(redeemerId))
+                    return;
+
+                if (!EnsureLoaded())
+                    return;
+
+                if (!s_data.viewers.TryGetValue(redeemerId, out LeaderboardViewer viewer))
+                {
+                    viewer = new LeaderboardViewer();
+                    s_data.viewers[redeemerId] = viewer;
+                }
+
+                GetOrAddStats(viewer, rawRedeemTitle).deaths++;
+                MarkDirty();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Leaderboard: could not record death: {e}");
+            }
         }
 
         private static void UpdateName(LeaderboardViewer viewer, string displayName)
@@ -287,7 +326,11 @@ namespace WizshBoneTwitchIntegration.Helpers
                 LeaderboardViewer viewer = file.viewers[id] ?? new LeaderboardViewer();
                 viewer.name = viewer.name ?? "";
                 viewer.previousNames = viewer.previousNames ?? new List<string>();
-                viewer.redeems = viewer.redeems ?? new Dictionary<string, int>();
+                viewer.redeems = viewer.redeems ?? new Dictionary<string, RedeemStats>();
+
+                foreach (string title in viewer.redeems.Keys.ToList())
+                    viewer.redeems[title] = viewer.redeems[title] ?? new RedeemStats();
+
                 file.viewers[id] = viewer;
             }
 
@@ -404,12 +447,17 @@ namespace WizshBoneTwitchIntegration.Helpers
                     acc.AddName(viewer.name);
 
                     acc.points += viewer.pointsSpent;
-                    acc.redeemCount += viewer.redeemCount;
 
-                    foreach (KeyValuePair<string, int> redeem in viewer.redeems)
+                    foreach (KeyValuePair<string, RedeemStats> redeem in viewer.redeems)
                     {
-                        acc.redeems.TryGetValue(redeem.Key, out int count);
-                        acc.redeems[redeem.Key] = count + redeem.Value;
+                        if (!acc.redeems.TryGetValue(redeem.Key, out RedeemStats sum))
+                        {
+                            sum = new RedeemStats();
+                            acc.redeems[redeem.Key] = sum;
+                        }
+
+                        sum.uses += redeem.Value.uses;
+                        sum.deaths += redeem.Value.deaths;
                     }
                 }
             }
@@ -423,8 +471,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 {
                     id = id,
                     name = acc.names.Count > 0 ? acc.names[acc.names.Count - 1] : id,
-                    points = acc.points,
-                    redeemCount = acc.redeemCount
+                    points = acc.points
                 };
 
                 for (int i = acc.names.Count - 2; i >= 0 && row.previousNames.Count < MaxPreviousNames; i--)
@@ -435,12 +482,18 @@ namespace WizshBoneTwitchIntegration.Helpers
                         row.previousNames.Add(candidate);
                 }
 
-                foreach (KeyValuePair<string, int> redeem in acc.redeems)
+                foreach (KeyValuePair<string, RedeemStats> redeem in acc.redeems)
                 {
-                    if (redeem.Value > row.favouriteCount)
+                    row.redeemCount += redeem.Value.uses;
+                    row.deaths += redeem.Value.deaths;
+
+                    if (redeem.Value.deaths > 0)
+                        row.deathsByRedeem[redeem.Key] = redeem.Value.deaths;
+
+                    if (redeem.Value.uses > row.favouriteCount)
                     {
                         row.favouriteTitle = redeem.Key;
-                        row.favouriteCount = redeem.Value;
+                        row.favouriteCount = redeem.Value.uses;
                     }
                 }
 
@@ -454,8 +507,7 @@ namespace WizshBoneTwitchIntegration.Helpers
         {
             public readonly List<string> names = new List<string>();
             public long points;
-            public int redeemCount;
-            public readonly Dictionary<string, int> redeems = new Dictionary<string, int>();
+            public readonly Dictionary<string, RedeemStats> redeems = new Dictionary<string, RedeemStats>();
 
             public void AddName(string name)
             {
@@ -506,6 +558,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                     for (int n = 0; n < 3; n++)
                         Apply(id, name, 500, titles[0]);
 
+                    GetOrAddStats(s_data.viewers[id], titles[0]).deaths = 1;
                     continue;
                 }
 
@@ -515,6 +568,12 @@ namespace WizshBoneTwitchIntegration.Helpers
                 int redeems = random.Next(1, 12);
                 for (int n = 0; n < redeems; n++)
                     Apply(id, name, random.Next(1, 20) * 100, titles[random.Next(titles.Count)]);
+
+                // A few deaths on random redeems the viewer actually used.
+                LeaderboardViewer seeded = s_data.viewers[id];
+                int deaths = random.Next(0, 4);
+                for (int n = 0; n < deaths; n++)
+                    seeded.redeems.ElementAt(random.Next(seeded.redeems.Count)).Value.deaths++;
             }
 
             return count;

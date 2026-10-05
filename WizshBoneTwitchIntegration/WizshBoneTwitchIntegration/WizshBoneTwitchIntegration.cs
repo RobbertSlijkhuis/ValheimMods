@@ -430,6 +430,7 @@ namespace WizshBoneTwitchIntegration
 
             CommandManager.Instance.AddConsoleCommand(new LeaderboardSeedCommand());
             CommandManager.Instance.AddConsoleCommand(new LeaderboardClearCommand());
+            CommandManager.Instance.AddConsoleCommand(new FakeRedeemerCommand());
 
             CommandManager.Instance.AddConsoleCommand(new UsersBanList());
             CommandManager.Instance.AddConsoleCommand(new UserBanCommand());

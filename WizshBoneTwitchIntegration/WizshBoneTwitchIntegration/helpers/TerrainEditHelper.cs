@@ -57,9 +57,15 @@ namespace WizshBoneTwitchIntegration.Helpers
                     break;
             }
 
+            // A fall (or a dip into water) shortly after this edit is credited to the redeemer.
+            DeathCreditHelper.NoteTerrainEdit(customRewardEvent, data.noFallDamage);
+
             if (data.duration > 0f)
             {
-                GameObject marker = Object.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.TerrainEdit, origin, Quaternion.identity);
+                // Through ZNetViewHelper (marks it as a redeem spawn) and tagged with the redeemer, so
+                // the timed reset - which can drop the streamer off raised ground - credits the same viewer.
+                GameObject marker = ZNetViewHelper.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.TerrainEdit, origin, Quaternion.identity);
+                RedeemerTagHelper.Apply(marker, customRewardEvent);
                 marker.GetComponent<TwitchTerrainReset>().Initialize(origin, settings.GetRadius() + ResetRadiusBuffer, data.duration);
             }
 

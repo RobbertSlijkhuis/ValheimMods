@@ -31,13 +31,13 @@ namespace WizshBoneTwitchIntegration.Helpers
             bool anyApplied = false;
             foreach (StatusEffectEntry entry in toApply)
             {
-                if (ApplyEntry(entry))
+                if (ApplyEntry(entry, customRewardEvent))
                     anyApplied = true;
             }
             return anyApplied;
         }
 
-        private static bool ApplyEntry(StatusEffectEntry entry)
+        private static bool ApplyEntry(StatusEffectEntry entry, CustomRewardEvent customRewardEvent)
         {
             if (string.IsNullOrEmpty(entry.name))
             {
@@ -89,6 +89,10 @@ namespace WizshBoneTwitchIntegration.Helpers
                     active.m_time = 0f;
                 }
             }
+
+            // Poison/burning damage and stamina-draining effects (drowning) credit this redeemer
+            // while the effect is active - see DeathCreditHelper.
+            DeathCreditHelper.NoteStatusEffect(source, hash, customRewardEvent);
 
             if (entry.persistsThroughDeath)
             {

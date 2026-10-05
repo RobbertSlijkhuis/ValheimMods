@@ -59,6 +59,10 @@ namespace WizshBoneTwitchIntegration.Extensions
 
             Action<GameObject, GameObject> onInstantiated = (gameObject, prefab) =>
             {
+                // Everything a redeem shower spawns (projectiles, AOEs, pieces, creatures) carries
+                // who redeemed it, so a death it causes can be credited to them.
+                RedeemerTagHelper.Apply(gameObject, customRewardEvent);
+
                 MonsterAI monsterAI = gameObject.GetComponent<MonsterAI>();
                 Humanoid humanoid2 = gameObject.GetComponent<Humanoid>();
                 ImpactEffect impactEffect = gameObject.GetComponentInChildren<ImpactEffect>(true);
@@ -199,6 +203,7 @@ namespace WizshBoneTwitchIntegration.Extensions
                     return;
 
                 CreatureHelper.ApplyInheritedScaling(gameObject, prefab, parentCreatureData, redeemerName, redeemTitle, lookupPrefabName);
+                RedeemerTagHelper.Copy(owner.gameObject, gameObject); // the child credits its summoner's redeemer
             };
 
             return SpawnLoop(spawnAbility, toSpawn, selectPrefab, null, onInstantiated, randomRotation: true, createSpawnEffect: true, batchSize: 1, checkSafeZone: false);

@@ -141,7 +141,11 @@ namespace WizshBoneTwitchIntegration.Helpers
                     continue;
                 }
 
-                GameObject explosionInstance = UnityEngine.Object.Instantiate(explosionFX, prefab.transform.position, prefab.transform.rotation);
+                // The explosion is the damage carrier for Detonate: it goes through ZNetViewHelper
+                // (marks it as a redeem spawn) and carries who redeemed it, so a death it causes
+                // can be credited to them.
+                GameObject explosionInstance = ZNetViewHelper.Instantiate(explosionFX, prefab.transform.position, prefab.transform.rotation);
+                RedeemerTagHelper.Apply(explosionInstance, customRewardEvent);
                 UnityEngine.Object.Instantiate(explosionSFX, prefab.transform.position, prefab.transform.rotation);
 
                 if (!detonateData.damageTerrain)

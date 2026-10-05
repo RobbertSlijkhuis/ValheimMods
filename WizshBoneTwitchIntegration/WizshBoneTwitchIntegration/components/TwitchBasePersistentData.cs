@@ -42,6 +42,46 @@ namespace WizshBoneTwitchIntegration.Components
             SetFlag(PersistentComponentFlags.RedeemSpawn, true);
         }
 
+        // Who redeemed this object into the world (Twitch user ID + the redeem's raw, prefix-free
+        // title), stored once as "id|rawTitle". Same replicate-through-the-ZDO pattern as the other
+        // persistent data: the spawning client writes it once (see RedeemerTagHelper), every
+        // client's Awake reads it back - no RPC. Used to credit the streamer's death to a redeem
+        // (see DeathCreditHelper); absent for the streamer's own and test redeems, so they never credit.
+        private static readonly int s_redeemerHash = "WBTI_Redeemer".GetStableHashCode();
+        private string m_redeemerId;
+        private string m_redeemerRawTitle;
+
+        public bool HasRedeemer => !string.IsNullOrEmpty(m_redeemerId);
+        public string RedeemerId => m_redeemerId;
+        public string RedeemerRawTitle => m_redeemerRawTitle;
+
+        public void SetRedeemer(string id, string rawTitle)
+        {
+            if (string.IsNullOrEmpty(id))
+                return;
+
+            m_redeemerId = id;
+            m_redeemerRawTitle = rawTitle ?? "";
+
+            // One-time config: written by the client that spawned the object (always its owner then).
+            if (m_netView == null || !m_netView.IsValid() || !m_netView.IsOwner())
+                return;
+
+            m_netView.GetZDO().Set(s_redeemerHash, $"{m_redeemerId}|{m_redeemerRawTitle}");
+        }
+
+        private void ReadRedeemer()
+        {
+            string stored = m_netView.GetZDO().GetString(s_redeemerHash, "");
+            int separator = stored.IndexOf('|');
+
+            if (separator <= 0)
+                return;
+
+            m_redeemerId = stored.Substring(0, separator);
+            m_redeemerRawTitle = stored.Substring(separator + 1);
+        }
+
         public void Awake()
         {
             try
@@ -50,6 +90,9 @@ namespace WizshBoneTwitchIntegration.Components
 
                 if (m_netView == null || !m_netView.IsValid())
                     return;
+
+                // Read before the early return below, which skips objects with no active flags.
+                ReadRedeemer();
 
                 var flags = (PersistentComponentFlags)m_netView.GetZDO().GetInt(s_activeComponentsHash, 0);
 

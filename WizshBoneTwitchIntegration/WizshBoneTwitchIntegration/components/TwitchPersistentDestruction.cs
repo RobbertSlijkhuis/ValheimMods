@@ -202,6 +202,9 @@ namespace WizshBoneTwitchIntegration.Components
             if (!m_netView.IsOwner())
                 m_netView.ClaimOwnership();
 
+            // A redeem boat expiring under the streamer: if they end up swimming right after, this redeemer is the cause.
+            DeathCreditHelper.NoteBoatExpiring(gameObject);
+
             gameObject.GetComponent<WearNTear>()?.Destroy();
         }
 
@@ -216,6 +219,8 @@ namespace WizshBoneTwitchIntegration.Components
 
             if (m_netView == null || !m_netView.IsValid())
                 yield break;
+
+            DeathCreditHelper.NoteBoatExpiring(gameObject);
 
             ZNetViewHelper.Destroy(gameObject);
         }

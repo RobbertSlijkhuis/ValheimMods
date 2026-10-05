@@ -84,6 +84,9 @@ namespace WizshBoneTwitchIntegration.Components
                     return;
                 }
 
+                // Undoing a raised edit can drop the streamer: a fall right after this credits the redeemer.
+                DeathCreditHelper.NoteTerrainReset(gameObject);
+
                 TerrainEditHelper.ResetTerrainToSeed(pos, radius);
             }
             catch (Exception e)

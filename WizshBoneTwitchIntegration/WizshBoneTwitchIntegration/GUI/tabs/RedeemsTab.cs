@@ -4,6 +4,7 @@ using Jotunn.Managers;
 using TwitchSDK.Interop;
 using UnityEngine;
 using UnityEngine.UI;
+using WizshBoneTwitchIntegration.Commands;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchIntegration;
@@ -601,6 +602,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 CustomRewardCost  = redeem.points,
                 Status            = CustomRewardRedemptionState.Unfulfilled
             };
+
+            FakeRedeemerCommand.Apply(rewardEvent); // debug: only does anything after WBTIFakeRedeemer
 
             WizshBoneTwitchIntegration.useRedeemCommand = true;
             customRewards.HandleRedeem(rewardEvent);

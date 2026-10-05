@@ -42,9 +42,11 @@ namespace WizshBoneTwitchIntegration.Gui
         private string m_searchText = "";
         private long m_totalPoints;
         private long m_totalRedeems;
+        private long m_totalDeaths;
 
         private const string SortPoints = "points";
         private const string SortRedeems = "redeems";
+        private const string SortDeaths = "deaths";
         private const string SortName = "name";
         private const string SortFavourite = "favourite";
         private const string AllWorldsValue = "all";
@@ -72,11 +74,12 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float SearchWidth = 380f;
         private const float DropdownWidth = 280f;
 
-        private const float ColRankW = 70f;
-        private const float ColNameW = 230f;
-        private const float ColPointsW = 200f;
-        private const float ColCountW = 110f;
-        private const float ColFavW = ListRightX - (LeftEdgeX + ColRankW + ColNameW + ColPointsW + ColCountW);
+        private const float ColRankW = 60f;
+        private const float ColNameW = 200f;
+        private const float ColPointsW = 190f;
+        private const float ColCountW = 90f;
+        private const float ColDeathsW = 130f;
+        private const float ColFavW = ListRightX - (LeftEdgeX + ColRankW + ColNameW + ColPointsW + ColCountW + ColDeathsW);
 
         // The first column is the only one flush with the list's left edge - inset just its text.
         private const float ColRankTextW = ColRankW - ListRow.LeftPadding;
@@ -84,7 +87,8 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float ColNameX = LeftEdgeX + ColRankW + ColNameW / 2f;
         private const float ColPointsX = LeftEdgeX + ColRankW + ColNameW + ColPointsW / 2f;
         private const float ColCountX = LeftEdgeX + ColRankW + ColNameW + ColPointsW + ColCountW / 2f;
-        private const float ColFavX = LeftEdgeX + ColRankW + ColNameW + ColPointsW + ColCountW + ColFavW / 2f;
+        private const float ColDeathsX = LeftEdgeX + ColRankW + ColNameW + ColPointsW + ColCountW + ColDeathsW / 2f;
+        private const float ColFavX = LeftEdgeX + ColRankW + ColNameW + ColPointsW + ColCountW + ColDeathsW + ColFavW / 2f;
 
         // Small gap so a long left-aligned value doesn't touch the next column's text.
         private const float CellGap = 10f;
@@ -225,6 +229,7 @@ namespace WizshBoneTwitchIntegration.Gui
             CreateHeader("Viewer", ColNameX, ColNameW - CellGap, SortName);
             CreateHeader("Points spent", ColPointsX, ColPointsW - CellGap, SortPoints);
             CreateHeader("Redeems", ColCountX, ColCountW - CellGap, SortRedeems);
+            CreateHeader("Deaths caused", ColDeathsX, ColDeathsW - CellGap, SortDeaths);
             CreateHeader("Favourite redeem", ColFavX, ColFavW - CellGap, SortFavourite);
         }
 
@@ -309,13 +314,14 @@ namespace WizshBoneTwitchIntegration.Gui
             m_rows = LeaderboardHelper.BuildRows(selected);
             m_totalPoints = m_rows.Sum(r => r.points);
             m_totalRedeems = m_rows.Sum(r => (long)r.redeemCount);
+            m_totalDeaths = m_rows.Sum(r => (long)r.deaths);
 
             RefreshList();
         }
 
         // ── sorting / ranking ────────────────────────────────────────────────
 
-        private static bool IsNumeric(string sortKey) => sortKey == SortPoints || sortKey == SortRedeems;
+        private static bool IsNumeric(string sortKey) => sortKey == SortPoints || sortKey == SortRedeems || sortKey == SortDeaths;
 
         /// <summary>
         /// Placement over the whole scope: by the active numeric column, highest first (points when
@@ -327,6 +333,8 @@ namespace WizshBoneTwitchIntegration.Gui
             Func<LeaderboardRow, long> value;
             if (m_sort.Key == SortRedeems)
                 value = r => r.redeemCount;
+            else if (m_sort.Key == SortDeaths)
+                value = r => r.deaths;
             else
                 value = r => r.points;
 
@@ -358,6 +366,9 @@ namespace WizshBoneTwitchIntegration.Gui
             {
                 case SortRedeems:
                     ordered = asc ? m_rows.OrderBy(r => r.redeemCount) : m_rows.OrderByDescending(r => r.redeemCount);
+                    break;
+                case SortDeaths:
+                    ordered = asc ? m_rows.OrderBy(r => r.deaths) : m_rows.OrderByDescending(r => r.deaths);
                     break;
                 case SortName:
                     ordered = asc ? m_rows.OrderBy(r => r.name, StringComparer.OrdinalIgnoreCase) : m_rows.OrderByDescending(r => r.name, StringComparer.OrdinalIgnoreCase);
@@ -419,7 +430,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void RefreshFooter(int shownCount)
         {
-            m_footerText.text = $"{m_rows.Count:N0} viewers   |   {m_totalPoints:N0} points spent   |   {m_totalRedeems:N0} redeems";
+            m_footerText.text = $"{m_rows.Count:N0} viewers   |   {m_totalPoints:N0} points spent   |   {m_totalRedeems:N0} redeems   |   {m_totalDeaths:N0} deaths caused";
             m_footerNoteText.text = string.IsNullOrEmpty(m_searchText) ? "" : $"Showing {shownCount:N0} of {m_rows.Count:N0}";
         }
 
@@ -449,6 +460,15 @@ namespace WizshBoneTwitchIntegration.Gui
             CreateCell(row, pointsLabel, ColPointsX, ColPointsW - CellGap, textColor, TextAnchor.MiddleLeft);
 
             CreateCell(row, data.redeemCount.ToString("N0"), ColCountX, ColCountW - CellGap, textColor, TextAnchor.MiddleLeft);
+
+            Text deathsText = CreateCell(row, data.deaths.ToString("N0"), ColDeathsX, ColDeathsW - CellGap, textColor, TextAnchor.MiddleLeft);
+            if (data.deathsByRedeem.Count > 0)
+            {
+                string split = string.Join(", ", data.deathsByRedeem
+                    .OrderByDescending(kv => kv.Value)
+                    .Select(kv => $"{kv.Key} x{kv.Value}"));
+                deathsText.gameObject.AddComponent<TooltipTrigger>().Init("Deaths caused by: " + split);
+            }
 
             string favouriteLabel = string.IsNullOrEmpty(data.favouriteTitle) ? "-" : $"{data.favouriteTitle} x{data.favouriteCount}";
             Text favouriteText = CreateCell(row, favouriteLabel, ColFavX, ColFavW - CellGap, textColor, TextAnchor.MiddleLeft);

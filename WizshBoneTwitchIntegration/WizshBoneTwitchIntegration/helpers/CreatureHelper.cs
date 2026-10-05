@@ -286,6 +286,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             TwitchCreaturePersistentData persistentData = creature.AddComponent<TwitchCreaturePersistentData>();
             persistentData.SetData(customRewardEvent.RedeemerName, creatureData, customRewardEvent.CustomRewardTitle, ignoreWard);
+            RedeemerTagHelper.Apply(creature, customRewardEvent);
 
             if (force > 0f)
             {

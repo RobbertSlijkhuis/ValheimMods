@@ -71,6 +71,7 @@ namespace WizshBoneTwitchIntegration.Commands
                 currentRewardEvent.CustomRewardTitle = redeem != null ? RedeemManager.GetFullTitle(redeem) : title;
                 currentRewardEvent.CustomRewardCost = 100;
                 currentRewardEvent.Status = CustomRewardRedemptionState.Unfulfilled;
+                FakeRedeemerCommand.Apply(currentRewardEvent); // debug: only does anything after WBTIFakeRedeemer
                 WizshBoneTwitchIntegration.useRedeemCommand = true;
 
                 customRewards.HandleRedeem(currentRewardEvent);

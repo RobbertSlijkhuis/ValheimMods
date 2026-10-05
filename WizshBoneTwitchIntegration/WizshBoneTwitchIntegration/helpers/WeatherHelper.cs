@@ -45,6 +45,9 @@ namespace WizshBoneTwitchIntegration.Helpers
             GameObject gameObject = ZNetViewHelper.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.EnvZone, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
             _activeWeatherZone = gameObject;
 
+            // A freezing death inside this zone is credited to whoever redeemed it (DeathCreditHelper).
+            RedeemerTagHelper.Apply(gameObject, customRewardEvent);
+
             CapsuleCollider capsuleCollider = gameObject.GetComponent<CapsuleCollider>();
             EnvZone envZone = gameObject.GetComponent<EnvZone>();
             TwitchPersistentDestruction persistentDestruction = gameObject.GetComponent<TwitchPersistentDestruction>();
