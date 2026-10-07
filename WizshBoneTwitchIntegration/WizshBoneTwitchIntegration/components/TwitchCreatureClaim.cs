@@ -278,21 +278,7 @@ namespace WizshBoneTwitchIntegration.Components
             if (creatureData.talkInteract)
                 m_creatureInteract = gameObject.AddComponent<TwitchCreatureInteract>();
 
-            if (creatureData.talkMessage.Contains(";"))
-            {
-                string[] messages = creatureData.talkMessage.Split(';');
-                m_npcTalk.m_aggravated = new List<string>();
-
-                foreach (string message in messages)
-                {
-                    string fixedMessage = message.Replace("{{userName}}", m_assignment.userName);
-                    m_npcTalk.m_aggravated.Add(fixedMessage);
-                }
-            }
-            else
-            {
-                m_npcTalk.m_aggravated = new List<string>() { creatureData.talkMessage };
-            }
+            m_npcTalk.m_aggravated = ParseTalkMessages(creatureData.talkMessage);
 
             if (creatureData.talkInterval >= 3f)
                 InvokeRepeating(nameof(SayAMessage), 0f, creatureData.talkInterval);
@@ -305,17 +291,25 @@ namespace WizshBoneTwitchIntegration.Components
             if (creatureData == null || !creatureData.talks || creatureData.talkMessage == null)
                 return;
 
-            m_simpleTalkMessages = creatureData.talkMessage.Contains(";")
-                ? new List<string>(creatureData.talkMessage.Split(';'))
-                : new List<string> { creatureData.talkMessage };
-
-            for (int i = 0; i < m_simpleTalkMessages.Count; i++)
-                m_simpleTalkMessages[i] = m_simpleTalkMessages[i].Replace("{{userName}}", m_assignment.userName);
+            m_simpleTalkMessages = ParseTalkMessages(creatureData.talkMessage);
 
             if (creatureData.talkInterval >= 3f)
                 InvokeRepeating(nameof(SaySimpleMessage), 0f, creatureData.talkInterval);
             else
                 SaySimpleMessage();
+        }
+
+        // Splits a talk message into its ';'-separated parts and replaces {{user}} (the same
+        // placeholder every announcement message uses) with the redeemer's name in each. Shared by
+        // both talk paths so the placeholder works the same for single and multiple messages.
+        private List<string> ParseTalkMessages(string talkMessage)
+        {
+            List<string> messages = new List<string>(talkMessage.Split(';'));
+
+            for (int i = 0; i < messages.Count; i++)
+                messages[i] = MessageHelper.ParseVariables("{{user}}", m_assignment.userName, messages[i]);
+
+            return messages;
         }
 
         public void SaySimpleMessage()

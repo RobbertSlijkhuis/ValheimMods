@@ -35,6 +35,12 @@ namespace WizshBoneTwitchIntegration.Gui
         private const float ListItemGap = 4f;
         private const float ActionButtonHeight = 36f;
         private const float EmptyTextInset = 14f;
+        private const float ButtonGap = 6f;
+        private const float TabGap = 6f;
+
+        // Solid (not translucent) so the field rows scrolling underneath the pinned tab strip don't
+        // show through the gaps between its buttons.
+        private static readonly Color TabStripBackdropColor = new Color(0.07f, 0.06f, 0.05f, 1f);
 
         private readonly SelectorList m_selectorList = new SelectorList();
 
@@ -63,6 +69,16 @@ namespace WizshBoneTwitchIntegration.Gui
         private RectTransform m_addButton;
         private RectTransform m_deleteButton;
         private float m_buttonRowTopOffset;
+
+        // Optional tab strip in the right half of the pinned row (see BuildTabs). It pins exactly like
+        // the Add/Delete buttons beside it, and is hidden for entries without tabs. The selected tab
+        // index is remembered across entry switches and card rebuilds.
+        private RectTransform m_tabStrip;
+        private readonly List<Image> m_tabButtonBgs = new List<Image>();
+        private Color m_tabDefaultColor;
+        private GameObject[] m_tabRoots = new GameObject[0];
+        private float[] m_tabHeights = new float[0];
+        private int m_selectedTab;
         private float m_buttonRestY;
         private float m_listTravel;
 
@@ -139,17 +155,24 @@ namespace WizshBoneTwitchIntegration.Gui
             CardWidth = contentWidth - ListWidth - ColumnGap;
             float cardX = listX + ListWidth / 2f + ColumnGap + CardWidth / 2f;
 
-            // Add/Delete buttons sit directly below the toggle row, above the list/card.
+            // The pinned row sits directly below the toggle row, above the list/card. Left half: "+ Add"
+            // and "Delete" side by side above the list, so selecting and deleting entries happen in the
+            // same place. Right half: the optional tab strip (see BuildTabs).
             float buttonRowTopY = toggleLayout.CurrentY;
             float buttonCenterY = buttonRowTopY - ActionButtonHeight / 2f;
+
+            float halfButtonWidth = Mathf.Floor((ListWidth - ButtonGap) / 2f);
+            float listLeftX = listX - ListWidth / 2f;
+            float addX = listLeftX + halfButtonWidth / 2f;
+            float deleteX = listLeftX + halfButtonWidth + ButtonGap + halfButtonWidth / 2f;
 
             GameObject addBtnObj = GuiHelper.CreateButton(
                 text: "+ Add",
                 parent: m_scrollContent.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(listX, buttonCenterY),
-                width: ListWidth,
+                position: new Vector2(addX, buttonCenterY),
+                width: halfButtonWidth,
                 height: ActionButtonHeight
             );
             addBtnObj.SetActive(true);
@@ -157,19 +180,36 @@ namespace WizshBoneTwitchIntegration.Gui
             m_addButton = (RectTransform)addBtnObj.transform;
 
             GameObject deleteBtnObj = GuiHelper.CreateButton(
-                text: "Delete this entry",
+                text: "Delete",
                 parent: m_scrollContent.transform,
                 anchorMin: new Vector2(0.5f, 1f),
                 anchorMax: new Vector2(0.5f, 1f),
-                position: new Vector2(cardX, buttonCenterY),
-                width: CardWidth,
+                position: new Vector2(deleteX, buttonCenterY),
+                width: halfButtonWidth,
                 height: ActionButtonHeight
             );
             deleteBtnObj.SetActive(true);
+
+            // Red text + red border, like every other delete button (see ListRow.CreateActionButton).
+            deleteBtnObj.GetComponentInChildren<Text>().color = Color.red;
+            GuiHelper.AddBorder(deleteBtnObj, Color.red);
             deleteBtnObj.GetComponent<Button>().onClick.AddListener(OnDeleteClicked);
             m_deleteButton = (RectTransform)deleteBtnObj.transform;
             m_buttonRowTopOffset = Mathf.Abs(buttonRowTopY);
             m_buttonRestY = m_addButton.anchoredPosition.y;
+
+            // Tab strip: same row, same pin offset as the buttons (centred on buttonCenterY like they
+            // are). Starts hidden - BuildTabs shows it for entries that have tabs.
+            GameObject stripObj = new GameObject("TabStrip", typeof(RectTransform), typeof(Image));
+            stripObj.transform.SetParent(m_scrollContent.transform, false);
+            m_tabStrip = (RectTransform)stripObj.transform;
+            m_tabStrip.anchorMin = new Vector2(0.5f, 1f);
+            m_tabStrip.anchorMax = new Vector2(0.5f, 1f);
+            m_tabStrip.pivot = new Vector2(0.5f, 0.5f);
+            m_tabStrip.sizeDelta = new Vector2(Mathf.Round(CardWidth), ActionButtonHeight);
+            m_tabStrip.anchoredPosition = new Vector2(Mathf.Round(cardX), m_buttonRestY);
+            stripObj.GetComponent<Image>().color = TabStripBackdropColor;
+            stripObj.SetActive(false);
 
             // List/card start a RowGap below the button row. They are plain panels (not scroll
             // views) sized by LayoutPanels() to whichever of the list/form is taller, but never
@@ -197,10 +237,11 @@ namespace WizshBoneTwitchIntegration.Gui
             // so the empty gaps between rows still take mouse-wheel input.
             m_cardRoot.GetComponent<Image>().color = Color.clear;
 
-            // The buttons were created first, so the card would draw over them once the form
-            // scrolls up underneath the pinned Delete button - move them back on top.
+            // The buttons and tab strip were created first, so the card would draw over them once the
+            // form scrolls up underneath the pinned row - move them back on top.
             m_addButton.SetAsLastSibling();
             m_deleteButton.SetAsLastSibling();
+            m_tabStrip.SetAsLastSibling();
 
             // ScrollRect raises this from its own LateUpdate whenever the content moved, i.e. in
             // the same frame as the scroll - so the pinned elements never lag a frame behind.
@@ -224,6 +265,105 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             m_formHeight = contentHeight;
             LayoutPanels();
+        }
+
+        /// <summary>
+        /// Opts the entry card currently being built into tabs. Call from the caller's
+        /// <c>buildEntryForm</c> right after clearing <paramref name="cardRoot"/>: it (re)creates the
+        /// pinned strip's buttons and returns one root per tab (children of <paramref name="cardRoot"/>)
+        /// for the caller to lay rows into - each with its own <c>Step2RowLayout</c> starting at
+        /// <see cref="CardContentTopY"/>. Only the selected tab's root is visible. The caller reports
+        /// each tab's content height through <see cref="SetTabContentHeight"/>; the scroll range follows
+        /// whichever tab is selected. The selected tab is remembered across entry switches. Forms that
+        /// never call this keep using <see cref="SetCardContentHeight"/> and get no strip.
+        /// </summary>
+        public GameObject[] BuildTabs(GameObject cardRoot, string[] names)
+        {
+            GuiHelper.ClearContainer(m_tabStrip.gameObject);
+            m_tabButtonBgs.Clear();
+            m_tabStrip.gameObject.SetActive(true);
+
+            m_tabRoots = new GameObject[names.Length];
+            m_tabHeights = new float[names.Length];
+            m_selectedTab = Mathf.Clamp(m_selectedTab, 0, names.Length - 1);
+
+            float tabWidth = Mathf.Floor((CardWidth - TabGap * (names.Length - 1)) / names.Length);
+            float firstX = -CardWidth / 2f + tabWidth / 2f;
+
+            for (int i = 0; i < names.Length; i++)
+            {
+                int index = i;
+
+                GameObject btnObj = GuiHelper.CreateButton(
+                    text: names[i],
+                    parent: m_tabStrip,
+                    anchorMin: new Vector2(0.5f, 0.5f),
+                    anchorMax: new Vector2(0.5f, 0.5f),
+                    position: new Vector2(Mathf.Round(firstX + i * (tabWidth + TabGap)), 0f),
+                    width: tabWidth,
+                    height: ActionButtonHeight
+                );
+                btnObj.SetActive(true);
+                btnObj.GetComponent<Button>().onClick.AddListener(() => SelectTab(index));
+
+                Image bg = btnObj.GetComponent<Image>();
+                if (i == 0)
+                    m_tabDefaultColor = bg.color;
+                m_tabButtonBgs.Add(bg);
+
+                m_tabRoots[i] = UIContainer.Create(cardRoot, "Tab" + names[i], startActive: i == m_selectedTab);
+            }
+
+            RecolorTabs();
+            return m_tabRoots;
+        }
+
+        /// <summary>
+        /// Reports tab <paramref name="tab"/>'s content height (its <c>Step2RowLayout.CurrentY</c>,
+        /// absolute) after (re)building its rows. If it is the selected tab, the card, list and outer
+        /// scroll range grow to fit it.
+        /// </summary>
+        public void SetTabContentHeight(int tab, float contentHeight)
+        {
+            m_tabHeights[tab] = contentHeight;
+
+            if (tab == m_selectedTab)
+                SetCardContentHeight(contentHeight);
+        }
+
+        /// <summary>
+        /// Hides the tab strip for the entry card being built. <c>RefreshCard</c> already does this
+        /// before every card build; call it only from a form that rebuilds its own card in place and
+        /// switches between a tabbed and a plain layout (SurpriseChest's creature/item loot).
+        /// </summary>
+        public void HideTabs()
+        {
+            m_tabStrip.gameObject.SetActive(false);
+            m_tabRoots = new GameObject[0];
+            m_tabHeights = new float[0];
+        }
+
+        private void SelectTab(int index)
+        {
+            if (index == m_selectedTab || index < 0 || index >= m_tabRoots.Length)
+                return;
+
+            m_selectedTab = index;
+
+            for (int i = 0; i < m_tabRoots.Length; i++)
+                m_tabRoots[i].SetActive(i == m_selectedTab);
+
+            RecolorTabs();
+            SetCardContentHeight(m_tabHeights[m_selectedTab]);
+
+            // A shorter tab could leave the page scrolled past its own content.
+            ResetScroll();
+        }
+
+        private void RecolorTabs()
+        {
+            for (int i = 0; i < m_tabButtonBgs.Count; i++)
+                m_tabButtonBgs[i].color = i == m_selectedTab ? ShellSidebar.TabActiveColor : m_tabDefaultColor;
         }
 
         private void LayoutPanels()
@@ -303,6 +443,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             m_addButton.anchoredPosition = new Vector2(m_addButton.anchoredPosition.x, m_buttonRestY - pinned);
             m_deleteButton.anchoredPosition = new Vector2(m_deleteButton.anchoredPosition.x, m_buttonRestY - pinned);
+            m_tabStrip.anchoredPosition = new Vector2(m_tabStrip.anchoredPosition.x, m_buttonRestY - pinned);
 
             var list = (RectTransform)m_listContent.transform;
             list.anchoredPosition = new Vector2(list.anchoredPosition.x, Mathf.Round(-m_panelsTopOffset) - Mathf.Min(pinned, m_listTravel));
@@ -404,6 +545,9 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             GuiHelper.ClearContainer(m_cardRoot);
             m_formHeight = 0f;
+
+            // Hidden until the caller's entry form opts in via BuildTabs.
+            m_tabStrip.gameObject.SetActive(false);
 
             if (m_entries.Count == 0)
             {

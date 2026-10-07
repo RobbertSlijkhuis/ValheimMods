@@ -25,7 +25,7 @@ namespace WizshBoneTwitchIntegration.Helpers
     /// </summary>
     internal static class ProfileMigrationHelper
     {
-        public const int CurrentVersion = 1;
+        public const int CurrentVersion = 2;
 
         // Only the keys the migration needs from the raw file - ProfileSettingsData no longer has
         // allowRedeemsOnBoats, so it's silently dropped by the normal (IgnoreUnmatchedProperties)
@@ -58,8 +58,39 @@ namespace WizshBoneTwitchIntegration.Helpers
                 StripBakedTitlePrefix(data);
             }
 
+            // v1 -> v2: ItemData.stackSize renamed to amount.
+            if (data.version < 2)
+                MigrateItemStackSize(data);
+
             data.version = CurrentVersion;
             return true;
+        }
+
+        /// <summary>
+        /// Surprise chest item entries used to store their count as "stackSize"; it is now "amount".
+        /// ItemData still deserializes the old key into its legacy stackSize field, which is carried
+        /// over here and cleared so the next save writes only the new key.
+        /// </summary>
+        private static void MigrateItemStackSize(ModData data)
+        {
+            if (data.redeems == null)
+                return;
+
+            foreach (RedeemData redeem in data.redeems)
+            {
+                if (redeem.chestData?.items == null)
+                    continue;
+
+                foreach (SurpriseChestSpawnData entry in redeem.chestData.items)
+                {
+                    ItemData item = entry?.itemData;
+                    if (item?.stackSize == null)
+                        continue;
+
+                    item.amount = item.stackSize.Value;
+                    item.stackSize = null;
+                }
+            }
         }
 
         /// <summary>

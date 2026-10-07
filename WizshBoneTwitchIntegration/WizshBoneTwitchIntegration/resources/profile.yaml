@@ -1,4 +1,4 @@
-version: 1
+version: 2
 settings:
   chattingEnabled: true
   chattingBlackList: Nightbot, StreamElements
@@ -517,48 +517,48 @@ redeems:
       items:
       - itemData:
           prefabName: MashedMeat
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: FierySvinstew
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: PiquantPie
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: MeadHealthLingering
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: SparklingShroomshake
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: MeadStaminaLingering
       - itemData:
           prefabName: MarinatedGreens
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: MeadEitrLingering
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: SpicyMarmalade
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: ScorchingMedley
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: RoastedCrustPie
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: SizzlingBerryBroth
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: BombSmoke
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: BombLava
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: BombBile
-          stackSize: 3
+          amount: 3
       - creatureData:
         - allowDrops: true
           prefabName: Morgen
@@ -596,19 +596,19 @@ redeems:
       items:
       - itemData:
           prefabName: MinceMeatSauce
-          stackSize: 3
+          amount: 3
         weight: 2
       - itemData:
           prefabName: QueensJam
-          stackSize: 3
+          amount: 3
         weight: 2
       - itemData:
           prefabName: CarrotSoup
-          stackSize: 3
+          amount: 3
         weight: 2
       - itemData:
           prefabName: DeerStew
-          stackSize: 3
+          amount: 3
         weight: 2
       - creatureData:
         - allowDrops: true
@@ -639,23 +639,23 @@ redeems:
       items:
       - itemData:
           prefabName: CookedDeerMeat
-          stackSize: 3
+          amount: 3
         weight: 2
       - itemData:
           prefabName: CookedMeat
-          stackSize: 3
+          amount: 3
         weight: 2
       - itemData:
           prefabName: Honey
-          stackSize: 3
+          amount: 3
         weight: 2
       - itemData:
           prefabName: Raspberry
-          stackSize: 3
+          amount: 3
         weight: 2
       - itemData:
           prefabName: Mushroom
-          stackSize: 3
+          amount: 3
         weight: 2
       - creatureData:
         - allowDrops: true
@@ -682,31 +682,31 @@ redeems:
       items:
       - itemData:
           prefabName: Meatplatter
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: MushroomOmelette
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: YggdrasilPorridge
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: MeadHealthLingering
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: MeadStaminaLingering
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: MeadEitrLingering
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: Mistharesupreme
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: FishAndBread
-          stackSize: 3
+          amount: 3
       - itemData:
           prefabName: SeekerAspic
-          stackSize: 3
+          amount: 3
       - creatureData:
         - allowDrops: true
           prefabName: Gjall
@@ -727,7 +727,7 @@ redeems:
           prefabName: Dverger
       - itemData:
           prefabName: BombBile
-          stackSize: 3
+          amount: 3
       type: Gold
       yeetChance: 5
   - title: 'Surprise Chest: Mountain'
@@ -745,19 +745,19 @@ redeems:
       items:
       - itemData:
           prefabName: Wolfjerky
-          stackSize: 3
+          amount: 3
         weight: 2
       - itemData:
           prefabName: OnionSoup
-          stackSize: 3
+          amount: 3
         weight: 2
       - itemData:
           prefabName: WolfMeatSkewer
-          stackSize: 3
+          amount: 3
         weight: 2
       - itemData:
           prefabName: Eyescream
-          stackSize: 3
+          amount: 3
         weight: 2
       - creatureData:
         - allowDrops: true
@@ -776,7 +776,7 @@ redeems:
           prefabName: Ulv
       - itemData:
           prefabName: BombOoze
-          stackSize: 3
+          amount: 3
         weight: 2
       yeetChance: 5
   - title: 'Surprise Chest: Plains'
@@ -794,19 +794,19 @@ redeems:
       items:
       - itemData:
           prefabName: BloodPudding
-          stackSize: 3
+          amount: 3
         weight: 2
       - itemData:
           prefabName: LoxPie
-          stackSize: 3
+          amount: 3
         weight: 2
       - itemData:
           prefabName: FishWraps
-          stackSize: 3
+          amount: 3
         weight: 2
       - itemData:
           prefabName: Bread
-          stackSize: 3
+          amount: 3
         weight: 2
       - creatureData:
         - allowDrops: true
@@ -825,7 +825,7 @@ redeems:
           prefabName: BlobTar
       - itemData:
           prefabName: BombOoze
-          stackSize: 3
+          amount: 3
         weight: 2
       type: Gold
       yeetChance: 5
@@ -844,19 +844,19 @@ redeems:
       items:
       - itemData:
           prefabName: TurnipStew
-          stackSize: 3
+          amount: 3
         weight: 2
       - itemData:
           prefabName: Sausages
-          stackSize: 3
+          amount: 3
         weight: 2
       - itemData:
           prefabName: ShocklateSmoothie
-          stackSize: 3
+          amount: 3
         weight: 2
       - itemData:
           prefabName: BlackSoup
-          stackSize: 3
+          amount: 3
         weight: 2
       - creatureData:
         - allowDrops: true

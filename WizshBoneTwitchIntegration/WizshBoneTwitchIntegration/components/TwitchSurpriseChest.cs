@@ -210,7 +210,7 @@ namespace WizshBoneTwitchIntegration.Components
                     return;
                 }
 
-                List<SurpriseChestSpawnData> eligibleItems = GetEligibleItems();
+                List<SurpriseChestSpawnData> eligibleItems = SurpriseChestHelper.GetEligibleItems(m_items);
 
                 if (eligibleItems.Count == 0)
                 {
@@ -218,17 +218,25 @@ namespace WizshBoneTwitchIntegration.Components
                     return;
                 }
 
-                if (!m_random)
-                    m_amount = eligibleItems.Count;
+                // Everything that will come out is decided first, with the Max spawned check removing
+                // entries from the eligible list as the picks add up; only then is any of it spawned.
+                List<SurpriseChestSpawnData> picks = PickLoot(eligibleItems);
+
+                if (picks.Count == 0)
+                {
+                    Jotunn.Logger.LogWarning("No surprise chest items left to spawn (every entry is at its max spawned limit)");
+                    StartCoroutine(DespawnAfterDelay(DespawnDelayAfterLoot));
+                    return;
+                }
 
                 float timeOffset = 0f;
                 float lastSpawnAt = 0f;
 
-                for (int index = 0; index < m_amount; index++)
+                for (int index = 0; index < picks.Count; index++)
                 {
                     float angleChange = ChangeAngleByIndex(index);
                     float force = m_yeetChance > 0 && Random.Range(0, 100) <= m_yeetChance ? 1000f : m_force;
-                    SurpriseChestSpawnData spawnData = m_random ? PickWeighted(eligibleItems) : eligibleItems[index];
+                    SurpriseChestSpawnData spawnData = picks[index];
 
                     StartCoroutine(SpawnItem(spawnData, force, angleChange, timeOffset));
                     lastSpawnAt = timeOffset;
@@ -263,6 +271,50 @@ namespace WizshBoneTwitchIntegration.Components
         }
 
         /// <summary>
+        /// Decides what comes out of the chest: m_amount weighted picks when random is on, otherwise
+        /// every eligible entry once. A creature entry is taken out of the eligible list once its Max
+        /// spawned limit is reached - by the creatures already alive near the player plus the creatures
+        /// earlier picks of this same draw will spawn (they don't exist yet, as spawning is delayed).
+        /// Item entries have no limit. Entries that would spawn nothing (creature amount or item stack of 0)
+        /// are never picked. With random on, the draw stops early if nothing eligible is left.
+        /// </summary>
+        private List<SurpriseChestSpawnData> PickLoot(List<SurpriseChestSpawnData> eligibleItems)
+        {
+            List<SurpriseChestSpawnData> picks = new List<SurpriseChestSpawnData>();
+            SurpriseChestHelper.LootDraw draw = new SurpriseChestHelper.LootDraw();
+
+            if (!m_random)
+            {
+                foreach (SurpriseChestSpawnData entry in eligibleItems)
+                {
+                    if (!draw.IsSpawnable(entry))
+                        continue;
+
+                    picks.Add(entry);
+                    draw.AddPlanned(entry);
+                }
+
+                return picks;
+            }
+
+            List<SurpriseChestSpawnData> pool = new List<SurpriseChestSpawnData>(eligibleItems);
+
+            for (int i = 0; i < m_amount; i++)
+            {
+                pool.RemoveAll(entry => !draw.IsSpawnable(entry));
+
+                if (pool.Count == 0)
+                    break;
+
+                SurpriseChestSpawnData pick = PickWeighted(pool);
+                picks.Add(pick);
+                draw.AddPlanned(pick);
+            }
+
+            return picks;
+        }
+
+        /// <summary>
         /// Picks one entry with probability proportional to its <see cref="SurpriseChestSpawnData.weight"/>
         /// (weights &lt;= 0 are never picked). Falls back to a uniform pick if every weight is 0, so a
         /// misconfigured chest still spawns something instead of nothing.
@@ -292,47 +344,6 @@ namespace WizshBoneTwitchIntegration.Components
 
             // Float rounding can leave the roll just above zero after the last entry.
             return lastPickable;
-        }
-
-        /// <summary>
-        /// Returns the chest's configured items, minus any dungeon-forbidden creatures, so a
-        /// dungeon-forbidden roll can never happen (rather than silently spawning nothing once
-        /// picked). Items are only cloned/modified when something actually needs stripping;
-        /// an item is dropped entirely only if that would leave it with nothing left to spawn.
-        /// </summary>
-        private List<SurpriseChestSpawnData> GetEligibleItems()
-        {
-            if (!Player.m_localPlayer.InInterior())
-                return m_items;
-
-            List<string> forbidden = CreatureHelper.GetDungeonForbiddenCreatures();
-            List<SurpriseChestSpawnData> eligible = new List<SurpriseChestSpawnData>();
-
-            foreach (SurpriseChestSpawnData item in m_items)
-            {
-                if (item.creatureData == null)
-                {
-                    eligible.Add(item);
-                    continue;
-                }
-
-                List<CreatureData> allowedCreatures = item.creatureData.FindAll(c => !forbidden.Contains(c.prefabName));
-
-                if (allowedCreatures.Count == item.creatureData.Count)
-                {
-                    eligible.Add(item);
-                    continue;
-                }
-
-                if (allowedCreatures.Count == 0 && item.itemData == null)
-                    continue;
-
-                SurpriseChestSpawnData filtered = item.Clone<SurpriseChestSpawnData>();
-                filtered.creatureData = allowedCreatures;
-                eligible.Add(filtered);
-            }
-
-            return eligible;
         }
 
         private IEnumerator SpawnItem(SurpriseChestSpawnData spawnData, float force, float deviation, float delay)

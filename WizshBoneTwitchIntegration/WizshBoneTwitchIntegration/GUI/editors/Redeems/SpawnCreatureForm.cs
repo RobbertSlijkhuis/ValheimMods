@@ -8,13 +8,13 @@ namespace WizshBoneTwitchIntegration.Gui
     /// Step-2 form for SpawnCreature - full multi-entry list support via
     /// <see cref="EntryListEditor{TEntry}"/>. <see cref="CreatureData.group"/> (a reusable named
     /// CreatureGroup reference) is deliberately not exposed - CreatureGroups is still a stub in
-    /// the new UI and gets its own future round. Speed multiplier and Rename are hidden (both match
-    /// <see cref="CreatureData"/>'s own class defaults, so hiding them is transparent).
-    /// The rows themselves live in <see cref="CreatureEntryFields"/>: Amount+Allow drops,
-    /// Friendly+Commandable, Level+Size, Is boss+Name, Position+Position radius and (last)
-    /// Color+Emission color are paired, with Position offset on its own row. Commandable is always shown (its
-    /// tooltip notes it only has an effect when Friendly is on). A fresh list starts with one
-    /// default entry, and a list row's label follows the entry's prefab/amount as they're edited.
+    /// the new UI and gets its own future round. The per-entry global keys, boss event, hallucination
+    /// flag and talk-interact flag are not exposed either.
+    /// The rows themselves live in <see cref="CreatureEntryFields"/>, split over the General,
+    /// Appearance, Behavior and Spawn tabs of the list editor's pinned tab strip. Commandable and
+    /// Always follow owner are always shown (their tooltips note they only have an effect when
+    /// Friendly is on). A fresh list starts with one default entry, and a list row's label follows
+    /// the entry's prefab/amount as they're edited.
     /// </summary>
     internal class SpawnCreatureForm : IRedeemStep2Form
     {
@@ -28,15 +28,11 @@ namespace WizshBoneTwitchIntegration.Gui
         private void BuildEntryFields(GameObject cardRoot, CreatureData creature)
         {
             GuiHelper.ClearContainer(cardRoot);
-            var layout = new Step2RowLayout(cardRoot, m_list.CardContentTopY, m_list.CardContentWidth);
 
             // Prefab and Amount both appear in the left list's row label (see CreatureEntryFields.Label),
-            // so the row is re-rendered whenever either changes.
-            CreatureEntryFields.Build(layout, creature, m_list.RefreshListLabels);
-
-            // Runs on every (re)build of this card so the card and page scroll range always match
-            // the currently rendered rows.
-            m_list.SetCardContentHeight(Mathf.Abs(layout.CurrentY));
+            // so the row is re-rendered whenever either changes. BuildTabbed also reports every tab's
+            // content height, so the card and page scroll range always match the rendered rows.
+            CreatureEntryFields.BuildTabbed(m_list, cardRoot, creature, m_list.RefreshListLabels);
         }
 
         public void Populate(RedeemData working)

@@ -86,38 +86,14 @@ namespace WizshBoneTwitchIntegration.Helpers
         //    playerSnapshot.Apply(player);
         //}
 
-        public static List<CreatureData> GetResolvedCreatureList(SpawnCreatureData spawnCreatureData)
-        {
-            List<CreatureData> resolved = new List<CreatureData>();
-
-            foreach (CreatureData entry in spawnCreatureData.list)
-            {
-                if (!string.IsNullOrEmpty(entry.prefabName))
-                {
-                    resolved.Add(entry);
-                    continue;
-                }
-
-                if (entry.group == null)
-                    continue;
-
-                CreatureGroupData group = creatureGroups.Find(g => g.group == entry.group);
-
-                if (group != null)
-                    resolved.AddRange(group.list);
-            }
-
-            return resolved;
-        }
-
         // Finds the CreatureData a redeem configured for the given prefab, wherever the redeem type
-        // keeps its creatures: the plain creature list (with groups resolved) or, for a surprise chest,
-        // the creatureData of its loot items. Null if the redeem has no such creature.
+        // keeps its creatures: the plain creature list or, for a surprise chest, the creatureData of its
+        // loot items. Null if the redeem has no such creature.
         public static CreatureData FindRedeemCreatureData(RedeemData redeem, string prefabName)
         {
             if (redeem.creatureData != null)
             {
-                CreatureData found = GetResolvedCreatureList(redeem.creatureData).Find(c => c.prefabName == prefabName);
+                CreatureData found = redeem.creatureData.list.Find(c => c.prefabName == prefabName);
 
                 if (found != null)
                     return found;

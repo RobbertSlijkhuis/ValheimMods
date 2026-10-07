@@ -353,6 +353,16 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
             if (!IsPlayerInSafeZone(customRewardEvent, redeem.ignoreWard))
             {
+                // Same last-chance cancel/refund as the safe-zone check above, while the redeem isn't
+                // fulfilled yet: if the dungeon filter and the Max spawned limits leave nothing for
+                // the chest to spawn, refund instead of handing out an empty chest.
+                if (!SurpriseChestHelper.HasEligibleLoot(redeem.chestData))
+                {
+                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the surprise chest has nothing it can spawn right now! {m_refundMessage}");
+                    HandleRedeemException(new RedeemException("Surprise chest has no eligible loot", ExceptionType.Warning), customRewardEvent);
+                    yield break;
+                }
+
                 SurpriseChestHelper.SpawnSupriseChest(prefab, redeem.chestData, customRewardEvent);
                 FinishRedeem(customRewardEvent, redeem);
             }

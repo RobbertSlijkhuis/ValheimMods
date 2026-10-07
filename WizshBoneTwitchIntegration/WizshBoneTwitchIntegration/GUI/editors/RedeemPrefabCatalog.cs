@@ -42,6 +42,31 @@ namespace WizshBoneTwitchIntegration.Gui
         /// icon and can't be picked up if spawned, so they're excluded - see <see cref="BuildPrefabCatalogs"/>.
         /// </summary>
         public static List<DropdownOption> ItemPrefabs { get; private set; } = new List<DropdownOption>();
+
+        /// <summary>
+        /// The subset of <see cref="ItemPrefabs"/> a creature can wear or hold (armor, shields,
+        /// weapons, tools, torches, trinkets/utility) - food, resources and the like are left out.
+        /// Feeds the creature form's Equip items picker.
+        /// </summary>
+        public static List<DropdownOption> EquippableItemPrefabs { get; private set; } = new List<DropdownOption>();
+
+        private static readonly HashSet<ItemDrop.ItemData.ItemType> EquippableItemTypes = new HashSet<ItemDrop.ItemData.ItemType>
+        {
+            ItemDrop.ItemData.ItemType.Helmet,
+            ItemDrop.ItemData.ItemType.Chest,
+            ItemDrop.ItemData.ItemType.Legs,
+            ItemDrop.ItemData.ItemType.Shoulder,
+            ItemDrop.ItemData.ItemType.Utility,
+            ItemDrop.ItemData.ItemType.Trinket,
+            ItemDrop.ItemData.ItemType.Shield,
+            ItemDrop.ItemData.ItemType.Torch,
+            ItemDrop.ItemData.ItemType.Tool,
+            ItemDrop.ItemData.ItemType.OneHandedWeapon,
+            ItemDrop.ItemData.ItemType.TwoHandedWeapon,
+            ItemDrop.ItemData.ItemType.TwoHandedWeaponLeft,
+            ItemDrop.ItemData.ItemType.Bow,
+        };
+
         private static List<DropdownOption> s_statusEffects = new List<DropdownOption>();
 
         // Prefab name -> plain localized creature name (no "(prefab)" suffix), for the narrow
@@ -50,6 +75,9 @@ namespace WizshBoneTwitchIntegration.Gui
 
         // Same, for item prefabs.
         private static Dictionary<string, string> s_itemNames = new Dictionary<string, string>();
+
+        // Same, for each item prefab's max stack size (ItemDrop.ItemData.SharedData.m_maxStackSize).
+        private static Dictionary<string, int> s_itemMaxStacks = new Dictionary<string, int>();
 
         /// <summary>
         /// Built eagerly in <see cref="BuildPrefabCatalogs"/>, but <c>ObjectDB.instance</c> isn't
@@ -128,7 +156,9 @@ namespace WizshBoneTwitchIntegration.Gui
             var doors = new List<DropdownOption>();
             var pieces = new List<DropdownOption>();
             var items = new List<DropdownOption>();
+            var equippableItems = new List<DropdownOption>();
             var itemNames = new Dictionary<string, string>();
+            var itemMaxStacks = new Dictionary<string, int>();
 
             foreach (string name in ZNetScene.instance.GetPrefabNames())
             {
@@ -149,7 +179,12 @@ namespace WizshBoneTwitchIntegration.Gui
                         if (string.IsNullOrEmpty(itemLabel) || (itemLabel.StartsWith("[") && itemLabel.EndsWith("]")))
                             itemLabel = name;
                         itemNames[name] = itemLabel;
-                        items.Add(new DropdownOption(name, itemLabel == name ? name : $"{itemLabel} ({name})"));
+                        itemMaxStacks[name] = Mathf.Max(1, shared.m_maxStackSize);
+                        DropdownOption itemOption = new DropdownOption(name, itemLabel == name ? name : $"{itemLabel} ({name})");
+                        items.Add(itemOption);
+
+                        if (EquippableItemTypes.Contains(shared.m_itemType))
+                            equippableItems.Add(itemOption);
                     }
                 }
 
@@ -189,13 +224,16 @@ namespace WizshBoneTwitchIntegration.Gui
             doors.Sort((a, b) => string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase));
             pieces.Sort((a, b) => string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase));
             items.Sort((a, b) => string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase));
+            equippableItems.Sort((a, b) => string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase));
 
             CreaturePrefabs = creatures;
             s_creatureNames = creatureNames;
             DoorPrefabs = doors;
             PlaceablePieces = pieces;
             ItemPrefabs = items;
+            EquippableItemPrefabs = equippableItems;
             s_itemNames = itemNames;
+            s_itemMaxStacks = itemMaxStacks;
             LogPrefabs = LogPrefabCandidates.Where(name => PrefabManager.Instance.GetPrefab(name) != null).ToList();
             s_statusEffects = BuildStatusEffectOptions();
         }
@@ -321,6 +359,18 @@ namespace WizshBoneTwitchIntegration.Gui
                 return prefabName;
 
             return s_itemNames.TryGetValue(prefabName, out string label) ? label : prefabName;
+        }
+
+        /// <summary>
+        /// The item prefab's max stack size, or <see cref="GuiFieldBuilder.DefaultMax"/> if the prefab
+        /// isn't in the catalog (catalog not built yet, or a hand-edited prefab name).
+        /// </summary>
+        public static int GetItemMaxStack(string prefabName)
+        {
+            if (!string.IsNullOrEmpty(prefabName) && s_itemMaxStacks.TryGetValue(prefabName, out int maxStack))
+                return maxStack;
+
+            return GuiFieldBuilder.DefaultMax;
         }
 
         /// <summary>

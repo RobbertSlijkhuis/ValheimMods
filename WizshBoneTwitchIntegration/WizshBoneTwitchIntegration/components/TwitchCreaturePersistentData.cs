@@ -143,6 +143,7 @@ namespace WizshBoneTwitchIntegration.Components
             ApplyMonsterAI(creatureData);
             ApplyAllowDrops(creatureData);
             ApplyTameable(creatureData);
+            CreatureGearHelper.Apply(gameObject.GetComponent<Humanoid>(), creatureData);
         }
 
         // Called once by CreatureHelper.ApplyInheritedScaling, on the owning client, right after a
@@ -211,6 +212,7 @@ namespace WizshBoneTwitchIntegration.Components
             ApplyMonsterAI(creatureData);
             ApplyAllowDrops(creatureData);
             ApplyTameable(creatureData);
+            CreatureGearHelper.Apply(gameObject.GetComponent<Humanoid>(), creatureData);
         }
 
         // Called by TwitchCreatureClaim.OnDestroy() when a manually-claimed (non-spawn) creature is

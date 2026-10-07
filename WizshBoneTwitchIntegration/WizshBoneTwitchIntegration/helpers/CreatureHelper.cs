@@ -215,7 +215,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 if (!ProgressionHelper.IsAllowedByGlobalKeys(creature.globalKeyAdd, creature.globalKeyRemove))
                     continue;
 
-                if (creature.maxSpawned > 0 && GetNrOfSpecificTwitchInstances(creature.prefabName) >= creature.maxSpawned)
+                if (IsAtMaxSpawned(creature))
                 {
                     chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the maximum spawned limit of {creature.prefabName} has been reached! {TwitchCustomRewards.m_refundMessage}");
                     throw new RedeemException("To many of the same spawned creatures", ExceptionType.Warning);
@@ -549,9 +549,38 @@ namespace WizshBoneTwitchIntegration.Helpers
             return num;
         }
 
+        /// <summary>
+        /// Whether <paramref name="creature"/>'s Max spawned limit is already reached by the redeem-spawned
+        /// creatures of its prefab near the player. <paramref name="alsoPlanned"/> counts creatures that
+        /// are already decided to spawn but don't exist yet (e.g. earlier picks of the same surprise
+        /// chest draw). A <c>maxSpawned</c> of 0 or less means no limit. Counting the existing creatures scans
+        /// every AI in the world, so a caller checking many times in a row can pass <paramref name="existingCounts"/>
+        /// (prefab name -> count) to look each prefab up only once.
+        /// </summary>
+        public static bool IsAtMaxSpawned(CreatureData creature, int alsoPlanned = 0, Dictionary<string, int> existingCounts = null)
+        {
+            if (creature.maxSpawned <= 0)
+                return false;
+
+            int existing;
+
+            if (existingCounts == null)
+            {
+                existing = GetNrOfSpecificTwitchInstances(creature.prefabName);
+            }
+            else if (!existingCounts.TryGetValue(creature.prefabName, out existing))
+            {
+                existing = GetNrOfSpecificTwitchInstances(creature.prefabName);
+                existingCounts[creature.prefabName] = existing;
+            }
+
+            return existing + alsoPlanned >= creature.maxSpawned;
+        }
+
+        // The creatures a SpawnCreature redeem fires: the whole list, or with "pick one at random" on,
+        // one entry drawn from the entries that are allowed here and aren't at their Max spawned limit.
         private static List<CreatureData> ResolveSpawnList(SpawnCreatureData creatureData)
         {
-            List<CreatureData> spawnList = new List<CreatureData>();
             List<CreatureData> source = creatureData.list;
 
             if (creatureData.random)
@@ -562,7 +591,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                     source = source.FindAll(c => !forbidden.Contains(c.prefabName));
                 }
 
-                source = source.FindAll(c => c.maxSpawned <= 0 || GetNrOfSpecificTwitchInstances(c.prefabName) < c.maxSpawned);
+                source = source.FindAll(c => !IsAtMaxSpawned(c));
 
                 if (source.Count == 0)
                     throw new RedeemException("No valid creatures available to spawn!", ExceptionType.Warning);
@@ -570,26 +599,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 source = new List<CreatureData> { GetRandomCreatureData(source) };
             }
 
-            foreach (CreatureData entry in source)
-            {
-                if (entry.group != null)
-                {
-                    CreatureGroupData creatureGroup = RedeemHelper.creatureGroups.Find(item => item.group == entry.group);
-
-                    if (creatureGroup == null)
-                        throw new RedeemException("Could not find referenced group!", ExceptionType.Error);
-
-                    foreach (CreatureData groupCreature in creatureGroup.list)
-                    {
-                        groupCreature.group = creatureGroup.group;
-                        spawnList.Add(groupCreature);
-                    }
-                }
-                else
-                    spawnList.Add(entry);
-            }
-
-            return spawnList;
+            return source;
         }
     }
 }

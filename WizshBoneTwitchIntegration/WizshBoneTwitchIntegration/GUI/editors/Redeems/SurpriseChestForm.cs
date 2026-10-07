@@ -151,7 +151,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 if (item == null || string.IsNullOrEmpty(item.prefabName))
                     return "New item";
 
-                return $"{RedeemPrefabCatalog.GetItemDisplayName(item.prefabName)} x{item.stackSize}";
+                return $"{RedeemPrefabCatalog.GetItemDisplayName(item.prefabName)} x{item.amount}";
             }
 
             return HasCreature(entry) ? CreatureEntryFields.Label(entry.creatureData[0]) : "New loot";
@@ -179,9 +179,36 @@ namespace WizshBoneTwitchIntegration.Gui
         private void BuildEntryFields(GameObject cardRoot, SurpriseChestSpawnData entry)
         {
             GuiHelper.ClearContainer(cardRoot);
-            var layout = new Step2RowLayout(cardRoot, m_list.CardContentTopY, m_list.CardContentWidth);
 
-            bool isItem = IsItemMode(entry);
+            if (IsItemMode(entry))
+            {
+                // Item entries are a short plain card with no tabs (the tab strip is only for creatures).
+                m_list.HideTabs();
+
+                var layout = new Step2RowLayout(cardRoot, m_list.CardContentTopY, m_list.CardContentWidth);
+                BuildEntryHead(layout, cardRoot, entry, isItem: true);
+                BuildItemFields(layout, cardRoot, entry);
+
+                // Runs on every (re)build of this card, including the Loot-type-triggered rebuild,
+                // so the card and page scroll range always match the currently rendered rows.
+                m_list.SetCardContentHeight(Mathf.Abs(layout.CurrentY));
+                return;
+            }
+
+            // A new (or emptied) entry starts with one default creature; extra creatures in a
+            // hand-edited list are left untouched and just not shown.
+            if (!HasCreature(entry))
+                entry.creatureData = new List<CreatureData> { NewChestCreature() };
+
+            // Creature entries use the creature form's tabs; the Loot type and Weight rows lead the
+            // General tab. BuildTabbed reports every tab's height to the list.
+            CreatureEntryFields.BuildTabbed(m_list, cardRoot, entry.creatureData[0], m_list.RefreshListLabels,
+                allowDropsDefault: true, generalHead: general => BuildEntryHead(general, cardRoot, entry, isItem: false));
+        }
+
+        // The Loot type and Weight rows every entry starts with, whichever loot type it is.
+        private void BuildEntryHead(Step2RowLayout layout, GameObject cardRoot, SurpriseChestSpawnData entry, bool isItem)
+        {
             layout.DropdownRow("Loot type", "Whether this entry spawns a creature or an item.",
                 LootTypeOptions, isItem ? ItemType : CreatureType, v =>
                 {
@@ -198,28 +225,9 @@ namespace WizshBoneTwitchIntegration.Gui
                     m_list.RefreshListLabels();
                 },
                 defaultValue: 1f, min: 0f);
-
-            if (isItem)
-                BuildItemFields(layout, entry);
-            else
-                BuildCreatureFields(layout, entry);
-
-            // Runs on every (re)build of this card, including the Loot-type-triggered rebuild
-            // above, so the card and page scroll range always match the currently rendered rows.
-            m_list.SetCardContentHeight(Mathf.Abs(layout.CurrentY));
         }
 
-        private void BuildCreatureFields(Step2RowLayout layout, SurpriseChestSpawnData entry)
-        {
-            // A new (or emptied) entry starts with one default creature; extra creatures in a
-            // hand-edited list are left untouched and just not shown.
-            if (!HasCreature(entry))
-                entry.creatureData = new List<CreatureData> { NewChestCreature() };
-
-            CreatureEntryFields.Build(layout, entry.creatureData[0], m_list.RefreshListLabels, allowDropsDefault: true);
-        }
-
-        private void BuildItemFields(Step2RowLayout layout, SurpriseChestSpawnData entry)
+        private void BuildItemFields(Step2RowLayout layout, GameObject cardRoot, SurpriseChestSpawnData entry)
         {
             if (entry.itemData == null)
                 entry.itemData = new ItemData();
@@ -230,25 +238,30 @@ namespace WizshBoneTwitchIntegration.Gui
             if (string.IsNullOrEmpty(item.prefabName) && RedeemPrefabCatalog.ItemPrefabs.Count > 0)
                 item.prefabName = RedeemPrefabCatalog.ItemPrefabs[0].Value;
 
+            // The amount is limited to one stack of the chosen item (the game caps it at spawn anyway).
+            int maxStack = RedeemPrefabCatalog.GetItemMaxStack(item.prefabName);
+            item.amount = Mathf.Clamp(item.amount, 1, maxStack);
+
             List<DropdownOption> options = RedeemPrefabCatalog.EnsureIncludesCurrentValue(RedeemPrefabCatalog.ItemPrefabs, item.prefabName);
             layout.DropdownRow("Item prefab", "Which item comes out of the chest. Only real, holdable items are listed.",
                 options, item.prefabName, v =>
                 {
                     item.prefabName = v;
                     m_list.RefreshListLabels();
+                    BuildEntryFields(cardRoot, entry);
                 },
                 defaultValue: null);
 
             layout.PairRow(
-                () => layout.IntRow("Stack size", "How many of the item are in the stack.",
-                    item.stackSize, v =>
+                () => layout.IntRow("Amount", "How many of the item come out of the chest (as one stack, up to the item's max stack size).",
+                    item.amount, v =>
                     {
-                        item.stackSize = v;
+                        item.amount = v;
                         m_list.RefreshListLabels();
                     },
-                    defaultValue: 1),
-                () => layout.IntRow("Quality", "Quality level of the item (1 = normal). Only has an effect on items that can be upgraded.",
-                    item.quality, v => item.quality = v, defaultValue: 1));
+                    defaultValue: 1, min: 1, max: maxStack),
+                () => layout.IntRow("Quality", "Quality level of the item (1 = normal, max 10). Can exceed the item's max quality, like Refinement Forge upgrades, but only on items that support it.",
+                    item.quality, v => item.quality = v, defaultValue: 1, min: 1, max: ItemData.MaxQuality));
         }
 
         // ── lifecycle ────────────────────────────────────────────────────────

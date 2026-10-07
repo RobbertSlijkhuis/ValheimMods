@@ -20,13 +20,16 @@ namespace WizshBoneTwitchIntegration.Helpers
             ItemDrop itemDrop = spawned.GetComponent<ItemDrop>();
             Rigidbody rigidBody = spawned.GetComponent<Rigidbody>();
 
-            if (itemData.quality > 1)
-                itemDrop.SetQuality(itemData.quality);
+            int quality = Mathf.Clamp(itemData.quality, 1, ItemData.MaxQuality);
+            if (quality > 1)
+                itemDrop.SetQuality(quality);
 
-            if (itemData.stackSize > 1)
-                itemDrop.SetStack(itemData.stackSize);
+            if (itemData.amount > 1)
+                itemDrop.SetStack(itemData.amount);
 
-            itemDrop.m_itemData.m_durability = itemDrop.m_itemData.m_shared.m_maxDurability + itemDrop.m_itemData.m_shared.m_durabilityPerLevel * itemData.quality;
+            // Same as Inventory.AddItem (and the Refinement Forge): full durability for the item's
+            // actual quality, which scales per level above 1 - including levels past its max quality.
+            itemDrop.m_itemData.m_durability = itemDrop.m_itemData.GetMaxDurability();
             rigidBody.AddForce((transform.forward * force) + (transform.up * force), ForceMode.Acceleration);
         }
     }
