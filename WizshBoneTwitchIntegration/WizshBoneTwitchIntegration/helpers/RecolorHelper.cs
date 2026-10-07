@@ -471,6 +471,19 @@ namespace WizshBoneTwitchIntegration.Helpers
                         levelSetup.m_value = 0f;
                         levelSetup.m_setEmissiveColor = false;
                     }
+
+                    // SetupLevelVisualization() (Start() and every SetLevel) replaces m_mainRender's
+                    // material with a copy cached in a static dictionary keyed by prefab name + level -
+                    // shared by every creature of that prefab/level, and built from whatever material the
+                    // renderer had when the first one was set up. For any starred creature that either
+                    // overwrites our recolored material with the vanilla one (starred deer/wolf skin
+                    // staying uncolored) or leaks one viewer's recolor to the next. Detach the renderer
+                    // from LevelEffects so that swap is skipped; scale and the per-star enable objects
+                    // are unaffected. UnColorCreature() restores it.
+                    Renderer recoloredRenderer = skinnedMeshRenderer != null ? (Renderer)skinnedMeshRenderer : meshRenderer;
+
+                    if (levelEffects.m_mainRender == recoloredRenderer)
+                        levelEffects.m_mainRender = null;
                 }
 
                 Recolor(recolorCreatureData, colors, mat, recolorCreatureData.emissiveMultiplier);
@@ -577,7 +590,32 @@ namespace WizshBoneTwitchIntegration.Helpers
                     LevelEffects levelEffectsOriginal = visualTransOriginal.gameObject.GetComponent<LevelEffects>();
 
                     if (levelEffectsOriginal != null)
-                        levelEffects.m_levelSetups = levelEffectsOriginal.m_levelSetups;
+                    {
+                        // Copy the tint values back onto this instance's own setups rather than assigning
+                        // the prefab's list: that would share the list (RecolorCreature() would then zero
+                        // the prefab's values) and point m_enableObject at the prefab's objects instead
+                        // of this instance's.
+                        int setupCount = Mathf.Min(levelEffects.m_levelSetups.Count, levelEffectsOriginal.m_levelSetups.Count);
+
+                        for (int i = 0; i < setupCount; i++)
+                        {
+                            LevelEffects.LevelSetup setup = levelEffects.m_levelSetups[i];
+                            LevelEffects.LevelSetup setupOriginal = levelEffectsOriginal.m_levelSetups[i];
+
+                            setup.m_hue = setupOriginal.m_hue;
+                            setup.m_saturation = setupOriginal.m_saturation;
+                            setup.m_value = setupOriginal.m_value;
+                            setup.m_setEmissiveColor = setupOriginal.m_setEmissiveColor;
+                            setup.m_emissiveColor = setupOriginal.m_emissiveColor;
+                        }
+
+                        // Re-attach the main renderer RecolorCreature() detached (the original's
+                        // m_mainRender points at the prefab's renderer, so map it to this instance's).
+                        Renderer originalRenderer = skinnedMeshRendererOriginal != null ? (Renderer)skinnedMeshRendererOriginal : meshRendererOriginal;
+
+                        if (levelEffects.m_mainRender == null && levelEffectsOriginal.m_mainRender == originalRenderer)
+                            levelEffects.m_mainRender = skinnedMeshRenderer != null ? (Renderer)skinnedMeshRenderer : meshRenderer;
+                    }
                 }
             }
         }

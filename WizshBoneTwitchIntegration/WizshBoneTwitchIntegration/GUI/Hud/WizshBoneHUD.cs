@@ -22,6 +22,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         // Mutable element references
         private Image m_loginStatusCircle;
+        private Image m_redeemsStatusCircle;
         private Text m_titleText;
         private Text m_redeemsText;
         private Text m_openKeyText;
@@ -29,11 +30,17 @@ namespace WizshBoneTwitchIntegration.Gui
         // Gap (in our canvas units) between the minimap's edge and the panel.
         private const float MinimapGap = 10f;
 
+        // Fixed panel width (our canvas units). The bottom corner offsets are derived from it so
+        // the panel keeps its distance from the screen edge.
+        private const float PanelWidth = 200f;
+        private const float PanelEdgeCenterOffset = PanelWidth / 2f + 10f;
+
         // Status panel layout (our canvas units) - see LayoutItems. The circle is nudged up a little
         // because text glyphs sit slightly above their box's vertical center.
         private const float ItemSpacing = 10f;
+        private const float CircleGap = 8f;
         private const float TextLineHeight = 20f;
-        private const float CircleSize = 16f;
+        private const float CircleSize = 14f;
         private const float CircleNudgeY = 2f;
         private readonly Vector3[] m_minimapCorners = new Vector3[4];
 
@@ -52,8 +59,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent: GUIManager.CustomGUIFront.transform,
                 anchorMin: new Vector2(1f, 0f),
                 anchorMax: new Vector2(1f, 0f),
-                position: new Vector2(-110f, 60f),
-                width: 200f,
+                position: new Vector2(-PanelEdgeCenterOffset, 60f),
+                width: PanelWidth,
                 height: 40f,
                 draggable: false
             );
@@ -62,18 +69,21 @@ namespace WizshBoneTwitchIntegration.Gui
 
             // Every item's position is set by LayoutItems() from the texts' measured widths, so the
             // positions passed to CreateText/CreateCircle are placeholders.
-            m_titleText = CreateLabel("WBTI:", GUIManager.Instance.ValheimOrange);
-
-            m_loginStatusCircle = CreateCircle("LoginStatusCircle");
-            m_loginStatusCircle.gameObject.AddComponent<TooltipTrigger>().Init(
+            // The circles are the indicators (green = on, red = off); hovering the label beside each
+            // one spells it out.
+            m_titleText = CreateLabel("Twitch:",GUIManager.Instance.ValheimBeige);
+            m_titleText.raycastTarget = true; // TooltipTrigger's pointer-enter/exit handlers need a raycastable Graphic here
+            m_titleText.gameObject.AddComponent<TooltipTrigger>().Init(
                 () => $"Connected to Twitch: {(auth.m_loggedIn ? "yes" : "no")}");
 
-            // The word itself is the indicator (green = enabled, red = disabled); the hover text
-            // spells it out.
-            m_redeemsText = CreateLabel("Redeems", customRewards.m_enabled ? ColorLoggedIn : ColorLoggedOut);
-            m_redeemsText.raycastTarget = true; // TooltipTrigger's pointer-enter/exit handlers need a raycastable Graphic here
+            m_loginStatusCircle = CreateCircle("LoginStatusCircle", auth.m_loggedIn);
+
+            m_redeemsText = CreateLabel("Live:",GUIManager.Instance.ValheimBeige);
+            m_redeemsText.raycastTarget = true; // see above
             m_redeemsText.gameObject.AddComponent<TooltipTrigger>().Init(
                 () => $"Redeems {(customRewards.m_enabled ? "enabled" : "disabled")} on Twitch");
+
+            m_redeemsStatusCircle = CreateCircle("RedeemsStatusCircle", customRewards.m_enabled);
 
             m_openKeyText = CreateLabel(GetOpenKeyText(), GUIManager.Instance.ValheimOrange);
             m_openKeyText.raycastTarget = true; // TooltipTrigger's pointer-enter/exit handlers need a raycastable Graphic here
@@ -109,7 +119,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             m_loginStatusCircle.color = auth.m_loggedIn ? ColorLoggedIn : ColorLoggedOut;
 
-            m_redeemsText.color = customRewards.m_enabled ? ColorLoggedIn : ColorLoggedOut;
+            m_redeemsStatusCircle.color = customRewards.m_enabled ? ColorLoggedIn : ColorLoggedOut;
 
             // A rebound key changes the hint's width, so the whole row is re-laid out.
             string openKeyText = GetOpenKeyText();
@@ -121,8 +131,8 @@ namespace WizshBoneTwitchIntegration.Gui
         }
 
         /// <summary>
-        /// Places the panel's items left to right with <see cref="ItemSpacing"/> between them, each
-        /// text sized to its measured width, centered in the panel. The panel itself stays a fixed
+        /// Places the panel's items left to right with <see cref="ItemSpacing"/> between them
+        /// (<see cref="CircleGap"/> on either side of a status circle), each text sized to its measured width, centered in the panel. The panel itself stays a fixed
         /// width (positioning in <see cref="RepositionHUD"/> relies on that). To add an item, create
         /// it and add it here.
         /// </summary>
@@ -133,6 +143,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 m_titleText.rectTransform,
                 m_loginStatusCircle.rectTransform,
                 m_redeemsText.rectTransform,
+                m_redeemsStatusCircle.rectTransform,
                 m_openKeyText.rectTransform,
             };
 
@@ -145,18 +156,27 @@ namespace WizshBoneTwitchIntegration.Gui
                 text.rectTransform.sizeDelta = new Vector2(Mathf.Ceil(text.preferredWidth), TextLineHeight);
             }
 
-            float totalWidth = ItemSpacing * (items.Length - 1);
-            foreach (RectTransform item in items)
-                totalWidth += item.sizeDelta.x;
+            // The gap on either side of a status circle is the same tight CircleGap; the full
+            // spacing only applies between two non-circle items.
+            bool IsCircle(RectTransform item) =>
+                item == m_loginStatusCircle.rectTransform || item == m_redeemsStatusCircle.rectTransform;
+            float GapBefore(int i) => IsCircle(items[i]) || IsCircle(items[i - 1]) ? CircleGap : ItemSpacing;
+
+            float totalWidth = 0f;
+            for (int i = 0; i < items.Length; i++)
+                totalWidth += items[i].sizeDelta.x + (i > 0 ? GapBefore(i) : 0f);
 
             // Items are center-anchored in the panel, so x is measured from the panel's center; the
             // row is centered in the (fixed-width) panel.
             float left = Mathf.Round(-totalWidth / 2f);
-            foreach (RectTransform item in items)
+            for (int i = 0; i < items.Length; i++)
             {
-                float y = item == m_loginStatusCircle.rectTransform ? CircleNudgeY : 0f;
+                RectTransform item = items[i];
+                if (i > 0)
+                    left += GapBefore(i);
+                float y = IsCircle(item) ? CircleNudgeY : 0f;
                 item.anchoredPosition = new Vector2(left + item.sizeDelta.x / 2f, y);
-                left += item.sizeDelta.x + ItemSpacing;
+                left += item.sizeDelta.x;
             }
         }
 
@@ -177,7 +197,7 @@ namespace WizshBoneTwitchIntegration.Gui
             {
                 case HudPosition.BottomLeft:
                     anchor = new Vector2(0f, 0f);
-                    position = new Vector2(110f, 30f) * scale;
+                    position = new Vector2(PanelEdgeCenterOffset, 30f) * scale;
                     break;
                 case HudPosition.AboveMinimap:
                     PlaceRelativeToMinimap(HudPosition.AboveMinimap, above: true, scale, new Vector2(-140f, -20f), out anchor, out position);
@@ -191,7 +211,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     break;
                 default: // BottomRight
                     anchor = new Vector2(1f, 0f);
-                    position = new Vector2(-110f, 30f) * scale;
+                    position = new Vector2(-PanelEdgeCenterOffset, 30f) * scale;
                     break;
             }
 
@@ -337,7 +357,7 @@ namespace WizshBoneTwitchIntegration.Gui
             ).GetComponent<Text>();
         }
 
-        private Image CreateCircle(string name)
+        private Image CreateCircle(string name, bool on)
         {
             GameObject circleObj = new GameObject(name);
             circleObj.transform.SetParent(hudPanel.transform, false);
@@ -349,7 +369,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             Image image = circleObj.AddComponent<Image>();
             image.sprite = CreateCircleSprite(64);
-            image.color = auth.m_loggedIn ? ColorLoggedIn : ColorLoggedOut;
+            image.color = on ? ColorLoggedIn : ColorLoggedOut;
 
             return image;
         }
