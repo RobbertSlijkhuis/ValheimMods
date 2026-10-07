@@ -93,6 +93,10 @@ namespace WizshBoneTwitchIntegration
                 if (newUI == null)
                     return;
 
+                // Rebinding the key on the Home tab: the key being pressed must not also toggle the window.
+                if (WindowKeyHelper.SuppressToggle)
+                    return;
+
                 bool guiVisible = newUI.IsVisible;
 
                 if (IsVanillaHideUiCombo())

@@ -168,6 +168,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             BuildDiscountCard(CardTopCenter(2, 0), auth, customRewards);
 
+            BuildWindowKeyCard(CardTopCenter(2, 1));
+
             GameObject createBtnObj = GuiHelper.CreateButton(
                 text: "Create a new redeem",
                 parent: m_overviewRoot.transform,
@@ -280,6 +282,75 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             applyBtnObj.GetComponent<Button>().onClick.AddListener(() => ApplyDiscount(auth, customRewards));
 
             GuiHelper.CreateCardDescription(card, "Percent off every redeem's Twitch point cost", CardWidth - 24f, height: 38f);
+        }
+
+        /// <summary>
+        /// Rebinds the key that opens/closes this window. The button shows the current key; clicking
+        /// it starts listening (<see cref="KeyCaptureListener"/>) for the next key press - Esc or
+        /// clicking the button again cancels. The new key is written straight to
+        /// PluginConfig.configWizshBoneWindow (see <see cref="WindowKeyHelper"/>), which BepInEx
+        /// persists and Jötunn's button picks up live.
+        /// </summary>
+        private void BuildWindowKeyCard(Vector2 topCenter)
+        {
+            GameObject card = GuiHelper.CreateCard(m_overviewRoot, topCenter, CardWidth, CardHeight);
+            GuiHelper.CreateCardTitle(card, "Open window key", CardWidth - 24f);
+
+            KeyCaptureListener listener = card.AddComponent<KeyCaptureListener>();
+            listener.enabled = false;
+
+            Text label = null;
+
+            void StopListening()
+            {
+                // Disabling the listener ends WindowKeyHelper's capture (OnDisable).
+                listener.enabled = false;
+                if (label != null)
+                    label.text = WindowKeyHelper.Describe();
+            }
+
+            listener.Init(
+                (key, modifiers) =>
+                {
+                    if (WindowKeyHelper.TryApply(key, modifiers, out string error))
+                        ToastNotifications.Show($"Window key set to {WindowKeyHelper.Describe()}.", ToastType.Success);
+                    else
+                        ToastNotifications.Show(error, ToastType.Warning);
+
+                    StopListening();
+                },
+                StopListening);
+
+            GameObject buttonObj = GuiHelper.CreateCardButton(card, WindowKeyHelper.Describe(), CardWidth, () =>
+            {
+                if (listener.enabled)
+                {
+                    StopListening();
+                    return;
+                }
+
+                WindowKeyHelper.BeginCapture();
+                listener.enabled = true;
+                label.text = "Press a key...";
+            });
+            label = buttonObj.GetComponentInChildren<Text>();
+
+            // Right of the key button, same Y: "Reset" back to the default key.
+            const float keyButtonWidth = 160f; // GuiHelper.CreateCardButton's default width
+            float resetX = -(CardWidth - 24f) / 2f + keyButtonWidth + GuiHelper.ResetButtonGap + GuiHelper.ResetButtonWidth / 2f;
+            GuiHelper.CreateResetButton(card, Mathf.Round(resetX), -60f, () =>
+            {
+                StopListening();
+
+                if (WindowKeyHelper.TryReset(out string error))
+                    ToastNotifications.Show($"Window key reset to {WindowKeyHelper.Describe()}.", ToastType.Success);
+                else
+                    ToastNotifications.Show(error, ToastType.Warning);
+
+                label.text = WindowKeyHelper.Describe();
+            });
+
+            GuiHelper.CreateCardDescription(card, "Click, then press the new key (Esc cancels)", CardWidth - 24f, height: 38f);
         }
 
         private void ApplyDiscount(TwitchAuth auth, TwitchCustomRewards customRewards)
