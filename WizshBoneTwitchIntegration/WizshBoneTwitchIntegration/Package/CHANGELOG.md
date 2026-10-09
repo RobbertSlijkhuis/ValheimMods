@@ -1,6 +1,7 @@
 ### 1.0.2
 - Added leaderboards: tracks viewers, points, redeem count, favourite redeems, previous names and caused deaths.
-- Fixed the login flow (single authorise, 4-hour token-expiry warning).
+- Fixed the login flow (single authorise, token-expiry warning).
+- Twitch login now uses the token's real expiry: warnings at 15, 10, 5 and 1 minute, then redeems are removed from Twitch and you are logged out 5 minutes before the token expires.
 - Fixed a bug that could leave toasts stuck forever, and added a Clear Toasts button in the Help tab.
 - Fixed starred creatures (e.g. one-star deer, starred wolves) not showing their recolour on the skin.
 - Fixed recolours deviating from the entered HEX value.

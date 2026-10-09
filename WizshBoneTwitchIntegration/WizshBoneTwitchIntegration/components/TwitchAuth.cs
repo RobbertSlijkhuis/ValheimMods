@@ -25,12 +25,16 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private Coroutine m_trackRoutine;
         private Coroutine m_loginRoutine;
         private bool m_loginPolling;
-        // Twitch access tokens last 4 hours.
-        private const int TokenLifetimeMinutes = 240;
-        // private const int TokenLifetimeMinutes = 16;
-        // Minutes-remaining marks at which the player is warned, once each per login (descending).
+        // Fallback only, used when the token response's expires_in wasn't captured (TwitchTokenCapture.ExpiresAtUtc is null).
+        private const int FallbackTokenLifetimeMinutes = 240;
+        // private const int FallbackTokenLifetimeMinutes = 16;
+        // We log out this long before the real expiry, so the redeems can still be removed from Twitch with a valid token.
+        private const int LogoutBeforeExpiryMinutes = 5;
+        // Minutes-remaining marks (until that logout) at which the player is warned, once each per login (descending).
         private static readonly int[] WarnAtMinutesRemaining = { 15, 10, 5, 1 };
         private int m_lastWarnedMark = int.MaxValue;
+        // Set once the pre-expiry logout has started, so the 60s tick doesn't start it twice.
+        private bool m_limitLogoutStarted;
         // Set by the deliberate logout paths below so GetAuthState can tell them apart from the
         // session dropping on its own (token expiry) and only warn about the latter.
         private bool m_logoutRequested;
@@ -190,7 +194,16 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             try
             {
-                double minutesRemaining = TokenLifetimeMinutes - DateTime.UtcNow.Subtract(m_loggedinInTime).TotalMinutes;
+                DateTime expiresAt = TwitchTokenCapture.ExpiresAtUtc ?? m_loggedinInTime.AddMinutes(FallbackTokenLifetimeMinutes);
+                double minutesRemaining = expiresAt.AddMinutes(-LogoutBeforeExpiryMinutes).Subtract(DateTime.UtcNow).TotalMinutes;
+
+                if (minutesRemaining <= 0)
+                {
+                    if (!m_limitLogoutStarted)
+                        LogoutAtTokenLimit();
+
+                    return;
+                }
 
                 // Smallest mark we've now passed but not yet warned about, so each mark fires once.
                 int dueMark = int.MaxValue;
@@ -213,6 +226,25 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             {
                 Jotunn.Logger.LogError("TwitchAuth.TrackAuthRepeating failed: " + e);
             }
+        }
+
+        // Reached LogoutBeforeExpiryMinutes before the real expiry: disable redeems and remove them from Twitch while the token is still valid, and
+        // only then log out. Going through LogOutOfTwitch marks it deliberate, so GetAuthState doesn't show a second message.
+        private void LogoutAtTokenLimit()
+        {
+            m_limitLogoutStarted = true;
+            Jotunn.Logger.LogWarning("[WBTI] Twitch login reached its time limit, removing redeems and logging out.");
+            ShowCenterMessage("You have been logged out from Twitch (login expired). Redeems and chat are inactive until you log in again.", 15);
+
+            m_customRewards.m_enabled = false;
+            TaskAwaiter awaiter = m_customRewards.ClearRewards();
+            awaiter.OnCompleted(OnLimitRewardsCleared);
+        }
+
+        private void OnLimitRewardsCleared()
+        {
+            m_customRewards.UnSubscribeFromRedeemEvents();
+            LogOutOfTwitch();
         }
 
         public IEnumerator TrackAuthState()
@@ -247,6 +279,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 {
                     m_loggedinInTime = DateTime.UtcNow;
                     m_lastWarnedMark = int.MaxValue;
+                    m_limitLogoutStarted = false;
                     m_logoutRequested = false;
                     m_loggedIn = true;
                     m_waitingForCode = false;
