@@ -73,6 +73,8 @@ namespace WizshBoneTwitchIntegration.Components
         {
             try
             {
+                RedeemTimerHelper.Unregister(this);
+
                 if (m_isOwner && m_timerElapsed && m_onDestroyEffects != null && !(m_breakOnDestroy && gameObject.GetComponent<WearNTear>() != null))
                     m_onDestroyEffects.Create(transform.position, transform.rotation);
 
@@ -112,8 +114,23 @@ namespace WizshBoneTwitchIntegration.Components
 
         private Coroutine m_breakRoutine;
 
+        // Seconds left on the countdown, or -1 if it hasn't started. Read by RedeemTimerLabel.
+        public float RemainingSeconds
+        {
+            get
+            {
+                if (!m_timerStarted)
+                    return -1f;
+
+                return m_paused ? m_remainingTime : Mathf.Max(0f, m_remainingTime - (Time.time - m_segmentStartTime));
+            }
+        }
+
+        public bool IsPaused => m_paused;
+
         private void StartDestructionTimer(float timeout)
         {
+            RedeemTimerHelper.Register(this);
             m_timerStarted = true;
             m_remainingTime = timeout;
             m_segmentStartTime = Time.time;

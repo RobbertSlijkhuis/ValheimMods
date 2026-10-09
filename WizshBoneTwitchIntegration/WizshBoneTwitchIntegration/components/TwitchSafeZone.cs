@@ -144,8 +144,9 @@ namespace WizshBoneTwitchIntegration.Components
                 }
 
                 // Added last, after the collider has its final size/center - TwitchSafeZone.Awake()
-                // runs synchronously inside AddComponent, and (if the debug toggle is on) reads this
-                // same collider's current bounds right then for the wireframe visual. Adding before
+                // runs synchronously inside AddComponent, and (if the debug toggle is on) its
+                // ColliderBoundsHelper.Register reads this same collider's current bounds right then
+                // for the wireframe visual. Adding before
                 // the resize above would capture the OnboardTrigger's original vanilla dimensions
                 // instead of the computed hull bounds.
                 onboardTriggerTrans.gameObject.AddComponent<TwitchSafeZone>();
@@ -225,6 +226,26 @@ namespace WizshBoneTwitchIntegration.Components
             return false;
         }
 
+        // False while the profile settings switch this kind of zone off: a ship's zone with
+        // safezoneBoats off, a trader's with safezoneTraders off (wards are always on). The zone and
+        // its collider stay in place either way - only new entries and creature handling are gated
+        // on this - so it's also what the debug bounds outline follows.
+        private bool IsEnabledBySettings()
+        {
+            Transform parent = transform.parent;
+
+            if (parent == null)
+                return true;
+
+            if (parent.GetComponent<Ship>() != null && !ProfileSettingsHelper.Current.safezoneBoats)
+                return false;
+
+            if (parent.GetComponent<Trader>() != null && !ProfileSettingsHelper.Current.safezoneTraders)
+                return false;
+
+            return true;
+        }
+
         public void Awake()
         {
             try
@@ -233,29 +254,11 @@ namespace WizshBoneTwitchIntegration.Components
                 m_collider = GetComponent<Collider>();
                 s_activeSafeZones.Add(this);
 
-                if (PluginConfig.configShowSafeZoneDebug.Value)
-                    gameObject.AddComponent<TwitchSafeZoneDebugVisual>();
+                ColliderBoundsHelper.Register(gameObject, ColliderBoundsHelper.SafeZoneColor, IsEnabledBySettings);
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("TwitchSafeZone.Awake failed: " + e);
-            }
-        }
-
-        // Called from PluginConfig.configShowSafeZoneDebug.SettingChanged so toggling the debug
-        // option live immediately shows/hides bounds on every currently active zone, not just
-        // ones created after the toggle. Newly created zones pick up the current value themselves
-        // in Awake() above.
-        public static void RefreshDebugVisuals(bool show)
-        {
-            foreach (TwitchSafeZone safeZone in s_activeSafeZones)
-            {
-                TwitchSafeZoneDebugVisual visual = safeZone.GetComponent<TwitchSafeZoneDebugVisual>();
-
-                if (show && visual == null)
-                    safeZone.gameObject.AddComponent<TwitchSafeZoneDebugVisual>();
-                else if (!show && visual != null)
-                    Destroy(visual);
             }
         }
 
@@ -303,11 +306,8 @@ namespace WizshBoneTwitchIntegration.Components
             // s_localPlayerZoneCount/m_playerIsInSafeZone stuck (or wrongly decremented). A ship
             // with safezoneBoats off this whole time never touches the count in either
             // direction, since entry is skipped and m_playerInZone then stays null for the exit too.
-            if (value && transform.parent.gameObject.GetComponent<Ship>() != null && !ProfileSettingsHelper.Current.safezoneBoats)
-                return;
-
-            // Same idea for traders - only gate new entries, same reasoning as the ship check above.
-            if (value && transform.parent.gameObject.GetComponent<Trader>() != null && !ProfileSettingsHelper.Current.safezoneTraders)
+            // Same gating applies to traders (safezoneTraders).
+            if (value && !IsEnabledBySettings())
                 return;
 
             if (collider.gameObject.name != playerIdentifier)
@@ -366,10 +366,7 @@ namespace WizshBoneTwitchIntegration.Components
                 if (!ProfileSettingsHelper.Current.wardBurnCreatures && !ProfileSettingsHelper.Current.wardPushCreatures)
                     return;
 
-                if (transform.parent.gameObject.GetComponent<Ship>() != null && !ProfileSettingsHelper.Current.safezoneBoats)
-                    return;
-
-                if (transform.parent.gameObject.GetComponent<Trader>() != null && !ProfileSettingsHelper.Current.safezoneTraders)
+                if (!IsEnabledBySettings())
                     return;
 
                 TwitchCreaturePersistentData persistentData = collider.gameObject.GetComponent<TwitchCreaturePersistentData>();
@@ -420,6 +417,7 @@ namespace WizshBoneTwitchIntegration.Components
             try
             {
                 s_activeSafeZones.Remove(this);
+                ColliderBoundsHelper.Unregister(gameObject);
 
                 if (m_playerInZone == null)
                     return;

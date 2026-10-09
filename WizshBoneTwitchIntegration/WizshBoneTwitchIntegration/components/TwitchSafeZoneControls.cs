@@ -175,7 +175,7 @@ namespace WizshBoneTwitchIntegration.Components
             colliderComp.radius = value;
             forceFieldComp.endRange = value;
 
-            colliderTrans.gameObject.GetComponent<TwitchSafeZoneDebugVisual>()?.Refresh();
+            ColliderBoundsHelper.Refresh(colliderTrans.gameObject);
 
             if (visualMode == VisualMode.Shield)
                 ShieldDomeHelper.ShowDome(this, parentTrans.position, value, ShieldColors.Ward);

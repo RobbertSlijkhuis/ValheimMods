@@ -64,7 +64,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 "Safezones can be put on ships, wards, and traders. While a player is inside one, redeem effects " +
                 "are blocked, unless \"Ignore safezone\" is enabled on that redeem. " +
                 "If a safezone ever seems stuck, use the \"Unstuck safezones\" button above. " +
-                "\"Show safezone bounds\" visualizes their bounds in-game as a wireframe outline.",
+                "\"Show safezone bounds\" visualizes their bounds, and the bounds of any active weather or time stop zone, in-game as a wireframe outline. It also floats a countdown over timed redeem objects (boats, weather zones, ...).",
         };
 
         private static readonly Color EnabledColor = new Color(0.95f, 0.65f, 0.2f, 1f);
@@ -160,7 +160,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             m_safeZoneDebugToggle = row.Toggle;
             m_safeZoneDebugStatusText = row.Status;
 
-            GuiHelper.CreateCardDescription(card, "Shows the bounds of active safezones (ships, wards, traders) in-game as a wireframe outline.", CardWidth - 24f, height: 38f);
+            GuiHelper.CreateCardDescription(card, "Shows safezone, weather and time stop zone bounds as a wireframe, plus time left on timed redeems.", CardWidth - 24f, height: 38f);
         }
 
         private void BuildClearToastsCard(Vector2 topCenter)
@@ -202,7 +202,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private void OnSafeZoneDebugToggled(bool value)
         {
             // Setting .Value fires configShowSafeZoneDebug.SettingChanged, which already calls
-            // TwitchSafeZone.RefreshDebugVisuals - no extra plumbing needed here.
+            // ColliderBoundsHelper.Reevaluate and RedeemTimerHelper.SetVisible - no extra plumbing needed here.
             PluginConfig.configShowSafeZoneDebug.Value = value;
 
             m_safeZoneDebugStatusText.text = value ? "Enabled" : "Disabled";

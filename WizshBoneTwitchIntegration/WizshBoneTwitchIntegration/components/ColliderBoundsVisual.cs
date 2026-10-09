@@ -3,38 +3,47 @@ using UnityEngine;
 
 namespace WizshBoneTwitchIntegration.Components
 {
-    // Purely client-local visual, toggled by PluginConfig.configShowSafeZoneDebug - added
-    // alongside a TwitchSafeZone (same GameObject, same Collider) to show its true bounds
-    // in-game as a wireframe outline (no fill, fully see-through): box edges for BoxCollider,
-    // two rings + four side lines for CapsuleCollider (a simplified "pill" outline, no domed
-    // cap arcs), three orthogonal rings for SphereCollider. Every line is a thin opaque bar
-    // rather than a GL/LineRenderer draw, since that's simple and doesn't need a custom shader.
-    // Callers that resize a safezone's collider after setup (e.g. TwitchSafeZoneControls.SetRadius
-    // on the ward stone) call Refresh() explicitly, so this stays correct without polling.
+    // Purely client-local visual - added to a GameObject (usually via ColliderBoundsHelper, which
+    // owns the show/hide toggle and the registry of tracked objects) to show its Collider's true
+    // bounds in-game as a wireframe outline (no fill, fully see-through): box edges for
+    // BoxCollider, two rings + four side lines + domed end arcs for CapsuleCollider (a pill
+    // outline; a capsule with no cylinder part comes out as three orthogonal rings), three
+    // orthogonal rings for SphereCollider. Every line is a thin opaque
+    // bar rather than a GL/LineRenderer draw, since that's simple and doesn't need a custom shader.
+    // Callers that resize the collider after Initialize() (e.g. TwitchSafeZoneControls.SetRadius on
+    // the ward stone) call Refresh() (or ColliderBoundsHelper.Refresh) explicitly, so this stays
+    // correct without polling.
     // No ZNetView/ZDO of its own, so it never gets networked - every client only sees their own.
-    internal class TwitchSafeZoneDebugVisual : MonoBehaviour
+    internal class ColliderBoundsVisual : MonoBehaviour
     {
-        private static readonly Color s_lineColor = new Color(0.2f, 1f, 0.3f, 0.9f);
         private const float LineThickness = 0.05f;
         private const int RingSegments = 24;
 
-        private static Material s_lineMaterial;
-
         private GameObject m_visual;
         private Collider m_collider;
+        private Material m_material;
+        private Color m_color = Color.white;
 
         public void Awake()
         {
+            m_collider = GetComponent<Collider>();
+        }
+
+        // Must be called right after AddComponent. Awake() doesn't build anything itself, so the
+        // color is known before the first (and only) initial build, and the collider's final size
+        // is whatever it is at this point.
+        public void Initialize(Color color)
+        {
             try
             {
-                m_collider = GetComponent<Collider>();
+                m_color = color;
 
                 if (m_collider == null)
                     return;
 
                 if (!(m_collider is BoxCollider) && !(m_collider is CapsuleCollider) && !(m_collider is SphereCollider))
                 {
-                    Jotunn.Logger.LogWarning($"[WBTI] TwitchSafeZoneDebugVisual: unsupported collider type '{m_collider.GetType().Name}' on '{gameObject.name}'");
+                    Jotunn.Logger.LogWarning($"[WBTI] ColliderBoundsVisual: unsupported collider type '{m_collider.GetType().Name}' on '{gameObject.name}'");
                     return;
                 }
 
@@ -42,22 +51,22 @@ namespace WizshBoneTwitchIntegration.Components
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("TwitchSafeZoneDebugVisual.Awake failed: " + e);
+                Jotunn.Logger.LogError("ColliderBoundsVisual.Initialize failed: " + e);
             }
         }
 
-        // Called by anything that resizes this zone's collider after Awake() already ran (e.g.
-        // TwitchSafeZoneControls.SetRadius on the ward stone), so the wireframe stays in sync.
+        // Called by anything that resizes this object's collider after Initialize() already ran,
+        // so the wireframe stays in sync.
         public void Refresh()
         {
             try
             {
-                if (m_collider != null)
+                if (m_visual != null)
                     Rebuild();
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("TwitchSafeZoneDebugVisual.Refresh failed: " + e);
+                Jotunn.Logger.LogError("ColliderBoundsVisual.Refresh failed: " + e);
             }
         }
 
@@ -66,7 +75,7 @@ namespace WizshBoneTwitchIntegration.Components
             if (m_visual != null)
                 Destroy(m_visual);
 
-            m_visual = new GameObject("WBTI_SafeZoneDebugVisual");
+            m_visual = new GameObject("WBTI_ColliderBoundsVisual");
             m_visual.transform.SetParent(transform, false);
 
             // Cancel out this GameObject's own world scale on the visual root, so a line bar's
@@ -122,9 +131,9 @@ namespace WizshBoneTwitchIntegration.Components
                 CreateLineBar(corners[edges[i, 0]], corners[edges[i, 1]]);
         }
 
-        // Simplified capsule outline: a ring at each cap (where the cylinder meets the dome)
-        // plus 4 straight side lines - no domed pole arcs, but the pill shape and radius/height
-        // read clearly enough for a debug bounds check. Radius/height under non-uniform scale
+        // Capsule outline: a ring at each cap (where the cylinder meets the dome), 4 straight side
+        // lines, and half-circle arcs over both poles in two perpendicular vertical planes.
+        // Radius/height under non-uniform scale
         // are inherently approximate (there's no single "correct" scaled radius for an ellipse) -
         // this mirrors Unity's own convention of scaling a capsule's radius by its two
         // perpendicular-to-axis scale components and its height by the axis scale component.
@@ -158,7 +167,11 @@ namespace WizshBoneTwitchIntegration.Components
             Vector3 bottomCenter = center - axis * halfCylinder;
 
             CreateRing(topCenter, perpA, perpB, radius);
-            CreateRing(bottomCenter, perpA, perpB, radius);
+
+            // A capsule whose height is no more than its diameter (e.g. the ward stone's zone) has
+            // no cylinder part - both rings would sit on the same spot, so draw only one.
+            if (halfCylinder > 0.01f)
+                CreateRing(bottomCenter, perpA, perpB, radius);
 
             for (int i = 0; i < 4; i++)
             {
@@ -166,6 +179,13 @@ namespace WizshBoneTwitchIntegration.Components
                 Vector3 offset = (Mathf.Cos(angle) * perpA + Mathf.Sin(angle) * perpB) * radius;
                 CreateLineBar(topCenter + offset, bottomCenter + offset);
             }
+
+            // Domed ends: a half circle over each pole in both vertical planes. Together with the
+            // horizontal ring(s) this splits a sphere-like capsule into 8 sections.
+            CreateArc(topCenter, perpA, axis, radius, 0f, Mathf.PI, RingSegments / 2);
+            CreateArc(topCenter, perpB, axis, radius, 0f, Mathf.PI, RingSegments / 2);
+            CreateArc(bottomCenter, perpA, axis, radius, Mathf.PI, Mathf.PI * 2f, RingSegments / 2);
+            CreateArc(bottomCenter, perpB, axis, radius, Mathf.PI, Mathf.PI * 2f, RingSegments / 2);
         }
 
         // SphereCollider radius under non-uniform scale follows Unity's own convention of using
@@ -184,11 +204,18 @@ namespace WizshBoneTwitchIntegration.Components
         // closed loop of straight line bars.
         private void CreateRing(Vector3 center, Vector3 axisA, Vector3 axisB, float radius)
         {
-            Vector3 prev = center + axisA * radius;
+            CreateArc(center, axisA, axisB, radius, 0f, Mathf.PI * 2f, RingSegments);
+        }
 
-            for (int i = 1; i <= RingSegments; i++)
+        // Part of a circle in the plane spanned by axisA/axisB (angle 0 = +axisA, pi/2 = +axisB),
+        // between two angles in radians, as a chain of straight line bars.
+        private void CreateArc(Vector3 center, Vector3 axisA, Vector3 axisB, float radius, float startAngle, float endAngle, int segments)
+        {
+            Vector3 prev = center + (Mathf.Cos(startAngle) * axisA + Mathf.Sin(startAngle) * axisB) * radius;
+
+            for (int i = 1; i <= segments; i++)
             {
-                float t = i / (float)RingSegments * Mathf.PI * 2f;
+                float t = Mathf.Lerp(startAngle, endAngle, i / (float)segments);
                 Vector3 next = center + (Mathf.Cos(t) * axisA + Mathf.Sin(t) * axisB) * radius;
                 CreateLineBar(prev, next);
                 prev = next;
@@ -217,27 +244,31 @@ namespace WizshBoneTwitchIntegration.Components
             Renderer renderer = bar.GetComponent<Renderer>();
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             renderer.receiveShadows = false;
-            renderer.material = GetLineMaterial();
+            renderer.sharedMaterial = GetLineMaterial();
         }
 
         // Sprites/Default is a built-in Unity shader (unlit, alpha-blended, respects
-        // Renderer.material.color) - Valheim's own UI depends on it, so it's safe to assume
-        // present without shipping a custom shader.
-        private static Material GetLineMaterial()
+        // Material.color) - Valheim's own UI depends on it, so it's safe to assume present without
+        // shipping a custom shader. One material per visual (shared by all its bars), so each
+        // tracked object can have its own color; destroyed again in OnDestroy.
+        private Material GetLineMaterial()
         {
-            if (s_lineMaterial == null)
+            if (m_material == null)
             {
-                s_lineMaterial = new Material(Shader.Find("Sprites/Default"));
-                s_lineMaterial.color = s_lineColor;
+                m_material = new Material(Shader.Find("Sprites/Default"));
+                m_material.color = m_color;
             }
 
-            return s_lineMaterial;
+            return m_material;
         }
 
         public void OnDestroy()
         {
             if (m_visual != null)
                 Destroy(m_visual);
+
+            if (m_material != null)
+                Destroy(m_material);
         }
     }
 }

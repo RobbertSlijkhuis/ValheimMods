@@ -145,6 +145,10 @@ namespace WizshBoneTwitchIntegration.Helpers
             WizshBoneGUI gui = Game.instance?.gameObject.GetComponent<WizshBoneGUI>();
             gui?.RepositionHUD();
 
+            // safezoneBoats/safezoneTraders switch ship/trader zones on and off, which the debug
+            // bounds outline should follow.
+            ColliderBoundsHelper.Reevaluate();
+
             Jotunn.Managers.PrefabManager prefabManager = Jotunn.Managers.PrefabManager.Instance;
             UnityEngine.GameObject guardStone = prefabManager?.GetPrefab("WBTI_guard_stone");
             Piece piece = guardStone?.GetComponent<Piece>();

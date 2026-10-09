@@ -75,7 +75,7 @@ namespace WizshBoneTwitchIntegration.GuiOld
             m_safeZoneDebugToggle.onValueChanged.AddListener(val =>
             {
                 // Setting .Value fires configShowSafeZoneDebug.SettingChanged, which already
-                // calls TwitchSafeZone.RefreshDebugVisuals - no extra plumbing needed here.
+                // calls ColliderBoundsHelper.Reevaluate and RedeemTimerHelper.SetVisible - no extra plumbing needed here.
                 PluginConfig.configShowSafeZoneDebug.Value = val;
             });
 

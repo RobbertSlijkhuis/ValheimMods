@@ -1,6 +1,7 @@
 using BepInEx.Configuration;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
+using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Configs
 {
@@ -43,11 +44,12 @@ namespace WizshBoneTwitchIntegration.Configs
 
 
             configShowSafeZoneDebug = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionDebug, "Show safezone bounds", false,
-                new ConfigDescription("Shows the bounds of active safezones (ships, wards, traders) in-game as a wireframe outline", null,
+                new ConfigDescription("Shows the bounds of active safezones (ships, wards, traders), weather zones and time stop zones in-game as a wireframe outline, and the time left on timed redeem objects (boats, weather zones, ...) as a floating countdown", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
             configShowSafeZoneDebug.SettingChanged += (obj, attr) =>
             {
-                TwitchSafeZone.RefreshDebugVisuals(configShowSafeZoneDebug.Value);
+                ColliderBoundsHelper.Reevaluate();
+                RedeemTimerHelper.SetVisible(configShowSafeZoneDebug.Value);
             };
 
 
