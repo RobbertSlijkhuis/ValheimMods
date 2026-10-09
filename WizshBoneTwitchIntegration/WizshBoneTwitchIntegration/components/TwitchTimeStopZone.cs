@@ -130,10 +130,6 @@ namespace WizshBoneTwitchIntegration.Components
             if (sphereCollider != null)
                 sphereCollider.radius = radius;
 
-            // Registered only after the radius is set - the bounds outline is built from the
-            // collider's dimensions right at registration.
-            ColliderBoundsHelper.Register(gameObject, ColliderBoundsHelper.TimeStopColor);
-
             ParticleSystem particles = GetComponentInChildren<ParticleSystem>();
             if (particles != null)
                 particles.gameObject.SetActive(false);
@@ -508,8 +504,6 @@ namespace WizshBoneTwitchIntegration.Components
         {
             try
             {
-                ColliderBoundsHelper.Unregister(gameObject);
-
                 if (m_registeredCreatures.Count > 0)
                 {
                     foreach (ZDOID zdoid in m_registeredCreatures)

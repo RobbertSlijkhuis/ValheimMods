@@ -49,13 +49,13 @@ namespace WizshBoneTwitchIntegration.Gui
             bool isPlayerScale = IsPlayerScaleEffect(entry.name);
             layout.FloatRow("Duration",
                 isPlayerScale
-                    ? "How long the scale/speed change lasts, in seconds. Both -1 and 0 fall back to a fixed 30s for this effect, not the general -1=default/0=infinite convention."
-                    : "Duration in seconds. -1 = the effect's own default duration, 0 = infinite.",
+                    ? "How long the scale/speed change lasts, in seconds. Unlike other effects, both -1 and 0 fall back to a fixed 30 seconds."
+                    : "How long the effect lasts, in seconds. Use -1 for the effect's own default duration and 0 for infinite.",
                 entry.duration, v => entry.duration = v, defaultValue: -1f);
             layout.PairRow(
                 () => layout.ToggleRow("Persists through death", "Whether this status effect survives the player dying.",
                     entry.persistsThroughDeath, v => entry.persistsThroughDeath = v, defaultValue: false),
-                () => layout.ToggleRow("Renew", "Whether re-applying this redeem while already active resets its duration.",
+                () => layout.ToggleRow("Renew", $"Whether re-applying this redeem while already active resets its {Emphasis.Of("Duration")}.",
                     entry.renew, v => entry.renew = v, defaultValue: false));
 
             // Runs on every (re)build of this card, including the Name-dropdown-triggered rebuild

@@ -31,7 +31,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 new Vector2(0f, RedeemWizard.BodyTopY), RedeemWizard.Step2FieldWidth);
             var layout = new Step2RowLayout(content, 0f, RedeemWizard.Step2FieldWidth);
 
-            m_announceMessage = layout.TextRow("Announcement message", "Shown on screen when triggered. {{user}} is replaced with the redeemer's name.",
+            m_announceMessage = layout.TextRow("Announcement message", $"Shown on screen when triggered. {Emphasis.Of("{{user}}")} is replaced with the redeemer's name.",
                 "", "Optional announcement", v => m_working.detonateData.announceMessage = v, defaultValue: DefaultAnnounceMessage);
             layout.PairRow(
                 () => m_radius = layout.FloatRow("Radius", "How far around the target to search for objects to detonate, in meters.",

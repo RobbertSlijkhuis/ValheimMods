@@ -4,6 +4,10 @@ Written 2026-09-29. Covers the profile **Sync** feature (`helpers/ProfileSyncHel
 `ProfileManager.IsSyncedProfile` / `MarkAsSynced`, the Sync button in `GUI/tabs/ProfilesTab.cs`) and how
 the new GUI treats a synced profile. Nothing in this document has been verified in-game yet.
 
+> **On hold (2026-10-09):** the role of Sync may shrink or change entirely depending on how spawned
+> objects replicate their config - see `MULTIPLAYER.md` ("Idea: snapshot the creature's runtime config into
+> the ZDO"). Hold off on the planned accept/decline dialog until that direction is decided.
+
 ## How sync works today (short)
 
 - Sync sends the active profile's whole `profile.yaml` (redeems, creature groups, settings) to every

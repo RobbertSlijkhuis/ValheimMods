@@ -27,7 +27,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 new Vector2(0f, RedeemWizard.BodyTopY), RedeemWizard.Step2FieldWidth);
             var layout = new Step2RowLayout(content, 0f, RedeemWizard.Step2FieldWidth);
 
-            m_announceMessage = layout.TextRow("Announcement message", "Shown on screen when triggered. {{user}} is replaced with the redeemer's name.",
+            m_announceMessage = layout.TextRow("Announcement message", $"Shown on screen when triggered. {Emphasis.Of("{{user}}")} is replaced with the redeemer's name.",
                 "", "Optional announcement", v => m_working.mistData.announceMessage = v, defaultValue: DefaultAnnounceMessage);
             m_duration = layout.IntRow("Duration", "How long the spawned mist lasts before it cleans itself up, in seconds (0 = indefinite).",
                 DefaultDuration, v => m_working.mistData.duration = v, defaultValue: DefaultDuration);

@@ -75,7 +75,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             layout.ToggleRow(
                 "Scale from target's max health & armor",
-                "If enabled, damage is calculated from the target's max health and armor instead of the fixed amounts above (Chop/Pickaxe still apply as typed).",
+                $"If enabled, damage is calculated from the target's max health and armor instead of the fixed amounts above ({Emphasis.Of("Chop")}/{Emphasis.Of("Pickaxe")} still apply as typed).",
                 m_data.basedOnMaxHealthAndArmor,
                 v =>
                 {

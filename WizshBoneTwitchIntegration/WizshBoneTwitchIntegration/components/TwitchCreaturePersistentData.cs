@@ -326,8 +326,7 @@ namespace WizshBoneTwitchIntegration.Components
                 return;
             }
 
-            monsterAI.m_aggravatable = creatureData.aggravatable;
-            monsterAI.m_mistVision   = creatureData.mistVision;
+            monsterAI.m_mistVision = creatureData.mistVision;
 
             // See the field comment on CreatureData.fullyPassive.
             IsFullyPassive = creatureData.fullyPassive;

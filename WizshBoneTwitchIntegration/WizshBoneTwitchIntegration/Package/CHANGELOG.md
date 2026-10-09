@@ -15,6 +15,13 @@
 - Status HUD now shows the configured key for opening the main UI.
 - Status HUD now shows "Twitch:" and "Live:" labels, each with a green/red status dot.
 - Restored the missing HUD section in Settings.
+- Added an "Open window key" card on the Home tab to rebind the key that opens the main window, with a Reset button.
+- Number fields now clamp to their limits immediately while typing, and out-of-range values are corrected when a form opens.
+- Surprise chest items: "Stack size" is now "Amount" (existing profiles are migrated automatically), limited to the item's max stack size.
+- Surprise chest items: Quality is limited to 1-10 and can go above the item's normal max quality, like extra Refinement Forge levels.
+- Surprise chest items now spawn with full durability for their quality.
+- Resized creatures now scale their attack reach, hitbox and AI attack range with their size: a shrunk creature no longer swings from out of reach and misses, and a grown one reaches further. Covers melee swings, area attacks (stomps and slams) and where projectiles spawn.
+- Removed the unused "Aggravatable" creature option (existing profiles still load).
 
 ### 1.0.1
 - Clamped number settings.

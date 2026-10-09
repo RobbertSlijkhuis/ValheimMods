@@ -38,7 +38,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 backgroundColor: Color.clear, autoHideScrollbar: true);
             var layout = new Step2RowLayout(content, 0f);
 
-            m_announceMessage = layout.TextRow("Announcement message", "Shown on screen when triggered. {{user}} is replaced with the redeemer's name.",
+            m_announceMessage = layout.TextRow("Announcement message", $"Shown on screen when triggered. {Emphasis.Of("{{user}}")} is replaced with the redeemer's name.",
                 "", "Optional announcement", v => m_working.terrainEditData.announceMessage = v, defaultValue: DefaultAnnounceMessage);
             layout.PairRow(
                 () => m_duration = layout.FloatRow("Duration", "How long before the terrain resets, in seconds (0 = permanent).",

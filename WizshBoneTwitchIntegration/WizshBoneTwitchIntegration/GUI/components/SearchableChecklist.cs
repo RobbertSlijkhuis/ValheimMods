@@ -373,6 +373,9 @@ namespace WizshBoneTwitchIntegration.Gui
                 Image checkmarkImg = checkmarkObj.GetComponent<Image>();
                 checkmarkImg.raycastTarget = false;
                 checkmarkImg.sprite = GUIManager.Instance.ValheimControlResources.checkmark;
+                // The checkmark sprite is white; a real Toggle gets tinted by Jötunn's toggle style,
+                // but this hand-built Image never is, so tint it orange explicitly.
+                checkmarkImg.color = GUIManager.Instance.ValheimOrange;
                 m_rowCheckboxes[capturedValue] = checkmarkImg;
 
                 float textWidth = rowWidth - CheckboxSize - CheckboxGap - 10f;

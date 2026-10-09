@@ -71,7 +71,7 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             m_list.Build(parent, RedeemWizard.BodyTopY, EntryLabel, BuildEntryFields, BuildHeader,
                 randomLabel: "Pick loot at random",
-                randomDescription: "If enabled, the chest picks Amount entries at random from the list below (the same entry can come up more than once). Otherwise every entry spawns once, in list order, and Amount is ignored.");
+                randomDescription: $"If enabled, the chest picks {Emphasis.Of("Amount")} entries at random from the list below (the same entry can come up more than once). Otherwise every entry spawns once, in list order, and {Emphasis.Of("Amount")} is ignored.");
         }
 
         // Chest-level rows above the loot list. Amount + Yeet chance come last, directly above the
@@ -81,7 +81,7 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             var layout = new Step2RowLayout(content, 0f, width);
 
-            m_announceMessage = layout.TextRow("Announcement message", "Shown on screen when the redeem triggers, a few seconds before the chest appears. {{user}} is replaced with the redeemer's name.",
+            m_announceMessage = layout.TextRow("Announcement message", $"Shown on screen when the redeem triggers, a few seconds before the chest appears. {Emphasis.Of("{{user}}")} is replaced with the redeemer's name.",
                 DefaultAnnounceMessage, "Optional announcement", v => Data.announceMessage = string.IsNullOrEmpty(v) ? null : v, defaultValue: DefaultAnnounceMessage);
 
             layout.PairRow(
@@ -91,7 +91,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     ChestTypeOptions, ChestType.Iron, v => Data.type = v, defaultValue: ChestType.Iron, showSearch: false));
 
             layout.PairRow(
-                () => m_amount = layout.IntRow("Amount", "How many loot entries are picked when \"Pick loot at random\" (below) is on. Ignored otherwise - every entry spawns once.",
+                () => m_amount = layout.IntRow("Amount", $"How many loot entries are picked when {Emphasis.Of("Pick loot at random")} (below) is on. Ignored otherwise - every entry spawns once.",
                     DefaultAmount, v => Data.amount = v, defaultValue: DefaultAmount),
                 () => m_yeetChance = layout.IntRow("Yeet chance", "Percent chance (0-100) that a piece of loot is launched extremely far instead of just popping out of the chest.",
                     DefaultYeetChance, v => Data.yeetChance = v, defaultValue: DefaultYeetChance));
@@ -218,7 +218,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 },
                 defaultValue: CreatureType, showSearch: false);
 
-            layout.FloatRow("Weight", "How likely this entry is picked when \"Pick loot at random\" is on, relative to the other entries: weight 3 comes up three times as often as weight 1. 0 = never picked. Ignored when random is off. The list on the left shows each entry's current chance.",
+            layout.FloatRow("Weight", $"How likely this entry is picked when {Emphasis.Of("Pick loot at random")} is on, relative to the other entries. A weight of 3 comes up three times as often as 1, and 0 is never picked. The list on the left shows each entry's chance.",
                 entry.weight, v =>
                 {
                     entry.weight = v;
@@ -253,14 +253,14 @@ namespace WizshBoneTwitchIntegration.Gui
                 defaultValue: null);
 
             layout.PairRow(
-                () => layout.IntRow("Amount", "How many of the item come out of the chest (as one stack, up to the item's max stack size).",
+                () => layout.IntRow("Amount", "How many of the item come out, as one stack. Capped by the item's max stack size, so unstackable items (weapons, armor) always give 1.",
                     item.amount, v =>
                     {
                         item.amount = v;
                         m_list.RefreshListLabels();
                     },
                     defaultValue: 1, min: 1, max: maxStack),
-                () => layout.IntRow("Quality", "Quality level of the item (1 = normal, max 10). Can exceed the item's max quality, like Refinement Forge upgrades, but only on items that support it.",
+                () => layout.IntRow("Quality", "Quality level of the item, up to 10. Items that can't be upgraded past their normal max quality are capped at it, and items without quality levels stay at 1.",
                     item.quality, v => item.quality = v, defaultValue: 1, min: 1, max: ItemData.MaxQuality));
         }
 

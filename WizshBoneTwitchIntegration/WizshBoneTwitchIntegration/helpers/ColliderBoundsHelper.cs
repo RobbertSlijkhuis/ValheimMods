@@ -16,8 +16,6 @@ namespace WizshBoneTwitchIntegration.Helpers
     {
         public static readonly Color SafeZoneColor = new Color(0.2f, 1f, 0.3f, 0.9f);
         public static readonly Color WeatherZoneColor = new Color(1f, 0.25f, 0.2f, 0.9f);
-        public static readonly Color TimeStopColor = new Color(0.3f, 0.7f, 1f, 0.9f);
-
         private class Entry
         {
             public Color color;

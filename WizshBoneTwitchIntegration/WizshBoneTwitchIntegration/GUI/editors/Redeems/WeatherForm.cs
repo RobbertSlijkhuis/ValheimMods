@@ -5,12 +5,15 @@ using WizshBoneTwitchIntegration.Models;
 
 namespace WizshBoneTwitchIntegration.Gui
 {
-    /// <summary>Step-2 form for Weather - all 6 fields are live, nothing to cut. Height+Radius and Duration+Force paired. Items uses the SearchableChecklist widget sourced from RedeemPrefabCatalog.WeatherNames.</summary>
+    /// <summary>Step-2 form for Weather - all 9 fields are live, nothing to cut. Height+Radius, Duration+Force and Cycle+Time per weather paired. Items uses the SearchableChecklist widget sourced from RedeemPrefabCatalog.WeatherNames.</summary>
     internal class WeatherForm : IRedeemStep2Form, IAppliesDefaultsOnSelect
     {
         private const string DefaultAnnounceMessage = "{{user}} is changing the skybox!";
         private const int DefaultDuration = 300;
         private const bool DefaultForce = false;
+        private const bool DefaultCycle = false;
+        private const float DefaultCycleInterval = 10f;
+        private const bool DefaultFollowPlayer = false;
         private const float DefaultHeight = 100f;
         private const float DefaultRadius = 300f;
 
@@ -26,6 +29,9 @@ namespace WizshBoneTwitchIntegration.Gui
         private InputField m_announceMessage;
         private InputField m_duration;
         private Toggle m_force;
+        private Toggle m_cycle;
+        private InputField m_cycleInterval;
+        private Toggle m_followPlayer;
         private InputField m_height;
         private InputField m_radius;
         private SearchableChecklist m_items;
@@ -37,7 +43,9 @@ namespace WizshBoneTwitchIntegration.Gui
                 backgroundColor: Color.clear, autoHideScrollbar: true);
             var layout = new Step2RowLayout(content, 0f);
 
-            m_announceMessage = layout.TextRow("Announcement message", "Shown on screen when triggered. {{user}} is replaced with the redeemer's name.",
+            m_items = layout.ChecklistRow("Weathers", "Which weather types this redeem uses: one is picked at random, or all of them in order when cycling.",
+                RedeemPrefabCatalog.WeatherNames, new List<string>(DefaultItems), v => m_working.weatherData.items = v, defaultValues: new List<string>(DefaultItems));
+            m_announceMessage = layout.TextRow("Announcement message", $"Shown on screen when triggered. {Emphasis.Of("{{user}}")} is replaced with the redeemer's name.",
                 "", "Optional announcement", v => m_working.weatherData.announceMessage = v, defaultValue: DefaultAnnounceMessage);
             layout.PairRow(
                 () => m_duration = layout.IntRow("Duration", "How long the weather event lasts, in seconds (0 = indefinite).",
@@ -49,8 +57,13 @@ namespace WizshBoneTwitchIntegration.Gui
                     DefaultHeight, v => m_working.weatherData.height = v, defaultValue: DefaultHeight),
                 () => m_radius = layout.FloatRow("Radius", "Horizontal size of the weather zone, in meters.",
                     DefaultRadius, v => m_working.weatherData.radius = v, defaultValue: DefaultRadius));
-            m_items = layout.ChecklistRow("Weathers", "Which weather types can be randomly picked when this redeem fires.",
-                RedeemPrefabCatalog.WeatherNames, new List<string>(DefaultItems), v => m_working.weatherData.items = v, defaultValues: new List<string>(DefaultItems));
+            layout.PairRow(
+                () => m_cycle = layout.ToggleRow("Cycle weathers", "Instead of picking one random weather, step through the list in order and keep looping until the duration ends.",
+                    DefaultCycle, v => m_working.weatherData.cycle = v, defaultValue: DefaultCycle),
+                () => m_cycleInterval = layout.FloatRow("Time per weather", "How long each weather is shown while cycling, in seconds (minimum 0.1). Weathers blend over a few seconds, so very short values won't look distinct.",
+                    DefaultCycleInterval, v => m_working.weatherData.cycleInterval = v, defaultValue: DefaultCycleInterval, min: 0.1f));
+            m_followPlayer = layout.ToggleRow("Follow player", "The weather zone follows the redeemer instead of staying where it spawned, so the weather keeps applying wherever they go.",
+                DefaultFollowPlayer, v => m_working.weatherData.followPlayer = v, defaultValue: DefaultFollowPlayer);
 
             ScrollableList.SetContentHeight(content, Mathf.Abs(layout.CurrentY));
         }
@@ -63,6 +76,9 @@ namespace WizshBoneTwitchIntegration.Gui
             m_announceMessage.text = data.announceMessage ?? "";
             m_duration.text = data.duration.ToString();
             m_force.isOn = data.force;
+            m_cycle.isOn = data.cycle;
+            m_cycleInterval.text = data.cycleInterval.ToString("G");
+            m_followPlayer.isOn = data.followPlayer;
             m_height.text = data.height.ToString("G");
             m_radius.text = data.radius.ToString("G");
 
@@ -79,6 +95,9 @@ namespace WizshBoneTwitchIntegration.Gui
             data.announceMessage = DefaultAnnounceMessage;
             data.duration = DefaultDuration;
             data.force = DefaultForce;
+            data.cycle = DefaultCycle;
+            data.cycleInterval = DefaultCycleInterval;
+            data.followPlayer = DefaultFollowPlayer;
             data.height = DefaultHeight;
             data.radius = DefaultRadius;
             data.items = new List<string>(DefaultItems);

@@ -94,7 +94,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 },
                 defaultValue: null);
 
-            layout.TextRow("Announcement message", "Shown on screen when triggered. {{user}} is replaced with the redeemer's name.",
+            layout.TextRow("Announcement message", $"Shown on screen when triggered. {Emphasis.Of("{{user}}")} is replaced with the redeemer's name.",
                 creature.announceMessage ?? "", "Optional announcement", v => creature.announceMessage = v, defaultValue: "");
 
             layout.PairRow(
@@ -127,7 +127,7 @@ namespace WizshBoneTwitchIntegration.Gui
                     creature.allowDrops, v => creature.allowDrops = v, defaultValue: allowDropsDefault));
 
             layout.PairRow(
-                () => layout.ToggleRow("Rename", "Whether the creature gets the name on the right (or the redeemer's name when that is empty). Off keeps the creature's own name.",
+                () => layout.ToggleRow("Rename", $"Whether the creature gets the {Emphasis.Of("Name")} on the right (or the redeemer's name when that is empty). Off keeps the creature's own name.",
                     creature.rename, v => creature.rename = v, defaultValue: true),
                 () => layout.TextRow("Name", "The name shown for the creature. Leave empty to use the redeemer's name.",
                     creature.name ?? "", "Redeemer's name", v => creature.name = string.IsNullOrEmpty(v) ? null : v, defaultValue: ""));
@@ -140,7 +140,7 @@ namespace WizshBoneTwitchIntegration.Gui
             layout.PairRow(
                 () => layout.FloatRow("Size", "Overall size multiplier of the creature.",
                     creature.size, v => creature.size = v, defaultValue: 1f),
-                () => layout.ToggleRow("Force color", "Makes the color above win even when the redeemer is a registered viewer with their own personal color. Off by default, so a viewer's own color takes priority.",
+                () => layout.ToggleRow("Force color", $"Makes the {Emphasis.Of("Color")} above win even when the redeemer is a registered viewer with their own personal color. Off by default, so a viewer's own color takes priority.",
                     creature.forceColor, v => creature.forceColor = v, defaultValue: false));
 
             List<string> equipValues = creature.equipItems ?? (creature.equipItems = new List<string>());
@@ -156,7 +156,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             List<string> removeValues = creature.removeEquipment ?? (creature.removeEquipment = new List<string>());
             layout.ChecklistRow("Remove equipment",
-                "Parts of the creature's default loadout to take away before the items above are equipped. Removed items leave its inventory, so it can't use them again. Warning: removing weapons also removes a creature's natural attacks and can leave it unable to attack. A weapon you add above sits alongside its default weapons unless you remove those too.",
+                $"Parts of the creature's default loadout to take away before the {Emphasis.Of("Equip items")} are equipped. Removed items leave its inventory, so it can't use them again. Warning: removing weapons also removes a creature's natural attacks and can leave it unable to attack. A weapon you add above sits alongside its default weapons unless you remove those too.",
                 RemoveEquipmentOptions, removeValues, v => creature.removeEquipment = v);
         }
 
@@ -165,34 +165,31 @@ namespace WizshBoneTwitchIntegration.Gui
             layout.PairRow(
                 () => layout.ToggleRow("Friendly", "Whether the creature is friendly toward the player.",
                     creature.friendly, v => creature.friendly = v, defaultValue: false),
-                () => layout.ToggleRow("Commandable", "Requires Friendly to be enabled. Whether the player can command this creature.",
+                () => layout.ToggleRow("Commandable", $"Requires {Emphasis.Of("Friendly")} to be enabled. Whether the player can command this creature.",
                     creature.commandable, v => creature.commandable = v, defaultValue: false));
 
             layout.PairRow(
                 () => layout.ToggleRow("Fully passive", "The creature never targets anything and nothing targets it, not even wild monsters. Players can still kill it manually.",
                     creature.fullyPassive, v => creature.fullyPassive = v, defaultValue: false),
-                () => layout.ToggleRow("Always follow owner", "Requires Friendly to be enabled. The creature always follows the player, independent of Commandable, and keeps closing the distance instead of stopping a few meters away.",
+                () => layout.ToggleRow("Always follow owner", $"Requires {Emphasis.Of("Friendly")} to be enabled. The creature always follows the player, independent of {Emphasis.Of("Commandable")}, and keeps closing the distance instead of stopping a few meters away.",
                     creature.alwaysFollowOwner, v => creature.alwaysFollowOwner = v, defaultValue: false));
 
             layout.PairRow(
                 () => layout.ToggleRow("Mist vision", "Whether the creature can see through Mist when looking for targets. Off lets Mist hide the player from it.",
                     creature.mistVision, v => creature.mistVision = v, defaultValue: true),
-                () => layout.ToggleRow("Aggravatable", "Lets the creature be provoked into hostility. Vanilla uses this for creatures that start out neutral towards players (such as Dvergr) and turn hostile once something aggravates them. Off = it never changes sides this way.",
-                    creature.aggravatable, v => creature.aggravatable = v, defaultValue: false));
-
-            layout.PairRow(
                 () => layout.ToggleRow("Allow damage structures", "Whether the creature's attacks can damage buildings and other structures. Turn off to stop it wrecking a base.",
-                    creature.allowDamageStructures, v => creature.allowDamageStructures = v, defaultValue: true),
-                () => layout.FloatRow("Idle sound interval", "Seconds between the creature's idle sound effect (e.g. a Fuling's laugh); it then always plays instead of the default ~50% chance. 0 = the creature's default behavior.",
-                    creature.idleSoundInterval, v => creature.idleSoundInterval = v, defaultValue: 0f, min: 0f));
+                    creature.allowDamageStructures, v => creature.allowDamageStructures = v, defaultValue: true));
+
+            layout.FloatRow("Idle sound interval", "Seconds between the creature's idle sound effect (e.g. a Fuling's laugh); it then always plays instead of the default ~50% chance. 0 = the creature's default behavior.",
+                creature.idleSoundInterval, v => creature.idleSoundInterval = v, defaultValue: 0f, min: 0f);
 
             layout.PairRow(
-                () => layout.ToggleRow("Talks", "Whether the creature says something above its head. Needs a talk message below.",
+                () => layout.ToggleRow("Talks", $"Whether the creature says something above its head. Needs a {Emphasis.Of("Talk message")} below.",
                     creature.talks, v => creature.talks = v, defaultValue: false),
                 () => layout.FloatRow("Talk interval", "Seconds between messages. An interval of 3 or more repeats the message(s) for as long as the creature lives; anything below 3 says it just once.",
                     creature.talkInterval, v => creature.talkInterval = v, defaultValue: 0f, min: 0f));
 
-            layout.TextRow("Talk message", "What the creature says. Separate several messages with a semicolon (;). {{user}} is replaced with the redeemer's name. Leave empty for none. Only used when Talks is on. On a redeem that asks the viewer for input, the viewer's message replaces this.",
+            layout.TextRow("Talk message", $"What the creature says. Separate several messages with a semicolon (;). {Emphasis.Of("{{user}}")} is replaced with the redeemer's name. Leave empty for none. Only used when {Emphasis.Of("Talks")} is on. On a redeem that asks the viewer for input, the viewer's message replaces this.",
                 creature.talkMessage ?? "", "Optional message", v => creature.talkMessage = string.IsNullOrEmpty(v) ? null : v, defaultValue: "");
 
             layout.FloatRow("Speed multiplier", "Multiplies the creature's walking and running speed (1 = normal speed).",
@@ -203,7 +200,7 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             List<DropdownOption> positionOptions = RedeemPrefabCatalog.EnsureIncludesCurrentValue(PositionOptions, creature.position);
             layout.PairRow(
-                () => layout.DropdownRow("Position", "Where the creature spawns, relative to the player (or to the chest, for a chest's loot). World position treats the offset below as absolute world coordinates.",
+                () => layout.DropdownRow("Position", $"Where the creature spawns, relative to the player (or to the chest, for a chest's loot). World position treats the {Emphasis.Of("Position offset")} below as absolute world coordinates.",
                     positionOptions, creature.position, v => creature.position = v,
                     defaultValue: SpawnPositionType.Random, showSearch: false),
                 () => layout.FloatRow("Position radius", "How far from the spawn point a creature can appear. Only used by the Random and Random flying positions.",
@@ -241,7 +238,7 @@ namespace WizshBoneTwitchIntegration.Gui
                             SetSwatchColor(emissionSwatch, v);
                     },
                     defaultValue: defaultColor),
-                () => emissionSwatch = layout.ColorRow("Emission color", "Overrides the color of the creature's glow. Follows Color until a different color is picked here.",
+                () => emissionSwatch = layout.ColorRow("Emission color", $"Overrides the color of the creature's glow. Follows {Emphasis.Of("Color")} until a different color is picked here.",
                     string.IsNullOrEmpty(creature.emissionColor) ? creature.color ?? defaultColor : creature.emissionColor, v =>
                     {
                         string mainColor = creature.color ?? defaultColor;

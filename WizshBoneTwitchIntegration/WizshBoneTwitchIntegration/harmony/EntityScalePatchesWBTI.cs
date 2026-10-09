@@ -1,11 +1,12 @@
 using HarmonyLib;
 using System;
+using System.Collections.Generic;
 using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Harmony
 {
     [HarmonyPatch]
-    public class PlayerScalePatchesWBTI
+    public class EntityScalePatchesWBTI
     {
         public struct MeleeRangeSnapshot
         {
@@ -44,20 +45,20 @@ namespace WizshBoneTwitchIntegration.Harmony
         }
 
         // Melee hit detection (range, height, offset, ray widths) is expressed in flat world
-        // units, so it doesn't grow/shrink with the player's visual scale on its own. Temporarily
+        // units, so it doesn't grow/shrink with the attacker's visual scale on its own. Temporarily
         // scale it for the duration of the swing so reach matches the (also scaled) weapon model.
+        // Applies to the local player and to resized Twitch creatures (see AttackScaleHelper).
+        // DoAreaAttack (stomps/slams) reads the same range/height/offset/ray-width fields.
         [HarmonyPrefix]
         [HarmonyPatch(typeof(Attack), nameof(Attack.DoMeleeAttack))]
+        [HarmonyPatch(typeof(Attack), "DoAreaAttack")]
         public static void DoMeleeAttack_Prefix(Attack __instance, out MeleeRangeSnapshot? __state)
         {
             __state = null;
 
             try
             {
-                if (!__instance.m_character.IsPlayer() || !ReferenceEquals(__instance.m_character, Player.m_localPlayer))
-                    return;
-
-                float scale = PlayerScaleHelper.CurrentScale;
+                float scale = AttackScaleHelper.GetAttackScale(__instance.m_character);
 
                 if (scale == 1f)
                     return;
@@ -80,6 +81,7 @@ namespace WizshBoneTwitchIntegration.Harmony
 
         [HarmonyFinalizer]
         [HarmonyPatch(typeof(Attack), nameof(Attack.DoMeleeAttack))]
+        [HarmonyPatch(typeof(Attack), "DoAreaAttack")]
         public static Exception DoMeleeAttack_Finalizer(Attack __instance, MeleeRangeSnapshot? __state, Exception __exception)
         {
             try
@@ -96,7 +98,7 @@ namespace WizshBoneTwitchIntegration.Harmony
 
         // Projectile spawn point is the (correctly-scaled) attack origin joint plus flat
         // world-unit offsets (m_attackHeight/m_attackRange/m_attackOffset), so projectiles
-        // always spawn at the unscaled height/offset relative to the player. Scale those
+        // always spawn at the unscaled height/offset relative to the attacker. Scale those
         // offsets for the duration of the calculation, same as the melee attack range above.
         [HarmonyPrefix]
         [HarmonyPatch(typeof(Attack), "GetProjectileSpawnPoint")]
@@ -106,10 +108,7 @@ namespace WizshBoneTwitchIntegration.Harmony
 
             try
             {
-                if (!__instance.m_character.IsPlayer() || !ReferenceEquals(__instance.m_character, Player.m_localPlayer))
-                    return;
-
-                float scale = PlayerScaleHelper.CurrentScale;
+                float scale = AttackScaleHelper.GetAttackScale(__instance.m_character);
 
                 if (scale == 1f)
                     return;
@@ -137,6 +136,44 @@ namespace WizshBoneTwitchIntegration.Harmony
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Something went wrong in GetProjectileSpawnPoint_Finalizer: " + e);
+            }
+
+            return __exception;
+        }
+
+        // MonsterAI's "close enough to swing / which weapon fits this distance" checks use flat
+        // per-weapon AI ranges (all inside UpdateAI, incl. Humanoid.EquipBestWeapon). Scale them for
+        // the duration of the AI tick so a resized monster starts swinging at its scaled reach.
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(MonsterAI), nameof(MonsterAI.UpdateAI))]
+        public static void UpdateAI_Prefix(MonsterAI __instance, out List<AttackScaleHelper.AiRangeSnapshot> __state)
+        {
+            __state = null;
+
+            try
+            {
+                Humanoid humanoid = __instance.GetComponent<Humanoid>();
+
+                if (humanoid != null)
+                    __state = AttackScaleHelper.ScaleAiAttackRanges(humanoid);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in UpdateAI_Prefix: " + e);
+            }
+        }
+
+        [HarmonyFinalizer]
+        [HarmonyPatch(typeof(MonsterAI), nameof(MonsterAI.UpdateAI))]
+        public static Exception UpdateAI_Finalizer(List<AttackScaleHelper.AiRangeSnapshot> __state, Exception __exception)
+        {
+            try
+            {
+                AttackScaleHelper.RestoreAiAttackRanges(__state);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in UpdateAI_Finalizer: " + e);
             }
 
             return __exception;

@@ -44,7 +44,7 @@ namespace WizshBoneTwitchIntegration.Configs
 
 
             configShowSafeZoneDebug = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionDebug, "Show safezone bounds", false,
-                new ConfigDescription("Shows the bounds of active safezones (ships, wards, traders), weather zones and time stop zones in-game as a wireframe outline, and the time left on timed redeem objects (boats, weather zones, ...) as a floating countdown", null,
+                new ConfigDescription("Shows the bounds of active safezones (ships, wards, traders) and weather zones in-game as a wireframe outline, and the time left on timed redeem objects (boats, weather zones, ...) as a floating countdown", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
             configShowSafeZoneDebug.SettingChanged += (obj, attr) =>
             {

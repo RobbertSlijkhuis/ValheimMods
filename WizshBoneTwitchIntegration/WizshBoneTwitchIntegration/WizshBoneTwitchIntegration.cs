@@ -196,6 +196,7 @@ namespace WizshBoneTwitchIntegration
             prefabs.GuardStone.transform.Find("controls").gameObject.AddComponent<TwitchSafeZoneControls>();
 
             prefabs.EnvZone.AddComponent<TwitchPersistentDestruction>();
+            prefabs.EnvZone.AddComponent<TwitchWeatherZone>();
 
             prefabs.TimeStopZone.AddComponent<TwitchPersistentDestruction>();
             prefabs.TimeStopZone.AddComponent<TwitchTimeStopZone>();
@@ -427,6 +428,7 @@ namespace WizshBoneTwitchIntegration
             CommandManager.Instance.AddConsoleCommand(new RemoveCreaturesCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveMistCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveTrapsCommand());
+            CommandManager.Instance.AddConsoleCommand(new RemoveWeatherCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveDoorsCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveWindmillsCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveLogsCommand());

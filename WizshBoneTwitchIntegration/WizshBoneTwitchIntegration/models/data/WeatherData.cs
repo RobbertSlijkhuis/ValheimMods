@@ -9,6 +9,13 @@ namespace WizshBoneTwitchIntegration.Models
         [EditorTooltip("A custom message to announce that a weather event is about to occur. {{user}} will be replaced with the player's name.")]
         public string announceMessage;
 
+        // Cycle mode: step through `items` in order instead of picking one at random.
+        public bool cycle = false;
+        public float cycleInterval = 10f;
+
+        // The zone follows the redeemer instead of staying where it spawned.
+        public bool followPlayer = false;
+
         [EditorLabel("Duration")]
         [EditorTooltip("The duration of the weather event in seconds (0 = indefinite).")]
         public int duration = 60;

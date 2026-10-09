@@ -40,7 +40,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 }
             }
 
-            string weather = weatherData.items[Random.Range(0, weatherData.items.Count)];
+            string weather = weatherData.cycle ? weatherData.items[0] : weatherData.items[Random.Range(0, weatherData.items.Count)];
 
             GameObject gameObject = ZNetViewHelper.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.EnvZone, Player.m_localPlayer.transform.position, Player.m_localPlayer.transform.rotation);
             _activeWeatherZone = gameObject;
@@ -48,17 +48,17 @@ namespace WizshBoneTwitchIntegration.Helpers
             // A freezing death inside this zone is credited to whoever redeemed it (DeathCreditHelper).
             RedeemerTagHelper.Apply(gameObject, customRewardEvent);
 
-            CapsuleCollider capsuleCollider = gameObject.GetComponent<CapsuleCollider>();
-            EnvZone envZone = gameObject.GetComponent<EnvZone>();
             TwitchPersistentDestruction persistentDestruction = gameObject.GetComponent<TwitchPersistentDestruction>();
-            envZone.m_environment = weather;
-            envZone.m_force = weatherData.force;
 
-            capsuleCollider.height = weatherData.height;
-            capsuleCollider.radius = weatherData.radius;
+            // The zone's weather, force flag and size live in its ZDO (see TwitchWeatherZone), so every
+            // client's copy of it is configured the same way, not just this one.
+            string[] weathers = weatherData.cycle ? weatherData.items.ToArray() : new[] { weather };
+            ZDOID followTarget = weatherData.followPlayer ? Player.m_localPlayer.GetComponent<ZNetView>().GetZDO().m_uid : ZDOID.None;
+            gameObject.GetComponent<TwitchWeatherZone>().Initialize(weathers, weatherData.cycleInterval, weatherData.force, weatherData.height, weatherData.radius, followTarget);
 
+            // The weather name is left out while cycling, since it changes every few seconds.
             if (weatherData.announceMessage != null)
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, weatherData.announceMessage) + $" \n{weather}", 3000);
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, MessageHelper.ParseVariables("{{user}}", customRewardEvent.RedeemerName, weatherData.announceMessage) + (weatherData.cycle ? "" : $" \n{weather}"), 3000);
 
             // duration == 0 means indefinite/never auto-cleanup - don't start the destruction timer,
             // since SetStarted(0) would trigger TimedDestruction with a 0s timeout and destroy the

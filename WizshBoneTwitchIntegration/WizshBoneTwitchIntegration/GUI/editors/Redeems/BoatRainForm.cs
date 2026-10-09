@@ -46,7 +46,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 backgroundColor: Color.clear, autoHideScrollbar: true);
             var layout = new Step2RowLayout(content, 0f);
 
-            m_announceMessage = layout.TextRow("Announcement message", "Shown on screen when triggered. {{user}} is replaced with the redeemer's name.",
+            m_announceMessage = layout.TextRow("Announcement message", $"Shown on screen when triggered. {Emphasis.Of("{{user}}")} is replaced with the redeemer's name.",
                 "", "Optional announcement", v => m_working.spawnAbilityData.announceMessage = v, defaultValue: DefaultAnnounceMessage);
             layout.PairRow(
                 () => m_allowDrops = layout.ToggleRow("Allow drops", "Whether the spawned boats can drop items when destroyed.",
@@ -56,7 +56,7 @@ namespace WizshBoneTwitchIntegration.Gui
             layout.PairRow(
                 () => m_minToSpawn = layout.IntRow("Min to spawn", "Minimum number of boats spawned.",
                     DefaultMinToSpawn, v => m_working.spawnAbilityData.minToSpawn = v, defaultValue: DefaultMinToSpawn),
-                () => m_maxToSpawn = layout.IntRow("Max to spawn", "Max allowed to spawn (count is randomized if Min is less).",
+                () => m_maxToSpawn = layout.IntRow("Max to spawn", $"Max allowed to spawn (count is randomized if {Emphasis.Of("Min")} is less).",
                     DefaultMaxToSpawn, v => m_working.spawnAbilityData.maxToSpawn = v, defaultValue: DefaultMaxToSpawn));
             layout.PairRow(
                 () => m_spawnDelay = layout.FloatRow("Spawn delay", "Time in seconds between each boat spawning.",
