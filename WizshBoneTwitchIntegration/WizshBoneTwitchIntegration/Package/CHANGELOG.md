@@ -22,6 +22,19 @@
 - Surprise chest items now spawn with full durability for their quality.
 - Resized creatures now scale their attack reach, hitbox and AI attack range with their size: a shrunk creature no longer swings from out of reach and misses, and a grown one reaches further. Covers melee swings, area attacks (stomps and slams) and where projectiles spawn.
 - Removed the unused "Aggravatable" creature option (existing profiles still load).
+- Weather redeem: new "Cycle weathers" option steps through the chosen weathers in order, with a "Time per weather" setting, instead of picking one at random.
+- Weather redeem: new "Follow player" option makes the weather zone follow the redeemer.
+- Weather redeem: new "Frost resistance" option protects anyone standing in the zone from cold weather damage (e.g. while cycling through snow).
+- Weather zones now sync to other players in multiplayer (weather, force flag and size are replicated).
+- Added the `WBTIRemoveWeather` console command to remove Twitch weather zones and restore normal weather.
+- Creatures can now be given gear: "Equip items" equips vanilla items on spawn, and "Remove equipment" strips parts of their default loadout.
+- The creature form (spawn creature and surprise chest) is now split into General, Appearance, Behavior and Spawn tabs.
+- Surprise chest: a redeem is now refunded if the dungeon filter and the Max spawned limits leave nothing the chest can spawn.
+- Creature talk messages now use `{{user}}` (like all other messages) for the redeemer's name, for single and multiple (`;`-separated) messages. The old `{{userName}}` placeholder in talk messages is no longer replaced, so update any existing talk messages that use it.
+- "Show safezone bounds" now also outlines weather zones, and draws capsule outlines (e.g. the ward zone) with rounded ends. Ship and trader outlines follow the safezone Boats/Traders settings.
+- "Show safezone bounds" also shows a countdown above timed redeem objects (boats, weather zones, ...).
+- Some form descriptions now highlight key words in yellow.
+- Removed the unused "random", "isHallucination" and "index" creature fields (existing profiles still load).
 
 ### 1.0.1
 - Clamped number settings.

@@ -54,7 +54,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             // client's copy of it is configured the same way, not just this one.
             string[] weathers = weatherData.cycle ? weatherData.items.ToArray() : new[] { weather };
             ZDOID followTarget = weatherData.followPlayer ? Player.m_localPlayer.GetComponent<ZNetView>().GetZDO().m_uid : ZDOID.None;
-            gameObject.GetComponent<TwitchWeatherZone>().Initialize(weathers, weatherData.cycleInterval, weatherData.force, weatherData.height, weatherData.radius, followTarget);
+            gameObject.GetComponent<TwitchWeatherZone>().Initialize(weathers, weatherData.cycleInterval, weatherData.force, weatherData.height, weatherData.radius, followTarget, weatherData.frostResist);
 
             // The weather name is left out while cycling, since it changes every few seconds.
             if (weatherData.announceMessage != null)

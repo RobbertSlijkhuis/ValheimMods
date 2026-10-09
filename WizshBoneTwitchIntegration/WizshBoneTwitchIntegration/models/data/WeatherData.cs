@@ -16,6 +16,9 @@ namespace WizshBoneTwitchIntegration.Models
         // The zone follows the redeemer instead of staying where it spawned.
         public bool followPlayer = false;
 
+        // Frost resistance for anyone standing in the zone, so cold weathers don't deal weather damage.
+        public bool frostResist = false;
+
         [EditorLabel("Duration")]
         [EditorTooltip("The duration of the weather event in seconds (0 = indefinite).")]
         public int duration = 60;
