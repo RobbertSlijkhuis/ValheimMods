@@ -63,10 +63,13 @@ namespace WizshBoneTwitchIntegration.Gui
             m_hud.UpdateHUD();
             m_safeZoneHUD.SyncVisibility();
 
+            InputBlockGate.Verify();
+
             if (m_shell.IsVisible)
             {
                 m_shell.RefreshTopBar();
                 m_shell.RefreshSidebar();
+                m_shell.RefreshLiveTab();
             }
         }
 

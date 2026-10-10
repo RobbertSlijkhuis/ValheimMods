@@ -32,6 +32,11 @@ namespace WizshBoneTwitchIntegration.Components
         public float m_damageScale = 0;
         public float m_healthScale = 0;
 
+        // The prefab's native root scale, read in Awake for every instance (including claimed wild
+        // creatures that never run ApplyVariables) so attack/ragdoll scaling is always relative to it.
+        private Vector3 m_nativeScale = Vector3.one; // replaced in Awake
+        public float NativeScale => m_nativeScale.x;
+
         // Permanent feature (see CreatureData.fullyPassive). Read by
         // harmony/SpecialRedeemPatchesWBTI.cs's IsEnemy prefix.
         public bool IsFullyPassive;
@@ -44,12 +49,16 @@ namespace WizshBoneTwitchIntegration.Components
         public string RedeemerName => m_redeemerName;
         public string RedeemTitle => m_redeemTitle;
         public string SavedPrefabName => m_savedPrefabName;
+        public string ColorOverride => m_colorOverride;
+        public string EmissionColorOverride => m_emissionColorOverride;
+        public bool ForceColorOverride => m_forceColorOverride;
 
         public void Awake()
         {
             try
             {
                 m_netView = gameObject.GetComponent<ZNetView>();
+                m_nativeScale = GetPrefabRootScale();
 
                 if (m_netView == null || !m_netView.IsValid())
                     return;
@@ -110,14 +119,10 @@ namespace WizshBoneTwitchIntegration.Components
                 // another creature's own SpawnAbility (see CreatureHelper.ApplyInheritedScaling) -
                 // m_savedPrefabName is the parent's own lookup prefab (the one that resolves in the
                 // redeem's list above), not this instance's actual prefab. Clone the resolved entry
-                // and swap in the real prefab identity before applying.
-                CreatureData creatureData = lookupData;
-
-                if (m_actualPrefabName != "")
-                {
-                    creatureData = lookupData.Clone<CreatureData>();
-                    creatureData.prefabName = m_actualPrefabName;
-                }
+                // for the child (own prefab identity, natural size) before applying.
+                CreatureData creatureData = m_actualPrefabName != ""
+                    ? CreatureHelper.CloneForChild(lookupData, m_actualPrefabName)
+                    : lookupData;
 
                 creatureClaim.ReInit(m_redeemerName, isSpawn: true, creatureData);
                 ApplyCreatureData(creatureData);
@@ -250,7 +255,7 @@ namespace WizshBoneTwitchIntegration.Components
             m_allowDamageStructures = creatureData.allowDamageStructures;
             m_damageScale           = creatureData.damageScale;
             m_healthScale           = creatureData.healthScale;
-            transform.localScale    = new Vector3(creatureData.size, creatureData.size, creatureData.size);
+            transform.localScale    = m_nativeScale * creatureData.size;
 
             if (creatureData.speedMultiplier != 1f)
             {
@@ -262,6 +267,26 @@ namespace WizshBoneTwitchIntegration.Components
                     character.m_runSpeed *= creatureData.speedMultiplier;
                 }
             }
+        }
+
+        // The prefab's own root scale (e.g. TrollFrost is 4). CreatureData.size is a multiplier on
+        // it (size 1 = vanilla size), and attack ranges, spawn offsets and ragdoll sizes are all
+        // authored against this native scale, so attack/ragdoll scaling is current / native - which
+        // works out to just size (see AttackScaleHelper.GetAttackScale). Read from the prefab rather
+        // than the instance so it doesn't depend on whether something already changed the
+        // instance's scale; when the prefab can't be found the instance's own scale stands in, so the
+        // factor is 1 rather than the raw root scale.
+        private Vector3 GetPrefabRootScale()
+        {
+            if (m_netView != null && m_netView.IsValid() && ZNetScene.instance != null)
+            {
+                GameObject prefab = ZNetScene.instance.GetPrefab(m_netView.GetZDO().GetPrefab());
+
+                if (prefab != null && prefab.transform.localScale.x > 0f)
+                    return prefab.transform.localScale;
+            }
+
+            return transform.localScale;
         }
 
         private void ApplyHumanoid(string redeemerName, CreatureData creatureData)

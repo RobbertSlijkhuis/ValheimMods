@@ -162,5 +162,17 @@ namespace WizshBoneTwitchIntegration.Harmony
                 Jotunn.Logger.LogError("Something went wrong in Player.OnDeath_Postfix: " + e);
             }
         }
+
+        // TwitchCreatureClaim adds a bare NpcTalk to MonsterAI creatures that don't have one, and
+        // NpcTalk.Awake hooks its OnDeathAnim into Character.m_onDeathAnim. Vanilla's OnDeathAnim
+        // picks a random m_onDieTalk entry without checking the list - fine for real NPCs, which
+        // always have lines, but it throws ArgumentOutOfRangeException for our empty one whenever a
+        // creature with a death animation (e.g. the Frost troll) dies. Skip it when there's nothing to say.
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(NpcTalk), nameof(NpcTalk.OnDeathAnim))]
+        public static bool NpcTalkOnDeathAnim_Prefix(NpcTalk __instance)
+        {
+            return __instance.m_onDieTalk != null && __instance.m_onDieTalk.Count > 0;
+        }
     }
 }

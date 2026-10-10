@@ -1,6 +1,7 @@
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Harmony
@@ -177,6 +178,65 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
 
             return __exception;
+        }
+
+        // Scales the damage area of Aoes a resized creature's attack spawns (see
+        // AttackScaleHelper.ScaleSpawnedAoe). Setup is the IProjectile entry point every
+        // attack-spawned Aoe goes through (weapon spawn-on-hit, SpawnOnHitTerrain, m_spawnOnTrigger,
+        // projectiles...).
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Aoe), nameof(Aoe.Setup))]
+        public static void AoeSetup_Postfix(Aoe __instance, Character owner)
+        {
+            try
+            {
+                AttackScaleHelper.ScaleSpawnedAoe(__instance, owner);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in AoeSetup_Postfix: " + e);
+            }
+        }
+
+        // A Twitch creature's death effects (ragdoll/statue) spawn at prefab scale and in the
+        // prefab's colors. Mark the creature whose OnDeath is running, then scale and recolor what
+        // EffectList.Create hands back for it (see DeathEffectHelper). Creatures with a death
+        // animation (e.g. the Frost troll) only get here once it finishes.
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Character), nameof(Character.OnDeath))]
+        public static void OnDeath_Prefix(Character __instance)
+        {
+            try
+            {
+                DeathEffectHelper.BeginDeath(__instance);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in Character.OnDeath_Prefix: " + e);
+            }
+        }
+
+        [HarmonyFinalizer]
+        [HarmonyPatch(typeof(Character), nameof(Character.OnDeath))]
+        public static Exception OnDeath_Finalizer(Exception __exception)
+        {
+            DeathEffectHelper.EndDeath();
+
+            return __exception;
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(EffectList), nameof(EffectList.Create))]
+        public static void EffectListCreate_Postfix(EffectList __instance, Transform baseParent, int variant, GameObject[] __result)
+        {
+            try
+            {
+                DeathEffectHelper.HandleDeathEffects(__instance, baseParent, variant, __result);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in EffectListCreate_Postfix: " + e);
+            }
         }
 
         // Re-equipping replaces the held/sheathed item GameObjects with fresh instances at

@@ -76,6 +76,10 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         // row's Y has to account for that extra row + gap on top of what the 2-row layout used.
         private const float ButtonRowY = GridTopY - 2f * (CardHeight + RowGap) - CardHeight - 30f;
 
+        // Live state the cards were last built from, so SyncLiveState can tell when they went stale.
+        private bool m_builtRedeemsEnabled;
+        private bool m_builtChattingEnabled;
+
         public GameObject Create(GameObject parent)
         {
             m_root = UIContainer.Create(parent, "HomeTab");
@@ -124,6 +128,23 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             OnHistoryBack?.Invoke();
         }
 
+        /// <summary>
+        /// Rebuilds the cards when the live redeems/chatting state changed behind the tab's back
+        /// (e.g. redeems enabled on login), which a toggle click or tab switch would otherwise be
+        /// the only thing to pick up. Called by the shell every frame while Home is the active tab.
+        /// </summary>
+        public void SyncLiveState()
+        {
+            TwitchCustomRewards customRewards = Game.instance != null ? Game.instance.gameObject.GetComponent<TwitchCustomRewards>() : null;
+            TwitchChatting chatting = Game.instance != null ? Game.instance.gameObject.GetComponent<TwitchChatting>() : null;
+
+            if (customRewards == null || chatting == null)
+                return;
+
+            if (customRewards.m_enabled != m_builtRedeemsEnabled || chatting.m_enabled != m_builtChattingEnabled)
+                Rebuild();
+        }
+
         private void Rebuild()
         {
             GuiHelper.ClearContainer(m_overviewRoot);
@@ -133,6 +154,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             TwitchAuth auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
             TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
             TwitchChatting chatting = Game.instance.gameObject.GetComponent<TwitchChatting>();
+
+            m_builtRedeemsEnabled = customRewards.m_enabled;
+            m_builtChattingEnabled = chatting.m_enabled;
 
             int totalRedeems = RedeemHelper.redeems.Count;
             int enabledRedeems = RedeemHelper.redeems.Count(r => r.enabled);

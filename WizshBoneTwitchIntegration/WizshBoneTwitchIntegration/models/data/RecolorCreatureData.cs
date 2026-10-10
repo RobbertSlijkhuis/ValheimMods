@@ -17,6 +17,10 @@ namespace WizshBoneTwitchIntegration.Models
         public int materialIndex = 0;
         public float particleAlpha = 0.2f;
         public string transformPath;
+
+        // Where this same renderer sits under the creature's ragdoll (its death effect), which has its
+        // own hierarchy. Null for entries the ragdoll doesn't get (see RecolorHelper.RecolorRagdoll).
+        public string ragdollPath;
         public Material zebraMaterial;
 
         public RecolorCreatureData() { }

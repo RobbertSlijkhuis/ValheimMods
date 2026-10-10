@@ -163,15 +163,16 @@ namespace WizshBoneTwitchIntegration.Helpers
         /// since, a nameless entry is created (<see cref="BuildRows"/> falls back to the id until
         /// the viewer redeems again).
         /// </summary>
-        public static void RecordDeath(string redeemerId, string rawRedeemTitle)
+        /// <returns>The viewer's display name if the death was recorded and the viewer has one, else null.</returns>
+        public static string RecordDeath(string redeemerId, string rawRedeemTitle)
         {
             try
             {
                 if (string.IsNullOrEmpty(redeemerId))
-                    return;
+                    return null;
 
                 if (!EnsureLoaded())
-                    return;
+                    return null;
 
                 if (!s_data.viewers.TryGetValue(redeemerId, out LeaderboardViewer viewer))
                 {
@@ -181,10 +182,13 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 GetOrAddStats(viewer, rawRedeemTitle).deaths++;
                 MarkDirty();
+
+                return string.IsNullOrEmpty(viewer.name) ? null : viewer.name;
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogWarning($"[WBTI] Leaderboard: could not record death: {e}");
+                return null;
             }
         }
 

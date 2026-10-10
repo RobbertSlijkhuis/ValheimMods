@@ -1,5 +1,7 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 using TwitchSDK.Interop;
 using UnityEngine;
@@ -85,6 +87,10 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         private const float PendingHazardLifetime = 2f;
 
+        // How long the "You died / Killed by" message stays fully visible, then its fade-out.
+        private const float DeathMessageHold = 6f;
+        private const float DeathMessageFade = 4f;
+
         private static readonly AccessTools.FieldRef<Character, HitData> s_lastHitRef =
             AccessTools.FieldRefAccess<Character, HitData>("m_lastHit");
 
@@ -104,8 +110,27 @@ namespace WizshBoneTwitchIntegration.Helpers
         private static Credit? s_committed;
         private static string s_committedSource;
 
+        // Set when the death was recorded on a viewer, consumed by the "You died" message.
+        private static string s_killerName;
+
         private static readonly Dictionary<int, SeTag> s_seTags = new Dictionary<int, SeTag>();
         private static readonly Dictionary<ZDOID, ShipHit> s_shipLastHit = new Dictionary<ZDOID, ShipHit>();
+
+        private class EffectCredit
+        {
+            public Credit Credit;
+        }
+
+        // Who started a vanilla burning/poison status effect, stored on that effect instance (so it
+        // lives and dies with the effect). Absent = nobody.
+        private static readonly ConditionalWeakTable<StatusEffect, EffectCredit> s_effectCredits =
+            new ConditionalWeakTable<StatusEffect, EffectCredit>();
+
+        // The hit currently inside RPC_Damage that carries fire/spirit and/or poison damage - vanilla
+        // zeroes those before ApplyDamage and turns them into status effects afterwards.
+        private static HitData s_incomingDotHit;
+        private static bool s_incomingBurns;
+        private static bool s_incomingPoisons;
 
         private static TimedCredit s_terrain;
         private static TimedCredit s_knockback;
@@ -125,8 +150,10 @@ namespace WizshBoneTwitchIntegration.Helpers
             s_candidate = null;
             s_committedHit = null;
             s_committed = null;
+            s_killerName = null;
             s_seTags.Clear();
             s_shipLastHit.Clear();
+            s_incomingDotHit = null;
             s_terrain = null;
             s_knockback = null;
             s_boatLoss = null;
@@ -211,6 +238,82 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
         }
 
+        /// <summary>
+        /// <c>Character.RPC_Damage</c> on the local player (prefix, before the hit is modified):
+        /// vanilla zeroes a hit's fire/spirit/poison damage before <c>ApplyDamage</c> and turns it
+        /// into a burning/poison status effect afterwards, so it has to be noted here.
+        /// </summary>
+        public static void NoteIncomingDot(Character target, HitData hit)
+        {
+            if (hit == null || target != Player.m_localPlayer)
+                return;
+
+            s_incomingBurns = hit.m_damage.m_fire > 0f || hit.m_damage.m_spirit > 0f;
+            s_incomingPoisons = hit.m_damage.m_poison > 0f;
+            s_incomingDotHit = s_incomingBurns || s_incomingPoisons ? hit : null;
+        }
+
+        /// <summary>
+        /// <c>Character.RPC_Damage</c> on the local player (postfix, the effects now exist): puts
+        /// the hit's credit on the burning/poison effect it started or topped up - or removes the
+        /// old credit if the hit is credited to nobody, since the effect now (partly) belongs to it.
+        /// </summary>
+        public static void TagStartedEffects(Character target, HitData hit)
+        {
+            if (hit == null || target != Player.m_localPlayer || !ReferenceEquals(hit, s_incomingDotHit))
+                return;
+
+            s_incomingDotHit = null;
+
+            // ApplyDamage never ran for this hit (early return in vanilla): no effect was started.
+            if (!ReferenceEquals(hit, s_candidateHit))
+                return;
+
+            SEMan seman = target.GetSEMan();
+
+            Jotunn.Logger.LogWarning($"[WBTI] Death credit: fire/poison hit (burns {s_incomingBurns}, poisons {s_incomingPoisons}) type {hit.m_hitType}, "
+                + $"credit {(s_candidate.HasValue ? s_candidate.Value.ToString() : "nobody")} via {s_candidateSource ?? "none"}, attacker {(hit.GetAttacker() != null ? hit.GetAttacker().name : "none")}.");
+
+            if (s_incomingBurns)
+            {
+                TagEffect(seman.GetStatusEffect(SEMan.s_statusEffectBurning), s_candidate);
+                TagEffect(seman.GetStatusEffect(SEMan.s_statusEffectSpirit), s_candidate);
+            }
+
+            if (s_incomingPoisons)
+                TagEffect(seman.GetStatusEffect(SEMan.s_statusEffectPoison), s_candidate);
+        }
+
+        private static void TagEffect(StatusEffect effect, Credit? credit)
+        {
+            if (effect == null)
+                return;
+
+            s_effectCredits.Remove(effect);
+
+            if (credit.HasValue)
+                s_effectCredits.Add(effect, new EffectCredit { Credit = credit.Value });
+        }
+
+        /// <summary>A damage-over-time tick: the credit stored on the active effect that produced it.</summary>
+        private static Credit? EffectTagCredit(HitData.HitType type)
+        {
+            Player player = Player.m_localPlayer;
+            SEMan seman = player != null ? player.GetSEMan() : null;
+
+            if (seman == null)
+                return null;
+
+            StatusEffect effect = null;
+
+            if (type == HitData.HitType.Burning)
+                effect = seman.GetStatusEffect(SEMan.s_statusEffectBurning) ?? seman.GetStatusEffect(SEMan.s_statusEffectSpirit);
+            else if (type == HitData.HitType.Poisoned)
+                effect = seman.GetStatusEffect(SEMan.s_statusEffectPoison);
+
+            return effect != null && s_effectCredits.TryGetValue(effect, out EffectCredit tag) ? tag.Credit : (Credit?)null;
+        }
+
         // ── resolving each hit ───────────────────────────────────────────────
 
         public static void OnApplyDamagePrefix(Character target, HitData hit)
@@ -262,6 +365,16 @@ namespace WizshBoneTwitchIntegration.Helpers
             {
                 source = "hazard";
                 return s_matchedCredit;
+            }
+
+            if (type == HitData.HitType.Burning || type == HitData.HitType.Poisoned)
+            {
+                credit = EffectTagCredit(type);
+                if (credit.HasValue)
+                {
+                    source = type == HitData.HitType.Burning ? "burning (hit)" : "poison (hit)";
+                    return credit;
+                }
             }
 
             credit = StatusEffectCredit(type);
@@ -578,19 +691,23 @@ namespace WizshBoneTwitchIntegration.Helpers
         // ── death ────────────────────────────────────────────────────────────
 
         /// <summary>
-        /// <c>Player.OnDeath</c> on the local player: credits the death to whoever the killing blow
-        /// (the last committed hit) was resolved to.
+        /// <c>Player.OnDeath</c> (prefix, since vanilla shows the "You died" message inside it) on
+        /// the local player: credits the death to whoever the killing blow (the last committed hit)
+        /// was resolved to, and - if that put it on a leaderboard viewer - queues the killer's name
+        /// for <see cref="OverrideDeathMessage"/>.
         /// </summary>
         public static void OnLocalPlayerDeath(Player player)
         {
             if (player != Player.m_localPlayer)
                 return;
 
+            s_killerName = null;
+
             HitData lastHit = s_lastHitRef(player);
 
             if (lastHit == null || !ReferenceEquals(lastHit, s_committedHit) || !s_committed.HasValue)
             {
-                Jotunn.Logger.LogWarning("[WBTI] Death credit: nobody credited for this death.");
+                Jotunn.Logger.LogWarning($"[WBTI] Death credit: nobody credited for this death. {DescribeKillingBlow(player, lastHit)}");
                 return;
             }
 
@@ -600,7 +717,66 @@ namespace WizshBoneTwitchIntegration.Helpers
             s_committedHit = null;
             s_committed = null;
 
-            LeaderboardHelper.RecordDeath(credit.Id, credit.Title);
+            s_killerName = LeaderboardHelper.RecordDeath(credit.Id, credit.Title);
+        }
+
+        /// <summary>Debug detail for an uncredited death: the killing hit and the active status effects.</summary>
+        private static string DescribeKillingBlow(Player player, HitData hit)
+        {
+            List<string> effects = new List<string>();
+
+            foreach (StatusEffect effect in player.GetSEMan().GetStatusEffects())
+                effects.Add(effect.name);
+
+            if (hit == null)
+                return $"No last hit. Status effects: [{string.Join(", ", effects)}]";
+
+            Character attacker = hit.GetAttacker();
+
+            return $"Hit: type {hit.m_hitType}, attacker {(attacker != null ? attacker.name : "none")}, "
+                + $"hit status effect hash {hit.m_statusEffectHash}, committed {ReferenceEquals(hit, s_committedHit)}. "
+                + $"Status effects: [{string.Join(", ", effects)}]";
+        }
+
+        /// <summary>
+        /// <c>Player.Message</c> (prefix): appends who killed the streamer to vanilla's centered
+        /// "You died" message, once, if <see cref="OnLocalPlayerDeath"/> recorded it on a viewer,
+        /// and keeps it on screen longer than vanilla's immediate 4 s fade-out.
+        /// </summary>
+        public static void OverrideDeathMessage(Player player, MessageHud.MessageType type, ref string msg)
+        {
+            if (s_killerName == null || type != MessageHud.MessageType.Center || msg != "$msg_youdied" || player != Player.m_localPlayer)
+                return;
+
+            msg = $"{msg}\nKilled by {s_killerName}";
+            s_killerName = null;
+
+            if (MessageHud.instance != null)
+                MessageHud.instance.StartCoroutine(HoldCenterMessage(Localization.instance.Localize(msg)));
+        }
+
+        /// <summary>
+        /// Vanilla shows a center message at full alpha and starts a 4 s fade-out right away (two
+        /// buffered cross-fades, one applied per frame). Once those have run, snap it back to full
+        /// alpha, hold it, then fade out - unless another center message replaced the text meanwhile.
+        /// </summary>
+        private static IEnumerator HoldCenterMessage(string text)
+        {
+            for (int i = 0; i < 3; i++)
+                yield return null;
+
+            MessageHud hud = MessageHud.instance;
+            if (hud == null || hud.m_messageCenterText == null || hud.m_messageCenterText.text != text)
+                yield break;
+
+            hud.m_messageCenterText.CrossFadeAlpha(1f, 0f, ignoreTimeScale: true);
+
+            yield return new WaitForSecondsRealtime(DeathMessageHold);
+
+            if (hud == null || hud.m_messageCenterText == null || hud.m_messageCenterText.text != text)
+                yield break;
+
+            hud.m_messageCenterText.CrossFadeAlpha(0f, DeathMessageFade, ignoreTimeScale: true);
         }
     }
 }

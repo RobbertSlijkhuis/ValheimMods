@@ -132,6 +132,16 @@ namespace WizshBoneTwitchIntegration.Gui
         }
 
         /// <summary>
+        /// Lets Home pick up live redeems/chatting changes that didn't come from its own toggles.
+        /// Called by <see cref="WizshBoneGUI"/> every frame while the shell is visible.
+        /// </summary>
+        public void RefreshLiveTab()
+        {
+            if (m_panel != null && m_activeTab == ShellTab.Home && m_tabViews[ShellTab.Home] is HomeTab homeTab)
+                homeTab.SyncLiveState();
+        }
+
+        /// <summary>
         /// Re-reads the active profile name into the sidebar's "Profile: {name}" group header.
         /// Called by <see cref="WizshBoneGUI"/> every frame while the shell is visible, same as
         /// <see cref="RefreshTopBar"/> - see <see cref="ShellSidebar.RefreshProfileGroupLabel"/>.

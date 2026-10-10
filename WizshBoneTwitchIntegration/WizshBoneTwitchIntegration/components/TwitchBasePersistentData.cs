@@ -21,6 +21,8 @@ namespace WizshBoneTwitchIntegration.Components
         // Appended after RedeemSpawn rather than renumbered - existing bits are already saved in
         // ZDOs on live worlds, and renumbering would corrupt that saved flag data.
         ShipIdlePhysics   = 1 << 8,
+        SpawnScale        = 1 << 9,
+        RagdollRecolor    = 1 << 10,
     }
 
     internal class TwitchBasePersistentData : MonoBehaviour
@@ -124,6 +126,12 @@ namespace WizshBoneTwitchIntegration.Components
 
                 if (flags.HasFlag(PersistentComponentFlags.ShipIdlePhysics))
                     gameObject.AddComponent<TwitchShipIdlePhysicsData>();
+
+                if (flags.HasFlag(PersistentComponentFlags.SpawnScale))
+                    gameObject.AddComponent<TwitchScaledSpawn>();
+
+                if (flags.HasFlag(PersistentComponentFlags.RagdollRecolor))
+                    gameObject.AddComponent<TwitchRagdollRecolor>();
             }
             catch (Exception e)
             {

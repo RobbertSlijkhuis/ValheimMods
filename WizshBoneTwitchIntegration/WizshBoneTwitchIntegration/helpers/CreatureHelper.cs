@@ -410,6 +410,20 @@ namespace WizshBoneTwitchIntegration.Helpers
         }
 
         /// <summary>
+        /// The CreatureData a summoned child inherits from its summoner: a clone of the summoner's
+        /// under the child's own prefab identity. <c>size</c> is not inherited - it is relative to
+        /// the prefab's own scale, so a 0.3 Gjall's ticks would come out 0.3 times their already
+        /// small natural size; children keep their natural size.
+        /// </summary>
+        public static CreatureData CloneForChild(CreatureData parentCreatureData, string childPrefabName)
+        {
+            CreatureData childCreatureData = parentCreatureData.Clone<CreatureData>();
+            childCreatureData.prefabName = childPrefabName;
+            childCreatureData.size = 1f;
+            return childCreatureData;
+        }
+
+        /// <summary>
         /// Makes <paramref name="child"/> (a creature just spawned by <paramref name="owner"/>'s own
         /// SpawnAbility) inherit <paramref name="parentCreatureData"/> - clones it, swaps in the
         /// child's own real prefab identity, and applies it the same way a direct redeem spawn would.
@@ -421,8 +435,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (child.GetComponent<MonsterAI>() == null || child.GetComponent<Humanoid>() == null)
                 return;
 
-            CreatureData childCreatureData = parentCreatureData.Clone<CreatureData>();
-            childCreatureData.prefabName = prefab.name;
+            CreatureData childCreatureData = CloneForChild(parentCreatureData, prefab.name);
 
             TwitchCreaturePersistentData childData = child.GetComponent<TwitchCreaturePersistentData>() ?? child.AddComponent<TwitchCreaturePersistentData>();
             childData.SetInherited(redeemerName, redeemTitle, lookupPrefabName, childCreatureData);

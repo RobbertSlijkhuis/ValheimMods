@@ -94,10 +94,26 @@ namespace WizshBoneTwitchIntegration.Harmony
             try
             {
                 DeathCreditHelper.MatchHazard(__instance, hit);
+                DeathCreditHelper.NoteIncomingDot(__instance, hit);
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Something went wrong in DeathCredit RPC_Damage prefix: " + e);
+            }
+        }
+
+        // After vanilla has turned the hit's fire/poison damage into burning/poison status effects.
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Character), "RPC_Damage")]
+        public static void CharacterRPCDamage_Postfix(Character __instance, HitData hit)
+        {
+            try
+            {
+                DeathCreditHelper.TagStartedEffects(__instance, hit);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in DeathCredit RPC_Damage postfix: " + e);
             }
         }
 
@@ -131,10 +147,11 @@ namespace WizshBoneTwitchIntegration.Harmony
 
         // ── the death itself and swimming ─────────────────────────────────────────────────────
 
-        // Runs only on the dying player's owning client (Player.OnDeath returns early for non-owners).
-        [HarmonyPostfix]
+        // Only acts for the local player (the owning client). A prefix rather than a postfix because
+        // vanilla shows the "You died" message inside OnDeath, which needs the killer's name first.
+        [HarmonyPrefix]
         [HarmonyPatch(typeof(Player), "OnDeath")]
-        public static void PlayerOnDeath_CreditPostfix(Player __instance)
+        public static void PlayerOnDeath_CreditPrefix(Player __instance)
         {
             try
             {
@@ -142,7 +159,22 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Something went wrong in DeathCredit Player.OnDeath postfix: " + e);
+                Jotunn.Logger.LogError("Something went wrong in DeathCredit Player.OnDeath prefix: " + e);
+            }
+        }
+
+        // Appends the killer to the centered "You died" message.
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Player), "Message")]
+        public static void PlayerMessage_DeathPrefix(Player __instance, MessageHud.MessageType type, ref string msg)
+        {
+            try
+            {
+                DeathCreditHelper.OverrideDeathMessage(__instance, type, ref msg);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in DeathCredit Player.Message prefix: " + e);
             }
         }
 
