@@ -10,27 +10,19 @@ namespace PlantCart.Components {
     public class Planter : MonoBehaviour
     {
         private ZNetView netView;
+        private Vagon vagon;
         public Transform cartTransform;
         private Vector3 lastPosition;
         public float distanceThreshold = 1.1f;
 
-        private List<string> m_allowedList = new List<string>();
         private Dictionary<string, string> m_plantDict = new Dictionary<string, string>();
 
         public void Awake()
         {
             netView = gameObject.GetComponent<ZNetView>();
+            vagon = gameObject.GetComponent<Vagon>();
             cartTransform = transform;
             lastPosition = cartTransform.position;
-
-
-            m_allowedList.Add("carrot");
-            m_allowedList.Add("turnip");
-            m_allowedList.Add("onion");
-            m_allowedList.Add("barley");
-            m_allowedList.Add("flax");
-            m_allowedList.Add("magecap");
-            m_allowedList.Add("jotunpuffs");
 
             m_plantDict.Add("$item_carrotseeds", "sapling_carrot");
             m_plantDict.Add("$item_carrot", "sapling_seedcarrot");
@@ -42,6 +34,10 @@ namespace PlantCart.Components {
             m_plantDict.Add("$item_flax", "sapling_flax");
             m_plantDict.Add("$item_magecap", "sapling_magecap");
             m_plantDict.Add("$item_jotunpuffs", "sapling_jotunpuffs");
+            m_plantDict.Add("$item_kale", "sapling_seedkale");
+            m_plantDict.Add("$item_kaleseeds", "sapling_Kale");
+            m_plantDict.Add("$item_poteitrseeds", "sapling_poteitr");
+            m_plantDict.Add("$item_oatseeds", "sapling_oat");
         }
 
         public bool IsValidPlantPoint(RaycastHit raycast)
@@ -66,6 +62,16 @@ namespace PlantCart.Components {
             try {
                 if (netView.m_ghost)
                     return;
+
+                // Only the cart's owner (whoever attached it) plants. Otherwise every client that has the
+                // cart loaded plants its own copy of each crop, and a non-owner's inventory change is never saved.
+                // Also only plant while someone is pulling the cart, pushing it does nothing.
+                // Keep lastPosition current while not planting, so taking ownership or attaching doesn't cause an instant plant.
+                if (!netView.IsValid() || !netView.IsOwner() || !vagon.IsAttached())
+                {
+                    lastPosition = cartTransform.position;
+                    return;
+                }
 
                 // Calculate the distance from the last frame
                 float distance = Vector3.Distance(lastPosition, cartTransform.position);
@@ -111,9 +117,8 @@ namespace PlantCart.Components {
                         Container containerComp = transform.Find("Container").GetComponent<Container>();
                         Inventory inv = containerComp.GetInventory();
                         List<ItemDrop.ItemData> items = inv.GetAllItemsInGridOrder();
-                        items.Reverse();
 
-                        List<ItemDrop.ItemData> plantableList = items.Where(item => m_allowedList.Any(other => item.m_shared.m_name.Contains(other))).ToList();
+                        List<ItemDrop.ItemData> plantableList = items.Where(item => m_plantDict.ContainsKey(item.m_shared.m_name)).ToList();
 
                         if (plantableList.Count == 0)
                         {
