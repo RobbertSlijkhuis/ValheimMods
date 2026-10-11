@@ -26,7 +26,16 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public static string m_refundMessage;
 
         public readonly List<CustomRewardEvent> m_redeemHistory = new List<CustomRewardEvent>();
-        private const int m_redeemHistoryMaxSize = 500;
+        private const int m_redeemHistoryMaxSize = 1000;
+        // Warns when this many redeems in the history are still unfulfilled. The history drops its
+        // oldest entry once it passes the max size, and a dropped unresolved entry can no longer be
+        // completed or refunded from the history.
+        private const int m_redeemHistoryWarnSize = 750;
+
+        // History entries whose title matched no redeem in the active profile. We can't tell a
+        // redeem that isn't ours from one that is ours but no longer in the profile, so they are
+        // left unresolved in the history for the user to decide, and don't count as unresolved.
+        private readonly HashSet<CustomRewardEvent> m_unknownRedeems = new HashSet<CustomRewardEvent>();
 
         public readonly BulkRedeemResolveHelper m_bulkResolveHelper = new BulkRedeemResolveHelper();
 
@@ -78,7 +87,27 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             return m_enabled
                 && !ProfileSettingsHelper.Current.autoResolveRedeems
-                && m_redeemHistory.Exists(item => item.Status == CustomRewardRedemptionState.Unfulfilled);
+                && m_redeemHistory.Exists(item =>
+                    item.Status == CustomRewardRedemptionState.Unfulfilled
+                    && !IsUnknownRedeem(item));
+        }
+
+        private int CountUnfulfilledInHistory()
+        {
+            int count = 0;
+
+            foreach (CustomRewardEvent item in m_redeemHistory)
+            {
+                if (item.Status == CustomRewardRedemptionState.Unfulfilled)
+                    count++;
+            }
+
+            return count;
+        }
+
+        public bool IsUnknownRedeem(CustomRewardEvent customRewardEvent)
+        {
+            return m_unknownRedeems.Contains(customRewardEvent);
         }
 
         public bool IsLoggedIn => m_auth != null && m_auth.m_loggedIn;
@@ -122,7 +151,30 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 m_redeemHistory.Add(customRewardEvent);
 
                 if (m_redeemHistory.Count > m_redeemHistoryMaxSize)
-                    m_redeemHistory.RemoveAt(0);
+                {
+                    // Drop the oldest already-resolved entry first so a still-pending redeem is only
+                    // lost when every entry is pending. The search skips the entry just added.
+                    int dropIndex = m_redeemHistory.FindIndex(0, m_redeemHistory.Count - 1,
+                        item => item.Status != CustomRewardRedemptionState.Unfulfilled);
+
+                    if (dropIndex < 0)
+                        dropIndex = 0;
+
+                    m_unknownRedeems.Remove(m_redeemHistory[dropIndex]);
+                    m_redeemHistory.RemoveAt(dropIndex);
+                }
+
+                // Fires each time the number of still-unfulfilled redeems climbs to the threshold;
+                // fulfilled/canceled ones no longer count. An add raises that number by at most 1,
+                // so every upward crossing lands exactly on it.
+                if (CountUnfulfilledInHistory() == m_redeemHistoryWarnSize)
+                {
+                    string warning = $"Redeem history is getting full ({m_redeemHistoryWarnSize}/{m_redeemHistoryMaxSize})";
+                    Jotunn.Logger.LogWarning($"[WBTI] {warning}");
+
+                    if (Player.m_localPlayer != null)
+                        Player.m_localPlayer.Message(MessageHud.MessageType.Center, warning);
+                }
 
                 if (m_alias != null && (customRewardEvent.RedeemerName == m_auth?.m_userInfo?.displayName || WizshBoneTwitchIntegration.useRedeemCommand))
                 {
@@ -138,13 +190,27 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 RedeemData redeem = GetRedeemList().Find(item => RedeemManager.GetFullTitle(item) == customRewardEvent.CustomRewardTitle);
                 if (redeem == null)
                 {
-                    //m_chat.Send($"Could not find redeem! Your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points has been refunded!");
-                    //throw new RedeemException("Could not find redeem", ExceptionType.Error);
-                    throw new RedeemException($"Could not find redeem with the name: {customRewardEvent.CustomRewardTitle}, probaly not part of the mod. Aborting...", ExceptionType.Warning);
+                    // Not refunded or resolved on purpose: see m_unknownRedeems.
+                    m_unknownRedeems.Add(customRewardEvent);
+                    Jotunn.Logger.LogWarning($"[WBTI] Redeem '{customRewardEvent.CustomRewardTitle}' is not in the active profile, leaving it unresolved in the history.");
+
+                    if (WizshBoneTwitchIntegration.useRedeemCommand)
+                        WizshBoneTwitchIntegration.useRedeemCommand = false;
+
+                    return;
                 }
 
                 if (m_bannedUsers.Contains(customRewardEvent.RedeemerName.ToLower()))
                     throw new RedeemException($"{customRewardEvent.RedeemerName} is banned", ExceptionType.Warning);
+
+                // Every check and helper below dereferences Player.m_localPlayer, which is null
+                // while dead/respawning/loading - refund instead of letting that NRE get swallowed
+                // by Update() and leave the redeem neither fulfilled nor refunded.
+                if (Player.m_localPlayer == null)
+                {
+                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer isn't in the world right now! {m_refundMessage}");
+                    throw new RedeemException("No local player", ExceptionType.Warning);
+                }
 
                 if (m_playerIsInSafeZone && !redeem.ignoreWard)
                 {
@@ -152,19 +218,19 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     throw new RedeemException("Player is in safe zone", ExceptionType.Warning);
                 }
 
-                if (Game.IsPaused() || Menu.IsVisible())
+                if (ProfileSettingsHelper.Current.rejectWhenPaused && (Game.IsPaused() || Menu.IsVisible()))
                 {
                     m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, either the game is currently paused or the streamer is busy in the menu! {m_refundMessage}");
                     throw new RedeemException("Game is paused or menu is visible", ExceptionType.Warning);
                 }
 
-                if (Player.m_localPlayer.IsSleeping())
+                if (ProfileSettingsHelper.Current.rejectWhenSleeping && Player.m_localPlayer.IsSleeping())
                 {
                     m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is currently sleeping and can't react! {m_refundMessage}");
                     throw new RedeemException("Player is sleeping", ExceptionType.Warning);
                 }
 
-                if (Player.m_localPlayer.IsTeleporting())
+                if (ProfileSettingsHelper.Current.rejectWhenTeleporting && Player.m_localPlayer.IsTeleporting())
                 {
                     m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is currently teleporting and can't react! {m_refundMessage}");
                     throw new RedeemException("Player is teleporting", ExceptionType.Warning);

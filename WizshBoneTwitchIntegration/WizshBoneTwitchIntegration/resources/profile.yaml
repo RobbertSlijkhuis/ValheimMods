@@ -23,6 +23,10 @@ settings:
   autoResolveRedeems: false
   redeemTitlePrefix: WBTI
   redeemsDiscountPercent: 0
+  rejectWhenPaused: true
+  rejectWhenSleeping: true
+  rejectWhenTeleporting: true
+  wardEnabled: true
   wardRecipe: FineWood:5, GreydwarfEye:5, SurtlingCore:1
   wardBurnCreatures: false
   wardPushCreatures: true

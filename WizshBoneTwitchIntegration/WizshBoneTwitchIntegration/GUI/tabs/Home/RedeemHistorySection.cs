@@ -60,6 +60,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private static readonly Color CompletedColor = new Color(0.95f, 0.65f, 0.2f, 1f);
         private static readonly Color RefundedColor = new Color(0.2f, 0.8f, 0.2f, 1f);
+        private static readonly Color UnknownColor = Color.red;
         private static readonly Color CompleteBtnColor = new Color(0.95f, 0.65f, 0.2f, 1f);
         private static readonly Color RefundBtnColor = new Color(0.2f, 0.8f, 0.2f, 1f);
 
@@ -256,7 +257,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             if (m_pendingCountText != null)
             {
-                int pending = CountUnresolved(filtered);
+                int pending = CountUnresolved(customRewards, filtered);
                 m_pendingCountText.text = $"{pending} pending";
                 m_pendingCountText.color = GUIManager.Instance.ValheimOrange;
                 m_pendingCountText.gameObject.SetActive(pending > 0);
@@ -287,7 +288,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             foreach (CustomRewardEvent entry in GetVisiblePageHistory(filtered, m_currentPage))
             {
-                BuildRow(entry, yOffset, rowIndex);
+                BuildRow(customRewards, entry, yOffset, rowIndex);
                 yOffset -= ListRow.ItemHeight + ListRow.ItemSpacing;
                 rowIndex++;
             }
@@ -296,21 +297,24 @@ namespace WizshBoneTwitchIntegration.Gui
             contentRt.sizeDelta = new Vector2(contentRt.sizeDelta.x, Mathf.Abs(yOffset) + ListRow.ItemHeight / 2f);
         }
 
-        private void BuildRow(CustomRewardEvent entry, float yOffset, int rowIndex)
+        private void BuildRow(TwitchCustomRewards customRewards, CustomRewardEvent entry, float yOffset, int rowIndex)
         {
             bool isTestRedeem = entry.RedemptionId == Guid.Empty.ToString();
             bool isResolved = entry.Status == CustomRewardRedemptionState.Fulfilled
                 || entry.Status == CustomRewardRedemptionState.Canceled;
 
+            // Red only while an unknown redeem is still pending - once the user resolves it, it
+            // takes the usual Completed/Refunded colors (the "Unknown: " title prefix stays).
             Color textColor = entry.Status == CustomRewardRedemptionState.Fulfilled ? CompletedColor
                 : entry.Status == CustomRewardRedemptionState.Canceled ? RefundedColor
+                : IsUnknown(customRewards, entry) ? UnknownColor
                 : GUIManager.Instance.ValheimBeige;
 
             var (row, background) = ListRow.Create(m_listContainer, "HistoryRow", yOffset);
             background.color = ListRow.ZebraColor(rowIndex);
 
             CreateRowText(row, entry.RedeemerName, ColViewerX, ColViewerW, textColor, bold: true);
-            CreateRowText(row, entry.CustomRewardTitle, ColRedeemX, ColRedeemW, textColor, bold: false);
+            CreateRowText(row, GetDisplayTitle(customRewards, entry), ColRedeemX, ColRedeemW, textColor, bold: false);
             CreateRowText(row, $"{entry.CustomRewardCost} pts", ColCostX, ColCostW, textColor, bold: false);
 
             // Checked before isTestRedeem: a resolved test redeem (e.g. RedeemsTab's "Test" button,
@@ -452,7 +456,10 @@ namespace WizshBoneTwitchIntegration.Gui
             if (customRewards == null)
                 return;
 
-            List<CustomRewardEvent> eligible = GetFilteredHistory(customRewards).FindAll(BulkRedeemResolveHelper.IsEligible);
+            // Unknown redeems are left to their own row buttons - a bulk Complete/Refund never
+            // touches something the active profile doesn't recognize.
+            List<CustomRewardEvent> eligible = GetFilteredHistory(customRewards)
+                .FindAll(e => BulkRedeemResolveHelper.IsEligible(e) && !IsUnknown(customRewards, e));
 
             customRewards.m_bulkResolveHelper.EnqueueAll(
                 host: customRewards,
@@ -551,8 +558,17 @@ namespace WizshBoneTwitchIntegration.Gui
 
             return customRewards.m_redeemHistory.FindAll(entry =>
                 entry.RedeemerName.IndexOf(m_searchText, StringComparison.OrdinalIgnoreCase) >= 0
-                || entry.CustomRewardTitle.IndexOf(m_searchText, StringComparison.OrdinalIgnoreCase) >= 0);
+                || GetDisplayTitle(customRewards, entry).IndexOf(m_searchText, StringComparison.OrdinalIgnoreCase) >= 0);
         }
+
+        private static bool IsUnknown(TwitchCustomRewards customRewards, CustomRewardEvent entry) =>
+            customRewards != null && customRewards.IsUnknownRedeem(entry);
+
+        /// <summary>
+        /// The title as shown in the Redeem column, and the text the search box matches against.
+        /// </summary>
+        private static string GetDisplayTitle(TwitchCustomRewards customRewards, CustomRewardEvent entry) =>
+            IsUnknown(customRewards, entry) ? "Unknown: " + entry.CustomRewardTitle : entry.CustomRewardTitle;
 
         /// <summary>
         /// The subset of <paramref name="filtered"/> actually rendered on <paramref name="page"/>,
@@ -571,7 +587,7 @@ namespace WizshBoneTwitchIntegration.Gui
             return visible;
         }
 
-        private static int CountUnresolved(List<CustomRewardEvent> entries) =>
-            entries.FindAll(e => e.Status == CustomRewardRedemptionState.Unfulfilled).Count;
+        private static int CountUnresolved(TwitchCustomRewards customRewards, List<CustomRewardEvent> entries) =>
+            entries.FindAll(e => e.Status == CustomRewardRedemptionState.Unfulfilled && !IsUnknown(customRewards, e)).Count;
     }
 }

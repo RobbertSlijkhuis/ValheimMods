@@ -213,7 +213,7 @@ namespace WizshBoneTwitchIntegration
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.Windmill, true));
 
             PieceConfig pieceConfig = new PieceConfig();
-            pieceConfig.Enabled = true;
+            pieceConfig.Enabled = ProfileSettingsHelper.Current.wardEnabled;
             pieceConfig.Name = "Twitchy Ward";
             pieceConfig.Description = "A ward against mysterious and twitchy forces!";
             pieceConfig.PieceTable = PieceTables.Hammer;

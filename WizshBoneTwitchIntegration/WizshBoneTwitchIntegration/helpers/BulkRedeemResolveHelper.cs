@@ -24,7 +24,7 @@ namespace WizshBoneTwitchIntegration.Helpers
     {
         // Real Twitch Helix calls via the native SDK, not local VFX - paced conservatively since
         // we don't have exact rate-limit numbers for the "update redemption status" endpoint.
-        // ~3.3 calls/sec keeps a full 500-entry history under ~2.5 minutes worst case while
+        // ~3.3 calls/sec keeps a full 1000-entry history under ~5 minutes worst case while
         // staying comfortably under any plausible per-second bucket limit.
         private const float DelayBetweenResolves = 0.3f;
 

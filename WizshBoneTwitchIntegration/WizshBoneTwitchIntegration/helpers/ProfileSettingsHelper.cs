@@ -154,6 +154,14 @@ namespace WizshBoneTwitchIntegration.Helpers
             Piece piece = guardStone?.GetComponent<Piece>();
             if (piece != null)
             {
+                // PieceTable.UpdateAvailable skips pieces with m_enabled == false, so this hides the
+                // ward from the Hammer menu the next time the player's available pieces refresh.
+                bool wardEnabledChanged = piece.m_enabled != Current.wardEnabled;
+                piece.m_enabled = Current.wardEnabled;
+
+                if (wardEnabledChanged)
+                    RefreshBuildMenu();
+
                 // GetAsPieceRequirementArray returns null for an unparsable/unresolvable recipe
                 // string (e.g. a mid-edit or malformed value from the Settings tab's Twitch Ward
                 // recipe field). Assigning null to m_resources breaks the Hammer's build UI, so an
@@ -164,6 +172,24 @@ namespace WizshBoneTwitchIntegration.Helpers
                 else
                     Jotunn.Logger.LogWarning($"[WBTI] Twitch Ward recipe '{Current.wardRecipe}' is invalid, keeping the previously applied recipe.");
             }
+        }
+
+        /// <summary>
+        /// Makes a flipped Piece.m_enabled show up in the local player's Hammer menu right away.
+        /// Vanilla only adds a piece to Player.m_knownRecipes (UpdateKnownRecipesList skips pieces
+        /// with m_enabled == false) on spawn, on a new item or on a new crafting station, and only
+        /// re-filters the build list (PieceTable.UpdateAvailable) when the Hammer is re-equipped or
+        /// the category changes - so a ward that was disabled at spawn never became "known" and
+        /// stayed hidden after being re-enabled. Both methods are private, hence AccessTools.
+        /// </summary>
+        private static void RefreshBuildMenu()
+        {
+            Player player = Player.m_localPlayer;
+            if (player == null)
+                return;
+
+            HarmonyLib.AccessTools.Method(typeof(Player), "UpdateKnownRecipesList")?.Invoke(player, null);
+            HarmonyLib.AccessTools.Method(typeof(Player), "UpdateAvailablePiecesList")?.Invoke(player, null);
         }
     }
 }

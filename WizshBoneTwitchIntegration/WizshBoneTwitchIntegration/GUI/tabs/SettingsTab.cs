@@ -32,7 +32,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private float m_cursorY;
 
         // On a synced profile, the settings that affect redeems and game mechanics (redeem prefix,
-        // creatures, indestructible, safezones) are view-only: CreateRow puts a CanvasGroup with
+        // rejections, creatures, indestructible, safezones) are view-only: CreateRow puts a CanvasGroup with
         // `interactable` off on each such row, which disables every input/toggle/reset button in it
         // while keeping the values visible. Which rows get it is decided per section (see
         // m_lockNewRows) - the chatting settings and the login/auto-resolve toggles don't affect
@@ -137,13 +137,33 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                     v => ProfileSettingsHelper.Current.autoResolveRedeems = v,
                     Defaults.autoResolveRedeems));
 
-            // The prefix is part of every redeem's Twitch title, so it belongs to the synced data.
+            // The prefix is part of every redeem's Twitch title, so it belongs to the synced data -
+            // and so do the rejections, which decide whether a redeem is carried out at all.
             m_lockNewRows = m_isSynced;
-            StringFieldRow("Redeem prefix", "Added in front of every redeem title. No trailing space needed, it's added automatically. Max 6 characters.",
+
+            GameObject prefixRow = CreateRow();
+            float cellWidth = (ScrollContentWidth - ColGap) / 2f;
+            BuildStringCell(prefixRow, -cellWidth / 2f - ColGap / 2f, cellWidth,
+                "Redeem prefix", "Added in front of every redeem title. No trailing space needed, it's added automatically. Max 6 characters.",
                 () => ProfileSettingsHelper.Current.redeemTitlePrefix,
                 v => ProfileSettingsHelper.Current.redeemTitlePrefix = v,
                 Defaults.redeemTitlePrefix,
                 maxLength: 6);
+            BuildBoolCell(prefixRow, cellWidth / 2f + ColGap / 2f, cellWidth,
+                ("Reject when paused", "Auto reject and refund redeems while the game is paused or the menu is open",
+                    () => ProfileSettingsHelper.Current.rejectWhenPaused,
+                    v => ProfileSettingsHelper.Current.rejectWhenPaused = v,
+                    Defaults.rejectWhenPaused));
+
+            BoolFieldRow(
+                ("Reject when sleeping", "Auto reject and refund redeems while the streamer is in bed",
+                    () => ProfileSettingsHelper.Current.rejectWhenSleeping,
+                    v => ProfileSettingsHelper.Current.rejectWhenSleeping = v,
+                    Defaults.rejectWhenSleeping),
+                ("Reject when teleporting", "Auto reject and refund redeems while the streamer is teleporting",
+                    () => ProfileSettingsHelper.Current.rejectWhenTeleporting,
+                    v => ProfileSettingsHelper.Current.rejectWhenTeleporting = v,
+                    Defaults.rejectWhenTeleporting));
         }
 
         private void BuildHudSection()
@@ -308,7 +328,15 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             SectionHeader("Safezones");
             m_lockNewRows = m_isSynced;
 
-            StringFieldRow("Twitch Ward recipe", "Comma-separated item:amount pairs required to craft the ward",
+            GameObject wardRow = CreateRow();
+            float wardCellWidth = (ScrollContentWidth - ColGap) / 2f;
+            BuildBoolCell(wardRow, -wardCellWidth / 2f - ColGap / 2f, wardCellWidth,
+                ("Twitch Ward buildable", "Disable to hide the ward from the Hammer build menu",
+                    () => ProfileSettingsHelper.Current.wardEnabled,
+                    v => ProfileSettingsHelper.Current.wardEnabled = v,
+                    Defaults.wardEnabled));
+            BuildStringCell(wardRow, wardCellWidth / 2f + ColGap / 2f, wardCellWidth,
+                "Twitch Ward recipe", "Comma-separated item:amount pairs required to craft the ward",
                 () => ProfileSettingsHelper.Current.wardRecipe,
                 v => ProfileSettingsHelper.Current.wardRecipe = v,
                 Defaults.wardRecipe,
@@ -339,6 +367,11 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         private void SectionHeader(string title)
         {
+            // The previous row already leaves RowSpacing below it; SectionGap on top of that doubles
+            // the space above a header. Skipped for the first header, which sits at ListTopPadding.
+            if (m_cursorY < -ListTopPadding)
+                m_cursorY -= SectionGap;
+
             Text header = GuiHelper.CreateTitle(title, m_scrollContent, new Vector2(0f, m_cursorY), width: ScrollContentWidth);
             GuiHelper.PivotToTop(header.rectTransform, m_cursorY);
             m_cursorY -= SectionHeaderHeight;
@@ -347,20 +380,21 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private void BoolFieldRow(params (string Title, string Description, Func<bool> Get, Action<bool> Set, bool Default)[] fields)
         {
             GameObject row = CreateRow();
-            ForEachCell(fields.Length, (x, width, i) =>
-            {
-                var f = fields[i];
-                GameObject cell = CreateCell(row, x, width);
-                GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
-                // The toggle stays its usual fixed left-aligned width (see CreateBoolField) - only
-                // the reset button's position comes from FieldAndResetLayout here.
-                (_, _, float resetCenterX) = GuiHelper.FieldAndResetLayout(width);
-                Toggle toggle = GuiFieldBuilder.CreateBoolField(cell, new Vector2(0f, -56f), width - 24f, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
-                // Toggle.isOn is a no-op when already equal to the target value, so this only fires
-                // the listener above (and persists) when a reset actually changes anything.
-                GuiHelper.CreateResetButton(cell, resetCenterX, -58f, () => toggle.isOn = f.Default);
-                GuiHelper.CreateCardDescription(cell, f.Description, width - 24f);
-            });
+            ForEachCell(fields.Length, (x, width, i) => BuildBoolCell(row, x, width, fields[i]));
+        }
+
+        private static void BuildBoolCell(GameObject row, float x, float width, (string Title, string Description, Func<bool> Get, Action<bool> Set, bool Default) f)
+        {
+            GameObject cell = CreateCell(row, x, width);
+            GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
+            // The toggle stays its usual fixed left-aligned width (see CreateBoolField) - only
+            // the reset button's position comes from FieldAndResetLayout here.
+            (_, _, float resetCenterX) = GuiHelper.FieldAndResetLayout(width);
+            Toggle toggle = GuiFieldBuilder.CreateBoolField(cell, new Vector2(0f, -56f), width - 24f, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
+            // Toggle.isOn is a no-op when already equal to the target value, so this only fires
+            // the listener above (and persists) when a reset actually changes anything.
+            GuiHelper.CreateResetButton(cell, resetCenterX, -58f, () => toggle.isOn = f.Default);
+            GuiHelper.CreateCardDescription(cell, f.Description, width - 24f);
         }
 
         private void IntFieldRow(params (string Title, string Description, Func<int> Get, Action<int> Set, int Default)[] fields)
@@ -422,10 +456,15 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private void StringFieldRow(string title, string description, Func<string> get, Action<string> set, string defaultValue, int maxLength = 0, Func<string, bool> isValid = null)
         {
             GameObject row = CreateRow();
-            GameObject cell = CreateCell(row, 0f, ScrollContentWidth);
-            GuiHelper.CreateCardTitle(cell, title, ScrollContentWidth - 24f);
+            BuildStringCell(row, 0f, ScrollContentWidth, title, description, get, set, defaultValue, maxLength, isValid);
+        }
 
-            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(ScrollContentWidth);
+        private static void BuildStringCell(GameObject row, float x, float width, string title, string description, Func<string> get, Action<string> set, string defaultValue, int maxLength = 0, Func<string, bool> isValid = null)
+        {
+            GameObject cell = CreateCell(row, x, width);
+            GuiHelper.CreateCardTitle(cell, title, width - 24f);
+
+            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(width);
 
             InputField input = GuiFieldBuilder.CreateInputField(cell, new Vector2(fieldCenterX, -58f), fieldWidth, get(), maxLength: maxLength);
             Color normalColor = input.textComponent.color;
@@ -442,7 +481,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             // behavior as typing the default value in by hand.
             GuiHelper.CreateResetButton(cell, resetCenterX, -58f, () => input.text = defaultValue);
 
-            GuiHelper.CreateCardDescription(cell, description, ScrollContentWidth - 24f);
+            GuiHelper.CreateCardDescription(cell, description, width - 24f);
         }
 
         /// <summary>

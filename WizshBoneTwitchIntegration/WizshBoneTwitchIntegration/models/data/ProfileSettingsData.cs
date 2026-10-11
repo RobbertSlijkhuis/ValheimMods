@@ -42,7 +42,14 @@ namespace WizshBoneTwitchIntegration.Models
         public string redeemTitlePrefix = "WBTI";
         public int redeemsDiscountPercent = 0;
 
+        // Rejections: auto reject (cancel + refund) redeems that arrive while the streamer is in
+        // one of these states.
+        public bool rejectWhenPaused = true;
+        public bool rejectWhenSleeping = true;
+        public bool rejectWhenTeleporting = true;
+
         // Twitchy Ward
+        public bool wardEnabled = true;
         public string wardRecipe = "FineWood:5, GreydwarfEye:5, SurtlingCore:1";
         public bool wardBurnCreatures = false;
         public bool wardPushCreatures = true;

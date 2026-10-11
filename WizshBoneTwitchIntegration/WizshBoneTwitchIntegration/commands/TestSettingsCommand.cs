@@ -104,7 +104,11 @@ namespace WizshBoneTwitchIntegration.Commands
                 enableRedeemsOnLogin = false,
                 autoResolveRedeems   = false,
                 redeemTitlePrefix    = "TEST",
+                rejectWhenPaused      = false,
+                rejectWhenSleeping    = false,
+                rejectWhenTeleporting = false,
 
+                wardEnabled       = false,
                 wardRecipe        = "Wood:99, Stone: 1, Iron:5",
                 wardBurnCreatures = true,
                 wardPushCreatures = false,
@@ -191,6 +195,10 @@ namespace WizshBoneTwitchIntegration.Commands
                 && a.enableRedeemsOnLogin == b.enableRedeemsOnLogin
                 && a.autoResolveRedeems == b.autoResolveRedeems
                 && a.redeemTitlePrefix == b.redeemTitlePrefix
+                && a.rejectWhenPaused == b.rejectWhenPaused
+                && a.rejectWhenSleeping == b.rejectWhenSleeping
+                && a.rejectWhenTeleporting == b.rejectWhenTeleporting
+                && a.wardEnabled == b.wardEnabled
                 && a.wardRecipe == b.wardRecipe
                 && a.wardBurnCreatures == b.wardBurnCreatures
                 && a.wardPushCreatures == b.wardPushCreatures
