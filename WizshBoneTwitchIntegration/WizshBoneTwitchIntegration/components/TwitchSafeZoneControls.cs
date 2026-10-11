@@ -6,7 +6,7 @@ namespace WizshBoneTwitchIntegration.Components
 {
     internal class TwitchSafeZoneControls : MonoBehaviour, Hoverable, Interactable, TextReceiver
     {
-        // Shared across every client via ZDO (see the no-RPC pattern in CLAUDE.md) - any player
+        // Shared across every client via ZDO (see the ZDO replication pattern in CLAUDE.md) - any player
         // can be the one to cycle it via alt+use, not just the owner, so the shield dome and
         // projector stay in sync for everyone looking at the same ward.
         private enum VisualMode
@@ -26,6 +26,9 @@ namespace WizshBoneTwitchIntegration.Components
         // change made by any client (including this one) and react exactly once - mirrors
         // TwitchSurpriseChest's m_openHandledLocally pattern.
         private VisualMode m_appliedVisualMode;
+        // Same idea for the radius: the last value this instance applied locally, so a change
+        // written by any other client is picked up once by CheckSyncedState().
+        private float m_appliedRadius;
         private float radius;
         private readonly int radiusHash = "SafeZoneRadius_WBTI".GetStableHashCode();
         private readonly int visualModeHash = "SafeZoneVisualMode_WBTI".GetStableHashCode();
@@ -46,12 +49,12 @@ namespace WizshBoneTwitchIntegration.Components
                 visualMode = (VisualMode)m_netView.GetZDO().GetInt(visualModeHash, (int)VisualMode.Shield);
                 m_appliedVisualMode = visualMode;
 
-                SetRadius(radius);
+                ApplyRadius(radius);
                 ApplyVisualMode();
 
-                // The mode only ever changes from a player interacting (see Interact()), so a
-                // twice-a-second check is plenty responsive without paying a per-frame Update() cost.
-                InvokeRepeating(nameof(CheckVisualMode), 0.5f, 0.5f);
+                // The mode and radius only ever change from a player interacting (see Interact()),
+                // so a twice-a-second check is plenty responsive without paying a per-frame Update() cost.
+                InvokeRepeating(nameof(CheckSyncedState), 0.5f, 0.5f);
             }
             catch (Exception e)
             {
@@ -59,14 +62,24 @@ namespace WizshBoneTwitchIntegration.Components
             }
         }
 
-        private void CheckVisualMode()
+        private void CheckSyncedState()
         {
             try
             {
                 if (m_netView == null || !m_netView.IsValid())
                     return;
 
-                VisualMode zdoVisualMode = (VisualMode)m_netView.GetZDO().GetInt(visualModeHash, (int)VisualMode.Shield);
+                ZDO zdo = m_netView.GetZDO();
+
+                // Clamped the same way ApplyRadius does: m_appliedRadius holds the clamped value, so
+                // comparing the raw ZDO value would never match an out-of-range one and re-apply
+                // (and rebuild the dome) on every check.
+                float zdoRadius = Mathf.Clamp(zdo.GetFloat(radiusHash, radius), 3f, 1000f);
+
+                if (!Mathf.Approximately(zdoRadius, m_appliedRadius))
+                    ApplyRadius(zdoRadius);
+
+                VisualMode zdoVisualMode = (VisualMode)zdo.GetInt(visualModeHash, (int)VisualMode.Shield);
 
                 if (zdoVisualMode == m_appliedVisualMode)
                     return;
@@ -77,7 +90,7 @@ namespace WizshBoneTwitchIntegration.Components
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("TwitchSafeZoneControls.CheckVisualMode failed: " + e);
+                Jotunn.Logger.LogError("TwitchSafeZoneControls.CheckSyncedState failed: " + e);
             }
         }
 
@@ -147,24 +160,34 @@ namespace WizshBoneTwitchIntegration.Components
 
         public string GetText()
         {
-            return $"{m_netView.GetZDO().GetFloat(radiusHash)}";
+            return $"{m_netView.GetZDO().GetFloat(radiusHash, radius)}";
         }
 
         public void SetText(string value)
         {
-            if (!IsDigitsOnly(value))
+            if (string.IsNullOrEmpty(value) || !IsDigitsOnly(value))
                 return;
 
-            float floatValue = float.Parse(value);
-            SetRadius(floatValue);
+            float floatValue = Mathf.Clamp(float.Parse(value), 3f, 1000f);
+
+            // Any player can change the radius, not just the owner - claim ownership first so the
+            // ZDO write actually propagates, then CheckSyncedState() applies it on every other client.
+            if (!m_netView.IsOwner())
+                m_netView.ClaimOwnership();
+
+            m_netView.GetZDO().Set(radiusHash, floatValue);
+            ApplyRadius(floatValue);
         }
 
-        public void SetRadius(float value)
+        // Local-only: applies the radius to this client's copy of the ward. Never writes the ZDO.
+        private void ApplyRadius(float value)
         {
             if (colliderTrans == null || projectorTransform == null || parentTrans == null)
                 throw new Exception("Transform is null");
 
             value = Mathf.Clamp(value, 3f, 1000f);
+            m_appliedRadius = value;
+            radius = value;
 
             CircleProjector projectorComp = projectorTransform.gameObject.GetComponent<CircleProjector>();
             CapsuleCollider colliderComp = colliderTrans.gameObject.GetComponent<CapsuleCollider>();
@@ -179,8 +202,6 @@ namespace WizshBoneTwitchIntegration.Components
 
             if (visualMode == VisualMode.Shield)
                 ShieldDomeHelper.ShowDome(this, parentTrans.position, value, ShieldColors.Ward);
-
-            m_netView.GetZDO().Set(radiusHash, value);
         }
 
         // Applies the current visualMode to both the projector and the shield dome, showing at

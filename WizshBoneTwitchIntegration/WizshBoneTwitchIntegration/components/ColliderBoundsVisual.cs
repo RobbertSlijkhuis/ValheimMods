@@ -10,7 +10,7 @@ namespace WizshBoneTwitchIntegration.Components
     // outline; a capsule with no cylinder part comes out as three orthogonal rings), three
     // orthogonal rings for SphereCollider. Every line is a thin opaque
     // bar rather than a GL/LineRenderer draw, since that's simple and doesn't need a custom shader.
-    // Callers that resize the collider after Initialize() (e.g. TwitchSafeZoneControls.SetRadius on
+    // Callers that resize the collider after Initialize() (e.g. TwitchSafeZoneControls.ApplyRadius on
     // the ward stone) call Refresh() (or ColliderBoundsHelper.Refresh) explicitly, so this stays
     // correct without polling.
     // No ZNetView/ZDO of its own, so it never gets networked - every client only sees their own.
