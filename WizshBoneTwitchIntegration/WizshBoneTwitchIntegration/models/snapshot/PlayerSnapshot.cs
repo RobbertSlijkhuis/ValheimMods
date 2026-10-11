@@ -17,6 +17,10 @@
 
         public float maxCarryWeight;
 
+        public float maxInteractDistance;
+        public float maxPlaceDistance;
+        public float autoPickupRange;
+
         public PlayerSnapshot(Player player)
         {
             Create(player);
@@ -38,6 +42,10 @@
             swimSpeed = player.m_swimSpeed;
 
             maxCarryWeight = player.m_maxCarryWeight;
+
+            maxInteractDistance = player.m_maxInteractDistance;
+            maxPlaceDistance = player.m_maxPlaceDistance;
+            autoPickupRange = player.m_autoPickupRange;
         }
 
         public void Apply(Player player)
@@ -56,6 +64,10 @@
             player.m_swimSpeed = swimSpeed;
 
             player.m_maxCarryWeight = maxCarryWeight;
+
+            player.m_maxInteractDistance = maxInteractDistance;
+            player.m_maxPlaceDistance = maxPlaceDistance;
+            player.m_autoPickupRange = autoPickupRange;
         }
     }
 }

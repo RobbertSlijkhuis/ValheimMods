@@ -2,6 +2,7 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Harmony
@@ -239,6 +240,22 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
         }
 
+        // Resized Twitch creatures: scale freshly attached gear with the creature (see
+        // CreatureGearHelper.ScaleAttachedItem). Players are handled by the Set*Equipped patches below.
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(VisEquipment), "AttachItem")]
+        public static void AttachItem_Postfix(VisEquipment __instance, GameObject __result)
+        {
+            try
+            {
+                CreatureGearHelper.ScaleAttachedItem(__instance, __result);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in AttachItem_Postfix: " + e);
+            }
+        }
+
         // Re-equipping replaces the held/sheathed item GameObjects with fresh instances at
         // scale 1, so re-apply the player's current scale whenever that happens.
         [HarmonyPostfix]
@@ -247,13 +264,10 @@ namespace WizshBoneTwitchIntegration.Harmony
         {
             try
             {
-                if (!__result || !IsLocalPlayerVisEquipment(__instance))
+                if (!__result || !PlayerScaleHelper.TryGetVisualScale(__instance, out float scale))
                     return;
 
-                float scale = PlayerScaleHelper.CurrentScale;
-
-                if (scale != 1f)
-                    PlayerScaleHelper.SetWorldScale(__instance.m_rightItemInstance, scale);
+                PlayerScaleHelper.SetWorldScale(__instance.m_rightItemInstance, scale);
             }
             catch (Exception e)
             {
@@ -267,13 +281,10 @@ namespace WizshBoneTwitchIntegration.Harmony
         {
             try
             {
-                if (!__result || !IsLocalPlayerVisEquipment(__instance))
+                if (!__result || !PlayerScaleHelper.TryGetVisualScale(__instance, out float scale))
                     return;
 
-                float scale = PlayerScaleHelper.CurrentScale;
-
-                if (scale != 1f)
-                    PlayerScaleHelper.SetWorldScale(__instance.m_leftItemInstance, scale);
+                PlayerScaleHelper.SetWorldScale(__instance.m_leftItemInstance, scale);
             }
             catch (Exception e)
             {
@@ -287,12 +298,7 @@ namespace WizshBoneTwitchIntegration.Harmony
         {
             try
             {
-                if (!__result || !IsLocalPlayerVisEquipment(__instance))
-                    return;
-
-                float scale = PlayerScaleHelper.CurrentScale;
-
-                if (scale == 1f)
+                if (!__result || !PlayerScaleHelper.TryGetVisualScale(__instance, out float scale))
                     return;
 
                 PlayerScaleHelper.SetWorldScale(__instance.m_leftBackItemInstance, scale);
@@ -312,13 +318,10 @@ namespace WizshBoneTwitchIntegration.Harmony
         {
             try
             {
-                if (!__result || !IsLocalPlayerVisEquipment(__instance))
+                if (!__result || !PlayerScaleHelper.TryGetVisualScale(__instance, out float scale))
                     return;
 
-                float scale = PlayerScaleHelper.CurrentScale;
-
-                if (scale != 1f)
-                    PlayerScaleHelper.SetWorldScale(__instance.m_helmetItemInstance, scale);
+                PlayerScaleHelper.SetWorldScale(__instance.m_helmetItemInstance, scale);
             }
             catch (Exception e)
             {
@@ -332,13 +335,10 @@ namespace WizshBoneTwitchIntegration.Harmony
         {
             try
             {
-                if (!__result || !IsLocalPlayerVisEquipment(__instance))
+                if (!__result || !PlayerScaleHelper.TryGetVisualScale(__instance, out float scale))
                     return;
 
-                float scale = PlayerScaleHelper.CurrentScale;
-
-                if (scale != 1f)
-                    PlayerScaleHelper.SetWorldScale(__instance.m_hairItemInstance, scale);
+                PlayerScaleHelper.SetWorldScale(__instance.m_hairItemInstance, scale);
             }
             catch (Exception e)
             {
@@ -352,13 +352,10 @@ namespace WizshBoneTwitchIntegration.Harmony
         {
             try
             {
-                if (!__result || !IsLocalPlayerVisEquipment(__instance))
+                if (!__result || !PlayerScaleHelper.TryGetVisualScale(__instance, out float scale))
                     return;
 
-                float scale = PlayerScaleHelper.CurrentScale;
-
-                if (scale != 1f)
-                    PlayerScaleHelper.SetWorldScale(__instance.m_beardItemInstance, scale);
+                PlayerScaleHelper.SetWorldScale(__instance.m_beardItemInstance, scale);
             }
             catch (Exception e)
             {
@@ -366,9 +363,64 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
         }
 
-        private static bool IsLocalPlayerVisEquipment(VisEquipment vis)
+        // Remote players are resized by TwitchPlayerScaleSync from the owner's replicated scale, so
+        // every player needs the component (it does nothing for the local player).
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Player), "Awake")]
+        public static void PlayerAwake_Postfix(Player __instance)
         {
-            return Player.m_localPlayer != null && ReferenceEquals(vis, Player.m_localPlayer.m_visEquipment);
+            try
+            {
+                if (__instance.GetComponent<TwitchPlayerScaleSync>() == null)
+                    __instance.gameObject.AddComponent<TwitchPlayerScaleSync>();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in PlayerAwake_Postfix: " + e);
+            }
+        }
+
+        // Wading resistance is quadratic in speed, so apply it to the unboosted speed and scale the
+        // result back (see PlayerScaleHelper.GetWadeSpeedFactor).
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Character), "ApplyLiquidResistance")]
+        public static void ApplyLiquidResistance_Prefix(Character __instance, ref float speed, out float __state)
+        {
+            // 0 = "this prefix did not divide", so the postfix leaves speed alone. Passing the exact
+            // factor along also means the postfix undoes precisely what this prefix did, even if
+            // another mod skips the original method or the multiplier changes in between.
+            __state = 0f;
+
+            try
+            {
+                // This runs for every Character each movement tick, but the factor is 1 for everyone
+                // except the local player with an active speed multiplier - leave those untouched.
+                float factor = PlayerScaleHelper.GetWadeSpeedFactor(__instance);
+                if (factor == 1f)
+                    return;
+
+                speed /= factor;
+                __state = factor;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in ApplyLiquidResistance_Prefix: " + e);
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Character), "ApplyLiquidResistance")]
+        public static void ApplyLiquidResistance_Postfix(ref float speed, float __state)
+        {
+            try
+            {
+                if (__state > 0f)
+                    speed *= __state;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in ApplyLiquidResistance_Postfix: " + e);
+            }
         }
 
         // Character.GetRadius/GetHeight special-case the player to always return the
@@ -382,7 +434,7 @@ namespace WizshBoneTwitchIntegration.Harmony
         {
             try
             {
-                if (!ReferenceEquals(__instance, Player.m_localPlayer))
+                if (!__instance.IsPlayer())
                     return;
 
                 float scale = __instance.transform.localScale.x;
@@ -402,7 +454,7 @@ namespace WizshBoneTwitchIntegration.Harmony
         {
             try
             {
-                if (!ReferenceEquals(__instance, Player.m_localPlayer))
+                if (!__instance.IsPlayer())
                     return;
 
                 float scale = __instance.transform.localScale.x;

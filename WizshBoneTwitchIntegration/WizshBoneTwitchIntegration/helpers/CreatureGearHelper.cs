@@ -77,6 +77,33 @@ namespace WizshBoneTwitchIntegration.Helpers
             yield return EquipItems(humanoid, creatureData.equipItems);
         }
 
+        // VisEquipment.AttachItem (held/sheathed items, helmet, hair, beard) parents the new instance
+        // with SetParent's keep-world-transform default, so it ends up at the item prefab's own world
+        // scale whatever the creature's current scale is. A creature resized before it equips (the
+        // normal redeem order) would therefore hold full-size gear, redeem-equipped or its own.
+        // Multiply by the creature's size factor (current root scale / native, same as its attack
+        // scale) to make the gear match. Relative on purpose: if the creature is resized after the
+        // item was attached, the hierarchy scales the item by itself, so the factor is still 1 at
+        // attach time. Visual only - attack reach never reads the item instance (the origin is a
+        // character bone, the ranges are scaled by EntityScalePatchesWBTI, item colliders are
+        // disabled), so this doesn't scale reach a second time. Body armor is skinned to the
+        // skeleton and follows it already. Players are handled by PlayerScaleHelper.
+        public static void ScaleAttachedItem(VisEquipment vis, GameObject item)
+        {
+            if (vis == null || item == null)
+                return;
+
+            Character character = vis.GetComponentInParent<Character>();
+
+            if (character == null || character.IsPlayer())
+                return;
+
+            float scale = AttackScaleHelper.GetAttackScale(character);
+
+            if (scale != 1f)
+                item.transform.localScale *= scale;
+        }
+
         // Unequips and drops from the creature's inventory every item matching the given types.
         // Vanilla GiveDefaultItem adds weapons to the inventory without equipping them, so "Weapon"
         // and "All" sweep the whole inventory; plain item-type entries (Shield, Helmet, ...) only
@@ -173,8 +200,191 @@ namespace WizshBoneTwitchIntegration.Helpers
                 if (itemData == null)
                     continue;
 
+                AdaptAttackAnimation(humanoid, itemData);
+                EnsureAmmo(humanoid, itemData);
+                AdaptRangedWeapon(itemData);
+
                 yield return EquipWithRetry(humanoid, itemData, prefabName);
             }
+        }
+
+        // Attack.Start fires the weapon's m_attackAnimation (plus a chain/random index) as an Animator
+        // trigger and reports success even when the Animator has no such trigger - the creature then
+        // "attacks" without any swing or hit event. Monster Animators don't have the player weapon
+        // triggers (e.g. swing_longsword0), they use their own: "attack" for swords and the like,
+        // "attack_mace" for clubs, "attack_bow" for bows. When the creature's Animator lacks the
+        // weapon's own trigger, point this item's attack at the matching monster trigger instead.
+        // Safe to mutate: PickupPrefab instantiates the item, so m_shared/m_attack are this instance's
+        // own copy, not the prefab's. Chain/random indices are zeroed because the monster triggers
+        // are plain names without an index suffix.
+        private static void AdaptAttackAnimation(Humanoid humanoid, ItemDrop.ItemData itemData)
+        {
+            Attack attack = itemData.m_shared.m_attack;
+
+            // Armor, shields etc. have no attack animation - skip before the Animator lookup.
+            if (attack == null || string.IsNullOrEmpty(attack.m_attackAnimation))
+                return;
+
+            Animator animator = humanoid.GetComponentInChildren<Animator>();
+
+            if (animator == null)
+                return;
+
+            if (AnimatorHasAttackTrigger(animator, attack))
+                return;
+
+            string monsterTrigger;
+
+            if (itemData.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Bow)
+                monsterTrigger = "attack_bow";
+            else if (itemData.m_shared.m_skillType == Skills.SkillType.Clubs)
+                monsterTrigger = "attack_mace";
+            else
+                monsterTrigger = "attack";
+
+            if (!AnimatorHasTrigger(animator, monsterTrigger))
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] CreatureGearHelper: {humanoid.name}'s Animator has neither '{attack.m_attackAnimation}' nor '{monsterTrigger}', '{itemData.m_shared.m_name}' will not be able to attack.");
+                return;
+            }
+
+            Jotunn.Logger.LogWarning($"[WBTI] CreatureGearHelper: remapping '{itemData.m_shared.m_name}' attack animation '{attack.m_attackAnimation}' -> '{monsterTrigger}' for {humanoid.name}.");
+
+            attack.m_attackAnimation = monsterTrigger;
+            attack.m_attackChainLevels = 1;
+            attack.m_attackRandomAnimations = 0;
+        }
+
+        // How close a target must be before a ranged weapon's AI starts shooting. MonsterAI walks up
+        // to m_aiAttackRange before attacking, and player weapons keep the 2 m default meant for
+        // melee, so a creature with a player bow would close to melee distance first.
+        private const float RangedAiAttackRange = 30f;
+
+        // Two things differ between a player and a creature firing a drawn bow:
+        // - The AI range above.
+        // - Draw: a player's draw time scales projectile velocity, accuracy and damage by the draw
+        //   percentage (Attack.m_bowDraw). A creature never draws (Humanoid.m_attackDrawTime stays 0),
+        //   so the percentage is 0 and the arrow leaves at minimum velocity with its damage scaled
+        //   down to nothing. Clearing m_bowDraw on this item's own copy makes it fire at full power,
+        //   like a monster bow.
+        private static void AdaptRangedWeapon(ItemDrop.ItemData itemData)
+        {
+            Attack attack = itemData.m_shared.m_attack;
+
+            if (attack == null || (!attack.m_bowDraw && string.IsNullOrEmpty(itemData.m_shared.m_ammoType)))
+                return;
+
+            attack.m_bowDraw = false;
+
+            if (itemData.m_shared.m_aiAttackRange < RangedAiAttackRange)
+                itemData.m_shared.m_aiAttackRange = RangedAiAttackRange;
+        }
+
+        // Player weapons that use ammo (bows, crossbows) have no projectile of their own: Attack.Start
+        // refuses to fire without a matching ammo item in the shooter's inventory (HaveAmmo), and the
+        // projectile, velocity and ammo damage come from that item. Vanilla monster bows avoid this
+        // with an empty m_ammoType, which a player bow doesn't have. So give the creature a full stack
+        // of a basic ammo item matching the weapon's m_ammoType. Each shot consumes one; a full stack
+        // outlasts any redeem. Skipped when the inventory already holds matching ammo.
+        private static readonly Dictionary<string, string> DefaultAmmoByType = new Dictionary<string, string>
+        {
+            { "arrow", "ArrowWood" },
+            { "bolt", "BoltBone" },
+        };
+
+        private static void EnsureAmmo(Humanoid humanoid, ItemDrop.ItemData weapon)
+        {
+            string ammoType = weapon.m_shared.m_ammoType;
+
+            if (string.IsNullOrEmpty(ammoType))
+                return;
+
+            if (humanoid.GetInventory().GetAmmoItem(ammoType) != null)
+                return;
+
+            GameObject ammoPrefab = FindAmmoPrefab(ammoType);
+
+            if (ammoPrefab == null)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] CreatureGearHelper: no ammo prefab found for ammo type '{ammoType}', '{weapon.m_shared.m_name}' will not be able to fire.");
+                return;
+            }
+
+            int maxStack = ammoPrefab.GetComponent<ItemDrop>().m_itemData.m_shared.m_maxStackSize;
+            ItemDrop.ItemData ammo = humanoid.PickupPrefab(ammoPrefab, maxStack, autoequip: false);
+
+            if (ammo == null)
+                Jotunn.Logger.LogWarning($"[WBTI] CreatureGearHelper: could not add '{ammoPrefab.name}' ammo to {humanoid.name}'s inventory, '{weapon.m_shared.m_name}' will not be able to fire.");
+        }
+
+        private static GameObject FindAmmoPrefab(string ammoType)
+        {
+            if (DefaultAmmoByType.TryGetValue(ammoType, out string prefabName))
+            {
+                GameObject prefab = PrefabManager.Instance.GetPrefab(prefabName);
+
+                if (prefab != null && prefab.GetComponent<ItemDrop>() != null)
+                    return prefab;
+            }
+
+            // Unknown ammo type (modded weapon): take any ammo item that matches it.
+            if (ObjectDB.instance == null)
+                return null;
+
+            foreach (GameObject candidate in ObjectDB.instance.m_items)
+            {
+                ItemDrop itemDrop = candidate != null ? candidate.GetComponent<ItemDrop>() : null;
+
+                if (itemDrop != null
+                    && itemDrop.m_itemData.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Ammo
+                    && itemDrop.m_itemData.m_shared.m_ammoType == ammoType)
+                    return candidate;
+            }
+
+            return null;
+        }
+
+        // Mirrors the trigger name Attack.Start builds: base + chain index, base + random index, or
+        // the plain base name.
+        private static bool AnimatorHasAttackTrigger(Animator animator, Attack attack)
+        {
+            string name = attack.m_attackAnimation;
+
+            if (attack.m_attackChainLevels > 1)
+                return AnimatorHasTrigger(animator, name + "0");
+
+            if (attack.m_attackRandomAnimations >= 2)
+                return AnimatorHasTrigger(animator, name + "0");
+
+            return AnimatorHasTrigger(animator, name);
+        }
+
+        // Animator.parameters allocates a new array on every access. The trigger names only depend on
+        // the controller, which every creature of a kind shares, so collect them once per controller.
+        private static readonly Dictionary<RuntimeAnimatorController, HashSet<string>> s_triggerNamesByController =
+            new Dictionary<RuntimeAnimatorController, HashSet<string>>();
+
+        private static bool AnimatorHasTrigger(Animator animator, string name)
+        {
+            RuntimeAnimatorController controller = animator.runtimeAnimatorController;
+
+            if (controller == null)
+                return false;
+
+            if (!s_triggerNamesByController.TryGetValue(controller, out HashSet<string> triggerNames))
+            {
+                triggerNames = new HashSet<string>();
+
+                foreach (AnimatorControllerParameter parameter in animator.parameters)
+                {
+                    if (parameter.type == AnimatorControllerParameterType.Trigger)
+                        triggerNames.Add(parameter.name);
+                }
+
+                s_triggerNamesByController[controller] = triggerNames;
+            }
+
+            return triggerNames.Contains(name);
         }
 
         // Humanoid.EquipItem refuses while the creature is mid-attack or mid-dodge (plausible for a
