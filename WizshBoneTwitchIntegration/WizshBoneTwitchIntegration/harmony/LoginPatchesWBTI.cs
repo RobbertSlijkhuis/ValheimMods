@@ -36,6 +36,22 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
         }
 
+        // Game.Start, not Awake: ZRoutedRpc is created in ZNet.Awake, which isn't guaranteed to have
+        // run before Game.Awake. Vanilla registers its own RPCs in Game.Start for the same reason.
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Game), "Start")]
+        public static void GameStart_Postfix()
+        {
+            try
+            {
+                FlashBangHelper.RegisterRpc();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not register RPCs in GameStart_Postfix: " + e);
+            }
+        }
+
         [HarmonyPrefix]
         [HarmonyPatch(typeof(Menu), "OnLogoutYes")]
         public static bool OnLogoutYes_Postfix()

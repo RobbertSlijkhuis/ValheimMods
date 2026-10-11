@@ -30,22 +30,114 @@ namespace WizshBoneTwitchIntegration.Helpers
         // explosions a brief window on screen before the flash takes over.
         private const float GroundExplosionLeadTime = 0.3f;
 
+        // Other players within this many meters of the streamer's flashbang are flashed too. Fixed
+        // on purpose and enforced by the RECEIVER, so no redeem config can widen it. The sent
+        // position itself is trusted - a modified client could fake it, which is accepted.
+        private const float NearbyPlayerRadius = 20f;
+        private const string FlashRpcName = "WBTI_Flashbang";
+
         private struct QueuedFlashbang
         {
             public FlashBangData data;
             public CustomRewardEvent customRewardEvent;
+            // Triggered by another player's flashbang: the delay already elapsed on their side and
+            // the ground explosions already replicate to us, so both are skipped.
+            public bool remote;
         }
 
         private static readonly Queue<QueuedFlashbang> s_queue = new Queue<QueuedFlashbang>();
         private static bool s_isRunning;
         private static GameObject s_activeFlash;
 
-        public static void Enqueue(MonoBehaviour host, FlashBangData flashbangData, CustomRewardEvent customRewardEvent)
+        public static void Enqueue(MonoBehaviour host, FlashBangData flashbangData, CustomRewardEvent customRewardEvent, bool remote = false)
         {
-            s_queue.Enqueue(new QueuedFlashbang { data = flashbangData, customRewardEvent = customRewardEvent });
+            s_queue.Enqueue(new QueuedFlashbang { data = flashbangData, customRewardEvent = customRewardEvent, remote = remote });
 
             if (!s_isRunning)
                 host.StartCoroutine(ProcessQueue(host));
+        }
+
+        // Called from GameStart_Postfix (not Awake: ZRoutedRpc is created in ZNet.Awake, so it may not
+        // exist yet during Game.Awake). ZRoutedRpc.instance is recreated per session; vanilla
+        // registers its own RPCs in Game.Start too.
+        // ZRoutedRpc.Register uses Dictionary.Add (throws on a duplicate name) and its function table
+        // is private, so remember which instance we already registered on and skip a repeat call.
+        private static ZRoutedRpc s_registeredRpc;
+
+        public static void RegisterRpc()
+        {
+            ZRoutedRpc rpc = ZRoutedRpc.instance;
+
+            if (rpc == null || ReferenceEquals(rpc, s_registeredRpc))
+                return;
+
+            rpc.Register<Vector3>(FlashRpcName, RPC_Flashbang);
+            s_registeredRpc = rpc;
+            Jotunn.Logger.LogWarning("[WBTI] Flashbang RPC registered.");
+        }
+
+        // Runs on every client (including the sender) - decides locally whether this player is hit
+        // and, if so, flashes them with THEIR OWN profile's Flashbang redeem settings.
+        private static void RPC_Flashbang(long sender, Vector3 origin)
+        {
+            try
+            {
+                if (ZRoutedRpc.instance == null)
+                    return;
+
+                // The sender already runs their own flash through the normal redeem path.
+                if (sender == ZDOMan.GetSessionID())
+                    return;
+
+                // No log here: a dedicated server (and anyone dead or loading) has no local player and
+                // would warn on every broadcast.
+                Player local = Player.m_localPlayer;
+                if (local == null)
+                    return;
+
+                float distance = Vector3.Distance(local.transform.position, origin);
+                if (distance > NearbyPlayerRadius)
+                {
+                    Jotunn.Logger.LogWarning($"[WBTI] Flashbang RPC received from {sender}, out of range ({distance:F1}m > {NearbyPlayerRadius}m), ignoring.");
+                    return;
+                }
+
+                // This player's own rejection settings apply, same as for a redeem of their own.
+                // (Teleporting is already skipped unconditionally by AttachFlashBang.)
+                ProfileSettingsData settings = ProfileSettingsHelper.Current;
+
+                if (settings.rejectWhenPaused && (Game.IsPaused() || Menu.IsVisible()))
+                {
+                    Jotunn.Logger.LogWarning("[WBTI] Flashbang RPC received but the game is paused or a menu is open, ignoring.");
+                    return;
+                }
+
+                if (settings.rejectWhenSleeping && local.IsSleeping())
+                {
+                    Jotunn.Logger.LogWarning("[WBTI] Flashbang RPC received but the player is sleeping, ignoring.");
+                    return;
+                }
+
+                // No Flashbang in this player's profile = they opted out, don't flash them.
+                RedeemData redeem = RedeemHelper.redeems.Find(item => item.enabled && item.type == RedeemType.Flashbang && item.flashbangData != null);
+                if (redeem == null)
+                {
+                    Jotunn.Logger.LogWarning("[WBTI] Flashbang RPC received but no enabled Flashbang redeem in the active profile, ignoring.");
+                    return;
+                }
+
+                TwitchCustomRewards customRewards = Game.instance?.gameObject.GetComponent<TwitchCustomRewards>();
+                if (customRewards == null)
+                    return;
+
+                Jotunn.Logger.LogWarning($"[WBTI] Flashbang RPC received from {sender} at {distance:F1}m, flashing with redeem '{redeem.title}'.");
+
+                Enqueue(customRewards, redeem.flashbangData, null, remote: true);
+            }
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogError("FlashBangHelper.RPC_Flashbang failed: " + e);
+            }
         }
 
         private static IEnumerator ProcessQueue(MonoBehaviour host)
@@ -56,7 +148,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 while (s_queue.Count > 0)
                 {
                     QueuedFlashbang next = s_queue.Dequeue();
-                    yield return host.StartCoroutine(AttachFlashBang(next.data, next.customRewardEvent));
+                    yield return host.StartCoroutine(AttachFlashBang(next.data, next.customRewardEvent, next.remote));
                 }
             }
             finally
@@ -66,9 +158,10 @@ namespace WizshBoneTwitchIntegration.Helpers
             }
         }
 
-        public static IEnumerator AttachFlashBang(FlashBangData flashbangData, CustomRewardEvent customRewardEvent)
+        public static IEnumerator AttachFlashBang(FlashBangData flashbangData, CustomRewardEvent customRewardEvent, bool remote = false)
         {
-            yield return new WaitForSeconds(flashbangData.delay);
+            if (!remote)
+                yield return new WaitForSeconds(flashbangData.delay);
 
             if (Game.instance == null)
             {
@@ -99,7 +192,15 @@ namespace WizshBoneTwitchIntegration.Helpers
                 yield break;
             }
 
-            SpawnGroundExplosions(Player.m_localPlayer.transform.position, flashbangData.soundVolume);
+            if (!remote)
+            {
+                Vector3 origin = Player.m_localPlayer.transform.position;
+                SpawnGroundExplosions(origin, flashbangData.soundVolume);
+
+                // Only the position goes out; each receiver applies NearbyPlayerRadius itself.
+                ZRoutedRpc.instance?.InvokeRoutedRPC(ZRoutedRpc.Everybody, FlashRpcName, origin);
+                Jotunn.Logger.LogWarning($"[WBTI] Flashbang RPC broadcast from {origin}.");
+            }
 
             yield return new WaitForSeconds(GroundExplosionLeadTime);
 
