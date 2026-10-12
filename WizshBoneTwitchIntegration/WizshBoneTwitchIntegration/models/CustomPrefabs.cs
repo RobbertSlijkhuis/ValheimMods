@@ -17,5 +17,7 @@ namespace WizshBoneTwitchIntegration.Models
 
         public GameObject EnvZone;
         public GameObject TimeStopZone;
+
+        public GameObject DomeHit;
     }
 }

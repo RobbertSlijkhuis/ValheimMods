@@ -459,28 +459,44 @@ namespace WizshBoneTwitchIntegration
             CommandManager.Instance.AddConsoleCommand(new TestSettingsCommand());
         }
 
+        // A prefab missing from the bundle (e.g. the bundle wasn't rebuilt alongside the plugin) would
+        // make `new CustomPrefab(null, true)` throw and abort the rest of the load, so it is skipped
+        // with a warning instead; the code that uses that prefab has to cope with it being null.
+        private static void RegisterBundlePrefab(GameObject prefab, string name)
+        {
+            if (prefab == null)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Prefab '{name}' not found in the asset bundle, not registering it");
+                return;
+            }
+
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefab, true));
+        }
+
         private void InitAssetBundle()
         {
             assetBundle = AssetUtils.LoadAssetBundleFromResources("wbti_dw");
 
             //prefabs.DetectFish = assetBundle.LoadAsset<GameObject>("Detect_Fish_WBTI");
             prefabs.FishRainScript = assetBundle.LoadAsset<GameObject>("spawn_fish_WBTI");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.FishRainScript, true));
+            RegisterBundlePrefab(prefabs.FishRainScript, "spawn_fish_WBTI");
             prefabs.Flashbang = assetBundle.LoadAsset<GameObject>("Flashbang_WBTI");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.Flashbang, true));
+            RegisterBundlePrefab(prefabs.Flashbang, "Flashbang_WBTI");
             prefabs.GuardStone = assetBundle.LoadAsset<GameObject>("WBTI_guard_stone");
             prefabs.TerrainEdit = assetBundle.LoadAsset<GameObject>("TerrainEdit_WBTI");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.TerrainEdit, true));
+            RegisterBundlePrefab(prefabs.TerrainEdit, "TerrainEdit_WBTI");
             //prefabs.NeckBeard = assetBundle.LoadAsset<GameObject>("FeoTheHistorian_WBTI");
             //PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.NeckBeard, true));
             prefabs.ChestIron = assetBundle.LoadAsset<GameObject>("ChestIron_WBTI");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ChestIron, true));
+            RegisterBundlePrefab(prefabs.ChestIron, "ChestIron_WBTI");
             prefabs.ChestGold = assetBundle.LoadAsset<GameObject>("ChestGold_WBTI");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ChestGold, true));
+            RegisterBundlePrefab(prefabs.ChestGold, "ChestGold_WBTI");
             prefabs.EnvZone = assetBundle.LoadAsset<GameObject>("EnvZone_WBTI");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.EnvZone, true));
+            RegisterBundlePrefab(prefabs.EnvZone, "EnvZone_WBTI");
             prefabs.TimeStopZone = assetBundle.LoadAsset<GameObject>("TimeStopZone_WBTI");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.TimeStopZone, true));
+            RegisterBundlePrefab(prefabs.TimeStopZone, "TimeStopZone_WBTI");
+            prefabs.DomeHit = assetBundle.LoadAsset<GameObject>("WBTI_dome_hit");
+            RegisterBundlePrefab(prefabs.DomeHit, "WBTI_dome_hit");
 
             effects.Burning = assetBundle.LoadAsset<SE_Stats>("Burning_WBTI");
             effects.Freezing = assetBundle.LoadAsset<StatusEffect>("Freezing_WBTI");

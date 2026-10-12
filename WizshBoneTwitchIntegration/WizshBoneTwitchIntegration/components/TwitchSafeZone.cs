@@ -21,6 +21,8 @@ namespace WizshBoneTwitchIntegration.Components
         // s_localPlayerZoneCount from reality - see HandlePlayer.
         private GameObject m_playerInZone;
         private Collider m_collider;
+        private bool m_isShipZone;
+        private bool m_isTraderZone;
         private readonly string playerIdentifier = "Player(Clone)";
 
         // Tracks how many safe zones the local player is currently standing in,
@@ -215,16 +217,83 @@ namespace WizshBoneTwitchIntegration.Components
         // origin overlaps any safe zone's collider (radius 0 = point containment).
         public static bool OverlapsSafeZone(Vector3 origin, float radius)
         {
+            return Overlaps(origin, radius, false);
+        }
+
+        // The shared zone test behind all the public queries. enabledOnly skips zones whose collider
+        // is off or that the profile settings currently switch off (see IsEnabledBySettings).
+        // ClosestPoint works in world space for the ward capsule, trader capsule and the ship's
+        // rotated box alike.
+        private static bool Overlaps(Vector3 origin, float radius, bool enabledOnly)
+        {
             foreach (TwitchSafeZone safeZone in s_activeSafeZones)
             {
-                if (safeZone.m_collider != null && Vector3.Distance(origin, safeZone.m_collider.ClosestPoint(origin)) <= radius)
-                {
+                if (safeZone.m_collider == null)
+                    continue;
+
+                if (enabledOnly && (!safeZone.m_collider.enabled || !safeZone.IsEnabledBySettings()))
+                    continue;
+
+                if (Vector3.Distance(origin, safeZone.m_collider.ClosestPoint(origin)) <= radius)
                     return true;
-                }
             }
 
             return false;
         }
+
+        // True for a Twitch-spawned (not manually claimed), untamed creature that the ward applies
+        // to, i.e. one whose redeem didn't set ignoreWard. Shared by the burn/push handling and the
+        // projectile blocking (SafeZoneProjectileHelper). All three components are rehydrated from
+        // the ZDO on every client, so this gives the same answer for owners and non-owners.
+        public static bool IsWardTargetCreature(GameObject creature)
+        {
+            return IsWardTargetCreature(creature, out _);
+        }
+
+        // Same test, also handing back the Humanoid it had to look up anyway (null when the creature
+        // has none, or when it isn't a ward target), so callers don't fetch it a second time.
+        public static bool IsWardTargetCreature(GameObject creature, out Humanoid humanoid)
+        {
+            humanoid = null;
+
+            TwitchCreaturePersistentData persistentData = creature.GetComponent<TwitchCreaturePersistentData>();
+
+            if (persistentData == null || persistentData.m_ignoreWard)
+                return false;
+
+            TwitchCreatureClaim creatureClaim = creature.GetComponent<TwitchCreatureClaim>();
+
+            if (creatureClaim == null || !creatureClaim.m_isSpawn)
+                return false;
+
+            humanoid = creature.GetComponent<Humanoid>();
+
+            if (humanoid != null && humanoid.m_tamed)
+            {
+                humanoid = null;
+                return false;
+            }
+
+            return true;
+        }
+
+        // True if the point is inside any enabled safe zone. Deliberately only looks at where the
+        // projectile / victim is, never where the attack came from: a monster that clips into a zone
+        // (pushed in, or spawned there) must not get a free pass for being "already inside".
+        public static bool IsInsideEnabledSafeZone(Vector3 point)
+        {
+            // ClosestPoint returns the point itself when it is inside; the tolerance absorbs float noise.
+            return Overlaps(point, 0.01f, true);
+        }
+
+        // Like IsInsideEnabledSafeZone, but also true within `margin` of an enabled zone's collider
+        // (used to keep idle wander destinations a body's width clear of the edge).
+        public static bool IsNearEnabledSafeZone(Vector3 point, float margin)
+        {
+            return Overlaps(point, margin, true);
+        }
+
+        public static bool HasActiveSafeZones => s_activeSafeZones.Count > 0;
 
         // False while the profile settings switch this kind of zone off: a ship's zone with
         // safezoneBoats off, a trader's with safezoneTraders off (wards are always on). The zone and
@@ -232,15 +301,10 @@ namespace WizshBoneTwitchIntegration.Components
         // on this - so it's also what the debug bounds outline follows.
         private bool IsEnabledBySettings()
         {
-            Transform parent = transform.parent;
-
-            if (parent == null)
-                return true;
-
-            if (parent.GetComponent<Ship>() != null && !ProfileSettingsHelper.Current.safezoneBoats)
+            if (m_isShipZone && !ProfileSettingsHelper.Current.safezoneBoats)
                 return false;
 
-            if (parent.GetComponent<Trader>() != null && !ProfileSettingsHelper.Current.safezoneTraders)
+            if (m_isTraderZone && !ProfileSettingsHelper.Current.safezoneTraders)
                 return false;
 
             return true;
@@ -252,6 +316,13 @@ namespace WizshBoneTwitchIntegration.Components
             {
                 m_customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
                 m_collider = GetComponent<Collider>();
+
+                // Cached once: IsEnabledBySettings runs for every zone on every zone query (every
+                // hit, projectile step and monster AI point check), and the parent never changes.
+                Transform parent = transform.parent;
+                m_isShipZone = parent != null && parent.GetComponent<Ship>() != null;
+                m_isTraderZone = parent != null && parent.GetComponent<Trader>() != null;
+
                 s_activeSafeZones.Add(this);
 
                 ColliderBoundsHelper.Register(gameObject, ColliderBoundsHelper.SafeZoneColor, IsEnabledBySettings);
@@ -361,55 +432,23 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void HandleCreatures(Collider collider)
         {
-            if (collider.gameObject.name != playerIdentifier)
-            {
-                if (!ProfileSettingsHelper.Current.wardBurnCreatures && !ProfileSettingsHelper.Current.wardPushCreatures)
-                    return;
+            // No player-name check needed here: IsWardTargetCreature requires the Twitch creature
+            // components, which a player never has (and it avoids a Unity .name string allocation
+            // per overlapping collider per physics step).
+            if (!ProfileSettingsHelper.Current.wardBurnCreatures && !ProfileSettingsHelper.Current.wardPushCreatures)
+                return;
 
-                if (!IsEnabledBySettings())
-                    return;
+            if (!IsEnabledBySettings())
+                return;
 
-                TwitchCreaturePersistentData persistentData = collider.gameObject.GetComponent<TwitchCreaturePersistentData>();
+            if (!IsWardTargetCreature(collider.gameObject, out Humanoid humanoid) || humanoid == null)
+                return;
 
-                if (persistentData == null || persistentData.m_ignoreWard)
-                    return;
+            if (ProfileSettingsHelper.Current.wardBurnCreatures)
+                SafeZoneBurnHelper.Apply(humanoid);
 
-                TwitchCreatureClaim creatureClaim = collider.gameObject.GetComponent<TwitchCreatureClaim>();
-
-                if (creatureClaim == null)
-                    return;
-
-                Humanoid humanoid = collider.gameObject.GetComponent<Humanoid>();
-
-                if (humanoid != null && humanoid.m_tamed)
-                    return;
-
-                if (!creatureClaim.m_isSpawn)
-                    return;
-
-                if (humanoid != null && ProfileSettingsHelper.Current.wardBurnCreatures && !humanoid.GetSEMan().HaveStatusEffect(WizshBoneTwitchIntegration.Instance.effects.Burning.m_nameHash))
-                {
-                    float duration = 10f;
-                    SE_Stats burning = Instantiate(WizshBoneTwitchIntegration.Instance.effects.Burning);
-                    burning.m_healthPerTick = Mathf.Round(humanoid.GetMaxHealth() / (duration - 1f) * -1f);
-                    burning.m_ttl = duration;
-                    humanoid.GetSEMan().AddStatusEffect(burning);
-                }
-
-                if (humanoid != null)
-                {
-                    float force = ProfileSettingsHelper.Current.wardPushForce;
-                    Vector3 pushDir = (collider.transform.position - transform.position).normalized;
-                    pushDir.y = 0;
-                    Rigidbody rb = collider.GetComponent<Rigidbody>();
-
-                    if (rb != null)
-                    {
-                        // rb.AddForce((transform.forward * -force) + (transform.up * force), ForceMode.Acceleration);
-                        rb.AddForce(pushDir * force, ForceMode.Acceleration);
-                    }
-                }
-            }
+            if (ProfileSettingsHelper.Current.wardPushCreatures)
+                SafeZonePushHelper.PushOut(humanoid, m_collider);
         }
 
         public void OnDestroy()
