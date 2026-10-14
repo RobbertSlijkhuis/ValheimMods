@@ -24,7 +24,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static void TryBlock(Projectile projectile)
         {
-            if (!TwitchSafeZone.HasActiveSafeZones)
+            if (!TwitchSafeZone.HasActiveSafeZones || !TwitchSafeZone.KeepsMonstersOut)
                 return;
 
             ZNetView nview = projectile.GetComponent<ZNetView>();
@@ -48,6 +48,25 @@ namespace WizshBoneTwitchIntegration.Helpers
             // SpawnOnHit/AOE and detonate it at the zone edge, hurting players inside.
             PlayHitEffect(position, projectile.m_startPoint);
             ZNetScene.instance.Destroy(projectile.gameObject);
+        }
+
+        private const string DomeHitPrefabName = "WBTI_dome_hit";
+
+        // WBTI_dome_hit is built from vanilla's fx_shieldgenerator_domehit, so it carries the vanilla
+        // ShieldDomeParticleColor too. Its Start recolors the particles by the closest
+        // ShieldGenerator's fuel and throws when the world has none (the usual case), so skip it:
+        //  - for our own prefab always: it is ward-colored on purpose, and a real generator elsewhere
+        //    must not recolor it;
+        //  - for anything else only when there is no generator to read (the vanilla-hit fallback in
+        //    BuildHitEffects, which would otherwise throw the same way).
+        public static bool ShouldSkipParticleColor(ShieldDomeParticleColor particleColor)
+        {
+            if (particleColor.gameObject.name.StartsWith(DomeHitPrefabName))
+                return true;
+
+            return ShieldGenerator.GetClosestShieldGenerator(
+                particleColor.transform.position,
+                particleColor.m_colorMode == ShieldDomeParticleColor.ColorMode.ClosestShieldGenerator) == null;
         }
 
         // The vanilla shield's hit effects with fx_shieldgenerator_domehit swapped for our own

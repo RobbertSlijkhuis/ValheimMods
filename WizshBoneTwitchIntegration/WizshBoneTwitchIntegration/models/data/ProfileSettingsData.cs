@@ -63,5 +63,32 @@ namespace WizshBoneTwitchIntegration.Models
         public HudPosition hudPosition = HudPosition.UnderMinimap;
         public float hudOffsetX;
         public float hudOffsetY;
+
+        /// <summary>
+        /// Copies the personal preferences - the settings a read-only (synced or locked built-in)
+        /// profile still lets its user change: everything under Chatting and HUD, plus enable
+        /// redeems on login, auto resolve and the redeem discount. Everything else is the
+        /// profile's fixed content. Keep in sync with the Settings/Home tab sections that stay
+        /// editable on a read-only profile.
+        /// </summary>
+        public void CopyPersonalSettingsFrom(ProfileSettingsData source)
+        {
+            chattingEnabled = source.chattingEnabled;
+            chattingBlackList = source.chattingBlackList;
+            chattingClaimDuration = source.chattingClaimDuration;
+            chattingCullingRange = source.chattingCullingRange;
+            chattingInterval = source.chattingInterval;
+            chattingRadius = source.chattingRadius;
+            chattingMaxTalkers = source.chattingMaxTalkers;
+            chattingClaimFreeForAll = source.chattingClaimFreeForAll;
+
+            enableRedeemsOnLogin = source.enableRedeemsOnLogin;
+            autoResolveRedeems = source.autoResolveRedeems;
+            redeemsDiscountPercent = source.redeemsDiscountPercent;
+
+            hudPosition = source.hudPosition;
+            hudOffsetX = source.hudOffsetX;
+            hudOffsetY = source.hudOffsetY;
+        }
     }
 }

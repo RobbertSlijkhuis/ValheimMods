@@ -24,7 +24,7 @@ namespace WizshBoneTwitchIntegration.Gui
     }
 
     /// <summary>
-    /// Single source of truth for the 17 selectable redeem effect types' display labels and
+    /// Single source of truth for the 18 selectable redeem effect types' display labels and
     /// descriptions - shared by <see cref="RedeemWizard"/>'s step-1 effect picker and
     /// <see cref="Tabs.RedeemsTab"/>'s list-row type-hover tooltip, rather than duplicating this
     /// text in both places. <see cref="All"/> is sorted alphabetically by label. Membership matches
@@ -39,29 +39,29 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             // Declaration order doesn't matter - All is sorted alphabetically by label below.
             new RedeemEffectInfo(RedeemType.Detonate, "Detonate Fish",
-                "Blows up any fish (fish creatures and fish items) within a radius around the streamer."),
+                "Blows up any fish within a radius around the streamer."),
             new RedeemEffectInfo(RedeemType.Flashbang, "Flashbang",
                 "Triggers a blinding flash and loud bang near the streamer, disorienting them briefly."),
             new RedeemEffectInfo(RedeemType.Mist, "Mist",
-                "Spawns a lingering mist cloud around the streamer."),
+                "Spawns a lingering Mistlands mist cloud around the streamer."),
             new RedeemEffectInfo(RedeemType.Door, "Doors of Doom",
                 "Spawns a stack of doors around the streamer, boxing them in until they break out."),
             new RedeemEffectInfo(RedeemType.Windmill, "Windmills of Death",
                 "Spawns spinning windmill blades around the streamer."),
             new RedeemEffectInfo(RedeemType.Smite, "Smite",
-                "Calls down a lightning strike on the streamer."),
-            new RedeemEffectInfo(RedeemType.Rain, "Fish Rain",
-                "Drops a damaging rain effect around the streamer."),
+                "Calls down lightning strikes on the streamer."),
+            new RedeemEffectInfo(RedeemType.Rain, "Spawn Fish",
+                "Drops fish around the streamer."),
             new RedeemEffectInfo(RedeemType.BoatRain, "Boat Rain",
                 "Drops a downpour of boats from the sky above the streamer."),
             new RedeemEffectInfo(RedeemType.LogRain, "Log Rain",
                 "Drops a shower of logs from the sky above the streamer."),
             new RedeemEffectInfo(RedeemType.Meteor, "Meteors",
-                "Calls down a meteor strike near the streamer's position."),
+                "Calls down meteor strikes near the streamer's position."),
             new RedeemEffectInfo(RedeemType.Trap, "Trap",
-                "Spawns a hidden trap near the streamer."),
+                "Spawns a plethora of traps near the streamer."),
             new RedeemEffectInfo(RedeemType.Root, "Roots",
-                "Entangles the streamer in roots, temporarily immobilizing them."),
+                "Spawns roots in batches around the streamer for a duration of time."),
             new RedeemEffectInfo(RedeemType.SpawnCreature, "Spawn Creature(s)",
                 "Spawns one or more creatures from a chosen group near the streamer."),
             new RedeemEffectInfo(RedeemType.StatusEffect, "Status Effect",

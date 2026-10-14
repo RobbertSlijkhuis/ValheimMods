@@ -37,12 +37,16 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         // while keeping the values visible. Which rows get it is decided per section (see
         // m_lockNewRows) - the chatting settings and the login/auto-resolve toggles don't affect
         // any of that, so they stay editable for everyone.
+        // A locked built-in profile is treated like a synced one here (m_isSynced is true for both);
+        // m_isLocked only picks the description text.
         private bool m_isSynced;
+        private bool m_isLocked;
         private bool m_lockNewRows;
         private Text m_descriptionText;
 
         private const string DescriptionNormal = "Settings are specific to each profile.";
         private const string DescriptionSynced = "This profile is synced - settings that affect redeems and gameplay are view only, only the owner can change them.";
+        private const string DescriptionLocked = "This is a built-in profile - its settings are view only.";
 
         // Fresh, never-persisted instance used only to read each field's original default (for
         // the reset button next to text fields) without duplicating the literals from
@@ -106,8 +110,11 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             GuiHelper.ClearContainer(m_scrollContent);
             m_cursorY = -ListTopPadding;
 
-            m_isSynced = ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile);
-            m_descriptionText.text = m_isSynced ? DescriptionSynced : DescriptionNormal;
+            m_isLocked = ProfileManager.IsLockedProfile(ProfileManager.ActiveProfile);
+            m_isSynced = ProfileManager.IsReadOnlyProfile(ProfileManager.ActiveProfile);
+            m_descriptionText.text = m_isLocked ? DescriptionLocked
+                : m_isSynced ? DescriptionSynced
+                : DescriptionNormal;
 
             BuildRedeemsSection();
             BuildChattingSection();
@@ -125,7 +132,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         {
             SectionHeader("Redeems");
 
-            // Login and auto-resolve are personal preferences - they stay editable when synced.
+            // Login and auto-resolve are personal preferences - they stay editable when synced
+            // or locked.
             m_lockNewRows = false;
             BoolFieldRow(
                 ("Enable redeems on login", "Automatically turns redeems on when you connect",
@@ -170,8 +178,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         {
             SectionHeader("Status HUD");
 
-            // The HUD is a purely local display preference - editable on a synced profile. Persist
-            // runs ApplyToLiveComponents, which repositions the live HUD immediately.
+            // The HUD is a purely local display preference - editable on a synced or locked profile.
+            // Persist runs ApplyToLiveComponents, which repositions the live HUD immediately.
             m_lockNewRows = false;
 
             List<DropdownOption> positionOptions = Enum.GetValues(typeof(HudPosition))
@@ -216,7 +224,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         {
             SectionHeader("Chatting");
 
-            // Chatting doesn't affect redeems or game mechanics - editable on a synced profile.
+            // Chatting doesn't affect redeems or game mechanics - editable on a synced or locked profile.
             m_lockNewRows = false;
             BoolFieldRow(
                 ("Enable in-game chatting feature", "Whether viewer chat messages are shown above creatures in-game",

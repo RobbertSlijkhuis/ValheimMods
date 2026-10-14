@@ -95,7 +95,12 @@ namespace WizshBoneTwitchIntegration.Gui
         // `interactable` is switched off - that disables every Selectable underneath (inputs,
         // toggles, buttons, dropdowns, color swatches), including ones step-2 forms build later,
         // while the nav row (a sibling of the step roots) keeps working.
+        //
+        // On a locked built-in profile the view-only wizard also lets the user change the Points
+        // (the reward cost) and nothing else: the points input opts out of the step's group and
+        // the last step offers "Save points" (see Finish).
         private bool m_readOnly;
+        private bool m_pointsEditable;
         private CanvasGroup[] m_stepGroups;
         private int m_step;
         private int m_floorStep;
@@ -303,9 +308,9 @@ namespace WizshBoneTwitchIntegration.Gui
         /// is visible and can be browsed (Back/Next, scrolling), yet nothing can be changed or
         /// saved. Used for redeems in a synced profile.
         /// </summary>
-        public void OpenView(RedeemData redeem)
+        public void OpenView(RedeemData redeem, bool pointsEditable = false)
         {
-            OpenExisting(redeem, readOnly: true);
+            OpenExisting(redeem, readOnly: true, pointsEditable);
         }
 
         public bool IsOpen => m_root != null && m_root.activeSelf;
@@ -320,16 +325,23 @@ namespace WizshBoneTwitchIntegration.Gui
                 Close(null);
         }
 
-        private void SetReadOnly(bool readOnly)
+        private void SetReadOnly(bool readOnly, bool pointsEditable = false)
         {
             m_readOnly = readOnly;
+            m_pointsEditable = readOnly && pointsEditable;
             foreach (CanvasGroup group in m_stepGroups)
                 group.interactable = !readOnly;
+
+            // The points input ignores its step's (disabled) group only while points are editable.
+            CanvasGroup costGroup = m_costInput.GetComponent<CanvasGroup>();
+            if (costGroup == null)
+                costGroup = m_costInput.gameObject.AddComponent<CanvasGroup>();
+            costGroup.ignoreParentGroups = m_pointsEditable;
         }
 
-        private void OpenExisting(RedeemData redeem, bool readOnly)
+        private void OpenExisting(RedeemData redeem, bool readOnly, bool pointsEditable = false)
         {
-            SetReadOnly(readOnly);
+            SetReadOnly(readOnly, pointsEditable);
             m_editingOriginal = redeem;
             m_working = redeem.DeepClone<RedeemData>();
             m_isEdit = true;
@@ -443,7 +455,10 @@ namespace WizshBoneTwitchIntegration.Gui
             };
             bool validStep = m_step >= 1 && m_step <= 3;
             m_stepTitleText.text = validStep ? titles[m_step] : "";
-            m_stepDescriptionText.text = validStep ? (m_readOnly ? "View only (synced profile) - " : "") + descriptions[m_step] : "";
+            string viewPrefix = !m_readOnly ? ""
+                : m_pointsEditable ? "View only (built-in profile, only Points can be changed) - "
+                : "View only (synced profile) - ";
+            m_stepDescriptionText.text = validStep ? viewPrefix + descriptions[m_step] : "";
         }
 
         // ── step 1: choose effect ────────────────────────────────────────────
@@ -1028,8 +1043,14 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             // Defensive - the Save button is hidden in view-only mode, and the step roots are
             // non-interactable, so nothing should reach here.
-            if (m_readOnly)
+            if (m_readOnly && !m_pointsEditable)
                 return;
+
+            if (m_readOnly)
+            {
+                SavePointsOnly();
+                return;
+            }
 
             if (string.IsNullOrEmpty(m_titleInput.text.Trim()))
             {
@@ -1070,6 +1091,24 @@ namespace WizshBoneTwitchIntegration.Gui
             }
 
             Close(successMessage);
+        }
+
+        /// <summary>
+        /// Saves a built-in profile's redeem with only its Points changed: everything else is taken
+        /// from the original, so nothing the (disabled) fields hold can leak into the save.
+        /// </summary>
+        private void SavePointsOnly()
+        {
+            RedeemData updated = m_editingOriginal.DeepClone<RedeemData>();
+            updated.points = m_working.points;
+
+            if (!RedeemManager.UpdateRedeem(m_editingOriginal, updated, out string error))
+            {
+                ToastNotifications.Show(error, ToastType.Error);
+                return;
+            }
+
+            Close($"Points of '{RedeemManager.GetFullTitle(updated)}' set to {updated.points}.");
         }
 
         private void SetActiveStep(int step)
@@ -1121,13 +1160,16 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             m_cancelBtnText.text = m_readOnly ? "Close" : "Cancel";
             // View-only has nothing to save, so the last step's Save button goes away entirely.
-            m_nextBtn.gameObject.SetActive(!(m_readOnly && m_step == 3));
+            m_nextBtn.gameObject.SetActive(!(m_readOnly && !m_pointsEditable && m_step == 3));
 
             m_backBtn.interactable = m_step > m_floorStep;
 
             bool hasType = !string.IsNullOrEmpty(m_working?.type) && m_working.type != RedeemType.Undefined;
             m_nextBtn.interactable = !(m_step == 1 && !hasType);
-            m_nextBtnText.text = m_step == 3 ? (m_isEdit ? "Save changes" : "Save redeem") : "Next";
+            m_nextBtnText.text = m_step != 3 ? "Next"
+                : m_pointsEditable ? "Save points"
+                : m_isEdit ? "Save changes"
+                : "Save redeem";
         }
 
         // ── small layout helpers ─────────────────────────────────────────────

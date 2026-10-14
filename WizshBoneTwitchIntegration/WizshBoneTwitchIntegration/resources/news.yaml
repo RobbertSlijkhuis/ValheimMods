@@ -4,36 +4,48 @@
 # Bodies use ">-" (folded): the line breaks in this file are NOT shown in-game, the dialog wraps
 # the text itself. A blank line starts a new paragraph. Use "|-" instead where line breaks matter
 # (e.g. the list below).
-version: 1
-title: Welcome to WizshBone Twitch Integration
+version: 2
+title: 1.0.2 The MONSTER update!
 sections:
-  - heading: Thank you!
-    body: >-
-      Thank you so much for downloading WizshBone Twitch Integration! I hope it brings you and
-      your chat plenty of chaos and fun moments. It's been a pleasure to work on this mod, and I hope you enjoy it as much as I enjoyed making it.
+  - heading: General
+    body: |-
+      Thank you for using WizshBone Twitch Integration! This is the Monster update, figuratively and literally! So many changes and most affect the monsters! Here are the highlights of this update. The full list is in the changelog.
 
-
-      Please take some time to look around in the mod's different tabs, especially the Help tab. If you have
-      any questions or feedback, feel free to reach out to me on Discord (use the Join Discord
-      button below).
+      - Logging in is now a single authorization.
+      - Session-expiry warnings and an automatic logout that also removes your redeems from Twitch.
+      - Leaderboards: tracks your viewers, their points, redeem count, favorite redeems and deaths caused.
+      - Built-in profiles: "Normal" and "Chatting only" always exist and can't be deleted, renamed or synced. Use Reset to restore their original redeems and settings.
+      - New profiles can start empty or be based on another profile.
+      - You can rebind the key that opens the main window on the Home tab.
+      - Number settings are now limited to valid values, plus many UX improvements.
+      - You can now change the position of the status HUD in the settings.
+  - heading: Monsters and redeems
+    body: |-
+      - Recolors now have a second (emission) color for the glowing parts.
+      - Many more creatures, and all bosses up to The Queen, can be recolored.
+      - Resized creatures now scale their attacks, hitbox, gear and death effects.
+      - Many new creature form fields, like equipment. Some are experimental, so please report anything odd!
+      - Rockies can now be claimed with "claim:", can talk and can be recolored!
+      - Weather redeem: cycle weathers, follow the player, frost resistance, multiplayer sync.
+      - Surprise chest: "Stack size" is now "Amount", and quality can go above the normal maximum.
+      - Flashbang now flashes nearby players too.
+      - Resized players are now visible to other players in multiplayer.
+      - Safezones: spawned monsters' projectiles and hits can no longer reach players inside a zone.
+      - The safezone ward can now be hidden from the build menu.
   - heading: Known issues
-    body: >-
-      The mod is still young, so there are a few rough edges that I'm working on. It's by far not completed yet, but I feel I need to release it now or
-      else it will be in development forever! I feel it is stable enough for release, but if something behaves strangely, the Help tab has tools for some problems.
-      Please reach out to me on Discord if you run into major issues (use the Join Discord button below).
+    body: |-
+      The mod is still young, so there are a few rough edges that I'm working on. If something behaves strangely, the Help tab has tools for some problems. Please reach out to me on Discord if you run into major issues (use the Join Discord button below).
 
-
-      - Creature recoloring is not finished yet: bosses and creatures from the Ashlands onwards can't be recolored so far.
-      - Multiplayer is not fully supported yet: the mod is designed with multiplayer in mind but has not been thoroughly tested in multiplayer, so some issues can arise. If you encounter any problems, please let me know.
+      - Creature recoloring is not finished yet: not every creature can be recolored so far.
+      - Multiplayer has not been thoroughly tested yet, so some issues can arise. Please let me know if you run into any.
   - heading: Future plans
     body: |-
-      I'm not done with the mod yet, there is still a lot more to come:
+      These are my plans to improve the mod. There is still a lot more to come:
 
       - More default profiles with different levels of chaos and difficulty!
-      - Leaderboards: who killed you the most, which redeems are used the most, points spent and more
-      - More redeem types, like dropping your inventory, inverted movement, rearranging your hotbar and much more       
-      - A periodic vote that lets viewers decide your fate by voting on a random redeem to be used on you
-      - Surprise chests that can turn out to be a mimic or spawn other redeems
+      - More redeem types, like dropping your inventory, inverted movement, exploding chickens and much more!
+      - A periodic vote that lets viewers decide your fate with a random redeem
+      - Surprise chests that can be a mimic, spawn other redeems and taunt you!
       - A new cooldown system with shared cooldowns
       - More commands for viewers to control the creatures they claimed or spawned
 

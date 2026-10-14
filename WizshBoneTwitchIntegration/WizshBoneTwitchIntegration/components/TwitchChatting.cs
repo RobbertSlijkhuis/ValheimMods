@@ -40,10 +40,45 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
         }
 
+        // The Twitch channel this client is streaming, lowercased - or "" when it isn't logged in.
+        // Stamped into every "!claim" claim (see TwitchCreaturePersistentData) so that, with several
+        // streamers in one world, only the streamer a claim belongs to runs its expiry and numbers it:
+        // chat, "!unclaim <n>" and the claimant's activity only exist on that streamer's client.
+        // Evaluated live - the streamer logs in after the world has loaded.
+        public string ClaimChannel
+        {
+            get
+            {
+                if (m_auth == null || !m_auth.m_loggedIn || m_auth.m_userInfo == null)
+                    return "";
+
+                string channel = string.IsNullOrEmpty(m_auth.m_userInfo.loginName) ? m_auth.m_userInfo.displayName : m_auth.m_userInfo.loginName;
+                return (channel ?? "").ToLower();
+            }
+        }
+
         public void AddCreatureAssignment(TwitchCreatureAssignment assignment)
         {
             m_creatureAssignments.Add(assignment);
             RefreshIndexDisplayForOwner(assignment.userName);
+        }
+
+        // A creature whose claim was re-assigned in place (another viewer took it over) keeps its
+        // claim component, so the old assignment must be dropped without RemoveCreatureAssignment -
+        // that would destroy the component.
+        public void ReplaceCreatureAssignment(TwitchCreatureAssignment oldAssignment, TwitchCreatureAssignment newAssignment)
+        {
+            m_creatureAssignments.Remove(oldAssignment);
+            RefreshIndexDisplayForOwner(oldAssignment.userName);
+            AddCreatureAssignment(newAssignment);
+        }
+
+        // Numbering is skipped on every client until it is the claim authority, so claims that were
+        // restored before the streamer finished logging in need numbering once they are.
+        public void RefreshAllDisplayIndexes()
+        {
+            foreach (string userName in m_creatureAssignments.Select(a => a.userName).Distinct().ToList())
+                RefreshIndexDisplayForOwner(userName);
         }
 
         public void RemoveCreatureAssignment(TwitchCreatureAssignment assignment)
@@ -72,10 +107,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         // Lowercased on both sides since callers pass either the raw stored assignment.userName
         // (from AddCreatureAssignment/RemoveCreatureAssignment) or an already-lowercased incoming
         // chat/command username (from UnclaimForUser) - never assume either side's casing.
+        // Only claims this client's streamer manages (see TwitchCreatureClaim.IsNumberedBy) - another
+        // streamer's claims are numbered by their own client, and a client that isn't logged in numbers none.
         private List<TwitchCreatureAssignment> NonSpawnSiblings(string userName)
         {
+            string channel = ClaimChannel;
+
             return m_creatureAssignments
-                .Where(a => a.userName.ToLower() == userName.ToLower() && !(a.creature.GetComponent<TwitchCreatureClaim>()?.m_isSpawn ?? true))
+                .Where(a => a.userName.ToLower() == userName.ToLower() && (a.creature.GetComponent<TwitchCreatureClaim>()?.IsNumberedBy(channel) ?? false))
                 .OrderBy(a => a.claimedAt)
                 .ToList();
         }

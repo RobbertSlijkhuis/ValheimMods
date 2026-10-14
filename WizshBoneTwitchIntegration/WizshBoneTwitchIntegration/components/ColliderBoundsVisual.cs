@@ -24,9 +24,32 @@ namespace WizshBoneTwitchIntegration.Components
         private Material m_material;
         private Color m_color = Color.white;
 
+        // Set (> 0) by InitializeCylinder: outlines an explicit upright cylinder instead of a
+        // collider, for objects that have no collider of their own (e.g. the timed terrain-edit marker).
+        private float m_cylinderRadius;
+        private float m_cylinderHeight;
+
         public void Awake()
         {
             m_collider = GetComponent<Collider>();
+        }
+
+        // Alternative to Initialize() for objects without a usable collider: outlines a cylinder of
+        // the given radius standing on this object's position. Must be called right after AddComponent.
+        public void InitializeCylinder(Color color, float radius, float height)
+        {
+            try
+            {
+                m_color = color;
+                m_cylinderRadius = radius;
+                m_cylinderHeight = height;
+
+                Rebuild();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("ColliderBoundsVisual.InitializeCylinder failed: " + e);
+            }
         }
 
         // Must be called right after AddComponent. Awake() doesn't build anything itself, so the
@@ -91,6 +114,12 @@ namespace WizshBoneTwitchIntegration.Components
                 scale.y != 0f ? 1f / scale.y : 1f,
                 scale.z != 0f ? 1f / scale.z : 1f);
 
+            if (m_cylinderRadius > 0f)
+            {
+                BuildCylinder();
+                return;
+            }
+
             switch (m_collider)
             {
                 case BoxCollider box:
@@ -102,6 +131,27 @@ namespace WizshBoneTwitchIntegration.Components
                 case SphereCollider sphere:
                     BuildSphere(sphere, scale);
                     break;
+            }
+        }
+
+        // Open-topped cylinder from this object's position upward: a ring at the bottom and top
+        // plus four side lines. Radius/height are world units as-is: the visual root already cancels
+        // this object's scale, so nothing needs to be re-applied here.
+        private void BuildCylinder()
+        {
+            float radius = m_cylinderRadius;
+
+            Vector3 bottom = Vector3.zero;
+            Vector3 top = Vector3.up * m_cylinderHeight;
+
+            CreateRing(bottom, Vector3.right, Vector3.forward, radius);
+            CreateRing(top, Vector3.right, Vector3.forward, radius);
+
+            for (int i = 0; i < 4; i++)
+            {
+                float angle = i * Mathf.PI / 2f;
+                Vector3 offset = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radius;
+                CreateLineBar(bottom + offset, top + offset);
             }
         }
 

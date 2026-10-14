@@ -65,6 +65,57 @@ namespace WizshBoneTwitchIntegration.Helpers
             WriteDefaultRedeemsTo(path);
         }
 
+        /// <summary>
+        /// Rewrites a locked profile's file from its stock resource, keeping only what the user may
+        /// still change from the existing file, both stored in the same profile.yaml: the personal
+        /// settings (see <see cref="ProfileSettingsData.CopyPersonalSettingsFrom"/>) and each
+        /// redeem's points (matched by title).
+        /// </summary>
+        private static void RestoreLockedProfile(string path, System.Action<string> writeSeed)
+        {
+            ModData existing = null;
+
+            try
+            {
+                if (File.Exists(path))
+                    existing = DeserializeYaml<ModData>(path);
+            }
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Could not read the user's settings from '{path}', using the stock ones: {e.Message}");
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            writeSeed(path);
+
+            if (existing == null)
+                return;
+
+            ModData stock = DeserializeYaml<ModData>(path);
+            if (stock == null)
+                return;
+
+            ProfileMigrationHelper.Migrate(stock, path);
+
+            if (existing.settings != null)
+            {
+                stock.settings = stock.settings ?? new ProfileSettingsData();
+                stock.settings.CopyPersonalSettingsFrom(existing.settings);
+            }
+
+            if (stock.redeems != null && existing.redeems != null)
+            {
+                foreach (RedeemData redeem in stock.redeems)
+                {
+                    RedeemData kept = existing.redeems.Find(r => r.title == redeem.title);
+                    if (kept != null)
+                        redeem.points = kept.points;
+                }
+            }
+
+            WriteRedeemsConfig(path, stock.settings, stock.creatureGroups ?? new List<CreatureGroupData>(), stock.redeems ?? new List<RedeemData>());
+        }
+
         public static ModData ReadRedeemsConfig(string path = null)
         {
             return ReadRedeemsConfig(path, out _);
@@ -76,6 +127,12 @@ namespace WizshBoneTwitchIntegration.Helpers
         public static ModData ReadRedeemsConfig(string path, out bool migrated)
         {
             path = path ?? ProfileManager.GetActiveRedeemPath();
+
+            // A locked profile's file is restored from its stock resource before every read, so a
+            // hand edit on disk can never go live (reload button, reload command, startup).
+            if (ProfileManager.TryGetLockedSeedWriter(path, out System.Action<string> writeSeed))
+                RestoreLockedProfile(path, writeSeed);
+
             EnsureRedeemsFileExists(path);
             ModData data = DeserializeYaml<ModData>(path);
             migrated = ProfileMigrationHelper.Migrate(data, path);
@@ -239,7 +296,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static void WriteDefaultRedeemsTo(string path)
         {
-            WriteFromEmbeddedResourceTo("WizshBoneTwitchIntegration.resources.profile.yaml", path);
+            WriteFromEmbeddedResourceTo("WizshBoneTwitchIntegration.resources.profile_normal.yaml", path);
         }
 
         /// <summary>
@@ -249,6 +306,14 @@ namespace WizshBoneTwitchIntegration.Helpers
         public static void WriteChattingOnlyProfileTo(string path)
         {
             WriteFromEmbeddedResourceTo("WizshBoneTwitchIntegration.resources.profile_chatting_only.yaml", path);
+        }
+
+        /// <summary>
+        /// Seeds the built-in "I got a DEATH WIZSH!" profile - see ProfileManager.ProtectedProfiles.
+        /// </summary>
+        public static void WriteDeathWizshProfileTo(string path)
+        {
+            WriteFromEmbeddedResourceTo("WizshBoneTwitchIntegration.resources.profile_death_wizsh.yaml", path);
         }
 
         /// <summary>

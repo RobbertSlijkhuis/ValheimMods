@@ -5,9 +5,18 @@ using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Components
 {
-    internal class TwitchTerrainReset : MonoBehaviour
+    internal class TwitchTerrainReset : MonoBehaviour, IRedeemTimer
     {
+        private const float DebugOutlineHeight = 6f;
+
         private ZNetView m_netView;
+
+        // Time.time at which the reset fires, or -1 before the countdown starts. Read by RedeemTimerLabel.
+        private float m_resetAt = -1f;
+
+        public float RemainingSeconds => m_resetAt < 0f ? -1f : Mathf.Max(0f, m_resetAt - Time.time);
+
+        public bool IsPaused => false;
 
         private const string KeyStarted  = "TerrainReset_Started_WBTI";
         private const string KeyDuration = "TerrainReset_Duration_WBTI";
@@ -34,9 +43,13 @@ namespace WizshBoneTwitchIntegration.Components
                 float remaining  = duration - timePassed;
 
                 if (remaining <= 0f)
+                {
                     ApplyResetAndDestroy();
+                }
                 else
-                    StartCoroutine(ResetAfterDelay(remaining));
+                {
+                    StartCountdown(remaining, m_netView.GetZDO().GetFloat(KeyRadius, 8f));
+                }
             }
             catch (Exception e)
             {
@@ -55,7 +68,25 @@ namespace WizshBoneTwitchIntegration.Components
             zdo.Set(KeyPosZ,     targetPos.z);
             zdo.Set(KeyRadius,   radius);
 
-            StartCoroutine(ResetAfterDelay(duration));
+            StartCountdown(duration, radius);
+        }
+
+        private void StartCountdown(float delay, float radius)
+        {
+            m_resetAt = Time.time + delay;
+
+            // Debug-mode visuals (client-local): the area that will be reset, and the time left. The
+            // marker has no collider, so the area is drawn as a cylinder standing on its position.
+            ColliderBoundsHelper.RegisterCylinder(gameObject, ColliderBoundsHelper.TerrainEditColor, radius, DebugOutlineHeight);
+            RedeemTimerHelper.Register(this);
+
+            StartCoroutine(ResetAfterDelay(delay));
+        }
+
+        public void OnDestroy()
+        {
+            ColliderBoundsHelper.Unregister(gameObject);
+            RedeemTimerHelper.Unregister(this);
         }
 
         private IEnumerator ResetAfterDelay(float delay)

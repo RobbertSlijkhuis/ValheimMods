@@ -210,6 +210,10 @@ namespace WizshBoneTwitchIntegration.Helpers
                 new RecolorCreatureData("Visual/Plane.004") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorSeekerBrood, emissive = true },
                 new RecolorCreatureData("Point Light") { isLight = true },
             }},
+            { "SeekerQueen", new List<RecolorCreatureData>() {
+                new RecolorCreatureData("Visual/Cube") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorQueen, emissive = true },
+                new RecolorCreatureData("Visual/Plane") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorQueen, emissive = true },
+            }},
             { "Serpent", new List<RecolorCreatureData>() {
                 new RecolorCreatureData("Visual/Serpant") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorSerpent, emissive = true },
             }},
@@ -263,6 +267,15 @@ namespace WizshBoneTwitchIntegration.Helpers
                 new RecolorCreatureData("Visual/wraith/chain") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorWraith, emissive = true },
                 new RecolorCreatureData("Visual/wraith/RagPlanes") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorWraith, emissive = false },
                 new RecolorCreatureData("Visual/wraith/Armature/root/spine1/spine2/spine3/neck/head/Point light") { isLight = true },
+            }},
+            { "Writhan", new List<RecolorCreatureData>() {
+                new RecolorCreatureData("Visual/Writhan/Cube.001") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorWrithan, emissive = true },
+                new RecolorCreatureData("Visual/Writhan/Sphere.001") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorWrithan, emissive = true },
+                new RecolorCreatureData("Visual/Writhan/BezierCurve") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorWrithan, emissive = true },
+                new RecolorCreatureData("Visual/particles/Point Light") { isLight = true },
+                new RecolorCreatureData("Visual/particles/ooz") { isParticle = true },
+                //new RecolorCreatureData("Visual/particles/wetsplsh") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorBlobSlime, emissive = true, emissiveMultiplier = 0.5f, isParticle = true },
+                new RecolorCreatureData("Visual/particles/wetsplsh (1)") { material = WizshBoneTwitchIntegration.Instance.materials.RecolorBlobSlime, emissive = true, emissiveMultiplier = 0.5f, isParticle = true },
             }},
         };
 

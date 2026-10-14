@@ -78,7 +78,7 @@ Goal: a creature carries what it needs, so no client depends on its local profil
 | Group | Fields |
 |-------|--------|
 | Look | `size`, `color`, `emissionColor`, `forceColor` |
-| Stats / behaviour | `level`, `isBoss`, `bossEvent`, `maxHealth`, `speedMultiplier`, `mistVision`, `idleSoundInterval`, `damageScale`, `healthScale`, `allowDamageStructures`, `allowDrops` |
+| Stats / behaviour | `level`, `isBoss`, `bossEvent`, `maxHealth`, `speedMultiplier`, `mistVision`, `idleSoundInterval`, `muteIdleSound`, `damageScale`, `healthScale`, `allowDamageStructures`, `allowDrops` |
 | Identity | `rename`, `name`, `group`, `friendly` |
 | Tame / follow | `commandable`, `alwaysFollowOwner`, `fullyPassive` |
 | Talking (`TwitchCreatureClaim`) | `talks`, `talkInteract`, `talkInterval`, `talkMessage` |

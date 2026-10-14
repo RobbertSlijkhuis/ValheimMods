@@ -61,16 +61,10 @@ namespace WizshBoneTwitchIntegration.Commands
                     return;
                 }
 
-                CustomRewardEvent currentRewardEvent = new CustomRewardEvent();
-                currentRewardEvent.RedemptionId = Guid.Empty.ToString();
-                currentRewardEvent.RedeemerName = "WizshBone";
-                currentRewardEvent.RedeemedAt = DateTime.Now.ToShortDateString();
                 // HandleRedeem looks the redeem up by its Twitch-facing (prefixed) title - fall
                 // back to the raw typed title verbatim if no redeem was found, so the "could not
                 // find redeem" error downstream still echoes back what was actually typed.
-                currentRewardEvent.CustomRewardTitle = redeem != null ? RedeemManager.GetFullTitle(redeem) : title;
-                currentRewardEvent.CustomRewardCost = 100;
-                currentRewardEvent.Status = CustomRewardRedemptionState.Unfulfilled;
+                CustomRewardEvent currentRewardEvent = TestRedeemEventHelper.Create(redeem != null ? RedeemManager.GetFullTitle(redeem) : title, 100);
                 FakeRedeemerCommand.Apply(currentRewardEvent); // debug: only does anything after WBTIFakeRedeemer
                 WizshBoneTwitchIntegration.useRedeemCommand = true;
 

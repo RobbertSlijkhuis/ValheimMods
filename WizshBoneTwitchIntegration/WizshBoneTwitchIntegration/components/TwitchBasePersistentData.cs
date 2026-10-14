@@ -96,6 +96,8 @@ namespace WizshBoneTwitchIntegration.Components
                 // Read before the early return below, which skips objects with no active flags.
                 ReadRedeemer();
 
+                StartClaimWatcher();
+
                 var flags = (PersistentComponentFlags)m_netView.GetZDO().GetInt(s_activeComponentsHash, 0);
 
                 m_isRedeemSpawn = flags.HasFlag(PersistentComponentFlags.RedeemSpawn);
@@ -136,6 +138,53 @@ namespace WizshBoneTwitchIntegration.Components
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("TwitchBasePersistentData.Awake failed: " + e);
+            }
+        }
+
+        // A manual creature claim is made (or renamed/released) by whichever client owns the chat, long
+        // after other clients loaded the creature - and a ZDO has no change event, while Awake-time
+        // rehydration only covers creatures that load afterwards. So every claimable instance (anything
+        // with a BaseAI, or a Tameable for non-creature claims like a Rocky) polls its claim field and
+        // hands any change to TwitchCreaturePersistentData. The first read here is the baseline, so a
+        // creature that rehydrates normally in Awake isn't applied twice.
+        private const float ClaimWatchInterval = 1f;
+        private string m_lastClaimData;
+
+        private void StartClaimWatcher()
+        {
+            if (gameObject.GetComponent<BaseAI>() == null && gameObject.GetComponent<Tameable>() == null)
+                return;
+
+            m_lastClaimData = m_netView.GetZDO().GetString(TwitchCreaturePersistentData.s_creatureDataHash, "");
+
+            // Randomized start so every creature loaded in the same frame doesn't poll in the same frame.
+            InvokeRepeating(nameof(WatchClaim), ClaimWatchInterval + UnityEngine.Random.value, ClaimWatchInterval);
+        }
+
+        private void WatchClaim()
+        {
+            try
+            {
+                if (m_netView == null || !m_netView.IsValid())
+                    return;
+
+                string current = m_netView.GetZDO().GetString(TwitchCreaturePersistentData.s_creatureDataHash, "");
+
+                if (current == m_lastClaimData)
+                    return;
+
+                m_lastClaimData = current;
+
+                TwitchCreaturePersistentData creatureData = gameObject.GetComponent<TwitchCreaturePersistentData>();
+
+                if (creatureData != null)
+                    creatureData.OnZdoChanged();
+                else if (current != "")
+                    gameObject.AddComponent<TwitchCreaturePersistentData>(); // its Awake rehydrates from the ZDO
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchBasePersistentData.WatchClaim failed: " + e);
             }
         }
 

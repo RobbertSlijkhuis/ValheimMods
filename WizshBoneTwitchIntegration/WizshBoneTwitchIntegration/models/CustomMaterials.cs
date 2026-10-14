@@ -42,6 +42,7 @@ namespace WizshBoneTwitchIntegration.Models
         public Material RecolorLox;
         public Material RecolorModer;
         public Material RecolorNeck;
+        public Material RecolorQueen;
         public Material RecolorSeeker;
         public Material RecolorSeekerBrute;
         public Material RecolorSeekerBrood;
@@ -57,6 +58,7 @@ namespace WizshBoneTwitchIntegration.Models
         public Material RecolorVile;
         public Material RecolorWraith;
         public Material RecolorWraithZebra;
+        public Material RecolorWrithan;
         public Material RecolorYagluth;
         public Material RecolorYagluthHair;
     }

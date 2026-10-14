@@ -25,6 +25,12 @@ namespace WizshBoneTwitchIntegration.Components
         private DateTime m_lastMessageTime;
         private bool m_isUnclaimDestroy = false;
 
+        // Set when the release came from the ZDO (another client released or expired the claim) rather
+        // than from this client - the ZDO and Tameable name were already cleaned up by that client.
+        private bool m_isRemoteRelease = false;
+
+        public string ClaimedUserName => m_assignment?.userName;
+
         // Fallback talk used for non-creature prefabs that have no MonsterAI -
         // NpcTalk.SayForce() calls m_animator.SetTrigger(), which NREs without one.
         private List<string> m_simpleTalkMessages;
@@ -65,7 +71,10 @@ namespace WizshBoneTwitchIntegration.Components
             m_chatting.onNewMessage.AddListener(CheckChatForMessage);
         }
 
-        public void Init(string userName)
+        // permanent is set for a "claim:" rename (made by any player, never expires); a claim accepted
+        // from chat ("!claim", the scan commands) is timed by chattingClaimDuration and gets stamped with
+        // this streamer's channel so that only this streamer's client runs its expiry and numbering.
+        public void Init(string userName, bool permanent = false)
         {
             if (userName == null || userName == "")
             {
@@ -80,7 +89,7 @@ namespace WizshBoneTwitchIntegration.Components
             if (m_netView != null && m_netView.IsValid() && !m_netView.IsOwner())
                 m_netView.ClaimOwnership();
 
-            m_assignment = new TwitchCreatureAssignment(userName, gameObject, ProfileSettingsHelper.Current.chattingClaimDuration);
+            m_assignment = new TwitchCreatureAssignment(userName, gameObject, permanent ? 0 : ProfileSettingsHelper.Current.chattingClaimDuration);
 
             // Only captured on the very first claim (re-claim:-renaming an already-claimed creature
             // calls Init again on this same component) - otherwise re-claiming would only ever restore
@@ -102,7 +111,11 @@ namespace WizshBoneTwitchIntegration.Components
             if (m_character != null)
                 m_character.m_name = userName;
 
-            if (ProfileSettingsHelper.Current.chattingClaimDuration == 0 && !(gameObject.GetComponent<TwitchBasePersistentData>()?.IsRedeemSpawn ?? false))
+            // Persisted whatever the claim duration: the ZDO is also how every other client learns about
+            // the claim (TwitchBasePersistentData's claim watcher). A timed claim that is reloaded just
+            // gets its expiry timer restarted (see ReInit). A "claim:" rename is left unstamped on
+            // purpose - a streamer's client adopts it later, for numbering only (see SetDisplayIndex).
+            if (!(gameObject.GetComponent<TwitchBasePersistentData>()?.IsRedeemSpawn ?? false))
             {
                 // Refresh persistent data on every manual claim, not just the first - otherwise
                 // re-claim:-renaming an already-claimed creature leaves the previous claimant's name
@@ -110,14 +123,25 @@ namespace WizshBoneTwitchIntegration.Components
                 // Only skip this for a genuinely redeem-spawned creature (IsRedeemSpawn) - one that already
                 // has real persistent data (title/prefab/color) which this claim:-rename must not wipe.
                 TwitchCreaturePersistentData persistentData = gameObject.GetComponent<TwitchCreaturePersistentData>() ?? gameObject.AddComponent<TwitchCreaturePersistentData>();
-                persistentData.SetData(m_assignment.userName);
+                persistentData.SetData(m_assignment.userName, claimChannel: permanent ? "" : m_chatting.ClaimChannel, claimPermanent: permanent);
             }
 
-            // Re-claiming an already-claimed creature (claim:-renaming it again) reuses this same
-            // component instead of tearing it down first, so a previous claim's color would otherwise
-            // stick around if the new name isn't a special viewer - reset to original in that case.
-            // RecolorCreature always replaces the material outright, so no reset is needed when the
-            // new name does recolor.
+            ApplyRecolor();
+
+            m_chatting.AddCreatureAssignment(m_assignment);
+            SetupNpcTalk();
+            m_chatting.onNewMessage.AddListener(CheckChatForMessage);
+
+            StartExpiry();
+        }
+
+        // Re-claiming an already-claimed creature (claim:-renaming it again) reuses this same
+        // component instead of tearing it down first, so a previous claim's color would otherwise
+        // stick around if the new name isn't a special viewer - reset to original in that case.
+        // RecolorCreature always replaces the material outright, so no reset is needed when the
+        // new name does recolor.
+        public void ApplyRecolor()
+        {
             if (RecolorHelper.IsPetRock(gameObject))
             {
                 if (RecolorHelper.CanRecolorPetRock(m_assignment.userName, gameObject))
@@ -132,14 +156,14 @@ namespace WizshBoneTwitchIntegration.Components
             }
             else if (RecolorHelper.IsCreatureInList(m_assignment.creature.name))
                 RecolorHelper.UnColorCreature(gameObject);
+        }
 
-            m_chatting.AddCreatureAssignment(m_assignment);
-            SetupNpcTalk();
-            m_chatting.onNewMessage.AddListener(CheckChatForMessage);
-
-            // Duration == 0 means permanent (see the persistent-data check above) - only
-            // self-expire timed claims. Runs on its own schedule instead of only re-checking when
-            // the claimed user happens to chat again, so a claim still expires even if they never do.
+        // Duration == 0 means permanent - only self-expire timed claims. Runs on its own schedule
+        // instead of only re-checking when the claimed user happens to chat again, so a claim still
+        // expires even if they never do. Started on every client that sets the claim up (a timed claim
+        // is also restored from the ZDO), but CheckExpiry only acts on the streamer the claim belongs to.
+        private void StartExpiry()
+        {
             m_lastMessageTime = DateTime.Now;
 
             // Re-claiming (claim:-renaming an already-claimed creature) reuses this same component
@@ -155,7 +179,12 @@ namespace WizshBoneTwitchIntegration.Components
         // == "") is a genuine spawn with no CreatureData to reapply, so "creatureData != null" isn't
         // a reliable signal. Getting this wrong excludes/includes a claim from index/bracket numbering
         // incorrectly (see TwitchChatting.NonSpawnSiblings).
-        public void ReInit(string userName, bool isSpawn, CreatureData creatureData = null)
+        //
+        // displayName and permanent are only meaningful for a manual claim (!isSpawn): the numbered name
+        // the managing streamer's client stored in the ZDO, and whether the claim never expires. Also
+        // called again, on an already-set-up component, when the ZDO says another viewer took the
+        // creature over - the previous assignment is replaced.
+        public void ReInit(string userName, bool isSpawn, CreatureData creatureData = null, string displayName = null, bool permanent = false)
         {
             if (userName == null)
             {
@@ -163,13 +192,20 @@ namespace WizshBoneTwitchIntegration.Components
                 return;
             }
 
+            TwitchCreatureAssignment previousAssignment = m_assignment;
+
+            if (previousAssignment != null)
+                m_chatting.onNewMessage.RemoveListener(CheckChatForMessage);
+
             m_isSpawn = isSpawn;
-            m_assignment = new TwitchCreatureAssignment(userName, gameObject, ProfileSettingsHelper.Current.chattingClaimDuration);
+            m_assignment = new TwitchCreatureAssignment(userName, gameObject, permanent ? 0 : ProfileSettingsHelper.Current.chattingClaimDuration);
 
             // Null-safe like Init(CreatureData, CustomRewardEvent)'s equivalent line - some
             // rehydration paths (see TwitchCreaturePersistentData.Awake) have no Character component,
-            // so m_character is genuinely null here.
-            m_originalName = GetOriginalName();
+            // so m_character is genuinely null here. Only captured once: on a re-assignment
+            // Character.m_name already holds the previous claimant's name.
+            if (m_originalName == null)
+                m_originalName = GetOriginalName();
 
             // A manually-claimed non-creature (e.g. a Rocky) has no Character.m_name to restore, only
             // the Tameable's ZDO name - which is the claimed name by now. Its unclaimed default is
@@ -177,9 +213,59 @@ namespace WizshBoneTwitchIntegration.Components
             if (!isSpawn && m_character == null)
                 m_originalTamedName = "";
 
-            m_chatting.AddCreatureAssignment(m_assignment);
+            if (previousAssignment != null)
+                m_chatting.ReplaceCreatureAssignment(previousAssignment, m_assignment);
+            else
+                m_chatting.AddCreatureAssignment(m_assignment);
+
+            if (!isSpawn)
+                ApplyStoredDisplayName(displayName);
+
             SetupNpcTalk(creatureData);
             m_chatting.onNewMessage.AddListener(CheckChatForMessage);
+
+            // A manual claim restored from the ZDO can be a timed one (they are persisted too) - restart
+            // its expiry timer. Redeem spawns never expire.
+            if (!isSpawn)
+                StartExpiry();
+        }
+
+        // Shows the numbered name that the managing streamer's client stored in the ZDO. That client
+        // numbers its own claims in SetDisplayIndex, so it never applies the stored value; everyone else
+        // must, because they can't compute the "[n]" suffix (it depends on the owner's other loaded
+        // claims). Falls back to the plain claimant name until the numbering client has written one.
+        public void ApplyStoredDisplayName(string displayName)
+        {
+            if (m_isSpawn || m_character == null || IsManagedByThisClient())
+                return;
+
+            m_character.m_name = string.IsNullOrEmpty(displayName) ? m_assignment.userName : displayName;
+        }
+
+        // Whether this client's streamer is the one this claim is stamped with - the only client that
+        // runs its expiry and writes its numbered name. False on every client that isn't logged in to
+        // Twitch, and on the other streamer's client when two share a world: they just mirror the ZDO.
+        private bool IsManagedByThisClient()
+        {
+            string channel = m_chatting.ClaimChannel;
+
+            return channel != "" && channel == gameObject.GetComponent<TwitchCreaturePersistentData>()?.ClaimChannel;
+        }
+
+        // Whether the streamer on `channel` numbers this claim: it is stamped with that channel, or it
+        // is an unstamped claim ("claim:" rename) the streamer may adopt. Used by TwitchChatting to pick
+        // the claims it counts for the "[n]" suffix and "!unclaim <n>".
+        public bool IsNumberedBy(string channel)
+        {
+            if (m_isSpawn || channel == "")
+                return false;
+
+            TwitchCreaturePersistentData persistentData = gameObject.GetComponent<TwitchCreaturePersistentData>();
+
+            if (persistentData == null)
+                return false;
+
+            return persistentData.ClaimChannel == "" || persistentData.ClaimChannel == channel;
         }
 
         // Character.m_name for creatures; the Piece name for a non-creature claim (e.g. a Rocky) so
@@ -214,7 +300,7 @@ namespace WizshBoneTwitchIntegration.Components
 
                 // Restores the vanilla Tameable rename field alongside Character.m_name above - only
                 // set for claims made via Init(string) (see the capture there for why).
-                if (m_originalTamedName != null)
+                if (m_originalTamedName != null && !m_isRemoteRelease)
                     SetTameableText(m_originalTamedName);
 
                 m_lastMessageTime = DateTime.MinValue;
@@ -232,7 +318,10 @@ namespace WizshBoneTwitchIntegration.Components
 
                     if (persistentData != null)
                     {
-                        persistentData.ClearClaimData();
+                        // A remote release already had its ZDO cleared by the client that released it.
+                        if (!m_isRemoteRelease)
+                            persistentData.ClearClaimData();
+
                         Destroy(persistentData);
                     }
                 }
@@ -407,6 +496,8 @@ namespace WizshBoneTwitchIntegration.Components
                     return;
                 }
 
+                BroadcastBubble("Alright... healing!");
+
                 if (m_chatting.CanCreatureTalk(gameObject))
                     m_npcTalk.SayForce("Alright... healing!", "Aggravated");
 
@@ -419,8 +510,31 @@ namespace WizshBoneTwitchIntegration.Components
                 return;
             }
 
+            // Sent before the local talker check: that check ranks creatures by distance to THIS
+            // client's player, and every receiver applies its own.
+            BroadcastBubble(message.message);
+
             if (m_chatting.CanCreatureTalk(gameObject))
                 ShowBubbleText(message.message);
+        }
+
+        // Chat-driven bubbles only exist on the client that receives viewer chat - tell the others so
+        // they show it too (see ChatBubbleSyncHelper). Scripted talk is not broadcast, every client
+        // runs that itself.
+        private void BroadcastBubble(string text)
+        {
+            if (m_netView != null && m_netView.IsValid())
+                ChatBubbleSyncHelper.Broadcast(m_netView.GetZDO().m_uid, text);
+        }
+
+        // Receiving end of ChatBubbleSyncHelper: the streamer's client showed this creature's bubble,
+        // so show it here too, subject to this client's own talker limit and culling range.
+        public void ShowRemoteBubble(string text)
+        {
+            if (m_chatting == null || !m_chatting.CanCreatureTalk(gameObject))
+                return;
+
+            ShowBubbleText(text);
         }
 
         // Called by TwitchChatting.UnclaimForUser once it has already decided this claim should be
@@ -468,8 +582,26 @@ namespace WizshBoneTwitchIntegration.Components
             m_npcTalk.SayForce(text, "Aggravated");
         }
 
+        // Called when the ZDO says this claim was released by another client (chat unclaim, expiry,
+        // unclaim:) - see TwitchCreaturePersistentData.OnZdoChanged. Tears down only this client's copy.
+        public void ApplyRemoteRelease()
+        {
+            m_isRemoteRelease = true;
+            m_isUnclaimDestroy = true;
+            Unassign();
+        }
+
         public void CheckExpiry()
         {
+            // The claimant's chat only ever reaches the client of the streamer whose channel they chat in,
+            // so only that client can tell they went quiet. Everywhere else - including the other
+            // streamer's client when two share a world - the claim just waits for the ZDO to be cleared.
+            if (!IsManagedByThisClient())
+            {
+                m_lastMessageTime = DateTime.Now;
+                return;
+            }
+
             if (DateTime.Now.Subtract(m_lastMessageTime).TotalSeconds <= m_assignment.duration)
                 return;
 
@@ -486,7 +618,26 @@ namespace WizshBoneTwitchIntegration.Components
         // a claim:-renamed tame needs both written or the bracket silently wouldn't show.
         public void SetDisplayIndex(int? index)
         {
-            if (m_isSpawn)
+            // Only the streamer this claim belongs to numbers it: the suffix depends on which of the
+            // owner's claims that client has loaded, so any other client computing it would overwrite the
+            // shared name with a different one. Others read it from the ZDO (ApplyStoredDisplayName).
+            string channel = m_chatting.ClaimChannel;
+            TwitchCreaturePersistentData persistentData = gameObject.GetComponent<TwitchCreaturePersistentData>();
+
+            if (m_isSpawn || channel == "" || persistentData == null)
+                return;
+
+            if (persistentData.ClaimChannel == "")
+            {
+                // An unstamped claim ("claim:" rename) - adopt it so it gets numbered. Needs the ZDO owned
+                // for the write; if another streamer adopts it at the same moment the last write wins and
+                // this client turns into a mirror (TwitchCreaturePersistentData.OnZdoChanged).
+                if (m_netView != null && m_netView.IsValid() && !m_netView.IsOwner())
+                    m_netView.ClaimOwnership();
+
+                persistentData.SetClaimChannel(channel);
+            }
+            else if (persistentData.ClaimChannel != channel)
                 return;
 
             string displayName = index.HasValue ? $"{m_assignment.userName} [{index}]" : m_assignment.userName;
@@ -494,7 +645,9 @@ namespace WizshBoneTwitchIntegration.Components
             if (m_character != null)
                 m_character.m_name = displayName;
 
+            // Claims ownership first, which the ZDO write below needs too.
             SetTameableText(displayName);
+            persistentData.SetClaimDisplayName(displayName);
         }
 
         // Ensures ownership before writing to Tameable's ZDO-backed name, mirroring the same

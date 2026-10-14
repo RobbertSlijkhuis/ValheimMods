@@ -11,9 +11,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
     /// Help tab content (formerly "Debug") - a single under-title orientation line (same
     /// TitleY/DescriptionY convention as SettingsTab/RedeemsTab), above the same card grid
     /// matching <see cref="HomeTab"/>'s card style (RedesignUI.dc.html only mocks up the first
-    /// card; the "Clear Toasts" card is a safety net for stuck toasts, and the "Show safezone bounds" toggle is carried over from GUI_OLD/tabs/DebugTab.cs,
+    /// card; the "Clear Toasts" card is a safety net for stuck toasts, and the "Debug mode" toggle is carried over from GUI_OLD/tabs/DebugTab.cs,
     /// which the mockup didn't include), followed by a clickable topic list explaining
-    /// Login/Profiles/Redeems/Viewers/Settings/Safezones. Purely client-local: nothing here touches
+    /// Login/Profiles/Redeems/Viewers/Settings/Safezones/Commands. Purely client-local: nothing here touches
     /// ZDOs or the network.
     /// </summary>
     internal class HelpTab : IShellTabView
@@ -25,46 +25,78 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private readonly SelectorList m_topicList = new SelectorList();
         private readonly SelectorPreviewPanel m_topicPreview = new SelectorPreviewPanel();
 
-        private static readonly string[] TopicOrder = { "Login", "Profiles", "Redeems", "Viewers", "Settings", "Safezones" };
+        private static readonly string[] TopicOrder = { "Login", "Profiles", "Redeems", "Viewers", "Settings", "Safezones", "Commands" };
 
         private static readonly Dictionary<string, string> TopicDescriptions = new Dictionary<string, string>
         {
             ["Login"] =
                 "You can log in with the \"Twitch Login\" button in the top bar. It opens your main browser, where " +
-                "you need to log in to Twitch and authorize the mod." +
-                "\n\nIf the login goes wrong for some reason, try logging out or restarting the world. " +
-                "This can happen sometimes.",
+                "you need to log in to Twitch and authorize the mod. You can find the status on the left!" +
+                "\n\nFor the chatting system to work you need to be logged in, so the mod can read the chat messages." +
+                "\n\nIf the login goes wrong for some reason, try logging out or restarting the world. This happens occasionally." +
+                "\n\nA login session lasts around 4 hours. You will be warned when the session is about to expire.",
             ["Profiles"] =
                 "Each profile holds all the configuration for Redeems and Settings, so switching profiles switches " +
-                "your entire setup at once. You can Import/Export, Copy and even Sync profiles. That lets you share " +
+                "your entire setup at once. You can import, export, copy and even sync profiles. That lets you share " +
                 "a profile, make a copy to adjust it slightly, or make sure you and your friends have the same " +
                 "Redeems and Settings." +
+                "\n\nBuilt-in profiles (Normal and Chatting only, shown in grey-blue) ship with the mod. They can't be renamed, deleted or synced, but Reset puts one back to its original redeems and settings." +
                 "\n\nSynced profiles are read-only for everyone except the owner, so only the owner can push changes. " +
-                "This prevents drift: some redeems read values from their configuration, and those must be the same for everyone!",
+                "This prevents drift: some redeems read values from their configuration, and those must be the same for everyone!" +
+                "\n\nA redeem history (the last 1000 redeems) is kept, which allows you to complete redeems or refund points. " +
+                "If you like to have control over that, I recommend keeping auto-resolve off.",
             ["Redeems"] =
                 "Redeems are your custom channel point rewards. Each one triggers an in-game effect, like spawning " +
-                "creatures, raining logs, placing traps and more. Keep in mind that Twitch allows a maximum of 50 " +
-                "custom channel point rewards per channel, including the ones you already have set up." +
+                "creatures, raining logs, placing traps and more." +
+                "\n\nKeep in mind that Twitch allows a maximum of 50 custom channel point rewards per channel, and that " +
+                "includes the ones you already have set up yourself (or through other tools). Make sure you have enough free " +
+                "slots for the redeems of your profile: every enabled redeem takes one slot, while disabled redeems are not sent " +
+                "to Twitch. The Redeems tab shows how many slots you are using, and the mod will not push your redeems if " +
+                "they do not fit next to your other rewards. In that case delete some of your own rewards or disable redeems." +
                 "\n\nTo create a new redeem, open the Redeems tab, click \"+ New redeem\" and follow the wizard. " +
-                "Step 1: choose an effect. Step 2: configure the chosen effect. Step 3: set up the channel point reward.",
+                "Step 1: choose an effect. Step 2: configure the chosen effect. Step 3: set up the Twitch channel point reward." +
+                "\n\nBEWARE: any changes made to the description, points or cooldowns will remove the channel point reward on Twitch " +
+                "and create a new one. Make sure you refund any points you want to before making changes, or they can be lost!",
             ["Viewers"] =
                 "Viewers are the Twitch chatters and redeemers you choose to register. Registering a viewer lets you " +
-                "give them cosmetics, like a creature color, with more perks and effects planned in a later update." +
-                "\n\nRight now you can add viewers manually by name and give them a color. Creatures claimed or spawned will " +
-                "then be colored with their configured color!",
+                "give them cosmetics, like a creature color. More perks and effects are planned for a later update." +
+                "\n\nRight now you can add viewers manually by name and give them a color. Creatures they claim or spawn will " +
+                "then get that color!\n\nFor now this is the only way. In a future update, viewers will be " +
+                "able to do most of this themselves, and your only job will be to approve them.",
             ["Settings"] =
                 "Settings control this profile's overall behavior. They are grouped into:" +
                 "\n- Redeems: enable redeems on login, auto-resolve redeems and the redeem title prefix" +
-                "\n- Chatting: show viewer chat above creatures, claiming creatures with !claim and how often and how far to scan" +
+                "\n- Chatting: showing viewer chat above creatures, claiming creatures with !claim, and how often and how far to scan" +
                 "\n- Creatures: same faction, scaling by biome tier, and limits on how many spawn and how far away" +
                 "\n- Indestructible: make boats, chests, portals and crops indestructible" +
                 "\n- Safezones: the Twitch Ward recipe and behavior, and safezones on traders and boats" +
                 "\n\nSettings save automatically; there's no Save button anywhere in this mod.",
             ["Safezones"] =
-                "Safezones can be put on ships, wards, and traders. While a player is inside one, redeem effects " +
-                "are blocked, unless \"Ignore safezone\" is enabled on that redeem. " +
-                "If a safezone ever seems stuck, use the \"Unstuck safezones\" button above. " +
-                "\"Show safezone bounds\" visualizes their bounds, and the bounds of any active weather zone, in-game as a wireframe outline. It also floats a countdown over timed redeem objects (boats, weather zones, ...).",
+                "Safezones can be put on boats, wards and traders. While a player is inside one, redeem effects " +
+                "are blocked unless \"Ignore safezone\" is enabled on that redeem." +
+                "\n\nSpawned creatures can optionally be kept from entering a Twitch Ward's safezone (pushed out) and can optionally " +
+                "get burned when they do (both are ward settings you can toggle). Their attacks are stopped, so players inside a safezone are safe from them." +
+                "\n\nSome redeems will not spawn anything inside a safezone, and they stop completely as soon as the " +
+                "player enters one." +
+                "\n\nIf a safezone ever seems stuck, use the \"Unstuck safezones\" button above." +
+                "\n\n\"Debug mode\" visualizes their bounds, and the bounds of any active weather zone or timed terrain edit, in-game as a wireframe outline. It also floats a countdown over timed redeem objects (boats, weather zones, ...).",
+            ["Commands"] =
+                "If a redeem leaves something behind that gets in your way, you can clean it up with the remove commands. " +
+                "Open the in-game console (F5) and type one of them. They only remove things spawned by this mod, never " +
+                "your own builds or vanilla creatures." +
+                "\n\nMost commands remove everything within 30 meters of you. Add a number to change the radius, for example " +
+                "\"WBTIRemoveCreatures 60\"." +
+                "\n\n- WBTIRemoveCreatures: spawned creatures" +
+                "\n- WBTIRemoveBoats: spawned boats" +
+                "\n- WBTIRemoveChests: surprise chests" +
+                "\n- WBTIRemoveDoors: spawned doors" +
+                "\n- WBTIRemoveTraps: spawned traps" +
+                "\n- WBTIRemoveWindmills: spawned windmills" +
+                "\n- WBTIRemoveLogs: spawned logs" +
+                "\n- WBTIRemoveMist: spawned mist (default radius is 100 meters)" +
+                "\n- WBTIRemoveWeather: spawned weather zones and restores the normal weather. This one has no radius, " +
+                "it removes all of them." +
+                "\n\nTip: if you are not sure which one you need, run the matching command while standing next to the problem.",
         };
 
         private static readonly Color EnabledColor = new Color(0.95f, 0.65f, 0.2f, 1f);
@@ -100,12 +132,10 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private const float TopicPreviewX = LeftEdgeX + TopicListWidth + TopicsGapX + TopicPreviewWidth / 2f;
 
         // Height of both the list card and the preview card, so their top/bottom edges line up.
-        // At least the topic buttons' total stacked height, but taller than that so the longest
-        // description (Settings, ~10 lines at 13pt) fits inside the preview card - the description
-        // text just grows downward and is never clipped, so it would spill out of a shorter card.
-        private static readonly float TopicsListHeight = Mathf.Max(
-            TopicOrder.Length * TopicBtnHeight + (TopicOrder.Length - 1) * TopicBtnGap,
-            240f);
+        // Both stretch from the body's top edge down to the same ContentMargin the tab leaves on
+        // its left/right. The preview's description scrolls when it's still longer than that.
+        private const float ContentHeight = WizshBoneShellGUI.PanelHeight - ShellTopBar.Height;  // 660
+        private const float TopicsListHeight = ContentHeight - ContentMargin + TopicsBodyTopY;
 
         private const float TopicPreviewPadding = 14f; // matches RedeemWizard's BoxPadding
 
@@ -153,14 +183,14 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private void BuildSafezoneBoundsCard(Vector2 topCenter)
         {
             GameObject card = GuiHelper.CreateCard(m_root, topCenter, CardWidth, CardHeight);
-            GuiHelper.CreateCardTitle(card, "Show safezone bounds", CardWidth - 24f);
+            GuiHelper.CreateCardTitle(card, "Debug mode", CardWidth - 24f);
 
             bool currentValue = PluginConfig.configShowSafeZoneDebug.Value;
             var row = GuiHelper.CreateToggleStatusRow(card, CardWidth, currentValue, OnSafeZoneDebugToggled, EnabledColor);
             m_safeZoneDebugToggle = row.Toggle;
             m_safeZoneDebugStatusText = row.Status;
 
-            GuiHelper.CreateCardDescription(card, "Shows safezone and weather zone bounds as a wireframe, plus time left on timed redeems.", CardWidth - 24f, height: 38f);
+            GuiHelper.CreateCardDescription(card, "Shows safezone, weather zone and timed terrain edit bounds as a wireframe, plus time left on timed redeems.", CardWidth - 24f, height: 38f);
         }
 
         private void BuildClearToastsCard(Vector2 topCenter)
@@ -188,7 +218,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             m_topicPreview.Build(
                 m_root, new Vector2(TopicPreviewX, TopicsBodyTopY), TopicPreviewWidth, TopicsListHeight,
-                TopicPreviewPadding);
+                TopicPreviewPadding, scrollable: true);
 
             SelectTopic(TopicOrder[0]);
         }

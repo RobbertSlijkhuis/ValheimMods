@@ -104,17 +104,25 @@ namespace WizshBoneTwitchIntegration.Gui
     {
         private const float TitleHeight = 26f;
 
+        // Gap between a scrollable description's text and its scrollbar.
+        private const float ScrollTextGap = 6f;
+
         private Text m_title;
         private Text m_description;
+        private GameObject m_scrollContent; // null unless built with scrollable: true
 
         /// <summary>
         /// Builds the card (drawn first, so later siblings draw on top of it) plus a top-pivoted
         /// title <see cref="Text"/> and a top-pivoted, wrap-and-grow-downward description
         /// <see cref="Text"/>, both centered on <paramref name="cardTopCenter"/>.x and inset from
         /// the card's edges by <paramref name="padding"/> on every side (title top, description
-        /// gap under the title, and both sides' text width).
+        /// gap under the title, and both sides' text width). With <paramref name="scrollable"/> the
+        /// description instead sits in a scroll view that fills the rest of the card (scrollbar only
+        /// shown when the text overflows), so a description longer than the card scrolls rather than
+        /// spilling out of it.
         /// </summary>
-        public void Build(GameObject parent, Vector2 cardTopCenter, float cardWidth, float cardHeight, float padding)
+        public void Build(GameObject parent, Vector2 cardTopCenter, float cardWidth, float cardHeight, float padding,
+            bool scrollable = false)
         {
             GuiHelper.CreateCard(parent, cardTopCenter, cardWidth, cardHeight);
 
@@ -140,9 +148,25 @@ namespace WizshBoneTwitchIntegration.Gui
             m_title.alignment = TextAnchor.MiddleLeft;
             GuiHelper.PivotToTop(m_title.rectTransform, titleTopY);
 
+            if (!scrollable)
+            {
+                m_description = GuiHelper.CreateTabDescription(
+                    "", parent, new Vector2(cardTopCenter.x, descriptionTopY), width: textWidth);
+                GuiHelper.MakeDescriptionExpandDownward(m_description, descriptionTopY);
+                return;
+            }
+
+            float scrollHeight = descriptionTopY - (cardTopCenter.y - cardHeight) - padding;
+            m_scrollContent = ScrollableList.CreateFixed(
+                parent, "TopicPreview", new Vector2(cardTopCenter.x, descriptionTopY), textWidth, scrollHeight,
+                backgroundColor: Color.clear, autoHideScrollbar: true);
+
+            // The text's top-center sits at the content's top-center (0, 0); the content's width is
+            // the viewport's, i.e. the scroll view minus its scrollbar.
             m_description = GuiHelper.CreateTabDescription(
-                "", parent, new Vector2(cardTopCenter.x, descriptionTopY), width: textWidth);
-            GuiHelper.MakeDescriptionExpandDownward(m_description, descriptionTopY);
+                "", m_scrollContent, Vector2.zero,
+                width: textWidth - ScrollableList.ScrollbarWidth - ScrollTextGap);
+            GuiHelper.MakeDescriptionExpandDownward(m_description, 0f);
         }
 
         /// <summary>Sets the shown title/description - callers decide fallback strings themselves.</summary>
@@ -150,6 +174,14 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             m_title.text = title;
             m_description.text = description;
+
+            if (m_scrollContent == null)
+                return;
+
+            // The text's own ContentSizeFitter only resizes it on the next layout pass; the scroll
+            // content needs the final height right now, so measure it directly, then jump back to the top.
+            ScrollableList.SetContentHeight(m_scrollContent, m_description.preferredHeight);
+            m_scrollContent.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
         }
     }
 }

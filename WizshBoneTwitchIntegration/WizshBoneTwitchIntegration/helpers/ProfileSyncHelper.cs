@@ -92,6 +92,13 @@ namespace WizshBoneTwitchIntegration.Helpers
                 yield break;
             }
 
+            // Built-in profiles can't be synced, so a peer can't replace them.
+            if (ProfileManager.IsProtectedProfile(profileName))
+            {
+                Jotunn.Logger.LogWarning($"ProfileSyncHelper: Rejected synced profile '{profileName}' from peer {sender}: it is a built-in profile.");
+                yield break;
+            }
+
             if (yamlContent == null || yamlContent.Length > MaxYamlLength)
             {
                 Jotunn.Logger.LogWarning($"ProfileSyncHelper: Rejected synced profile '{profileName}' from peer {sender}: empty or too large.");

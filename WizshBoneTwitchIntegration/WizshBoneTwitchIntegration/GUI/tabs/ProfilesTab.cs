@@ -77,6 +77,10 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private const float ColRedeemsX = LeftEdgeX + ColNameW + ColRedeemsW / 2f;           //  15
         private const float ColActionsX = RightEdgeX - ColActionsW / 2f;                     // 259
 
+        // Built-in profiles use the same blue-ish as the Redeems tab's Type column (the active
+        // profile still shows orange).
+        private static readonly Color BuiltInNameColor = new Color(0.56f, 0.7f, 0.79f, 1f);
+
         // Row action buttons chain left-to-right within the Actions column: Copy, Export, Sync,
         // Rename, then Reload/Delete share the rightmost slot - same order/sizing as
         // GUI_OLD/tabs/ProfilesTab.cs's button cluster (minus its per-row Import, dropped per
@@ -301,9 +305,15 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             string profileName = profile;
             bool isActive = profile == ProfileManager.ActiveProfile;
             bool isSynced = ProfileManager.IsSyncedProfile(profile);
+            bool isProtected = ProfileManager.IsProtectedProfile(profile);
 
             var (row, rowBackground) = ListRow.Create(m_profileListContainer, "ProfileRow", yOffset);
             var revealOnHover = new List<GameObject>();
+
+            // Name and redeem count share one colour: orange when active, blue when built-in, else beige.
+            Color rowTextColor = isActive ? GUIManager.Instance.ValheimOrange
+                : isProtected ? BuiltInNameColor
+                : GUIManager.Instance.ValheimBeige;
 
             Text nameText = GUIManager.Instance.CreateText(
                 text: profile,
@@ -313,7 +323,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 position: new Vector2(ColNameX, 0f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: GuiFieldBuilder.FieldFontSize,
-                color: isActive ? GUIManager.Instance.ValheimOrange : GUIManager.Instance.ValheimBeige,
+                color: rowTextColor,
                 outline: true,
                 outlineColor: Color.black,
                 width: ColNameTextW,
@@ -321,6 +331,10 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 addContentSizeFitter: false
             ).GetComponent<Text>();
             nameText.alignment = TextAnchor.MiddleLeft;
+
+            if (isProtected)
+                nameText.gameObject.AddComponent<TooltipTrigger>().Init("Built-in profile",
+                    "Ships with the mod. It can't be renamed or deleted, but Reset puts it back to its original redeems and settings.");
 
             Text countText = GUIManager.Instance.CreateText(
                 text: redeemCount.ToString(),
@@ -330,7 +344,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 position: new Vector2(ColRedeemsX, 0f),
                 font: GUIManager.Instance.AveriaSerifBold,
                 fontSize: GuiFieldBuilder.FieldFontSize,
-                color: GUIManager.Instance.ValheimBeige,
+                color: rowTextColor,
                 outline: true,
                 outlineColor: Color.black,
                 width: ColRedeemsW,
@@ -354,21 +368,31 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             revealOnHover.Add(exportBtn);
 
             GameObject syncBtn = ListRow.CreateActionButton(row, "Sync", BtnSyncX, SyncBtnWidth, ListRow.ItemHeight, Color.yellow, () => OnRowSync(profileName));
-            syncBtn.GetComponent<Button>().interactable = !isSynced;
+            syncBtn.GetComponent<Button>().interactable = !isSynced && !isProtected;
             revealOnHover.Add(syncBtn);
 
-            GameObject renameBtn = ListRow.CreateActionButton(row, "Rename", BtnRenameX, RenameBtnWidth, ListRow.ItemHeight, Color.cyan, () => OnRenameProfile(profileName));
-            renameBtn.GetComponent<Button>().interactable = !isSynced;
-            revealOnHover.Add(renameBtn);
+            // Built-in profiles can't be renamed (or deleted, below); they get Reset instead.
+            GameObject renameResetBtn;
+            if (isProtected)
+            {
+                renameResetBtn = ListRow.CreateActionButton(row, "Reset", BtnRenameX, RenameBtnWidth, ListRow.ItemHeight, GUIManager.Instance.ValheimOrange, () => OnResetProfile(profileName));
+            }
+            else
+            {
+                renameResetBtn = ListRow.CreateActionButton(row, "Rename", BtnRenameX, RenameBtnWidth, ListRow.ItemHeight, Color.cyan, () => OnRenameProfile(profileName));
+                renameResetBtn.GetComponent<Button>().interactable = !isSynced;
+            }
+            revealOnHover.Add(renameResetBtn);
 
             // The Reload/Delete slot stays permanently visible (not added to revealOnHover) so a
-            // row isn't empty-looking until hovered - matching GUI_OLD.
+            // row isn't empty-looking until hovered - matching GUI_OLD. A built-in profile gets no
+            // Delete button; its slot stays empty unless it is the active row (Reload).
             if (isActive)
             {
                 GameObject reloadBtn = ListRow.CreateActionButton(row, "↺", BtnReloadDeleteX, ReloadDeleteWidth, ListRow.ItemHeight, GUIManager.Instance.ValheimOrange, () => OnReloadProfile(profileName));
                 reloadBtn.SetActive(true);
             }
-            else
+            else if (!isProtected)
             {
                 GameObject deleteBtn = ListRow.CreateActionButton(row, "X", BtnReloadDeleteX, ReloadDeleteWidth, ListRow.ItemHeight, Color.red, () => OnDeleteProfile(profileName));
                 deleteBtn.SetActive(true);
@@ -594,6 +618,12 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 return;
             }
 
+            if (ProfileManager.IsProtectedProfile(sourceProfile))
+            {
+                ToastNotifications.Show("Built-in profiles can't be synced.", ToastType.Warning);
+                return;
+            }
+
             if (ProfileManager.IsSyncedProfile(sourceProfile))
             {
                 ToastNotifications.Show("Only the original owner can sync this profile.", ToastType.Warning);
@@ -610,6 +640,15 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             if (name != ProfileManager.ActiveProfile)
                 return;
 
+            bool reloaded = ReloadActiveProfileData();
+
+            ToastNotifications.Show(reloaded
+                ? $"Profile '{name}' reloaded."
+                : $"Failed to reload profile '{name}'.", reloaded ? ToastType.Success : ToastType.Error);
+        }
+
+        private static bool ReloadActiveProfileData()
+        {
             TwitchCustomRewards customRewards = Game.instance?.gameObject?.GetComponent<TwitchCustomRewards>();
 
             bool reloaded = customRewards != null
@@ -621,9 +660,38 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             if (reloaded)
                 ProfileManager.RaiseActiveProfileDataReplaced(ProfileManager.ActiveProfileChange.Reload);
 
-            ToastNotifications.Show(reloaded
-                ? $"Profile '{name}' reloaded."
-                : $"Failed to reload profile '{name}'.", reloaded ? ToastType.Success : ToastType.Error);
+            return reloaded;
+        }
+
+        private void OnResetProfile(string name)
+        {
+            m_confirmDialog.Show(
+                title:       "Reset Profile",
+                description: $"Reset '{name}' to its original redeems and settings?\nYour changes to it will be lost.",
+                onConfirm:   () =>
+                {
+                    try
+                    {
+                        if (!ProfileManager.ResetProfile(name, out string error))
+                        {
+                            ToastNotifications.Show("Reset failed: " + error, ToastType.Error);
+                            return;
+                        }
+
+                        bool ok = name != ProfileManager.ActiveProfile || ReloadActiveProfileData();
+                        ToastNotifications.Show(ok
+                            ? $"Profile '{name}' reset."
+                            : $"Profile '{name}' was reset on disk but could not be reloaded.", ok ? ToastType.Success : ToastType.Error);
+                    }
+                    catch (Exception e)
+                    {
+                        Jotunn.Logger.LogWarning("[WBTI] Profile reset failed: " + e);
+                        ToastNotifications.Show("Reset failed: " + e.Message, ToastType.Error);
+                    }
+
+                    RefreshList();
+                }
+            );
         }
 
         private void OnRenameProfile(string name)

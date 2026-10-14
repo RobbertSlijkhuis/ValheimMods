@@ -295,6 +295,11 @@ namespace WizshBoneTwitchIntegration.Components
 
         public static bool HasActiveSafeZones => s_activeSafeZones.Count > 0;
 
+        // False when the profile lets spawned monsters into zones (push is off). Their projectiles and
+        // hits are then left alone too: only monsters kept out are also stopped from attacking into a
+        // zone (SafeZoneProjectileHelper, SafeZoneDamageHelper). Independent of burning.
+        public static bool KeepsMonstersOut => ProfileSettingsHelper.Current.wardPushCreatures;
+
         // False while the profile settings switch this kind of zone off: a ship's zone with
         // safezoneBoats off, a trader's with safezoneTraders off (wards are always on). The zone and
         // its collider stay in place either way - only new entries and creature handling are gated
@@ -324,6 +329,12 @@ namespace WizshBoneTwitchIntegration.Components
                 m_isTraderZone = parent != null && parent.GetComponent<Trader>() != null;
 
                 s_activeSafeZones.Add(this);
+
+                if (m_isTraderZone && m_collider is CapsuleCollider capsule)
+                {
+                    Vector3 scale = transform.lossyScale;
+                    Jotunn.Logger.LogWarning($"[WBTI] Trader safezone '{parent.name}': lossyScale={scale}, capsule radius={capsule.radius} height={capsule.height} (direction {capsule.direction}) -> world radius~{capsule.radius * Mathf.Max(scale.x, scale.z):F1} height~{capsule.height * scale.y:F1}");
+                }
 
                 ColliderBoundsHelper.Register(gameObject, ColliderBoundsHelper.SafeZoneColor, IsEnabledBySettings);
             }

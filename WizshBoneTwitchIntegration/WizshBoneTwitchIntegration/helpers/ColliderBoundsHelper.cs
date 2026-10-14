@@ -7,8 +7,8 @@ using WizshBoneTwitchIntegration.Configs;
 namespace WizshBoneTwitchIntegration.Helpers
 {
     // Owns the "Show safezone bounds" debug toggle for anything that wants its collider outlined
-    // (safezones, weather zones, ...). A GameObject with a Box/Capsule/Sphere collider calls
-    // Register() when it comes alive and Unregister() when it dies; the ColliderBoundsVisual is
+    // (safezones, weather zones, timed terrain edits, ...). A GameObject with a Box/Capsule/Sphere
+    // collider calls Register() (or RegisterCylinder() for one without a collider) when it comes alive and Unregister() when it dies; the ColliderBoundsVisual is
     // then added/removed automatically as the toggle changes. An object can also pass an "is active"
     // predicate (e.g. a safezone that a profile setting has switched off), which Reevaluate() re-checks
     // whenever the toggle or the profile settings change. Purely client-local.
@@ -16,10 +16,15 @@ namespace WizshBoneTwitchIntegration.Helpers
     {
         public static readonly Color SafeZoneColor = new Color(0.2f, 1f, 0.3f, 0.9f);
         public static readonly Color WeatherZoneColor = new Color(1f, 0.25f, 0.2f, 0.9f);
+        public static readonly Color TerrainEditColor = new Color(1f, 0.7f, 0.1f, 0.9f);
         private class Entry
         {
             public Color color;
             public Func<bool> isActive;
+
+            // > 0 for objects outlined as an explicit cylinder instead of via their collider.
+            public float cylinderRadius;
+            public float cylinderHeight;
 
             public bool ShouldShow => Show && (isActive == null || isActive());
         }
@@ -39,7 +44,18 @@ namespace WizshBoneTwitchIntegration.Helpers
             s_tracked[gameObject] = entry;
 
             if (entry.ShouldShow)
-                Attach(gameObject, color);
+                Attach(gameObject, entry);
+        }
+
+        // For objects with no collider (e.g. the timed terrain-edit marker): outlines an upright
+        // cylinder of the given world-space radius/height standing on the object's position.
+        public static void RegisterCylinder(GameObject gameObject, Color color, float radius, float height, Func<bool> isActive = null)
+        {
+            Entry entry = new Entry { color = color, isActive = isActive, cylinderRadius = radius, cylinderHeight = height };
+            s_tracked[gameObject] = entry;
+
+            if (entry.ShouldShow)
+                Attach(gameObject, entry);
         }
 
         public static void Unregister(GameObject gameObject)
@@ -68,18 +84,23 @@ namespace WizshBoneTwitchIntegration.Helpers
                 bool shouldShow = pair.Value.ShouldShow;
 
                 if (shouldShow && visual == null)
-                    Attach(pair.Key, pair.Value.color);
+                    Attach(pair.Key, pair.Value);
                 else if (!shouldShow && visual != null)
                     UnityEngine.Object.Destroy(visual);
             }
         }
 
-        private static void Attach(GameObject gameObject, Color color)
+        private static void Attach(GameObject gameObject, Entry entry)
         {
             if (gameObject.GetComponent<ColliderBoundsVisual>() != null)
                 return;
 
-            gameObject.AddComponent<ColliderBoundsVisual>().Initialize(color);
+            ColliderBoundsVisual visual = gameObject.AddComponent<ColliderBoundsVisual>();
+
+            if (entry.cylinderRadius > 0f)
+                visual.InitializeCylinder(entry.color, entry.cylinderRadius, entry.cylinderHeight);
+            else
+                visual.Initialize(entry.color);
         }
     }
 }

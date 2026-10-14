@@ -11,9 +11,118 @@ namespace WizshBoneTwitchIntegration.Helpers
         // ConfigPathHelper.GetEffectiveRoot().
         private static string ProfilesPath => ConfigPathHelper.GetEffectiveRoot() + "/profiles";
         private static string ActiveProfileFile => ProfilesPath + "/active.txt";
-        private const string DefaultProfileName = "Default";
+        // Formerly "Default". A "Default" profile that already exists on disk is left alone (it is
+        // just an ordinary profile now), so only a fresh install or a missing active.txt lands here.
+        private const string NormalProfileName = "Normal";
         private const string ChattingOnlyProfileName = "Chatting only";
+        private const string DeathWizshProfileName = "I got a DEATH WIZSH!";
         private const string RedeemsStem = "_redeems";
+
+        /// <summary>
+        /// Built-in profiles that always exist: they can be neither deleted nor renamed, and
+        /// <see cref="Init"/> re-creates any that is missing from its stock content. <c>Locked</c>
+        /// ones are also read-only (like a synced profile) and are restored from their stock
+        /// content before every read (see <see cref="TryGetLockedSeedWriter"/>), so they can't drift
+        /// from what the mod ships. None are locked today: they are ordinary editable profiles
+        /// that can be put back to their stock content with <see cref="ResetProfile"/>.
+        /// </summary>
+        private static readonly (string Name, bool Locked, System.Action<string> WriteSeed)[] ProtectedProfiles =
+        {
+            (ChattingOnlyProfileName, false, ExtraConfigHelper.WriteChattingOnlyProfileTo),
+            (NormalProfileName, false, ExtraConfigHelper.WriteDefaultRedeemsTo),
+            // Disabled for this release: resources/profile_death_wizsh.yaml stays embedded, but the
+            // profile is not claimed, created, restored or locked. Re-enable by uncommenting.
+            // (DeathWizshProfileName, true, ExtraConfigHelper.WriteDeathWizshProfileTo),
+        };
+
+        /// <summary>Always exists; can't be deleted or renamed.</summary>
+        public static bool IsProtectedProfile(string name)
+        {
+            foreach (var profile in ProtectedProfiles)
+            {
+                if (profile.Name == name)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>A built-in profile whose content is fixed (redeems, settings, everything).</summary>
+        public static bool IsLockedProfile(string name)
+        {
+            foreach (var profile in ProtectedProfiles)
+            {
+                if (profile.Locked && profile.Name == name)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Content can't be edited: a synced profile (owned by whoever synced it) or a locked
+        /// built-in one. Gates every edit, import and copy-into path.
+        /// </summary>
+        public static bool IsReadOnlyProfile(string name)
+        {
+            return IsLockedProfile(name) || IsSyncedProfile(name);
+        }
+
+        /// <summary>
+        /// Puts a built-in profile back to its stock redeems and settings and clears its synced
+        /// marker (so it is editable again). The caller reloads the data if it is the active one.
+        /// </summary>
+        public static bool ResetProfile(string name, out string error)
+        {
+            error = null;
+
+            foreach (var profile in ProtectedProfiles)
+            {
+                if (profile.Name != name)
+                    continue;
+
+                string path = GetRedeemPath(name);
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                profile.WriteSeed(path);
+
+                string syncedMarker = $"{ProfilesPath}/{name}/.synced";
+                if (File.Exists(syncedMarker))
+                    File.Delete(syncedMarker);
+
+                return true;
+            }
+
+            error = $"'{name}' is not a built-in profile.";
+            return false;
+        }
+
+        /// <summary>
+        /// True when <paramref name="profileFilePath"/> is the profile.yaml of a locked profile,
+        /// with the writer that restores it to its stock content.
+        /// </summary>
+        public static bool TryGetLockedSeedWriter(string profileFilePath, out System.Action<string> writeSeed)
+        {
+            writeSeed = null;
+
+            if (string.IsNullOrEmpty(profileFilePath))
+                return false;
+
+            string fullPath = Path.GetFullPath(profileFilePath);
+
+            foreach (var profile in ProtectedProfiles)
+            {
+                if (!profile.Locked)
+                    continue;
+
+                if (string.Equals(fullPath, Path.GetFullPath(GetRedeemPath(profile.Name)), System.StringComparison.OrdinalIgnoreCase))
+                {
+                    writeSeed = profile.WriteSeed;
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// Long profile names overflow the Profiles/Redeems tabs' fixed-width Name column and the
@@ -26,7 +135,7 @@ namespace WizshBoneTwitchIntegration.Helpers
         private static readonly System.Text.RegularExpressions.Regex TrailingDuplicateNumberRegex =
             new System.Text.RegularExpressions.Regex(@" ?\(\d+\)$");
 
-        public static string ActiveProfile { get; private set; } = DefaultProfileName;
+        public static string ActiveProfile { get; private set; } = NormalProfileName;
 
         /// <summary>Why the active profile's redeems/settings were just replaced.</summary>
         public enum ActiveProfileChange { Sync, Switch, Import, Reload }
@@ -111,29 +220,95 @@ namespace WizshBoneTwitchIntegration.Helpers
                 .ToList();
         }
 
+        // Names of the built-in profiles this install has already created itself, one per line. A
+        // folder with a built-in name that is NOT listed here was made by the user before that name
+        // became a built-in (e.g. an older "Chatting only"), so it is renamed instead of overwritten.
+        // Kept in the profiles folder (not the BepInEx config) because that folder is shared by every
+        // mod-manager profile, just like active.txt.
+        private static string ClaimedBuiltInsFile => ProfilesPath + "/builtin.txt";
+
+        /// <summary>
+        /// Makes sure every built-in profile exists. The first time a name is claimed, any existing
+        /// user profile of that name is set aside under a new name; afterwards the folder is the
+        /// built-in's and is only ever re-created when missing (locked ones are restored on read).
+        /// A legacy "Default" profile is not a built-in and is left exactly as it is.
+        /// </summary>
+        private static void ClaimBuiltInProfiles()
+        {
+            HashSet<string> claimed = File.Exists(ClaimedBuiltInsFile)
+                ? new HashSet<string>(File.ReadAllLines(ClaimedBuiltInsFile).Select(line => line.Trim()).Where(line => line.Length > 0))
+                : new HashSet<string>();
+            bool claimedChanged = false;
+
+            foreach (var profile in ProtectedProfiles)
+            {
+                if (!claimed.Contains(profile.Name))
+                {
+                    if (ProfileExists(profile.Name))
+                        SetAsideUserProfile(profile.Name);
+
+                    claimed.Add(profile.Name);
+                    claimedChanged = true;
+                }
+
+                if (ProfileExists(profile.Name))
+                    continue;
+
+                Directory.CreateDirectory($"{ProfilesPath}/{profile.Name}");
+                profile.WriteSeed(GetRedeemPath(profile.Name));
+            }
+
+            if (claimedChanged)
+                File.WriteAllLines(ClaimedBuiltInsFile, claimed);
+        }
+
+        /// <summary>
+        /// Renames a user's own profile that sits on a built-in name to "&lt;name&gt; (old)" (or
+        /// "(old 2)" ...), keeping everything in its folder, and follows it if it was the active one.
+        /// </summary>
+        private static void SetAsideUserProfile(string name)
+        {
+            string newName = $"{name} (old)";
+            for (int n = 2; ProfileExists(newName); n++)
+                newName = $"{name} (old {n})";
+
+            try
+            {
+                Directory.Move($"{ProfilesPath}/{name}", $"{ProfilesPath}/{newName}");
+            }
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogError($"[WBTI] Could not set aside your profile '{name}' - it will be replaced by the built-in profile of that name: {e}");
+                return;
+            }
+
+            if (ActiveProfile == name)
+            {
+                ActiveProfile = newName;
+                File.WriteAllText(ActiveProfileFile, newName);
+            }
+
+            Jotunn.Logger.LogWarning($"[WBTI] '{name}' is now a built-in profile. Your own profile of that name was renamed to '{newName}'.");
+        }
+
         public static void Init()
         {
-            // Captured before the folder is created: a missing profiles folder means a fresh install.
-            bool firstRun = !Directory.Exists(ProfilesPath);
-
             Directory.CreateDirectory(ProfilesPath);
 
+            // Read first: setting aside a user's old profile of a built-in name (below) must be able
+            // to move the active profile along with it.
             ActiveProfile = File.Exists(ActiveProfileFile)
                 ? File.ReadAllText(ActiveProfileFile).Trim()
-                : DefaultProfileName;
+                : NormalProfileName;
 
-            // The one place a profile is seeded with the stock default redeems (CreateProfile
-            // makes empty profiles).
+            ClaimBuiltInProfiles();
+
+            // The other place a profile is seeded with the stock default redeems (CreateProfile
+            // makes empty profiles): an active profile whose folder is gone.
             if (!Directory.Exists($"{ProfilesPath}/{ActiveProfile}") && IsValidProfileName(ActiveProfile, out _))
             {
                 Directory.CreateDirectory($"{ProfilesPath}/{ActiveProfile}");
                 ExtraConfigHelper.WriteDefaultRedeemsTo(GetRedeemPath(ActiveProfile));
-            }
-
-            if (firstRun && !ProfileExists(ChattingOnlyProfileName))
-            {
-                Directory.CreateDirectory($"{ProfilesPath}/{ChattingOnlyProfileName}");
-                ExtraConfigHelper.WriteChattingOnlyProfileTo(GetRedeemPath(ChattingOnlyProfileName));
             }
 
             ProfileMigrationHelper.MigrateAllProfilesOnDisk();
@@ -269,7 +444,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
         public static bool DeleteProfile(string name)
         {
-            if (name == DefaultProfileName)
+            if (IsProtectedProfile(name))
                 return false;
 
             if (name == ActiveProfile)
@@ -343,9 +518,9 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (!IsValidProfileName(targetProfileName, out error))
                 return false;
 
-            if (IsSyncedProfile(targetProfileName))
+            if (IsReadOnlyProfile(targetProfileName))
             {
-                error = $"Cannot import into '{targetProfileName}' - it is a synced (read-only) profile.";
+                error = $"Cannot import into '{targetProfileName}' - it is a read-only profile.";
                 return false;
             }
 
@@ -397,6 +572,12 @@ namespace WizshBoneTwitchIntegration.Helpers
         public static bool RenameProfile(string oldName, string newName, out string error)
         {
             error = null;
+
+            if (IsProtectedProfile(oldName))
+            {
+                error = $"Cannot rename '{oldName}' - it is a built-in profile.";
+                return false;
+            }
 
             if (IsSyncedProfile(oldName))
             {
@@ -459,9 +640,9 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return false;
             }
 
-            if (IsSyncedProfile(targetProfileName))
+            if (IsReadOnlyProfile(targetProfileName))
             {
-                error = $"Cannot copy into '{targetProfileName}' - it is a synced (read-only) profile.";
+                error = $"Cannot copy into '{targetProfileName}' - it is a read-only profile.";
                 return false;
             }
 

@@ -163,8 +163,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             // A synced profile's redeems are read-only - only its owner can change and re-sync
             // them. Every Home setting (chatting, auto-resolve, enable-on-login, discount) stays
-            // editable; on Home only "Create a new redeem" is locked.
-            bool isSynced = ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile);
+            // editable; on Home only "Create a new redeem" is locked. The same goes for a locked
+            // built-in profile: these are personal preferences, not part of its fixed content.
+            bool isSynced = ProfileManager.IsReadOnlyProfile(ProfileManager.ActiveProfile);
 
             BuildActiveProfileCard(CardTopCenter(0, 0), totalRedeems, isSynced);
 
@@ -242,7 +243,11 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             GuiHelper.CreateCardTitle(card, "Active profile", CardWidth - 24f);
             GuiHelper.CreateCardText(card, ProfileManager.ActiveProfile, -54f, 22, GUIManager.Instance.ValheimOrange, CardWidth - 24f, height: 30f);
-            GuiHelper.CreateCardDescription(card, $"{totalRedeems} redeems configured" + (isSynced ? " - synced, read-only" : ""), CardWidth - 24f);
+
+            string readOnlyNote = ProfileManager.IsLockedProfile(ProfileManager.ActiveProfile) ? " - built-in, read-only"
+                : isSynced ? " - synced, read-only"
+                : "";
+            GuiHelper.CreateCardDescription(card, $"{totalRedeems} redeems configured" + readOnlyNote, CardWidth - 24f);
         }
 
         /// <summary>

@@ -91,7 +91,8 @@ namespace WizshBoneTwitchIntegration.Harmony
                     creatureClaim = __instance.gameObject.AddComponent<TwitchCreatureClaim>();
 
                 text = text.Replace("claim:", "");
-                creatureClaim.Init(text);
+                // A rename can be typed by any player, with or without chat - it never expires.
+                creatureClaim.Init(text, permanent: true);
                 return true;
             }
             catch (Exception e)

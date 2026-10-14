@@ -864,14 +864,7 @@ namespace WizshBoneTwitchIntegration.GuiOld
 
             TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
 
-            CustomRewardEvent rewardEvent = new CustomRewardEvent
-            {
-                RedeemerName       = "WizshBone",
-                RedeemedAt         = System.DateTime.Now.ToShortDateString(),
-                CustomRewardTitle  = redeem.title,
-                CustomRewardCost   = redeem.points,
-                Status             = CustomRewardRedemptionState.Unfulfilled
-            };
+            CustomRewardEvent rewardEvent = TestRedeemEventHelper.Create(redeem.title, redeem.points);
 
             WizshBoneTwitchIntegration.useRedeemCommand = true;
             customRewards.HandleRedeem(rewardEvent);

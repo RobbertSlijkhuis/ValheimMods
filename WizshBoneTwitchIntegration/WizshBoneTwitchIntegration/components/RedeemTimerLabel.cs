@@ -6,8 +6,8 @@ using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Components
 {
-    // Purely client-local debug label - shows the time left on a TwitchPersistentDestruction
-    // countdown at the center of the object (weather zone, redeem boat, ...), 1m above it. It's a
+    // Purely client-local debug label - shows the time left on an IRedeemTimer (a
+    // TwitchPersistentDestruction, a timed terrain reset) countdown at the center of the object (weather zone, redeem boat, ...), 1m above it. It's a
     // UI element on RedeemTimerHelper's screen-space overlay canvas, repositioned every frame with
     // Camera.WorldToScreenPoint (the way vanilla's enemy health bars work) rather than a world-space
     // object: overlay canvases draw after post-processing, so depth of field, bloom and the like
@@ -28,7 +28,7 @@ namespace WizshBoneTwitchIntegration.Components
         private static readonly Color TextColor = new Color(1f, 0.9f, 0.4f, 1f);
         private static readonly Color BackgroundColor = new Color(0f, 0f, 0f, 0.8f);
 
-        private TwitchPersistentDestruction m_destruction;
+        private IRedeemTimer m_destruction;
         private Canvas m_canvas;
         private GameObject m_label;
         private RectTransform m_rect;
@@ -38,7 +38,7 @@ namespace WizshBoneTwitchIntegration.Components
         private int m_shownSeconds = -1;
         private bool m_shownPaused;
 
-        public void Initialize(TwitchPersistentDestruction destruction)
+        public void Initialize(IRedeemTimer destruction)
         {
             try
             {

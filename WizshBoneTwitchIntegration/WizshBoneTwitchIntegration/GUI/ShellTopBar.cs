@@ -43,6 +43,12 @@ namespace WizshBoneTwitchIntegration.Gui
         /// </summary>
         public Action OnOpenHistoryRequested;
 
+        /// <summary>
+        /// Horizontal center of the Login/Logout button, measured from the left edge of the content area
+        /// (the area right of the sidebar). Tabs use it to center things under the button.
+        /// </summary>
+        public const float LoginButtonCenterX = 460f;
+
         private TwitchAuth m_auth;
         private TwitchCustomRewards m_customRewards;
 
@@ -103,7 +109,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 parent:    root.transform,
                 anchorMin: new Vector2(0f, 0.5f),
                 anchorMax: new Vector2(0f, 0.5f),
-                position:  new Vector2(460f, 0f),
+                position:  new Vector2(LoginButtonCenterX, 0f),
                 width:     140f,
                 height:    36f
             );
@@ -112,7 +118,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_loginButtonText = loginBtnObj.GetComponentInChildren<Text>();
 
             Text credit = GUIManager.Instance.CreateText(
-                text:                $"Created by <color=#{ColorUtility.ToHtmlStringRGB(GUIManager.Instance.ValheimOrange)}>DeathWizsh</color>",
+                text:                $"Created by {Emphasis.Of("DeathWizsh")}",
                 parent:              root.transform,
                 anchorMin:           new Vector2(1f, 0.5f),
                 anchorMax:           new Vector2(1f, 0.5f),

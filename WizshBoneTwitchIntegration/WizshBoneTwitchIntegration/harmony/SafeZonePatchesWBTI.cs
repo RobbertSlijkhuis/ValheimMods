@@ -26,6 +26,23 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
         }
 
+        // Vanilla's Start dereferences the closest ShieldGenerator, which only exists in a world with
+        // an Ashlands shield generator - see SafeZoneProjectileHelper.ShouldSkipParticleColor.
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(ShieldDomeParticleColor), "Start")]
+        public static bool ShieldDomeParticleColorStart_Prefix(ShieldDomeParticleColor __instance)
+        {
+            try
+            {
+                return !SafeZoneProjectileHelper.ShouldSkipParticleColor(__instance);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("ShieldDomeParticleColorStart_Prefix failed: " + e);
+                return true;
+            }
+        }
+
         // Idle wandering: RandomMovement picks another point when this is false.
         [HarmonyPostfix]
         [HarmonyPatch(typeof(BaseAI), "IsValidRandomMovePoint", new Type[] { typeof(Vector3) })]

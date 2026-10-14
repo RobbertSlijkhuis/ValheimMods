@@ -128,6 +128,20 @@ namespace WizshBoneTwitchIntegration.Gui
         }
 
         /// <summary>
+        /// Keeps <paramref name="control"/> usable while the redeem wizard is view-only. View-only
+        /// switches off a CanvasGroup above every step's fields, which disables everything below it;
+        /// navigation (form tabs, the entry list's rows) only changes what is shown, so it opts out
+        /// with a child group that ignores its parents' groups. Harmless when the wizard is editable.
+        /// </summary>
+        public static void KeepInteractiveInViewOnly(GameObject control)
+        {
+            CanvasGroup group = control.GetComponent<CanvasGroup>();
+            if (group == null)
+                group = control.AddComponent<CanvasGroup>();
+            group.ignoreParentGroups = true;
+        }
+
+        /// <summary>
         /// A short, muted line of extra orientation info shown directly under a tab's title (e.g.
         /// Redeems'/Profiles'/Viewers'/Settings' under-title blurbs, HelpTab's description lines) -
         /// always visible, not a tooltip.
@@ -601,6 +615,13 @@ namespace WizshBoneTwitchIntegration.Gui
         {
             GameObject toggleObj = GUIManager.Instance.CreateToggle(parent, width, height);
             AddToggleClickSound(toggleObj);
+
+            // Jötunn only fades the toggle's box when disabled; this fades the checkmark too.
+            toggleObj.AddComponent<ToggleDisabledLook>();
+
+            // A clicked toggle would otherwise stay drawn as selected (= hovered) until another
+            // control is clicked.
+            toggleObj.AddComponent<DeselectOnClick>();
             return toggleObj;
         }
 

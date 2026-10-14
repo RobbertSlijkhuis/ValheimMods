@@ -317,7 +317,7 @@ namespace WizshBoneTwitchIntegration.Gui
             CreateRowText(row, GetDisplayTitle(customRewards, entry), ColRedeemX, ColRedeemW, textColor, bold: false);
             CreateRowText(row, $"{entry.CustomRewardCost} pts", ColCostX, ColCostW, textColor, bold: false);
 
-            // Checked before isTestRedeem: a resolved test redeem (e.g. RedeemsTab's "Test" button,
+            // Checked before isTestRedeem: a resolved test redeem (e.g. RedeemsTab's "Trigger" button,
             // or any redeem auto-resolved while ProfileSettingsHelper.Current.autoResolveRedeems is
             // on - see TwitchCustomRewards.HandleRedeem, which flips Status regardless of test-ness)
             // should still show "Completed"/"Refunded" - only the buttons below are test-redeem-only

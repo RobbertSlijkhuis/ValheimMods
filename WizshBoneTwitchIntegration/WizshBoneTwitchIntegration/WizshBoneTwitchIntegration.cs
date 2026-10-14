@@ -544,6 +544,7 @@ namespace WizshBoneTwitchIntegration
             materials.RecolorModer = assetBundle.LoadAsset<Material>("Moder_recolor_WBTI");
             materials.RecolorLox = assetBundle.LoadAsset<Material>("Lox_recolor_WBTI");
             materials.RecolorNeck = assetBundle.LoadAsset<Material>("Neck_recolor_WBTI");
+            materials.RecolorQueen = assetBundle.LoadAsset<Material>("Queen_recolor_WBTI");
             materials.RecolorSeeker = assetBundle.LoadAsset<Material>("Seeker_recolor_WBTI");
             materials.RecolorSeekerBrute = assetBundle.LoadAsset<Material>("SeekerBrute_recolor_WBTI");
             materials.RecolorSeekerBrood = assetBundle.LoadAsset<Material>("SeekerBrood_recolor_WBTI");
@@ -559,6 +560,7 @@ namespace WizshBoneTwitchIntegration
             materials.RecolorWolf = assetBundle.LoadAsset<Material>("Wolf_recolor_WBTI");
             materials.RecolorWraith = assetBundle.LoadAsset<Material>("Wraith_recolor_WBTI");
             materials.RecolorWraithZebra = assetBundle.LoadAsset<Material>("Wraith_recolor_zebra_WBTI");
+            materials.RecolorWrithan = assetBundle.LoadAsset<Material>("Writhan_recolor_WBTI");
             materials.RecolorYagluth = assetBundle.LoadAsset<Material>("Yagluth_recolor_WBTI");
             materials.RecolorYagluthHair = assetBundle.LoadAsset<Material>("Yagluth_hair_recolor_WBTI");
 

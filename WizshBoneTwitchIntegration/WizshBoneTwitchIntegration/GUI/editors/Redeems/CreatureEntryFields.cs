@@ -180,8 +180,11 @@ namespace WizshBoneTwitchIntegration.Gui
                 () => layout.ToggleRow("Allow damage structures", "Whether the creature's attacks can damage buildings and other structures. Turn off to stop it wrecking a base.",
                     creature.allowDamageStructures, v => creature.allowDamageStructures = v, defaultValue: true));
 
-            layout.FloatRow("Idle sound interval", "Seconds between the creature's idle sound effect (e.g. a Fuling's laugh); it then always plays instead of the default ~50% chance. 0 = the creature's default behavior.",
-                creature.idleSoundInterval, v => creature.idleSoundInterval = v, defaultValue: 0f, min: 0f);
+            layout.PairRow(
+                () => layout.FloatRow("Idle sound interval", $"Seconds between the creature's idle sound effect (e.g. a Fuling's laugh); it then always plays instead of the default ~50% chance. 0 = the creature's default behavior. Ignored when {Emphasis.Of("Mute idle sound")} is on.",
+                    creature.idleSoundInterval, v => creature.idleSoundInterval = v, defaultValue: 0f, min: 0f),
+                () => layout.ToggleRow("Mute idle sound", "Stops the creature from making its idle sound effect (e.g. a Fuling's laugh) at all.",
+                    creature.muteIdleSound, v => creature.muteIdleSound = v, defaultValue: false));
 
             layout.PairRow(
                 () => layout.ToggleRow("Talks", $"Whether the creature says something above its head. Needs a {Emphasis.Of("Talk message")} below.",

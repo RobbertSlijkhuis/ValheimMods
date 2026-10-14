@@ -6,12 +6,12 @@ using WizshBoneTwitchIntegration.Configs;
 
 namespace WizshBoneTwitchIntegration.Helpers
 {
-    // Owns the timer-label side of the "Show safezone bounds" debug toggle: every
-    // TwitchPersistentDestruction with a running countdown registers itself here, and gets a
-    // RedeemTimerLabel added/removed as the toggle changes. Purely client-local.
+    // Owns the timer-label side of the "Show safezone bounds" debug toggle: every IRedeemTimer
+    // (TwitchPersistentDestruction, TwitchTerrainReset) with a running countdown registers itself
+    // here, and gets a RedeemTimerLabel added/removed as the toggle changes. Purely client-local.
     internal static class RedeemTimerHelper
     {
-        private static readonly HashSet<TwitchPersistentDestruction> s_tracked = new HashSet<TwitchPersistentDestruction>();
+        private static readonly HashSet<IRedeemTimer> s_tracked = new HashSet<IRedeemTimer>();
 
         // Shared screen-space overlay canvas every RedeemTimerLabel lives on. Created on first use and
         // re-created if it was destroyed (e.g. by a scene change) - the labels on it die with it.
@@ -44,43 +44,44 @@ namespace WizshBoneTwitchIntegration.Helpers
         }
 
         // Called when the object's countdown starts (fresh redeem or reloaded from its ZDO).
-        public static void Register(TwitchPersistentDestruction destruction)
+        public static void Register(IRedeemTimer timer)
         {
-            s_tracked.Add(destruction);
+            s_tracked.Add(timer);
 
             if (Show)
-                Attach(destruction);
+                Attach(timer);
         }
 
-        public static void Unregister(TwitchPersistentDestruction destruction)
+        public static void Unregister(IRedeemTimer timer)
         {
-            s_tracked.Remove(destruction);
+            s_tracked.Remove(timer);
         }
 
         // Called from PluginConfig.configShowSafeZoneDebug.SettingChanged so toggling the option
         // live shows/hides the timers on everything currently counting down.
         public static void SetVisible(bool show)
         {
-            foreach (TwitchPersistentDestruction destruction in s_tracked)
+            foreach (IRedeemTimer timer in s_tracked)
             {
-                if (destruction == null)
+                // Unity's overloaded == only applies through UnityEngine.Object, hence the cast.
+                if ((Object)timer == null)
                     continue;
 
-                RedeemTimerLabel label = destruction.GetComponent<RedeemTimerLabel>();
+                RedeemTimerLabel label = timer.gameObject.GetComponent<RedeemTimerLabel>();
 
                 if (show && label == null)
-                    Attach(destruction);
+                    Attach(timer);
                 else if (!show && label != null)
                     Object.Destroy(label);
             }
         }
 
-        private static void Attach(TwitchPersistentDestruction destruction)
+        private static void Attach(IRedeemTimer timer)
         {
-            if (destruction.GetComponent<RedeemTimerLabel>() != null)
+            if (timer.gameObject.GetComponent<RedeemTimerLabel>() != null)
                 return;
 
-            destruction.gameObject.AddComponent<RedeemTimerLabel>().Initialize(destruction);
+            timer.gameObject.AddComponent<RedeemTimerLabel>().Initialize(timer);
         }
     }
 }

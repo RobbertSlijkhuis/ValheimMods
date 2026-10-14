@@ -52,6 +52,10 @@ namespace WizshBoneTwitchIntegration.Models
         [EditorTooltip("Overrides the interval (seconds) between the creature's idle sound effect (e.g. a Fuling's laugh), and makes it always play instead of the default ~50% chance. Leave at 0 to use the creature's default behavior.")]
         public float idleSoundInterval = 0;
 
+        [EditorLabel("Mute idle sound")]
+        [EditorTooltip("Stops the creature from making its idle sound effect (e.g. a Fuling's laugh) at all. Takes priority over the idle sound interval.")]
+        public bool muteIdleSound = false;
+
         [EditorHidden] public bool allowDamageStructures = true;
         [EditorHidden] public string bossEvent = "";
         [EditorHidden] public bool talkInteract = false;

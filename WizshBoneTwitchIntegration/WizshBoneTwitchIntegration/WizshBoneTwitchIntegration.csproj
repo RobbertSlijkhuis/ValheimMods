@@ -34,6 +34,8 @@
     <None Remove="resources\banned.txt" />
     <None Remove="resources\news.yaml" />
     <None Remove="resources\profile_chatting_only.yaml" />
+    <None Remove="resources\profile_normal.yaml" />
+    <None Remove="resources\profile_death_wizsh.yaml" />
     <None Remove="resources\viewers.yaml" />
     <None Remove="resources\WizehBoneMatteGradient.png" />
     <None Remove="resources\WizehBone_Gradient.png" />
@@ -51,8 +53,9 @@
     <EmbeddedResource Include="assets\wbti_dw.manifest" />
     <EmbeddedResource Include="resources\banned.txt" />
     <EmbeddedResource Include="resources\news.yaml" />
-    <EmbeddedResource Include="resources\profile.yaml" />
+    <EmbeddedResource Include="resources\profile_normal.yaml" />
     <EmbeddedResource Include="resources\profile_chatting_only.yaml" />
+    <EmbeddedResource Include="resources\profile_death_wizsh.yaml" />
     <EmbeddedResource Include="resources\viewers.yaml" />
     <EmbeddedResource Include="resources\WizshBone_Simple_512.png" />
   </ItemGroup>

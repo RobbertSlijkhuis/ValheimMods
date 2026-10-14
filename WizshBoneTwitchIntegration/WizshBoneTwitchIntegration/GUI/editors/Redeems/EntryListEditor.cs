@@ -305,6 +305,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 );
                 btnObj.SetActive(true);
                 btnObj.GetComponent<Button>().onClick.AddListener(() => SelectTab(index));
+                GuiHelper.KeepInteractiveInViewOnly(btnObj);
 
                 Image bg = btnObj.GetComponent<Image>();
                 if (i == 0)
@@ -537,6 +538,12 @@ namespace WizshBoneTwitchIntegration.Gui
             // doesn't stack a second set on the panel.
             GuiHelper.ClearContainer(m_listItems);
             m_listHeight = m_selectorList.Build(m_listItems.transform, items, ListWidth - 8f, ListItemHeight, ListItemGap, OnEntryClicked);
+
+            // Picking an entry only changes which one is shown, so it stays usable in view-only mode
+            // (+ Add / Delete do not).
+            foreach (Button entryButton in m_listItems.GetComponentsInChildren<Button>(true))
+                GuiHelper.KeepInteractiveInViewOnly(entryButton.gameObject);
+
             m_selectorList.Select(m_entries.Count > 0 ? m_selectedIndex.ToString() : null);
             LayoutPanels();
         }

@@ -32,6 +32,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         private SearchableDropdown m_profileDropdown;
         private Text m_titleText;
+        private Text m_slotsText;
         private Button m_newRedeemBtn;
 
         private readonly ColumnSortState m_sortState = new ColumnSortState("title");
@@ -61,6 +62,10 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private const float TitleY   = -30f;
         private const float TitleWidth = 300f;
         private const float DescriptionY = -50f;
+        private const float SlotsTextWidth = 480f;
+        // Centered under the top bar's Login/Logout button, not on the content area's own center.
+        private const float SlotsTextX = ShellTopBar.LoginButtonCenterX - ContentWidth / 2f;
+        private const int SlotsWarnThreshold = 40;
         private const float ToolbarY = -99f;
         private const float ColumnHeaderY = -136f;
         private const float ListTopInset = 155f;
@@ -133,8 +138,17 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             m_titleText = GuiHelper.CreateTitle("Redeems", m_listRoot, new Vector2(LeftEdgeX + TitleWidth / 2f, TitleY), width: TitleWidth);
             GuiHelper.CreateTabDescription(
-                "These are your channel point rewards. Twitch allows a maximum of 50 enabled at once - keep an eye on how many you have active.",
+                "These are your channel point rewards. Create, edit and toggle them here, and use View history to complete redeems or refund points.",
                 m_listRoot, new Vector2(0f, DescriptionY), width: ContentWidth - 2f * ContentMargin);
+
+            m_slotsText = GuiHelper.CreateTabDescription(
+                "", m_listRoot, new Vector2(SlotsTextX, TitleY), width: SlotsTextWidth);
+            m_slotsText.alignment = TextAnchor.MiddleCenter;
+            m_slotsText.gameObject.AddComponent<TooltipTrigger>().Init(BuildSlotsTooltip);
+
+            // Unsubscribe first so a re-run of Create can't stack a second handler.
+            TwitchCustomRewards.ChannelRewardCountsChanged -= OnChannelRewardCountsChanged;
+            TwitchCustomRewards.ChannelRewardCountsChanged += OnChannelRewardCountsChanged;
 
             BuildToolbar();
             BuildColumnHeaders();
@@ -163,6 +177,80 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         {
             m_profileDropdown?.SetOptions(ProfileManager.GetProfiles(), ProfileManager.ActiveProfile);
             RefreshList();
+
+            // Other rewards on the channel can change outside the game, so re-read them whenever the tab is shown.
+            if (Game.instance != null)
+                Game.instance.gameObject.GetComponent<TwitchCustomRewards>().RefreshChannelRewardCounts();
+        }
+
+        // A lookup finished (or logout cleared it) while the tab may already be open - e.g. it was opened
+        // before logging in. Only touches the label when the list view is actually showing; the wizard
+        // and other tabs refresh it themselves when they come back (RefreshList).
+        private void OnChannelRewardCountsChanged()
+        {
+            if (m_listRoot != null && m_listRoot.activeInHierarchy)
+                UpdateSlotsText();
+        }
+
+        /// <summary>
+        /// "Twitch slots" counter: Twitch caps a channel at 50 custom rewards, shared with rewards the
+        /// streamer made themselves. Only enabled redeems are sent to Twitch, so they are what's counted.
+        /// </summary>
+        private void UpdateSlotsText()
+        {
+            if (m_slotsText == null || Game.instance == null)
+                return;
+
+            TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+            int ours = customRewards.CountPushedRedeems();
+            int? others = customRewards.IsLoggedIn ? customRewards.OtherChannelRewards : null;
+            int max = TwitchRewardLimitHelper.MaxRewards;
+
+            int total = ours + (others ?? 0);
+            bool over = total > max;
+
+            bool nearLimit = total >= SlotsWarnThreshold;
+
+            // The "used / max" figure is Valheim yellow. From the warn threshold the whole line is orange,
+            // and red once over the limit - the yellow is dropped then so it doesn't soften the warning.
+            string usage = over || nearLimit ? $"{total} / {max}" : Emphasis.Of($"{total} / {max}");
+
+            m_slotsText.text = others == null
+                ? $"Twitch slots: {usage} estimate"
+                : $"Twitch slots: {usage} used";
+            m_slotsText.color = over ? Color.red
+                : nearLimit ? GUIManager.Instance.ValheimOrange
+                : GUIManager.Instance.ValheimBeige;
+        }
+
+        /// <summary>
+        /// Hover text of the slots counter: how many slots this mod's enabled redeems take and how many
+        /// rewards the channel already has on Twitch. Evaluated each time the tooltip opens.
+        /// </summary>
+        private static string BuildSlotsTooltip()
+        {
+            string title = $"<b><color=#{ColorUtility.ToHtmlStringRGB(GUIManager.Instance.ValheimOrange)}>Twitch slots</color></b>";
+
+            if (Game.instance == null)
+                return title;
+
+            TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
+            int ours = customRewards.CountPushedRedeems();
+            int? others = customRewards.IsLoggedIn ? customRewards.OtherChannelRewards : null;
+            int max = TwitchRewardLimitHelper.MaxRewards;
+
+            string oursLine = $"This mod (enabled): {Emphasis.Of(ours.ToString())}";
+
+            if (others == null)
+            {
+                return $"{title}\n{oursLine}\nAlready on Twitch: unknown (not logged in, or Twitch could not be reached)." +
+                       $"\nTwitch allows {max} in total.";
+            }
+
+            int total = ours + others.Value;
+            return $"{title}\n{oursLine}" +
+                   $"\nAlready on Twitch: {Emphasis.Of(others.Value.ToString())}" +
+                   $"\nTotal: {Emphasis.Of($"{total} / {max}")}";
         }
 
         /// <summary>
@@ -366,6 +454,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             // Total redeems in the active profile - deliberately not the search-filtered count.
             // CreateTitle upper-cases its text, so match that here.
             m_titleText.text = $"REDEEMS ({RedeemHelper.redeems.Count})";
+            UpdateSlotsText();
 
             // A synced profile is read-only here: no new redeems, no toggling/deleting, and Edit
             // becomes a view-only "Show" (see BuildRow).
@@ -393,14 +482,15 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             contentRt.sizeDelta = new Vector2(contentRt.sizeDelta.x, Mathf.Abs(yOffset) + ListRow.ItemHeight / 2f);
         }
 
+        // Synced or locked built-in: either way the active profile's redeems can't be edited.
         private static bool IsActiveProfileSynced()
         {
-            return ProfileManager.IsSyncedProfile(ProfileManager.ActiveProfile);
+            return ProfileManager.IsReadOnlyProfile(ProfileManager.ActiveProfile);
         }
 
         /// <summary>
-        /// Guards every action that would change a synced profile's redeems. The buttons are
-        /// already disabled/hidden for synced profiles (see <see cref="BuildRow"/>); this is the
+        /// Guards every action that would change a read-only profile's redeems. The buttons are
+        /// already disabled/hidden for read-only profiles (see <see cref="BuildRow"/>); this is the
         /// backstop for entry points that aren't a button on this tab (Home's "Create a new redeem").
         /// </summary>
         private static bool BlockedBySync()
@@ -408,7 +498,10 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             if (!IsActiveProfileSynced())
                 return false;
 
-            ToastNotifications.Show("This profile is synced and read-only - only the owner can change it.", ToastType.Warning);
+            string reason = ProfileManager.IsLockedProfile(ProfileManager.ActiveProfile)
+                ? "This is a built-in profile and read-only."
+                : "This profile is synced and read-only - only the owner can change it.";
+            ToastNotifications.Show(reason, ToastType.Warning);
             return true;
         }
 
@@ -482,8 +575,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             ).GetComponent<Text>();
             costText.alignment = TextAnchor.MiddleLeft;
 
-            GameObject testBtn = ListRow.CreateActionButton(row, "Test", BtnTestX, ActionBtnWidth, ListRow.ItemHeight, Color.yellow, () => OnTestRedeem(captured));
-            testBtn.AddComponent<TooltipTrigger>().Init("Test redeem", "Executes the redeem so you can see how it works in-game.");
+            GameObject testBtn = ListRow.CreateActionButton(row, "Trigger", BtnTestX, ActionBtnWidth, ListRow.ItemHeight, Color.yellow, () => OnTestRedeem(captured));
+            testBtn.AddComponent<TooltipTrigger>().Init("Trigger redeem", "Triggers this redeem's effect in-game right now, no Twitch redemption needed.");
             revealOnHover.Add(testBtn);
 
             // A synced profile can be looked at but not changed: "Show" opens the wizard view-only.
@@ -533,7 +626,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private void OpenView(RedeemData redeem)
         {
             m_listRoot.SetActive(false);
-            m_redeemWizard.OpenView(redeem);
+
+            // A built-in profile is fixed content, except the Points of its redeems.
+            m_redeemWizard.OpenView(redeem, pointsEditable: ProfileManager.IsLockedProfile(ProfileManager.ActiveProfile));
         }
 
         private void OnWizardFinished(string toastMessage)
@@ -592,16 +687,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
 
-            CustomRewardEvent rewardEvent = new CustomRewardEvent
-            {
-                RedeemerName      = "WizshBone",
-                RedeemedAt        = DateTime.Now.ToShortDateString(),
-                // Must match what TwitchCustomRewards.HandleRedeem looks the redeem up by - the
-                // Twitch-facing (prefixed) title, not the raw RedeemData.title.
-                CustomRewardTitle = RedeemManager.GetFullTitle(redeem),
-                CustomRewardCost  = redeem.points,
-                Status            = CustomRewardRedemptionState.Unfulfilled
-            };
+            // The title must match what TwitchCustomRewards.HandleRedeem looks the redeem up by - the
+            // Twitch-facing (prefixed) title, not the raw RedeemData.title.
+            CustomRewardEvent rewardEvent = TestRedeemEventHelper.Create(RedeemManager.GetFullTitle(redeem), redeem.points);
 
             FakeRedeemerCommand.Apply(rewardEvent); // debug: only does anything after WBTIFakeRedeemer
 
@@ -626,8 +714,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             if (string.IsNullOrWhiteSpace(newTitle))
                 return "Please enter a name.";
 
-            if (ProfileManager.IsSyncedProfile(targetProfile))
-                return $"Cannot copy into '{targetProfile}' - it is a synced (read-only) profile.";
+            if (ProfileManager.IsReadOnlyProfile(targetProfile))
+                return $"Cannot copy into '{targetProfile}' - it is a read-only profile.";
 
             string sourceFullTitle = RedeemManager.GetFullTitle(redeem);
 

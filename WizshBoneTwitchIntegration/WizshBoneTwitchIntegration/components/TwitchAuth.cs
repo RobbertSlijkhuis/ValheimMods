@@ -152,7 +152,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 m_customRewards.SubscribeToRedeemEvents();
 
                 if (ProfileSettingsHelper.Current.enableRedeemsOnLogin)
-                    m_customRewards.SetEnableRedeems(true);
+                    m_customRewards.SetEnableRedeems(true);   // looks up the channel's other rewards as part of the push
+                else
+                    m_customRewards.RefreshChannelRewardCounts();
 
                 StopLoginPolling();
                 StartTracking();
@@ -297,6 +299,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     m_userInfo = null;
                     TwitchTokenCapture.Clear();
 
+                    if (m_customRewards)
+                        m_customRewards.ClearChannelRewardCounts();
+
                     if (!m_logoutRequested)
                     {
                         // The session dropped by itself (token expired): stop the per-minute poll and
@@ -354,6 +359,11 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 m_userInfo.broadcasterType = userInfo.BroadcasterType;
                 m_userInfo.displayName = userInfo.DisplayName;
                 m_userInfo.loginName = userInfo.LoginName;
+                m_userInfo.channelId = userInfo.ChannelId;
+
+                // The channel name is only known now, and claim ownership (TwitchChatting.ClaimChannel)
+                // depends on it - number the claims this client already holds / can adopt.
+                gameObject.GetComponent<TwitchChatting>()?.RefreshAllDisplayIndexes();
             }
             catch (Exception e)
             {

@@ -2,11 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using TwitchSDK;
 using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Exceptions;
+using WizshBoneTwitchIntegration.Gui;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.Types;
@@ -38,6 +40,21 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private readonly HashSet<CustomRewardEvent> m_unknownRedeems = new HashSet<CustomRewardEvent>();
 
         public readonly BulkRedeemResolveHelper m_bulkResolveHelper = new BulkRedeemResolveHelper();
+
+        // Twitch's reward cap is shared with rewards we didn't create (the streamer's own, other tools').
+        // How many of those the channel had at the last Helix lookup; null when unknown (logged out, or
+        // the lookup failed). Our own rewards are replaced on every push, so they aren't counted here.
+        public int? OtherChannelRewards { get; private set; }
+
+        /// <summary>
+        /// Raised on the main thread whenever <see cref="OtherChannelRewards"/> changes (a lookup finished,
+        /// or logout cleared it), so an open Redeems tab can update itself. Static because the UI outlives
+        /// this component (it lives on <c>Game.instance</c>, which is replaced per world).
+        /// </summary>
+        public static event Action ChannelRewardCountsChanged;
+
+        private const float ChannelLookupTimeoutSeconds = 10f;
+        private Coroutine m_pushRoutine;
 
         public void Awake()
         {
@@ -434,6 +451,23 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
         }
 
+        /// <summary>
+        /// Whether a redeem is sent to Twitch. Disabled redeems are left off entirely, since even a hidden
+        /// reward takes one of the channel's <see cref="TwitchRewardLimitHelper.MaxRewards"/> slots.
+        /// </summary>
+        private static bool IsPushedToTwitch(RedeemData redeem)
+        {
+            return redeem.type != RedeemType.Undefined
+                && redeem.enabled
+                && ProgressionHelper.IsAllowedByGlobalKeys(redeem.globalKeyAdd, redeem.globalKeyRemove);
+        }
+
+        /// <summary>How many Twitch slots the active profile takes up right now.</summary>
+        public int CountPushedRedeems()
+        {
+            return GetRedeemList().Count(IsPushedToTwitch);
+        }
+
         public void SetRewards(List<RedeemData> redeems = null, bool isEnabled = true)
         {
             List<CustomRewardDefinition> listRewards = new List<CustomRewardDefinition>();
@@ -445,7 +479,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
             foreach (RedeemData redeem in redeems)
             {
-                if (ProgressionHelper.IsAllowedByGlobalKeys(redeem.globalKeyAdd, redeem.globalKeyRemove))
+                if (IsPushedToTwitch(redeem))
                 {
                     // Capped here too (not just in the wizard) so a hand-edited profile.yaml can't
                     // send Twitch a cooldown it rejects.
@@ -466,12 +500,90 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         // The Twitch-facing (prefixed) title - RedeemData.title itself is stored
                         // prefix-free, see RedeemManager.GetFullTitle.
                         Title = RedeemManager.GetFullTitle(redeem),
-                        IsEnabled = redeem.enabled && isEnabled,
+                        IsEnabled = isEnabled,
                     });
                 }
             }
 
-            Twitch.API.ReplaceCustomRewards(listRewards.ToArray());
+            if (m_pushRoutine != null)
+                StopCoroutine(m_pushRoutine);
+
+            m_pushRoutine = StartCoroutine(PushRewards(listRewards.ToArray(), isEnabled));
+        }
+
+        /// <summary>
+        /// Sends the rewards to Twitch, after checking they fit next to the channel's other rewards. The
+        /// push is skipped (with an error toast) when it would go over Twitch's limit; if the lookup itself
+        /// fails the push goes ahead, and a rejection from Twitch is reported instead of silently lost.
+        /// </summary>
+        private IEnumerator PushRewards(CustomRewardDefinition[] rewards, bool isEnabled)
+        {
+            yield return StartCoroutine(LookupChannelRewards());
+
+            // Redeems were switched off (ClearRewards) while the lookup ran.
+            if (isEnabled && !m_enabled)
+            {
+                m_pushRoutine = null;
+                yield break;
+            }
+
+            int others = OtherChannelRewards ?? 0;
+
+            if (rewards.Length + others > TwitchRewardLimitHelper.MaxRewards)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Redeems not pushed: {rewards.Length} redeems + {others} other Twitch rewards is over the limit of {TwitchRewardLimitHelper.MaxRewards}.");
+                ToastNotifications.Show(
+                    $"Redeems not sent to Twitch: {rewards.Length} redeems plus {others} of your other rewards is over Twitch's limit of {TwitchRewardLimitHelper.MaxRewards}. Delete some Twitch rewards or disable redeems.",
+                    ToastType.Error);
+                m_pushRoutine = null;
+                yield break;
+            }
+
+            GameTask push = Twitch.API.ReplaceCustomRewards(rewards);
+
+            while (!push.IsCompleted)
+                yield return null;
+
+            if (push.Task.IsFaulted)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Twitch rejected the redeems: {push.Task.Exception?.GetBaseException()}");
+                ToastNotifications.Show("Twitch rejected the redeems. You may be over its limit of 50 rewards - check the log.", ToastType.Error);
+            }
+
+            m_pushRoutine = null;
+        }
+
+        /// <summary>
+        /// Re-reads how many other rewards (not ours) the channel has; <see cref="ChannelRewardCountsChanged"/>
+        /// fires when the answer is in. Does nothing when logged out.
+        /// </summary>
+        public void RefreshChannelRewardCounts()
+        {
+            if (!IsLoggedIn)
+                return;
+
+            StartCoroutine(LookupChannelRewards());
+        }
+
+        /// <summary>Forgets the last lookup (logout): the number belongs to the channel that was logged in.</summary>
+        public void ClearChannelRewardCounts()
+        {
+            OtherChannelRewards = null;
+            ChannelRewardCountsChanged?.Invoke();
+        }
+
+        private IEnumerator LookupChannelRewards()
+        {
+            System.Threading.Tasks.Task<TwitchRewardLimitHelper.ChannelRewardCounts> lookup =
+                TwitchRewardLimitHelper.FetchAsync(m_auth?.m_userInfo?.channelId);
+            float deadline = Time.realtimeSinceStartup + ChannelLookupTimeoutSeconds;
+
+            while (!lookup.IsCompleted && Time.realtimeSinceStartup < deadline)
+                yield return null;
+
+            // Unknown (null) when the lookup failed or timed out, rather than a stale number.
+            OtherChannelRewards = lookup.IsCompleted ? lookup.Result?.Others : null;
+            ChannelRewardCountsChanged?.Invoke();
         }
 
         /// <summary>
@@ -491,6 +603,13 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public TaskAwaiter ClearRewards()
         {
+            // A push still waiting on its lookup must not land after the clear.
+            if (m_pushRoutine != null)
+            {
+                StopCoroutine(m_pushRoutine);
+                m_pushRoutine = null;
+            }
+
             List<CustomRewardDefinition> list = new List<CustomRewardDefinition>();
             GameTask gameTask = Twitch.API.ReplaceCustomRewards(list.ToArray());
             return gameTask.GetAwaiter();

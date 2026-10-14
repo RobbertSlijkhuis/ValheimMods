@@ -1,13 +1,14 @@
 # WizshBone Twitch Integration
 
 Let your Twitch chat turn your Valheim world into chaos! WizshBone Twitch Integration connects your
-channel to the game: viewers can spend channel points on redeems that trigger effects around you, and chatters can even take control of the creatures in your world!
+channel to the game: viewers can spend channel points on redeems that trigger effects around you,
+and chatters can even take control of the creatures in your world!
 
 ## Getting started
 
 1. Install the mod and its dependencies.
 2. Start Valheim, load into a world and open the mod's window (default F3).
-3. Click **Twitch Login** in the top bar. Your main browser opens, where you log in to Twitch and authorize the mod. (You need to do this twice currently seperate for the mod and chat)
+3. Click **Twitch Login** in the top bar. Your main browser opens, where you log in to Twitch and authorize the mod.
 4. Turn on redeems from the Home tab. Your redeems are created as custom channel point rewards on your channel.
 
 Twitch only offers channel points (and custom rewards) to Affiliates and Partners, and allows at most 50 custom rewards per channel, including any you already have.
@@ -29,8 +30,9 @@ choosing an effect, configuring it and setting up the channel point reward. Avai
 - **Doors of Doom** and **Windmills of Death**
 - **Mist**, **Flashbang** and **Detonate fish**
 
-A redeem requires at least a point cost and a title. You can also add cooldowns, and make redeems appear or disappear as you progress and defeat bosses. You can apply a percentage discount to all redeem costs, and choose whether redeems are resolved automatically
-or by hand from the redeem history.
+A redeem requires at least a point cost and a title. You can also add cooldowns, and make redeems
+appear or disappear as you progress and defeat bosses. You can apply a percentage discount to all
+redeem costs, and choose whether redeems are resolved automatically or by hand from the redeem history.
 
 ### Chatting and claiming creatures
 - Chat messages can show up above nearby creatures.
@@ -41,10 +43,15 @@ or by hand from the redeem history.
 ### Viewers
 Register the chatters and redeemers you care about to give them perks, like a creature color.
 
+### Leaderboards
+Tracks your viewers: points spent, redeem count, favorite redeems, previous names and the deaths
+they caused.
+
 ### Profiles
 A profile holds all your redeems and settings. Switch, copy, rename, import and
 export profiles to share a setup, or sync a profile so you and your friends run the exact same
 configuration. Synced profiles are read-only for everyone except the owner.
+The built-in profiles (Normal and Chatting only) can't be renamed, deleted or synced, but can be reset to their original content.
 
 ### Settings
 Everything below is configured per profile and saves automatically:
@@ -56,18 +63,19 @@ Everything below is configured per profile and saves automatically:
 
 ### Safezones
 Safezones (Twitch Wards, ships and traders) block redeem effects while you are inside them, unless a
-redeem is set to ignore safezones.
+redeem is set to ignore safezones. In the Settings you can stop spawned monsters from entering a zone,
+or burn them if they do. Monsters that are pushed away can't shoot or hit anyone inside a zone either; if
+you allow them inside, their attacks aren't blocked.
 
 ## Multiplayer
 
 The mod is designed with multiplayer in mind, so redeem effects should work for everyone in the
-world, not just the streamer. It has **NOT** been thoroughly tested in multiplayer yet, so some issues
-can arise. Please report any problems you run into.
+world, not just the streamer. It has **NOT** been thoroughly tested in multiplayer yet, so issues may
+occur. Please report any problems you run into.
 
 ## Known issues
 
-- Login requires you to authorize twice, once for the mod and once for chat. I am looking into this.
-- Creature recoloring is not finished: bosses and creatures from the Ashlands onwards can't be recolored yet.
+- Creature recoloring is not finished: not every creature can be recolored yet.
 - Multiplayer has not been tested thoroughly (see above).
 
 ## Bugs & Suggestions
@@ -78,7 +86,6 @@ Select the modding role and post your feedback or bug report there!
 ## Planned
 
 - More default profiles with different levels of chaos and difficulty
-- Leaderboards (who killed you the most, most used redeems, points spent and more)
 - More redeem types, like dropping your inventory, inverted movement and rearranging your hotbar
 - A periodic vote that lets viewers decide your fate with a random redeem
 - Surprise chests that can turn out to be a mimic or spawn other redeems
@@ -87,4 +94,18 @@ Select the modding role and post your feedback or bug report there!
 
 ## Screenshots
 
-Soon™
+![Anarchy 1](https://robhost.nl/img/valheim/WizshBone/Anarchy.png)
+![Anarchy 1](https://robhost.nl/img/valheim/WizshBone/Anarchy2.png)
+![Bonemass recolor](https://robhost.nl/img/valheim/WizshBone/Bonemass.png)
+![Roots & traps](https://robhost.nl/img/valheim/WizshBone/RootsAndTraps.png)
+![Log rain](https://robhost.nl/img/valheim/WizshBone/Lograin.png)
+![Windmills & doors](https://robhost.nl/img/valheim/WizshBone/DoorsAndWindmills.png)
+![Meteors & lightning](https://robhost.nl/img/valheim/WizshBone/MeteorAndLightning.png)
+![Safezone bubble](https://robhost.nl/img/valheim/WizshBone/Safezone_bubble.png)
+![Safezone menu](https://robhost.nl/img/valheim/WizshBone/Safezone_ward.png)
+![Home tab UI](https://robhost.nl/img/valheim/WizshBone/Menu.png)
+![Settings tab UI](https://robhost.nl/img/valheim/WizshBone/Settings.png)
+![Redeem create step 1](https://robhost.nl/img/valheim/WizshBone/Redeem1.png)
+![Redeem create step 2](https://robhost.nl/img/valheim/WizshBone/Redeem2.png)
+![Redeem create step 3](https://robhost.nl/img/valheim/WizshBone/Redeem3.png)
+![Redeem History](https://robhost.nl/img/valheim/WizshBone/History.png)

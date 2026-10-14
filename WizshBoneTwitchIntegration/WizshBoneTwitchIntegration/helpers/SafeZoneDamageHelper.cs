@@ -15,7 +15,7 @@ namespace WizshBoneTwitchIntegration.Helpers
     {
         public static bool ShouldBlockHit(Character victim, HitData hit)
         {
-            if (!TwitchSafeZone.HasActiveSafeZones)
+            if (!TwitchSafeZone.HasActiveSafeZones || !TwitchSafeZone.KeepsMonstersOut)
                 return false;
 
             Character attacker = hit.GetAttacker();

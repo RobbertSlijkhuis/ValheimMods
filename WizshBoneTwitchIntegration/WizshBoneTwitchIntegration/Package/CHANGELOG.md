@@ -1,41 +1,68 @@
 ### 1.0.2
-- Added leaderboards: tracks viewers, points, redeem count, favourite redeems, previous names and caused deaths.
-- Fixed the login flow (single authorise, token-expiry warning).
-- Twitch login now uses the token's real expiry: warnings at 15, 10, 5 and 1 minute, then redeems are removed from Twitch and you are logged out 5 minutes before the token expires.
-- Fixed a bug that could leave toasts stuck forever, and added a Clear Toasts button in the Help tab.
-- Fixed starred creatures (e.g. one-star deer, starred wolves) not showing their recolour on the skin.
-- Fixed recolours deviating from the entered HEX value.
-- Colour picker: applies on change, accepts paste and strips a leading `#`; click a colour in the Viewer list to copy its hex code.
-- Added a second (emission) colour for recolours, and recolours for Eikthyr through Yagluth.
-- New creature form fields: position, name and emission colour.
-- Rockies can now be claimed with `claim:`, can talk and can be recoloured.
-- Scrolling no longer zooms the camera while the UI is open.
+---
+#### General
+- Fixed the login flow (single authorize).
+- Fixed the session-expiry warning at the 15, 10, 5 and 1 minute login checks. Once expired, you are logged out and the redeems are removed from Twitch.
+- Added a first version of leaderboards: tracks viewers, points, redeem count, favorite redeems, previous names and caused deaths.
+- Added a card on the Home tab to rebind the key that opens the main window, with a Reset button.
 - Creating a profile can now start empty or based on another profile.
-- Importing into a live profile now warns first.
+- Fixed a bug where scrolling zoomed the camera while the UI was open.
+- Fixed a bug that could leave toasts stuck forever, and added a Clear Toasts button in the Help tab.
+- Added built-in profiles "Normal" and "Chatting only". They always exist (they are re-created if missing) and can't be deleted, renamed or synced, but a Reset button puts one back to its original redeems and settings. An existing profile of one of these names is renamed to "name (old)" instead of being overwritten. "Normal" replaces the old "Default" profile, which is kept as a regular profile if you already have it.
+
+#### Redeems
+- Fixed the "Enable redeems" and "Chatting" cards on the Home tab not updating live (when redeems are enabled on login).
+- New toggleable settings to enable/disable auto reject and refund redeems while the game is paused or a menu is open, while the streamer is sleeping, or while teleporting (all on by default).
+- A redeem that arrives while the streamer isn't in the world (dead, respawning or loading) is now refunded instead of being lost.
+- Redeems that are not in the active profile are no longer discarded: they stay unresolved in the Redeem history, shown in red as "Unknown: title", and bulk Complete/Refund skips them.
+- The Redeem history now holds 1000 entries (was 500), warns when 750 unresolved redeems are pending, and drops the oldest resolved entry first so pending redeems are kept.
+- Disabled redeems are no longer sent to Twitch, so they don't use up one of its 50 channel point reward slots.
+- The Redeems tab now shows how many Twitch reward slots you use, including rewards on Twitch at that moment. Redeems are not pushed (and an error is shown) when they would go over Twitch's limit of 50, and Twitch rejections are now reported.
+- The Redeems tab's "Test" button is now called "Trigger", with a clearer tooltip.
+
+#### Monsters
+- Fixed recolors deviating from the entered HEX value.
+- Rockies can now be claimed with `claim:`, can talk and can be recolored.
+- Added a second (emission) color for recolors! Now you can recolor the skin and glowing parts separately!
+- Added recolors for the new Skeletons, Bat, Writhan and up to Ashlands. Also the bosses from Eikthyr up to The Queen can now be recolored!
+- Fixed starred creatures (e.g. one-star deer, starred wolves) not showing their recolor on the skin.
+- The color picker applies on change, accepts paste and strips a leading `#`. Click a color in the Viewer list to copy its hex code.
+- Resized creatures now scale their attack reach, hitbox and AI attack range with their size. Covers melee swings, area attacks (stomps and slams) and where projectiles spawn.
+- Death effects of resized creatures (ragdolls etc.) now spawn at the creature's size, and recolored creatures leave a recolored ragdoll.
+- Gear held or worn by resized creatures now scales with them.
+- MANY new creature form fields! Some are experimental and might not work as intended, like setting equipment, but I do encourage you to experiment and report any feedback!
+
+#### Surprise chest redeem
+- "Stack size" is now "Amount" (existing profiles are migrated automatically), limited to the item's max stack size.
+- Quality is limited to 1-10 and can go above the item's normal max quality, like extra Refinement Forge levels.
+- Items now spawn with full durability for their quality.
+- A redeem is now refunded if the dungeon filter and the Max spawned limits leave nothing the chest can spawn.
+
+#### Weather redeem
+- Added the `WBTIRemoveWeather` console command to remove Twitch weather zones and restore normal weather.
+- New "Cycle weathers" option steps through the chosen weathers in order, with a "Time per weather" setting, instead of picking one at random.
+- New "Follow player" option makes the weather zone follow the redeemer.
+- New "Frost resistance" option protects anyone standing in the zone from cold weather damage (e.g. while cycling through snow).
+- Weather zones now sync to other players in multiplayer (weather, force flag and size are replicated).
+
+#### Flashbang redeem
+- Flashbang: nearby players are flashed too when the streamer throws one, using their own Flashbang redeem settings.
+
+#### Status effect redeem
+- Grow/shrink player resizes are now visible to other players in multiplayer. Fixed swim/wade speed and interact distances for resized players.
+
+#### Safezones
+- New "Twitch Ward buildable" setting: turn it off to hide the ward from the Hammer build menu.
+- Safezones: spawned creatures are pushed out harder, no longer pick destinations inside a zone, and, while monsters are pushed away, their projectiles and hits can no longer enter or hit players inside a zone.
+- Fixed the ward's burn leaving spawned creatures with a little health left.
+- Safezone radius changes now sync to all players, and the radius is limited to 3-1000.
+
+#### HUD
+- Restored the missing HUD section in Settings.
 - Status HUD now defaults to below the minimap.
 - Status HUD now shows the configured key for opening the main UI.
 - Status HUD now shows "Twitch:" and "Live:" labels, each with a green/red status dot.
-- Restored the missing HUD section in Settings.
-- Added an "Open window key" card on the Home tab to rebind the key that opens the main window, with a Reset button.
-- Number fields now clamp to their limits immediately while typing, and out-of-range values are corrected when a form opens.
-- Surprise chest items: "Stack size" is now "Amount" (existing profiles are migrated automatically), limited to the item's max stack size.
-- Surprise chest items: Quality is limited to 1-10 and can go above the item's normal max quality, like extra Refinement Forge levels.
-- Surprise chest items now spawn with full durability for their quality.
-- Resized creatures now scale their attack reach, hitbox and AI attack range with their size: a shrunk creature no longer swings from out of reach and misses, and a grown one reaches further. Covers melee swings, area attacks (stomps and slams) and where projectiles spawn.
-- Removed the unused "Aggravatable" creature option (existing profiles still load).
-- Weather redeem: new "Cycle weathers" option steps through the chosen weathers in order, with a "Time per weather" setting, instead of picking one at random.
-- Weather redeem: new "Follow player" option makes the weather zone follow the redeemer.
-- Weather redeem: new "Frost resistance" option protects anyone standing in the zone from cold weather damage (e.g. while cycling through snow).
-- Weather zones now sync to other players in multiplayer (weather, force flag and size are replicated).
-- Added the `WBTIRemoveWeather` console command to remove Twitch weather zones and restore normal weather.
-- Creatures can now be given gear: "Equip items" equips vanilla items on spawn, and "Remove equipment" strips parts of their default loadout.
-- The creature form (spawn creature and surprise chest) is now split into General, Appearance, Behavior and Spawn tabs.
-- Surprise chest: a redeem is now refunded if the dungeon filter and the Max spawned limits leave nothing the chest can spawn.
-- Creature talk messages now use `{{user}}` (like all other messages) for the redeemer's name, for single and multiple (`;`-separated) messages. The old `{{userName}}` placeholder in talk messages is no longer replaced, so update any existing talk messages that use it.
-- "Show safezone bounds" now also outlines weather zones, and draws capsule outlines (e.g. the ward zone) with rounded ends. Ship and trader outlines follow the safezone Boats/Traders settings.
-- "Show safezone bounds" also shows a countdown above timed redeem objects (boats, weather zones, ...).
-- Some form descriptions now highlight key words in yellow.
-- Removed the unused "random", "isHallucination" and "index" creature fields (existing profiles still load).
+---
 
 ### 1.0.1
 - Clamped number settings.

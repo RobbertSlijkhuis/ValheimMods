@@ -53,6 +53,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_generalBg = generalBtnObj.GetComponent<Image>();
             m_defaultColor = m_generalBg.color;
             generalBtnObj.GetComponent<Button>().onClick.AddListener(() => SelectTab(true));
+            GuiHelper.KeepInteractiveInViewOnly(generalBtnObj);
 
             GameObject damageBtnObj = GuiHelper.CreateButton(
                 text: "Damage",
@@ -66,6 +67,7 @@ namespace WizshBoneTwitchIntegration.Gui
             damageBtnObj.SetActive(true);
             m_damageBg = damageBtnObj.GetComponent<Image>();
             damageBtnObj.GetComponent<Button>().onClick.AddListener(() => SelectTab(false));
+            GuiHelper.KeepInteractiveInViewOnly(damageBtnObj);
 
             float contentTopY = tabY - TabHeight - RedeemWizard.RowGap;
 

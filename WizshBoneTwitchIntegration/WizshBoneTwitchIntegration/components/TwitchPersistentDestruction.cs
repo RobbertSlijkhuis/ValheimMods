@@ -5,7 +5,7 @@ using WizshBoneTwitchIntegration.Helpers;
 
 namespace WizshBoneTwitchIntegration.Components
 {
-    internal class TwitchPersistentDestruction : MonoBehaviour
+    internal class TwitchPersistentDestruction : MonoBehaviour, IRedeemTimer
     {
         public ZNetView m_netView;
         public int m_duration;

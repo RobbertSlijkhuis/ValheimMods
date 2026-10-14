@@ -45,6 +45,7 @@ namespace WizshBoneTwitchIntegration.Harmony
             try
             {
                 FlashBangHelper.RegisterRpc();
+                ChatBubbleSyncHelper.RegisterRpc();
             }
             catch (Exception e)
             {

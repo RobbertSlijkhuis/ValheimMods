@@ -17,7 +17,7 @@ namespace WizshBoneTwitchIntegration.Helpers
     ///
     /// To add a future format change: bump <see cref="CurrentVersion"/> and add an
     /// "if (data.version &lt; N)" step to <see cref="Migrate"/> - and also update the
-    /// "version:" line in the embedded resources/profile.yaml seed, since
+    /// "version:" line in the embedded resources/profile_normal.yaml seed, since
     /// <see cref="ExtraConfigHelper.WriteDefaultRedeemsTo"/> copies it verbatim for brand-new
     /// profiles rather than going through <see cref="ExtraConfigHelper.WriteRedeemsConfig"/>;
     /// forgetting this makes every new profile look legacy and get needlessly migrated on
@@ -163,14 +163,14 @@ namespace WizshBoneTwitchIntegration.Helpers
         /// Persists the migration for every profile on disk (one-time, at startup), so profiles
         /// that are never opened - and therefore never re-saved - still end up in the current
         /// format. The pre-migration file is kept next to it as profile.yaml.premigration.bak.
-        /// Synced (read-only) profiles are skipped: they're re-downloaded and migrated in memory
-        /// on read anyway.
+        /// Read-only profiles are skipped: synced ones are re-downloaded and migrated in memory
+        /// on read anyway, and locked built-in ones are restored from stock before every read.
         /// </summary>
         public static void MigrateAllProfilesOnDisk()
         {
             foreach (string profileName in ProfileManager.GetProfiles())
             {
-                if (ProfileManager.IsSyncedProfile(profileName))
+                if (ProfileManager.IsReadOnlyProfile(profileName))
                     continue;
 
                 string path = ProfileManager.GetRedeemPath(profileName);
