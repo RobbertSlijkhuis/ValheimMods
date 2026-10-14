@@ -1,6 +1,7 @@
 ### 1.0.3
 ---
 #### Redeems
+- Added the "Slippery Ground" status effect (pick it in a Status Effect redeem): the streamer slides on any terrain like on the Deep North ice sheets for the effect's duration. Boats and building floors keep their normal grip, and ice shoes still prevent sliding.
 - Added the `WBTIRemoveTerrainEdit` console command to undo Twitch terrain edits and restore the original terrain. Permanent terrain edits (no duration) can now be undone too, but only edits made from this version on. Timed terrain edits now also reset their whole area for Rectangle and Chevron shapes.
 
 ### 1.0.2

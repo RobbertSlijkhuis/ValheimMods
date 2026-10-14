@@ -563,6 +563,18 @@ redeems:
       list:
       - name: PlayerShrink
         duration: 180
+  - title: 'Status: Slippery Ground'
+    description: Turns the ground into ice for the streamer, making them slide everywhere!
+    points: 300
+    backgroundColor: '#A9E4FF'
+    cooldown: 600
+    cooldownUnit: minutes
+    ignoreWard: true
+    type: StatusEffect
+    statusEffectData:
+      list:
+      - name: SlipperyGround
+        duration: 30
   #######################
   # SurpriseChest
   #######################

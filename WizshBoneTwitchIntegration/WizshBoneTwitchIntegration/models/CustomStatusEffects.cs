@@ -9,5 +9,6 @@ namespace WizshBoneTwitchIntegration.Models
         public StatusEffect Poison;
         public StatusEffect NoFallDamage;
         public SE_PlayerScale PlayerScale;
+        public SE_Stats SlipperyGround;
     }
 }

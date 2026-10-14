@@ -391,6 +391,18 @@ namespace WizshBoneTwitchIntegration
             effects.PlayerScale.m_icon   = sprites.MiniMeSprite;
             effects.PlayerScale.m_ttl    = 180f;
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.PlayerScale, fixReference: false));
+
+            // Only a marker: SlipperyGroundHelper / SlipperyGroundPatchesWBTI do the actual sliding
+            // while the local player has it.
+            effects.SlipperyGround = ScriptableObject.CreateInstance<SE_Stats>();
+            effects.SlipperyGround.name      = Helpers.SlipperyGroundHelper.EffectName;
+            effects.SlipperyGround.m_name    = "Slippery ground";
+            effects.SlipperyGround.m_tooltip = "The ground is as slippery as ice.";
+            effects.SlipperyGround.m_ttl     = 30f;
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.SlipperyGround, fixReference: false));
+
+            // Vanilla status effects only exist once ObjectDB is populated, so borrow the Frost icon then.
+            ItemManager.OnItemsRegistered += () => effects.SlipperyGround.m_icon = ObjectDB.instance.GetStatusEffect("Frost".GetStableHashCode())?.m_icon;
         }
 
         private void InitInputs()

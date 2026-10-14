@@ -70,7 +70,6 @@ namespace WizshBoneTwitchIntegration.Models
         [EditorHidden] public StatusEffectData statusEffectData = new StatusEffectData();
         [EditorHidden] public TimeStopData timeStopData = new TimeStopData();
         [EditorHidden] public WeatherData weatherData = new WeatherData();
-
         // Maps each RedeemType to the one sub-data field that should be serialized for it.
         private static readonly Dictionary<string, string> TypeToDataField = new Dictionary<string, string>
         {
@@ -92,8 +91,7 @@ namespace WizshBoneTwitchIntegration.Models
             { RedeemType.StatusEffect,       nameof(statusEffectData) },
             { RedeemType.TerrainEdit,        nameof(terrainEditData)  },
             { RedeemType.TimeStop,           nameof(timeStopData)     },
-            { RedeemType.Weather,            nameof(weatherData)      },
-        };
+            { RedeemType.Weather,            nameof(weatherData)      },        };
 
         private static readonly HashSet<string> AllDataFields = new HashSet<string>
         {
@@ -106,8 +104,7 @@ namespace WizshBoneTwitchIntegration.Models
             nameof(spawnAbilityData),
             nameof(statusEffectData),
             nameof(timeStopData),
-            nameof(weatherData),
-        };
+            nameof(weatherData),        };
 
         /// <summary>
         /// Returns a dictionary with all standard fields and only the

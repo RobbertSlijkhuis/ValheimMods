@@ -593,8 +593,7 @@ namespace WizshBoneTwitchIntegration.Gui
             RegisterStep2Form(RedeemType.Flashbang, new FlashbangForm());
             RegisterStep2Form(RedeemType.Mist, new MistForm());
             RegisterStep2Form(RedeemType.TimeStop, new TimeStopForm());
-            RegisterStep2Form(RedeemType.Weather, new WeatherForm());
-            RegisterStep2Form(RedeemType.TerrainEdit, new TerrainEditForm());
+            RegisterStep2Form(RedeemType.Weather, new WeatherForm());            RegisterStep2Form(RedeemType.TerrainEdit, new TerrainEditForm());
             RegisterStep2Form(RedeemType.Detonate, new DetonateForm());
             RegisterStep2Form(RedeemType.Door, new DoorForm());
             RegisterStep2Form(RedeemType.Windmill, new WindmillForm());

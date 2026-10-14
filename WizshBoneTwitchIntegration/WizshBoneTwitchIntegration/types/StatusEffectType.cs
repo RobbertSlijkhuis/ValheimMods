@@ -14,6 +14,7 @@
         public static string Freezing => WizshBoneTwitchIntegration.Instance.effects.Freezing.name;
         public static string Poison => WizshBoneTwitchIntegration.Instance.effects.Poison.name;
         public static string Puke => "Puke";
+        public static string SlipperyGround => Helpers.SlipperyGroundHelper.EffectName;
         public static string Tarred => "Tared";
         public static string Wet => "Wet";
 
