@@ -60,16 +60,27 @@ namespace WizshBoneTwitchIntegration.Helpers
             // A fall (or a dip into water) shortly after this edit is credited to the redeemer.
             DeathCreditHelper.NoteTerrainEdit(customRewardEvent, data.noFallDamage);
 
-            if (data.duration > 0f)
-            {
-                // Through ZNetViewHelper (marks it as a redeem spawn) and tagged with the redeemer, so
-                // the timed reset - which can drop the streamer off raised ground - credits the same viewer.
-                GameObject marker = ZNetViewHelper.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.TerrainEdit, origin, Quaternion.identity);
-                RedeemerTagHelper.Apply(marker, customRewardEvent);
-                marker.GetComponent<TwitchTerrainReset>().Initialize(origin, settings.GetRadius() + ResetRadiusBuffer, data.duration);
-            }
+            // Always spawned, also for permanent edits (duration <= 0): the marker is what
+            // WBTIRemoveTerrainEdit finds to undo the edit. Through ZNetViewHelper (marks it as a redeem
+            // spawn) and tagged with the redeemer, so a reset - which can drop the streamer off raised
+            // ground - credits the same viewer.
+            GameObject marker = ZNetViewHelper.Instantiate(WizshBoneTwitchIntegration.Instance.prefabs.TerrainEdit, origin, Quaternion.identity);
+            RedeemerTagHelper.Apply(marker, customRewardEvent);
+            marker.GetComponent<TwitchTerrainReset>().Initialize(origin, GetResetRadius(data, settings), data.duration);
 
             SpawnEffects(origin);
+        }
+
+        // Bounding circle around origin that covers the whole edit. Rectangle/Chevron stamp the brush
+        // along a wall reaching about raiseRadius from origin, so the brush radius alone would miss most of it.
+        private static float GetResetRadius(TerrainEditData data, TerrainOp.Settings settings)
+        {
+            float radius = settings.GetRadius() + ResetRadiusBuffer;
+
+            if (data.shape == "Rectangle" || data.shape == "Chevron")
+                radius += data.raiseRadius;
+
+            return radius;
         }
 
         private static bool OverlapsWithSafeZone(Vector3 origin, float radius)
@@ -129,6 +140,11 @@ namespace WizshBoneTwitchIntegration.Helpers
             foreach (Heightmap heightmap in heightmaps)
             {
                 TerrainComp comp = heightmap.GetAndCreateTerrainCompiler();
+
+                // Save() is a no-op for non-owners, so without this the reset would only show locally.
+                if (!comp.IsOwner() && comp.m_nview.IsValid())
+                    comp.m_nview.ClaimOwnership();
+
                 heightmap.WorldToVertex(worldPos, out int cx, out int cy);
 
                 float   numVerts = radius / heightmap.m_scale;

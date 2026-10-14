@@ -1,3 +1,8 @@
+### 1.0.3
+---
+#### Redeems
+- Added the `WBTIRemoveTerrainEdit` console command to undo Twitch terrain edits and restore the original terrain. Permanent terrain edits (no duration) can now be undone too, but only edits made from this version on. Timed terrain edits now also reset their whole area for Rectangle and Chevron shapes.
+
 ### 1.0.2
 ---
 #### General
