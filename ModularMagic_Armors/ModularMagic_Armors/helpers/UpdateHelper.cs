@@ -57,42 +57,8 @@ namespace ModularMagic_Armors.Helpers
                 if (player == null)
                     return;
 
-                GameObject eyeLeft;
-                GameObject eyeRight;
-
-                bool wraithHelmet = items.Contains(ModularMagic_Armors.WraithHelmetHashCode);
-                bool wraithChest = items.Contains(ModularMagic_Armors.WraithChestHashCode);
-                bool wraithLegs = items.Contains(ModularMagic_Armors.WraithLegsHashCode);
-                bool darkWizardHelmet = items.Contains(ModularMagic_Armors.DarkWizardHelmetHashCode);
                 bool emblaHelmet = items.Contains(ModularMagic_Armors.EmblaHelmetHashCode);
                 bool emblaChest = items.Contains(ModularMagic_Armors.EmblaChestHashCode);
-
-                eyeLeft = player.gameObject.transform.Find(pathHelper.headPath + "/" + pathHelper.EyeLeftPath).gameObject;
-                eyeRight = player.gameObject.transform.Find(pathHelper.headPath + "/" + pathHelper.EyeRightPath).gameObject;
-
-                if (wraithHelmet)
-                {
-                    eyeLeft.GetComponent<MeshRenderer>().material = ModularMagic_Armors.Instance.materials.WraithArmorEye;
-                    eyeRight.GetComponent<MeshRenderer>().material = ModularMagic_Armors.Instance.materials.WraithArmorEye;
-                }
-
-                player.gameObject.transform.Find(pathHelper.headPath + "/"+ pathHelper.WraithHeadEffectPath).gameObject.SetActive(wraithHelmet);
-
-                player.gameObject.transform.Find(pathHelper.spine1Path + "/" + pathHelper.WraithChestEffectPath).gameObject.SetActive(wraithChest);
-                player.gameObject.transform.Find(pathHelper.handLeftPath + "/" + pathHelper.WraithHandLeftEffectPath).gameObject.SetActive(wraithChest);
-                player.gameObject.transform.Find(pathHelper.handRightPath + "/" + pathHelper.WraithHandRightEffectPath).gameObject.SetActive(wraithChest);
-
-                player.gameObject.transform.Find(pathHelper.kneeLeftPath + "/" + pathHelper.WraithKneeLeftEffectPath).gameObject.SetActive(wraithLegs);
-                player.gameObject.transform.Find(pathHelper.kneeRightPath + "/" + pathHelper.WraithKneeRightEffectPath).gameObject.SetActive(wraithLegs);
-
-                if (darkWizardHelmet)
-                {
-                    eyeLeft.GetComponent<MeshRenderer>().material = ModularMagic_Armors.Instance.materials.DarkWizardArmorEye;
-                    eyeRight.GetComponent<MeshRenderer>().material = ModularMagic_Armors.Instance.materials.DarkWizardArmorEye;
-                }
-
-                eyeLeft.SetActive((wraithHelmet || darkWizardHelmet));
-                eyeRight.SetActive((wraithHelmet || darkWizardHelmet));
 
                 if (PluginConfig.adjustEmbla.Value)
                 {
@@ -108,48 +74,6 @@ namespace ModularMagic_Armors.Helpers
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not de/activate item effects: " + e);
-            }
-        }
-
-        public static void UpdateSetEffects(long playerId, int? setHash)
-        {
-            try
-            {
-                Player player = Player.GetPlayer(playerId);
-
-                if (player == null)
-                    return;
-
-                if (setHash == ModularMagic_Armors.WraithArmorSetHashCode)
-                {
-
-                    player.gameObject.transform.Find(pathHelper.bodyPath).gameObject.SetActive(false);
-                    player.gameObject.transform.Find(pathHelper.headPath + "/" + pathHelper.WraithFaceEffectPath).gameObject.SetActive(true);
-                }
-                else
-                {
-                    player.gameObject.transform.Find(pathHelper.bodyPath).gameObject.SetActive(true);
-                    player.gameObject.transform.Find(pathHelper.headPath + "/" + pathHelper.WraithFaceEffectPath).gameObject.SetActive(false);
-                }
-
-                if (setHash == ModularMagic_Armors.DarkWizardArmorSetHashCode)
-                {
-                    player.gameObject.transform.Find(pathHelper.headPath + "/" + pathHelper.EyeLeftPath + "/flames").gameObject.SetActive(true);
-                    player.gameObject.transform.Find(pathHelper.headPath + "/" + pathHelper.EyeRightPath + "/flames").gameObject.SetActive(true);
-                    player.gameObject.transform.Find(pathHelper.shoulderLeftPath + "/" + pathHelper.DarkWizardShoulderLeftEffectPath).gameObject.SetActive(true);
-                    player.gameObject.transform.Find(pathHelper.shoulderRightPath + "/" + pathHelper.DarkWizardShoulderRightEffectPath).gameObject.SetActive(true);
-                }
-                else
-                {
-                    player.gameObject.transform.Find(pathHelper.headPath + "/" + pathHelper.EyeLeftPath + "/flames").gameObject.SetActive(false);
-                    player.gameObject.transform.Find(pathHelper.headPath + "/" + pathHelper.EyeRightPath +"/flames").gameObject.SetActive(false);
-                    player.gameObject.transform.Find(pathHelper.shoulderLeftPath + "/" + pathHelper.DarkWizardShoulderLeftEffectPath).gameObject.SetActive(false);
-                    player.gameObject.transform.Find(pathHelper.shoulderRightPath + "/" + pathHelper.DarkWizardShoulderRightEffectPath).gameObject.SetActive(false);
-                }
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Could not de/activate set effects: " + e);
             }
         }
 

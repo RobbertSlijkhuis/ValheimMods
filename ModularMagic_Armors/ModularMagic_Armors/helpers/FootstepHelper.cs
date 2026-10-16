@@ -7,7 +7,7 @@ namespace ModularMagic_Armors.Helpers
 {
     internal class FootstepHelper
     {
-        private const float FootstepLifetime = 10f;
+        private const float FootstepLifetime = 3f;
         private const float GroundCheckUp = 0.5f;
         private const float GroundCheckDistance = 1.5f;
 

@@ -46,7 +46,6 @@ namespace ModularMagic_Armors.Components
 
                 ArmorStatus current = StatusStringToObject(status);
                 UpdateHelper.UpdateItemEffects(current.playerId, current.items);
-                UpdateHelper.UpdateSetEffects(current.playerId, current.set);
                 prevStatus = status;
             }
             catch (Exception e)

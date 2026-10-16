@@ -121,75 +121,9 @@ namespace ModularMagic_Armors
             ItemHelper.Create(prefabs.WraithChestPrefab, PluginConfig.armor2Chest);
             ItemHelper.Create(prefabs.WraithLegsPrefab, PluginConfig.armor2Legs);
 
-            GameObject player = PrefabManager.Instance.GetPrefab("Player");
-            GameObject playerHead = player.transform.Find(pathHelper.headPath).gameObject;
-            GameObject playerSpine1 = player.transform.Find(pathHelper.spine1Path).gameObject;
-            GameObject playerHandLeft = player.transform.Find(pathHelper.handLeftPath).gameObject;
-            GameObject playerHandRight = player.transform.Find(pathHelper.handRightPath).gameObject;
-            GameObject playerKneeLeft = player.transform.Find(pathHelper.kneeLeftPath).gameObject;
-            GameObject playerKneeRight = player.transform.Find(pathHelper.kneeRightPath).gameObject;
-
-            GameObject eyeLeft = prefabs.WraithHelmetPrefab.transform.Find(pathHelper.EyeLeftPath).gameObject;
-            GameObject eyeRight = prefabs.WraithHelmetPrefab.transform.Find(pathHelper.EyeRightPath).gameObject;
-            GameObject helmetEffectHead = prefabs.WraithHelmetPrefab.transform.Find(pathHelper.WraithHeadEffectPath).gameObject;
-            GameObject helmetEffectHeadFace = prefabs.WraithHelmetPrefab.transform.Find(pathHelper.WraithFaceEffectPath).gameObject;
-            GameObject chestEffectSpine1 = prefabs.WraithChestPrefab.transform.Find(pathHelper.WraithChestEffectPath).gameObject;
-            GameObject chestEffectHandLeft = prefabs.WraithChestPrefab.transform.Find(pathHelper.WraithHandLeftEffectPath).gameObject;
-            GameObject chestEffectHandRight = prefabs.WraithChestPrefab.transform.Find(pathHelper.WraithHandRightEffectPath).gameObject;
-            GameObject legsEffectKneeLeft = prefabs.WraithLegsPrefab.transform.Find(pathHelper.WraithKneeLeftEffectPath).gameObject;
-            GameObject legsEffectKneeRight = prefabs.WraithLegsPrefab.transform.Find(pathHelper.WraithKneeRightEffectPath).gameObject;
-
-            eyeLeft.FixReferences();
-            eyeRight.FixReferences();
-            helmetEffectHead.FixReferences();
-            helmetEffectHeadFace.FixReferences();
-            chestEffectSpine1.FixReferences();
-            chestEffectHandLeft.FixReferences();
-            chestEffectHandRight.FixReferences();
-            legsEffectKneeLeft.FixReferences();
-            legsEffectKneeRight.FixReferences();
-
-            eyeLeft.transform.parent = playerHead.transform;
-            eyeLeft.transform.localPosition = new Vector3(-0.00087f, 0.00178f, -0.00035f);
-            eyeLeft.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 340.544f, 0f));
-            eyeLeft.transform.localScale = new Vector3(0.0002f, 0.0001f, 0.0003f);
-            eyeLeft.SetActive(false);
-
-            eyeRight.transform.parent = playerHead.transform;
-            eyeRight.transform.localPosition = new Vector3(-0.00087f, 0.00178f, 0.00044f);
-            eyeRight.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 27.096f, 0f));
-            eyeRight.transform.localScale = new Vector3(0.0002f, 0.0001f, 0.0003f);
-            eyeRight.SetActive(false);
-
-            helmetEffectHead.transform.parent = playerHead.transform;
-            helmetEffectHead.transform.localPosition = new Vector3(0f, 0f, 0f);
-            helmetEffectHead.SetActive(false);
-
-            helmetEffectHeadFace.transform.parent = playerHead.transform;
-            helmetEffectHeadFace.transform.localPosition = new Vector3(-0.0015f, 0.001f, 0f);
-            helmetEffectHeadFace.SetActive(false);
-
-            chestEffectSpine1.transform.parent = playerSpine1.transform;
-            chestEffectSpine1.transform.localPosition = new Vector3(0f, 0f, 0f);
-            chestEffectSpine1.SetActive(false);
-
-            chestEffectHandLeft.transform.parent = playerHandLeft.transform;
-            chestEffectHandLeft.transform.localPosition = new Vector3(0f, 0f, 0f);
-            chestEffectHandLeft.SetActive(false);
-
-            chestEffectHandRight.transform.parent = playerHandRight.transform;
-            chestEffectHandRight.transform.localPosition = new Vector3(0f, 0f, 0f);
-            chestEffectHandRight.SetActive(false);
-
-            legsEffectKneeLeft.transform.parent = playerKneeLeft.transform;
-            legsEffectKneeLeft.transform.localPosition = new Vector3(0f, 0f, 0f);
-            legsEffectKneeLeft.SetActive(false);
-
-            legsEffectKneeRight.transform.parent = playerKneeRight.transform;
-            legsEffectKneeRight.transform.localPosition = new Vector3(0f, 0f, 0f);
-            legsEffectKneeRight.SetActive(false);
+            ArmorEffectSetup.ApplyWraith(prefabs);
         }
-        as
+        
         private void AddFrostWolfArmor()
         {
             PrefabManager.OnVanillaPrefabsAvailable -= AddFrostWolfArmor;
@@ -211,27 +145,7 @@ namespace ModularMagic_Armors
             ItemHelper.Create(prefabs.DarkWizardChestPrefab, PluginConfig.armor4Chest);
             ItemHelper.Create(prefabs.DarkWizardLegsPrefab, PluginConfig.armor4Legs);
 
-            GameObject player = PrefabManager.Instance.GetPrefab("Player");
-            GameObject playerShoulderLeft = player.transform.Find(pathHelper.shoulderLeftPath).gameObject;
-            GameObject playerShoulderRight = player.transform.Find(pathHelper.shoulderRightPath).gameObject;
-
-            GameObject chestEffectShoulderLeft = prefabs.DarkWizardChestPrefab.transform.Find(pathHelper.DarkWizardShoulderLeftEffectPath).gameObject;
-            GameObject chestEffectShoulderRight = prefabs.DarkWizardChestPrefab.transform.Find(pathHelper.DarkWizardShoulderRightEffectPath).gameObject;
-
-            chestEffectShoulderLeft.FixReferences();
-            chestEffectShoulderRight.FixReferences();
-
-            chestEffectShoulderLeft.transform.parent = playerShoulderLeft.transform;
-            chestEffectShoulderLeft.transform.localPosition = new Vector3(0f, 0f, -0.0001f);
-            // chestEffectShoulderLeft.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 0f, 0f));
-            chestEffectShoulderLeft.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-            chestEffectShoulderLeft.SetActive(false);
-
-            chestEffectShoulderRight.transform.parent = playerShoulderRight.transform;
-            chestEffectShoulderRight.transform.localPosition = new Vector3(0f, 0f, -0.0001f); // 0 -0,0007 -0,0005
-            // chestEffectShoulderRight.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 0f, 0f)); // 58, 130, 90
-            chestEffectShoulderRight.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-            chestEffectShoulderRight.SetActive(false);
+            ArmorEffectSetup.ApplyDarkWizard(prefabs);
         }
 
         private void AdjustEitrWeaveArmor()

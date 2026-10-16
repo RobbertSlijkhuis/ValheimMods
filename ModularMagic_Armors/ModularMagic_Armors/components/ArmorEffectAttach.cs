@@ -7,32 +7,11 @@ using UnityEngine;
 namespace ModularMagic_Armors.Components
 {
     /**
-     * One effect on an armor piece. Authored in Unity, keep the field names stable, they are serialized in the prefabs.
-     */
-    [Serializable]
-    public class EffectBinding
-    {
-        // The effect object, authored inactive
-        public Transform target;
-
-        // Name of the real (animated) bone the effect is moved to. Empty = the effect stays where it is and is only switched on/off (e.g. a child of another effect)
-        public string bone;
-
-        // None = the effect is on as long as the piece is worn, otherwise only while the full set is worn
-        public ArmorSetId gateSet = ArmorSetId.None;
-
-        // Use the local transform below instead of the one authored in the prefab (used for effects injected from code)
-        public bool overrideLocal;
-        public Vector3 localPosition = Vector3.zero;
-        public Vector3 localEuler = Vector3.zero;
-        public Vector3 localScale = Vector3.one;
-    }
-
-    /**
-     * Put on the attach object (attach / attach_skin / attach_[bone]) of an armor piece.
+     * Put on the attach object (attach / attach_skin / attach_[bone]) of an armor piece by ArmorEffectSetup.
      * VisEquipment instantiates that object on every client when the piece is worn, but it is not parented to an animated bone itself
      * (attach_skin is bound to the skeleton through its mesh, and the armature inside it is a static copy).
-     * So at Start the effects are moved to the real bones of the wearer, and removed again when the piece is taken off.
+     * So at Start the effects (children of this object that are known to ArmorEffectSetup) are moved to the real bones of the wearer,
+     * and removed again when the piece is taken off.
      * Start is used and not OnEnable, because VisEquipment parents helmets after activating them.
      */
     public class ArmorEffectAttach : MonoBehaviour
@@ -41,8 +20,14 @@ namespace ModularMagic_Armors.Components
 
         private static bool helmetJointLogged = false;
 
-        public List<EffectBinding> bindings = new List<EffectBinding>();
+        private class AttachedEffect
+        {
+            public Transform target;
+            public ArmorEffectSetup.Effect effect;
+            public bool moved;
+        }
 
+        private readonly List<AttachedEffect> attached = new List<AttachedEffect>();
         private VisEquipment visEquipment;
         private bool hasGates = false;
 
@@ -60,26 +45,34 @@ namespace ModularMagic_Armors.Components
 
                 Transform visualRoot = visEquipment.m_visual != null ? visEquipment.m_visual.transform : visEquipment.transform;
 
-                foreach (EffectBinding binding in bindings)
+                // GetComponentsInChildren returns a copy, so the effects can be moved while going through it
+                foreach (Transform child in GetComponentsInChildren<Transform>(true))
                 {
-                    if (binding == null || binding.target == null)
+                    if (child == transform || !ArmorEffectSetup.TryGetEffect(child.name, out ArmorEffectSetup.Effect effect))
                         continue;
 
-                    if (!string.IsNullOrEmpty(binding.bone) && !MoveToBone(binding, visualRoot))
+                    bool moved = !string.IsNullOrEmpty(effect.bone);
+
+                    if (moved && !MoveToBone(child, effect, visualRoot))
                     {
-                        binding.target.gameObject.SetActive(false);
+                        child.gameObject.SetActive(false);
                         continue;
                     }
 
-                    if (binding.gateSet != ArmorSetId.None)
+                    if (effect.gateSet != ArmorSetId.None)
                         hasGates = true;
 
-                    bool active = IsActive(binding);
-                    binding.target.gameObject.SetActive(active);
+                    attached.Add(new AttachedEffect() { target = child, effect = effect, moved = moved });
+
+                    bool active = IsActive(effect);
+                    child.gameObject.SetActive(active);
 
                     // Temporary diagnostic
-                    Jotunn.Logger.LogWarning($"[ArmorEffectAttach] {name}: '{binding.target.name}' bone '{binding.bone}' parent '{(binding.target.parent != null ? binding.target.parent.name : "none")}' active {active} (gate {binding.gateSet}, {ArmorSetHelper.Describe(binding.gateSet, visEquipment)})");
+                    Jotunn.Logger.LogWarning($"[ArmorEffectAttach] {name}: '{child.name}' bone '{effect.bone}' parent '{(child.parent != null ? child.parent.name : "none")}' active {active} (gate {effect.gateSet}, {ArmorSetHelper.Describe(effect.gateSet, visEquipment)})");
                 }
+
+                // Temporary diagnostic
+                Jotunn.Logger.LogWarning($"[ArmorEffectAttach] Start on '{name}': {attached.Count} effects attached");
 
                 if (hasGates)
                     InvokeRepeating(nameof(UpdateGates), GateInterval, GateInterval);
@@ -95,33 +88,35 @@ namespace ModularMagic_Armors.Components
             CancelInvoke();
 
             // Moved effects are no longer children of this object, so they have to be removed here
-            foreach (EffectBinding binding in bindings)
+            foreach (AttachedEffect item in attached)
             {
-                if (binding == null || binding.target == null || string.IsNullOrEmpty(binding.bone))
-                    continue;
-
-                Destroy(binding.target.gameObject);
+                if (item.moved && item.target != null)
+                    Destroy(item.target.gameObject);
             }
         }
 
-        private bool MoveToBone(EffectBinding binding, Transform visualRoot)
+        private bool MoveToBone(Transform target, ArmorEffectSetup.Effect effect, Transform visualRoot)
         {
-            Transform bone = TransformHelper.FindChildDepthFirst(visualRoot, binding.bone, transform);
+            Transform bone = TransformHelper.FindChildDepthFirst(visualRoot, effect.bone, transform);
 
             if (bone == null)
             {
-                Jotunn.Logger.LogWarning($"[ArmorEffectAttach] Bone '{binding.bone}' not found for effect '{binding.target.name}' on '{name}'");
+                Jotunn.Logger.LogWarning($"[ArmorEffectAttach] Bone '{effect.bone}' not found for effect '{target.name}' on '{name}'");
                 return false;
             }
 
-            binding.target.SetParent(bone, false);
+            // Read before moving, a null rotation in the table means the rotation authored in the prefab
+            Vector3 euler = effect.euler ?? target.localEulerAngles;
 
-            if (binding.overrideLocal)
-            {
-                binding.target.localPosition = binding.localPosition;
-                binding.target.localRotation = Quaternion.Euler(binding.localEuler);
-                binding.target.localScale = binding.localScale;
-            }
+            target.SetParent(bone, false);
+            target.localPosition = effect.position;
+            target.localScale = effect.scale;
+
+            // From the wearer: the rotation is set in the world, relative to the player, so the tilt of the bone does not matter. The effect then follows the bone
+            if (effect.eulerFromWearer)
+                target.rotation = visEquipment.transform.rotation * Quaternion.Euler(euler);
+            else
+                target.localRotation = Quaternion.Euler(euler);
 
             return true;
         }
@@ -131,27 +126,27 @@ namespace ModularMagic_Armors.Components
             if (visEquipment == null)
                 return;
 
-            foreach (EffectBinding binding in bindings)
+            foreach (AttachedEffect item in attached)
             {
-                if (binding == null || binding.target == null || binding.gateSet == ArmorSetId.None)
+                if (item.target == null || item.effect.gateSet == ArmorSetId.None)
                     continue;
 
-                bool active = IsActive(binding);
+                bool active = IsActive(item.effect);
 
-                if (binding.target.gameObject.activeSelf != active)
+                if (item.target.gameObject.activeSelf != active)
                 {
-                    binding.target.gameObject.SetActive(active);
-                    Jotunn.Logger.LogWarning($"[ArmorEffectAttach] {name}: '{binding.target.name}' active {active} ({ArmorSetHelper.Describe(binding.gateSet, visEquipment)})");
+                    item.target.gameObject.SetActive(active);
+                    Jotunn.Logger.LogWarning($"[ArmorEffectAttach] {name}: '{item.target.name}' active {active} ({ArmorSetHelper.Describe(item.effect.gateSet, visEquipment)})");
                 }
             }
         }
 
-        private bool IsActive(EffectBinding binding)
+        private bool IsActive(ArmorEffectSetup.Effect effect)
         {
-            if (binding.gateSet == ArmorSetId.None)
+            if (effect.gateSet == ArmorSetId.None)
                 return true;
 
-            return ArmorSetHelper.IsSetWorn(binding.gateSet, visEquipment);
+            return ArmorSetHelper.IsSetWorn(effect.gateSet, visEquipment);
         }
 
         // Temporary diagnostic: is m_helmet the Helmet_attach bone?
