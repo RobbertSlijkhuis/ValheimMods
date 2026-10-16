@@ -1,4 +1,5 @@
 ﻿using RestingRockFace.Gui;
+using RestingRockFace.Helpers;
 using RestingRockFace.Models;
 using RestingRockFace.Types;
 using Splatform;
@@ -33,7 +34,7 @@ namespace RestingRockFace.Components
             m_gui = new RockyGUI(this);
             m_gui.onAccept.AddListener(SetNameAndFace);
 
-            m_face = m_netView.GetZDO().GetInt(faceDataHash, (int)RockyFaceEnum.Nothing);
+            m_face = m_netView.GetZDO().GetInt(faceDataHash, (int)RockyFaceEnum.Random);
             UpdateFace(m_face);
         }
 
@@ -42,7 +43,7 @@ namespace RestingRockFace.Components
             if (m_netView == null || m_netView.GetZDO() == null)
                 return;
 
-            if (m_face != (int)RockyFaceEnum.Nothing)
+            if (m_face != (int)RockyFaceEnum.Random)
                 materialVar.SetMaterial(m_face);
         }
 
@@ -92,13 +93,16 @@ namespace RestingRockFace.Components
                 m_face = face;
                 UpdateFace(face);
 
-                materialVar.SetMaterial(face);
+                if (face == (int)RockyFaceEnum.Random)
+                    RockyFaceHelper.ResetToGameDecided(materialVar, m_netView);
+                else
+                    materialVar.SetMaterial(face);
             }
         }
 
         public void UpdateFace(int face)
         {
-            if (face == (int)RockyFaceEnum.Nothing)
+            if (face == (int)RockyFaceEnum.Random)
                 m_netView.GetZDO().RemoveInt(faceDataHash);
             else
                 m_netView.GetZDO().Set(faceDataHash, face);

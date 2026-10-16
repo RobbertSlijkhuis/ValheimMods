@@ -64,7 +64,7 @@ namespace RestingRockFace.Gui
                     draggable: false
                 );
 
-            currentForm = new RockyGuiResult(rockyControls.m_tameable.GetName(), rockyControls.m_face == -1 ? (int)RockyFaceEnum.NoFeeling : rockyControls.m_face);
+            currentForm = new RockyGuiResult(rockyControls.m_tameable.GetName(), rockyControls.m_face);
             panel.SetActive(false);
             ClearGUI();
             CreateGUI();
@@ -175,8 +175,9 @@ namespace RestingRockFace.Gui
             Dropdown faceDropdown = faceSelect.GetComponent<Dropdown>();
             faceDropdown.GetComponent<Dropdown>().AddOptions(new List<string>
             {
-                nameof(RockyFaceTypes.Dead), nameof(RockyFaceTypes.LookLeft), nameof(RockyFaceTypes.LookRight), nameof(RockyFaceTypes.NoFeeling), nameof(RockyFaceTypes.Nothing), nameof(RockyFaceTypes.Sad),
-                nameof(RockyFaceTypes.Scream), nameof(RockyFaceTypes.Smile), nameof(RockyFaceTypes.SmileBig),
+                RockyFaceTypes.Random,
+                RockyFaceTypes.Dead, RockyFaceTypes.LookLeft, RockyFaceTypes.LookRight, RockyFaceTypes.NoFeeling, RockyFaceTypes.Nothing, RockyFaceTypes.Sad,
+                RockyFaceTypes.Scream, RockyFaceTypes.Smile, RockyFaceTypes.SmileBig,
             });
             faceDropdown.value = GetDropdownValue(currentForm.face);
             faceDropdown.onValueChanged.AddListener(SetFace);
@@ -210,56 +211,30 @@ namespace RestingRockFace.Gui
             acceptButton.onClick.AddListener(Accept);
         }
 
+        // Dropdown order; index in this array == dropdown value.
+        private static readonly int[] dropdownFaces =
+        {
+            (int)RockyFaceEnum.Random,
+            (int)RockyFaceEnum.Dead,
+            (int)RockyFaceEnum.LookLeft,
+            (int)RockyFaceEnum.LookRight,
+            (int)RockyFaceEnum.NoFeeling,
+            (int)RockyFaceEnum.Nothing,
+            (int)RockyFaceEnum.Sad,
+            (int)RockyFaceEnum.Scream,
+            (int)RockyFaceEnum.Smile,
+            (int)RockyFaceEnum.SmileBig,
+        };
+
         private int GetRockyFace(int value)
         {
-            switch (value)
-            {
-                case 0:
-                    return (int)RockyFaceEnum.Dead;
-                case 1:
-                    return (int)RockyFaceEnum.LookLeft;
-                case 2:
-                    return (int)RockyFaceEnum.LookRight;
-                case 3:
-                    return (int)RockyFaceEnum.NoFeeling;
-                case 4:
-                default:
-                    return (int)RockyFaceEnum.Nothing;
-                case 5:
-                    return (int)RockyFaceEnum.Sad;
-                case 6:
-                    return (int)RockyFaceEnum.Scream;
-                case 7:
-                    return (int)RockyFaceEnum.Smile;
-                case 8:
-                    return (int)RockyFaceEnum.SmileBig;
-            }
+            return value >= 0 && value < dropdownFaces.Length ? dropdownFaces[value] : (int)RockyFaceEnum.Random;
         }
 
         private int GetDropdownValue(int value)
         {
-            switch (value)
-            {
-                case (int)RockyFaceEnum.Dead:
-                    return 0;
-                case (int)RockyFaceEnum.LookLeft:
-                    return 1;
-                case (int)RockyFaceEnum.LookRight:
-                    return 2;
-                case (int)RockyFaceEnum.NoFeeling:
-                    return 3;
-                case (int)RockyFaceEnum.Nothing:
-                default:
-                    return 4;
-                case (int)RockyFaceEnum.Sad:
-                    return 5;
-                case (int)RockyFaceEnum.Scream:
-                    return 6;
-                case (int)RockyFaceEnum.Smile:
-                    return 7;
-                case (int)RockyFaceEnum.SmileBig:
-                    return 8;
-            }
+            int index = System.Array.IndexOf(dropdownFaces, value);
+            return index >= 0 ? index : 0;
         }
     }
 }
