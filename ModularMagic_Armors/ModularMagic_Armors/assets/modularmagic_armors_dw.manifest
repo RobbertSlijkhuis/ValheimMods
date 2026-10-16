@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 1941294337
+CRC: 3420982405
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 8b95e76f72b75f3a3472c3592e2bee64
+    Hash: 54a1538a49af48744f4a95ab169ea42a
   TypeTreeHash:
     serializedVersion: 2
     Hash: 12902360dc5b72512b1b09e51673070c
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 8b95e76f72b75f3a3472c3592e2bee64
+    Hash: 54a1538a49af48744f4a95ab169ea42a
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -114,6 +114,7 @@ Assets:
 - Assets/Custom/PrefabInstance/Armor/Wraith/MMA_WraithCape.prefab
 - Assets/Custom/Material/Armor/Wraith/WraithEye_MMA.mat
 - Assets/Custom/PrefabInstance/Armor/DarkWizard/MMA_DarkWizardChest.prefab
+- Assets/Custom/PrefabInstance/Armor/DarkWizard/DarkWizard_Footstep_MMA.prefab
 - Assets/Custom/PrefabInstance/Armor/Wraith/MMA_WraithHelmet.prefab
 - Assets/Custom/MonoBehaviour/Armor/SetEffect_ShamanArmor_MMA.asset
 - Assets/Custom/PrefabInstance/Armor/FrostWolf/MMA_FrostWolfLegs.prefab

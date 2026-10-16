@@ -129,6 +129,7 @@ namespace ModularMagic_Armors.Configs
         public static ConfigEntry<bool> adjustEitrWeave;
         public static ConfigEntry<bool> adjustEmbla;
         public static ConfigEntry<bool> reskinEmbla;
+        public static ConfigEntry<bool> darkWizardFootsteps;
 
         public static void Init()
         {
@@ -209,6 +210,10 @@ namespace ModularMagic_Armors.Configs
                 reskinEmbla.SettingChanged += (obj, attr) =>
                 {
                 };
+
+                darkWizardFootsteps = ModularMagic_Armors.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "DarkWizard footstep flames"), true,
+                  new ConfigDescription("Players wearing the DarkWizard set leave flames behind their footsteps. Visual only and local to you, disabling it only hides the flames for you.", null,
+                  new ConfigurationManagerAttributes { Order = 4 }));
             }
             catch (Exception e)
             {

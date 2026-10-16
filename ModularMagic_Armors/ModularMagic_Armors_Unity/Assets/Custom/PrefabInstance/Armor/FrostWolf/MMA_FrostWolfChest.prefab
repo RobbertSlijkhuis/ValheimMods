@@ -33,6 +33,9 @@ Transform:
   - {fileID: 3838198431572581388}
   - {fileID: 8376445804128716922}
   - {fileID: 374695120769149967}
+  - {fileID: 5006402896076793890}
+  - {fileID: 5999961464313688596}
+  - {fileID: 6823557680987316964}
   m_Father: {fileID: 4102111214918528}
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
 --- !u!1 &1054044988432783
@@ -1312,9 +1315,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 5006402896076793890}
-  - {fileID: 5999961464313688596}
-  - {fileID: 6823557680987316964}
   - {fileID: 4349201063862435}
   - {fileID: 4740787898342393}
   m_Father: {fileID: 0}
@@ -4932,12 +4932,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 742690451991877419}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 4102111214918528}
+  m_Father: {fileID: 4349201063862435}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!198 &5844707395254002415
 ParticleSystem:
@@ -7236,12 +7236,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2520370273178550011}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 4102111214918528}
+  m_Father: {fileID: 4349201063862435}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!198 &5855102096156662176
 ParticleSystem:
@@ -9678,12 +9678,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7193313491336478200}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 4102111214918528}
+  m_Father: {fileID: 4349201063862435}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!198 &2470635933047771782
 ParticleSystem:

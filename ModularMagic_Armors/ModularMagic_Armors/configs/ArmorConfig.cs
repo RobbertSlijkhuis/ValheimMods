@@ -272,8 +272,7 @@ namespace ModularMagic_Armors.Configs
                 if (eitr.Value < 0f) return;
 
                 ItemDrop itemDrop = options.prefab.GetComponent<ItemDrop>();
-                MagicStatusEffect statusEffect = (MagicStatusEffect)itemDrop.m_itemData.m_shared.m_equipStatusEffect;
-                statusEffect.SetEitr(eitr.Value);
+                (itemDrop.m_itemData.m_shared.m_equipStatusEffect as MagicStatusEffect)?.SetEitr(eitr.Value);
             };
 
             eitrRegen = Config.Bind(new ConfigDefinition(options.sectionName, "Eitr regen"), options.eitrRegen,
@@ -298,8 +297,7 @@ namespace ModularMagic_Armors.Configs
                     return;
 
                 ItemDrop itemDrop = options.prefab.GetComponent<ItemDrop>();
-                MagicStatusEffect statusEffect = (MagicStatusEffect)itemDrop.m_itemData.m_shared.m_equipStatusEffect;
-                statusEffect.SetElementalMagic(elementalMagic.Value);
+                (itemDrop.m_itemData.m_shared.m_equipStatusEffect as MagicStatusEffect)?.SetElementalMagic(elementalMagic.Value);
             };
 
             bloodMagic = Config.Bind(new ConfigDefinition(options.sectionName, "Blood magic"), options.bloodMagic,
@@ -311,8 +309,7 @@ namespace ModularMagic_Armors.Configs
                     return;
 
                 ItemDrop itemDrop = options.prefab.GetComponent<ItemDrop>();
-                MagicStatusEffect statusEffect = (MagicStatusEffect)itemDrop.m_itemData.m_shared.m_equipStatusEffect;
-                statusEffect.SetBloodMagic(bloodMagic.Value);
+                (itemDrop.m_itemData.m_shared.m_equipStatusEffect as MagicStatusEffect)?.SetBloodMagic(bloodMagic.Value);
             };
         }
         public void ShowConfig(bool value, bool refreshConfigManager = false)

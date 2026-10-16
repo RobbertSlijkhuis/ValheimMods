@@ -120,64 +120,16 @@ namespace ModularMagic_Armors.Helpers
                 if (player == null)
                     return;
 
-                if (setHash == ModularMagic_Armors.ShamanArmorSetHashCode)
-                {
-                    player.gameObject.transform.Find(pathHelper.headPath + "/" + pathHelper.ShamanHeadEffectPath).gameObject.SetActive(true);
-                    player.gameObject.transform.Find(pathHelper.headPath + "/" + pathHelper.ShamanAntlerLefEffectPath).gameObject.SetActive(true);
-                    player.gameObject.transform.Find(pathHelper.headPath + "/" + pathHelper.ShamanAntlerRightEffectPath).gameObject.SetActive(true);
-                    player.gameObject.transform.Find(pathHelper.wristLeftPath + "/" + pathHelper.ShamanWristLeftEffectPath).gameObject.SetActive(true);
-                    player.gameObject.transform.Find(pathHelper.wristRightPath + "/" + pathHelper.ShamanWristRightEffectPath).gameObject.SetActive(true);
-                    player.gameObject.transform.Find(pathHelper.kneeLeftPath + "/" + pathHelper.ShamanKneeLeftEffectPath).gameObject.SetActive(true);
-                    player.gameObject.transform.Find(pathHelper.kneeRightPath + "/" + pathHelper.ShamanKneeRightEffectPath).gameObject.SetActive(true);
-                }
-                else
-                {
-                    player.gameObject.transform.Find(pathHelper.headPath + "/" + pathHelper.ShamanHeadEffectPath).gameObject.SetActive(false);
-                    player.gameObject.transform.Find(pathHelper.headPath + "/" + pathHelper.ShamanAntlerLefEffectPath).gameObject.SetActive(false);
-                    player.gameObject.transform.Find(pathHelper.headPath + "/" + pathHelper.ShamanAntlerRightEffectPath).gameObject.SetActive(false);
-                    player.gameObject.transform.Find(pathHelper.wristLeftPath + "/" + pathHelper.ShamanWristLeftEffectPath).gameObject.SetActive(false);
-                    player.gameObject.transform.Find(pathHelper.wristRightPath + "/" + pathHelper.ShamanWristRightEffectPath).gameObject.SetActive(false);
-                    player.gameObject.transform.Find(pathHelper.kneeLeftPath + "/" + pathHelper.ShamanKneeLeftEffectPath).gameObject.SetActive(false);
-                    player.gameObject.transform.Find(pathHelper.kneeRightPath + "/" + pathHelper.ShamanKneeRightEffectPath).gameObject.SetActive(false);
-                }
-
                 if (setHash == ModularMagic_Armors.WraithArmorSetHashCode)
                 {
 
                     player.gameObject.transform.Find(pathHelper.bodyPath).gameObject.SetActive(false);
                     player.gameObject.transform.Find(pathHelper.headPath + "/" + pathHelper.WraithFaceEffectPath).gameObject.SetActive(true);
-
-                    if (ModularMagic_Armors.Instance.updatePlayerBeard)
-                    {
-                        player.SetBeard("BeardNone");
-                    }
                 }
                 else
                 {
                     player.gameObject.transform.Find(pathHelper.bodyPath).gameObject.SetActive(true);
                     player.gameObject.transform.Find(pathHelper.headPath + "/" + pathHelper.WraithFaceEffectPath).gameObject.SetActive(false);
-
-                    if (ModularMagic_Armors.Instance.updatePlayerBeard && ModularMagic_Armors.Instance.playerBeard != null)
-                        player.SetBeard(ModularMagic_Armors.Instance.playerBeard);
-                }
-
-                if (setHash == ModularMagic_Armors.FrostWolfArmorSetHashCode)
-                {
-                    player.gameObject.transform.Find(pathHelper.headPath + "/" + pathHelper.FrostwolfHeadEffectPath).gameObject.SetActive(true);
-                    player.gameObject.transform.Find(pathHelper.spine2Path + "/" + pathHelper.FrostwolfChestEffectPath).gameObject.SetActive(true);
-                    player.gameObject.transform.Find(pathHelper.handLeftPath + "/" + pathHelper.FrostwolfHandLeftEffectPath).gameObject.SetActive(true);
-                    player.gameObject.transform.Find(pathHelper.handRightPath + "/" + pathHelper.FrostwolfHandRightEffectPath).gameObject.SetActive(true);
-                    player.gameObject.transform.Find(pathHelper.kneeLeftPath + "/" + pathHelper.FrostwolfKneeLeftEffectPath).gameObject.SetActive(true);
-                    player.gameObject.transform.Find(pathHelper.kneeRightPath + "/" + pathHelper.FrostwolfKneeRightEffectPath).gameObject.SetActive(true);
-                }
-                else
-                {
-                    player.gameObject.transform.Find(pathHelper.headPath + "/" + pathHelper.FrostwolfHeadEffectPath).gameObject.SetActive(false);
-                    player.gameObject.transform.Find(pathHelper.spine2Path + "/" + pathHelper.FrostwolfChestEffectPath).gameObject.SetActive(false);
-                    player.gameObject.transform.Find(pathHelper.handLeftPath + "/" + pathHelper.FrostwolfHandLeftEffectPath).gameObject.SetActive(false);
-                    player.gameObject.transform.Find(pathHelper.handRightPath + "/" + pathHelper.FrostwolfHandRightEffectPath).gameObject.SetActive(false);
-                    player.gameObject.transform.Find(pathHelper.kneeLeftPath + "/" + pathHelper.FrostwolfKneeLeftEffectPath).gameObject.SetActive(false);
-                    player.gameObject.transform.Find(pathHelper.kneeRightPath + "/" + pathHelper.FrostwolfKneeRightEffectPath).gameObject.SetActive(false);
                 }
 
                 if (setHash == ModularMagic_Armors.DarkWizardArmorSetHashCode)

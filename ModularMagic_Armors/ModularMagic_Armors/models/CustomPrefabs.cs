@@ -27,6 +27,7 @@ namespace ModularMagic_Armors.Models
         public GameObject DarkWizardCapePrefab;
         public GameObject DarkWizardChestPrefab;
         public GameObject DarkWizardLegsPrefab;
+        public GameObject DarkWizardFootstepPrefab;
 
         // Eitr-weave set
         public GameObject EitrWeaveHelmetPrefab;

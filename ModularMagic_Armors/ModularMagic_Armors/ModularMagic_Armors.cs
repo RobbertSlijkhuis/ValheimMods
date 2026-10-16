@@ -38,8 +38,6 @@ namespace ModularMagic_Armors
         public CustomSprites sprites = new CustomSprites();
 
         public bool gameIsReady = false;
-        public string playerBeard;
-        public bool updatePlayerBeard = true;
 
         public static readonly int armorStatusHashCode = "ArmorStatus_MMA".GetStableHashCode();
         public static int ShamanArmorSetHashCode;
@@ -70,6 +68,7 @@ namespace ModularMagic_Armors
             configManager = configManagerType == null ? null : BepInEx.Bootstrap.Chainloader.ManagerObject.GetComponent(configManagerType);
 
             InitAssetBundle();
+            ArmorSetHelper.Init();
             InitStatusEffects();
             PluginConfig.Init();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
@@ -102,82 +101,21 @@ namespace ModularMagic_Armors
         //}
 
         private void AddShamanArmor()
-        {            
+        {
+            PrefabManager.OnVanillaPrefabsAvailable -= AddShamanArmor;
+
             ItemHelper.Create(prefabs.ShamanHelmetPrefab, PluginConfig.armor1Helmet);
             ItemHelper.Create(prefabs.ShamanCapePrefab, PluginConfig.armor1Cape);
             ItemHelper.Create(prefabs.ShamanChestPrefab, PluginConfig.armor1Chest);
             ItemHelper.Create(prefabs.ShamanLegsPrefab, PluginConfig.armor1Legs);
 
-            GameObject player = PrefabManager.Instance.GetPrefab("Player");
-            GameObject playerHead = player.transform.Find(pathHelper.headPath).gameObject;
-            GameObject playerWristLeft = player.transform.Find(pathHelper.wristLeftPath).gameObject;
-            GameObject playerWristRight = player.transform.Find(pathHelper.wristRightPath).gameObject;
-            GameObject playerKneeLeft = player.transform.Find(pathHelper.kneeLeftPath).gameObject;
-            GameObject playerKneeRight = player.transform.Find(pathHelper.kneeRightPath).gameObject;
-
-            GameObject helmetEffectHead = prefabs.ShamanHelmetPrefab.transform.Find(pathHelper.ShamanHeadEffectPath).gameObject;
-            GameObject HelmetEffectAntlerLeft = prefabs.ShamanHelmetPrefab.transform.Find(pathHelper.ShamanAntlerLefEffectPath).gameObject;
-            GameObject helmetEffectAntlerRight = prefabs.ShamanHelmetPrefab.transform.Find(pathHelper.ShamanAntlerRightEffectPath).gameObject;
-            GameObject chestEffectWristLeft = prefabs.ShamanChestPrefab.transform.Find(pathHelper.ShamanWristLeftEffectPath).gameObject;
-            GameObject chestEffectWristRight = prefabs.ShamanChestPrefab.transform.Find(pathHelper.ShamanWristRightEffectPath).gameObject;
-            GameObject legsEffectKneeLeft = prefabs.ShamanLegsPrefab.transform.Find(pathHelper.ShamanKneeLeftEffectPath).gameObject;
-            GameObject legsEffectKneeRight = prefabs.ShamanLegsPrefab.transform.Find(pathHelper.ShamanKneeRightEffectPath).gameObject;
-
-            helmetEffectHead.FixReferences();
-            HelmetEffectAntlerLeft.FixReferences();
-            helmetEffectAntlerRight.FixReferences();
-            chestEffectWristLeft.FixReferences();
-            chestEffectWristRight.FixReferences();
-            legsEffectKneeLeft.FixReferences();
-            legsEffectKneeRight.FixReferences();
-
-            helmetEffectHead.transform.parent = playerHead.transform;
-            helmetEffectHead.transform.localPosition = new Vector3(-0.0017f, -0.0008f, 0f);
-            helmetEffectHead.transform.localRotation = TransformHelper.generateRotation(new Vector3(90f, 0f, 0f));
-            helmetEffectHead.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            helmetEffectHead.SetActive(false);
-
-            HelmetEffectAntlerLeft.transform.parent = playerHead.transform;
-            HelmetEffectAntlerLeft.transform.localPosition = new Vector3(0f, 0.004f, 0f);
-            HelmetEffectAntlerLeft.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 0f, 0f));
-            HelmetEffectAntlerLeft.transform.localScale = new Vector3(0.0007f, 0.0007f, 0.0007f);
-            HelmetEffectAntlerLeft.SetActive(false);
-
-            helmetEffectAntlerRight.transform.parent = playerHead.transform;
-            helmetEffectAntlerRight.transform.localPosition = new Vector3(0f, 0.004f, 0f);
-            helmetEffectAntlerRight.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 0f, 0f));
-            helmetEffectAntlerRight.transform.localScale = new Vector3(0.0007f, 0.0007f, 0.0007f);
-            helmetEffectAntlerRight.SetActive(false);
-
-            chestEffectWristLeft.transform.parent = playerWristLeft.transform;
-            chestEffectWristLeft.transform.localPosition = new Vector3(-0.0012f, -0.001f, -0.00081f);
-            chestEffectWristLeft.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 0f, 0f));
-            chestEffectWristLeft.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
-            chestEffectWristLeft.SetActive(false);
-
-            chestEffectWristRight.transform.parent = playerWristRight.transform;
-            chestEffectWristRight.transform.localPosition = new Vector3(-0.0012f, -0.001f, 0f);
-            chestEffectWristRight.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 0f, 0f));
-            chestEffectWristRight.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
-            chestEffectWristRight.SetActive(false);
-
-            legsEffectKneeLeft.transform.parent = playerKneeLeft.transform;
-            legsEffectKneeLeft.transform.localPosition = new Vector3(-0.0012f, 0.003f, 0f);
-            legsEffectKneeLeft.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 0f, 0f));
-            legsEffectKneeLeft.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
-            legsEffectKneeLeft.SetActive(false);
-
-            legsEffectKneeRight.transform.parent = playerKneeRight.transform;
-            legsEffectKneeRight.transform.localPosition = new Vector3(-0.0012f, 0.003f, 0f);
-            legsEffectKneeRight.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 0f, 0f));
-            legsEffectKneeRight.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
-            legsEffectKneeRight.SetActive(false);
-
-            PrefabManager.OnVanillaPrefabsAvailable -= AddShamanArmor;
+            ArmorEffectSetup.ApplyShaman(prefabs);
         }
 
         private void AddWraithArmor()
         {
+            PrefabManager.OnVanillaPrefabsAvailable -= AddWraithArmor;
+
             ItemHelper.Create(prefabs.WraithHelmetPrefab, PluginConfig.armor2Helmet);
             ItemHelper.Create(prefabs.WraithCapePrefab, PluginConfig.armor2Cape);
             ItemHelper.Create(prefabs.WraithChestPrefab, PluginConfig.armor2Chest);
@@ -250,74 +188,24 @@ namespace ModularMagic_Armors
             legsEffectKneeRight.transform.parent = playerKneeRight.transform;
             legsEffectKneeRight.transform.localPosition = new Vector3(0f, 0f, 0f);
             legsEffectKneeRight.SetActive(false);
-
-            PrefabManager.OnVanillaPrefabsAvailable -= AddWraithArmor;
         }
-
+        as
         private void AddFrostWolfArmor()
         {
+            PrefabManager.OnVanillaPrefabsAvailable -= AddFrostWolfArmor;
+
             ItemHelper.Create(prefabs.FrostWolfHelmetPrefab, PluginConfig.armor3Helmet);
             ItemHelper.Create(prefabs.FrostWolfCapePrefab, PluginConfig.armor3Cape);
             ItemHelper.Create(prefabs.FrostWolfChestPrefab, PluginConfig.armor3Chest);
             ItemHelper.Create(prefabs.FrostWolfLegsPrefab, PluginConfig.armor3Legs);
 
-            GameObject player = PrefabManager.Instance.GetPrefab("Player");
-            GameObject playerHead = player.transform.Find(pathHelper.headPath).gameObject;
-            GameObject playerSpine2 = player.transform.Find(pathHelper.spine2Path).gameObject;
-            GameObject playerHandLeft = player.transform.Find(pathHelper.handLeftPath).gameObject;
-            GameObject playerHandRight = player.transform.Find(pathHelper.handRightPath).gameObject;
-            GameObject playerKneeLeft = player.transform.Find(pathHelper.kneeLeftPath).gameObject;
-            GameObject playerKneeRight = player.transform.Find(pathHelper.kneeRightPath).gameObject;
-
-            GameObject helmetEffectHead = prefabs.FrostWolfHelmetPrefab.transform.Find(pathHelper.FrostwolfHeadEffectPath).gameObject;
-            GameObject chestEffectSpine2 = prefabs.FrostWolfChestPrefab.transform.Find(pathHelper.FrostwolfChestEffectPath).gameObject;
-            GameObject chestEffectHandLeft = prefabs.FrostWolfChestPrefab.transform.Find(pathHelper.FrostwolfHandLeftEffectPath).gameObject;
-            GameObject chestEffectHandRight = prefabs.FrostWolfChestPrefab.transform.Find(pathHelper.FrostwolfHandRightEffectPath).gameObject;
-            GameObject legsEffectKneeLeft = prefabs.FrostWolfLegsPrefab.transform.Find(pathHelper.FrostwolfKneeLeftEffectPath).gameObject;
-            GameObject legsEffectKneeRight = prefabs.FrostWolfLegsPrefab.transform.Find(pathHelper.FrostwolfKneeRightEffectPath).gameObject;
-
-            helmetEffectHead.FixReferences();
-            chestEffectSpine2.FixReferences();
-            chestEffectHandLeft.FixReferences();
-            chestEffectHandRight.FixReferences();
-            legsEffectKneeLeft.FixReferences();
-            legsEffectKneeRight.FixReferences();
-
-            helmetEffectHead.transform.parent = playerHead.transform;
-            helmetEffectHead.transform.localPosition = new Vector3(0f, 0.0025f, 0f);
-            helmetEffectHead.transform.localScale = new Vector3(1f, 1f, 1f);
-            helmetEffectHead.SetActive(false);
-
-            chestEffectSpine2.transform.parent = playerSpine2.transform;
-            chestEffectSpine2.transform.localPosition = new Vector3(0f, 0f, 0f);
-            chestEffectSpine2.transform.localScale = new Vector3(1f, 1f, 1f);
-            chestEffectSpine2.SetActive(false);
-
-            chestEffectHandLeft.transform.parent = playerHandLeft.transform;
-            chestEffectHandLeft.transform.localPosition = new Vector3(0f, 0f, 0f);
-            chestEffectHandLeft.transform.localScale = new Vector3(1f, 1f, 1f);
-            chestEffectHandLeft.SetActive(false);
-
-            chestEffectHandRight.transform.parent = playerHandRight.transform;
-            chestEffectHandRight.transform.localPosition = new Vector3(0f, 0f, 0f);
-            chestEffectHandRight.transform.localScale = new Vector3(1f, 1f, 1f);
-            chestEffectHandRight.SetActive(false);
-
-            legsEffectKneeLeft.transform.parent = playerKneeLeft.transform;
-            legsEffectKneeLeft.transform.localPosition = new Vector3(0f, 0f, 0f);
-            legsEffectKneeLeft.transform.localScale = new Vector3(1f, 1f, 1f);
-            legsEffectKneeLeft.SetActive(false);
-
-            legsEffectKneeRight.transform.parent = playerKneeRight.transform;
-            legsEffectKneeRight.transform.localPosition = new Vector3(0f, 0f, 0f);
-            legsEffectKneeRight.transform.localScale = new Vector3(1f, 1f, 1f);
-            legsEffectKneeRight.SetActive(false);
-
-            PrefabManager.OnVanillaPrefabsAvailable -= AddFrostWolfArmor;
+            ArmorEffectSetup.ApplyFrostWolf(prefabs);
         }
 
         private void AddDarkWizardArmor()
         {
+            PrefabManager.OnVanillaPrefabsAvailable -= AddDarkWizardArmor;
+
             ItemHelper.Create(prefabs.DarkWizardHelmetPrefab, PluginConfig.armor4Helmet);
             ItemHelper.Create(prefabs.DarkWizardCapePrefab, PluginConfig.armor4Cape);
             ItemHelper.Create(prefabs.DarkWizardChestPrefab, PluginConfig.armor4Chest);
@@ -344,23 +232,27 @@ namespace ModularMagic_Armors
             // chestEffectShoulderRight.transform.localRotation = TransformHelper.generateRotation(new Vector3(0f, 0f, 0f)); // 58, 130, 90
             chestEffectShoulderRight.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
             chestEffectShoulderRight.SetActive(false);
-
-            PrefabManager.OnVanillaPrefabsAvailable -= AddDarkWizardArmor;
         }
 
         private void AdjustEitrWeaveArmor()
         {
+            ItemManager.OnItemsRegistered -= AdjustEitrWeaveArmor;
+
             prefabs.EitrWeaveHelmetPrefab = PrefabManager.Instance.GetPrefab("HelmetMage");
             prefabs.EitrWeaveChestPrefab = PrefabManager.Instance.GetPrefab("ArmorMageChest");
             prefabs.EitrWeaveLegsPrefab = PrefabManager.Instance.GetPrefab("ArmorMageLegs");
 
-            itemSnapShots.EitrWeaveHelmetStats = UpdateHelper.TakeSnapShot(prefabs.EitrWeaveHelmetPrefab);
-            itemSnapShots.EitrWeaveChestStats = UpdateHelper.TakeSnapShot(prefabs.EitrWeaveChestPrefab);
-            itemSnapShots.EitrWeaveLegsStats = UpdateHelper.TakeSnapShot(prefabs.EitrWeaveLegsPrefab);
+            // Vanilla prefab edits persist for the whole session, so a snapshot must never be taken from an already adjusted prefab
+            if (itemSnapShots.EitrWeaveHelmetStats == null)
+            {
+                itemSnapShots.EitrWeaveHelmetStats = UpdateHelper.TakeSnapShot(prefabs.EitrWeaveHelmetPrefab);
+                itemSnapShots.EitrWeaveChestStats = UpdateHelper.TakeSnapShot(prefabs.EitrWeaveChestPrefab);
+                itemSnapShots.EitrWeaveLegsStats = UpdateHelper.TakeSnapShot(prefabs.EitrWeaveLegsPrefab);
 
-            itemSnapShots.EitrWeaveHelmetRecipe = RecipeHelper.TakeSnapShot(prefabs.EitrWeaveHelmetPrefab);
-            itemSnapShots.EitrWeaveChestRecipe = RecipeHelper.TakeSnapShot(prefabs.EitrWeaveChestPrefab);
-            itemSnapShots.EitrWeaveLegsRecipe = RecipeHelper.TakeSnapShot(prefabs.EitrWeaveLegsPrefab);
+                itemSnapShots.EitrWeaveHelmetRecipe = RecipeHelper.TakeSnapShot(prefabs.EitrWeaveHelmetPrefab);
+                itemSnapShots.EitrWeaveChestRecipe = RecipeHelper.TakeSnapShot(prefabs.EitrWeaveChestPrefab);
+                itemSnapShots.EitrWeaveLegsRecipe = RecipeHelper.TakeSnapShot(prefabs.EitrWeaveLegsPrefab);
+            }
 
             PluginConfig.InitArmor5Config(PluginConfig.adjustEitrWeave.Value);
 
@@ -377,19 +269,23 @@ namespace ModularMagic_Armors
             ItemHelper.Adjust(prefabs.EitrWeaveHelmetPrefab, PluginConfig.armor5Helmet, armorSetOptions);
             ItemHelper.Adjust(prefabs.EitrWeaveChestPrefab, PluginConfig.armor5Chest, armorSetOptions);
             ItemHelper.Adjust(prefabs.EitrWeaveLegsPrefab, PluginConfig.armor5Legs, armorSetOptions);
-
-            PrefabManager.OnVanillaPrefabsAvailable -= AdjustEitrWeaveArmor;
         }
 
         private void AdjustEmblaArmor()
         {
-            itemSnapShots.EmblaHelmetStats = UpdateHelper.TakeSnapShot(prefabs.EmblaHelmetPrefab);
-            itemSnapShots.EmblaChestStats = UpdateHelper.TakeSnapShot(prefabs.EmblaChestPrefab);
-            itemSnapShots.EmblaLegsStats = UpdateHelper.TakeSnapShot(prefabs.EmblaLegsPrefab);
+            ItemManager.OnItemsRegistered -= AdjustEmblaArmor;
 
-            itemSnapShots.EmblaHelmetRecipe = RecipeHelper.TakeSnapShot(prefabs.EmblaHelmetPrefab);
-            itemSnapShots.EmblaChestRecipe = RecipeHelper.TakeSnapShot(prefabs.EmblaChestPrefab);
-            itemSnapShots.EmblaLegsRecipe = RecipeHelper.TakeSnapShot(prefabs.EmblaLegsPrefab);
+            // Vanilla prefab edits persist for the whole session, so a snapshot must never be taken from an already adjusted prefab
+            if (itemSnapShots.EmblaHelmetStats == null)
+            {
+                itemSnapShots.EmblaHelmetStats = UpdateHelper.TakeSnapShot(prefabs.EmblaHelmetPrefab);
+                itemSnapShots.EmblaChestStats = UpdateHelper.TakeSnapShot(prefabs.EmblaChestPrefab);
+                itemSnapShots.EmblaLegsStats = UpdateHelper.TakeSnapShot(prefabs.EmblaLegsPrefab);
+
+                itemSnapShots.EmblaHelmetRecipe = RecipeHelper.TakeSnapShot(prefabs.EmblaHelmetPrefab);
+                itemSnapShots.EmblaChestRecipe = RecipeHelper.TakeSnapShot(prefabs.EmblaChestPrefab);
+                itemSnapShots.EmblaLegsRecipe = RecipeHelper.TakeSnapShot(prefabs.EmblaLegsPrefab);
+            }
 
             PluginConfig.InitArmor6Config(PluginConfig.adjustEmbla.Value);
 
@@ -406,12 +302,12 @@ namespace ModularMagic_Armors
             ItemHelper.Adjust(prefabs.EmblaHelmetPrefab, PluginConfig.armor6Helmet, armorSetOptions);
             ItemHelper.Adjust(prefabs.EmblaChestPrefab, PluginConfig.armor6Chest, armorSetOptions);
             ItemHelper.Adjust(prefabs.EmblaLegsPrefab, PluginConfig.armor6Legs, armorSetOptions);
-
-            ItemManager.OnItemsRegistered -= AdjustEmblaArmor;
         }
 
         private void ApplyEffectsEmblaArmor()
         {
+            PrefabManager.OnVanillaPrefabsAvailable -= ApplyEffectsEmblaArmor;
+
             prefabs.EmblaHelmetPrefab = PrefabManager.Instance.GetPrefab("HelmetMage_Ashlands");
             prefabs.EmblaChestPrefab = PrefabManager.Instance.GetPrefab("ArmorMageChest_Ashlands");
             prefabs.EmblaLegsPrefab = PrefabManager.Instance.GetPrefab("ArmorMageLegs_Ashlands");
@@ -487,12 +383,12 @@ namespace ModularMagic_Armors
             shoulderRightEffect.transform.parent = playerShoulderRight.transform;
             shoulderRightEffect.transform.localPosition = new Vector3(0.002f, 0f, -0.0001f);
             shoulderRightEffect.SetActive(false);
-
-            PrefabManager.OnVanillaPrefabsAvailable -= ApplyEffectsEmblaArmor;
         }
 
         private void InitHashes()
         {
+            ItemManager.OnItemsRegistered -= InitHashes;
+
             ShamanArmorSetHashCode = effects.ShamanArmorSetSE.name.GetStableHashCode();
             WraithArmorSetHashCode = effects.WraithArmorSetSE.name.GetStableHashCode();
             FrostWolfArmorSetHashCode = effects.FrostWolfArmorSetSE.name.GetStableHashCode();
@@ -506,8 +402,6 @@ namespace ModularMagic_Armors
             DarkWizardHelmetHashCode = PluginConfig.armor4Helmet.name.Value.GetStableHashCode();
             EmblaHelmetHashCode = PluginConfig.armor6Helmet.name.Value.GetStableHashCode();
             EmblaChestHashCode = PluginConfig.armor6Chest.name.Value.GetStableHashCode();
-
-            ItemManager.OnItemsRegistered -= InitHashes;
         }
 
         private void InitStatusEffects()
@@ -569,6 +463,8 @@ namespace ModularMagic_Armors
             prefabs.DarkWizardCapePrefab = assetBundle.LoadAsset<GameObject>("MMA_DarkWizardCape");
             prefabs.DarkWizardChestPrefab = assetBundle.LoadAsset<GameObject>("MMA_DarkWizardChest");
             prefabs.DarkWizardLegsPrefab = assetBundle.LoadAsset<GameObject>("MMA_DarkWizardLegs");
+            prefabs.DarkWizardFootstepPrefab = assetBundle.LoadAsset<GameObject>("DarkWizard_Footstep_MMA");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.DarkWizardFootstepPrefab, true));
             effects.DarkWizardArmorSetSE = assetBundle.LoadAsset<StatusEffect>("SetEffect_DarkWizardArmor_MMA");
 
             // Eitr-weave armor
