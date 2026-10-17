@@ -40,5 +40,19 @@ namespace ModularMagic_Armors.Harmony
                 Jotunn.Logger.LogError("Could not update Eitr in GetTotalFoodValue_Postfix: " + e);
             }
         }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Player), "OnSpawned")]
+        public static void OnSpawned_Postfix(Player __instance)
+        {
+            try
+            {
+                LanternHelper.RestoreState(__instance);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not restore lantern state in OnSpawned_Postfix: " + e);
+            }
+        }
     }
 }

@@ -3,7 +3,6 @@ using ModularMagic_Armors.Helpers;
 using ModularMagic_Armors.Models;
 using ModularMagic_Armors.StatusEffects;
 using ModularMagic_Armors.Types;
-using ModularMagic_Utilities.Types;
 
 namespace ModularMagic_Armors.Configs
 {

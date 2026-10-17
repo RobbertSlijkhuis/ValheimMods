@@ -17,12 +17,20 @@ namespace ModularMagic_Armors.Helpers
             itemConfig.Name = config.name.Value;
             itemConfig.Enabled = config.enable.Value;
             itemConfig.Description = config.description.Value;
-            itemConfig.CraftingStation = config.craftingStation.Value;
             itemConfig.MinStationLevel = config.minStationLevel.Value;
             RequirementConfig[] requirements = RecipeHelper.GetAsRequirementConfigArray(config.recipe.Value, config.recipeUpgrade.Value, config.recipeMultiplier.Value);
 
+            // Without a station Jotunn cannot resolve the recipe, and without requirements the item would be free to craft
+            if (config.craftingStation.Value == CraftingStationType.None || config.craftingStation.Value == CraftingStationType.Disabled)
+                itemConfig.Enabled = false;
+            else
+                itemConfig.CraftingStation = config.craftingStation.Value;
+
             if (requirements == null || requirements.Length == 0)
-                Jotunn.Logger.LogWarning($"Could not resolve recipe for: {prefab.name}");
+            {
+                Jotunn.Logger.LogWarning($"Could not resolve recipe for: {prefab.name}, recipe disabled");
+                itemConfig.Enabled = false;
+            }
             else
                 itemConfig.Requirements = requirements;
 

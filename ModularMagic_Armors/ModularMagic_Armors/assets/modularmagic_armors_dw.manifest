@@ -1,15 +1,16 @@
 ManifestFileVersion: 0
-CRC: 1762612726
+UnityVersion: 6000.0.75f1
+CRC: 1223214828
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: d13e63f7357ed3b63d39bba557a7da62
+    Hash: 06105637772aea88a514ebc572995cdf
   TypeTreeHash:
     serializedVersion: 2
-    Hash: b0fc23811960ef9ff4aeee22b0200805
+    Hash: 6a2e3aab6861d01bc900a9f14e751445
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: d13e63f7357ed3b63d39bba557a7da62
+    Hash: 8561d2755f6ed2554e0a014dbc53efa8
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -41,30 +42,32 @@ ClassTypes:
 - Class: 108
   Script: {instanceID: 0}
 - Class: 114
-  Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+  Script: {fileID: 692743832, guid: ab57a9538f4798ea3e3076baee09d1af, type: 3}
 - Class: 114
-  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 489050665, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 927819712, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+  Script: {fileID: 1932734688, guid: ab57a9538f4798ea3e3076baee09d1af, type: 3}
 - Class: 114
   Script: {fileID: -923427435, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
   Script: {fileID: 1345532120, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1307519463, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 489050665, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 115
   Script: {instanceID: 0}
 - Class: 137
-  Script: {instanceID: 0}
-- Class: 183
   Script: {instanceID: 0}
 - Class: 198
   Script: {instanceID: 0}
@@ -77,6 +80,104 @@ ClassTypes:
 - Class: 330
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers:
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.AABB
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.AngleConstraint/LimitSerializeData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.AngleConstraint/RestorationSerializeData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.CheckSliderSerializeData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.ClothInitSerializeData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.ClothSerializeData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.ClothSerializeData2
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.ColliderCollisionConstraint/SerializeData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.CullingSettings
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.CurveSerializeData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.CustomSkinningSettings
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.DistanceConstraint/ConstraintData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.DistanceConstraint/SerializeData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.ExBitFlag8
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.ExSimpleNativeArray`1/SerializationData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.InertiaConstraint/CenterData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.InertiaConstraint/ConstraintData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.InertiaConstraint/SerializeData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.MotionConstraint/SerializeData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.NormalAlignmentSettings
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.PreBuildSerializeData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.ReductionSettings
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.RenderSetupData/ShareSerializationData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.RenderSetupData/UniqueSerializationData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.RenderSetupSerializeData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.ResultCode
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.SelectionData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.SelfCollisionConstraint/SerializeData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.SharePreBuildData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.SpringConstraint/SerializeData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.TetherConstraint/SerializeData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.TransformData/ShareSerializationData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.TransformData/UniqueSerializationData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.TransformRecordSerializeData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.TriangleBendingConstraint/ConstraintData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.TriangleBendingConstraint/SerializeData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.UniquePreBuildData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.VertexAttribute
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.VirtualMesh/ShareSerializationData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.VirtualMesh/UniqueSerializationData
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.VirtualMeshBoneWeight
+- AssemblyName: MagicaClothV2
+  ClassName: MagicaCloth2.WindSettings
+- AssemblyName: Unity.Mathematics
+  ClassName: Unity.Mathematics.float2
+- AssemblyName: Unity.Mathematics
+  ClassName: Unity.Mathematics.float3
+- AssemblyName: Unity.Mathematics
+  ClassName: Unity.Mathematics.float4
+- AssemblyName: Unity.Mathematics
+  ClassName: Unity.Mathematics.float4x4
+- AssemblyName: Unity.Mathematics
+  ClassName: Unity.Mathematics.int2
+- AssemblyName: Unity.Mathematics
+  ClassName: Unity.Mathematics.int3
+- AssemblyName: Unity.Mathematics
+  ClassName: Unity.Mathematics.quaternion
 - AssemblyName: assembly_valheim
   ClassName: Attack
 - AssemblyName: assembly_valheim
@@ -94,7 +195,6 @@ SerializeReferenceClassIdentifiers:
 Assets:
 - Assets/Custom/PrefabInstance/Armor/Shaman/MMA_ShamanChest.prefab
 - Assets/Custom/PrefabInstance/Armor/FrostWolf/MMA_FrostWolfChest.prefab
-- Assets/Custom/PrefabInstance/Armor/DarkWizard/MMA_DarkWizardCape.prefab
 - Assets/Custom/Material/Lanterns/EverwinterLanternMat_MMA.mat
 - Assets/Custom/PrefabInstance/Lantern/MMA_LanternMistcaller.prefab
 - Assets/Custom/MonoBehaviour/Armor/SetEffect_EitrWeaveArmor_MMA.asset
@@ -106,15 +206,15 @@ Assets:
 - Assets/Custom/Material/Lanterns/MythicalLanternMat_Off_MMA.mat
 - Assets/Custom/MonoBehaviour/Armor/SetEffect_DarkWizardArmor_MMA.asset
 - Assets/Custom/PrefabInstance/Armor/Wraith/MMA_WraithLegs.prefab
+- Assets/Custom/PrefabInstance/Armor/DarkWizard/MMA_DarkWizardCape.prefab
 - Assets/Custom/PrefabInstance/Armor/FrostWolf/MMA_FrostWolfCape.prefab
-- Assets/Custom/PrefabInstance/Armor/Wraith/MMA_WraithCape.prefab
 - Assets/Custom/PrefabInstance/Lantern/MMA_LanternMythical.prefab
 - Assets/Custom/PrefabInstance/Armor/DarkWizard/DarkWizard_Footstep_MMA.prefab
 - Assets/Custom/PrefabInstance/Armor/Wraith/MMA_WraithHelmet.prefab
 - Assets/Custom/Material/Lanterns/MistcallerLanternMat_Off_MMA.mat
+- Assets/Custom/PrefabInstance/Armor/Wraith/MMA_WraithCape.prefab
 - Assets/Custom/PrefabInstance/Armor/Wraith/Wraith_armor_set_effect_MMA.prefab
 - Assets/Custom/PrefabInstance/Armor/Shaman/Shaman_armor_set_effect_MMA.prefab
-- Assets/Custom/PrefabInstance/Armor/Shaman/MMA_ShamanCape.prefab
 - Assets/Custom/Sprite/Armor/Embla/EmblaLegs_MMA.png
 - Assets/Custom/PrefabInstance/Armor/DarkWizard/MMA_DarkWizardLegs.prefab
 - Assets/Custom/Sprite/Armor/Embla/EmblaHelmet_MMA.png
@@ -128,6 +228,7 @@ Assets:
 - Assets/Custom/Material/Armor/DarkWizard/DarkWizardEye_MMA.mat
 - Assets/Custom/PrefabInstance/Armor/FrostWolf/FrostWolf_armor_set_effect_MMA.prefab
 - Assets/Custom/Material/Armor/Embla/AshlandsMageArmorLegs_red_MMA.mat
+- Assets/Custom/PrefabInstance/Armor/Shaman/MMA_ShamanCape.prefab
 - Assets/Custom/PrefabInstance/Books/MMA_SpellbookOfTheHearth.prefab
 - Assets/Custom/PrefabInstance/Armor/Embla/EmblaHood_Effects_MMA.prefab
 - Assets/Custom/MonoBehaviour/Armor/SetEffect_WraithArmor_MMA.asset

@@ -52,8 +52,12 @@ namespace ModularMagic_Armors
             ArmorSetHelper.Init();
             InitStatusEffects();
             PluginConfig.Init();
+            InitInputs();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
+            PrefabManager.OnVanillaPrefabsAvailable += AddSpellbooks;
+            PrefabManager.OnVanillaPrefabsAvailable += AddLanterns;
+            PrefabManager.OnVanillaPrefabsAvailable += AddItemStandSupport;
             PrefabManager.OnVanillaPrefabsAvailable += AddShamanArmor;
             PrefabManager.OnVanillaPrefabsAvailable += AddWraithArmor;
             PrefabManager.OnVanillaPrefabsAvailable += AddFrostWolfArmor;
@@ -62,6 +66,19 @@ namespace ModularMagic_Armors
             ItemManager.OnItemsRegistered += AdjustEitrWeaveArmor;
             ItemManager.OnItemsRegistered += AdjustEmblaArmor;
             // ItemManager.OnItemsRegistered += LogRecipes;
+        }
+
+        // Polled here and not in a Player.Update patch: Jotunn buttons are read from the plugin's own Update
+        private void Update()
+        {
+            try
+            {
+                LanternHelper.HandleToggleInput(Player.m_localPlayer);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not handle lantern input: " + e);
+            }
         }
 
         public void RefreshConfigManager()
@@ -126,6 +143,44 @@ namespace ModularMagic_Armors
             ItemHelper.Create(prefabs.DarkWizardLegsPrefab, PluginConfig.armor4Legs);
 
             ArmorEffectSetup.ApplyDarkWizard(prefabs);
+        }
+
+        private void AddSpellbooks()
+        {
+            PrefabManager.OnVanillaPrefabsAvailable -= AddSpellbooks;
+
+            ItemHelper.Create(prefabs.SpellbookHearthPrefab, PluginConfig.spellbook1);
+            ItemHelper.Create(prefabs.SpellbookStormPrefab, PluginConfig.spellbook2);
+            ItemHelper.Create(prefabs.SpellbookCodexPrefab, PluginConfig.spellbook3);
+        }
+
+        private void AddLanterns()
+        {
+            PrefabManager.OnVanillaPrefabsAvailable -= AddLanterns;
+
+            ItemHelper.Create(prefabs.LanternMythicalPrefab, PluginConfig.lantern1);
+            ItemHelper.Create(prefabs.LanternEverwinterPrefab, PluginConfig.lantern2);
+            ItemHelper.Create(prefabs.LanternMistcallerPrefab, PluginConfig.lantern3);
+
+            // Only the Mistcaller lantern keeps the demister
+            LanternHelper.Register(prefabs.LanternMythicalPrefab, materials.LanternMythicalOn, materials.LanternMythicalOff, false);
+            LanternHelper.Register(prefabs.LanternEverwinterPrefab, materials.LanternEverwinterOn, materials.LanternEverwinterOff, false);
+            LanternHelper.Register(prefabs.LanternMistcallerPrefab, materials.LanternMistcallerOn, materials.LanternMistcallerOff, true);
+        }
+
+        private void AddItemStandSupport()
+        {
+            PrefabManager.OnVanillaPrefabsAvailable -= AddItemStandSupport;
+
+            ItemStandHelper.AddSupportedItems(new[] { "itemstand", "itemstandh" }, new[]
+            {
+                prefabs.SpellbookHearthPrefab,
+                prefabs.SpellbookStormPrefab,
+                prefabs.SpellbookCodexPrefab,
+                prefabs.LanternMythicalPrefab,
+                prefabs.LanternEverwinterPrefab,
+                prefabs.LanternMistcallerPrefab,
+            });
         }
 
         private void AdjustEitrWeaveArmor()
@@ -282,6 +337,34 @@ namespace ModularMagic_Armors
             prefabs.EmblaEffects = assetBundle.LoadAsset<GameObject>("EmblaHood_Effects_MMA");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.EmblaEffects, true));
             effects.EmblaArmorSetSE = assetBundle.LoadAsset<StatusEffect>("SetEffect_EmblaArmor_MMA");
+
+            // Spell books
+            prefabs.SpellbookHearthPrefab = assetBundle.LoadAsset<GameObject>("MMA_SpellbookOfTheHearth");
+            prefabs.SpellbookStormPrefab = assetBundle.LoadAsset<GameObject>("MMA_SpellbookGrimoireOfTheStorm");
+            prefabs.SpellbookCodexPrefab = assetBundle.LoadAsset<GameObject>("MMA_SpellbookCodexOfTheAsgardianSorcerer");
+
+            // Lanterns
+            prefabs.LanternMythicalPrefab = assetBundle.LoadAsset<GameObject>("MMA_LanternMythical");
+            prefabs.LanternEverwinterPrefab = assetBundle.LoadAsset<GameObject>("MMA_LanternEverWinter");
+            prefabs.LanternMistcallerPrefab = assetBundle.LoadAsset<GameObject>("MMA_LanternMistcaller");
+            materials.LanternMythicalOn = assetBundle.LoadAsset<Material>("MythicalLanternMat_MMA");
+            materials.LanternMythicalOff = assetBundle.LoadAsset<Material>("MythicalLanternMat_Off_MMA");
+            materials.LanternEverwinterOn = assetBundle.LoadAsset<Material>("EverwinterLanternMat_MMA");
+            materials.LanternEverwinterOff = assetBundle.LoadAsset<Material>("EverwinterLanternMat_Off_MMA");
+            materials.LanternMistcallerOn = assetBundle.LoadAsset<Material>("MistcallerLanternMat_MMA");
+            materials.LanternMistcallerOff = assetBundle.LoadAsset<Material>("MistcallerLanternMat_Off_MMA");
+        }
+
+        private void InitInputs()
+        {
+            try
+            {
+                LanternHelper.InitInput(PluginConfig.lanternKey);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not initialise inputs: " + e);
+            }
         }
     }
 }

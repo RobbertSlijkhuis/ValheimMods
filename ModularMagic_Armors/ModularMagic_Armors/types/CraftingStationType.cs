@@ -1,4 +1,4 @@
-﻿namespace ModularMagic_Utilities.Types
+﻿namespace ModularMagic_Armors.Types
 {
     internal class CraftingStationType
     {
