@@ -6,7 +6,8 @@ namespace ModularMagic_Armors.Helpers
 {
     /**
      * Answers "does this player wear the full set" for every client.
-     * Status effects are not replicated to other players, but the worn item hashes are: VisEquipment reads them from the ZDO of every player.
+     * Status effects are not replicated to other players, but the worn item hashes are: VisEquipment reads them from the ZDO of every player
+     * (and from its own stored hashes when there is no ZDO, as in the main-menu preview).
      * Pieces are identified by the hash of their prefab name, the same hash vanilla writes (m_dropPrefab.name).
      */
     internal class ArmorSetHelper
@@ -20,7 +21,6 @@ namespace ModularMagic_Armors.Helpers
         }
 
         private static readonly Dictionary<ArmorSetId, SetPieces> sets = new Dictionary<ArmorSetId, SetPieces>();
-        private static int diagnosticsLeft = 3;
 
         public static void Init()
         {
@@ -34,16 +34,37 @@ namespace ModularMagic_Armors.Helpers
             Register(ArmorSetId.DarkWizard, prefabs.DarkWizardHelmetPrefab, prefabs.DarkWizardCapePrefab, prefabs.DarkWizardChestPrefab, prefabs.DarkWizardLegsPrefab);
         }
 
+        /**
+         * Reads the worn pieces from the same place VisEquipment does: the ZDO, and its own stored hashes when there is no ZDO.
+         * The second case is the player preview in the main menu, where the set effects are shown too.
+         */
         public static bool IsSetWorn(ArmorSetId set, VisEquipment visEquipment)
         {
-            if (visEquipment == null)
+            if (visEquipment == null || !sets.TryGetValue(set, out SetPieces pieces))
                 return false;
 
-            return IsSetWorn(set, visEquipment.m_nview);
+            ZNetView netView = visEquipment.m_nview;
+            ZDO zdo = netView != null ? netView.GetZDO() : null;
+
+            if (zdo != null)
+            {
+                // Helmet first, it is the cheapest way to bail out for players not wearing the set (this runs every frame per player)
+                if (zdo.GetInt(ZDOVars.s_helmetItem) != pieces.helmet)
+                    return false;
+
+                return zdo.GetInt(ZDOVars.s_chestItem) == pieces.chest
+                    && zdo.GetInt(ZDOVars.s_legItem) == pieces.legs
+                    && zdo.GetInt(ZDOVars.s_shoulderItem) == pieces.shoulder;
+            }
+
+            return visEquipment.m_helmetItem == pieces.helmet
+                && visEquipment.m_chestItem == pieces.chest
+                && visEquipment.m_legItem == pieces.legs
+                && visEquipment.m_shoulderItem == pieces.shoulder;
         }
 
         /**
-         * False when there is no valid ZNetView/ZDO, which is the case for the player preview in the main menu.
+         * False when there is no valid ZNetView/ZDO. Used where only the network object is available (footsteps).
          */
         public static bool IsSetWorn(ArmorSetId set, ZNetView netView)
         {
@@ -55,29 +76,12 @@ namespace ModularMagic_Armors.Helpers
             // Helmet first, it is the cheapest way to bail out for players not wearing the set (this runs every frame per player)
             int helmet = zdo.GetInt(ZDOVars.s_helmetItem);
 
-            if (diagnosticsLeft > 0 && helmet != 0)
-            {
-                diagnosticsLeft--;
-                Jotunn.Logger.LogWarning($"[ArmorSet] ZDO helmet hash {helmet}, {set} helmet hash {pieces.helmet}");
-            }
-
             if (helmet != pieces.helmet)
                 return false;
 
             return zdo.GetInt(ZDOVars.s_chestItem) == pieces.chest
                 && zdo.GetInt(ZDOVars.s_legItem) == pieces.legs
                 && zdo.GetInt(ZDOVars.s_shoulderItem) == pieces.shoulder;
-        }
-
-        // Temporary diagnostic
-        public static string Describe(ArmorSetId set, VisEquipment visEquipment)
-        {
-            if (visEquipment == null || visEquipment.m_nview == null || !visEquipment.m_nview.IsValid() || !sets.TryGetValue(set, out SetPieces pieces))
-                return "no valid ZDO";
-
-            ZDO zdo = visEquipment.m_nview.GetZDO();
-
-            return $"worn helmet/shoulder/chest/legs = {zdo.GetInt(ZDOVars.s_helmetItem)}/{zdo.GetInt(ZDOVars.s_shoulderItem)}/{zdo.GetInt(ZDOVars.s_chestItem)}/{zdo.GetInt(ZDOVars.s_legItem)}, expected {pieces.helmet}/{pieces.shoulder}/{pieces.chest}/{pieces.legs}";
         }
 
         private static void Register(ArmorSetId set, GameObject helmet, GameObject shoulder, GameObject chest, GameObject legs)
@@ -89,8 +93,6 @@ namespace ModularMagic_Armors.Helpers
                 chest = chest.name.GetStableHashCode(),
                 legs = legs.name.GetStableHashCode(),
             };
-
-            Jotunn.Logger.LogWarning($"[ArmorSet] Registered {set}: {helmet.name} {sets[set].helmet}, {shoulder.name} {sets[set].shoulder}, {chest.name} {sets[set].chest}, {legs.name} {sets[set].legs}");
         }
     }
 }

@@ -128,7 +128,6 @@ namespace ModularMagic_Armors.Configs
         public static string generalSectionname = "General";
         public static ConfigEntry<bool> adjustEitrWeave;
         public static ConfigEntry<bool> adjustEmbla;
-        public static ConfigEntry<bool> reskinEmbla;
         public static ConfigEntry<bool> darkWizardFootsteps;
 
         public static void Init()
@@ -175,7 +174,7 @@ namespace ModularMagic_Armors.Configs
                 };
 
                 adjustEmbla = ModularMagic_Armors.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Adjust Embla set"), true,
-                  new ConfigDescription("Adjust the Embla set to be in line with the rest. Will apply the set bonus effect and config settings. If disabled the set will be as vanilla (requires restart)", null,
+                  new ConfigDescription("Adjust the Embla set to be in line with the rest. Will apply the set bonus effect and config settings, retexture the set to be red with dark gray ash (because the FrostWolf set uses the same models) and add flame effects. If disabled the set will be as vanilla. The retexture and the flame effects require a restart.", null,
                   new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 2 }));
                 adjustEmbla.SettingChanged += (obj, attr) =>
                 {
@@ -202,13 +201,6 @@ namespace ModularMagic_Armors.Configs
                     armor6Helmet.ShowConfig(adjustEmbla.Value);
                     armor6Chest.ShowConfig(adjustEmbla.Value);
                     armor6Legs.ShowConfig(adjustEmbla.Value, true);
-                };
-
-                reskinEmbla = ModularMagic_Armors.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Retexture Embla set"), true,
-                  new ConfigDescription("Due to the FrostWolf set using the same models this mod retextures the Embla set to be red with dark gray ash. If disabled the set will look as vanilla (requires restart)", null,
-                  new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 1 }));
-                reskinEmbla.SettingChanged += (obj, attr) =>
-                {
                 };
 
                 darkWizardFootsteps = ModularMagic_Armors.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "DarkWizard footstep flames"), true,

@@ -30,29 +30,11 @@ namespace ModularMagic_Armors
         public object configManager;
 
         private AssetBundle assetBundle;
-        public PathHelper pathHelper;
         public ItemSnapShots itemSnapShots = new ItemSnapShots();
         public CustomPrefabs prefabs = new CustomPrefabs();
         public CustomMaterials materials = new CustomMaterials();
         public CustomStatusEffects effects = new CustomStatusEffects();
         public CustomSprites sprites = new CustomSprites();
-
-        public bool gameIsReady = false;
-
-        public static readonly int armorStatusHashCode = "ArmorStatus_MMA".GetStableHashCode();
-        public static int ShamanArmorSetHashCode;
-        public static int WraithArmorSetHashCode;
-        public static int FrostWolfArmorSetHashCode;
-        public static int DarkWizardArmorSetHashCode;
-        public static int EitrWeaveArmorSetHashCode;
-        public static int EmblaArmorSetHashCode;
-
-        public static int WraithHelmetHashCode;
-        public static int WraithChestHashCode;
-        public static int WraithLegsHashCode;
-        public static int DarkWizardHelmetHashCode;
-        public static int EmblaHelmetHashCode;
-        public static int EmblaChestHashCode;
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -61,7 +43,6 @@ namespace ModularMagic_Armors
         private void Awake()
         {
             Instance = this;
-            pathHelper = new PathHelper();
 
             Assembly? bepinexConfigManager = System.AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == "ConfigurationManager");
             Type? configManagerType = bepinexConfigManager?.GetType("ConfigurationManager.ConfigurationManager");
@@ -80,7 +61,6 @@ namespace ModularMagic_Armors
             PrefabManager.OnVanillaPrefabsAvailable += ApplyEffectsEmblaArmor;
             ItemManager.OnItemsRegistered += AdjustEitrWeaveArmor;
             ItemManager.OnItemsRegistered += AdjustEmblaArmor;
-            ItemManager.OnItemsRegistered += InitHashes;
             // ItemManager.OnItemsRegistered += LogRecipes;
         }
 
@@ -226,96 +206,12 @@ namespace ModularMagic_Armors
             prefabs.EmblaChestPrefab = PrefabManager.Instance.GetPrefab("ArmorMageChest_Ashlands");
             prefabs.EmblaLegsPrefab = PrefabManager.Instance.GetPrefab("ArmorMageLegs_Ashlands");
 
-            if (!PluginConfig.reskinEmbla.Value)
+            // One option for the stats, the retexture and the effects of the set. Retexture and effects need a restart, the stats follow the setting live
+            if (!PluginConfig.adjustEmbla.Value)
                 return;
 
-            materials.EmblaArmor.FixReferences();
-            materials.EmblaChest.FixReferences();
-            materials.EmblaLegs.FixReferences();
-
-            List<Material> armorMaterials = new List<Material>();
-            armorMaterials.Add(materials.EmblaArmor);
-
-            ItemDrop helmetItemDrop = prefabs.EmblaHelmetPrefab.GetComponent<ItemDrop>();
-            ItemDrop chestItemDrop = prefabs.EmblaChestPrefab.GetComponent<ItemDrop>();
-            ItemDrop legsItemDrop = prefabs.EmblaLegsPrefab.GetComponent<ItemDrop>();
-
-            Transform helmet = prefabs.EmblaHelmetPrefab.transform.Find("attach_skin/AshlandsHood");
-            Transform helmetFlat = prefabs.EmblaHelmetPrefab.transform.Find("hood");
-            Transform chest = prefabs.EmblaChestPrefab.transform.Find("attach_skin/AshlandsMageChest");
-            Transform chestFlat = prefabs.EmblaChestPrefab.transform.Find("model");
-            Transform legs = prefabs.EmblaLegsPrefab.transform.Find("attach_skin/AshlandsMageLegs");
-            Transform legsFlat = prefabs.EmblaLegsPrefab.transform.Find("log");
-
-            SkinnedMeshRenderer helmetMesh = helmet.gameObject.GetComponent<SkinnedMeshRenderer>();
-            MeshRenderer helmetFlatMesh = helmetFlat.gameObject.GetComponent<MeshRenderer>();
-            SkinnedMeshRenderer chestMesh = chest.gameObject.GetComponent<SkinnedMeshRenderer>();
-            MeshRenderer chestFlatMesh = chestFlat.gameObject.GetComponent<MeshRenderer>();
-            SkinnedMeshRenderer legsMesh = legs.gameObject.GetComponent<SkinnedMeshRenderer>();
-            MeshRenderer legsFlatMesh = legsFlat.gameObject.GetComponent<MeshRenderer>();
-
-            List<Sprite> helmetSpriteList = new List<Sprite>();
-            helmetSpriteList.Add(sprites.EmblaHood);
-            helmetItemDrop.m_itemData.m_shared.m_icons = helmetSpriteList.ToArray();
-            helmetMesh.materials = armorMaterials.ToArray();
-            helmetFlatMesh.materials = armorMaterials.ToArray();
-
-            List<Sprite> chestSpriteList = new List<Sprite>();
-            chestSpriteList.Add(sprites.EmblaChest);
-            chestItemDrop.m_itemData.m_shared.m_icons = chestSpriteList.ToArray();
-            chestItemDrop.m_itemData.m_shared.m_armorMaterial = materials.EmblaChest;
-            chestMesh.materials = armorMaterials.ToArray();
-            chestFlatMesh.materials = armorMaterials.ToArray();
-
-            List<Sprite> legsSpriteList = new List<Sprite>();
-            legsSpriteList.Add(sprites.EmblaLegs);
-            legsItemDrop.m_itemData.m_shared.m_icons = legsSpriteList.ToArray();
-            legsItemDrop.m_itemData.m_shared.m_armorMaterial = materials.EmblaLegs;
-            legsMesh.materials = armorMaterials.ToArray();
-            legsFlatMesh.materials = armorMaterials.ToArray();
-
-            GameObject player = PrefabManager.Instance.GetPrefab("Player");
-            GameObject playerHelmetAttach = player.transform.Find(pathHelper.helmetAttachPath).gameObject;
-            GameObject playerShoulderLeft = player.transform.Find(pathHelper.shoulderLeftPath).gameObject;
-            GameObject playerShoulderRight = player.transform.Find(pathHelper.shoulderRightPath).gameObject;
-
-            GameObject shoulderLeftEffect = PrefabManager.Instance.CreateClonedPrefab(pathHelper.EmblaShoulderLeftEffectPath, prefabs.EmblaEffects.name);
-            GameObject shoulderRightEffect = PrefabManager.Instance.CreateClonedPrefab(pathHelper.EmblaShoulderRightEffectPath, prefabs.EmblaEffects.name);
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(shoulderLeftEffect, true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(shoulderRightEffect, true));
-            Transform flare = prefabs.EmblaEffects.transform.Find("equiped/flare");
-
-            flare.gameObject.SetActive(true);
-            prefabs.EmblaEffects.transform.parent = playerHelmetAttach.transform;
-            prefabs.EmblaEffects.transform.localPosition = new Vector3(0f, -0.1f, -0.15f);
-            prefabs.EmblaEffects.SetActive(false);
-
-            shoulderLeftEffect.transform.parent = playerShoulderLeft.transform;
-            shoulderLeftEffect.transform.localPosition = new Vector3(-0.002f, 0f, -0.0001f);
-            shoulderLeftEffect.SetActive(false);
-
-            shoulderRightEffect.transform.parent = playerShoulderRight.transform;
-            shoulderRightEffect.transform.localPosition = new Vector3(0.002f, 0f, -0.0001f);
-            shoulderRightEffect.SetActive(false);
-        }
-
-        private void InitHashes()
-        {
-            ItemManager.OnItemsRegistered -= InitHashes;
-
-            ShamanArmorSetHashCode = effects.ShamanArmorSetSE.name.GetStableHashCode();
-            WraithArmorSetHashCode = effects.WraithArmorSetSE.name.GetStableHashCode();
-            FrostWolfArmorSetHashCode = effects.FrostWolfArmorSetSE.name.GetStableHashCode();
-            DarkWizardArmorSetHashCode = effects.DarkWizardArmorSetSE.name.GetStableHashCode();
-            EitrWeaveArmorSetHashCode = effects.EitrWeaveArmorSetSE.name.GetStableHashCode();
-            EmblaArmorSetHashCode = effects.EmblaArmorSetSE.name.GetStableHashCode();
-
-            WraithHelmetHashCode = PluginConfig.armor2Helmet.name.Value.GetStableHashCode();
-            WraithChestHashCode = PluginConfig.armor2Chest.name.Value.GetStableHashCode();
-            WraithLegsHashCode = PluginConfig.armor2Legs.name.Value.GetStableHashCode();
-            DarkWizardHelmetHashCode = PluginConfig.armor4Helmet.name.Value.GetStableHashCode();
-            EmblaHelmetHashCode = PluginConfig.armor6Helmet.name.Value.GetStableHashCode();
-            EmblaChestHashCode = PluginConfig.armor6Chest.name.Value.GetStableHashCode();
+            EmblaHelper.ApplyReskin(prefabs, materials, sprites);
+            EmblaHelper.InjectEffects(prefabs);
         }
 
         private void InitStatusEffects()
@@ -342,8 +238,6 @@ namespace ModularMagic_Armors
             sprites.EmblaLegs = assetBundle.LoadAsset<Sprite>("EmblaLegs_MMA");
 
             // Materials
-            materials.WraithArmorEye = assetBundle.LoadAsset<Material>("WraithEye_MMA");
-            materials.DarkWizardArmorEye = assetBundle.LoadAsset<Material>("DarkWizardEye_MMA");
             materials.EmblaArmor = assetBundle.LoadAsset<Material>("AshlandsMageArmor_red_MMA");
             materials.EmblaChest = assetBundle.LoadAsset<Material>("AshlandsMageArmorChest_red_MMA");
             materials.EmblaLegs = assetBundle.LoadAsset<Material>("AshlandsMageArmorLegs_red_MMA");

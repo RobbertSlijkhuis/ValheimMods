@@ -18,8 +18,6 @@ namespace ModularMagic_Armors.Components
     {
         private const float GateInterval = 0.25f;
 
-        private static bool helmetJointLogged = false;
-
         private class AttachedEffect
         {
             public Transform target;
@@ -40,8 +38,6 @@ namespace ModularMagic_Armors.Components
                 // Not worn by anyone (e.g. the item prefab itself), nothing to attach to
                 if (visEquipment == null)
                     return;
-
-                LogHelmetJoint();
 
                 Transform visualRoot = visEquipment.m_visual != null ? visEquipment.m_visual.transform : visEquipment.transform;
 
@@ -64,15 +60,8 @@ namespace ModularMagic_Armors.Components
 
                     attached.Add(new AttachedEffect() { target = child, effect = effect, moved = moved });
 
-                    bool active = IsActive(effect);
-                    child.gameObject.SetActive(active);
-
-                    // Temporary diagnostic
-                    Jotunn.Logger.LogWarning($"[ArmorEffectAttach] {name}: '{child.name}' bone '{effect.bone}' parent '{(child.parent != null ? child.parent.name : "none")}' active {active} (gate {effect.gateSet}, {ArmorSetHelper.Describe(effect.gateSet, visEquipment)})");
+                    child.gameObject.SetActive(IsActive(effect));
                 }
-
-                // Temporary diagnostic
-                Jotunn.Logger.LogWarning($"[ArmorEffectAttach] Start on '{name}': {attached.Count} effects attached");
 
                 if (hasGates)
                     InvokeRepeating(nameof(UpdateGates), GateInterval, GateInterval);
@@ -110,13 +99,8 @@ namespace ModularMagic_Armors.Components
 
             target.SetParent(bone, false);
             target.localPosition = effect.position;
+            target.localRotation = Quaternion.Euler(euler);
             target.localScale = effect.scale;
-
-            // From the wearer: the rotation is set in the world, relative to the player, so the tilt of the bone does not matter. The effect then follows the bone
-            if (effect.eulerFromWearer)
-                target.rotation = visEquipment.transform.rotation * Quaternion.Euler(euler);
-            else
-                target.localRotation = Quaternion.Euler(euler);
 
             return true;
         }
@@ -134,10 +118,7 @@ namespace ModularMagic_Armors.Components
                 bool active = IsActive(item.effect);
 
                 if (item.target.gameObject.activeSelf != active)
-                {
                     item.target.gameObject.SetActive(active);
-                    Jotunn.Logger.LogWarning($"[ArmorEffectAttach] {name}: '{item.target.name}' active {active} ({ArmorSetHelper.Describe(item.effect.gateSet, visEquipment)})");
-                }
             }
         }
 
@@ -147,16 +128,6 @@ namespace ModularMagic_Armors.Components
                 return true;
 
             return ArmorSetHelper.IsSetWorn(effect.gateSet, visEquipment);
-        }
-
-        // Temporary diagnostic: is m_helmet the Helmet_attach bone?
-        private void LogHelmetJoint()
-        {
-            if (helmetJointLogged)
-                return;
-
-            helmetJointLogged = true;
-            Jotunn.Logger.LogWarning($"[ArmorEffectAttach] VisEquipment.m_helmet = {(visEquipment.m_helmet != null ? visEquipment.m_helmet.name : "null")}");
         }
     }
 }

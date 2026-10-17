@@ -23,14 +23,12 @@ namespace ModularMagic_Armors.Helpers
             public readonly Vector3 position;
             public readonly Vector3? euler;
             public readonly Vector3 scale;
-            public readonly bool eulerFromWearer;
             public ArmorSetId gateSet;
 
             // bone = "" keeps the effect where it is and only switches it on/off (e.g. a child of another effect)
             // euler = null keeps the rotation the effect has in the prefab
             // gateSet = None is on as long as the piece is worn, otherwise only while the full set is worn
-            // eulerFromWearer = the euler is seen from the character and not from the bone, which can be tilted (-90 on X points up for a standing character)
-            public Effect(string name, string bone, Vector3 position, Vector3? euler, Vector3 scale, ArmorSetId gateSet = ArmorSetId.None, bool eulerFromWearer = false)
+            public Effect(string name, string bone, Vector3 position, Vector3? euler, Vector3 scale, ArmorSetId gateSet = ArmorSetId.None)
             {
                 this.name = name;
                 this.bone = bone;
@@ -38,7 +36,6 @@ namespace ModularMagic_Armors.Helpers
                 this.euler = euler;
                 this.scale = scale;
                 this.gateSet = gateSet;
-                this.eulerFromWearer = eulerFromWearer;
             }
         }
 
@@ -121,6 +118,21 @@ namespace ModularMagic_Armors.Helpers
                 new Effect("MMA_darkwizard_shoulder_right_effect", "RightArm", new Vector3(0f, 0f, -0.0001f), new Vector3(58f, 220f, 0f), new Vector3(0.5f, 0.5f, 0.5f)));
         }
 
+        // The effects themselves are added by EmblaHelper, they are per piece (no set gate).
+        // The old code kept the authored size (scale 1) in the world: the hood bone (Helmet_attach) does not scale, the shoulder bones scale by 100, so the shoulders get 1 / 100
+        public static void ApplyEmbla(CustomPrefabs prefabs)
+        {
+            Attach(prefabs.EmblaHelmetPrefab, ArmorSetId.None,
+                new Effect(EmblaHelper.HoodEffectName, "Helmet_attach", new Vector3(0f, -0.1f, -0.15f), Vector3.zero, Vector3.one));
+
+            Vector3 shoulderScale = new Vector3(0.01f, 0.01f, 0.01f);
+
+            Attach(prefabs.EmblaChestPrefab, ArmorSetId.None,
+                new Effect(EmblaHelper.ShoulderLeftEffectName, "LeftArm", new Vector3(0f, -0.002f, -0.002f), Vector3.zero, shoulderScale),
+                new Effect(EmblaHelper.ShoulderRightEffectName, "RightArm", new Vector3(0f, -0.002f, -0.002f), Vector3.zero, shoulderScale),
+                new Effect(EmblaHelper.SpineEffectName, "Spine", new Vector3(0f, 0f, -0.0015f), Vector3.zero, shoulderScale));
+        }
+
         // Same eyes on the Wraith and the DarkWizard helmet, only the material (set in Unity) differs
         private static Effect CreateEye(string name, Vector3 position, Vector3 euler)
         {
@@ -172,8 +184,6 @@ namespace ModularMagic_Armors.Helpers
 
             AddComponentOnce<ArmorEffectAttach>(attach);
 
-            int found = 0;
-
             foreach (Effect effect in effects)
             {
                 Transform target = TransformHelper.FindChildDepthFirst(attach, effect.name);
@@ -191,11 +201,7 @@ namespace ModularMagic_Armors.Helpers
                     effect.gateSet = defaultGate;
 
                 effectsByName[effect.name] = effect;
-                found++;
             }
-
-            // Temporary diagnostic
-            Jotunn.Logger.LogWarning($"[ArmorEffectSetup] '{itemPrefab.name}': {found} of {effects.Length} effects found under '{attach.name}'");
         }
     }
 }

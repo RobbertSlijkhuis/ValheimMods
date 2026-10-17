@@ -1,19 +1,12 @@
-﻿using Jotunn.Managers;
-using ModularMagic_Armors.Configs;
-using ModularMagic_Armors.Models;
-using PlayFab.ClientModels;
+﻿using ModularMagic_Armors.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting;
 using UnityEngine;
 
 namespace ModularMagic_Armors.Helpers
 {
     internal class UpdateHelper
     {
-        public static readonly PathHelper pathHelper = new PathHelper();
-
         public static void UpdateItemDropStats(GameObject prefab, UpdateItemDropStatsOptions options)
         {
             try
@@ -45,35 +38,6 @@ namespace ModularMagic_Armors.Helpers
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not update ItemDrop stats: " + e);
-            }
-        }
-
-        public static void UpdateItemEffects(long playerId, List<int> items)
-        {
-            try
-            {
-                Player player = Player.GetPlayer(playerId);
-
-                if (player == null)
-                    return;
-
-                bool emblaHelmet = items.Contains(ModularMagic_Armors.EmblaHelmetHashCode);
-                bool emblaChest = items.Contains(ModularMagic_Armors.EmblaChestHashCode);
-
-                if (PluginConfig.adjustEmbla.Value)
-                {
-                    player.gameObject.transform.Find(pathHelper.helmetAttachPath + "/" + pathHelper.EmblaHoodEffectsPath)?.gameObject.SetActive(emblaHelmet);
-                }
-
-                if (PluginConfig.adjustEmbla.Value)
-                {
-                    player.gameObject.transform.Find(pathHelper.shoulderLeftPath + "/" + pathHelper.EmblaShoulderLeftEffectPath)?.gameObject.SetActive(emblaChest);
-                    player.gameObject.transform.Find(pathHelper.shoulderRightPath + "/" + pathHelper.EmblaShoulderRightEffectPath)?.gameObject.SetActive(emblaChest);
-                }
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Could not de/activate item effects: " + e);
             }
         }
 
