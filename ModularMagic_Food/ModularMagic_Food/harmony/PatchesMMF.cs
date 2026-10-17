@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using ModularMagic_Food.Helpers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,55 +11,20 @@ namespace ModularMagic_Utilities.Harmony
     [HarmonyPatch]
     public class PatchesMMF
     {
+        // A fresh load reads the picked state from the ZDO without going through SetPicked
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(Pickable), "SetPicked")]
-        public static void SetPicked_Postfix(ref Pickable __instance, ref bool picked)
+        [HarmonyPatch(typeof(Pickable), "Awake")]
+        public static void Awake_Postfix(Pickable __instance)
         {
-            try
-            {
-                if (__instance == null || !picked)
-                    return;
-
-                Transform footTrans = __instance.transform.Find("foot/particles");
-
-                if (footTrans == null)
-                    return;
-
-                footTrans.gameObject.GetComponent<ParticleSystem>().Stop();
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Could not stop particles in SetPicked_Postfix: "+ e);
-            }
+            PickableHelper.SyncFootParticles(__instance, instant: true);
         }
 
+        // Runs on every client for a pick and for a respawn
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(Pickable), "ShouldRespawn")]
-        public static void ShouldRespawn_Postfix(ref Pickable __instance, ref bool __result)
+        [HarmonyPatch(typeof(Pickable), "SetPicked")]
+        public static void SetPicked_Postfix(Pickable __instance)
         {
-            try
-            {
-                if (__instance == null)
-                    return;
-
-                Transform footTrans = __instance.transform.Find("foot/particles");
-
-                if (footTrans == null)
-                    return;
-
-                if (__result)
-                {
-                    footTrans.gameObject.GetComponent<ParticleSystem>().Play();
-                }
-                else
-                {
-                    footTrans.gameObject.GetComponent<ParticleSystem>().Stop();
-                }
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Could not start/stop particles in ShouldRespawn_Postfix: " + e);
-            }
+            PickableHelper.SyncFootParticles(__instance, instant: false);
         }
     }
 }
