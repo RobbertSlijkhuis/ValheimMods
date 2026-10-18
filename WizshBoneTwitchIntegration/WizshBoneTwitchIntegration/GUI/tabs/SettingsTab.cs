@@ -379,23 +379,20 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             });
 
             // Show safe zone message is a personal preference that stays editable on a synced
-            // profile (unlike the recipe next to it), so this row is created unlocked and only the
-            // recipe cell is locked by hand.
-            m_lockNewRows = false;
-            GameObject recipeRow = CreateRow();
+            // profile (unlike the recipe next to it), so the row itself is unlocked and only the
+            // recipe cell is locked.
+            GameObject recipeRow = CreateRow(lockRow: false);
             ForEachCell(2, (x, width, i) =>
             {
                 if (i == 0)
                 {
-                    GameObject recipeCell = BuildStringCell(recipeRow, x, width,
+                    BuildStringCell(recipeRow, x, width,
                         "Twitch Ward recipe", "Comma-separated item:amount pairs required to craft the ward",
                         () => ProfileSettingsHelper.Current.wardRecipe,
                         v => ProfileSettingsHelper.Current.wardRecipe = v,
                         Defaults.wardRecipe,
-                        isValid: v => RecipeHelper.GetAsPieceRequirementArray(v, null, null) != null);
-
-                    if (m_isSynced)
-                        recipeCell.AddComponent<CanvasGroup>().interactable = false;
+                        isValid: v => RecipeHelper.GetAsPieceRequirementArray(v, null, null) != null,
+                        locked: m_isSynced);
                 }
                 else
                 {
@@ -406,7 +403,6 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                             Defaults.showSafeZoneMessage));
                 }
             });
-            m_lockNewRows = m_isSynced;
 
             BoolFieldRow(
                 ("Ward burns spawned creatures", "Damages mod-spawned creatures that enter the ward",
@@ -449,9 +445,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             ForEachCell(fields.Length, (x, width, i) => BuildBoolCell(row, x, width, fields[i]));
         }
 
-        private static void BuildBoolCell(GameObject row, float x, float width, (string Title, string Description, Func<bool> Get, Action<bool> Set, bool Default) f)
+        private static void BuildBoolCell(GameObject row, float x, float width, (string Title, string Description, Func<bool> Get, Action<bool> Set, bool Default) f, bool locked = false)
         {
-            GameObject cell = CreateCell(row, x, width);
+            GameObject cell = CreateCell(row, x, width, locked);
             GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
             // The toggle stays its usual fixed left-aligned width (see CreateBoolField) - only
             // the reset button's position comes from FieldAndResetLayout here.
@@ -469,9 +465,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             ForEachCell(fields.Length, (x, width, i) => BuildIntCell(row, x, width, fields[i]));
         }
 
-        private static void BuildIntCell(GameObject row, float x, float width, (string Title, string Description, Func<int> Get, Action<int> Set, int Default) f)
+        private static void BuildIntCell(GameObject row, float x, float width, (string Title, string Description, Func<int> Get, Action<int> Set, int Default) f, bool locked = false)
         {
-            GameObject cell = CreateCell(row, x, width);
+            GameObject cell = CreateCell(row, x, width, locked);
             GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
             (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(width);
             InputField input = GuiFieldBuilder.CreateIntField(cell, new Vector2(fieldCenterX, -58f), fieldWidth, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
@@ -526,9 +522,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             BuildStringCell(row, 0f, ScrollContentWidth, title, description, get, set, defaultValue, maxLength, isValid);
         }
 
-        private static GameObject BuildStringCell(GameObject row, float x, float width, string title, string description, Func<string> get, Action<string> set, string defaultValue, int maxLength = 0, Func<string, bool> isValid = null)
+        private static void BuildStringCell(GameObject row, float x, float width, string title, string description, Func<string> get, Action<string> set, string defaultValue, int maxLength = 0, Func<string, bool> isValid = null, bool locked = false)
         {
-            GameObject cell = CreateCell(row, x, width);
+            GameObject cell = CreateCell(row, x, width, locked);
             GuiHelper.CreateCardTitle(cell, title, width - 24f);
 
             (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(width);
@@ -549,8 +545,6 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             GuiHelper.CreateResetButton(cell, resetCenterX, -58f, () => input.text = defaultValue);
 
             GuiHelper.CreateCardDescription(cell, description, width - 24f);
-
-            return cell;
         }
 
         /// <summary>
@@ -571,7 +565,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             build(cellWidth / 2f + ColGap / 2f, cellWidth, 1);
         }
 
-        private GameObject CreateRow()
+        /// <param name="lockRow">Overrides <see cref="m_lockNewRows"/> for this row; null follows it.</param>
+        private GameObject CreateRow(bool? lockRow = null)
         {
             GameObject row = new GameObject("Row");
             row.transform.SetParent(m_scrollContent.transform, false);
@@ -583,16 +578,22 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             rt.sizeDelta = new Vector2(ScrollContentWidth, RowHeight);
             rt.anchoredPosition = new Vector2(0f, m_cursorY);
 
-            if (m_lockNewRows)
+            if (lockRow ?? m_lockNewRows)
                 row.AddComponent<CanvasGroup>().interactable = false;
 
             m_cursorY -= RowHeight + RowSpacing;
             return row;
         }
 
-        private static GameObject CreateCell(GameObject row, float x, float width)
+        /// <param name="locked">View-only, like a locked row but for just this cell (a row can mix locked and editable cells).</param>
+        private static GameObject CreateCell(GameObject row, float x, float width, bool locked = false)
         {
-            return GuiHelper.CreateCard(row, new Vector2(x, 0f), width, RowHeight);
+            GameObject cell = GuiHelper.CreateCard(row, new Vector2(x, 0f), width, RowHeight);
+
+            if (locked)
+                cell.AddComponent<CanvasGroup>().interactable = false;
+
+            return cell;
         }
     }
 }

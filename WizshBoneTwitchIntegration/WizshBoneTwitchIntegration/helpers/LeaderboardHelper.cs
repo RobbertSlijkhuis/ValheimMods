@@ -106,12 +106,20 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (!EnsureLoaded())
                 return new List<LeaderboardRow>();
 
-            LeaderboardWorld current = new LeaderboardWorld { uid = s_worldUid, name = s_data.worldName, isCurrent = true, file = s_data };
-
-            return BuildRows(new[] { current })
-                .Where(r => r.deaths > 0)
-                .OrderByDescending(r => r.deaths)
+            // Only the deaths are needed, so sum those and build rows for the top few instead of
+            // BuildRows' full row (names, favourite redeem, ...) for every viewer. Same name fallback
+            // as BuildRows; OrderByDescending is stable, so ties keep the file order.
+            return s_data.viewers
+                .Select(entry => (Key: entry.Key, Value: entry.Value, Deaths: entry.Value.redeems.Values.Sum(r => r.deaths)))
+                .Where(viewer => viewer.Deaths > 0)
+                .OrderByDescending(viewer => viewer.Deaths)
                 .Take(count)
+                .Select(viewer => new LeaderboardRow
+                {
+                    id = viewer.Key,
+                    name = string.IsNullOrEmpty(viewer.Value.name) ? viewer.Key : viewer.Value.name,
+                    deaths = viewer.Deaths
+                })
                 .ToList();
         }
 
@@ -130,9 +138,12 @@ namespace WizshBoneTwitchIntegration.Helpers
             return file.streamerDeaths ?? CreditedDeaths(file);
         }
 
+        // Seeded test viewers (see Seed) never count towards the total, so test data can't end up in it.
         private static int CreditedDeaths(LeaderboardFile file)
         {
-            return file.viewers.Values.Sum(v => v.redeems.Values.Sum(r => r.deaths));
+            return file.viewers
+                .Where(entry => !entry.Key.StartsWith(SeedIdPrefix, StringComparison.Ordinal))
+                .Sum(entry => entry.Value.redeems.Values.Sum(r => r.deaths));
         }
 
         // ── recording ────────────────────────────────────────────────────────
