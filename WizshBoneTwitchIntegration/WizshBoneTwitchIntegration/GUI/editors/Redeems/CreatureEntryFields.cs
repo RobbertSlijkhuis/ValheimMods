@@ -181,9 +181,9 @@ namespace WizshBoneTwitchIntegration.Gui
                     creature.allowDamageStructures, v => creature.allowDamageStructures = v, defaultValue: true));
 
             layout.PairRow(
-                () => layout.FloatRow("Idle sound interval", $"Seconds between the creature's idle sound effect (e.g. a Fuling's laugh); it then always plays instead of the default ~50% chance. 0 = the creature's default behavior. Ignored when {Emphasis.Of("Mute idle sound")} is on.",
+                () => layout.FloatRow("Idle sound interval", $"Seconds between the creature's idle sound effect (e.g. a Fuling's laugh); it then always plays instead of the default ~50% chance. 0 = the creature's default behavior. Ignored when {Emphasis.Of("Mute sounds")} is on.",
                     creature.idleSoundInterval, v => creature.idleSoundInterval = v, defaultValue: 0f, min: 0f),
-                () => layout.ToggleRow("Mute idle sound", "Stops the creature from making its idle sound effect (e.g. a Fuling's laugh) at all.",
+                () => layout.ToggleRow("Mute sounds", "Stops the creature from making its idle sound effect (e.g. a Fuling's laugh) and its alert sound (e.g. a roar when it notices you) at all.",
                     creature.muteIdleSound, v => creature.muteIdleSound = v, defaultValue: false));
 
             layout.PairRow(

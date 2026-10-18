@@ -319,6 +319,22 @@ namespace WizshBoneTwitchIntegration.Components
         {
             try
             {
+                // The hammer's placement ghost is a plain Instantiate of the prefab with
+                // ZNetView.m_forceDisableInit set, so this Awake runs on it too. A ghost must never
+                // act as a zone (spawn blocking, burn/push, bounds outline): switch it off and don't
+                // register it. Not ZNetView.IsValid(): a real piece's ZNetView may Awake after this
+                // child, the flag has no such ordering issue.
+                if (ZNetView.m_forceDisableInit)
+                {
+                    Collider ghostCollider = GetComponent<Collider>();
+
+                    if (ghostCollider != null)
+                        ghostCollider.enabled = false;
+
+                    enabled = false;
+                    return;
+                }
+
                 m_customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
                 m_collider = GetComponent<Collider>();
 

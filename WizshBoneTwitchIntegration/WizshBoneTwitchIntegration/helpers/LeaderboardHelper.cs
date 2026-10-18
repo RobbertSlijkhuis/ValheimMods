@@ -96,7 +96,68 @@ namespace WizshBoneTwitchIntegration.Helpers
             return true;
         }
 
+        /// <summary>
+        /// The viewers who caused the most deaths in the current world (highest first, at most
+        /// <paramref name="count"/>, only those with at least one). Empty when not in a world.
+        /// Uses the live in-memory copy, no disk read.
+        /// </summary>
+        public static List<LeaderboardRow> GetTopDeathCausers(int count)
+        {
+            if (!EnsureLoaded())
+                return new List<LeaderboardRow>();
+
+            LeaderboardWorld current = new LeaderboardWorld { uid = s_worldUid, name = s_data.worldName, isCurrent = true, file = s_data };
+
+            return BuildRows(new[] { current })
+                .Where(r => r.deaths > 0)
+                .OrderByDescending(r => r.deaths)
+                .Take(count)
+                .ToList();
+        }
+
+        /// <summary>The streamer's total deaths in the current world; 0 when not in a world.</summary>
+        public static int GetCurrentWorldDeaths()
+        {
+            return EnsureLoaded() ? GetTotalDeaths(s_data) : 0;
+        }
+
+        /// <summary>
+        /// A world's total streamer deaths. A world from before the total was tracked has only the
+        /// deaths viewers are credited with, so that is what it reports until the next death.
+        /// </summary>
+        public static int GetTotalDeaths(LeaderboardFile file)
+        {
+            return file.streamerDeaths ?? CreditedDeaths(file);
+        }
+
+        private static int CreditedDeaths(LeaderboardFile file)
+        {
+            return file.viewers.Values.Sum(v => v.redeems.Values.Sum(r => r.deaths));
+        }
+
         // ── recording ────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Counts one death of the streamer in the current world, whether or not a viewer gets the
+        /// credit (see <see cref="DeathCreditHelper"/>, which calls it for every local player death).
+        /// </summary>
+        public static void RecordStreamerDeath()
+        {
+            try
+            {
+                if (!EnsureLoaded())
+                    return;
+
+                // Called before the death is credited to a viewer, so a world without a total yet
+                // starts from the credited deaths of the earlier ones.
+                s_data.streamerDeaths = GetTotalDeaths(s_data) + 1;
+                MarkDirty();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Leaderboard: could not record streamer death: {e}");
+            }
+        }
 
         /// <summary>
         /// Counts a redeem that was actually carried out. Skips events without a RedeemerId (test

@@ -28,6 +28,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private readonly WizshBoneHUD m_hud = new WizshBoneHUD();
         private readonly ConfirmDialog m_exitConfirmDialog = new ConfirmDialog();
         private readonly SafeZoneHUD m_safeZoneHUD = new SafeZoneHUD();
+        private readonly DeathCounterHUD m_deathCounterHUD = new DeathCounterHUD();
 
         private TwitchAuth m_auth;
         private TwitchCustomRewards m_customRewards;
@@ -48,6 +49,7 @@ namespace WizshBoneTwitchIntegration.Gui
                 m_hud.ShowHUD();
                 m_exitConfirmDialog.Init();
                 m_safeZoneHUD.Init();
+                m_deathCounterHUD.Init();
                 GUIManager.OnCustomGUIAvailable -= OnGUIAvailable;
             }
             catch (Exception e)
@@ -62,6 +64,7 @@ namespace WizshBoneTwitchIntegration.Gui
             // always on-screen, so it updates every frame regardless of IsVisible.
             m_hud.UpdateHUD();
             m_safeZoneHUD.SyncVisibility();
+            m_deathCounterHUD.Refresh();
 
             InputBlockGate.Verify();
 

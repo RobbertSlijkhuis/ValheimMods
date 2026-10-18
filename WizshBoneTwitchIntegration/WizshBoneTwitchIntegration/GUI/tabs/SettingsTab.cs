@@ -122,6 +122,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             BuildIndestructibleSection();
             BuildSafezonesSection();
             BuildHudSection();
+            BuildDeathCounterSection();
 
             ScrollableList.SetContentHeight(m_scrollContent, Mathf.Abs(m_cursorY));
         }
@@ -206,6 +207,30 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                     () => ProfileSettingsHelper.Current.hudOffsetY,
                     v => ProfileSettingsHelper.Current.hudOffsetY = v,
                     Defaults.hudOffsetY));
+        }
+
+        private void BuildDeathCounterSection()
+        {
+            SectionHeader("Death counter");
+
+            // Like the HUD, a purely local display preference - editable on a synced or locked profile.
+            m_lockNewRows = false;
+
+            BoolFieldRow(
+                ("Show death counter", "Shows how many times this character has died at the top of the screen.",
+                    () => ProfileSettingsHelper.Current.showDeathCounter,
+                    v => ProfileSettingsHelper.Current.showDeathCounter = v,
+                    Defaults.showDeathCounter),
+                ("Show top death causers", "Lists the three viewers who caused the most deaths in this world under the death counter. Only shown while the death counter is.",
+                    () => ProfileSettingsHelper.Current.showTopDeathCausers,
+                    v => ProfileSettingsHelper.Current.showTopDeathCausers = v,
+                    Defaults.showTopDeathCausers));
+
+            BoolFieldRow(
+                ("Show total death count", "On shows all deaths of this character, in every world. Off shows only the deaths in the current world (for worlds played before this option was added, counting starts from the deaths viewers caused).",
+                    () => ProfileSettingsHelper.Current.showTotalDeathCount,
+                    v => ProfileSettingsHelper.Current.showTotalDeathCount = v,
+                    Defaults.showTotalDeathCount));
         }
 
         private static string HudPositionLabel(HudPosition position)
@@ -336,19 +361,52 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             SectionHeader("Safezones");
             m_lockNewRows = m_isSynced;
 
-            GameObject wardRow = CreateRow();
-            float wardCellWidth = (ScrollContentWidth - ColGap) / 2f;
-            BuildBoolCell(wardRow, -wardCellWidth / 2f - ColGap / 2f, wardCellWidth,
-                ("Twitch Ward buildable", "Disable to hide the ward from the Hammer build menu",
-                    () => ProfileSettingsHelper.Current.wardEnabled,
-                    v => ProfileSettingsHelper.Current.wardEnabled = v,
-                    Defaults.wardEnabled));
-            BuildStringCell(wardRow, wardCellWidth / 2f + ColGap / 2f, wardCellWidth,
-                "Twitch Ward recipe", "Comma-separated item:amount pairs required to craft the ward",
-                () => ProfileSettingsHelper.Current.wardRecipe,
-                v => ProfileSettingsHelper.Current.wardRecipe = v,
-                Defaults.wardRecipe,
-                isValid: v => RecipeHelper.GetAsPieceRequirementArray(v, null, null) != null);
+            GameObject buildableRow = CreateRow();
+            ForEachCell(2, (x, width, i) =>
+            {
+                if (i == 0)
+                    BuildBoolCell(buildableRow, x, width,
+                        ("Twitch Ward buildable", "Disable to hide the ward from the Hammer build menu",
+                            () => ProfileSettingsHelper.Current.wardEnabled,
+                            v => ProfileSettingsHelper.Current.wardEnabled = v,
+                            Defaults.wardEnabled));
+                else
+                    BuildIntCell(buildableRow, x, width,
+                        ("Max Twitch Wards", "Most wards that can exist in the world at once. 0 means unlimited. Existing wards are kept if you lower it.",
+                            () => ProfileSettingsHelper.Current.wardMaxCount,
+                            v => ProfileSettingsHelper.Current.wardMaxCount = v,
+                            Defaults.wardMaxCount));
+            });
+
+            // Show safe zone message is a personal preference that stays editable on a synced
+            // profile (unlike the recipe next to it), so this row is created unlocked and only the
+            // recipe cell is locked by hand.
+            m_lockNewRows = false;
+            GameObject recipeRow = CreateRow();
+            ForEachCell(2, (x, width, i) =>
+            {
+                if (i == 0)
+                {
+                    GameObject recipeCell = BuildStringCell(recipeRow, x, width,
+                        "Twitch Ward recipe", "Comma-separated item:amount pairs required to craft the ward",
+                        () => ProfileSettingsHelper.Current.wardRecipe,
+                        v => ProfileSettingsHelper.Current.wardRecipe = v,
+                        Defaults.wardRecipe,
+                        isValid: v => RecipeHelper.GetAsPieceRequirementArray(v, null, null) != null);
+
+                    if (m_isSynced)
+                        recipeCell.AddComponent<CanvasGroup>().interactable = false;
+                }
+                else
+                {
+                    BuildBoolCell(recipeRow, x, width,
+                        ("Show safe zone message", "Shows \"Streamer is in a safe zone!\" on screen while you are inside a safe zone.",
+                            () => ProfileSettingsHelper.Current.showSafeZoneMessage,
+                            v => ProfileSettingsHelper.Current.showSafeZoneMessage = v,
+                            Defaults.showSafeZoneMessage));
+                }
+            });
+            m_lockNewRows = m_isSynced;
 
             BoolFieldRow(
                 ("Ward burns spawned creatures", "Damages mod-spawned creatures that enter the ward",
@@ -408,16 +466,17 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private void IntFieldRow(params (string Title, string Description, Func<int> Get, Action<int> Set, int Default)[] fields)
         {
             GameObject row = CreateRow();
-            ForEachCell(fields.Length, (x, width, i) =>
-            {
-                var f = fields[i];
-                GameObject cell = CreateCell(row, x, width);
-                GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
-                (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(width);
-                InputField input = GuiFieldBuilder.CreateIntField(cell, new Vector2(fieldCenterX, -58f), fieldWidth, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
-                GuiHelper.CreateResetButton(cell, resetCenterX, -58f, () => input.text = f.Default.ToString());
-                GuiHelper.CreateCardDescription(cell, f.Description, width - 24f);
-            });
+            ForEachCell(fields.Length, (x, width, i) => BuildIntCell(row, x, width, fields[i]));
+        }
+
+        private static void BuildIntCell(GameObject row, float x, float width, (string Title, string Description, Func<int> Get, Action<int> Set, int Default) f)
+        {
+            GameObject cell = CreateCell(row, x, width);
+            GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
+            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(width);
+            InputField input = GuiFieldBuilder.CreateIntField(cell, new Vector2(fieldCenterX, -58f), fieldWidth, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
+            GuiHelper.CreateResetButton(cell, resetCenterX, -58f, () => input.text = f.Default.ToString());
+            GuiHelper.CreateCardDescription(cell, f.Description, width - 24f);
         }
 
         private void FloatFieldRow(params (string Title, string Description, Func<float> Get, Action<float> Set, float Default)[] fields)
@@ -467,7 +526,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             BuildStringCell(row, 0f, ScrollContentWidth, title, description, get, set, defaultValue, maxLength, isValid);
         }
 
-        private static void BuildStringCell(GameObject row, float x, float width, string title, string description, Func<string> get, Action<string> set, string defaultValue, int maxLength = 0, Func<string, bool> isValid = null)
+        private static GameObject BuildStringCell(GameObject row, float x, float width, string title, string description, Func<string> get, Action<string> set, string defaultValue, int maxLength = 0, Func<string, bool> isValid = null)
         {
             GameObject cell = CreateCell(row, x, width);
             GuiHelper.CreateCardTitle(cell, title, width - 24f);
@@ -490,6 +549,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             GuiHelper.CreateResetButton(cell, resetCenterX, -58f, () => input.text = defaultValue);
 
             GuiHelper.CreateCardDescription(cell, description, width - 24f);
+
+            return cell;
         }
 
         /// <summary>

@@ -120,6 +120,11 @@ namespace WizshBoneTwitchIntegration.Commands
                 hudPosition = HudPosition.Custom,
                 hudOffsetX  = -12.5f,
                 hudOffsetY  = 34.25f,
+                showDeathCounter = false,
+                showTopDeathCausers = true,
+                showTotalDeathCount = false,
+                showSafeZoneMessage = false,
+                wardMaxCount = 7,
             };
 
             ProfileSettingsHelper.Current = edited;
@@ -207,7 +212,12 @@ namespace WizshBoneTwitchIntegration.Commands
                 && a.safezoneBoats == b.safezoneBoats
                 && a.hudPosition == b.hudPosition
                 && a.hudOffsetX == b.hudOffsetX
-                && a.hudOffsetY == b.hudOffsetY;
+                && a.hudOffsetY == b.hudOffsetY
+                && a.showDeathCounter == b.showDeathCounter
+                && a.showTopDeathCausers == b.showTopDeathCausers
+                && a.showTotalDeathCount == b.showTotalDeathCount
+                && a.showSafeZoneMessage == b.showSafeZoneMessage
+                && a.wardMaxCount == b.wardMaxCount;
         }
 
         /// <summary>

@@ -1,5 +1,20 @@
 ### 1.0.3
 ---
+#### General
+- Added a death counter at the top of the screen that shows how many times the streamer has died. It has its own "Death counter" section in the Settings tab, with a "Show death counter" setting to turn it off.
+- Added a "Show top death causers" setting (off by default) that lists the three viewers who caused the most deaths in the current world under the death counter, in gold, silver and bronze.
+- Added a "Show total death count" setting (on by default). Turn it off to count only the deaths in the current world instead of all deaths of the character.
+- Leaderboards now track every death of the streamer per world (not only the ones a viewer caused) and show it in the footer, e.g. "5 deaths caused (12 total)". Worlds played before this update start from the deaths viewers caused.
+
+#### Twitch Ward
+- Added a "Max Twitch Wards" setting (0 means unlimited). Once the limit is reached, placing another ward is blocked with a message. Existing wards are kept if you lower the limit. On a dedicated server a client only counts the wards near it, so it can place more than the limit there.
+- Added a "Show safe zone message" setting (on by default) for the "Streamer is in a safe zone!" message.
+- The placement ghost of the ward no longer acts as a safe zone while you are positioning it.
+- The Settings tab now pairs "Twitch Ward buildable" with "Max Twitch Wards" and "Twitch Ward recipe" with "Show safe zone message", and "Show death counter" with "Show top death causers".
+
+#### Monsters
+- "Mute idle sound" is now called "Mute sounds" and also mutes the creature's alert sound (like a roar when it notices you). Creatures in existing redeems that have it enabled will now be silent on alert too.
+
 #### Redeems
 - Added the "Slippery Ground" status effect (pick it in a Status Effect redeem): the streamer slides on any terrain like on the Deep North ice sheets for the effect's duration. Boats and building floors keep their normal grip, and ice shoes still prevent sliding.
 - Added the `WBTIRemoveTerrainEdit` console command to undo Twitch terrain edits and restore the original terrain. Permanent terrain edits (no duration) can now be undone too, but only edits made from this version on. Timed terrain edits now also reset their whole area for Rectangle and Chevron shapes.

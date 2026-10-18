@@ -214,7 +214,7 @@ namespace WizshBoneTwitchIntegration
 
             PieceConfig pieceConfig = new PieceConfig();
             pieceConfig.Enabled = ProfileSettingsHelper.Current.wardEnabled;
-            pieceConfig.Name = "Twitchy Ward";
+            pieceConfig.Name = "Twitch Ward";
             pieceConfig.Description = "A ward against mysterious and twitchy forces!";
             pieceConfig.PieceTable = PieceTables.Hammer;
             pieceConfig.Category = PieceCategories.Misc;

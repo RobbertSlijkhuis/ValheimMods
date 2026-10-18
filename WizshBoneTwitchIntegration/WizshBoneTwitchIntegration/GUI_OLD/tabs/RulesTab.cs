@@ -53,7 +53,7 @@ namespace WizshBoneTwitchIntegration.GuiOld
             yOffset -= BuildSection("Creatures", new CreaturesSettingsView(), yOffset) + SectionSpacing;
             yOffset -= BuildSection("Indestructible", new IndestructibleSettingsView(), yOffset) + SectionSpacing;
             yOffset -= BuildSection("Redeems", new RedeemsSettingsView(), yOffset) + SectionSpacing;
-            yOffset -= BuildSection("Twitchy Ward", new WardSettingsView(), yOffset) + SectionSpacing;
+            yOffset -= BuildSection("Twitch Ward", new WardSettingsView(), yOffset) + SectionSpacing;
             yOffset -= BuildSection("HUD", new HudSettingsView(), yOffset) + SectionSpacing;
 
             TabUIHelper.UpdateScrollContentHeight(m_scrollContent, StartY, Mathf.Abs(yOffset - StartY));
