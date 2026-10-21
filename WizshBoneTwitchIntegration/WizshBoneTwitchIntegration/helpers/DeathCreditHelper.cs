@@ -703,6 +703,8 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             s_killerName = null;
 
+            LeaderboardHelper.RecordStreamerDeath();
+
             HitData lastHit = s_lastHitRef(player);
 
             if (lastHit == null || !ReferenceEquals(lastHit, s_committedHit) || !s_committed.HasValue)

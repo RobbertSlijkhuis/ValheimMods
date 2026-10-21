@@ -25,7 +25,7 @@ namespace WizshBoneTwitchIntegration
     {
         public const string PluginGUID = "DeathWizsh.WizshBoneTwitchIntegration";
         public const string PluginName = "WizshBoneTwitchIntegration";
-        public const string PluginVersion = "1.0.2";
+        public const string PluginVersion = "1.0.3";
         public static WizshBoneTwitchIntegration Instance;
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
 
@@ -214,7 +214,7 @@ namespace WizshBoneTwitchIntegration
 
             PieceConfig pieceConfig = new PieceConfig();
             pieceConfig.Enabled = ProfileSettingsHelper.Current.wardEnabled;
-            pieceConfig.Name = "Twitchy Ward";
+            pieceConfig.Name = "Twitch Ward";
             pieceConfig.Description = "A ward against mysterious and twitchy forces!";
             pieceConfig.PieceTable = PieceTables.Hammer;
             pieceConfig.Category = PieceCategories.Misc;
@@ -391,6 +391,18 @@ namespace WizshBoneTwitchIntegration
             effects.PlayerScale.m_icon   = sprites.MiniMeSprite;
             effects.PlayerScale.m_ttl    = 180f;
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.PlayerScale, fixReference: false));
+
+            // Only a marker: SlipperyGroundHelper / SlipperyGroundPatchesWBTI do the actual sliding
+            // while the local player has it.
+            effects.SlipperyGround = ScriptableObject.CreateInstance<SE_Stats>();
+            effects.SlipperyGround.name      = Helpers.SlipperyGroundHelper.EffectName;
+            effects.SlipperyGround.m_name    = "Slippery ground";
+            effects.SlipperyGround.m_tooltip = "The ground is as slippery as ice.";
+            effects.SlipperyGround.m_ttl     = 30f;
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.SlipperyGround, fixReference: false));
+
+            // Vanilla status effects only exist once ObjectDB is populated, so borrow the Frost icon then.
+            ItemManager.OnItemsRegistered += () => effects.SlipperyGround.m_icon = ObjectDB.instance.GetStatusEffect("Frost".GetStableHashCode())?.m_icon;
         }
 
         private void InitInputs()
@@ -429,6 +441,7 @@ namespace WizshBoneTwitchIntegration
             CommandManager.Instance.AddConsoleCommand(new RemoveMistCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveTrapsCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveWeatherCommand());
+            CommandManager.Instance.AddConsoleCommand(new RemoveTerrainEditCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveDoorsCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveWindmillsCommand());
             CommandManager.Instance.AddConsoleCommand(new RemoveLogsCommand());
@@ -563,108 +576,6 @@ namespace WizshBoneTwitchIntegration
             materials.RecolorWrithan = assetBundle.LoadAsset<Material>("Writhan_recolor_WBTI");
             materials.RecolorYagluth = assetBundle.LoadAsset<Material>("Yagluth_recolor_WBTI");
             materials.RecolorYagluthHair = assetBundle.LoadAsset<Material>("Yagluth_hair_recolor_WBTI");
-
-            // ====================================
-            // TODO:
-            // ====================================
-            // Serpent, noodle detonate
-            // Teleport allies to streamer emote
-            // SPAWN MISILE (mistile) redeem!
-            // Ppl specific monsters
-            // - Xainty the Greydwarf
-            // - Flow the Deathsquito
-            // - Crys the Fueling
-            // - NECK SQUAD (Lothren, Soma, Phenazo, 1mmun1tyy, DeathWizsh, Bonkerz)
-
-            // ====================================
-            // DONE
-            // ====================================
-            // DONE: Add claim to a tame by renaming it with claim:insertnamehere
-            // DONE: Fix message showing for split second of creature claims
-            // DONE: Allow permanent claiming with the chatting system
-            // DONE: Add maximum limit of how many of the same spawned creatures are allowed
-            // DONE: Add maximum limit of total spawned creaturs are allowed
-            // DONE: Change weather/tod redeem
-            // DONE: Save/load recolors from a file
-            // DONE: Add new rains like meteors from Yagluth and Fader, Karve rain etc.
-            // DONE: Add persistend data for pieces, like allow drops
-            // DONE: Armor, shield, weapons, monsters don't get thrown out very far out of suprise chests
-            // DONE: Fix noodles spawning in dungeons
-            // DONE: Add option to block/push out enemies from Safezones
-            // DONE: Greydwarfds friendlies do no attack enemy greyfwards
-            // DONE: Add a mass follow/unfollow method
-            // DONE: Sausage rain for Bearded
-            // DONE: Fix starred mobs recolors
-            // DONE: Add options to make portals/chests industructable
-            // DONE: Safezones don't allow hoe actions
-            // DONE: Allow messages to parse variables like RedeemerName
-            // DONE: Bug: thou shall be smited used in dungeon
-            // DONE: Remove redeems on logout/quit
-            // DONE: Added CreatureData and ItemData to Surprise chests
-            // DONE: Cancel redeem when player is teleporting
-            // DONE: Add globalkey add/remove to creatures
-            // DONE: Surprise chest map marker not dissapearing automaticly correctly
-            // DONE: Don't refresh timer of buffs under 5 seconds to prevent endless buff bugg
-            // DONE: Wake up mosnter programmaticly so they engange straight away
-            // DONE: Follow status is resetted to follow when player moves to far away (portal)
-            // DONE: Fixed timer for being logged out by Twitch warning
-            // DONE: Fixed refreshing buffs and persist through death
-            // DONE: Stop spawning things when streamer walks into a safezone
-            // DONE: Add safe zones to traders
-            // DONE: Make trap/log/smite damage health/armor base
-            // DONE: Make trap's damage persistent
-            // DONE: Add command or action to delete surprise chests / spawned creatures in the vicinity
-            // DONE: Check for safezone when surprise chest actually spawns in
-            // DONE: Prevent redeems when on a boat
-            // DONE: Make friendly follow troops automaticly follow their owner
-            // DONE: Friendly troops now attack bosses
-            // DONE: Prevent AOE scripts from doing damage to boats (Thou shall be smited)
-            // DONE: Prevent Impact scripts from doing damage to boats (Log rain)
-            // DONE: Trap field redeem
-            // DONE: Add recipe in config for twitch ward, also add option to turn of burning spawns to death
-            // DONE: Add map markers where you spawned certain stuff (surprise chests)
-            // DONE: Make surpise chests floatable in water, reduce mass to not sink ships XD, add map pin and auto remove it, make them persistent
-            // DONE: Finish all types of statuseffects and make it decently configurable
-            // DONE: Add configurable timers to status effect, persist through death, renew
-            // DONE: Mod says it refunded stuff from a custom redeem, should not do that.
-            // Wind in back (moder) and reverse redeem
-            // Add halucinations, make player stunned/dazed when getting hit by Hallucinations? Or half damage?
-            // Suprise chests, multiple chests to gamble, add a mimic to bite the opener (add legs like the luggage from terry pratchett's novel
-
-            // Add references to friends, streamers, viewers in a seperate mod. Like I did with troll Betuti line
-            // - DeathWizsh the Raven landing on streamers shoulder saying "There is a mod for that" every time someone says that in chat
-            // - Feo the neckbeard (A neck with a beard) that randomly gives you history facts (spawned by redeem?)
-            // - Sjoeky an actuall goat that gives you random combat/survial tips when you die to much in the most dry and sarcastic manner (spawn at your respawn location and redeem aswell?)
-            // - Kimetsu a Dvergr mage, blessing?
-            // - Soma_af a bear (reskinned as a white/pink teddybear with antlers as soma has a bear with antlers emote) Spawns when cooking? Drops random food when sneezing? Adds a 4th food slot?
-            // - Make DurdyJay exactly like Odin, and spawns randomly in like Odin. But instead of dissappearing straight away he gets Googly Eyes and a stick out Tongue and says something nice/somewhat durdy. And his name changes to DurdyJay at that moment ofc (blessing?)
-            // - Xxainty iets van een greydwarf ofzo
-            // - Kassie (Kassandra) The god of chaos, makes map dissapear when pissed off?
-            // - itsnanobug?
-            // - Azeriath? Blessing: Less fall damage he said
-            // - jaqkEquips
-            // - PithyPeaches?
-            // - LoyalBones and KrzyMoogle?
-            // References are kinda like gods? Allow them to give you blessings when encountered? Feo relaxing you, rested. Sjoeky "encouraging you", damage reduction
-            // Some gods can be summoned via a ritual (new piece spawned in the world? and/or buildable one) Some gods can be angered and do something negative
-            // - Feo summon alter spawns in meadows here and there, you can then make a food to summon him (includes neck tail as joke, he does not know)
-            //   He can also get angry if you don't sit down to listen to his history fact or if you try to summon him when the summon is on cooldown
-            //   3 summons to anger him, 3 summons while angered and then you get smiten by Obliterator lightning
-            // - Soma_af can also be summoned and gives food to the player (back-up emergency food) according to highest boss kill (Global or player key)
-            //   Will summon big teddybear version when angered that hunts you down! She has a temper
-            // - When dieing to much Sjoeky will give tips and damage reduction blessing, during blessing timer he can also randomly help and fight.
-
-
-            // What went wrong:
-
-            // New mod ideas:
-            // - Inventory in the Saddle
-            // - Priortise spear slot
-            // - lock inventory slots so putting all in inventory does not touch it
-            // - Troll pacify, give them something to become neutral and in that state you can backpack them
-            // - square cultivator/hoe mod (no circle editing) with range scroll
-            // - Mist control mod, add demister to shield gen and configurable range for wisp light/torches and maybe even remove all mist
-            // - Beewax mod that allows you to put wax on wood to protect against water dammage. Mix it with other things to creat colors as well
         }
     }
 }

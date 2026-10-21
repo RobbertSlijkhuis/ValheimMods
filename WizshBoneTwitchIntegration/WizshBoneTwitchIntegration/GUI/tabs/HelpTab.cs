@@ -96,6 +96,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 "\n- WBTIRemoveMist: spawned mist (default radius is 100 meters)" +
                 "\n- WBTIRemoveWeather: spawned weather zones and restores the normal weather. This one has no radius, " +
                 "it removes all of them." +
+                "\n- WBTIRemoveTerrainEdit: undoes terrain edits, including permanent ones, and restores the original terrain " +
+                "(default radius is 100 meters). Terrain edits made before this command existed can't be undone." +
                 "\n\nTip: if you are not sure which one you need, run the matching command while standing next to the problem.",
         };
 

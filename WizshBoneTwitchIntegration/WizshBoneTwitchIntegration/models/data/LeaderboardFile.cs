@@ -12,6 +12,13 @@ namespace WizshBoneTwitchIntegration.Models
         public int version = 1;
         public string worldName = "";
 
+        /// <summary>
+        /// Every death of the streamer in this world, credited to a viewer or not. Null in a file from
+        /// before this was tracked: read it through LeaderboardHelper.GetTotalDeaths, and the first
+        /// new death starts it from the deaths viewers were credited with.
+        /// </summary>
+        public int? streamerDeaths;
+
         /// <summary>Keyed by the viewer's Twitch user ID (stable across renames).</summary>
         public Dictionary<string, LeaderboardViewer> viewers = new Dictionary<string, LeaderboardViewer>();
     }

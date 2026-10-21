@@ -1,8 +1,9 @@
 ﻿using BepInEx.Configuration;
 using ModularMagic_Armors.Helpers;
 using ModularMagic_Armors.Models;
-using ModularMagic_Utilities.Types;
+using ModularMagic_Armors.Types;
 using System;
+using UnityEngine;
 
 namespace ModularMagic_Armors.Configs
 {
@@ -124,11 +125,38 @@ namespace ModularMagic_Armors.Configs
         public static string armor6LegsRecipeUpgrade = "LinenThread:10, Eitr:5";
         public static ArmorConfig armor6Legs = new ArmorConfig();
 
+        // Spell books. The recipes of the upgrade chain are made in InitSpellbookConfig, because they use the prefab names
+        public static string spellbook1Name = "Spellbook of the Hearth";
+        public static string spellbook1Recipe = "Bronze:4, TrollHide:6, Resin:8, Coal:10";
+        public static ArmorConfig spellbook1 = new ArmorConfig();
+
+        public static string spellbook2Name = "Grimoire of the Storm";
+        public static string spellbook2Recipe = "{0}:1, Silver:4, Thunderstone:2, Chitin:10";
+        public static ArmorConfig spellbook2 = new ArmorConfig();
+
+        public static string spellbook3Name = "Codex of the Asgardian Sorcerer";
+        public static string spellbook3Recipe = "{0}:1, BlackCore:1, Sap:10, Eitr:8";
+        public static ArmorConfig spellbook3 = new ArmorConfig();
+
+        // Lanterns, same thing for the recipes of the upgrade chain
+        public static string lantern1Name = "Mythical Lantern";
+        public static string lantern1Recipe = "Bronze:4, RoundLog:10, Resin:8, SurtlingCore:2";
+        public static ArmorConfig lantern1 = new ArmorConfig();
+
+        public static string lantern2Name = "Everwinter Lantern";
+        public static string lantern2Recipe = "{0}:1, Silver:4, DragonEgg:1, Crystal:10";
+        public static ArmorConfig lantern2 = new ArmorConfig();
+
+        public static string lantern3Name = "Mistcaller Lantern";
+        public static string lantern3Recipe = "{0}:1, BlackCore:1, BlackMarble:12, Eitr:6";
+        public static ArmorConfig lantern3 = new ArmorConfig();
+
         // Other
         public static string generalSectionname = "General";
         public static ConfigEntry<bool> adjustEitrWeave;
         public static ConfigEntry<bool> adjustEmbla;
-        public static ConfigEntry<bool> reskinEmbla;
+        public static ConfigEntry<bool> darkWizardFootsteps;
+        public static ConfigEntry<KeyboardShortcut> lanternKey;
 
         public static void Init()
         {
@@ -137,6 +165,8 @@ namespace ModularMagic_Armors.Configs
             InitArmor2Config();
             InitArmor3Config();
             InitArmor4Config();
+            InitSpellbookConfig();
+            InitLanternConfig();
         }
 
         private static void InitGeneralConfig()
@@ -174,7 +204,7 @@ namespace ModularMagic_Armors.Configs
                 };
 
                 adjustEmbla = ModularMagic_Armors.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Adjust Embla set"), true,
-                  new ConfigDescription("Adjust the Embla set to be in line with the rest. Will apply the set bonus effect and config settings. If disabled the set will be as vanilla (requires restart)", null,
+                  new ConfigDescription("Adjust the Embla set to be in line with the rest. Will apply the set bonus effect and config settings, retexture the set to be red with dark gray ash (because the FrostWolf set uses the same models) and add flame effects. If disabled the set will be as vanilla. The retexture and the flame effects require a restart.", null,
                   new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 2 }));
                 adjustEmbla.SettingChanged += (obj, attr) =>
                 {
@@ -203,12 +233,13 @@ namespace ModularMagic_Armors.Configs
                     armor6Legs.ShowConfig(adjustEmbla.Value, true);
                 };
 
-                reskinEmbla = ModularMagic_Armors.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Retexture Embla set"), true,
-                  new ConfigDescription("Due to the FrostWolf set using the same models this mod retextures the Embla set to be red with dark gray ash. If disabled the set will look as vanilla (requires restart)", null,
-                  new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 1 }));
-                reskinEmbla.SettingChanged += (obj, attr) =>
-                {
-                };
+                darkWizardFootsteps = ModularMagic_Armors.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "DarkWizard footstep flames"), true,
+                  new ConfigDescription("Players wearing the DarkWizard set leave flames behind their footsteps. Visual only and local to you, disabling it only hides the flames for you.", null,
+                  new ConfigurationManagerAttributes { Order = 4 }));
+
+                lanternKey = ModularMagic_Armors.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Lantern on/off key"), new KeyboardShortcut(KeyCode.Y),
+                  new ConfigDescription("Key to switch the light of the worn lantern on or off. The state is remembered between sessions.", null,
+                  new ConfigurationManagerAttributes { Order = 1 }));
             }
             catch (Exception e)
             {
@@ -550,6 +581,67 @@ namespace ModularMagic_Armors.Configs
             {
                 Jotunn.Logger.LogError("Could not initialise " + armor6HelmetName + " config: " + e);
             }
+        }
+
+        private static void InitSpellbookConfig()
+        {
+            try
+            {
+                CustomPrefabs prefabs = ModularMagic_Armors.Instance.prefabs;
+
+                spellbook1.GenerateConfig(CreateUtilityOptions(prefabs.SpellbookHearthPrefab, spellbook1Name, spellbook1Recipe,
+                    "A spellbook of hearthside lore, increasing your knowledge of magic.", CraftingStationType.Workbench, 3, 35f, 0.10f, 4f));
+
+                spellbook2.GenerateConfig(CreateUtilityOptions(prefabs.SpellbookStormPrefab, spellbook2Name, string.Format(spellbook2Recipe, prefabs.SpellbookHearthPrefab.name),
+                    "A grimoire of storm magic, charged with crackling power that sharpens your mastery of the elements.", CraftingStationType.Workbench, 5, 50f, 0.15f, 8f));
+
+                spellbook3.GenerateConfig(CreateUtilityOptions(prefabs.SpellbookCodexPrefab, spellbook3Name, string.Format(spellbook3Recipe, prefabs.SpellbookStormPrefab.name),
+                    "A codex of forbidden Asgardian sorcery, holding the deepest knowledge of magic.", CraftingStationType.GaldrTable, 1, 65f, 0.20f, 12f));
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + spellbook1Name + " config: " + e);
+            }
+        }
+
+        private static void InitLanternConfig()
+        {
+            try
+            {
+                CustomPrefabs prefabs = ModularMagic_Armors.Instance.prefabs;
+
+                lantern1.GenerateConfig(CreateUtilityOptions(prefabs.LanternMythicalPrefab, lantern1Name, lantern1Recipe,
+                    "A lantern to light your way on your travels, glowing with a warm mythical light.", CraftingStationType.Forge, 1, 30f, 0.15f, 3f));
+
+                lantern2.GenerateConfig(CreateUtilityOptions(prefabs.LanternEverwinterPrefab, lantern2Name, string.Format(lantern2Recipe, prefabs.LanternMythicalPrefab.name),
+                    "A lantern that burns with the pale blue light of the everlasting winter.", CraftingStationType.Forge, 5, 45f, 0.20f, 6f));
+
+                lantern3.GenerateConfig(CreateUtilityOptions(prefabs.LanternMistcallerPrefab, lantern3Name, string.Format(lantern3Recipe, prefabs.LanternEverwinterPrefab.name),
+                    "A lantern that calls the mist to heel and drives it back, lit by a rosy glow.", CraftingStationType.BlackForge, 1, 60f, 0.25f, 9f));
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + lantern1Name + " config: " + e);
+            }
+        }
+
+        // Books and lanterns are Utility items that only give magic stats: no armor, no upgrades and no upgrade recipe
+        private static ArmorConfigOptions CreateUtilityOptions(GameObject prefab, string name, string recipe, string description, string craftingStation, int minStationLevel, float eitr, float eitrRegen, float magicSkill)
+        {
+            return new ArmorConfigOptions(prefab, name, recipe, "")
+            {
+                description = description,
+                craftingStation = craftingStation,
+                minStationLevel = minStationLevel,
+                armor = 0,
+                armorPerLevel = 0,
+                weight = 2f,
+                maxQuality = 1,
+                eitr = eitr,
+                eitrRegen = eitrRegen,
+                elementalMagic = magicSkill,
+                bloodMagic = magicSkill,
+            };
         }
     }
 }

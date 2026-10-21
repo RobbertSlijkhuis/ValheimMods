@@ -59,8 +59,9 @@ namespace WizshBoneTwitchIntegration.Components
         // harmony/SpecialRedeemPatchesWBTI.cs's IsEnemy prefix.
         public bool IsFullyPassive;
 
-        // See CreatureData.muteIdleSound. Besides cancelling BaseAI's DoIdleSound, this lets
-        // harmony/AnimationSoundPatchesWBTI.cs skip idle sounds spawned from animation events.
+        // See CreatureData.muteIdleSound. Besides cancelling BaseAI's DoIdleSound and clearing its
+        // alert effects, this lets harmony/AnimationSoundPatchesWBTI.cs skip idle and alert sounds
+        // spawned from animation events.
         public bool IsIdleSoundMuted;
 
         // Permanent feature (see CreatureData.alwaysFollowOwner). Read by
@@ -468,6 +469,10 @@ namespace WizshBoneTwitchIntegration.Components
                 // it silent if anything re-arms the invoke later.
                 monsterAI.m_idleSoundChance = 0f;
                 monsterAI.CancelInvoke("DoIdleSound");
+
+                // Alert sounds are BaseAI.m_alertedEffects, created in SetAlerted. Swapping in an
+                // empty list only affects this instance, not the shared prefab's list.
+                monsterAI.m_alertedEffects = new EffectList();
             }
             else if (creatureData.idleSoundInterval > 0)
             {

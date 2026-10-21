@@ -48,12 +48,13 @@ namespace WizshBoneTwitchIntegration.Models
         public bool rejectWhenSleeping = true;
         public bool rejectWhenTeleporting = true;
 
-        // Twitchy Ward
+        // Twitch Ward
         public bool wardEnabled = true;
         public string wardRecipe = "FineWood:5, GreydwarfEye:5, SurtlingCore:1";
         public bool wardBurnCreatures = false;
         public bool wardPushCreatures = true;
         public float wardPushForce = 2000f;
+        public int wardMaxCount = 0; // 0 = unlimited
 
         // Safezones
         public bool safezoneTraders = true;
@@ -63,6 +64,10 @@ namespace WizshBoneTwitchIntegration.Models
         public HudPosition hudPosition = HudPosition.UnderMinimap;
         public float hudOffsetX;
         public float hudOffsetY;
+        public bool showDeathCounter = true;
+        public bool showTopDeathCausers = false;
+        public bool showTotalDeathCount = true; // false = only the current world's deaths
+        public bool showSafeZoneMessage = true;
 
         /// <summary>
         /// Copies the personal preferences - the settings a read-only (synced or locked built-in)
@@ -89,6 +94,10 @@ namespace WizshBoneTwitchIntegration.Models
             hudPosition = source.hudPosition;
             hudOffsetX = source.hudOffsetX;
             hudOffsetY = source.hudOffsetY;
+            showDeathCounter = source.showDeathCounter;
+            showTopDeathCausers = source.showTopDeathCausers;
+            showTotalDeathCount = source.showTotalDeathCount;
+            showSafeZoneMessage = source.showSafeZoneMessage;
         }
     }
 }

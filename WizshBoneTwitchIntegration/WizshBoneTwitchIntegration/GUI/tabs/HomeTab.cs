@@ -219,6 +219,20 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         private void ToggleRedeems(TwitchAuth auth, TwitchCustomRewards customRewards)
         {
+            if (!customRewards.m_enabled && !auth.m_loggedIn)
+            {
+                ToastNotifications.Show("Log in to Twitch before enabling redeems.", ToastType.Warning);
+                Refresh();
+                return;
+            }
+
+            if (!customRewards.m_enabled && auth.m_userInfo == null)
+            {
+                ToastNotifications.Show("Your Twitch account info isn't loaded yet. Wait a moment and try again, or log in again if it keeps happening.", ToastType.Warning);
+                Refresh();
+                return;
+            }
+
             if (customRewards.HasUnresolvedRedeems())
             {
                 m_confirmDialog.Show(

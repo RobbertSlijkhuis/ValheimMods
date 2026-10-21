@@ -7,7 +7,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 {
     /// <summary>
     /// Per-profile equivalent of <see cref="RedeemHelper"/> for the "rules" settings
-    /// (Chatting/Creatures/Indestructible/Redeems/Twitchy Ward/HUD) that used to be global
+    /// (Chatting/Creatures/Indestructible/Redeems/Twitch Ward/HUD) that used to be global
     /// BepInEx <c>ConfigEntry&lt;T&gt;</c> values in <c>PluginConfig.cs</c>. General/Debug/
     /// Performance stay global and are untouched by this class. Settings live embedded in the
     /// active profile's profile.yaml (<see cref="ModData.settings"/>), alongside redeems and
@@ -117,7 +117,7 @@ namespace WizshBoneTwitchIntegration.Helpers
         /// <summary>
         /// Pushes the current in-memory settings into whichever live components already exist,
         /// mirroring what PluginConfig.cs's SettingChanged lambdas used to do per-field. Safe to
-        /// call before a world is loaded (Game.instance null) or before the Twitchy Ward prefab
+        /// call before a world is loaded (Game.instance null) or before the Twitch Ward prefab
         /// is registered - each push is skipped if its target isn't present yet.
         /// </summary>
         public static void ApplyToLiveComponents()

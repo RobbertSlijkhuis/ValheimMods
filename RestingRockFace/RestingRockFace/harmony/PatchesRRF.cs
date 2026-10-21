@@ -22,12 +22,17 @@ namespace RestingRockFace.Harmony
                     return true;
 
                 RockyControls rockyControls = __instance.gameObject.GetComponent<RockyControls>();
+
+                // Awake leaves m_gui unset when the Rocky has no ZDO, so fall back to vanilla there.
+                if (rockyControls == null || rockyControls.m_gui == null)
+                    return true;
+
                 rockyControls.m_gui.ShowGUI();
                 return false;
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("Somethign went wrong in GetText_Prefix: " + e);
+                Jotunn.Logger.LogError("Somethign went wrong in Interact_Prefix: " + e);
                 return true;
             }
         }
@@ -52,7 +57,7 @@ namespace RestingRockFace.Harmony
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(Pet), "SetFace")]
-        public static bool SetFace_Prefix(ref Tameable __instance, int index)
+        public static bool SetFace_Prefix(Pet __instance, int index)
         {
             try
             {
@@ -67,7 +72,7 @@ namespace RestingRockFace.Harmony
                 if (rockyControls == null)
                     throw new Exception("RockyControls is null somehow");
 
-                if (rockyControls.m_face == (int)RockyFaceEnum.Nothing)
+                if (rockyControls.m_face == (int)RockyFaceEnum.Random)
                     return true;
 
                 return false;

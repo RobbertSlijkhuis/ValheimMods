@@ -28,6 +28,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                 TwitchSafeZone.ResetActiveSafeZones();
                 FlashBangHelper.ResetQueue();
                 DetonateHelper.ResetQueue();
+                SlipperyGroundHelper.ResetState();
                 DeathCreditHelper.Reset();
             }
             catch (Exception e)

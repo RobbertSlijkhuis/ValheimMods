@@ -24,3 +24,8 @@ Jotunn.Logger.LogWarning($"[Tag] SomeThing: {value}");
 ## Verifying Valheim behavior
 
 When Valheim's exact API/networking behavior is unclear, verify it in the real game code rather than guessing. See `Environment.props` in the mod's folder for the Valheim install path. `valheim_Data/Managed/assembly_valheim.dll` is the main game assembly and can be decompiled (e.g. with `ilspycmd`) to confirm method/field behavior before relying on it.
+
+## Deprecated mods
+
+- `MagicExtended` is deprecated and kept only for looking up old code. Do not propose refactors, cleanups or fixes there unless explicitly asked; treat it as read-only reference.
+- `ModularMagic_Utilities` (MMU) is deprecated and unused. Never edit it, and never propose edits, cleanups or removals there. Read it only as a porting reference (its spell books and lanterns are being ported into `ModularMagic_Armors` as `MMA_` items; MMU and MMA items are not meant to coexist).

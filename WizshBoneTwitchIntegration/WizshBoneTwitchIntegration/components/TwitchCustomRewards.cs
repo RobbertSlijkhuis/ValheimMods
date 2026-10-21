@@ -70,6 +70,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
         }
 
+        // Game.FixedUpdate calls Game.Logout() directly on a lost connection, which skips the
+        // Menu.OnLogoutYes patch (and with it every logout path that disposes the stream), while the
+        // SDK's login and subscription outlive this component.
+        public void OnDestroy()
+        {
+            UnSubscribeFromRedeemEvents();
+        }
+
         public void SubscribeToRedeemEvents()
         {
             m_auth = gameObject.GetComponent<TwitchAuth>();
@@ -82,7 +90,28 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void UnSubscribeFromRedeemEvents()
         {
+            // Dropping the reference isn't enough: an undisposed EventStream stays subscribed and keeps
+            // buffering every event until the GC finalizes it.
+            GameTask<EventStream<CustomRewardEvent>> stream = m_customRewardEvents;
             m_customRewardEvents = null;
+
+            if (stream == null)
+                return;
+
+            try
+            {
+                if (stream.IsCompleted)
+                    stream.MaybeResult?.Dispose();
+                else
+                    // Still connecting (MaybeResult is null until it's done), so close it once it is.
+                    stream.Task.ContinueWith(
+                        task => { if (task.Status == System.Threading.Tasks.TaskStatus.RanToCompletion) task.Result?.Dispose(); },
+                        System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Could not close the redeem event stream: {e.Message}");
+            }
         }
 
         public List<RedeemData> GetRedeemList()
@@ -92,6 +121,27 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void SetEnableRedeems(bool value)
         {
+            if (value)
+            {
+                // Nothing can be pushed to Twitch while logged out, so don't claim redeems are on.
+                // The user info is needed too: without its channel id the reward-limit lookup is
+                // skipped and the push goes out unchecked.
+                if (m_auth == null)
+                    m_auth = gameObject.GetComponent<TwitchAuth>();
+
+                if (!IsLoggedIn)
+                {
+                    Jotunn.Logger.LogWarning("[WBTI] Redeems were not enabled: not logged in to Twitch.");
+                    return;
+                }
+
+                if (m_auth.m_userInfo == null)
+                {
+                    Jotunn.Logger.LogWarning("[WBTI] Redeems were not enabled: the Twitch user info is not loaded yet.");
+                    return;
+                }
+            }
+
             m_enabled = value;
 
             if (value)
@@ -145,8 +195,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (m_customRewardEvents == null || !m_auth.m_loggedIn)
                     return;
 
+                // MaybeResult is null until the subscription has finished connecting.
+                EventStream<CustomRewardEvent> stream = m_customRewardEvents.MaybeResult;
+
+                if (stream == null)
+                    return;
+
                 CustomRewardEvent customRewardEvent;
-                m_customRewardEvents.MaybeResult.TryGetNextEvent(out customRewardEvent);
+                stream.TryGetNextEvent(out customRewardEvent);
                 HandleRedeem(customRewardEvent);
             }
             catch (Exception e)

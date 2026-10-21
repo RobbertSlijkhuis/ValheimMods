@@ -26,6 +26,28 @@ namespace WizshBoneTwitchIntegration.Harmony
             }
         }
 
+        // TryPlacePiece is the one place a hammer placement is confirmed (it does its own status
+        // checks and messages before calling PlacePiece), so returning false here cancels the
+        // placement the same way vanilla's own checks do - see WardLimitHelper.
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Player), nameof(Player.TryPlacePiece))]
+        public static bool TryPlacePiece_Prefix(Player __instance, Piece piece)
+        {
+            try
+            {
+                if (!WardLimitHelper.IsWardPiece(piece) || !WardLimitHelper.IsLimitReached(out int max))
+                    return true;
+
+                __instance.Message(MessageHud.MessageType.Center, $"Maximum Twitch Wards reached ({max})");
+                return false;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TryPlacePiece_Prefix failed: " + e);
+                return true;
+            }
+        }
+
         // Vanilla's Start dereferences the closest ShieldGenerator, which only exists in a world with
         // an Ashlands shield generator - see SafeZoneProjectileHelper.ShouldSkipParticleColor.
         [HarmonyPrefix]

@@ -14,8 +14,7 @@ namespace WizshBoneTwitchIntegration.Types
         public static string TerrainEdit => "TerrainEdit";
         public static string Undefined => "Undefined";
         public static string TimeStop => "TimeStop";
-        public static string Weather => "Weather";
-        public static string Door => "Door";
+        public static string Weather => "Weather";        public static string Door => "Door";
         public static string Windmill => "Windmill";
         public static string Smite => "Smite";
         public static string Rain => "Rain";

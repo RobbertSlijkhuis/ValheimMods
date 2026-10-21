@@ -43,6 +43,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private long m_totalPoints;
         private long m_totalRedeems;
         private long m_totalDeaths;
+        private long m_streamerDeaths;
 
         private const string SortPoints = "points";
         private const string SortRedeems = "redeems";
@@ -133,7 +134,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_listContent = ScrollableList.CreateFixed(
                 m_panel, "Leaderboard", new Vector2(0f, ListTopY), ListWidth, ListHeight, autoHideScrollbar: true);
 
-            m_footerText = CreateLabel(m_panel, "", new Vector2(LeftEdgeX + 300f, FooterY), 600f, 24f, 14,
+            m_footerText = CreateLabel(m_panel, "", new Vector2(LeftEdgeX + 350f, FooterY), 700f, 24f, 14,
                 GUIManager.Instance.ValheimBeige, TextAnchor.MiddleLeft, anchorTop: true);
             m_footerNoteText = CreateLabel(m_panel, "", new Vector2(RightEdgeX - 150f, FooterY), 300f, 24f, 14,
                 GUIManager.Instance.ValheimOrange, TextAnchor.MiddleRight, anchorTop: true);
@@ -315,6 +316,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_totalPoints = m_rows.Sum(r => r.points);
             m_totalRedeems = m_rows.Sum(r => (long)r.redeemCount);
             m_totalDeaths = m_rows.Sum(r => (long)r.deaths);
+            m_streamerDeaths = selected.Sum(w => (long)LeaderboardHelper.GetTotalDeaths(w.file));
 
             RefreshList();
         }
@@ -430,7 +432,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void RefreshFooter(int shownCount)
         {
-            m_footerText.text = $"{m_rows.Count:N0} viewers   |   {m_totalPoints:N0} points spent   |   {m_totalRedeems:N0} redeems   |   {m_totalDeaths:N0} deaths caused";
+            m_footerText.text = $"{m_rows.Count:N0} viewers   |   {m_totalPoints:N0} points spent   |   {m_totalRedeems:N0} redeems   |   {m_totalDeaths:N0} deaths caused ({m_streamerDeaths:N0} total)";
             m_footerNoteText.text = string.IsNullOrEmpty(m_searchText) ? "" : $"Showing {shownCount:N0} of {m_rows.Count:N0}";
         }
 

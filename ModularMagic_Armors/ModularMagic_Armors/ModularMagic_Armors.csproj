@@ -59,7 +59,7 @@
 
   <PropertyGroup>
     <VALHEIM_MANAGED>$(VALHEIM_INSTALL)/valheim_Data/Managed</VALHEIM_MANAGED>
-    <UNITY_FOLDER>$(SolutionDir)ModularMagic_ArmorsUnity</UNITY_FOLDER>
+    <UNITY_FOLDER>$(SolutionDir)ModularMagic_Armors_Unity</UNITY_FOLDER>
     <BaseOutputPath></BaseOutputPath>
   </PropertyGroup>
 

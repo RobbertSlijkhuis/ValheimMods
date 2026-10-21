@@ -1,15 +1,16 @@
 ManifestFileVersion: 0
-CRC: 784912140
+UnityVersion: 6000.0.75f1
+CRC: 146613002
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 8df91d210baadbfeb0efcdce5cc1c189
+    Hash: af422c54a981daa3d6154b6856e85914
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 0115d419bbc21defd99fb752b81dfc7f
+    Hash: 9ca15ce677c7d4682d9b86b2111e944b
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 8df91d210baadbfeb0efcdce5cc1c189
+    Hash: 1b01aa844f0efb987e18181d476abd25
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -37,17 +38,17 @@ ClassTypes:
 - Class: 108
   Script: {instanceID: 0}
 - Class: 114
-  Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+  Script: {fileID: 1345532120, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 2106984268, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 2094620348, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+  Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 1345532120, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+  Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 2094620348, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 895252998, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 115
@@ -79,16 +80,18 @@ SerializeReferenceClassIdentifiers:
   ClassName: ItemDrop/ItemData
 - AssemblyName: assembly_valheim
   ClassName: ItemDrop/ItemData/SharedData
+- AssemblyName: assembly_valheim
+  ClassName: Piece/Requirement
 Assets:
 - Assets/Custom/PrefabInstance/Food/Cooked/MMF_GribSnowMushroomSoup.prefab
 - Assets/Custom/PrefabInstance/Food/Cooked/MMF_PircedMushroomSoup.prefab
+- Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_CookedMagicalMushroom.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_Pickable_PircedMushroom.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_GribSnowMushroom.prefab
 - Assets/Custom/PrefabInstance/Food/Cooked/MMF_MagicalMushroomSoup.prefab
 - Assets/Custom/PrefabInstance/Food/Cooked/MMF_SeekerJerky.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_Pickable_GribSnowMushroom.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_MagicalMushroom.prefab
-- Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_CookedMagicalMushroom.prefab
 - Assets/Custom/PrefabInstance/Food/Cooked/MMF_BogMushroomSoup.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_Pickable_BogMushroom.prefab
 - Assets/Custom/PrefabInstance/Food/Mushrooms/MMF_Pickable_VioletCloudMushroom.prefab

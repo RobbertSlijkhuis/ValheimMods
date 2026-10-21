@@ -18,8 +18,9 @@ namespace WizshBoneTwitchIntegration.Helpers
         }
 
         /// <summary>
-        /// Redeems are on AND the user is logged in. <c>m_enabled</c> alone isn't enough: Logout
-        /// never resets it, so it can stay true with nothing actually pushed to Twitch.
+        /// Redeems are on AND the user is logged in. <c>m_enabled</c> alone isn't enough: a deliberate
+        /// logout resets it, but an unexpected session expiry doesn't, so it can stay true while
+        /// logged out.
         /// </summary>
         public static bool AreRedeemsLive()
         {

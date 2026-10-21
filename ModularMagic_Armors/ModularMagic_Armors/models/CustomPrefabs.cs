@@ -27,6 +27,7 @@ namespace ModularMagic_Armors.Models
         public GameObject DarkWizardCapePrefab;
         public GameObject DarkWizardChestPrefab;
         public GameObject DarkWizardLegsPrefab;
+        public GameObject DarkWizardFootstepPrefab;
 
         // Eitr-weave set
         public GameObject EitrWeaveHelmetPrefab;
@@ -38,5 +39,15 @@ namespace ModularMagic_Armors.Models
         public GameObject EmblaChestPrefab;
         public GameObject EmblaLegsPrefab;
         public GameObject EmblaEffects;
+
+        // Spell books
+        public GameObject SpellbookHearthPrefab;
+        public GameObject SpellbookStormPrefab;
+        public GameObject SpellbookCodexPrefab;
+
+        // Lanterns
+        public GameObject LanternMythicalPrefab;
+        public GameObject LanternEverwinterPrefab;
+        public GameObject LanternMistcallerPrefab;
     }
 }

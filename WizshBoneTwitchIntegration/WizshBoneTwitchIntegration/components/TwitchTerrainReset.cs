@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Helpers;
 
@@ -8,6 +9,11 @@ namespace WizshBoneTwitchIntegration.Components
     internal class TwitchTerrainReset : MonoBehaviour, IRedeemTimer
     {
         private const float DebugOutlineHeight = 6f;
+
+        // Every loaded terrain-edit marker on this client, so WBTIRemoveTerrainEdit can find them (the
+        // marker has no collider to overlap-query). Includes permanent edits (duration <= 0), which
+        // never run a countdown but still need a marker to know what to undo.
+        public static readonly HashSet<TwitchTerrainReset> Instances = new HashSet<TwitchTerrainReset>();
 
         private ZNetView m_netView;
 
@@ -34,11 +40,21 @@ namespace WizshBoneTwitchIntegration.Components
                 if (m_netView == null || !m_netView.IsValid())
                     return;
 
+                Instances.Add(this);
+
                 string started = m_netView.GetZDO().GetString(KeyStarted, "");
                 if (started == "")
                     return;
 
-                float duration   = m_netView.GetZDO().GetFloat(KeyDuration, 0f);
+                float duration = m_netView.GetZDO().GetFloat(KeyDuration, 0f);
+
+                // Permanent edit: nothing to count down, the marker just waits for WBTIRemoveTerrainEdit.
+                if (duration <= 0f)
+                {
+                    RegisterDebugOutline(m_netView.GetZDO().GetFloat(KeyRadius, 8f));
+                    return;
+                }
+
                 float timePassed = (float)DateTime.Now.Subtract(DateTime.Parse(started)).TotalSeconds;
                 float remaining  = duration - timePassed;
 
@@ -68,16 +84,25 @@ namespace WizshBoneTwitchIntegration.Components
             zdo.Set(KeyPosZ,     targetPos.z);
             zdo.Set(KeyRadius,   radius);
 
-            StartCountdown(duration, radius);
+            if (duration > 0f)
+                StartCountdown(duration, radius);
+            else
+                RegisterDebugOutline(radius);
+        }
+
+        // Debug-mode visuals (client-local): the area that will be reset. The marker has no
+        // collider, so the area is drawn as a cylinder standing on its position.
+        private void RegisterDebugOutline(float radius)
+        {
+            ColliderBoundsHelper.RegisterCylinder(gameObject, ColliderBoundsHelper.TerrainEditColor, radius, DebugOutlineHeight);
         }
 
         private void StartCountdown(float delay, float radius)
         {
             m_resetAt = Time.time + delay;
 
-            // Debug-mode visuals (client-local): the area that will be reset, and the time left. The
-            // marker has no collider, so the area is drawn as a cylinder standing on its position.
-            ColliderBoundsHelper.RegisterCylinder(gameObject, ColliderBoundsHelper.TerrainEditColor, radius, DebugOutlineHeight);
+            // ...and, for timed edits, the time left.
+            RegisterDebugOutline(radius);
             RedeemTimerHelper.Register(this);
 
             StartCoroutine(ResetAfterDelay(delay));
@@ -85,6 +110,7 @@ namespace WizshBoneTwitchIntegration.Components
 
         public void OnDestroy()
         {
+            Instances.Remove(this);
             ColliderBoundsHelper.Unregister(gameObject);
             RedeemTimerHelper.Unregister(this);
         }
@@ -95,7 +121,21 @@ namespace WizshBoneTwitchIntegration.Components
             ApplyResetAndDestroy();
         }
 
+        // Undoes the edit immediately and removes the marker, from any client (claims ownership of
+        // the marker first so the destroy propagates). Used by WBTIRemoveTerrainEdit.
+        public void RemoveNow()
+        {
+            ApplyReset();
+            ZNetViewHelper.Destroy(gameObject);
+        }
+
         private void ApplyResetAndDestroy()
+        {
+            ApplyReset();
+            m_netView.Destroy();
+        }
+
+        private void ApplyReset()
         {
             try
             {
@@ -122,11 +162,7 @@ namespace WizshBoneTwitchIntegration.Components
             }
             catch (Exception e)
             {
-                Jotunn.Logger.LogError("TwitchTerrainReset.ApplyResetAndDestroy failed: " + e);
-            }
-            finally
-            {
-                m_netView.Destroy();
+                Jotunn.Logger.LogError("TwitchTerrainReset.ApplyReset failed: " + e);
             }
         }
     }

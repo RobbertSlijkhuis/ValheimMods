@@ -1,4 +1,5 @@
 ﻿using RestingRockFace.Gui;
+using RestingRockFace.Helpers;
 using RestingRockFace.Models;
 using RestingRockFace.Types;
 using Splatform;
@@ -14,7 +15,12 @@ namespace RestingRockFace.Components
         public MaterialVariation materialVar;
         public Transform m_faceTransform;
         private readonly int faceDataHash = "FaceData_RRF".GetStableHashCode();
-        public int m_face;
+
+        // Read from the ZDO instead of caching: only the owner runs RPC_SetFace, so a cached field goes stale on
+        // every other client and the Pet.SetFace patch would keep blocking the game's faces once ownership moves there.
+        public int m_face => m_netView != null && m_netView.GetZDO() != null
+            ? m_netView.GetZDO().GetInt(faceDataHash, (int)RockyFaceEnum.Random)
+            : (int)RockyFaceEnum.Random;
 
         public void Awake()
         {
@@ -32,9 +38,6 @@ namespace RestingRockFace.Components
 
             m_gui = new RockyGUI(this);
             m_gui.onAccept.AddListener(SetNameAndFace);
-
-            m_face = m_netView.GetZDO().GetInt(faceDataHash, (int)RockyFaceEnum.Nothing);
-            UpdateFace(m_face);
         }
 
         public void Start()
@@ -42,20 +45,26 @@ namespace RestingRockFace.Components
             if (m_netView == null || m_netView.GetZDO() == null)
                 return;
 
-            if (m_face != (int)RockyFaceEnum.Nothing)
+            if (m_face != (int)RockyFaceEnum.Random)
                 materialVar.SetMaterial(m_face);
         }
 
         public void SetNameAndFace(RockyGuiResult result)
         {
-            m_face = result.face;
-
             if (!m_netView.IsValid())
                 return;
 
             // Only touch the name when it actually changed - the GUI is prefilled with the current name,
             // so a face-only change must not write the default piece name as a custom one.
-            if (result.name != m_tameable.GetName())
+            bool nameChanged = result.name != m_tameable.GetName();
+
+            // Take ownership first so the RPCs below target us; sent to a previous owner they would be dropped
+            // by the IsOwner checks if ownership moved before they arrived. Skipped when nothing changed so an
+            // untouched Accept doesn't steal ownership.
+            if (nameChanged || result.face != m_face)
+                m_netView.ClaimOwnership();
+
+            if (nameChanged)
                 SetName(result.name);
 
             m_netView.InvokeRPC("SetFace_RRF", result.face);
@@ -89,16 +98,18 @@ namespace RestingRockFace.Components
         {
             if (m_netView.IsValid() && m_netView.IsOwner())
             {
-                m_face = face;
                 UpdateFace(face);
 
-                materialVar.SetMaterial(face);
+                if (face == (int)RockyFaceEnum.Random)
+                    RockyFaceHelper.ResetToGameDecided(materialVar, m_netView);
+                else
+                    materialVar.SetMaterial(face);
             }
         }
 
         public void UpdateFace(int face)
         {
-            if (face == (int)RockyFaceEnum.Nothing)
+            if (face == (int)RockyFaceEnum.Random)
                 m_netView.GetZDO().RemoveInt(faceDataHash);
             else
                 m_netView.GetZDO().Set(faceDataHash, face);

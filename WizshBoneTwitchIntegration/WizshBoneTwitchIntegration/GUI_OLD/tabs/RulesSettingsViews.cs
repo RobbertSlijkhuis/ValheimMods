@@ -162,26 +162,26 @@ namespace WizshBoneTwitchIntegration.GuiOld
 
     internal sealed class WardSettingsView
     {
-        [EditorLabel("Twitchy Ward recipe")]
-        [EditorTooltip("The recipe to build the Twitchy Ward")]
+        [EditorLabel("Twitch Ward recipe")]
+        [EditorTooltip("The recipe to build the Twitch Ward")]
         public BoundField<string> wardRecipe = new BoundField<string>(
             () => ProfileSettingsHelper.Current.wardRecipe,
             v => { ProfileSettingsHelper.Current.wardRecipe = v; RulesSettingsViewHelper.Persist(); });
 
         [EditorLabel("Ward burn spawned creatures")]
-        [EditorTooltip("Wether the Twitchy Ward will burn creatures (only spawned by the mod)")]
+        [EditorTooltip("Wether the Twitch Ward will burn creatures (only spawned by the mod)")]
         public BoundField<bool> wardBurnCreatures = new BoundField<bool>(
             () => ProfileSettingsHelper.Current.wardBurnCreatures,
             v => { ProfileSettingsHelper.Current.wardBurnCreatures = v; RulesSettingsViewHelper.Persist(); });
 
         [EditorLabel("Ward push out spawned creatures")]
-        [EditorTooltip("Wether the Twitchy Ward will push out creatures (only spawned by the mod)")]
+        [EditorTooltip("Wether the Twitch Ward will push out creatures (only spawned by the mod)")]
         public BoundField<bool> wardPushCreatures = new BoundField<bool>(
             () => ProfileSettingsHelper.Current.wardPushCreatures,
             v => { ProfileSettingsHelper.Current.wardPushCreatures = v; RulesSettingsViewHelper.Persist(); });
 
         [EditorLabel("Ward push force")]
-        [EditorTooltip("How much force the Twitchy Ward will push out creatures (only spawned by the mod)")]
+        [EditorTooltip("How much force the Twitch Ward will push out creatures (only spawned by the mod)")]
         public BoundField<float> wardPushForce = new BoundField<float>(
             () => ProfileSettingsHelper.Current.wardPushForce,
             v => { ProfileSettingsHelper.Current.wardPushForce = v; RulesSettingsViewHelper.Persist(); });

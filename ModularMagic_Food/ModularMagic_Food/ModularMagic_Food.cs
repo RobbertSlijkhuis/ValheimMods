@@ -41,7 +41,24 @@ namespace ModularMagic_Food
 
             PrefabManager.OnVanillaPrefabsAvailable += AddFood;
             ZoneManager.OnVanillaVegetationAvailable += AddLocations;
+            PieceManager.OnPiecesRegistered += AddServingTrayPieces;
             //ItemManager.OnItemsRegistered += LogRecipes;
+        }
+
+        // Fires on every ObjectDB.Awake, the table's own Contains check keeps this from adding duplicates
+        private void AddServingTrayPieces()
+        {
+            PieceHelper.RegisterOnServingTray(prefabs.mushroom1Prefab, PluginConfig.mushroom1);
+            PieceHelper.RegisterOnServingTray(prefabs.mushroom2Prefab, PluginConfig.mushroom2);
+            PieceHelper.RegisterOnServingTray(prefabs.mushroom3Prefab, PluginConfig.mushroom3);
+            PieceHelper.RegisterOnServingTray(prefabs.mushroom4Prefab, PluginConfig.mushroom4);
+            PieceHelper.RegisterOnServingTray(prefabs.mushroom5Prefab, PluginConfig.mushroom5);
+            PieceHelper.RegisterOnServingTray(prefabs.mushroom1CookedPrefab, PluginConfig.mushroom1Cooked);
+            PieceHelper.RegisterOnServingTray(prefabs.mushroom1SoupPrefab, PluginConfig.mushroom1Soup);
+            PieceHelper.RegisterOnServingTray(prefabs.mushroom2SoupPrefab, PluginConfig.mushroom2Soup);
+            PieceHelper.RegisterOnServingTray(prefabs.mushroom3SoupPrefab, PluginConfig.mushroom3Soup);
+            PieceHelper.RegisterOnServingTray(prefabs.mushroom4SoupPrefab, PluginConfig.mushroom4Soup);
+            PieceHelper.RegisterOnServingTray(prefabs.mushroom5SoupPrefab, PluginConfig.mushroom5Soup);
         }
 
         //private void LogRecipes()
@@ -162,7 +179,7 @@ namespace ModularMagic_Food
                 gribSnowVegetationConfig.MinOceanDepth = 0f;
                 gribSnowVegetationConfig.MaxOceanDepth = 2f;
                 gribSnowVegetationConfig.MinTilt = 0f;
-                gribSnowVegetationConfig.MaxTilt = 25;
+                gribSnowVegetationConfig.MaxTilt = 30;
                 ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(prefabs.mushroom2PickablePrefab, true, gribSnowVegetationConfig));
 
                 // Bog Mushroom
@@ -184,7 +201,7 @@ namespace ModularMagic_Food
                 bogMushroomVegetationConfig.ForestThresholdMin = 0f;
                 bogMushroomVegetationConfig.ForestThresholdMax = 1f;
                 bogMushroomVegetationConfig.Min = 1;
-                bogMushroomVegetationConfig.Max = 2;
+                bogMushroomVegetationConfig.Max = 4;
                 bogMushroomVegetationConfig.MinAltitude = PluginConfig.mushroom3.minAltitude.Value;
                 bogMushroomVegetationConfig.MaxAltitude = PluginConfig.mushroom3.maxAltitude.Value;
                 bogMushroomVegetationConfig.MinTerrainDelta = 0f;
@@ -193,7 +210,7 @@ namespace ModularMagic_Food
                 bogMushroomVegetationConfig.MinOceanDepth = 0f;
                 bogMushroomVegetationConfig.MaxOceanDepth = 0f;
                 bogMushroomVegetationConfig.MinTilt = 0f;
-                bogMushroomVegetationConfig.MaxTilt = 20;
+                bogMushroomVegetationConfig.MaxTilt = 30;
                 ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(prefabs.mushroom3PickablePrefab, true, bogMushroomVegetationConfig));
 
                 // Pirced Mushroom
@@ -215,7 +232,7 @@ namespace ModularMagic_Food
                 pircedMushroomVegetationConfig.ForestThresholdMin = 0f;
                 pircedMushroomVegetationConfig.ForestThresholdMax = 1f;
                 pircedMushroomVegetationConfig.Min = 1;
-                pircedMushroomVegetationConfig.Max = 2;
+                pircedMushroomVegetationConfig.Max = 4;
                 pircedMushroomVegetationConfig.MinAltitude = PluginConfig.mushroom4.minAltitude.Value;
                 pircedMushroomVegetationConfig.MaxAltitude = PluginConfig.mushroom4.maxAltitude.Value;
                 pircedMushroomVegetationConfig.MinTerrainDelta = 0f;
@@ -224,7 +241,7 @@ namespace ModularMagic_Food
                 pircedMushroomVegetationConfig.MinOceanDepth = 0f;
                 pircedMushroomVegetationConfig.MaxOceanDepth = 0f;
                 pircedMushroomVegetationConfig.MinTilt = 0f;
-                pircedMushroomVegetationConfig.MaxTilt = 20;
+                pircedMushroomVegetationConfig.MaxTilt = 40;
                 ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(prefabs.mushroom4PickablePrefab, true, pircedMushroomVegetationConfig));
 
                 // Violet Cloud Mushroom

@@ -11,6 +11,15 @@
             UpdateTooltip();
         }
 
+        // Vanilla Skills.GetSkillLevel asks every active status effect, so each worn piece adds its own bonus
+        public override void ModifySkillLevel(Skills.SkillType skill, ref float level)
+        {
+            if (skill == Skills.SkillType.ElementalMagic)
+                level += m_elementalMagic;
+            else if (skill == Skills.SkillType.BloodMagic)
+                level += m_bloodMagic;
+        }
+
         public void SetEitr(float value)
         {
             m_eitr = value;

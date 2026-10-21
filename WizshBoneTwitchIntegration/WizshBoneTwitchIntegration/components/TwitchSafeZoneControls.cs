@@ -96,7 +96,7 @@ namespace WizshBoneTwitchIntegration.Components
 
         public string GetHoverText()
         {
-            string title = "Twitchy Ward (Active)\n";
+            string title = "Twitch Ward (Active)\n";
             string inputString = Localization.instance.Localize("[<color=yellow>$KEY_Use</color>]");
             string inputAltString = Localization.instance.Localize("[<color=yellow>$KEY_AltPlace + $KEY_Use</color>]");
             string text = $"{inputString} Change radius\n{inputAltString} Cycle shield/projector/hidden";
