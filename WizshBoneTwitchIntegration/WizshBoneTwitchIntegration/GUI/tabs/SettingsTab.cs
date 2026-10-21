@@ -155,9 +155,13 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             BuildStringCell(prefixRow, -cellWidth / 2f - ColGap / 2f, cellWidth,
                 "Redeem prefix", "Added in front of every redeem title. No trailing space needed, it's added automatically. Max 6 characters.",
                 () => ProfileSettingsHelper.Current.redeemTitlePrefix,
-                v => ProfileSettingsHelper.Current.redeemTitlePrefix = v,
+                v =>
+                {
+                    RedeemManager.RegisterPrefixChange(ProfileSettingsHelper.Current.redeemTitlePrefix, v);
+                    ProfileSettingsHelper.Current.redeemTitlePrefix = v;
+                },
                 Defaults.redeemTitlePrefix,
-                maxLength: 6);
+                maxLength: ProfileSettingsHelper.MaxPrefixLength);
             BuildBoolCell(prefixRow, cellWidth / 2f + ColGap / 2f, cellWidth,
                 ("Reject when paused", "Auto reject and refund redeems while the game is paused or the menu is open",
                     () => ProfileSettingsHelper.Current.rejectWhenPaused,

@@ -86,6 +86,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="JotunnLib" Version="2.30.2" />
+    <!-- Only for compiling, not shipped: the game itself ships Newtonsoft.Json (valheim_Data/Managed) and loads it first. -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
 

@@ -59,7 +59,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             // m_redeemTitle = customRewardEvent.CustomRewardTitle assignments feeding this), i.e.
             // the Twitch-facing (prefixed) title, not the raw RedeemData.title - match via
             // RedeemManager.GetFullTitle() the same way TwitchCustomRewards.HandleRedeem does.
-            return redeems.Find(item => RedeemManager.GetFullTitle(item) == value);
+            return redeems.Find(item => RedeemManager.SameTitle(RedeemManager.GetFullTitle(item), value));
         }
 
         //public static void SetPlayerSpeed(float multiplier)

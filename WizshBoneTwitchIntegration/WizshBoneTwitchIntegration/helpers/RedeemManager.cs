@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using WizshBoneTwitchIntegration.Models;
+using WizshBoneTwitchIntegration.TwitchApi;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.Helpers
@@ -21,6 +22,16 @@ namespace WizshBoneTwitchIntegration.Helpers
     /// </summary>
     internal static class RedeemManager
     {
+        /// <summary>
+        /// Longest <see cref="RedeemData.title"/> the wizard accepts: Twitch's title limit minus the longest
+        /// possible prefix and its space, whatever prefix is set. A title that fits with a short prefix
+        /// then still fits when the prefix is made longer, so Twitch never cuts a title.
+        /// </summary>
+        public const int MaxTitleLength = TwitchRewardSync.MaxTitleLength - ProfileSettingsHelper.MaxPrefixLength - 1;
+
+        /// <summary>Longest <see cref="RedeemData.description"/> Twitch accepts as a reward's description.</summary>
+        public const int MaxDescriptionLength = TwitchRewardSync.MaxPromptLength;
+
         /// <summary>
         /// The Twitch-facing title for <paramref name="redeem"/>: the active profile's
         /// <see cref="ProfileSettingsHelper.Current"/>.<c>redeemTitlePrefix</c> prepended to
@@ -85,6 +96,15 @@ namespace WizshBoneTwitchIntegration.Helpers
                    ?? new List<RedeemData>();
         }
 
+        /// <summary>
+        /// Whether two redeems would get the same title on Twitch. Ignores capitals, because the Twitch sync
+        /// treats "Rain" and "rain" as one title and would leave the second redeem out.
+        /// </summary>
+        internal static bool SameTitle(string a, string b)
+        {
+            return string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
+        }
+
         public static bool AddRedeem(RedeemData redeem, out string error, string profileName = null)
         {
             error = null;
@@ -93,7 +113,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             {
                 return EditOnDisk(profileName, redeems =>
                 {
-                    if (redeems.Exists(r => r.title == redeem.title))
+                    if (redeems.Exists(r => SameTitle(r.title, redeem.title)))
                         return $"A redeem named '{redeem.title}' already exists.";
 
                     redeems.Add(redeem);
@@ -101,7 +121,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 }, out error);
             }
 
-            if (RedeemHelper.redeems.Exists(r => r.title == redeem.title))
+            if (RedeemHelper.redeems.Exists(r => SameTitle(r.title, redeem.title)))
             {
                 error = $"A redeem named '{redeem.title}' already exists.";
                 return false;
@@ -129,7 +149,9 @@ namespace WizshBoneTwitchIntegration.Helpers
                     if (diskIndex < 0)
                         return "Redeem not found.";
 
-                    if (titleChanged && redeems.Exists(r => r.title == updated.title))
+                    // A change of capitals only ("Rain" -> "rain") matches the redeem itself, which is fine.
+                    int clash = redeems.FindIndex(r => SameTitle(r.title, updated.title));
+                    if (titleChanged && clash >= 0 && clash != diskIndex)
                         return $"A redeem named '{updated.title}' already exists.";
 
                     redeems[diskIndex] = updated;
@@ -144,14 +166,44 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return false;
             }
 
-            if (titleChanged && RedeemHelper.redeems.Exists(r => r != original && r.title == updated.title))
+            if (titleChanged && RedeemHelper.redeems.Exists(r => r != original && SameTitle(r.title, updated.title)))
             {
                 error = $"A redeem named '{updated.title}' already exists.";
                 return false;
             }
 
+            // Tell the Twitch sync before SaveActive pushes: it then edits the reward under its old title
+            // (keeping its id) instead of deleting it and creating a new one.
+            if (titleChanged)
+                RegisterRename(GetFullTitle(original), GetFullTitle(updated));
+
             RedeemHelper.redeems[index] = updated;
             return SaveActive(out error);
+        }
+
+        private static void RegisterRename(string previousTitle, string newTitle)
+        {
+            if (Game.instance == null)
+                return;
+
+            Game.instance.gameObject.GetComponent<TwitchCustomRewards>()?.RegisterRename(previousTitle, newTitle);
+        }
+
+        /// <summary>
+        /// Changing the title prefix renames every redeem on Twitch. Tell the Twitch sync, so it edits the
+        /// rewards (keeping their ids) instead of deleting and creating all of them, and ask for that sync.
+        /// The prefix field calls this for every letter typed, so the sync waits until typing has stopped.
+        /// </summary>
+        public static void RegisterPrefixChange(string previousPrefix, string newPrefix)
+        {
+            if (previousPrefix == newPrefix)
+                return;
+
+            foreach (RedeemData redeem in RedeemHelper.redeems)
+                RegisterRename(GetFullTitle(redeem.title, previousPrefix), GetFullTitle(redeem.title, newPrefix));
+
+            if (Game.instance != null)
+                Game.instance.gameObject.GetComponent<TwitchCustomRewards>()?.SetRewardsSoon();
         }
 
         public static bool DeleteRedeem(RedeemData redeem, out string error, string profileName = null)
@@ -211,7 +263,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             {
                 return EditOnDisk(profileName, redeems =>
                 {
-                    if (redeems.Exists(r => r.title == newTitle))
+                    if (redeems.Exists(r => SameTitle(r.title, newTitle)))
                         return $"A redeem named '{newTitle}' already exists.";
 
                     RedeemData diskCopy = redeem.DeepClone<RedeemData>();
@@ -221,7 +273,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 }, out error);
             }
 
-            if (RedeemHelper.redeems.Exists(r => r.title == newTitle))
+            if (RedeemHelper.redeems.Exists(r => SameTitle(r.title, newTitle)))
             {
                 error = $"A redeem named '{newTitle}' already exists.";
                 return false;

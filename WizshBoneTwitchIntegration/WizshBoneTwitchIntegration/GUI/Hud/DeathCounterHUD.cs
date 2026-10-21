@@ -10,7 +10,7 @@ namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
     /// Top-center "Deaths: N" label for the playing character's vanilla Deaths stat, built like
-    /// <see cref="SafeZoneHUD"/> and owned/ticked by <see cref="WizshBoneGUI"/>. Under it, a smaller
+    /// <see cref="StatusMessageHUD"/> and owned/ticked by <see cref="WizshBoneGUI"/>. Under it, a smaller
     /// list of the top viewers by deaths caused in the current world, from the Leaderboards.
     /// </summary>
     internal class DeathCounterHUD

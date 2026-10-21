@@ -122,7 +122,8 @@ namespace WizshBoneTwitchIntegration.Gui
         /// (the panel widens to fit it). Null keeps the standard two-button layout.</param>
         /// <param name="onExtra">Invoked when the user clicks the extra button. May be <c>null</c>.</param>
         /// <param name="confirmEnabled">False greys out the confirm button so it can't be clicked.</param>
-        public void Show(
+        /// <returns>False when the dialog could not be shown (not initialised yet), so no button callback will ever run.</returns>
+        public bool Show(
             string title,
             string description,
             Action onConfirm,
@@ -136,7 +137,7 @@ namespace WizshBoneTwitchIntegration.Gui
             if (m_panel == null)
             {
                 Jotunn.Logger.LogWarning("[WBTI] ConfirmDialog.Show called before Init().");
-                return;
+                return false;
             }
 
             m_titleText.text       = title;
@@ -180,6 +181,8 @@ namespace WizshBoneTwitchIntegration.Gui
                 m_blockingInput = true;
                 InputBlockGate.Push();
             }
+
+            return true;
         }
 
         public void Hide()

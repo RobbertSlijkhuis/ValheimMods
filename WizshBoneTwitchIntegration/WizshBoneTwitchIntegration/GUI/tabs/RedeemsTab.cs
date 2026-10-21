@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Jotunn.Managers;
 using TwitchSDK.Interop;
 using UnityEngine;
@@ -7,7 +8,9 @@ using UnityEngine.UI;
 using WizshBoneTwitchIntegration.Commands;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
+using WizshBoneTwitchIntegration.TwitchApi;
 using WizshBoneTwitchIntegration.TwitchIntegration;
+using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.Gui.Tabs
 {
@@ -34,6 +37,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private Text m_titleText;
         private Text m_slotsText;
         private Button m_newRedeemBtn;
+        private Button m_retryBtn;
 
         private readonly ColumnSortState m_sortState = new ColumnSortState("title");
         private readonly List<(string Text, string SortKey, Text Label)> m_sortableHeaders = new List<(string, string, Text)>();
@@ -70,10 +74,12 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private const float ColumnHeaderY = -136f;
         private const float ListTopInset = 155f;
 
-        private const float SearchWidth = 300f;
+        // Narrowed from 300 to make room for the 80-wide Retry button after the history button.
+        private const float SearchWidth = 220f;
         private const float ToolbarButtonSpacing = 10f;
         private const float NewRedeemBtnWidth = 150f;
         private const float HistoryBtnWidth = 160f;
+        private const float RetryBtnWidth = 80f;
         private const float ProfileDropdownWidth = 180f; // narrowed from 220 to make room for the 160-wide history button
         private const float ProfileLabelWidth = 60f;
 
@@ -209,18 +215,60 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             int total = ours + (others ?? 0);
             bool over = total > max;
 
-            bool nearLimit = total >= SlotsWarnThreshold;
+            // A global key that isn't in the world yet would raise the slots in use to the warn threshold when it's added.
+            bool unlockOver = GetUnlockWarnings(customRewards, others ?? 0).Count > 0;
+            bool nearLimit = total >= SlotsWarnThreshold || unlockOver;
 
             // The "used / max" figure is Valheim yellow. From the warn threshold the whole line is orange,
             // and red once over the limit - the yellow is dropped then so it doesn't soften the warning.
             string usage = over || nearLimit ? $"{total} / {max}" : Emphasis.Of($"{total} / {max}");
 
-            m_slotsText.text = others == null
+            m_slotsText.text = (others == null
                 ? $"Twitch slots: {usage} estimate"
-                : $"Twitch slots: {usage} used";
+                : $"Twitch slots: {usage} used") + (unlockOver ? " (!)" : "");
             m_slotsText.color = over ? Color.red
                 : nearLimit ? GUIManager.Instance.ValheimOrange
                 : GUIManager.Instance.ValheimBeige;
+
+            // Only offered while the last update to Twitch was skipped for being over the limit.
+            if (m_retryBtn != null)
+                m_retryBtn.gameObject.SetActive(customRewards.PushBlockedByLimit);
+        }
+
+        /// <summary>
+        /// The global keys that would raise the slots in use to the warn threshold (<see cref="SlotsWarnThreshold"/>)
+        /// or beyond once the world gains them (the next boss, a first troll kill...), with the slots they would use.
+        /// Keys that don't add any redeem are left out, so being at 45 already
+        /// doesn't list every key. Empty outside a world, where global keys don't exist, and for keys the world
+        /// already has (those are in the current count).
+        /// </summary>
+        private static List<(string Label, int After)> GetUnlockWarnings(TwitchCustomRewards customRewards, int others)
+        {
+            List<(string Label, int After)> warnings = new List<(string Label, int After)>();
+
+            if (ZoneSystem.instance == null)
+                return warnings;
+
+            int current = customRewards.CountPushedRedeems() + others;
+
+            foreach (KeyValuePair<string, string> key in GlobalKeyType.Labeled)
+            {
+                if (ZoneSystem.instance.GetGlobalKey(key.Key))
+                    continue;
+
+                int after = customRewards.CountPushedRedeemsAfter(key.Key) + others;
+
+                if (after >= SlotsWarnThreshold && after > current)
+                    warnings.Add((key.Value, after));
+            }
+
+            return warnings;
+        }
+
+        private void OnRetryPush()
+        {
+            if (Game.instance != null)
+                Game.instance.gameObject.GetComponent<TwitchCustomRewards>().RetryPush();
         }
 
         /// <summary>
@@ -241,16 +289,39 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             string oursLine = $"This mod (enabled): {Emphasis.Of(ours.ToString())}";
 
+            string blockedLine = customRewards.PushBlockedByLimit
+                ? "\nThe last update to Twitch was skipped because it was over the limit. Press Retry once you've freed up slots."
+                : "";
+
+            List<(string Label, int After)> unlockWarnings = GetUnlockWarnings(customRewards, others ?? 0);
+            string unlockLines = unlockWarnings.Count == 0
+                ? ""
+                : "\nSlots once the world gets:\n" + string.Join("\n", unlockWarnings.Select(w =>
+                    $"  {w.Label}: {ColorBySlots($"{w.After} / {max}", w.After)}"));
+
             if (others == null)
             {
-                return $"{title}\n{oursLine}\nAlready on Twitch: unknown (not logged in, or Twitch could not be reached)." +
-                       $"\nTwitch allows {max} in total.";
+                // Logged out the answer is simply missing; logged in it means the lookup failed.
+                string unknown = customRewards.IsLoggedIn ? "unknown" : Emphasis.Of("Log in");
+                return $"{title}\n{oursLine}\nAlready on Twitch: {unknown}{blockedLine}{unlockLines}";
             }
 
             int total = ours + others.Value;
             return $"{title}\n{oursLine}" +
                    $"\nAlready on Twitch: {Emphasis.Of(others.Value.ToString())}" +
-                   $"\nTotal: {Emphasis.Of($"{total} / {max}")}";
+                   $"\nTotal: {ColorBySlots($"{total} / {max}", total)}{blockedLine}{unlockLines}";
+        }
+
+        // Colours a slots figure like the counter label: yellow normally, orange from the warn threshold, red over the limit.
+        private static string ColorBySlots(string text, int used)
+        {
+            if (used > TwitchRewardLimitHelper.MaxRewards)
+                return $"<color=#{ColorUtility.ToHtmlStringRGB(Color.red)}>{text}</color>";
+
+            if (used >= SlotsWarnThreshold)
+                return $"<color=#{ColorUtility.ToHtmlStringRGB(GUIManager.Instance.ValheimOrange)}>{text}</color>";
+
+            return Emphasis.Of(text);
         }
 
         /// <summary>
@@ -293,6 +364,11 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             m_newRedeemBtn = CreateToolbarButton("+ New redeem", NewRedeemBtnWidth, cursor, OpenCreate);
             cursor += ToolbarButtonSpacing + NewRedeemBtnWidth;
             CreateToolbarButton("View history",HistoryBtnWidth, cursor, () => OnOpenHistoryRequested?.Invoke());
+            cursor += ToolbarButtonSpacing + HistoryBtnWidth;
+
+            // Only shown while the last update to Twitch was skipped for being over the limit (UpdateSlotsText).
+            m_retryBtn = CreateToolbarButton("Retry", RetryBtnWidth, cursor, OnRetryPush);
+            m_retryBtn.gameObject.SetActive(false);
 
             float dropdownX = RightEdgeX - ProfileDropdownWidth / 2f;
             float labelX = dropdownX - ProfileDropdownWidth / 2f - 8f - ProfileLabelWidth / 2f;

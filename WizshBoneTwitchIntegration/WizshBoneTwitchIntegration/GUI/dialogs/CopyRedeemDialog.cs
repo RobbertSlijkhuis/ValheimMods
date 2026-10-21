@@ -99,7 +99,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_profileDropdown = new SearchableDropdown();
             m_profileDropdown.Build(m_panel, new Vector2(0f, DropdownY), FieldWidth, GuiFieldBuilder.FieldHeight, new List<string>(), null);
 
-            m_nameInput = GuiFieldBuilder.CreateInputField(m_panel, new Vector2(0f, InputY), FieldWidth);
+            m_nameInput = GuiFieldBuilder.CreateInputField(m_panel, new Vector2(0f, InputY), FieldWidth, maxLength: Helpers.RedeemManager.MaxTitleLength);
 
             m_feedbackText = GUIManager.Instance.CreateText(
                 text:                "",

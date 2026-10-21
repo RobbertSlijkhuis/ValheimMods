@@ -60,7 +60,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             return true;
         }
 
-        private const int MaxPrefixLength = 6;
+        public const int MaxPrefixLength = 6;
 
         private static string ClampPrefix(string prefix)
         {

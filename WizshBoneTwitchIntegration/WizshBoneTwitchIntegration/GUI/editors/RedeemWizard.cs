@@ -701,12 +701,12 @@ namespace WizshBoneTwitchIntegration.Gui
                 graphic.raycastTarget = false;
             m_prefixInput.textComponent.alignment = TextAnchor.MiddleCenter;
 
-            m_titleInput = GuiFieldBuilder.CreateInputField(rewardBox, new Vector2(middleCenterX, titleRowY), middleWidth, placeholderText: "Reward title");
+            m_titleInput = GuiFieldBuilder.CreateInputField(rewardBox, new Vector2(middleCenterX, titleRowY), middleWidth, placeholderText: "Reward title", maxLength: RedeemManager.MaxTitleLength);
             m_titleInput.onValueChanged.AddListener(OnTitleInputChanged);
             LayoutTitleRow();
 
             float descriptionRowY = secondContentTopY - RowHeight / 2f;
-            m_descriptionInput = GuiFieldBuilder.CreateInputField(rewardBox, new Vector2(middleCenterX, descriptionRowY), middleWidth, placeholderText: "Description shown to viewers when they open the reward");
+            m_descriptionInput = GuiFieldBuilder.CreateInputField(rewardBox, new Vector2(middleCenterX, descriptionRowY), middleWidth, placeholderText: "Description shown to viewers when they open the reward", maxLength: RedeemManager.MaxDescriptionLength);
             m_descriptionInput.onValueChanged.AddListener(v => m_working.description = v);
 
             // Cooldown: number on the left, unit dropdown on the right, sharing the points column.
@@ -873,20 +873,12 @@ namespace WizshBoneTwitchIntegration.Gui
         /// </summary>
         private static List<DropdownOption> GetAvailableGlobalKeyOptions()
         {
-            return new List<DropdownOption>
-            {
-                new DropdownOption("", "None"),
-                new DropdownOption(GlobalKeyType.DefeatedEikthyr, "Defeated Eikthyr"),
-                new DropdownOption(GlobalKeyType.DefeatedElder, "Defeated the Elder"),
-                new DropdownOption(GlobalKeyType.DefeatedBonemass, "Defeated Bonemass"),
-                new DropdownOption(GlobalKeyType.DefeatedModer, "Defeated Moder"),
-                new DropdownOption(GlobalKeyType.DefeatedYagluth, "Defeated Yagluth"),
-                new DropdownOption(GlobalKeyType.DefeatedQueen, "Defeated the Queen"),
-                new DropdownOption(GlobalKeyType.DefeatedFader, "Defeated Fader"),
-                new DropdownOption(GlobalKeyType.KilledBat, "Killed a Bat"),
-                new DropdownOption(GlobalKeyType.KilledTroll, "Killed a Troll"),
-                new DropdownOption(GlobalKeyType.killedSurtling, "Killed a Surtling"),
-            };
+            List<DropdownOption> options = new List<DropdownOption> { new DropdownOption("", "None") };
+
+            foreach (KeyValuePair<string, string> key in GlobalKeyType.Labeled)
+                options.Add(new DropdownOption(key.Key, key.Value));
+
+            return options;
         }
 
         /// <summary>

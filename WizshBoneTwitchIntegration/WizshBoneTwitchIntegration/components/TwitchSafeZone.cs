@@ -82,7 +82,7 @@ namespace WizshBoneTwitchIntegration.Components
             if (customRewards != null)
                 customRewards.m_playerIsInSafeZone = false;
 
-            Game.instance?.gameObject.GetComponent<WizshBoneGUI>()?.HideSafeZoneHUD();
+            StatusMessages.SetSafeZone(false);
         }
 
         public static bool IsPointInSafeZone(Vector3 point)
@@ -441,7 +441,7 @@ namespace WizshBoneTwitchIntegration.Components
             if (s_localPlayerZoneCount == 1)
             {
                 m_customRewards.m_playerIsInSafeZone = true;
-                Game.instance.gameObject.GetComponent<WizshBoneGUI>()?.ShowSafeZoneHUD();
+                StatusMessages.SetSafeZone(true);
             }
         }
 
@@ -453,7 +453,7 @@ namespace WizshBoneTwitchIntegration.Components
             if (s_localPlayerZoneCount == 0)
             {
                 m_customRewards.m_playerIsInSafeZone = false;
-                Game.instance.gameObject.GetComponent<WizshBoneGUI>()?.HideSafeZoneHUD();
+                StatusMessages.SetSafeZone(false);
             }
         }
 

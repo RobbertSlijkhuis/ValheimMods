@@ -650,7 +650,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             ModData data = ExtraConfigHelper.ReadRedeemsConfig(targetPath) ?? new ModData();
             data.redeems = data.redeems ?? new List<RedeemData>();
 
-            if (data.redeems.Exists(r => r.title == newTitle))
+            if (data.redeems.Exists(r => RedeemManager.SameTitle(r.title, newTitle)))
             {
                 error = $"A redeem named '{newTitle}' already exists in '{targetProfileName}'.";
                 return false;

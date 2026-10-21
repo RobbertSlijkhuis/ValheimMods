@@ -27,7 +27,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private readonly WizshBoneShellGUI m_shell = new WizshBoneShellGUI();
         private readonly WizshBoneHUD m_hud = new WizshBoneHUD();
         private readonly ConfirmDialog m_exitConfirmDialog = new ConfirmDialog();
-        private readonly SafeZoneHUD m_safeZoneHUD = new SafeZoneHUD();
+        private readonly StatusMessageHUD m_statusMessageHUD = new StatusMessageHUD();
         private readonly DeathCounterHUD m_deathCounterHUD = new DeathCounterHUD();
 
         private TwitchAuth m_auth;
@@ -48,7 +48,7 @@ namespace WizshBoneTwitchIntegration.Gui
             {
                 m_hud.ShowHUD();
                 m_exitConfirmDialog.Init();
-                m_safeZoneHUD.Init();
+                m_statusMessageHUD.Init();
                 m_deathCounterHUD.Init();
                 GUIManager.OnCustomGUIAvailable -= OnGUIAvailable;
             }
@@ -63,7 +63,7 @@ namespace WizshBoneTwitchIntegration.Gui
             // Unlike the shell (only refreshed while its panel is visible), the corner HUD is
             // always on-screen, so it updates every frame regardless of IsVisible.
             m_hud.UpdateHUD();
-            m_safeZoneHUD.SyncVisibility();
+            m_statusMessageHUD.SyncVisibility();
             m_deathCounterHUD.Refresh();
 
             InputBlockGate.Verify();
@@ -117,9 +117,9 @@ namespace WizshBoneTwitchIntegration.Gui
         /// of whether the shell/HUD has ever needed attention before, so this must be reachable
         /// independent of <see cref="ShowShell"/>/<see cref="IsVisible"/>.
         /// </summary>
-        public void ShowExitConfirm(string title, string description, Action onConfirm, Action onCancel = null, string confirmText = "Confirm", string cancelText = "Cancel")
+        public bool ShowExitConfirm(string title, string description, Action onConfirm, Action onCancel = null, string confirmText = "Confirm", string cancelText = "Cancel")
         {
-            m_exitConfirmDialog.Show(title, description, onConfirm, onCancel, confirmText, cancelText);
+            return m_exitConfirmDialog.Show(title, description, onConfirm, onCancel, confirmText, cancelText);
         }
 
         /// <summary>
@@ -133,11 +133,13 @@ namespace WizshBoneTwitchIntegration.Gui
         }
 
         /// <summary>
-        /// Shows/hides the "Streamer is in a safe zone!" label - called by
-        /// components/TwitchSafeZone.cs as the local player enters/exits a safe zone.
+        /// Shows/hides a persistent on-screen status message (the safe zone one, the redeems-over-limit one, ...).
+        /// Callers go through <see cref="StatusMessages"/>, which holds each message's text, color and priority.
         /// </summary>
-        public void ShowSafeZoneHUD() => m_safeZoneHUD.Show();
-        public void HideSafeZoneHUD() => m_safeZoneHUD.Hide();
+        public void ShowStatusMessage(string id, string text, Color color, int priority, Func<bool> visibleWhen = null)
+            => m_statusMessageHUD.Show(id, text, color, priority, visibleWhen);
+
+        public void HideStatusMessage(string id) => m_statusMessageHUD.Hide(id);
 
         /// <summary>
         /// Shows the shell and jumps straight to Home's history section - see

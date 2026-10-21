@@ -1,7 +1,7 @@
 ﻿using Jotunn.Managers;
 using System;
 using System.Collections;
-using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using TwitchSDK;
 using TwitchSDK.Interop;
 using UnityEngine;
@@ -30,6 +30,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         // private const int FallbackTokenLifetimeMinutes = 16;
         // We log out this long before the real expiry, so the redeems can still be removed from Twitch with a valid token.
         private const int LogoutBeforeExpiryMinutes = 5;
+        private const string RemovingRewardsMessage = "Removing redeems from Twitch, this could take a moment";
+        private const string RewardsNotRemovedMessage = "Your redeems could not be confirmed removed from Twitch. Any left are cleaned up the next time you enable redeems.";
         // Minutes-remaining marks (until that logout) at which the player is warned, once each per login (descending).
         private static readonly int[] WarnAtMinutesRemaining = { 15, 10, 5, 1 };
         private int m_lastWarnedMark = int.MaxValue;
@@ -38,6 +40,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         // Set by the deliberate logout paths below so GetAuthState can tell them apart from the
         // session dropping on its own (token expiry) and only warn about the latter.
         private bool m_logoutRequested;
+        // Set while a logout or quit waits for the redeems to be removed from Twitch (or for the player's answer).
+        private bool m_logoutInProgress;
         public bool m_waitingForCode = false;
         private DateTime m_waitingForCodeSince;
 
@@ -239,14 +243,68 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             ShowCenterMessage("You have been logged out from Twitch (login expired). Redeems and chat are inactive until you log in again.", 15);
 
             m_customRewards.m_enabled = false;
-            TaskAwaiter awaiter = m_customRewards.ClearRewards();
-            awaiter.OnCompleted(OnLimitRewardsCleared);
+            StartCoroutine(WaitForClear(m_customRewards.ClearRewards(), OnLimitRewardsCleared));
         }
 
-        private void OnLimitRewardsCleared()
+        private void OnLimitRewardsCleared(bool removed)
         {
+            if (!removed)
+                ShowCenterMessage(RewardsNotRemovedMessage, 15);
+
             m_customRewards.UnSubscribeFromRedeemEvents();
             LogOutOfTwitch();
+        }
+
+        // Waits for ClearRewards to finish and tells onDone whether every reward is confirmed gone. It always
+        // ends: each Twitch request has its own time limit, and the clear stops at the first one that gets no answer.
+        private IEnumerator WaitForClear(Task<bool> clear, Action<bool> onDone)
+        {
+            while (!clear.IsCompleted)
+                yield return null;
+
+            bool removed = !clear.IsFaulted && clear.Result;
+
+            if (!removed)
+                Jotunn.Logger.LogWarning("[WBTI] Not all redeems could be confirmed removed from Twitch before logging out.");
+
+            onDone(removed);
+        }
+
+        // Removes the redeems from Twitch and only then calls proceed(removed). When some could not be removed the
+        // game doesn't carry on by itself: the player picks Retry or continuing anyway (named by anywayText).
+        private void ClearBeforeExit(string anywayText, Action<bool> proceed)
+        {
+            m_logoutProgressHUD.Show(this, RemovingRewardsMessage);
+            StartCoroutine(WaitForClear(m_customRewards.ClearRewards(), removed => OnExitClearDone(removed, anywayText, proceed)));
+        }
+
+        private void OnExitClearDone(bool removed, string anywayText, Action<bool> proceed)
+        {
+            if (removed)
+            {
+                proceed(true);
+                return;
+            }
+
+            m_logoutProgressHUD.Hide();
+            WizshBoneGUI gui = gameObject.GetComponent<WizshBoneGUI>();
+
+            bool asked = gui != null && gui.ShowExitConfirm(
+                "Redeems not removed",
+                "Your redeems could not be removed from Twitch. Retry, or continue and have them cleaned up the next time you enable redeems.",
+                onConfirm:   () => ClearBeforeExit(anywayText, proceed),
+                onCancel:    () =>
+                {
+                    // The steps after this one update the message on this panel, which only works while it is up.
+                    m_logoutProgressHUD.Show(this, anywayText + "...");
+                    proceed(false);
+                },
+                confirmText: "Retry",
+                cancelText:  anywayText);
+
+            // Nothing to ask with (the GUI isn't up): carry on, the redeems are cleaned up at the next enable.
+            if (!asked)
+                proceed(false);
         }
 
         public IEnumerator TrackAuthState()
@@ -407,9 +465,23 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void Logout()
         {
-            m_customRewards.ClearRewards();
-            m_customRewards.UnSubscribeFromRedeemEvents();
+            // A second click while the rewards are still being removed would start a second clear.
+            if (m_logoutInProgress)
+                return;
 
+            m_logoutInProgress = true;
+            ClearBeforeExit("Logout anyway", OnLogoutRewardsCleared);
+        }
+
+        private void OnLogoutRewardsCleared(bool removed)
+        {
+            m_logoutProgressHUD.Hide();
+            m_logoutInProgress = false;
+
+            if (!removed)
+                ShowCenterMessage(RewardsNotRemovedMessage, 15);
+
+            m_customRewards.UnSubscribeFromRedeemEvents();
             LogOutOfTwitch();
         }
 
@@ -428,43 +500,55 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void LogoutBackToMainMenu()
         {
-            m_logoutProgressHUD.Show(this, "Removing redeems from Twitch, this could take a moment");
-            TaskAwaiter awaiter = m_customRewards.ClearRewards();
-            awaiter.OnCompleted(OnLogoutBackToMainMenu);
+            // The game leaves this scene afterwards, so the flag needs no reset.
+            if (m_logoutInProgress)
+                return;
+
+            m_logoutInProgress = true;
+            ClearBeforeExit("Logout anyway", OnLogoutBackToMainMenu);
         }
 
-        private void OnLogoutBackToMainMenu()
+        private void OnLogoutBackToMainMenu(bool removed)
         {
             LogOutOfTwitch();
-            StartCoroutine(DelayedLogout());
+            StartCoroutine(DelayedLogout(removed));
         }
 
-        private IEnumerator DelayedLogout()
+        private IEnumerator DelayedLogout(bool removed)
         {
-            m_logoutProgressHUD.UpdateMessage("Logging out...");
-            yield return new WaitForSecondsRealtime(1f);
+            yield return ShowLogoutStep("Logging out...", removed);
             m_logoutProgressHUD.Hide();
             Menu.instance.OnLogoutYes();
         }
 
         public void LogoutQuitApplication()
         {
-            m_logoutProgressHUD.Show(this, "Removing redeems from Twitch, this could take a moment");
-            TaskAwaiter awaiter = m_customRewards.ClearRewards();
-            awaiter.OnCompleted(ShowQuitMessage);
+            // The game closes afterwards, so the flag needs no reset.
+            if (m_logoutInProgress)
+                return;
+
+            m_logoutInProgress = true;
+            ClearBeforeExit("Quit anyway", OnQuitRewardsCleared);
         }
 
-        public void ShowQuitMessage()
+        private void OnQuitRewardsCleared(bool removed)
         {
             LogOutOfTwitch();
-            StartCoroutine(DelayedQuit());
+            StartCoroutine(DelayedQuit(removed));
         }
 
-        private IEnumerator DelayedQuit()
+        private IEnumerator DelayedQuit(bool removed)
         {
-            m_logoutProgressHUD.UpdateMessage("Quitting game...");
-            yield return new WaitForSecondsRealtime(1f);
+            yield return ShowLogoutStep("Quitting game...", removed);
             Menu.instance.OnQuitYes();
+        }
+
+        // The last HUD message before the game goes on. When the redeems couldn't be removed it says so and stays
+        // long enough to read.
+        private IEnumerator ShowLogoutStep(string message, bool rewardsRemoved)
+        {
+            m_logoutProgressHUD.UpdateMessage(rewardsRemoved ? message : RewardsNotRemovedMessage + " " + message);
+            yield return new WaitForSecondsRealtime(rewardsRemoved ? 1f : 4f);
         }
 
         public void GetBitsLeaderboard()

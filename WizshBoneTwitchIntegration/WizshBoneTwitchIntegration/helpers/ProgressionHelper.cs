@@ -45,9 +45,16 @@ namespace WizshBoneTwitchIntegration.Helpers
             return 1f;
         }
 
-        public static bool IsAllowedByGlobalKeys(string add, string remove)
+        /// <summary>
+        /// Whether the world's global keys allow something with these add/remove keys. With
+        /// <paramref name="assumeKey"/> set, that key is treated as present too, which answers what would be
+        /// allowed after it is added (e.g. after the next boss).
+        /// </summary>
+        public static bool IsAllowedByGlobalKeys(string add, string remove, string assumeKey = null)
         {
-            if ((add == "" && (remove == "" || !ZoneSystem.instance.GetGlobalKey(remove))) || (ZoneSystem.instance.GetGlobalKey(add) && !ZoneSystem.instance.GetGlobalKey(remove)))
+            bool HasKey(string key) => (assumeKey != null && key == assumeKey) || ZoneSystem.instance.GetGlobalKey(key);
+
+            if ((add == "" && (remove == "" || !HasKey(remove))) || (HasKey(add) && !HasKey(remove)))
                 return true;
 
             return false;

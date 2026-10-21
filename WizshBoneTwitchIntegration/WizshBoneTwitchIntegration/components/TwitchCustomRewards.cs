@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using TwitchSDK;
 using TwitchSDK.Interop;
 using UnityEngine;
@@ -11,6 +12,8 @@ using WizshBoneTwitchIntegration.Exceptions;
 using WizshBoneTwitchIntegration.Gui;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
+using WizshBoneTwitchIntegration.TwitchApi;
+using WizshBoneTwitchIntegration.TwitchApi.Models;
 using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.TwitchIntegration
@@ -43,7 +46,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         // Twitch's reward cap is shared with rewards we didn't create (the streamer's own, other tools').
         // How many of those the channel had at the last Helix lookup; null when unknown (logged out, or
-        // the lookup failed). Our own rewards are replaced on every push, so they aren't counted here.
+        // the lookup failed). Our own rewards are managed by the sync, so they aren't counted here.
         public int? OtherChannelRewards { get; private set; }
 
         /// <summary>
@@ -54,7 +57,32 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public static event Action ChannelRewardCountsChanged;
 
         private const float ChannelLookupTimeoutSeconds = 10f;
-        private Coroutine m_pushRoutine;
+        private const float SyncDelaySeconds = 1.5f;
+        private Coroutine m_delayedSync;
+
+        // Everything that changes the rewards on Twitch goes through one worker (RunWorkerAsync) that does one thing
+        // at a time. Callers only note what they want - a sync to the current state, or a clear - and the worker picks
+        // it up as soon as the step that is running is done, so two actions never overlap however fast they follow
+        // each other. Only the worker touches Twitch; it runs on the main thread between its awaits.
+        private bool m_workerRunning;
+        private bool m_syncRequested;
+        private ClearRequest m_clearRequest;
+
+        // Lets a running sync stop after its current request when something newer is waiting; the worker then
+        // starts over from the rewards as they are on Twitch by then.
+        private CancellationTokenSource m_passCancel;
+
+        private class ClearRequest
+        {
+            public string ChannelId;
+            public string Token;
+            public readonly TaskCompletionSource<bool> Done = new TaskCompletionSource<bool>();
+        }
+
+        // Twitch title -> the titles it replaced. The sync uses it to edit a renamed reward (keeping its id)
+        // instead of deleting it and creating a new one, and the history lookup to find redemptions made under an
+        // old title. Never cleared: nothing here can become wrong by remembering a title that no longer exists.
+        private readonly Dictionary<string, HashSet<string>> m_formerTitles = new Dictionary<string, HashSet<string>>();
 
         public void Awake()
         {
@@ -75,6 +103,10 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         // SDK's login and subscription outlive this component.
         public void OnDestroy()
         {
+            // No more syncs for a component that is gone; a clear that was asked for still runs.
+            m_syncRequested = false;
+            m_passCancel?.Cancel();
+
             UnSubscribeFromRedeemEvents();
         }
 
@@ -147,7 +179,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             if (value)
                 SetRewards();
             else
-                ClearRewards();
+                StartCoroutine(WarnIfNotCleared(ClearRewards()));
         }
 
         public bool HasUnresolvedRedeems()
@@ -181,11 +213,40 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public bool HasUnresolvedRedeemsFor(string redeemTitle)
         {
-            return m_enabled
-                && !ProfileSettingsHelper.Current.autoResolveRedeems
-                && m_redeemHistory.Exists(item =>
-                    item.CustomRewardTitle == redeemTitle
-                    && item.Status == CustomRewardRedemptionState.Unfulfilled);
+            if (!m_enabled || ProfileSettingsHelper.Current.autoResolveRedeems)
+                return false;
+
+            HashSet<string> titles = new HashSet<string>(FormerTitlesOf(redeemTitle)) { redeemTitle };
+
+            return m_redeemHistory.Exists(item =>
+                titles.Contains(item.CustomRewardTitle)
+                && item.Status == CustomRewardRedemptionState.Unfulfilled);
+        }
+
+        // Every title the redeem had before this one (through any number of renames), the most recent first.
+        private List<string> FormerTitlesOf(string title)
+        {
+            List<string> found = new List<string>();
+            HashSet<string> seen = new HashSet<string> { title };
+            Queue<string> open = new Queue<string>();
+            open.Enqueue(title);
+
+            while (open.Count > 0)
+            {
+                if (!m_formerTitles.TryGetValue(open.Dequeue(), out HashSet<string> former))
+                    continue;
+
+                foreach (string earlier in former)
+                {
+                    if (seen.Add(earlier))
+                    {
+                        found.Add(earlier);
+                        open.Enqueue(earlier);
+                    }
+                }
+            }
+
+            return found;
         }
 
         public void Update()
@@ -259,8 +320,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 // customRewardEvent.CustomRewardTitle is whatever was actually pushed to Twitch -
                 // the Twitch-facing (prefixed) title, not the raw RedeemData.title - so match
-                // against RedeemManager.GetFullTitle() rather than item.title directly.
-                RedeemData redeem = GetRedeemList().Find(item => RedeemManager.GetFullTitle(item) == customRewardEvent.CustomRewardTitle);
+                // against RedeemManager.GetFullTitle() rather than item.title directly. Capitals are ignored: the
+                // reward may have been retitled in a different case on twitch.tv since the last sync.
+                RedeemData redeem = GetRedeemList().Find(item => RedeemManager.SameTitle(RedeemManager.GetFullTitle(item), customRewardEvent.CustomRewardTitle));
                 if (redeem == null)
                 {
                     // Not refunded or resolved on purpose: see m_unknownRedeems.
@@ -508,105 +570,269 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         }
 
         /// <summary>
-        /// Whether a redeem is sent to Twitch. Disabled redeems are left off entirely, since even a hidden
-        /// reward takes one of the channel's <see cref="TwitchRewardLimitHelper.MaxRewards"/> slots.
+        /// Whether a redeem is sent to Twitch. Disabled redeems, and ones their global keys don't allow
+        /// right now, are left off entirely (and removed if they were there), since even a hidden reward
+        /// takes one of the channel's <see cref="TwitchRewardLimitHelper.MaxRewards"/> slots.
         /// </summary>
-        private static bool IsPushedToTwitch(RedeemData redeem)
+        private static bool IsPushedToTwitch(RedeemData redeem, string assumeKey = null)
         {
             return redeem.type != RedeemType.Undefined
                 && redeem.enabled
-                && ProgressionHelper.IsAllowedByGlobalKeys(redeem.globalKeyAdd, redeem.globalKeyRemove);
+                && ProgressionHelper.IsAllowedByGlobalKeys(redeem.globalKeyAdd, redeem.globalKeyRemove, assumeKey);
         }
 
         /// <summary>How many Twitch slots the active profile takes up right now.</summary>
         public int CountPushedRedeems()
         {
-            return GetRedeemList().Count(IsPushedToTwitch);
-        }
-
-        public void SetRewards(List<RedeemData> redeems = null, bool isEnabled = true)
-        {
-            List<CustomRewardDefinition> listRewards = new List<CustomRewardDefinition>();
-
-            if (redeems == null)
-                redeems = GetRedeemList();
-
-            redeems.RemoveAll(item => item.type == RedeemType.Undefined);
-
-            foreach (RedeemData redeem in redeems)
-            {
-                if (IsPushedToTwitch(redeem))
-                {
-                    // Capped here too (not just in the wizard) so a hand-edited profile.yaml can't
-                    // send Twitch a cooldown it rejects.
-                    int cooldownSeconds = CooldownHelper.ClampSeconds(redeem.cooldown);
-
-                    listRewards.Add(new CustomRewardDefinition()
-                    {
-                        BackgroundColor = redeem.backgroundColor,
-                        GlobalCooldownSeconds = cooldownSeconds,
-                        IsGlobalCooldownEnabled = cooldownSeconds > 0,
-                        MaxPerStream = redeem.maxPerStream,
-                        IsMaxPerStreamEnabled = redeem.maxPerStream > 0,
-                        MaxPerUserPerStream = redeem.maxPerUserPerStream,
-                        IsMaxPerUserPerStreamEnabled = redeem.maxPerUserPerStream > 0,
-                        IsUserInputRequired = redeem.userInput,
-                        Cost = ApplyDiscount(redeem.points),
-                        Prompt = redeem.description,
-                        // The Twitch-facing (prefixed) title - RedeemData.title itself is stored
-                        // prefix-free, see RedeemManager.GetFullTitle.
-                        Title = RedeemManager.GetFullTitle(redeem),
-                        IsEnabled = isEnabled,
-                    });
-                }
-            }
-
-            if (m_pushRoutine != null)
-                StopCoroutine(m_pushRoutine);
-
-            m_pushRoutine = StartCoroutine(PushRewards(listRewards.ToArray(), isEnabled));
+            return GetRedeemList().Count(r => IsPushedToTwitch(r));
         }
 
         /// <summary>
-        /// Sends the rewards to Twitch, after checking they fit next to the channel's other rewards. The
-        /// push is skipped (with an error toast) when it would go over Twitch's limit; if the lookup itself
-        /// fails the push goes ahead, and a rejection from Twitch is reported instead of silently lost.
+        /// How many Twitch slots the active profile would take if the world gained <paramref name="globalKey"/>
+        /// (e.g. after the next boss). Needs a loaded world: global keys only exist there.
         /// </summary>
-        private IEnumerator PushRewards(CustomRewardDefinition[] rewards, bool isEnabled)
+        public int CountPushedRedeemsAfter(string globalKey)
         {
-            yield return StartCoroutine(LookupChannelRewards());
+            return GetRedeemList().Count(r => IsPushedToTwitch(r, globalKey));
+        }
 
-            // Redeems were switched off (ClearRewards) while the lookup ran.
-            if (isEnabled && !m_enabled)
+        /// <summary>
+        /// True while the last push was skipped because the redeems plus the channel's other rewards don't fit
+        /// under Twitch's limit. Nothing was changed on Twitch then. <see cref="RetryPush"/> tries again.
+        /// </summary>
+        public bool PushBlockedByLimit { get; private set; }
+
+        /// <summary>Pushes again, e.g. after freeing up slots on twitch.tv. Does nothing unless redeems are on.</summary>
+        public void RetryPush()
+        {
+            if (!IsLoggedIn || !m_enabled)
+                return;
+
+            SetRewards();
+        }
+
+        private void SetPushBlocked(bool blocked)
+        {
+            if (PushBlockedByLimit == blocked)
+                return;
+
+            PushBlockedByLimit = blocked;
+
+            // Stays on screen until the redeems fit again (a successful Retry, or redeems switched off).
+            StatusMessages.SetRedeemsOverLimit(blocked);
+            ChannelRewardCountsChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// Remembers that a redeem's Twitch title changed, so a sync edits its reward (keeping its id) instead
+        /// of deleting it and creating a new one. Titles are the Twitch-facing (prefixed) ones. Doesn't start a sync.
+        /// </summary>
+        public void RegisterRename(string previousTitle, string newTitle)
+        {
+            if (string.IsNullOrEmpty(previousTitle) || previousTitle == newTitle)
+                return;
+
+            if (!m_formerTitles.TryGetValue(newTitle, out HashSet<string> former))
+                m_formerTitles[newTitle] = former = new HashSet<string>();
+
+            former.Add(previousTitle);
+        }
+
+        /// <summary>
+        /// Asks for the rewards on Twitch to be made to match the profile as it is by the time the worker gets to
+        /// it. Returns at once; asking again while a sync is running makes it stop early and start over.
+        /// </summary>
+        public void SetRewards()
+        {
+            m_syncRequested = true;
+            m_passCancel?.Cancel();
+            EnsureWorker();
+        }
+
+        /// <summary>
+        /// <see cref="SetRewards"/> once no further call has come in for <see cref="SyncDelaySeconds"/> - for a value that
+        /// is typed letter by letter. Does nothing when redeems are off or the login is gone by then.
+        /// </summary>
+        public void SetRewardsSoon()
+        {
+            if (m_delayedSync != null)
+                StopCoroutine(m_delayedSync);
+
+            m_delayedSync = StartCoroutine(SetRewardsAfterDelay());
+        }
+
+        private IEnumerator SetRewardsAfterDelay()
+        {
+            yield return new WaitForSecondsRealtime(SyncDelaySeconds);
+
+            m_delayedSync = null;
+
+            if (IsLoggedIn && m_enabled)
+                SetRewards();
+        }
+
+        private void EnsureWorker()
+        {
+            if (m_workerRunning)
+                return;
+
+            m_workerRunning = true;
+            _ = RunWorkerAsync();
+        }
+
+        // Runs until nothing is left to do. A clear always goes before a sync that was asked for after it.
+        private async Task RunWorkerAsync()
+        {
+            try
             {
-                m_pushRoutine = null;
-                yield break;
+                while (m_clearRequest != null || m_syncRequested)
+                {
+                    if (m_clearRequest != null)
+                    {
+                        ClearRequest request = m_clearRequest;
+                        m_clearRequest = null;
+                        request.Done.TrySetResult(await ClearOnTwitchAsync(request));
+                        continue;
+                    }
+
+                    m_syncRequested = false;
+
+                    // Redeems may have been switched off, or the login lost, since the sync was asked for.
+                    if (!m_enabled || !IsLoggedIn)
+                        continue;
+
+                    await SyncPassAsync();
+                }
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] The Twitch reward worker stopped: {e}");
+            }
+            finally
+            {
+                m_workerRunning = false;
+            }
+        }
+
+        // The rewards the profile wants on Twitch right now, each with the titles its redeem had before.
+        private List<TwitchRewardSync.Desired> BuildWanted(out Dictionary<string, List<string>> formerTitles)
+        {
+            List<RedeemData> redeems = GetRedeemList();
+
+            redeems.RemoveAll(item => item.type == RedeemType.Undefined);
+
+            formerTitles = new Dictionary<string, List<string>>();
+            List<TwitchRewardSync.Desired> wanted = new List<TwitchRewardSync.Desired>();
+
+            foreach (RedeemData redeem in redeems)
+            {
+                if (!IsPushedToTwitch(redeem))
+                    continue;
+
+                string title = RedeemManager.GetFullTitle(redeem);
+                List<string> former = FormerTitlesOf(title);
+
+                if (former.Count > 0)
+                    formerTitles[title] = former;
+
+                wanted.Add(new TwitchRewardSync.Desired
+                {
+                    // The Twitch-facing (prefixed) title - RedeemData.title itself is stored
+                    // prefix-free, see RedeemManager.GetFullTitle.
+                    Title = title,
+                    Prompt = redeem.description,
+                    Cost = ApplyDiscount(redeem.points),
+                    BackgroundColor = redeem.backgroundColor,
+                    UserInput = redeem.userInput,
+                    MaxPerStream = redeem.maxPerStream,
+                    MaxPerUserPerStream = redeem.maxPerUserPerStream,
+                    // Capped here too (not just in the wizard) so a hand-edited profile.yaml can't
+                    // send Twitch a cooldown it rejects.
+                    CooldownSeconds = CooldownHelper.ClampSeconds(redeem.cooldown),
+                });
             }
 
-            int others = OtherChannelRewards ?? 0;
+            return wanted;
+        }
 
-            if (rewards.Length + others > TwitchRewardLimitHelper.MaxRewards)
+        /// <summary>
+        /// One sync: makes the rewards on Twitch match the profile, after checking they fit next to the
+        /// channel's other rewards. It is skipped (with an error toast) when it would go over Twitch's
+        /// limit; if the lookup itself fails it goes ahead, and a rejection from Twitch is reported
+        /// instead of silently lost.
+        /// </summary>
+        private async Task SyncPassAsync()
+        {
+            CancellationTokenSource cancelSource = new CancellationTokenSource();
+            m_passCancel = cancelSource;
+            CancellationToken cancel = cancelSource.Token;
+
+            try
             {
-                Jotunn.Logger.LogWarning($"[WBTI] Redeems not pushed: {rewards.Length} redeems + {others} other Twitch rewards is over the limit of {TwitchRewardLimitHelper.MaxRewards}.");
-                ToastNotifications.Show(
-                    $"Redeems not sent to Twitch: {rewards.Length} redeems plus {others} of your other rewards is over Twitch's limit of {TwitchRewardLimitHelper.MaxRewards}. Delete some Twitch rewards or disable redeems.",
-                    ToastType.Error);
-                m_pushRoutine = null;
-                yield break;
+                List<TwitchRewardSync.Desired> wanted = BuildWanted(out Dictionary<string, List<string>> formerTitles);
+
+                // Our rewards as the lookup read them, handed to the sync so it doesn't read them a second time.
+                TwitchRewardLimitHelper.ChannelRewardCounts counts = await LookupChannelRewardsAsync();
+
+                // Redeems were switched off or something newer was asked for while the lookup ran.
+                if (!m_enabled || cancel.IsCancellationRequested)
+                    return;
+
+                await PushAsync(wanted, formerTitles, counts, cancel);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Updating the Twitch rewards failed: {e}");
+                ToastNotifications.Show("Updating the redeems on Twitch failed - check the log.", ToastType.Error);
+            }
+            finally
+            {
+                m_passCancel = null;
+                cancelSource.Dispose();
+            }
+        }
+
+        // counts is this pass's own lookup (null when it failed): not OtherChannelRewards, which other lookups can overwrite.
+        private async Task PushAsync(List<TwitchRewardSync.Desired> wanted, Dictionary<string, List<string>> formerTitles, TwitchRewardLimitHelper.ChannelRewardCounts counts, CancellationToken cancel)
+        {
+            int others = counts?.Others ?? 0;
+
+            int over = wanted.Count + others - TwitchRewardLimitHelper.MaxRewards;
+
+            if (over > 0)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Redeems not pushed: {wanted.Count} redeems + {others} other Twitch rewards is over the limit of {TwitchRewardLimitHelper.MaxRewards}.");
+                string message = $"Redeems were not updated on Twitch: {wanted.Count} redeems plus {others} of your other rewards is over Twitch's limit of {TwitchRewardLimitHelper.MaxRewards}. " +
+                                 $"Free up {over} slot(s) on Twitch or disable {over} redeem(s), then press Retry in the Redeems tab.";
+
+                // The mod window is usually closed when this happens (e.g. a boss kill): SetPushBlocked puts the
+                // "Redeems need fixing" message on screen, which stays until it is fixed.
+                ToastNotifications.Show(message, ToastType.Error);
+                SetPushBlocked(true);
+                return;
             }
 
-            GameTask push = Twitch.API.ReplaceCustomRewards(rewards);
+            SetPushBlocked(false);
 
-            while (!push.IsCompleted)
-                yield return null;
+            TwitchRewardSync.Result result = await TwitchRewardSync.SyncAsync(
+                m_auth?.m_userInfo?.channelId, wanted, formerTitles, cancel, counts?.OwnRewards);
 
-            if (push.Task.IsFaulted)
+            if (result.LookupFailed)
             {
-                Jotunn.Logger.LogWarning($"[WBTI] Twitch rejected the redeems: {push.Task.Exception?.GetBaseException()}");
-                ToastNotifications.Show("Twitch rejected the redeems. You may be over its limit of 50 rewards - check the log.", ToastType.Error);
+                ToastNotifications.Show("Redeems not sent to Twitch: your channel's rewards could not be read - check the log.", ToastType.Error);
+                return;
             }
 
-            m_pushRoutine = null;
+            if (result.Cancelled)
+                return;
+
+            Jotunn.Logger.LogWarning($"[WBTI] Twitch rewards updated: {result}.");
+
+            if (result.Failed > 0)
+                ToastNotifications.Show($"Twitch rejected {result.Failed} change(s) to your redeems - check the log.", ToastType.Error);
+
+            if (result.Skipped > 0)
+                ToastNotifications.Show($"{result.Skipped} redeem(s) were not sent to Twitch because their title is empty or matches another redeem's - check the log.", ToastType.Error);
         }
 
         /// <summary>
@@ -618,7 +844,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             if (!IsLoggedIn)
                 return;
 
-            StartCoroutine(LookupChannelRewards());
+            _ = LookupChannelRewardsAsync();
         }
 
         /// <summary>Forgets the last lookup (logout): the number belongs to the channel that was logged in.</summary>
@@ -628,25 +854,35 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             ChannelRewardCountsChanged?.Invoke();
         }
 
-        private IEnumerator LookupChannelRewards()
+        // Null when the lookup failed or timed out.
+        private async Task<TwitchRewardLimitHelper.ChannelRewardCounts> LookupChannelRewardsAsync()
         {
-            System.Threading.Tasks.Task<TwitchRewardLimitHelper.ChannelRewardCounts> lookup =
-                TwitchRewardLimitHelper.FetchAsync(m_auth?.m_userInfo?.channelId);
-            float deadline = Time.realtimeSinceStartup + ChannelLookupTimeoutSeconds;
+            TwitchRewardLimitHelper.ChannelRewardCounts counts = null;
 
-            while (!lookup.IsCompleted && Time.realtimeSinceStartup < deadline)
-                yield return null;
+            try
+            {
+                Task<TwitchRewardLimitHelper.ChannelRewardCounts> lookup =
+                    TwitchRewardLimitHelper.FetchAsync(m_auth?.m_userInfo?.channelId);
+
+                if (await Task.WhenAny(lookup, Task.Delay(TimeSpan.FromSeconds(ChannelLookupTimeoutSeconds))) == lookup)
+                    counts = lookup.Result;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Could not read the channel's Twitch rewards: {e.Message}");
+            }
 
             // Unknown (null) when the lookup failed or timed out, rather than a stale number.
-            OtherChannelRewards = lookup.IsCompleted ? lookup.Result?.Others : null;
+            OtherChannelRewards = counts?.Others;
             ChannelRewardCountsChanged?.Invoke();
+            return counts;
         }
 
         /// <summary>
         /// Applies <see cref="ProfileSettingsData.redeemsDiscountPercent"/> to a redeem's configured
-        /// point cost before it's sent to Twitch. A 0-cost redeem is left as 0 (never floored to 1),
-        /// but any nonzero cost is never rounded down to 0 by the discount - that would silently
-        /// turn a paid redeem into a free one.
+        /// point cost before it's sent to Twitch. A 0-cost redeem isn't discounted (<c>TwitchRewardSync</c>
+        /// raises it to Twitch's minimum of 1 when it sends it), and any nonzero cost is never rounded
+        /// down to 0 by the discount - that would silently turn a paid redeem into a free one.
         /// </summary>
         private static int ApplyDiscount(int points)
         {
@@ -657,18 +893,60 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             return Mathf.Max(1, Mathf.RoundToInt(points * (100 - discountPercent) / 100f));
         }
 
-        public TaskAwaiter ClearRewards()
+        /// <summary>
+        /// Removes every reward this app made from the channel. The task resolves to whether all of them
+        /// are gone, and never faults, so a caller can wait for it (see <c>TwitchAuth.WaitForClear</c>) and
+        /// carry on whatever Twitch answers; failures are logged.
+        /// </summary>
+        public Task<bool> ClearRewards()
         {
-            // A push still waiting on its lookup must not land after the clear.
-            if (m_pushRoutine != null)
+            // Off before the delete starts: a sync asked for meanwhile (boss kill, redeem save) would
+            // recreate what is being removed. Every caller leaves redeems off afterwards anyway.
+            m_enabled = false;
+
+            // A sync that was asked for but hasn't started is dropped, and a running one stops early.
+            m_syncRequested = false;
+            m_passCancel?.Cancel();
+            SetPushBlocked(false);
+
+            // A clear that is still waiting for its turn covers this one too. The channel and token are taken now:
+            // the logout that follows wipes the stored token before the deletes are done.
+            if (m_clearRequest == null)
             {
-                StopCoroutine(m_pushRoutine);
-                m_pushRoutine = null;
+                m_clearRequest = new ClearRequest
+                {
+                    ChannelId = m_auth?.m_userInfo?.channelId,
+                    Token = TwitchTokenCapture.AccessToken,
+                };
             }
 
-            List<CustomRewardDefinition> list = new List<CustomRewardDefinition>();
-            GameTask gameTask = Twitch.API.ReplaceCustomRewards(list.ToArray());
-            return gameTask.GetAwaiter();
+            Task<bool> done = m_clearRequest.Done.Task;
+            EnsureWorker();
+            return done;
+        }
+
+        // For the clear that switching redeems off starts: nobody waits for it, so a failure is shown here.
+        private IEnumerator WarnIfNotCleared(Task<bool> clear)
+        {
+            while (!clear.IsCompleted)
+                yield return null;
+
+            if (!clear.Result)
+                ToastNotifications.Show("Not all redeems could be removed from Twitch. Any left are cleaned up the next time you enable redeems.", ToastType.Warning);
+        }
+
+        // Never throws: the answer is whether every reward is gone.
+        private async Task<bool> ClearOnTwitchAsync(ClearRequest request)
+        {
+            try
+            {
+                return await TwitchRewardSync.ClearAsync(request.ChannelId, request.Token);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Could not remove the redeems from Twitch: {e.Message}");
+                return false;
+            }
         }
 
         public bool ReloadRewards()
