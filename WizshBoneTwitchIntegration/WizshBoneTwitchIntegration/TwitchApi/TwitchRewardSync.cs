@@ -14,8 +14,8 @@ namespace WizshBoneTwitchIntegration.TwitchApi
     /// Makes the rewards this app owns on Twitch match the wanted list by creating, editing and deleting
     /// them one by one through Helix. Unlike the SDK's ReplaceCustomRewards (which re-creates every reward
     /// with a new id on every push) an edited reward keeps its id, so redemptions still pending on it can
-    /// be fulfilled or refunded afterwards. Rewards are matched by title; <c>formerTitles</c> tells the sync
-    /// that a reward was renamed so it is edited instead of deleted and created again.
+    /// be fulfilled or refunded afterwards. A redeem is linked to its reward by the redeem's permanent id, so a
+    /// renamed redeem keeps its reward; rewards the sync has no id for yet are matched by title.
     /// </summary>
     internal static class TwitchRewardSync
     {
@@ -28,6 +28,9 @@ namespace WizshBoneTwitchIntegration.TwitchApi
         /// <summary>One reward we want on Twitch.</summary>
         public class Desired
         {
+            /// <summary>The redeem's permanent id; with it the sync finds the redeem's reward again after a rename.</summary>
+            public string RedeemId;
+
             public string Title;
             public string Prompt;
             public int Cost;
@@ -51,6 +54,9 @@ namespace WizshBoneTwitchIntegration.TwitchApi
             /// <summary>Wanted rewards left out because their title is empty or the same as another one's.</summary>
             public int Skipped;
 
+            /// <summary>Redeem id -> id of its reward on Twitch, for every wanted reward that is on Twitch after the sync.</summary>
+            public readonly Dictionary<string, string> RewardIds = new Dictionary<string, string>();
+
             /// <summary>Set when a newer push or a clear took over before all changes were made.</summary>
             public bool Cancelled;
 
@@ -62,10 +68,10 @@ namespace WizshBoneTwitchIntegration.TwitchApi
         }
 
         /// <param name="wanted">What should be on Twitch; the caller has checked it fits under the cap.</param>
-        /// <param name="formerTitles">Wanted title -> the titles that redeem had before, the most recent first. A reward
-        /// still under one of them is edited instead of deleted and created again.</param>
+        /// <param name="rewardIds">Redeem id -> id of the reward the last sync made for it. A reward found by its id is
+        /// edited whatever its title is now, so a renamed redeem keeps its reward; anything else is paired by title.</param>
         /// <param name="knownRewards">Our rewards as just read from Twitch, to save reading them again; null reads them here.</param>
-        public static async Task<Result> SyncAsync(string broadcasterId, IList<Desired> wanted, IDictionary<string, List<string>> formerTitles, CancellationToken cancel, List<HelixReward> knownRewards = null)
+        public static async Task<Result> SyncAsync(string broadcasterId, IList<Desired> wanted, IDictionary<string, string> rewardIds, CancellationToken cancel, List<HelixReward> knownRewards = null)
         {
             Result result = new Result();
             List<HelixReward> existing = knownRewards ?? await ListAsync(broadcasterId, onlyOwn: true);
@@ -77,7 +83,19 @@ namespace WizshBoneTwitchIntegration.TwitchApi
             }
 
             List<Desired> desired = Normalize(wanted, result);
-            Dictionary<Desired, HelixReward> matches = Match(desired, existing, TruncateFormerTitles(formerTitles), out List<HelixReward> leftovers);
+            Dictionary<Desired, HelixReward> matches = Match(desired, existing, rewardIds, out List<HelixReward> leftovers);
+
+            foreach (KeyValuePair<Desired, HelixReward> match in matches)
+            {
+                if (!string.IsNullOrEmpty(match.Key.RedeemId))
+                    result.RewardIds[match.Key.RedeemId] = match.Value.id;
+            }
+
+            // The titles the rewards on Twitch hold right now. Twitch compares them ignoring capitals.
+            Dictionary<string, HelixReward> held = new Dictionary<string, HelixReward>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (HelixReward reward in existing)
+                held[reward.title ?? ""] = reward;
 
             // Deletes first so a title or slot they free up is available to the edits and creates.
             foreach (HelixReward reward in leftovers)
@@ -86,34 +104,29 @@ namespace WizshBoneTwitchIntegration.TwitchApi
                     return Cancelled(result);
 
                 if ((await DeleteAsync(broadcasterId, reward)).IsSuccess)
+                {
+                    held.Remove(reward.title ?? "");
                     result.Deleted++;
+                }
                 else
                     result.Failed++;
             }
+
+            List<KeyValuePair<Desired, HelixReward>> edits = new List<KeyValuePair<Desired, HelixReward>>();
 
             foreach (Desired d in desired)
             {
                 if (!matches.TryGetValue(d, out HelixReward reward))
                     continue;
 
-                if (!NeedsEdit(reward, d))
-                {
-                    result.Unchanged++;
-                    continue;
-                }
-
-                if (cancel.IsCancellationRequested)
-                    return Cancelled(result);
-
-                TwitchHelixClient.Response response = await TwitchHelixClient.SendAsync(
-                    TwitchHelixClient.Patch, RewardsPath, $"broadcaster_id={Uri.EscapeDataString(broadcasterId)}&id={Uri.EscapeDataString(reward.id)}",
-                    BuildBody(d, includeTitle: reward.title != d.Title));
-
-                if (response.IsSuccess)
-                    result.Edited++;
+                if (NeedsEdit(reward, d))
+                    edits.Add(new KeyValuePair<Desired, HelixReward>(d, reward));
                 else
-                    result.Failed += Fail("edit", d.Title, response);
+                    result.Unchanged++;
             }
+
+            if (!await EditAllAsync(broadcasterId, edits, held, result, cancel))
+                return Cancelled(result);
 
             foreach (Desired d in desired)
             {
@@ -127,12 +140,144 @@ namespace WizshBoneTwitchIntegration.TwitchApi
                     HttpMethod.Post, RewardsPath, $"broadcaster_id={Uri.EscapeDataString(broadcasterId)}", BuildBody(d, includeTitle: true));
 
                 if (response.IsSuccess)
+                {
                     result.Created++;
+
+                    string createdId = ReadCreatedId(response.Body);
+
+                    if (createdId != null && !string.IsNullOrEmpty(d.RedeemId))
+                        result.RewardIds[d.RedeemId] = createdId;
+                }
                 else
                     result.Failed += Fail("create", d.Title, response);
             }
 
             return result;
+        }
+
+        // The id Twitch gave the reward it just created, from the answer's data[0]. null when it can't be read:
+        // the reward is then found by its title the next time.
+        private static string ReadCreatedId(string body)
+        {
+            try
+            {
+                return JsonConvert.DeserializeObject<HelixRewardList>(body)?.data?[0]?.id;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Could not read the id of a created Twitch reward: {e.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Makes the edits. Twitch titles are unique, so a reward can only be given a title that no other reward holds
+        /// at that moment: the edits are ordered so each one frees its old title before another needs it (A to B
+        /// together with B to C does the second first), and rewards that would have to swap titles are moved aside
+        /// under a temporary title first. Returns false when cancelled.
+        /// </summary>
+        private static async Task<bool> EditAllAsync(string broadcasterId, List<KeyValuePair<Desired, HelixReward>> edits,
+            Dictionary<string, HelixReward> held, Result result, CancellationToken cancel)
+        {
+            HashSet<HelixReward> parked = new HashSet<HelixReward>();
+
+            while (edits.Count > 0)
+            {
+                if (cancel.IsCancellationRequested)
+                    return false;
+
+                int next = edits.FindIndex(edit => !HeldByOther(held, edit));
+                bool moveAside = false;
+
+                if (next < 0)
+                {
+                    // Every remaining edit needs a title that another reward holds. When the holders wait for each other
+                    // in a circle (a swap), one of them goes aside.
+                    next = edits.FindIndex(edit => !parked.Contains(edit.Value) && InCycle(held, edits, edit.Value));
+                    moveAside = next >= 0;
+
+                    // Otherwise the holder isn't going anywhere (a delete failed): let Twitch refuse the edit.
+                    if (next < 0)
+                        next = 0;
+                }
+
+                Desired d = edits[next].Key;
+                HelixReward reward = edits[next].Value;
+
+                if (moveAside)
+                {
+                    string temporary = "~wbti " + Guid.NewGuid().ToString("N").Substring(0, 8);
+                    TwitchHelixClient.Response aside = await PatchAsync(broadcasterId, reward, new JObject { ["title"] = temporary }.ToString(Formatting.None));
+
+                    if (aside.IsSuccess)
+                    {
+                        Retitle(held, reward, temporary);
+                        parked.Add(reward);
+                    }
+                    else
+                    {
+                        result.Failed += Fail("edit", d.Title, aside);
+                        edits.RemoveAt(next);
+                    }
+
+                    continue;
+                }
+
+                edits.RemoveAt(next);
+                TwitchHelixClient.Response response = await PatchAsync(broadcasterId, reward, BuildBody(d, includeTitle: reward.title != d.Title));
+
+                if (response.IsSuccess)
+                {
+                    Retitle(held, reward, d.Title);
+                    result.Edited++;
+                }
+                else
+                    result.Failed += Fail("edit", d.Title, response);
+            }
+
+            return true;
+        }
+
+        // Whether the reward is part of a circle of edits: the title it needs is held by a reward that is waiting for
+        // an edit itself, whose wanted title is held by the next one, and so on until it comes back to this reward.
+        // A chain that ends in a reward that isn't going anywhere is not a circle; moving a reward aside there
+        // would not help and could leave it under the temporary title.
+        private static bool InCycle(Dictionary<string, HelixReward> held, List<KeyValuePair<Desired, HelixReward>> edits, HelixReward start)
+        {
+            HelixReward current = start;
+
+            for (int step = 0; step <= edits.Count; step++)
+            {
+                int index = edits.FindIndex(edit => edit.Value == current);
+
+                if (index < 0 || !held.TryGetValue(edits[index].Key.Title, out HelixReward holder) || holder == current)
+                    return false;
+
+                if (holder == start)
+                    return true;
+
+                current = holder;
+            }
+
+            return false;
+        }
+
+        private static bool HeldByOther(Dictionary<string, HelixReward> held, KeyValuePair<Desired, HelixReward> edit)
+        {
+            return held.TryGetValue(edit.Key.Title, out HelixReward holder) && holder != edit.Value;
+        }
+
+        private static void Retitle(Dictionary<string, HelixReward> held, HelixReward reward, string title)
+        {
+            held.Remove(reward.title ?? "");
+            reward.title = title;
+            held[title] = reward;
+        }
+
+        private static Task<TwitchHelixClient.Response> PatchAsync(string broadcasterId, HelixReward reward, string body)
+        {
+            return TwitchHelixClient.SendAsync(
+                TwitchHelixClient.Patch, RewardsPath, $"broadcaster_id={Uri.EscapeDataString(broadcasterId)}&id={Uri.EscapeDataString(reward.id)}", body);
         }
 
         /// <summary>
@@ -252,6 +397,7 @@ namespace WizshBoneTwitchIntegration.TwitchApi
 
                 normalized.Add(new Desired
                 {
+                    RedeemId = source.RedeemId,
                     Title = title,
                     Prompt = Truncate(source.Prompt, MaxPromptLength),
                     Cost = Math.Max(1, source.Cost),
@@ -266,54 +412,41 @@ namespace WizshBoneTwitchIntegration.TwitchApi
             return normalized;
         }
 
-        // Titles on Twitch and in the wanted list are cut to MaxTitleLength, so the earlier titles (full titles)
-        // must be cut the same way or a long title never matches.
-        private static Dictionary<string, List<string>> TruncateFormerTitles(IDictionary<string, List<string>> formerTitles)
-        {
-            if (formerTitles == null)
-                return null;
-
-            Dictionary<string, List<string>> truncated = new Dictionary<string, List<string>>();
-
-            foreach (KeyValuePair<string, List<string>> entry in formerTitles)
-                truncated[Truncate(entry.Key, MaxTitleLength)] = entry.Value.ConvertAll(title => Truncate(title, MaxTitleLength));
-
-            return truncated;
-        }
-
-        // Pairs wanted rewards with existing ones: same title first, then (for a renamed reward) a title
-        // it had before, the most recent first. What is left of the existing rewards comes out in leftovers.
-        private static Dictionary<Desired, HelixReward> Match(List<Desired> desired, List<HelixReward> existing, Dictionary<string, List<string>> formerTitles, out List<HelixReward> leftovers)
+        // Pairs wanted rewards with existing ones. A redeem goes to the reward the last sync made for it (found by its
+        // id, whatever the title is now - this is what keeps a renamed redeem's reward). Whatever is still unpaired is
+        // paired by title: rewards from before this session, or ones whose id is not known. What is left of the
+        // existing rewards comes out in leftovers.
+        private static Dictionary<Desired, HelixReward> Match(List<Desired> desired, List<HelixReward> existing, IDictionary<string, string> rewardIds, out List<HelixReward> leftovers)
         {
             leftovers = new List<HelixReward>(existing);
             Dictionary<Desired, HelixReward> matches = new Dictionary<Desired, HelixReward>();
 
-            foreach (Desired d in desired)
+            if (rewardIds != null)
             {
-                HelixReward reward = TakeByTitle(leftovers, d.Title);
-
-                if (reward != null)
-                    matches[d] = reward;
-            }
-
-            if (formerTitles == null)
-                return matches;
-
-            foreach (Desired d in desired)
-            {
-                if (matches.ContainsKey(d) || !formerTitles.TryGetValue(d.Title, out List<string> earlier))
-                    continue;
-
-                foreach (string previousTitle in earlier)
+                foreach (Desired d in desired)
                 {
-                    HelixReward reward = TakeByTitle(leftovers, previousTitle);
+                    if (string.IsNullOrEmpty(d.RedeemId) || !rewardIds.TryGetValue(d.RedeemId, out string rewardId))
+                        continue;
+
+                    HelixReward reward = leftovers.Find(r => r.id == rewardId);
 
                     if (reward == null)
                         continue;
 
+                    leftovers.Remove(reward);
                     matches[d] = reward;
-                    break;
                 }
+            }
+
+            foreach (Desired d in desired)
+            {
+                if (matches.ContainsKey(d))
+                    continue;
+
+                HelixReward reward = TakeByTitle(leftovers, d.Title);
+
+                if (reward != null)
+                    matches[d] = reward;
             }
 
             return matches;

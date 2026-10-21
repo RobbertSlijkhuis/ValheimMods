@@ -726,10 +726,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
             string fullTitle = RedeemManager.GetFullTitle(redeem);
 
-            // HasUnresolvedRedeemsFor/history entries key off the Twitch-facing (prefixed) title,
-            // not RedeemData.title - see RedeemManager.GetFullTitle.
             bool willDisable = redeem.enabled;
-            if (willDisable && customRewards.HasUnresolvedRedeemsFor(fullTitle))
+            if (willDisable && customRewards.HasUnresolvedRedeemsFor(redeem))
             {
                 m_confirmDialog.Show(
                     title:       "Disable Redeem",

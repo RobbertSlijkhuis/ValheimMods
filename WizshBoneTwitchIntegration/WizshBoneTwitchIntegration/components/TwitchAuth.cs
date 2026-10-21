@@ -274,6 +274,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         // game doesn't carry on by itself: the player picks Retry or continuing anyway (named by anywayText).
         private void ClearBeforeExit(string anywayText, Action<bool> proceed)
         {
+            // Already logged out (the pre-expiry logout finished first): the redeems are gone and the token is wiped,
+            // so a clear would only fail and ask the player to retry something that can't work.
+            if (!m_loggedIn)
+            {
+                proceed(true);
+                return;
+            }
+
             m_logoutProgressHUD.Show(this, RemovingRewardsMessage);
             StartCoroutine(WaitForClear(m_customRewards.ClearRewards(), removed => OnExitClearDone(removed, anywayText, proceed)));
         }
@@ -488,6 +496,10 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         // Shared by every deliberate logout. m_logoutRequested keeps GetAuthState from reporting it as an expiry.
         private void LogOutOfTwitch()
         {
+            // Another logout got here first (e.g. the pre-expiry one while the player chose Logout or Quit).
+            if (!m_loggedIn)
+                return;
+
             m_logoutRequested = true;
 
             if (m_chat)
@@ -500,7 +512,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public void LogoutBackToMainMenu()
         {
-            // The game leaves this scene afterwards, so the flag needs no reset.
+            // Reset by DelayedLogout just before the vanilla logout runs.
             if (m_logoutInProgress)
                 return;
 
@@ -518,12 +530,16 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             yield return ShowLogoutStep("Logging out...", removed);
             m_logoutProgressHUD.Hide();
+
+            // The patch on OnLogoutYes starts this logout again while we are still logged in; the guard must be
+            // off by then, or that call would return and the vanilla logout would never run.
+            m_logoutInProgress = false;
             Menu.instance.OnLogoutYes();
         }
 
         public void LogoutQuitApplication()
         {
-            // The game closes afterwards, so the flag needs no reset.
+            // Reset by DelayedQuit just before the vanilla quit runs.
             if (m_logoutInProgress)
                 return;
 
@@ -540,6 +556,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private IEnumerator DelayedQuit(bool removed)
         {
             yield return ShowLogoutStep("Quitting game...", removed);
+
+            // Same as DelayedLogout: the patch on OnQuitYes must not find the guard still set.
+            m_logoutInProgress = false;
             Menu.instance.OnQuitYes();
         }
 

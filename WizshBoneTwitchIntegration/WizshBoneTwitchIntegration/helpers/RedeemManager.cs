@@ -105,6 +105,13 @@ namespace WizshBoneTwitchIntegration.Helpers
             return string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
         }
 
+        // A redeem added to a profile gets an id of its own, unless it already has one that no redeem there uses.
+        private static void EnsureOwnId(RedeemData redeem, List<RedeemData> redeems)
+        {
+            if (string.IsNullOrEmpty(redeem.id) || redeems.Exists(r => r.id == redeem.id))
+                redeem.id = RedeemIdHelper.NewId();
+        }
+
         public static bool AddRedeem(RedeemData redeem, out string error, string profileName = null)
         {
             error = null;
@@ -116,6 +123,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                     if (redeems.Exists(r => SameTitle(r.title, redeem.title)))
                         return $"A redeem named '{redeem.title}' already exists.";
 
+                    EnsureOwnId(redeem, redeems);
                     redeems.Add(redeem);
                     return null;
                 }, out error);
@@ -127,6 +135,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return false;
             }
 
+            EnsureOwnId(redeem, RedeemHelper.redeems);
             RedeemHelper.redeems.Add(redeem);
             return SaveActive(out error);
         }
@@ -154,6 +163,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                     if (titleChanged && clash >= 0 && clash != diskIndex)
                         return $"A redeem named '{updated.title}' already exists.";
 
+                    updated.id = redeems[diskIndex].id;
                     redeems[diskIndex] = updated;
                     return null;
                 }, out error);
@@ -172,38 +182,24 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return false;
             }
 
-            // Tell the Twitch sync before SaveActive pushes: it then edits the reward under its old title
-            // (keeping its id) instead of deleting it and creating a new one.
-            if (titleChanged)
-                RegisterRename(GetFullTitle(original), GetFullTitle(updated));
+            // The edit keeps the redeem's identity, so its reward on Twitch is edited (keeping its Twitch id)
+            // and not replaced, whatever the new title is.
+            updated.id = original.id;
 
             RedeemHelper.redeems[index] = updated;
             return SaveActive(out error);
         }
 
-        private static void RegisterRename(string previousTitle, string newTitle)
-        {
-            if (Game.instance == null)
-                return;
-
-            Game.instance.gameObject.GetComponent<TwitchCustomRewards>()?.RegisterRename(previousTitle, newTitle);
-        }
-
         /// <summary>
-        /// Changing the title prefix renames every redeem on Twitch. Tell the Twitch sync, so it edits the
-        /// rewards (keeping their ids) instead of deleting and creating all of them, and ask for that sync.
-        /// The prefix field calls this for every letter typed, so the sync waits until typing has stopped.
+        /// Changing the title prefix renames every redeem on Twitch. The prefix field calls this for every letter
+        /// typed, so the update of the rewards waits until typing has stopped.
         /// </summary>
-        public static void RegisterPrefixChange(string previousPrefix, string newPrefix)
+        public static void OnPrefixChanged(string previousPrefix, string newPrefix)
         {
-            if (previousPrefix == newPrefix)
+            if (previousPrefix == newPrefix || Game.instance == null)
                 return;
 
-            foreach (RedeemData redeem in RedeemHelper.redeems)
-                RegisterRename(GetFullTitle(redeem.title, previousPrefix), GetFullTitle(redeem.title, newPrefix));
-
-            if (Game.instance != null)
-                Game.instance.gameObject.GetComponent<TwitchCustomRewards>()?.SetRewardsSoon();
+            Game.instance.gameObject.GetComponent<TwitchCustomRewards>()?.SetRewardsSoon();
         }
 
         public static bool DeleteRedeem(RedeemData redeem, out string error, string profileName = null)
@@ -268,6 +264,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                     RedeemData diskCopy = redeem.DeepClone<RedeemData>();
                     diskCopy.title = newTitle;
+                    diskCopy.id = RedeemIdHelper.NewId();
                     redeems.Add(diskCopy);
                     return null;
                 }, out error);
@@ -281,6 +278,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             RedeemData copy = redeem.DeepClone<RedeemData>();
             copy.title = newTitle;
+            copy.id = RedeemIdHelper.NewId();
 
             RedeemHelper.redeems.Add(copy);
             return SaveActive(out error);

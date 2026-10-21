@@ -14,6 +14,11 @@ namespace WizshBoneTwitchIntegration.Models
         [InputPrefix("WBTI")]
         public string title = "";
 
+        // The redeem's permanent identity. The title can change (rename, prefix), this never does, so whatever
+        // is linked to a redeem (its reward on Twitch) survives a rename. Assigned when the profile is loaded
+        // (RedeemIdHelper.EnsureIds), saved with the profile, and new for every new or copied redeem.
+        [EditorHidden] public string id = "";
+
         [EditorLabel("Description")]
         [EditorTooltip("The description of the redeem shown when selected in Twitch.")]
         public string description = "";

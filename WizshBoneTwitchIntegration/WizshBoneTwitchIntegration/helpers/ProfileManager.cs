@@ -658,6 +658,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             RedeemData copy = redeem.DeepClone<RedeemData>();
             copy.title = newTitle;
+            copy.id = RedeemIdHelper.NewId();
             data.redeems.Add(copy);
 
             ExtraConfigHelper.WriteRedeemsConfig(targetPath, data.settings, data.creatureGroups, data.redeems);

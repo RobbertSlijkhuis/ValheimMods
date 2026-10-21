@@ -79,10 +79,11 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             public readonly TaskCompletionSource<bool> Done = new TaskCompletionSource<bool>();
         }
 
-        // Twitch title -> the titles it replaced. The sync uses it to edit a renamed reward (keeping its id)
-        // instead of deleting it and creating a new one, and the history lookup to find redemptions made under an
-        // old title. Never cleared: nothing here can become wrong by remembering a title that no longer exists.
-        private readonly Dictionary<string, HashSet<string>> m_formerTitles = new Dictionary<string, HashSet<string>>();
+        // Redeem id -> id of its reward on Twitch, as far as the last sync knows. This is the link between a redeem
+        // and its reward that survives a rename: the sync finds the reward by it (and edits it instead of replacing
+        // it), a redemption is matched to its redeem by it, and the history lookup uses it. Only lives for the session:
+        // the rewards are removed at logout, so there is nothing to remember across one.
+        private readonly Dictionary<string, string> m_rewardIds = new Dictionary<string, string>();
 
         public void Awake()
         {
@@ -211,42 +212,63 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public bool IsLoggedIn => m_auth != null && m_auth.m_loggedIn;
 
+        /// <summary>By title only, for the legacy GUI_OLD, which has no redeem to ask about.</summary>
         public bool HasUnresolvedRedeemsFor(string redeemTitle)
+        {
+            return m_enabled
+                && !ProfileSettingsHelper.Current.autoResolveRedeems
+                && m_redeemHistory.Exists(item =>
+                    item.CustomRewardTitle == redeemTitle
+                    && item.Status == CustomRewardRedemptionState.Unfulfilled);
+        }
+
+        /// <summary>
+        /// Whether redemptions of <paramref name="redeem"/> are still waiting to be completed or refunded. Found by the
+        /// redeem's reward, so redemptions made under an earlier title (before a rename) count too. Only a redeem
+        /// without a known reward is looked up by its title, since a title can be reused by another redeem later.
+        /// </summary>
+        public bool HasUnresolvedRedeemsFor(RedeemData redeem)
         {
             if (!m_enabled || ProfileSettingsHelper.Current.autoResolveRedeems)
                 return false;
 
-            HashSet<string> titles = new HashSet<string>(FormerTitlesOf(redeemTitle)) { redeemTitle };
+            if (m_rewardIds.TryGetValue(redeem.id ?? "", out string rewardId))
+            {
+                return m_redeemHistory.Exists(item =>
+                    item.Status == CustomRewardRedemptionState.Unfulfilled && item.CustomRewardId == rewardId);
+            }
+
+            string title = RedeemManager.GetFullTitle(redeem);
 
             return m_redeemHistory.Exists(item =>
-                titles.Contains(item.CustomRewardTitle)
-                && item.Status == CustomRewardRedemptionState.Unfulfilled);
+                item.Status == CustomRewardRedemptionState.Unfulfilled && RedeemManager.SameTitle(item.CustomRewardTitle, title));
         }
 
-        // Every title the redeem had before this one (through any number of renames), the most recent first.
-        private List<string> FormerTitlesOf(string title)
+        /// <summary>
+        /// The redeem a redemption belongs to: by the id of the reward it was made on, which still works while Twitch
+        /// shows an old title (a rename that is not synced yet), and otherwise by its title.
+        /// </summary>
+        private RedeemData FindRedeemFor(CustomRewardEvent customRewardEvent)
         {
-            List<string> found = new List<string>();
-            HashSet<string> seen = new HashSet<string> { title };
-            Queue<string> open = new Queue<string>();
-            open.Enqueue(title);
-
-            while (open.Count > 0)
+            if (!string.IsNullOrEmpty(customRewardEvent.CustomRewardId))
             {
-                if (!m_formerTitles.TryGetValue(open.Dequeue(), out HashSet<string> former))
-                    continue;
-
-                foreach (string earlier in former)
+                foreach (KeyValuePair<string, string> link in m_rewardIds)
                 {
-                    if (seen.Add(earlier))
-                    {
-                        found.Add(earlier);
-                        open.Enqueue(earlier);
-                    }
+                    if (link.Value != customRewardEvent.CustomRewardId)
+                        continue;
+
+                    RedeemData byId = GetRedeemList().Find(item => item.id == link.Key);
+
+                    if (byId != null)
+                        return byId;
                 }
             }
 
-            return found;
+            // customRewardEvent.CustomRewardTitle is whatever was actually pushed to Twitch - the Twitch-facing
+            // (prefixed) title, not the raw RedeemData.title - so match against RedeemManager.GetFullTitle() rather
+            // than item.title directly. Capitals are ignored: the reward may have been retitled in a different case
+            // on twitch.tv since the last sync.
+            return GetRedeemList().Find(item => RedeemManager.SameTitle(RedeemManager.GetFullTitle(item), customRewardEvent.CustomRewardTitle));
         }
 
         public void Update()
@@ -318,11 +340,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                 m_refundMessage = $"Your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points has been refunded!";
 
-                // customRewardEvent.CustomRewardTitle is whatever was actually pushed to Twitch -
-                // the Twitch-facing (prefixed) title, not the raw RedeemData.title - so match
-                // against RedeemManager.GetFullTitle() rather than item.title directly. Capitals are ignored: the
-                // reward may have been retitled in a different case on twitch.tv since the last sync.
-                RedeemData redeem = GetRedeemList().Find(item => RedeemManager.SameTitle(RedeemManager.GetFullTitle(item), customRewardEvent.CustomRewardTitle));
+                RedeemData redeem = FindRedeemFor(customRewardEvent);
                 if (redeem == null)
                 {
                     // Not refunded or resolved on purpose: see m_unknownRedeems.
@@ -624,21 +642,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         }
 
         /// <summary>
-        /// Remembers that a redeem's Twitch title changed, so a sync edits its reward (keeping its id) instead
-        /// of deleting it and creating a new one. Titles are the Twitch-facing (prefixed) ones. Doesn't start a sync.
-        /// </summary>
-        public void RegisterRename(string previousTitle, string newTitle)
-        {
-            if (string.IsNullOrEmpty(previousTitle) || previousTitle == newTitle)
-                return;
-
-            if (!m_formerTitles.TryGetValue(newTitle, out HashSet<string> former))
-                m_formerTitles[newTitle] = former = new HashSet<string>();
-
-            former.Add(previousTitle);
-        }
-
-        /// <summary>
         /// Asks for the rewards on Twitch to be made to match the profile as it is by the time the worker gets to
         /// it. Returns at once; asking again while a sync is running makes it stop early and start over.
         /// </summary>
@@ -691,7 +694,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     {
                         ClearRequest request = m_clearRequest;
                         m_clearRequest = null;
-                        request.Done.TrySetResult(await ClearOnTwitchAsync(request));
+                        bool removed = await ClearOnTwitchAsync(request);
+
+                        // The rewards are gone, so no redeem has a reward to be linked to. Only the worker changes this map,
+                        // in its own turn: a sync that was still finishing when the clear was asked for wrote its rewards
+                        // into it, and they were still on Twitch until now.
+                        m_rewardIds.Clear();
+
+                        request.Done.TrySetResult(removed);
                         continue;
                     }
 
@@ -714,14 +724,13 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
         }
 
-        // The rewards the profile wants on Twitch right now, each with the titles its redeem had before.
-        private List<TwitchRewardSync.Desired> BuildWanted(out Dictionary<string, List<string>> formerTitles)
+        // The rewards the profile wants on Twitch right now.
+        private List<TwitchRewardSync.Desired> BuildWanted()
         {
             List<RedeemData> redeems = GetRedeemList();
 
             redeems.RemoveAll(item => item.type == RedeemType.Undefined);
 
-            formerTitles = new Dictionary<string, List<string>>();
             List<TwitchRewardSync.Desired> wanted = new List<TwitchRewardSync.Desired>();
 
             foreach (RedeemData redeem in redeems)
@@ -729,17 +738,13 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (!IsPushedToTwitch(redeem))
                     continue;
 
-                string title = RedeemManager.GetFullTitle(redeem);
-                List<string> former = FormerTitlesOf(title);
-
-                if (former.Count > 0)
-                    formerTitles[title] = former;
-
                 wanted.Add(new TwitchRewardSync.Desired
                 {
+                    RedeemId = redeem.id,
+
                     // The Twitch-facing (prefixed) title - RedeemData.title itself is stored
                     // prefix-free, see RedeemManager.GetFullTitle.
-                    Title = title,
+                    Title = RedeemManager.GetFullTitle(redeem),
                     Prompt = redeem.description,
                     Cost = ApplyDiscount(redeem.points),
                     BackgroundColor = redeem.backgroundColor,
@@ -769,7 +774,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
             try
             {
-                List<TwitchRewardSync.Desired> wanted = BuildWanted(out Dictionary<string, List<string>> formerTitles);
+                List<TwitchRewardSync.Desired> wanted = BuildWanted();
 
                 // Our rewards as the lookup read them, handed to the sync so it doesn't read them a second time.
                 TwitchRewardLimitHelper.ChannelRewardCounts counts = await LookupChannelRewardsAsync();
@@ -778,7 +783,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (!m_enabled || cancel.IsCancellationRequested)
                     return;
 
-                await PushAsync(wanted, formerTitles, counts, cancel);
+                await PushAsync(wanted, counts, cancel);
             }
             catch (Exception e)
             {
@@ -793,7 +798,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         }
 
         // counts is this pass's own lookup (null when it failed): not OtherChannelRewards, which other lookups can overwrite.
-        private async Task PushAsync(List<TwitchRewardSync.Desired> wanted, Dictionary<string, List<string>> formerTitles, TwitchRewardLimitHelper.ChannelRewardCounts counts, CancellationToken cancel)
+        private async Task PushAsync(List<TwitchRewardSync.Desired> wanted, TwitchRewardLimitHelper.ChannelRewardCounts counts, CancellationToken cancel)
         {
             int others = counts?.Others ?? 0;
 
@@ -815,13 +820,21 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             SetPushBlocked(false);
 
             TwitchRewardSync.Result result = await TwitchRewardSync.SyncAsync(
-                m_auth?.m_userInfo?.channelId, wanted, formerTitles, cancel, counts?.OwnRewards);
+                m_auth?.m_userInfo?.channelId, wanted, new Dictionary<string, string>(m_rewardIds), cancel, counts?.OwnRewards);
 
             if (result.LookupFailed)
             {
                 ToastNotifications.Show("Redeems not sent to Twitch: your channel's rewards could not be read - check the log.", ToastType.Error);
                 return;
             }
+
+            // A finished sync knows the reward of every redeem that is on Twitch, so it replaces what was known (the
+            // rewards it removed drop out); a cancelled one only adds what it found.
+            if (!result.Cancelled)
+                m_rewardIds.Clear();
+
+            foreach (KeyValuePair<string, string> link in result.RewardIds)
+                m_rewardIds[link.Key] = link.Value;
 
             if (result.Cancelled)
                 return;

@@ -157,7 +157,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 () => ProfileSettingsHelper.Current.redeemTitlePrefix,
                 v =>
                 {
-                    RedeemManager.RegisterPrefixChange(ProfileSettingsHelper.Current.redeemTitlePrefix, v);
+                    RedeemManager.OnPrefixChanged(ProfileSettingsHelper.Current.redeemTitlePrefix, v);
                     ProfileSettingsHelper.Current.redeemTitlePrefix = v;
                 },
                 Defaults.redeemTitlePrefix,

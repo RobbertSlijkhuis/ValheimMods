@@ -145,6 +145,9 @@ namespace WizshBoneTwitchIntegration.Helpers
             {
                 data.redeems = data.redeems ?? new List<RedeemData>();
                 data.creatureGroups = data.creatureGroups ?? new List<CreatureGroupData>();
+
+                // Every redeem has an id from here on; it is written to the file with the next save.
+                RedeemIdHelper.EnsureIds(data.redeems);
             }
 
             return data;
