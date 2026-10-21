@@ -18,7 +18,7 @@
 #### Redeems
 - Added the "Slippery Ground" status effect (pick it in a Status Effect redeem): the streamer slides on any terrain like on the Deep North ice sheets for the effect's duration. Boats and building floors keep their normal grip, and ice shoes still prevent sliding.
 - Added the `WBTIRemoveTerrainEdit` console command to undo Twitch terrain edits and restore the original terrain. Permanent terrain edits (no duration) can now be undone too, but only edits made from this version on. Timed terrain edits now also reset their whole area for Rectangle and Chevron shapes.
-- Fixed redeems showing up on Twitch but not being handled in the game after a Twitch session dropped. Enabling redeems now always starts a fresh connection to Twitch for redemptions, so turning them off and on again fixes it without leaving the world.
+- Fixed redeems showing up on Twitch but not being handled in the game after a Twitch session dropped. The connection for redemptions is now closed on every logout (including a lost game-server connection) and opened fresh on login, so logging out and back in fixes it.
 - Redeems can no longer be enabled while you are logged out of Twitch, or before your Twitch account info has loaded. The Home tab shows a message instead. This also makes sure the check against Twitch's 50 reward limit is never skipped.
 - The Home tab and the HUD now show redeems as disabled after you log out of Twitch yourself, so they no longer say enabled when nothing is on Twitch.
 
