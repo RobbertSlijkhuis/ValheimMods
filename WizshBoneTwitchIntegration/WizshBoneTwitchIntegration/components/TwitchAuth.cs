@@ -300,7 +300,17 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     TwitchTokenCapture.Clear();
 
                     if (m_customRewards)
+                    {
                         m_customRewards.ClearChannelRewardCounts();
+                        m_customRewards.UnSubscribeFromRedeemEvents();
+
+                        // Every deliberate logout removes the rewards from Twitch first, so the UI mustn't
+                        // keep showing redeems as enabled (a re-login without enable-on-login would never
+                        // push them again). After an unexpected expiry the rewards are still live on
+                        // Twitch and keep being received after the next login, so the flag stays as it is.
+                        if (m_logoutRequested)
+                            m_customRewards.m_enabled = false;
+                    }
 
                     if (!m_logoutRequested)
                     {
