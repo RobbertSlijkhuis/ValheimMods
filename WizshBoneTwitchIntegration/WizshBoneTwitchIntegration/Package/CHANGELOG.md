@@ -5,6 +5,7 @@
 - Added a "Show top death causers" setting (off by default) that lists the three viewers who caused the most deaths in the current world under the death counter, in gold, silver and bronze.
 - Added a "Show total death count" setting (on by default). Turn it off to count only the deaths in the current world instead of all deaths of the character.
 - Leaderboards now track every death of the streamer per world (not only the ones a viewer caused) and show it in the footer, e.g. "5 deaths caused (12 total)". Worlds played before this update start from the deaths viewers caused.
+- The Twitch chat connection is now encrypted (TLS). Before, your Twitch access token was sent in plain text when chat connected. Chat is also read and sent in the background now, so a bad connection can no longer freeze the game, and chat reconnects by itself when the connection drops (it used to stay dead until you logged in again). Chat commands are also recognised more strictly: a viewer typing certain words (like a message in capitals containing "PING") can no longer drop their own message or break the chat connection.
 
 #### Twitch Ward
 - Added a "Max Twitch Wards" setting (0 means unlimited). Once the limit is reached, placing another ward is blocked with a message. Existing wards are kept if you lower the limit. On a dedicated server a client only counts the wards near it, so it can place more than the limit there.

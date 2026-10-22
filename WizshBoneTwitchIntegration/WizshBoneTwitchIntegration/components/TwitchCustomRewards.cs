@@ -77,6 +77,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             public string ChannelId;
             public string Token;
             public readonly TaskCompletionSource<bool> Done = new TaskCompletionSource<bool>();
+
+            /// <summary>Ids of the rewards the clear has confirmed deleted, also when it did not get through all of them.</summary>
+            public readonly HashSet<string> DeletedRewardIds = new HashSet<string>();
         }
 
         // Redeem id -> id of its reward on Twitch, as far as the last sync knows. This is the link between a redeem
@@ -696,10 +699,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                         m_clearRequest = null;
                         bool removed = await ClearOnTwitchAsync(request);
 
-                        // The rewards are gone, so no redeem has a reward to be linked to. Only the worker changes this map,
+                        // The removed rewards no longer have a redeem to be linked to. Only the worker changes this map,
                         // in its own turn: a sync that was still finishing when the clear was asked for wrote its rewards
-                        // into it, and they were still on Twitch until now.
-                        m_rewardIds.Clear();
+                        // into it, and they were still on Twitch until now. A reward that could not be removed keeps its
+                        // link, so a redemption on it is still matched to its redeem, also after a rename.
+                        if (removed)
+                            m_rewardIds.Clear();
+                        else
+                            RemoveRewardLinks(request.DeletedRewardIds);
 
                         request.Done.TrySetResult(removed);
                         continue;
@@ -953,13 +960,27 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             try
             {
-                return await TwitchRewardSync.ClearAsync(request.ChannelId, request.Token);
+                return await TwitchRewardSync.ClearAsync(request.ChannelId, request.Token, request.DeletedRewardIds);
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogWarning($"[WBTI] Could not remove the redeems from Twitch: {e.Message}");
                 return false;
             }
+        }
+
+        private void RemoveRewardLinks(ICollection<string> rewardIds)
+        {
+            List<string> redeemIds = new List<string>();
+
+            foreach (KeyValuePair<string, string> link in m_rewardIds)
+            {
+                if (rewardIds.Contains(link.Value))
+                    redeemIds.Add(link.Key);
+            }
+
+            foreach (string redeemId in redeemIds)
+                m_rewardIds.Remove(redeemId);
         }
 
         public bool ReloadRewards()

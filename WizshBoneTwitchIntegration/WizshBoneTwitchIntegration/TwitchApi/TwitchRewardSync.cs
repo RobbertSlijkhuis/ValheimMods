@@ -174,7 +174,8 @@ namespace WizshBoneTwitchIntegration.TwitchApi
         /// Makes the edits. Twitch titles are unique, so a reward can only be given a title that no other reward holds
         /// at that moment: the edits are ordered so each one frees its old title before another needs it (A to B
         /// together with B to C does the second first), and rewards that would have to swap titles are moved aside
-        /// under a temporary title first. Returns false when cancelled.
+        /// under a temporary title first. Returns false when cancelled. A cancel waits until no reward is left under
+        /// a temporary title, so the channel never keeps one (the rest of the swap is only a request or two).
         /// </summary>
         private static async Task<bool> EditAllAsync(string broadcasterId, List<KeyValuePair<Desired, HelixReward>> edits,
             Dictionary<string, HelixReward> held, Result result, CancellationToken cancel)
@@ -183,7 +184,7 @@ namespace WizshBoneTwitchIntegration.TwitchApi
 
             while (edits.Count > 0)
             {
-                if (cancel.IsCancellationRequested)
+                if (cancel.IsCancellationRequested && !edits.Exists(edit => parked.Contains(edit.Value)))
                     return false;
 
                 int next = edits.FindIndex(edit => !HeldByOther(held, edit));
@@ -286,9 +287,11 @@ namespace WizshBoneTwitchIntegration.TwitchApi
         /// Stops at the first delete that gets no answer or is refused for the login (401): every one after it
         /// would fail the same way, so a dead connection ends the clear after one request instead of one per reward.
         /// Logging out wipes the stored token while this is still running, so it works with the
-        /// <paramref name="token"/> taken before the logout.
+        /// <paramref name="token"/> taken before the logout. The ids of the rewards that are confirmed deleted are
+        /// added to <paramref name="deletedIds"/> as they go, so a caller also knows what was removed when this
+        /// returns false (or is cut short).
         /// </summary>
-        public static async Task<bool> ClearAsync(string broadcasterId, string token)
+        public static async Task<bool> ClearAsync(string broadcasterId, string token, ICollection<string> deletedIds = null)
         {
             // Nothing was ever pushed without a channel id.
             if (string.IsNullOrEmpty(broadcasterId))
@@ -306,7 +309,10 @@ namespace WizshBoneTwitchIntegration.TwitchApi
                 TwitchHelixClient.Response response = await DeleteAsync(broadcasterId, reward, token);
 
                 if (response.IsSuccess)
+                {
+                    deletedIds?.Add(reward.id);
                     continue;
+                }
 
                 allDeleted = false;
 
