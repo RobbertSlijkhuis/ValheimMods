@@ -2,12 +2,11 @@
 using System;
 using System.Collections;
 using System.Threading.Tasks;
-using TwitchSDK;
-using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Gui;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
+using WizshBoneTwitchIntegration.TwitchApi;
 
 namespace WizshBoneTwitchIntegration.TwitchIntegration
 {
@@ -15,21 +14,19 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
     {
         private TwitchChat m_chat;
         public TwitchCustomRewards m_customRewards;
-        private GameTask<AuthenticationInfo> m_authInfo;
-        private GameTask<AuthState> m_authState;
-        private string m_scopes = $"{TwitchOAuthScope.Bits.Read.Scope} {TwitchOAuthScope.Channel.ManageRedemptions.Scope} {TwitchOAuthScope.User.ReadSubscriptions.Scope} {TwitchTokenCapture.ChatScopes}";
         public TwitchUserInfo m_userInfo;
         public bool m_loggedIn = false;
-        // UTC so a clock/daylight-saving change mid-session can't skew the countdown.
-        private DateTime m_loggedinInTime;
         private Coroutine m_trackRoutine;
-        private Coroutine m_loginRoutine;
-        private bool m_loginPolling;
-        // Fallback only, used when the token response's expires_in wasn't captured (TwitchTokenCapture.ExpiresAtUtc is null).
-        private const int FallbackTokenLifetimeMinutes = 240;
-        // private const int FallbackTokenLifetimeMinutes = 16;
         // We log out this long before the real expiry, so the redeems can still be removed from Twitch with a valid token.
         private const int LogoutBeforeExpiryMinutes = 5;
+        // Twitch wants a login that is kept to be validated when it starts and then every hour.
+        private const int ValidateEveryMinutes = 60;
+        // Polls in a row that get no answer from Twitch before the login gives up (about half a minute).
+        private const int MaxUnreachablePolls = 6;
+        private const int UserLookupAttempts = 3;
+        private const int UserLookupRetryMilliseconds = 2000;
+        // How long a logout or quit waits for the token to be revoked on Twitch's side before going on without it.
+        private const float RevokeWaitSeconds = 3f;
         private const string RemovingRewardsMessage = "Removing redeems from Twitch, this could take a moment";
         private const string RewardsNotRemovedMessage = "Your redeems could not be confirmed removed from Twitch. Any left are cleaned up the next time you enable redeems.";
         // Minutes-remaining marks (until that logout) at which the player is warned, once each per login (descending).
@@ -37,13 +34,23 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private int m_lastWarnedMark = int.MaxValue;
         // Set once the pre-expiry logout has started, so the 60s tick doesn't start it twice.
         private bool m_limitLogoutStarted;
-        // Set by the deliberate logout paths below so GetAuthState can tell them apart from the
-        // session dropping on its own (token expiry) and only warn about the latter.
+        // Set by the deliberate logout paths below so OnSessionEnded can tell them apart from the
+        // login being ended by Twitch (token expired or revoked) and only warn about the latter.
         private bool m_logoutRequested;
         // Set while a logout or quit waits for the redeems to be removed from Twitch (or for the player's answer).
         private bool m_logoutInProgress;
         public bool m_waitingForCode = false;
-        private DateTime m_waitingForCodeSince;
+
+        // The login in progress. Every start of a login, and every end of a session, takes a new number, so a step
+        // that was waiting (for Twitch, or for the player to authorize) sees that it was replaced and stops.
+        private int m_loginGeneration;
+        private bool m_loginInFlight;
+        private TwitchOAuthClient.DeviceCode m_device;
+        private DateTime m_deviceExpiresAtUtc;
+        private DateTime m_lastValidatedUtc;
+        private bool m_validating;
+        // The revoke of the last deliberate logout; the logout and quit steps give it a moment to finish.
+        private Task m_revokeTask;
 
         // LogoutProgressHUD is the one Gui.* panel that still lives here - Show/UpdateMessage/Hide
         // are called directly from this class's own logout/quit sequence below, unlike
@@ -65,6 +72,23 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
         }
 
+        // A login that is still waiting (for Twitch, or for the player) must not finish on a component that is gone.
+        // Destroyed while still logged in means the game connection was lost: Game.Logout() skips every logout path
+        // above, so the login is ended here instead - on Twitch's side too, and nothing of it is carried to the next
+        // world, which logs in again.
+        private void OnDestroy()
+        {
+            m_loginGeneration++;
+            GUIManager.OnCustomGUIAvailable -= OnGUIAvailable;
+
+            if (!m_loggedIn)
+                return;
+
+            m_loggedIn = false;
+            _ = TwitchOAuthClient.RevokeAsync(TwitchSession.AccessToken);
+            TwitchSession.Clear();
+        }
+
         private void OnGUIAvailable()
         {
             try
@@ -78,43 +102,205 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
         }
 
+        /// <summary>
+        /// The login button. Starts the login in the browser; while that waits for the player it opens the page again.
+        /// </summary>
         public void InvokeAuth()
         {
-            m_waitingForCode = false;
-            StartLoginPolling();
-        }
-
-        // Realtime coroutine rather than InvokeRepeating (scaled time), so the login is still picked up
-        // while a single-player menu pauses the game. The flag - not just StopCoroutine - ends the loop,
-        // because InitLoginProcess stops its own polling from inside the loop.
-        private void StartLoginPolling()
-        {
-            StopLoginPolling();
-            m_loginPolling = true;
-            m_loginRoutine = StartCoroutine(LoginLoop());
-        }
-
-        private void StopLoginPolling()
-        {
-            m_loginPolling = false;
-
-            if (m_loginRoutine == null)
+            if (m_loggedIn)
                 return;
 
-            StopCoroutine(m_loginRoutine);
-            m_loginRoutine = null;
+            // Waiting for the player to authorize: the button opens the page of the same code again.
+            if (m_waitingForCode && m_device != null && DateTime.UtcNow < m_deviceExpiresAtUtc)
+            {
+                Application.OpenURL(m_device.VerificationUri);
+                return;
+            }
+
+            // A press while the code or the account is still being fetched would start a second login.
+            if (m_loginInFlight)
+                return;
+
+            _ = LoginAsync();
         }
 
-        private IEnumerator LoginLoop()
+        // Runs on the main thread: it is started from InvokeAuth and resumes there after every await.
+        private async Task LoginAsync()
         {
-            while (m_loginPolling)
+            int generation = ++m_loginGeneration;
+            m_loginInFlight = true;
+
+            try
             {
-                InitLoginProcess();
+                m_waitingForCode = false;
+                m_device = null;
 
-                if (!m_loginPolling)
-                    break;
+                TwitchOAuthClient.DeviceCode device = await TwitchOAuthClient.RequestDeviceCodeAsync(TwitchApp.LoginScopes);
 
-                yield return new WaitForSecondsRealtime(1f);
+                if (generation != m_loginGeneration)
+                    return;
+
+                if (device == null)
+                {
+                    ToastNotifications.Show("Could not start the Twitch login. Check your connection and try again.", ToastType.Warning);
+                    return;
+                }
+
+                m_device = device;
+                m_deviceExpiresAtUtc = DateTime.UtcNow.AddSeconds(device.ExpiresInSeconds);
+                m_waitingForCode = true;
+                Application.OpenURL(device.VerificationUri);
+
+                TwitchOAuthClient.PollResult granted = await WaitForAuthorizationAsync(device, generation);
+
+                if (generation != m_loginGeneration)
+                    return;
+
+                m_waitingForCode = false;
+                m_device = null;
+
+                // Not authorized (the reason was shown): back to the login button.
+                if (granted == null)
+                    return;
+
+                TwitchSession.Set(granted.AccessToken, granted.ExpiresInSeconds);
+                await CompleteLoginAsync(generation);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong while logging in to Twitch: " + e);
+
+                if (generation == m_loginGeneration)
+                {
+                    m_waitingForCode = false;
+                    m_device = null;
+                }
+            }
+            finally
+            {
+                if (generation == m_loginGeneration)
+                    m_loginInFlight = false;
+            }
+        }
+
+        // Polls until the player has authorized, the code runs out, or the login is replaced. null when it did not
+        // end with a token (the player was told why, except when the login was replaced).
+        private async Task<TwitchOAuthClient.PollResult> WaitForAuthorizationAsync(TwitchOAuthClient.DeviceCode device, int generation)
+        {
+            int interval = device.IntervalSeconds;
+            int unreachablePolls = 0;
+
+            while (DateTime.UtcNow < m_deviceExpiresAtUtc)
+            {
+                await Task.Delay(interval * 1000);
+
+                if (generation != m_loginGeneration)
+                    return null;
+
+                TwitchOAuthClient.PollResult result = await TwitchOAuthClient.PollAsync(device.Code, TwitchApp.LoginScopes);
+
+                if (generation != m_loginGeneration)
+                    return null;
+
+                // Twitch answered (even if only "not yet"): the connection is fine.
+                if (result.Status != TwitchOAuthClient.PollStatus.Unreachable)
+                    unreachablePolls = 0;
+
+                switch (result.Status)
+                {
+                    case TwitchOAuthClient.PollStatus.Granted:
+                        return result;
+
+                    case TwitchOAuthClient.PollStatus.SlowDown:
+                        interval += 5;
+                        break;
+
+                    // Waiting would only look like waiting for the player: say it when Twitch stays out of reach.
+                    case TwitchOAuthClient.PollStatus.Unreachable:
+                        Jotunn.Logger.LogWarning($"[WBTI] Could not reach Twitch to check the login: {result.Message}");
+
+                        if (++unreachablePolls >= MaxUnreachablePolls)
+                        {
+                            ToastNotifications.Show("Could not reach Twitch to finish the login. Check your connection and press Twitch Login to try again.", ToastType.Warning);
+                            return null;
+                        }
+
+                        break;
+
+                    case TwitchOAuthClient.PollStatus.Failed:
+                        Jotunn.Logger.LogWarning($"[WBTI] The Twitch login was not completed: {result.Message}");
+                        ToastNotifications.Show("The Twitch login was not completed. Press Twitch Login to try again.", ToastType.Warning);
+                        return null;
+                }
+            }
+
+            Jotunn.Logger.LogWarning("[WBTI] The Twitch login was not authorized in time.");
+            ToastNotifications.Show("The Twitch login timed out. Press Twitch Login to try again.", ToastType.Warning);
+            return null;
+        }
+
+        // The token is in TwitchSession: look up who it belongs to and start everything that needs the login.
+        private async Task CompleteLoginAsync(int generation)
+        {
+            m_lastValidatedUtc = DateTime.UtcNow;
+            m_lastWarnedMark = int.MaxValue;
+            m_limitLogoutStarted = false;
+            m_logoutRequested = false;
+            m_loggedIn = true;
+
+            // A failed lookup is tried again a few times: giving up ends (and revokes) a login that is fine.
+            TwitchUserInfo user = null;
+
+            for (int attempt = 0; attempt < UserLookupAttempts && user == null; attempt++)
+            {
+                if (attempt > 0)
+                    await Task.Delay(UserLookupRetryMilliseconds);
+
+                // Logged out (or logging in again) in the meantime: that already ended this session.
+                if (generation != m_loginGeneration || !m_loggedIn)
+                    return;
+
+                user = await TwitchUserClient.GetMyUserAsync();
+            }
+
+            if (generation != m_loginGeneration || !m_loggedIn)
+                return;
+
+            if (user == null)
+            {
+                ToastNotifications.Show("Could not read your Twitch account. Press Twitch Login to try again.", ToastType.Warning);
+                DropSession(deliberate: true);
+                return;
+            }
+
+            m_userInfo = user;
+
+            // The channel name is only known now, and claim ownership (TwitchChatting.ClaimChannel)
+            // depends on it - number the claims this client already holds / can adopt.
+            gameObject.GetComponent<TwitchChatting>()?.RefreshAllDisplayIndexes();
+
+            FinishLogin();
+        }
+
+        private void FinishLogin()
+        {
+            // Tracking first: it holds the expiry warnings, the logout before the token ends (which removes the redeems)
+            // and the hourly validation, so a step below that throws must not leave a login without them.
+            StartTracking();
+
+            try
+            {
+                m_chat.LogIn();
+                m_customRewards.SubscribeToRedeemEvents();
+
+                if (ProfileSettingsHelper.Current.enableRedeemsOnLogin)
+                    m_customRewards.SetEnableRedeems(true);   // looks up the channel's other rewards as part of the push
+                else
+                    m_customRewards.RefreshChannelRewardCounts();
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong while loggin in: " + e);
             }
         }
 
@@ -129,46 +315,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             chatting.m_enabled = !chatting.m_enabled;
             ProfileSettingsHelper.Current.chattingEnabled = chatting.m_enabled;
             ProfileSettingsHelper.Save();
-        }
-
-        public void InitLoginProcess()
-        {
-            try
-            {
-                if (m_authInfo == null)
-                {
-                    GetAuthInformation();
-                    return;
-                }
-
-                if (!m_loggedIn)
-                {
-                    GetAuthState();
-                    return;
-                }
-                else if (m_userInfo == null)
-                {
-                    GetUserInfo();
-                    return;
-                }
-
-                m_chat.Connect();
-                m_customRewards.SubscribeToRedeemEvents();
-
-                if (ProfileSettingsHelper.Current.enableRedeemsOnLogin)
-                    m_customRewards.SetEnableRedeems(true);   // looks up the channel's other rewards as part of the push
-                else
-                    m_customRewards.RefreshChannelRewardCounts();
-
-                StopLoginPolling();
-                StartTracking();
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Something went wrong while loggin in: " + e);
-                StopLoginPolling();
-                StopTracking();
-            }
         }
 
         // Realtime rather than InvokeRepeating (scaled time), which stops while a single-player menu pauses the game.
@@ -200,8 +346,13 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             try
             {
-                DateTime expiresAt = TwitchTokenCapture.ExpiresAtUtc ?? m_loggedinInTime.AddMinutes(FallbackTokenLifetimeMinutes);
-                double minutesRemaining = expiresAt.AddMinutes(-LogoutBeforeExpiryMinutes).Subtract(DateTime.UtcNow).TotalMinutes;
+                // A login always has its expiry in the session; none means it just ended.
+                DateTime? expiresAt = TwitchSession.ExpiresAtUtc;
+
+                if (!expiresAt.HasValue)
+                    return;
+
+                double minutesRemaining = expiresAt.Value.AddMinutes(-LogoutBeforeExpiryMinutes).Subtract(DateTime.UtcNow).TotalMinutes;
 
                 if (minutesRemaining <= 0)
                 {
@@ -226,7 +377,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     ShowCenterMessage($"You will be logged out from Twitch in {minutes} minute{(minutes == 1 ? "" : "s")}!");
                 }
 
-                StartCoroutine(TrackAuthState());
+                if (!m_validating && DateTime.UtcNow - m_lastValidatedUtc >= TimeSpan.FromMinutes(ValidateEveryMinutes))
+                    _ = ValidateSessionAsync();
             }
             catch (Exception e)
             {
@@ -234,8 +386,49 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
         }
 
+        // Asks Twitch whether the login still stands. It stops standing without its time running out when the player
+        // disconnects the app on twitch.tv, which nothing else would notice. The next check is an hour after an answer;
+        // when Twitch could not be reached it is tried again on the next tick. Never throws.
+        private async Task ValidateSessionAsync()
+        {
+            m_validating = true;
+
+            try
+            {
+                string token = TwitchSession.AccessToken;
+                int generation = m_loginGeneration;
+
+                if (string.IsNullOrEmpty(token))
+                    return;
+
+                TwitchOAuthClient.ValidateResult result = await TwitchOAuthClient.ValidateAsync(token);
+
+                // Logged out, logged in again or destroyed while the request was out: the answer is about a login that
+                // is over, and must not end the session of whatever replaced it.
+                if (generation != m_loginGeneration || !m_loggedIn || TwitchSession.AccessToken != token)
+                    return;
+
+                if (result.State != TwitchOAuthClient.TokenState.Unknown)
+                    m_lastValidatedUtc = DateTime.UtcNow;
+
+                if (result.State == TwitchOAuthClient.TokenState.Invalid)
+                {
+                    Jotunn.Logger.LogWarning("[WBTI] Twitch no longer accepts this login.");
+                    OnSessionEnded();
+                }
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("TwitchAuth.ValidateSessionAsync failed: " + e);
+            }
+            finally
+            {
+                m_validating = false;
+            }
+        }
+
         // Reached LogoutBeforeExpiryMinutes before the real expiry: disable redeems and remove them from Twitch while the token is still valid, and
-        // only then log out. Going through LogOutOfTwitch marks it deliberate, so GetAuthState doesn't show a second message.
+        // only then log out. Going through LogOutOfTwitch marks it deliberate, so OnSessionEnded doesn't show a second message.
         private void LogoutAtTokenLimit()
         {
             m_limitLogoutStarted = true;
@@ -315,160 +508,54 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 proceed(false);
         }
 
-        public IEnumerator TrackAuthState()
+        // The login is over: reset everything that depended on it. Reached from a deliberate logout (DropSession) and,
+        // with m_logoutRequested false, when Twitch ended the login by itself (it expired or was revoked).
+        private void OnSessionEnded()
         {
-            GetBitsLeaderboard();
+            if (!m_loggedIn)
+                return;
 
-            yield return new WaitForSecondsRealtime(5f);
+            // Whatever is still waiting on this login (the account lookup) must not finish it.
+            m_loginGeneration++;
+            m_loginInFlight = false;
 
-            try
+            m_loggedIn = false;
+            m_waitingForCode = false;
+            m_device = null;
+            m_userInfo = null;
+            TwitchSession.Clear();
+
+            if (m_customRewards)
             {
-                GetAuthState();
+                m_customRewards.ClearChannelRewardCounts();
+                m_customRewards.UnSubscribeFromRedeemEvents();
+
+                // Every deliberate logout removes the rewards from Twitch first, so the UI mustn't
+                // keep showing redeems as enabled (a re-login without enable-on-login would never
+                // push them again). After the login was ended by Twitch the rewards are still live on
+                // Twitch and keep being received after the next login, so the flag stays as it is.
+                if (m_logoutRequested)
+                    m_customRewards.m_enabled = false;
             }
-            catch (Exception e)
+
+            if (!m_logoutRequested)
             {
-                Jotunn.Logger.LogError("TwitchAuth.TrackAuthState failed: " + e);
+                // The login was ended by Twitch: stop the per-minute poll and close the chat connection
+                // that was using the same token.
+                StopTracking();
+                if (m_chat)
+                    m_chat.Disconnect();
+                Jotunn.Logger.LogWarning("[WBTI] Twitch session ended unexpectedly (access token expired or revoked).");
+                ShowCenterMessage("You have been logged out from Twitch (login expired). Redeems and chat are inactive until you log in again.", 15);
             }
-        }
 
-        public void GetAuthState()
-        {
-            try
-            {
-                m_authState = Twitch.API.GetAuthState();
-
-                if (m_authState == null || m_authState.MaybeResult == null)
-                {
-                    Jotunn.Logger.LogError("Current auth state is null");
-                    return;
-                }
-
-                if (m_authState.MaybeResult.Status == AuthStatus.LoggedIn && !m_loggedIn)
-                {
-                    m_loggedinInTime = DateTime.UtcNow;
-                    m_lastWarnedMark = int.MaxValue;
-                    m_limitLogoutStarted = false;
-                    m_logoutRequested = false;
-                    m_loggedIn = true;
-                    m_waitingForCode = false;
-                    return;
-                }
-
-                if (m_authState.MaybeResult.Status == AuthStatus.LoggedOut)
-                {
-                    if (!m_loggedIn)
-                        return;
-
-                    m_loggedIn = false;
-                    m_waitingForCode = false;
-                    m_authInfo = null;
-                    m_userInfo = null;
-                    TwitchTokenCapture.Clear();
-
-                    if (m_customRewards)
-                    {
-                        m_customRewards.ClearChannelRewardCounts();
-                        m_customRewards.UnSubscribeFromRedeemEvents();
-
-                        // Every deliberate logout removes the rewards from Twitch first, so the UI mustn't
-                        // keep showing redeems as enabled (a re-login without enable-on-login would never
-                        // push them again). After an unexpected expiry the rewards are still live on
-                        // Twitch and keep being received after the next login, so the flag stays as it is.
-                        if (m_logoutRequested)
-                            m_customRewards.m_enabled = false;
-                    }
-
-                    if (!m_logoutRequested)
-                    {
-                        // The session dropped by itself (token expired): stop the per-minute poll and
-                        // close the chat connection that was using the same token.
-                        StopTracking();
-                        if (m_chat)
-                            m_chat.Disconnect();
-                        Jotunn.Logger.LogWarning("[WBTI] Twitch session ended unexpectedly (access token expired).");
-                        ShowCenterMessage("You have been logged out from Twitch (login expired). Redeems and chat are inactive until you log in again.", 15);
-                    }
-
-                    m_logoutRequested = false;
-                    return;
-                }
-
-                if (m_authState.MaybeResult.Status == AuthStatus.WaitingForCode)
-                {
-                    if (m_waitingForCode)
-                    {
-                        if ((DateTime.UtcNow - m_waitingForCodeSince).TotalSeconds > 60)
-                            ResetLoginProcess();
-
-                        return;
-                    }
-
-                    TwitchOAuthScope tscopes = new TwitchOAuthScope(m_scopes);
-                    AuthenticationInfo authInfo = Twitch.API.GetAuthenticationInfo(tscopes).MaybeResult;
-
-                    if (authInfo == null)
-                        throw new Exception("auth information is null while waiting for code");
-
-                    Application.OpenURL($"{authInfo.Uri}");
-                    m_waitingForCode = true;
-                    m_waitingForCodeSince = DateTime.UtcNow;
-                    return;
-                }
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Something went wrong while getting auth state: " + e);
-                StopLoginPolling();
-            }
-        }
-
-        public void GetUserInfo()
-        {
-            try
-            {
-                TwitchSDK.Interop.UserInfo userInfo = Twitch.API.GetMyUserInfo().MaybeResult;
-
-                if (userInfo == null)
-                    throw new Exception("UserInfo is null");
-
-                m_userInfo = new TwitchUserInfo();
-                m_userInfo.broadcasterType = userInfo.BroadcasterType;
-                m_userInfo.displayName = userInfo.DisplayName;
-                m_userInfo.loginName = userInfo.LoginName;
-                m_userInfo.channelId = userInfo.ChannelId;
-
-                // The channel name is only known now, and claim ownership (TwitchChatting.ClaimChannel)
-                // depends on it - number the claims this client already holds / can adopt.
-                gameObject.GetComponent<TwitchChatting>()?.RefreshAllDisplayIndexes();
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Something went wrong while getting user info: " + e);
-                StopLoginPolling();
-            }
-        }
-
-        public void GetAuthInformation()
-        {
-            if (m_authInfo == null)
-            {
-                TwitchOAuthScope tscopes = new TwitchOAuthScope(m_scopes);
-                m_authInfo = Twitch.API.GetAuthenticationInfo(tscopes);
-            }
+            m_logoutRequested = false;
         }
 
         private static void ShowCenterMessage(string message, int seconds = 10)
         {
             if (Player.m_localPlayer != null)
                 Player.m_localPlayer.Message(MessageHud.MessageType.Center, message, seconds);
-        }
-
-        private void ResetLoginProcess()
-        {
-            StopLoginPolling();
-            m_waitingForCode = false;
-            m_authInfo = null;
-            Twitch.API.LogOut();
         }
 
         public void Logout()
@@ -493,21 +580,30 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             LogOutOfTwitch();
         }
 
-        // Shared by every deliberate logout. m_logoutRequested keeps GetAuthState from reporting it as an expiry.
+        // Shared by every deliberate logout.
         private void LogOutOfTwitch()
         {
             // Another logout got here first (e.g. the pre-expiry one while the player chose Logout or Quit).
             if (!m_loggedIn)
                 return;
 
-            m_logoutRequested = true;
-
             if (m_chat)
                 m_chat.Disconnect();
 
-            Twitch.API.LogOut();
             StopTracking();
-            GetAuthState();
+            DropSession(deliberate: true);
+        }
+
+        // Ends the login. A deliberate one also revokes the token on Twitch's side (best effort: the login is over
+        // either way) so it cannot be used anymore; m_logoutRequested keeps OnSessionEnded from reporting it as an expiry.
+        private void DropSession(bool deliberate)
+        {
+            m_logoutRequested = deliberate;
+
+            if (deliberate)
+                m_revokeTask = TwitchOAuthClient.RevokeAsync(TwitchSession.AccessToken);
+
+            OnSessionEnded();
         }
 
         public void LogoutBackToMainMenu()
@@ -568,11 +664,12 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             m_logoutProgressHUD.UpdateMessage(rewardsRemoved ? message : RewardsNotRemovedMessage + " " + message);
             yield return new WaitForSecondsRealtime(rewardsRemoved ? 1f : 4f);
-        }
 
-        public void GetBitsLeaderboard()
-        {
-            Twitch.API.GetBitsLeaderboard();
+            // A quit right after must not cut the revoke off: the token would stay valid on Twitch for hours.
+            float until = Time.realtimeSinceStartup + RevokeWaitSeconds;
+
+            while (m_revokeTask != null && !m_revokeTask.IsCompleted && Time.realtimeSinceStartup < until)
+                yield return null;
         }
     }
 }

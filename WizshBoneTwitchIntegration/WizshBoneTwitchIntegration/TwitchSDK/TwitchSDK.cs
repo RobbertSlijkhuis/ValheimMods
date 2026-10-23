@@ -122,16 +122,12 @@ class UnityTwitch : TwitchSDKApi
             if (!string.IsNullOrEmpty(request.Authorization))
             {
                 message.Headers.Add("Authorization", request.Authorization);
-                // Lets chat reuse this login instead of authorizing a second time.
-                WizshBoneTwitchIntegration.TwitchIntegration.TwitchTokenCapture.Capture(request.Authorization);
             }
             message.Headers.UserAgent.Add(new ProductInfoHeaderValue(HttpUserAgent, "0.2"));
 
             using (HttpResponseMessage response = await m_http.SendAsync(message, HttpCompletionOption.ResponseContentRead, m_cancel.Token).ConfigureAwait(false))
             {
                 string body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                // Token responses carry the real expires_in, which TwitchAuth uses for its logout countdown.
-                WizshBoneTwitchIntegration.TwitchIntegration.TwitchTokenCapture.CaptureResponse(body);
                 return new WebRequestResult { HttpStatus = (int)response.StatusCode, ResponseBody = body };
             }
         }

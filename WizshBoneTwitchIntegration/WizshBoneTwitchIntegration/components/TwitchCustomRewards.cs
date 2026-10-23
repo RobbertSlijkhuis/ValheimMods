@@ -1114,7 +1114,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 m_clearRequest = new ClearRequest
                 {
                     ChannelId = m_auth?.m_userInfo?.channelId,
-                    Token = TwitchTokenCapture.AccessToken,
+                    Token = TwitchSession.AccessToken,
                 };
             }
 

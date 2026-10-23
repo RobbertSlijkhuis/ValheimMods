@@ -2,7 +2,6 @@ using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using WizshBoneTwitchIntegration.TwitchIntegration;
 
 namespace WizshBoneTwitchIntegration.TwitchApi
 {
@@ -10,14 +9,14 @@ namespace WizshBoneTwitchIntegration.TwitchApi
     /// Thin wrapper around the Twitch Helix REST API: adds the bearer token and client id, retries a
     /// rate-limited call once, and turns every failure (no token, network error, error status) into a
     /// <see cref="Response"/> instead of an exception, so callers only check <see cref="Response.IsSuccess"/>.
-    /// The token is the one the SDK login holds, see <see cref="TwitchTokenCapture"/>.
+    /// The token is the one of the current login, see <see cref="TwitchSession"/>.
     /// </summary>
     internal static class TwitchHelixClient
     {
         private const string BaseUrl = "https://api.twitch.tv/helix/";
         private const int MaxRateLimitWaitSeconds = 10;
 
-        private static readonly HttpClient m_http = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+        private static readonly HttpClient m_http = TwitchHttp.Client;
 
         public static readonly HttpMethod Patch = new HttpMethod("PATCH");
 
@@ -36,19 +35,19 @@ namespace WizshBoneTwitchIntegration.TwitchApi
 
         /// <summary>
         /// Sends one Helix request. <paramref name="path"/> is relative to /helix/, <paramref name="query"/>
-        /// has no leading '?'. Call it on the main thread: the token and client id are read before the first
-        /// await, and a caller that awaits the result resumes on the main thread again. A logout wipes the
+        /// has no leading '?'. The token is read before the first await, so call it while the login is the one the
+        /// request is for; a caller that awaits the result resumes on the main thread again. A logout wipes the
         /// stored token, so work that has to finish after one (removing the rewards) passes the token it
         /// took beforehand as <paramref name="tokenOverride"/>.
         /// </summary>
         public static async Task<Response> SendAsync(HttpMethod method, string path, string query = null, string jsonBody = null, string tokenOverride = null)
         {
-            string token = tokenOverride ?? TwitchTokenCapture.AccessToken;
+            string token = tokenOverride ?? TwitchSession.AccessToken;
 
             if (string.IsNullOrEmpty(token))
                 return new Response { Status = 0, Body = "not logged in to Twitch" };
 
-            string clientId = TwitchSDKSettings.Instance.ClientId;
+            string clientId = TwitchApp.ClientId;
             string url = BaseUrl + path + (string.IsNullOrEmpty(query) ? "" : "?" + query);
 
             try

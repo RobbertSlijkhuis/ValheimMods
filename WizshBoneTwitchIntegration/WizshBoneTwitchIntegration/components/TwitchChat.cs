@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -10,6 +9,7 @@ using System.Threading;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Helpers;
 using WizshBoneTwitchIntegration.Models;
+using WizshBoneTwitchIntegration.TwitchApi;
 
 namespace WizshBoneTwitchIntegration.TwitchIntegration
 {
@@ -34,7 +34,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         private int m_historyLength = 30;
         private int m_messageRelevanceTimer = 120;
 
-        private Coroutine m_connectRoutine;
         private string m_channel;
 
         public void Update()
@@ -59,31 +58,20 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             CloseConnection();
         }
 
-        public void Connect()
-        {
-            try
-            {
-                if (m_connectRoutine != null)
-                    StopCoroutine(m_connectRoutine);
-
-                m_connectRoutine = StartCoroutine(ConnectWhenTokenCaptured());
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("TwitchChat.Connect failed: " + e);
-            }
-        }
-
+        /// <summary>Joins the chat of the logged-in channel, with the token of the current Twitch login.</summary>
         public void LogIn()
         {
             try
             {
                 m_auth = Game.instance.gameObject.GetComponent<TwitchAuth>();
 
-                string accessToken = TwitchTokenCapture.AccessToken;
+                string accessToken = TwitchSession.AccessToken;
 
                 if (string.IsNullOrEmpty(accessToken))
+                {
+                    Jotunn.Logger.LogWarning("[WBTI] Chat not connected: not logged in to Twitch.");
                     return;
+                }
 
                 // Re-logins land here too - close the previous connection instead of leaking it.
                 CloseConnection();
@@ -108,15 +96,9 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             }
         }
 
-        /// <summary>Stops any pending connect and closes the chat connection (logout, expiry).</summary>
+        /// <summary>Closes the chat connection and cancels a planned reconnect (logout, expiry).</summary>
         public void Disconnect()
         {
-            if (m_connectRoutine != null)
-            {
-                StopCoroutine(m_connectRoutine);
-                m_connectRoutine = null;
-            }
-
             m_reconnectAt = 0f;
             m_reconnectDelay = ReconnectMinDelay;
             CloseConnection();
@@ -141,27 +123,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             m_connection?.Close();
             m_connection = null;
-        }
-
-        // Chat reuses the access token of the Twitch SDK login (see TwitchTokenCapture) rather than
-        // running its own authorization. The SDK has normally already made an authenticated call by
-        // the time Connect() runs, but give it a few seconds in case it hasn't.
-        private IEnumerator ConnectWhenTokenCaptured()
-        {
-            float deadline = Time.realtimeSinceStartup + 10f;
-
-            while (string.IsNullOrEmpty(TwitchTokenCapture.AccessToken) && Time.realtimeSinceStartup < deadline)
-                yield return new WaitForSecondsRealtime(0.5f);
-
-            m_connectRoutine = null;
-
-            if (string.IsNullOrEmpty(TwitchTokenCapture.AccessToken))
-            {
-                Jotunn.Logger.LogWarning("[WBTI] Chat not connected: no Twitch access token was captured from the SDK login.");
-                yield break;
-            }
-
-            LogIn();
         }
 
         public List<string> GetUsersInChatHistory()
