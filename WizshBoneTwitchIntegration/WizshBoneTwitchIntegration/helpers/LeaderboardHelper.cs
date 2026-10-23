@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using TwitchSDK.Interop;
+using WizshBoneTwitchIntegration.TwitchApi.Models;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Models;
 using YamlDotNet.Serialization;

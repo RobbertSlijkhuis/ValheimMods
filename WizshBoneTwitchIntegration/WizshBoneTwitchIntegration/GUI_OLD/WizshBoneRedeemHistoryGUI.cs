@@ -1,8 +1,8 @@
 using Jotunn.Managers;
 using System;
 using System.Collections.Generic;
-using TwitchSDK;
-using TwitchSDK.Interop;
+using System.Threading.Tasks;
+using WizshBoneTwitchIntegration.TwitchApi.Models;
 using UnityEngine;
 using UnityEngine.UI;
 using WizshBoneTwitchIntegration.Helpers;
@@ -365,19 +365,17 @@ namespace WizshBoneTwitchIntegration.GuiOld
 
         private void OnComplete(CustomRewardEvent entry)
         {
-            GameTask task = Twitch.API.ResolveCustomReward(entry, CustomRewardRedemptionState.Fulfilled);
-            task.GetAwaiter().OnCompleted(() => OnResolveCompleted(entry, CustomRewardRedemptionState.Fulfilled));
+            _ = ResolveAndRefreshAsync(entry, CustomRewardRedemptionState.Fulfilled);
         }
 
         private void OnRefund(CustomRewardEvent entry)
         {
-            GameTask task = Twitch.API.ResolveCustomReward(entry, CustomRewardRedemptionState.Canceled);
-            task.GetAwaiter().OnCompleted(() => OnResolveCompleted(entry, CustomRewardRedemptionState.Canceled));
+            _ = ResolveAndRefreshAsync(entry, CustomRewardRedemptionState.Canceled);
         }
 
-        private void OnResolveCompleted(CustomRewardEvent entry, CustomRewardRedemptionState state)
+        private async Task ResolveAndRefreshAsync(CustomRewardEvent entry, CustomRewardRedemptionState state)
         {
-            entry.Status = state;
+            await m_customRewards.ResolveAsync(entry, state);
             RefreshPage();
         }
 

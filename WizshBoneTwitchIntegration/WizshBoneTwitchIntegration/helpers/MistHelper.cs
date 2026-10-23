@@ -1,5 +1,5 @@
 ﻿using Jotunn.Managers;
-using TwitchSDK.Interop;
+using WizshBoneTwitchIntegration.TwitchApi.Models;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Models;

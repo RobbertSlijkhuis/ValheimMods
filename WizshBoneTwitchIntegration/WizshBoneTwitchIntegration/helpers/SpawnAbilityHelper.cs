@@ -1,7 +1,7 @@
 ﻿using Jotunn.Managers;
 using System;
 using System.Collections.Generic;
-using TwitchSDK.Interop;
+using WizshBoneTwitchIntegration.TwitchApi.Models;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Exceptions;
 using WizshBoneTwitchIntegration.Extensions;
@@ -146,7 +146,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 {
                     if (SpawnSystem.GetNrOfInstances(prefab, spawnAbility.transform.position, 0f) + toSpawn > spawnAbilityData.maxSpawned)
                     {
-                        m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, there isn't enough room left for the full spawn amount! {TwitchCustomRewards.m_refundMessage}");
+                        customRewardEvent.RejectReason = "there isn't enough room left for the full spawn amount!";
                         throw new RedeemException("Not enough space left for this redeem", ExceptionType.Warning);
                     }
                 }

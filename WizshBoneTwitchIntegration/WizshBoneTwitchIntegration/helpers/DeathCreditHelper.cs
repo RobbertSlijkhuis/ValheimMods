@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
-using TwitchSDK.Interop;
+using WizshBoneTwitchIntegration.TwitchApi.Models;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
 

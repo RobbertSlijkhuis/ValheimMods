@@ -1,16 +1,19 @@
 using System;
-using TwitchSDK.Interop;
+using WizshBoneTwitchIntegration.TwitchApi.Models;
 
 namespace WizshBoneTwitchIntegration.Helpers
 {
-    // Builds the CustomRewardEvent for a locally triggered ("test") redeem. The SDK's
-    // CustomRewardEvent.GetHashCode() dereferences every string field, so an event with any null
-    // string throws as soon as it is used in a HashSet (TwitchCustomRewards.m_unknownRedeems) -
-    // which broke HasUnresolvedRedeems and with it the redeem toggle, history and profile switching.
-    // Every string is therefore set (to "" unless something meaningful applies).
+    // Builds the CustomRewardEvent for a locally triggered ("test") redeem. Every string is set
+    // (to "" unless something meaningful applies), like the ones built from Twitch's JSON.
     // RedemptionId = Guid.Empty is also what marks an event as a test redeem in the history.
     internal static class TestRedeemEventHelper
     {
+        /// <summary>Whether the event came from <see cref="Create"/>: it exists only in the game, not on Twitch.</summary>
+        public static bool IsTestRedeem(CustomRewardEvent entry)
+        {
+            return entry.RedemptionId == Guid.Empty.ToString();
+        }
+
         public static CustomRewardEvent Create(string title, long cost)
         {
             return new CustomRewardEvent

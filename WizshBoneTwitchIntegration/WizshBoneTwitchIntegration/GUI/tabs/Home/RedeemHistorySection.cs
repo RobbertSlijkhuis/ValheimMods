@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Jotunn.Managers;
-using TwitchSDK;
-using TwitchSDK.Interop;
+using WizshBoneTwitchIntegration.TwitchApi.Models;
 using UnityEngine;
 using UnityEngine.UI;
 using WizshBoneTwitchIntegration.Helpers;
@@ -257,7 +257,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
             if (m_pendingCountText != null)
             {
-                int pending = CountUnresolved(customRewards, filtered);
+                int pending = CountUnresolved(filtered);
                 m_pendingCountText.text = $"{pending} pending";
                 m_pendingCountText.color = GUIManager.Instance.ValheimOrange;
                 m_pendingCountText.gameObject.SetActive(pending > 0);
@@ -299,7 +299,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void BuildRow(TwitchCustomRewards customRewards, CustomRewardEvent entry, float yOffset, int rowIndex)
         {
-            bool isTestRedeem = entry.RedemptionId == Guid.Empty.ToString();
+            bool isTestRedeem = TestRedeemEventHelper.IsTestRedeem(entry);
             bool isResolved = entry.Status == CustomRewardRedemptionState.Fulfilled
                 || entry.Status == CustomRewardRedemptionState.Canceled;
 
@@ -307,14 +307,14 @@ namespace WizshBoneTwitchIntegration.Gui
             // takes the usual Completed/Refunded colors (the "Unknown: " title prefix stays).
             Color textColor = entry.Status == CustomRewardRedemptionState.Fulfilled ? CompletedColor
                 : entry.Status == CustomRewardRedemptionState.Canceled ? RefundedColor
-                : IsUnknown(customRewards, entry) ? UnknownColor
+                : entry.IsUnknown ? UnknownColor
                 : GUIManager.Instance.ValheimBeige;
 
             var (row, background) = ListRow.Create(m_listContainer, "HistoryRow", yOffset);
             background.color = ListRow.ZebraColor(rowIndex);
 
             CreateRowText(row, entry.RedeemerName, ColViewerX, ColViewerW, textColor, bold: true);
-            CreateRowText(row, GetDisplayTitle(customRewards, entry), ColRedeemX, ColRedeemW, textColor, bold: false);
+            CreateRowText(row, GetDisplayTitle(entry), ColRedeemX, ColRedeemW, textColor, bold: false);
             CreateRowText(row, $"{entry.CustomRewardCost} pts", ColCostX, ColCostW, textColor, bold: false);
 
             // Checked before isTestRedeem: a resolved test redeem (e.g. RedeemsTab's "Trigger" button,
@@ -459,7 +459,7 @@ namespace WizshBoneTwitchIntegration.Gui
             // Unknown redeems are left to their own row buttons - a bulk Complete/Refund never
             // touches something the active profile doesn't recognize.
             List<CustomRewardEvent> eligible = GetFilteredHistory(customRewards)
-                .FindAll(e => BulkRedeemResolveHelper.IsEligible(e) && !IsUnknown(customRewards, e));
+                .FindAll(e => BulkRedeemResolveHelper.IsEligible(e) && !e.IsUnknown);
 
             customRewards.m_bulkResolveHelper.EnqueueAll(
                 host: customRewards,
@@ -506,19 +506,23 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void OnComplete(CustomRewardEvent entry)
         {
-            GameTask task = Twitch.API.ResolveCustomReward(entry, CustomRewardRedemptionState.Fulfilled);
-            task.GetAwaiter().OnCompleted(() => OnResolveCompleted(entry, CustomRewardRedemptionState.Fulfilled));
+            _ = ResolveAndRefreshAsync(entry, CustomRewardRedemptionState.Fulfilled);
         }
 
         private void OnRefund(CustomRewardEvent entry)
         {
-            GameTask task = Twitch.API.ResolveCustomReward(entry, CustomRewardRedemptionState.Canceled);
-            task.GetAwaiter().OnCompleted(() => OnResolveCompleted(entry, CustomRewardRedemptionState.Canceled));
+            _ = ResolveAndRefreshAsync(entry, CustomRewardRedemptionState.Canceled);
         }
 
-        private void OnResolveCompleted(CustomRewardEvent entry, CustomRewardRedemptionState state)
+        // The row only changes once Twitch has accepted it; when it did not, the entry stays as it was.
+        private async Task ResolveAndRefreshAsync(CustomRewardEvent entry, CustomRewardRedemptionState state)
         {
-            entry.Status = state;
+            TwitchCustomRewards customRewards = GetCustomRewards();
+
+            if (customRewards == null)
+                return;
+
+            await customRewards.ResolveAsync(entry, state);
 
             if (IsVisible)
                 RefreshPage();
@@ -558,17 +562,14 @@ namespace WizshBoneTwitchIntegration.Gui
 
             return customRewards.m_redeemHistory.FindAll(entry =>
                 entry.RedeemerName.IndexOf(m_searchText, StringComparison.OrdinalIgnoreCase) >= 0
-                || GetDisplayTitle(customRewards, entry).IndexOf(m_searchText, StringComparison.OrdinalIgnoreCase) >= 0);
+                || GetDisplayTitle(entry).IndexOf(m_searchText, StringComparison.OrdinalIgnoreCase) >= 0);
         }
-
-        private static bool IsUnknown(TwitchCustomRewards customRewards, CustomRewardEvent entry) =>
-            customRewards != null && customRewards.IsUnknownRedeem(entry);
 
         /// <summary>
         /// The title as shown in the Redeem column, and the text the search box matches against.
         /// </summary>
-        private static string GetDisplayTitle(TwitchCustomRewards customRewards, CustomRewardEvent entry) =>
-            IsUnknown(customRewards, entry) ? "Unknown: " + entry.CustomRewardTitle : entry.CustomRewardTitle;
+        private static string GetDisplayTitle(CustomRewardEvent entry) =>
+            entry.IsUnknown ? "Unknown: " + entry.CustomRewardTitle : entry.CustomRewardTitle;
 
         /// <summary>
         /// The subset of <paramref name="filtered"/> actually rendered on <paramref name="page"/>,
@@ -587,7 +588,7 @@ namespace WizshBoneTwitchIntegration.Gui
             return visible;
         }
 
-        private static int CountUnresolved(TwitchCustomRewards customRewards, List<CustomRewardEvent> entries) =>
-            entries.FindAll(e => e.Status == CustomRewardRedemptionState.Unfulfilled && !IsUnknown(customRewards, e)).Count;
+        private static int CountUnresolved(List<CustomRewardEvent> entries) =>
+            entries.FindAll(e => e.Status == CustomRewardRedemptionState.Unfulfilled && !e.IsUnknown).Count;
     }
 }

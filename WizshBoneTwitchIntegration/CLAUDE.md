@@ -12,7 +12,7 @@ All work is within `WizshBoneTwitchIntegration/` (the C# plugin). The sibling `G
 
 ## How redemptions work
 
-1. `TwitchCustomRewards.cs` receives a channel point redemption event from the Twitch SDK.
+1. `TwitchCustomRewards.cs` receives a channel point redemption event from Twitch's EventSub (`TwitchApi/TwitchEventSubClient.cs`).
 2. It looks up the redeem type and delegates to a helper in `helpers/`.
 3. Helpers apply the in-game effect (spawn creature, modify terrain, deal damage, etc.).
 4. Adding a new redeem type requires both a handler in C# **and** a corresponding entry in the YAML schema (`resources/`).

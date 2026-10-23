@@ -1,4 +1,4 @@
-﻿using TwitchSDK.Interop;
+﻿using WizshBoneTwitchIntegration.TwitchApi.Models;
 using UnityEngine;
 
 namespace WizshBoneTwitchIntegration.Models

@@ -1,7 +1,7 @@
 ﻿using Jotunn.Managers;
 using System.Collections;
 using System.Collections.Generic;
-using TwitchSDK.Interop;
+using WizshBoneTwitchIntegration.TwitchApi.Models;
 using UnityEngine;
 using UnityEngine.UI;
 using WizshBoneTwitchIntegration.Models;
@@ -106,7 +106,7 @@ namespace WizshBoneTwitchIntegration.Helpers
                 // (Teleporting is already skipped unconditionally by AttachFlashBang.)
                 ProfileSettingsData settings = ProfileSettingsHelper.Current;
 
-                if (settings.rejectWhenPaused && (Game.IsPaused() || Menu.IsVisible()))
+                if (settings.rejectWhenPaused && MenuStateHelper.IsInMenu())
                 {
                     Jotunn.Logger.LogWarning("[WBTI] Flashbang RPC received but the game is paused or a menu is open, ignoring.");
                     return;

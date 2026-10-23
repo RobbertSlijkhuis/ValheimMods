@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using TwitchSDK.Interop;
+using WizshBoneTwitchIntegration.TwitchApi.Models;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.Types;

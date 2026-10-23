@@ -163,7 +163,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                 Defaults.redeemTitlePrefix,
                 maxLength: ProfileSettingsHelper.MaxPrefixLength);
             BuildBoolCell(prefixRow, cellWidth / 2f + ColGap / 2f, cellWidth,
-                ("Reject when paused", "Auto reject and refund redeems while the game is paused or the menu is open",
+                ("Reject when in menus", "Auto reject and refund redeems while the game is paused or a menu is open, including the WizshBone window",
                     () => ProfileSettingsHelper.Current.rejectWhenPaused,
                     v => ProfileSettingsHelper.Current.rejectWhenPaused = v,
                     Defaults.rejectWhenPaused));

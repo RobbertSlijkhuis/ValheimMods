@@ -1,7 +1,7 @@
 using HarmonyLib;
 using Jotunn.Managers;
 using System.Collections.Generic;
-using TwitchSDK.Interop;
+using WizshBoneTwitchIntegration.TwitchApi.Models;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Components;
 using WizshBoneTwitchIntegration.Exceptions;
@@ -198,7 +198,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             if (GetNrOfTwitchInstances(ProfileSettingsHelper.Current.creaturesMaxRadius) >= ProfileSettingsHelper.Current.creaturesMaxAmount)
             {
-                chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the maximum spawned creature limit has been reached! {TwitchCustomRewards.m_refundMessage}");
+                customRewardEvent.RejectReason = "the maximum spawned creature limit has been reached!";
                 throw new RedeemException("To many spawned creatures", ExceptionType.Warning);
             }
 
@@ -206,7 +206,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             if (Player.m_localPlayer.InInterior() && CancelRedeemCauseOfDungeon(spawnList))
             {
-                chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! {TwitchCustomRewards.m_refundMessage}");
+                customRewardEvent.RejectReason = "the streamer is inside a dungeon and this redeem is not allowed in dungeons!";
                 throw new RedeemException("Player is in dungeon and redeem is not allowed", ExceptionType.Warning);
             }
 
@@ -217,7 +217,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
                 if (IsAtMaxSpawned(creature))
                 {
-                    chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the maximum spawned limit of {creature.prefabName} has been reached! {TwitchCustomRewards.m_refundMessage}");
+                    customRewardEvent.RejectReason = $"the maximum spawned limit of {creature.prefabName} has been reached!";
                     throw new RedeemException("To many of the same spawned creatures", ExceptionType.Warning);
                 }
 

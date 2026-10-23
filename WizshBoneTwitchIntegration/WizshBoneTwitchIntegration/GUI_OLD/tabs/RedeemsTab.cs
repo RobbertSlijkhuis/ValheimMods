@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Jotunn.Managers;
-using TwitchSDK.Interop;
+using WizshBoneTwitchIntegration.TwitchApi.Models;
 using UnityEngine;
 using UnityEngine.UI;
 using WizshBoneTwitchIntegration.Helpers;

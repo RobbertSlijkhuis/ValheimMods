@@ -5,8 +5,6 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TwitchSDK;
-using TwitchSDK.Interop;
 using UnityEngine;
 using WizshBoneTwitchIntegration.Exceptions;
 using WizshBoneTwitchIntegration.Gui;
@@ -22,13 +20,12 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
     {
         private TwitchAuth m_auth;
         private TwitchChat m_chat;
-        private GameTask<EventStream<CustomRewardEvent>> m_customRewardEvents;
+        private readonly TwitchEventSubClient m_eventSub = new TwitchEventSubClient();
         public List<string> m_bannedUsers = new List<string>();
         public bool m_playerIsInSafeZone = false;
         public bool m_enabled = false;
         public string m_alias;
         public string m_quickTestRedeem = "Timestop";
-        public static string m_refundMessage;
 
         public readonly List<CustomRewardEvent> m_redeemHistory = new List<CustomRewardEvent>();
         private const int m_redeemHistoryMaxSize = 1000;
@@ -36,11 +33,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         // oldest entry once it passes the max size, and a dropped unresolved entry can no longer be
         // completed or refunded from the history.
         private const int m_redeemHistoryWarnSize = 750;
-
-        // History entries whose title matched no redeem in the active profile. We can't tell a
-        // redeem that isn't ours from one that is ours but no longer in the profile, so they are
-        // left unresolved in the history for the user to decide, and don't count as unresolved.
-        private readonly HashSet<CustomRewardEvent> m_unknownRedeems = new HashSet<CustomRewardEvent>();
 
         public readonly BulkRedeemResolveHelper m_bulkResolveHelper = new BulkRedeemResolveHelper();
 
@@ -55,6 +47,11 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         /// this component (it lives on <c>Game.instance</c>, which is replaced per world).
         /// </summary>
         public static event Action ChannelRewardCountsChanged;
+
+        // How far before the last message from before a connection loss the catch-up still counts a redemption as missed.
+        private const float CatchUpMarginSeconds = 60f;
+
+        private const int ResolveRetryDelayMilliseconds = 3000;
 
         private const float ChannelLookupTimeoutSeconds = 10f;
         private const float SyncDelaySeconds = 1.5f;
@@ -95,6 +92,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 m_chat = gameObject.GetComponent<TwitchChat>();
                 m_bannedUsers = ExtraConfigHelper.ReadBannedUsersFromFile();
                 RedeemHelper.ReadRedeems();
+                m_eventSub.Resubscribed += OnEventSubResubscribed;
+                m_eventSub.Stopped += OnEventSubStopped;
             }
             catch (Exception e)
             {
@@ -103,14 +102,16 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         }
 
         // Game.FixedUpdate calls Game.Logout() directly on a lost connection, which skips the
-        // Menu.OnLogoutYes patch (and with it every logout path that disposes the stream), while the
-        // SDK's login and subscription outlive this component.
+        // Menu.OnLogoutYes patch (and with it every logout path that stops the redemption connection), while the
+        // connection's socket would otherwise stay open.
         public void OnDestroy()
         {
             // No more syncs for a component that is gone; a clear that was asked for still runs.
             m_syncRequested = false;
             m_passCancel?.Cancel();
 
+            m_eventSub.Resubscribed -= OnEventSubResubscribed;
+            m_eventSub.Stopped -= OnEventSubStopped;
             UnSubscribeFromRedeemEvents();
         }
 
@@ -118,36 +119,23 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             m_auth = gameObject.GetComponent<TwitchAuth>();
 
-            if (m_customRewardEvents != null || !m_auth.m_loggedIn)
+            if (m_eventSub.IsRunning || !m_auth.m_loggedIn)
                 return;
 
-            m_customRewardEvents = Twitch.API.SubscribeToCustomRewardEvents();
+            string channelId = m_auth.m_userInfo?.channelId;
+
+            if (string.IsNullOrEmpty(channelId))
+            {
+                Jotunn.Logger.LogWarning("[WBTI] Redemptions are not received: the Twitch channel id is not known yet.");
+                return;
+            }
+
+            m_eventSub.Start(channelId);
         }
 
         public void UnSubscribeFromRedeemEvents()
         {
-            // Dropping the reference isn't enough: an undisposed EventStream stays subscribed and keeps
-            // buffering every event until the GC finalizes it.
-            GameTask<EventStream<CustomRewardEvent>> stream = m_customRewardEvents;
-            m_customRewardEvents = null;
-
-            if (stream == null)
-                return;
-
-            try
-            {
-                if (stream.IsCompleted)
-                    stream.MaybeResult?.Dispose();
-                else
-                    // Still connecting (MaybeResult is null until it's done), so close it once it is.
-                    stream.Task.ContinueWith(
-                        task => { if (task.Status == System.Threading.Tasks.TaskStatus.RanToCompletion) task.Result?.Dispose(); },
-                        System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogWarning($"[WBTI] Could not close the redeem event stream: {e.Message}");
-            }
+            m_eventSub.Stop();
         }
 
         public List<RedeemData> GetRedeemList()
@@ -189,10 +177,15 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public bool HasUnresolvedRedeems()
         {
             return m_enabled
-                && !ProfileSettingsHelper.Current.autoResolveRedeems
-                && m_redeemHistory.Exists(item =>
-                    item.Status == CustomRewardRedemptionState.Unfulfilled
-                    && !IsUnknownRedeem(item));
+                && m_redeemHistory.Exists(item => IsWaiting(item) && !item.IsUnknown);
+        }
+
+        // Whether the redemption still needs the streamer: unfulfilled and not taken care of by auto-resolve. With
+        // auto-resolve on that is only a redemption whose complete or refund Twitch did not accept.
+        private bool IsWaiting(CustomRewardEvent item)
+        {
+            return item.Status == CustomRewardRedemptionState.Unfulfilled
+                && (!ProfileSettingsHelper.Current.autoResolveRedeems || item.ResolveFailed);
         }
 
         private int CountUnfulfilledInHistory()
@@ -208,21 +201,13 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             return count;
         }
 
-        public bool IsUnknownRedeem(CustomRewardEvent customRewardEvent)
-        {
-            return m_unknownRedeems.Contains(customRewardEvent);
-        }
-
         public bool IsLoggedIn => m_auth != null && m_auth.m_loggedIn;
 
         /// <summary>By title only, for the legacy GUI_OLD, which has no redeem to ask about.</summary>
         public bool HasUnresolvedRedeemsFor(string redeemTitle)
         {
             return m_enabled
-                && !ProfileSettingsHelper.Current.autoResolveRedeems
-                && m_redeemHistory.Exists(item =>
-                    item.CustomRewardTitle == redeemTitle
-                    && item.Status == CustomRewardRedemptionState.Unfulfilled);
+                && m_redeemHistory.Exists(item => item.CustomRewardTitle == redeemTitle && IsWaiting(item));
         }
 
         /// <summary>
@@ -232,19 +217,15 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         /// </summary>
         public bool HasUnresolvedRedeemsFor(RedeemData redeem)
         {
-            if (!m_enabled || ProfileSettingsHelper.Current.autoResolveRedeems)
+            if (!m_enabled)
                 return false;
 
             if (m_rewardIds.TryGetValue(redeem.id ?? "", out string rewardId))
-            {
-                return m_redeemHistory.Exists(item =>
-                    item.Status == CustomRewardRedemptionState.Unfulfilled && item.CustomRewardId == rewardId);
-            }
+                return m_redeemHistory.Exists(item => IsWaiting(item) && item.CustomRewardId == rewardId);
 
             string title = RedeemManager.GetFullTitle(redeem);
 
-            return m_redeemHistory.Exists(item =>
-                item.Status == CustomRewardRedemptionState.Unfulfilled && RedeemManager.SameTitle(item.CustomRewardTitle, title));
+            return m_redeemHistory.Exists(item => IsWaiting(item) && RedeemManager.SameTitle(item.CustomRewardTitle, title));
         }
 
         /// <summary>
@@ -278,18 +259,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         {
             try
             {
-                if (m_customRewardEvents == null || !m_auth.m_loggedIn)
+                if (!m_eventSub.IsRunning || !m_auth.m_loggedIn)
                     return;
 
-                // MaybeResult is null until the subscription has finished connecting.
-                EventStream<CustomRewardEvent> stream = m_customRewardEvents.MaybeResult;
+                m_eventSub.Update();
 
-                if (stream == null)
-                    return;
-
-                CustomRewardEvent customRewardEvent;
-                stream.TryGetNextEvent(out customRewardEvent);
-                HandleRedeem(customRewardEvent);
+                // One redemption per frame, so the effects of a burst keep some spacing.
+                if (m_eventSub.TryDequeue(out CustomRewardEvent customRewardEvent))
+                    HandleRedeem(customRewardEvent);
             }
             catch (Exception e)
             {
@@ -319,7 +296,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     if (dropIndex < 0)
                         dropIndex = 0;
 
-                    m_unknownRedeems.Remove(m_redeemHistory[dropIndex]);
                     m_redeemHistory.RemoveAt(dropIndex);
                 }
 
@@ -341,13 +317,13 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 }
 
 
-                m_refundMessage = $"Your redeem {customRewardEvent.CustomRewardTitle} of {customRewardEvent.CustomRewardCost} points has been refunded!";
-
                 RedeemData redeem = FindRedeemFor(customRewardEvent);
                 if (redeem == null)
                 {
-                    // Not refunded or resolved on purpose: see m_unknownRedeems.
-                    m_unknownRedeems.Add(customRewardEvent);
+                    // Not refunded or resolved on purpose. We can't tell a redeem that isn't ours from one that is ours
+                    // but no longer in the profile, so it is left unresolved in the history for the streamer to decide,
+                    // and doesn't count as unresolved.
+                    customRewardEvent.IsUnknown = true;
                     Jotunn.Logger.LogWarning($"[WBTI] Redeem '{customRewardEvent.CustomRewardTitle}' is not in the active profile, leaving it unresolved in the history.");
 
                     if (WizshBoneTwitchIntegration.useRedeemCommand)
@@ -364,31 +340,31 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 // by Update() and leave the redeem neither fulfilled nor refunded.
                 if (Player.m_localPlayer == null)
                 {
-                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer isn't in the world right now! {m_refundMessage}");
+                    customRewardEvent.RejectReason = "the streamer isn't in the world right now!";
                     throw new RedeemException("No local player", ExceptionType.Warning);
                 }
 
                 if (m_playerIsInSafeZone && !redeem.ignoreWard)
                 {
-                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a Twitch safe zone! {m_refundMessage}");
+                    customRewardEvent.RejectReason = "the streamer is inside a Twitch safe zone!";
                     throw new RedeemException("Player is in safe zone", ExceptionType.Warning);
                 }
 
-                if (ProfileSettingsHelper.Current.rejectWhenPaused && (Game.IsPaused() || Menu.IsVisible()))
+                if (ProfileSettingsHelper.Current.rejectWhenPaused && MenuStateHelper.IsInMenu())
                 {
-                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, either the game is currently paused or the streamer is busy in the menu! {m_refundMessage}");
+                    customRewardEvent.RejectReason = "either the game is currently paused or the streamer is busy in the menu!";
                     throw new RedeemException("Game is paused or menu is visible", ExceptionType.Warning);
                 }
 
                 if (ProfileSettingsHelper.Current.rejectWhenSleeping && Player.m_localPlayer.IsSleeping())
                 {
-                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is currently sleeping and can't react! {m_refundMessage}");
+                    customRewardEvent.RejectReason = "the streamer is currently sleeping and can't react!";
                     throw new RedeemException("Player is sleeping", ExceptionType.Warning);
                 }
 
                 if (ProfileSettingsHelper.Current.rejectWhenTeleporting && Player.m_localPlayer.IsTeleporting())
                 {
-                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is currently teleporting and can't react! {m_refundMessage}");
+                    customRewardEvent.RejectReason = "the streamer is currently teleporting and can't react!";
                     throw new RedeemException("Player is teleporting", ExceptionType.Warning);
                 }
 
@@ -396,7 +372,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 {
                     if (redeem.type == RedeemType.TerrainEdit || RedeemType.SpawnAbilityFamily.Contains(redeem.type))
                     {
-                        m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a dungeon and this redeem is not allowed in dungeons! {m_refundMessage}");
+                        customRewardEvent.RejectReason = "the streamer is inside a dungeon and this redeem is not allowed in dungeons!";
                         throw new RedeemException("Player is in dungeon and redeem is not allowed", ExceptionType.Warning);
                     }
                 }
@@ -522,14 +498,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 if (Player.m_localPlayer != null)
                     Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft, $"{customRewardEvent.CustomRewardTitle} fullfilled");
 
-                customRewardEvent.Status = CustomRewardRedemptionState.Fulfilled;
-
-                // A test/command-triggered redeem (or any redeem processed before we're
-                // actually logged in) has no real reward ID behind it - resolving it would
-                // either be a pointless real API call or, if Twitch.API hasn't been
-                // initialized yet, throw trying to bootstrap one from scratch.
-                if (IsLoggedIn)
-                    Twitch.API.ResolveCustomReward(customRewardEvent, CustomRewardRedemptionState.Fulfilled);
+                // The status follows once Twitch has accepted it; a test redeem has nothing on Twitch and is set at once.
+                _ = ResolveWithRetryAsync(customRewardEvent, CustomRewardRedemptionState.Fulfilled);
             }
         }
 
@@ -546,22 +516,230 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
             if (Player.m_localPlayer != null)
                 Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft, $"{customRewardEvent.CustomRewardTitle} canceled");
 
-            customRewardEvent.Status = CustomRewardRedemptionState.Canceled;
+            // The refund; the status follows once Twitch has accepted it (see FinishRedeem).
+            _ = RefundAsync(customRewardEvent);
+        }
 
-            // See the matching guard in HandleRedeem's success path: resolving against the real
-            // Twitch API only makes sense once we're actually logged in - otherwise it's either a
-            // pointless call for a locally-fabricated test event, or throws trying to bootstrap a
-            // Twitch.API instance that has no business existing yet (e.g. a DllNotFoundException
-            // from the native SDK library never having been loaded).
-            if (IsLoggedIn)
-                Twitch.API.ResolveCustomReward(customRewardEvent, CustomRewardRedemptionState.Canceled);
+        // Refunds the redemption, and only then tells the viewer, in one message: chat must not say "refunded" before
+        // Twitch has done it. The viewer is only told when the redeem set a RejectReason; a rejection without one (a
+        // banned viewer) stays silent in chat as before. Never throws.
+        private async Task RefundAsync(CustomRewardEvent entry)
+        {
+            try
+            {
+                await ResolveWithRetryAsync(entry, CustomRewardRedemptionState.Canceled);
+
+                if (string.IsNullOrEmpty(entry.RejectReason))
+                    return;
+
+                string redeem = $"Your redeem {entry.CustomRewardTitle} of {entry.CustomRewardCost} points";
+
+                if (entry.Status == CustomRewardRedemptionState.Canceled)
+                    m_chat.Send($"Sorry @{entry.RedeemerName}, {entry.RejectReason} {redeem} has been refunded!");
+                else if (entry.Status == CustomRewardRedemptionState.Unfulfilled)
+                    m_chat.Send($"Sorry @{entry.RedeemerName}, {entry.RejectReason} {redeem} could not be refunded automatically. The streamer will refund it by hand.");
+
+                // Fulfilled: the streamer completed it in the history while the refund was being retried. Nothing to tell.
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Could not tell the viewer about the refund of '{entry.CustomRewardTitle}': {e.Message}");
+            }
+        }
+
+        // For the resolves the game starts by itself (auto-resolve, the refund of a redeem it rejected): when Twitch does
+        // not accept the first try, one more follows a few seconds later, which covers a short hiccup. The streamer's own
+        // button presses are not retried. Never throws.
+        private async Task ResolveWithRetryAsync(CustomRewardEvent entry, CustomRewardRedemptionState state)
+        {
+            if (await ResolveAsync(entry, state, toastOnFailure: false, willRetry: true))
+                return;
+
+            await Task.Delay(ResolveRetryDelayMilliseconds);
+
+            // Resolved another way in the meantime (a button in the history).
+            if (entry.Status == CustomRewardRedemptionState.Unfulfilled)
+                await ResolveAsync(entry, state);
+        }
+
+        /// <summary>
+        /// Completes (Fulfilled) or refunds (Canceled) a redemption on Twitch, and sets its status in the history
+        /// once Twitch has accepted that. When Twitch does not, the redemption stays unfulfilled in the history so
+        /// it can be completed or refunded again; the viewer keeps waiting, which beats showing a refund that never
+        /// happened. Returns whether the redemption now has the state. A test redeem exists only here: it is set at
+        /// once, without a request. With <paramref name="willRetry"/> a failure is only logged: the caller tries again,
+        /// so the redemption is not marked as failed and no message is shown for this attempt.
+        /// </summary>
+        public async Task<bool> ResolveAsync(CustomRewardEvent entry, CustomRewardRedemptionState state, bool toastOnFailure = true, bool willRetry = false)
+        {
+            if (TestRedeemEventHelper.IsTestRedeem(entry))
+            {
+                entry.Status = state;
+                return true;
+            }
+
+            // Already being resolved by another button or the bulk queue.
+            if (entry.IsResolving)
+                return false;
+
+            entry.IsResolving = true;
+
+            string verb = state == CustomRewardRedemptionState.Fulfilled ? "complete" : "refund";
+
+            try
+            {
+                string broadcasterId = string.IsNullOrEmpty(entry.BroadcasterId) ? m_auth?.m_userInfo?.channelId : entry.BroadcasterId;
+
+                if (string.IsNullOrEmpty(entry.RedemptionId) || string.IsNullOrEmpty(entry.CustomRewardId))
+                    return ResolveFailed(entry, verb, "it has no redemption or reward id", toastOnFailure, willRetry);
+
+                if (!IsLoggedIn || string.IsNullOrEmpty(broadcasterId))
+                    return ResolveFailed(entry, verb, "not logged in to Twitch", toastOnFailure, willRetry);
+
+                TwitchHelixClient.Response response = await TwitchRedemptionClient.ResolveAsync(broadcasterId, entry, state);
+
+                if (response.IsSuccess)
+                {
+                    ResolveDone(entry, state);
+                    return true;
+                }
+
+                // Twitch answers 404 when the redemption is not waiting anymore (already handled on twitch.tv) or its
+                // reward is gone. Asking again can never work, so show it as done instead of leaving it in the history
+                // for good. Any other answer (a 400 is a request Twitch cannot read) is a failure.
+                if (response.Status == 404)
+                {
+                    Jotunn.Logger.LogWarning($"[WBTI] Twitch no longer has a waiting redemption for '{entry.CustomRewardTitle}' to {verb}: {response}");
+                    ResolveDone(entry, state);
+                    return true;
+                }
+
+                return ResolveFailed(entry, verb, response.ToString(), toastOnFailure, willRetry);
+            }
+            catch (Exception e)
+            {
+                return ResolveFailed(entry, verb, e.Message, toastOnFailure, willRetry);
+            }
+            finally
+            {
+                entry.IsResolving = false;
+            }
+        }
+
+        private void ResolveDone(CustomRewardEvent entry, CustomRewardRedemptionState state)
+        {
+            entry.Status = state;
+            entry.ResolveFailed = false;
+        }
+
+        private bool ResolveFailed(CustomRewardEvent entry, string verb, string reason, bool toastOnFailure, bool willRetry)
+        {
+            Jotunn.Logger.LogWarning($"[WBTI] Twitch did not {verb} '{entry.CustomRewardTitle}': {reason}");
+
+            if (willRetry)
+                return false;
+
+            entry.ResolveFailed = true;
+
+            if (toastOnFailure)
+                ToastNotifications.Show($"Could not {verb} '{entry.CustomRewardTitle}'. It stays in the history; try again.", ToastType.Warning);
+
+            return false;
+        }
+
+        private void OnEventSubResubscribed(DateTime lostSinceUtc)
+        {
+            _ = CatchUpAsync(lostSinceUtc);
+        }
+
+        // Twitch ended the redemption subscription or refused it for this login, and it is not retried: the rewards are
+        // live on Twitch but nothing arrives, which the streamer has to hear about.
+        private void OnEventSubStopped(string reason)
+        {
+            string message = $"{reason} Redeems are not received until you log in to Twitch again.";
+
+            ToastNotifications.Show(message, ToastType.Error);
+
+            if (Player.m_localPlayer != null)
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, message);
+        }
+
+        // The connection for redemptions was lost and is back: redemptions made in between were not delivered. Looks
+        // up the ones still waiting on our rewards and hands the ones made since the loss to the normal flow. Only
+        // runs after a loss (also one before the first subscription), never for a login that went straight through,
+        // and never reaches back before this login, so redemptions from before this session are not replayed.
+        private async Task CatchUpAsync(DateTime lostSinceUtc)
+        {
+            try
+            {
+                string broadcasterId = m_auth?.m_userInfo?.channelId;
+
+                if (string.IsNullOrEmpty(broadcasterId))
+                    return;
+
+                DateTime from = lostSinceUtc.AddSeconds(-CatchUpMarginSeconds);
+                List<KeyValuePair<DateTime, CustomRewardEvent>> missed = new List<KeyValuePair<DateTime, CustomRewardEvent>>();
+                int failedLookups = 0;
+                int session = m_eventSub.Session;
+
+                foreach (string rewardId in new HashSet<string>(m_rewardIds.Values))
+                {
+                    List<CustomRewardEvent> waiting = await TwitchRedemptionClient.ListUnfulfilledAsync(broadcasterId, rewardId, from);
+
+                    // Logged out (and maybe in again) while the lookups were out: this belongs to a login that is over.
+                    if (!m_eventSub.IsRunning || m_eventSub.Session != session)
+                        return;
+
+                    if (waiting == null)
+                    {
+                        failedLookups++;
+                        continue;
+                    }
+
+                    foreach (CustomRewardEvent redemption in waiting)
+                    {
+                        if (CustomRewardEventParser.TryParseRedeemedAt(redemption.RedeemedAt, out DateTime madeAt))
+                        {
+                            if (madeAt < from)
+                                continue;
+                        }
+                        else
+                        {
+                            // Cannot be dated: counted as missed, since a viewer who lost points costs more than a replay.
+                            madeAt = DateTime.UtcNow;
+                        }
+
+                        missed.Add(new KeyValuePair<DateTime, CustomRewardEvent>(madeAt, redemption));
+                    }
+                }
+
+                missed.Sort((a, b) => a.Key.CompareTo(b.Key));
+
+                int added = 0;
+
+                foreach (KeyValuePair<DateTime, CustomRewardEvent> redemption in missed)
+                {
+                    if (m_eventSub.Enqueue(redemption.Value))
+                        added++;
+                }
+
+                Jotunn.Logger.LogWarning($"[WBTI] Redemptions made while the connection was down: {added}"
+                    + (failedLookups > 0 ? $" ({failedLookups} rewards could not be looked up)." : "."));
+
+                if (failedLookups > 0)
+                    ToastNotifications.Show("Some redeems made while the connection was down could not be looked up and may have been missed.", ToastType.Warning);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[WBTI] Could not look up the redemptions missed while the connection was down: {e.Message}");
+            }
         }
 
         public bool IsPlayerInSafeZone(CustomRewardEvent customRewardEvent, bool ignoreWard = false)
         {
             if (m_playerIsInSafeZone && !ignoreWard)
             {
-                m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the streamer is inside a Twitch safe zone! {m_refundMessage}");
+                customRewardEvent.RejectReason = "the streamer is inside a Twitch safe zone!";
                 HandleRedeemException(new RedeemException("Player is in safe zone", ExceptionType.Warning), customRewardEvent);
                 return true;
             }
@@ -580,7 +758,7 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 // the chest to spawn, refund instead of handing out an empty chest.
                 if (!SurpriseChestHelper.HasEligibleLoot(redeem.chestData))
                 {
-                    m_chat.Send($"Sorry @{customRewardEvent.RedeemerName}, the surprise chest has nothing it can spawn right now! {m_refundMessage}");
+                    customRewardEvent.RejectReason = "the surprise chest has nothing it can spawn right now!";
                     HandleRedeemException(new RedeemException("Surprise chest has no eligible loot", ExceptionType.Warning), customRewardEvent);
                     yield break;
                 }
