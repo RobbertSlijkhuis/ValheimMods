@@ -44,31 +44,18 @@ namespace WizshBoneTwitchIntegration.Helpers
             return PluginConfig.configWizshBoneWindow.Value.ToString();
         }
 
-        /// <summary>
-        /// Binds the window key to <paramref name="key"/> (+ <paramref name="modifiers"/>). Returns
-        /// false with a message when the combination is already taken by the quick test redeem key.
-        /// </summary>
-        public static bool TryApply(KeyCode key, IEnumerable<KeyCode> modifiers, out string error)
+        /// <summary>Binds the window key to <paramref name="key"/> (+ <paramref name="modifiers"/>).</summary>
+        public static void Apply(KeyCode key, IEnumerable<KeyCode> modifiers)
         {
-            KeyboardShortcut shortcut = new KeyboardShortcut(key, new List<KeyCode>(modifiers).ToArray());
-
-            if (shortcut.Equals(PluginConfig.configQuickTestRedeemKey.Value))
-            {
-                error = $"{shortcut} is already used by the quick test redeem key.";
-                return false;
-            }
-
-            PluginConfig.configWizshBoneWindow.Value = shortcut;
+            PluginConfig.configWizshBoneWindow.Value = new KeyboardShortcut(key, new List<KeyCode>(modifiers).ToArray());
             RebindZInputButton();
-            error = null;
-            return true;
         }
 
         /// <summary>Restores the config entry's default key (F3).</summary>
-        public static bool TryReset(out string error)
+        public static void Reset()
         {
             KeyboardShortcut defaultShortcut = (KeyboardShortcut)PluginConfig.configWizshBoneWindow.DefaultValue;
-            return TryApply(defaultShortcut.MainKey, defaultShortcut.Modifiers, out error);
+            Apply(defaultShortcut.MainKey, defaultShortcut.Modifiers);
         }
 
         /// <summary>

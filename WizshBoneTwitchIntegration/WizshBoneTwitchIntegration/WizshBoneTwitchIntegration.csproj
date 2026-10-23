@@ -70,9 +70,6 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="TwitchSDK">
-      <HintPath>TwitchSDK\TwitchSDK.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>
@@ -81,10 +78,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.43">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="JotunnLib" Version="2.30.2" />
     <!-- Only for compiling, not shipped: the game itself ships Newtonsoft.Json (valheim_Data/Managed) and loads it first. -->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
@@ -127,14 +120,6 @@
 
   <Target Name="JotunnPostBuildTask" AfterTargets="Build">
     <CallTarget Targets="CopyToUnity" Condition="Exists('$(UNITY_FOLDER)')" />
-  </Target>
-
-    <Target Name="ILRepacker" AfterTargets="Build">
-      <ItemGroup>
-          <InputAssemblies Include="$(TargetPath)" />
-          <InputAssemblies Include="$(OutputPath)TwitchSDK.dll" />
-      </ItemGroup>
-      <ILRepack Parallel="true" DebugInfo="true" Internalize="true" InputAssemblies="@(InputAssemblies)" OutputFile="$(TargetPath)" TargetKind="SameAsPrimaryAssembly" LibraryPath="$(OutputPath)" />
   </Target>
 
   <Target Name="JotunnPostBuildTaskWin" AfterTargets="Build" Condition=" '$(OS)' == 'Windows_NT' ">

@@ -388,7 +388,7 @@ namespace WizshBoneTwitchIntegration.GuiOld
         /// matching pre-d51804d3 behavior - not GetVisiblePageHistory(), which only scoped this
         /// to the current pagination window. The resolve calls themselves are spread across time
         /// via BulkRedeemResolveHelper instead of firing all at once, to avoid the lag a large
-        /// synchronous batch of native Twitch SDK calls can cause.
+        /// synchronous batch of Twitch calls can cause.
         /// </summary>
         private void StartBulkResolve(CustomRewardRedemptionState targetState)
         {

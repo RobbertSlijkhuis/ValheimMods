@@ -52,11 +52,6 @@ if ($Target.Equals("Debug")) {
     Copy-Item -Path "$TargetPath\$name.dll" -Destination "$plug" -Force
     Copy-Item -Path "$TargetPath\$name.pdb" -Destination "$plug" -Force
     Copy-Item -Path "$TargetPath\$name.dll.mdb" -Destination "$plug" -Force
-
-    # The Twitch SDK's native library isn't part of the .csproj build output, so it never lands
-    # in TargetPath on its own - copy it straight from the vendored TwitchSDK folder instead, or
-    # the plugin throws DllNotFoundException: R66_core the first time it touches Twitch.API.
-    Copy-Item -Path "$ProjectPath\TwitchSDK\x86_64\R66_core.dll" -Destination "$plug" -Force
 }
 
 if($Target.Equals("Release")) {
@@ -108,10 +103,12 @@ if($Target.Equals("Release")) {
     New-Item -Type Directory -Path "$PackagePath\plugins" -Force | Out-Null
     Copy-Item -Path "$TargetPath\$TargetAssembly" -Destination "$PackagePath\plugins\$TargetAssembly" -Force
 
-    # The Twitch SDK's native library isn't part of the .csproj build output (see the Debug
-    # branch above) - the Release package needs it too, or the plugin throws
-    # DllNotFoundException: R66_core the first time it touches Twitch.API.
-    Copy-Item -Path "$ProjectPath\TwitchSDK\x86_64\R66_core.dll" -Destination "$PackagePath\plugins" -Force
+    # The debug symbols ship with the plugin, so stack traces in bug reports show source lines. They are the plugin's
+    # own: nothing is merged into the dll anymore, so the pdb describes all of it.
+    if (-not (Test-Path "$TargetPath\$name.pdb")) {
+        Write-Error -ErrorAction Stop -Message "$TargetPath\$name.pdb is missing - the Release build has to produce it."
+    }
+    Copy-Item -Path "$TargetPath\$name.pdb" -Destination "$PackagePath\plugins" -Force
 
     $itemsToPackage = @(
         "$PackagePath\manifest.json",

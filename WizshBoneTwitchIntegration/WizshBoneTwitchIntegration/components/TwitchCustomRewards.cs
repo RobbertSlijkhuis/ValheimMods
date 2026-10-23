@@ -25,7 +25,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
         public bool m_playerIsInSafeZone = false;
         public bool m_enabled = false;
         public string m_alias;
-        public string m_quickTestRedeem = "Timestop";
 
         public readonly List<CustomRewardEvent> m_redeemHistory = new List<CustomRewardEvent>();
         private const int m_redeemHistoryMaxSize = 1000;

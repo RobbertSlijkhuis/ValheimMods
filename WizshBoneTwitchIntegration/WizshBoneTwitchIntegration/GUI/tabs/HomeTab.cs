@@ -355,10 +355,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             listener.Init(
                 (key, modifiers) =>
                 {
-                    if (WindowKeyHelper.TryApply(key, modifiers, out string error))
-                        ToastNotifications.Show($"Window key set to {WindowKeyHelper.Describe()}.", ToastType.Success);
-                    else
-                        ToastNotifications.Show(error, ToastType.Warning);
+                    WindowKeyHelper.Apply(key, modifiers);
+                    ToastNotifications.Show($"Window key set to {WindowKeyHelper.Describe()}.", ToastType.Success);
 
                     StopListening();
                 },
@@ -385,10 +383,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             {
                 StopListening();
 
-                if (WindowKeyHelper.TryReset(out string error))
-                    ToastNotifications.Show($"Window key reset to {WindowKeyHelper.Describe()}.", ToastType.Success);
-                else
-                    ToastNotifications.Show(error, ToastType.Warning);
+                WindowKeyHelper.Reset();
+                ToastNotifications.Show($"Window key reset to {WindowKeyHelper.Describe()}.", ToastType.Success);
 
                 label.text = WindowKeyHelper.Describe();
             });

@@ -36,7 +36,6 @@ namespace WizshBoneTwitchIntegration
         public CustomSprites sprites = new CustomSprites();
         public CustomEffectLists effectLists = new CustomEffectLists();
         private ButtonConfig wizshBoneWindowButton;
-        private ButtonConfig quickTestRedeemButton;
         public static bool useRedeemCommand = false;
         public static readonly string HumanoidGroupNoDamageStructure = "WBTI_HumanoidGroupNoDamageStructure";
         public static readonly string HumanoidGroupSpawnEnemy = "WBTI_HumanoidGroupSpawnEnemy";
@@ -79,7 +78,6 @@ namespace WizshBoneTwitchIntegration
         public void Update()
         {
             HandleNewUIWindowInput();
-            HandleQuickTestRedeemInput();
         }
 
         private void HandleNewUIWindowInput()
@@ -150,31 +148,6 @@ namespace WizshBoneTwitchIntegration
             }
 
             return Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-        }
-
-        private void HandleQuickTestRedeemInput()
-        {
-            try
-            {
-                if (ZInput.instance == null || quickTestRedeemButton == null || !Player.m_localPlayer)
-                    return;
-
-                if (!ZInput.GetButtonDown(quickTestRedeemButton.Name))
-                    return;
-
-                TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
-                if (string.IsNullOrEmpty(customRewards.m_quickTestRedeem))
-                {
-                    Jotunn.Logger.LogWarning("[WBTI] No quick test redeem set. Use WBTISetQuickRedeem <title> first.");
-                    return;
-                }
-
-                UseRedeemCommand.FireRedeem(customRewards.m_quickTestRedeem);
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Could not fire quick test redeem: " + e);
-            }
         }
 
         private void LogStatusEffects()
@@ -419,14 +392,6 @@ namespace WizshBoneTwitchIntegration
                 };
 
                 InputManager.Instance.AddButton(PluginGUID, wizshBoneWindowButton);
-
-                quickTestRedeemButton = new ButtonConfig
-                {
-                    Name = "WBTI Quick Test Redeem",
-                    ShortcutConfig = PluginConfig.configQuickTestRedeemKey,
-                };
-
-                InputManager.Instance.AddButton(PluginGUID, quickTestRedeemButton);
             }
             catch (Exception e)
             {
@@ -460,7 +425,6 @@ namespace WizshBoneTwitchIntegration
             CommandManager.Instance.AddConsoleCommand(new ReloadRedeemsCommand());
             CommandManager.Instance.AddConsoleCommand(new ReloadViewersCommand());
             CommandManager.Instance.AddConsoleCommand(new SetAliasCommand());
-            CommandManager.Instance.AddConsoleCommand(new SetQuickRedeemCommand());
             CommandManager.Instance.AddConsoleCommand(new TestCommand());
             CommandManager.Instance.AddConsoleCommand(new TestWeatherCommand());
             CommandManager.Instance.AddConsoleCommand(new UseRedeemCommand());

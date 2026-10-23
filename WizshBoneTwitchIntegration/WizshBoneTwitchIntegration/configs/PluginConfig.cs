@@ -16,7 +16,6 @@ namespace WizshBoneTwitchIntegration.Configs
         public static string sectionPerformance = "Performance";
 
         public static ConfigEntry<KeyboardShortcut> configWizshBoneWindow;
-        public static ConfigEntry<KeyboardShortcut> configQuickTestRedeemKey;
 
         // Debug
         public static ConfigEntry<bool> configShowSafeZoneDebug;
@@ -36,10 +35,6 @@ namespace WizshBoneTwitchIntegration.Configs
         {
             configWizshBoneWindow = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionKeybinds, "Open WizshBone window", new KeyboardShortcut(KeyCode.F3),
                 new ConfigDescription("WizshBone Twitch Integration UI", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
-
-            configQuickTestRedeemKey = WizshBoneTwitchIntegration.Instance.Config.Bind(sectionKeybinds, "Quick test redeem key", new KeyboardShortcut(KeyCode.Y),
-                new ConfigDescription("Fires the redeem set via WBTISetQuickRedeem, for quick in-game testing", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = false, Order = HandleOrder() }));
 
 

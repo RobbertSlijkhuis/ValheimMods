@@ -71,9 +71,15 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (rpc == null || ReferenceEquals(rpc, s_registeredRpc))
                 return;
 
-            rpc.Register<Vector3>(FlashRpcName, RPC_Flashbang);
-            s_registeredRpc = rpc;
-            Jotunn.Logger.LogWarning("[WBTI] Flashbang RPC registered.");
+            try
+            {
+                rpc.Register<Vector3>(FlashRpcName, RPC_Flashbang);
+                s_registeredRpc = rpc;
+            }
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogError("[WBTI] Could not register the Flashbang RPC: " + e);
+            }
         }
 
         // Runs on every client (including the sender) - decides locally whether this player is hit
