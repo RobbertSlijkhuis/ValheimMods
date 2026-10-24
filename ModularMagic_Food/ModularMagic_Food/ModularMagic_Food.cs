@@ -42,7 +42,6 @@ namespace ModularMagic_Food
             PrefabManager.OnVanillaPrefabsAvailable += AddFood;
             ZoneManager.OnVanillaVegetationAvailable += AddLocations;
             PieceManager.OnPiecesRegistered += AddServingTrayPieces;
-            //ItemManager.OnItemsRegistered += LogRecipes;
         }
 
         // Fires on every ObjectDB.Awake, the table's own Contains check keeps this from adding duplicates
@@ -61,17 +60,6 @@ namespace ModularMagic_Food
             PieceHelper.RegisterOnServingTray(prefabs.mushroom5SoupPrefab, PluginConfig.mushroom5Soup);
         }
 
-        //private void LogRecipes()
-        //{
-        //    ObjectDB.instance.m_recipes.ForEach(r =>
-        //    {
-        //        if (r.name.Contains("MMF_"))
-        //            Jotunn.Logger.LogInfo(r.name);
-        //    });
-
-        //    ItemManager.OnItemsRegistered -= LogRecipes;
-        //}
-
         private void AddFood()
         {
             try
@@ -88,6 +76,44 @@ namespace ModularMagic_Food
                 ItemHelper.Create(prefabs.mushroom4SoupPrefab, PluginConfig.mushroom4Soup);
                 ItemHelper.Create(prefabs.mushroom5SoupPrefab, PluginConfig.mushroom5Soup);
                 ItemHelper.Create(prefabs.jerky1Prefab, PluginConfig.jerky1);
+
+                // Vanilla feasts
+                UpdateHelper.UpdateItemDrop(PrefabManager.Instance.GetPrefab("FeastMeadows"), new UpdateItemDropOptions()
+                {
+                    eitr = 35f,
+                });
+                UpdateHelper.UpdateItemDrop(PrefabManager.Instance.GetPrefab("FeastBlackforest"), new UpdateItemDropOptions()
+                {
+                    eitr = 35f,
+                });
+                UpdateHelper.UpdateItemDrop(PrefabManager.Instance.GetPrefab("FeastSwamps"), new UpdateItemDropOptions()
+                {
+                    eitr = 35f,
+                });
+                UpdateHelper.UpdateItemDrop(PrefabManager.Instance.GetPrefab("FeastOceans"), new UpdateItemDropOptions()
+                {
+                    eitr = 35f,
+                });
+                UpdateHelper.UpdateItemDrop(PrefabManager.Instance.GetPrefab("FeastMountains"), new UpdateItemDropOptions()
+                {
+                    eitr = 35f,
+                });
+                UpdateHelper.UpdateItemDrop(PrefabManager.Instance.GetPrefab("FeastPlains"), new UpdateItemDropOptions()
+                {
+                    eitr = 45f,
+                });
+                UpdateHelper.UpdateItemDrop(PrefabManager.Instance.GetPrefab("FeastMistlands"), new UpdateItemDropOptions()
+                {
+                    eitr = 45f,
+                });
+                UpdateHelper.UpdateItemDrop(PrefabManager.Instance.GetPrefab("FeastAshlands"), new UpdateItemDropOptions()
+                {
+                    eitr = 55f,
+                });
+                UpdateHelper.UpdateItemDrop(PrefabManager.Instance.GetPrefab("FeastDeepNorth"), new UpdateItemDropOptions()
+                {
+                    eitr = 55f,
+                });
 
                 CookingConversionConfig cookedMushroomConfig = new CookingConversionConfig();
                 cookedMushroomConfig.FromItem = prefabs.mushroom1Prefab.name;
@@ -108,18 +134,6 @@ namespace ModularMagic_Food
         {
             try
             {
-                //// Increase size to find them better
-                //Transform visual = magicalMushroomPickablePrefab.transform.Find("visual");
-                //visual.localScale = new Vector3(3, 3, 3);
-
-                //Transform visualGribSnow = gribSnowMushroomPickablePrefab.transform.Find("visual");
-                //visualGribSnow.localScale = new Vector3(3, 3, 3);
-
-                //Transform visualBog = bogMushroomPickablePrefab.transform.Find("visual");
-                //Transform visualBogFoot = bogMushroomPickablePrefab.transform.Find("bogfoot");
-                //visualBog.localScale = new Vector3(3, 3, 3);
-                //visualBogFoot.localScale = new Vector3(3, 3, 3);
-
                 // Magical Mushroom
                 List<Heightmap.Biome> magicMushroomBiomeList = new List<Heightmap.Biome>();
                 magicMushroomBiomeList.Add(Heightmap.Biome.Meadows);
@@ -131,8 +145,6 @@ namespace ModularMagic_Food
                 magicMushroomVegetationConfig.GroupRadius = 5;
                 magicMushroomVegetationConfig.GroupSizeMin = PluginConfig.mushroom1.groupMin.Value;
                 magicMushroomVegetationConfig.GroupSizeMax = PluginConfig.mushroom1.groupMax.Value;
-                //magicMushroomVegetationConfig.ScaleMin = PluginConfig.mushroom1.scaleMin.Value;
-                //magicMushroomVegetationConfig.ScaleMax = PluginConfig.mushroom1.scaleMax.Value;
                 magicMushroomVegetationConfig.ScaleMin = 1f;
                 magicMushroomVegetationConfig.ScaleMax = 1.5f;
                 magicMushroomVegetationConfig.InForest = true;
@@ -162,8 +174,6 @@ namespace ModularMagic_Food
                 gribSnowVegetationConfig.GroupRadius = 5;
                 gribSnowVegetationConfig.GroupSizeMin = PluginConfig.mushroom2.groupMin.Value;
                 gribSnowVegetationConfig.GroupSizeMax = PluginConfig.mushroom2.groupMax.Value;
-                //gribSnowVegetationConfig.ScaleMin = PluginConfig.mushroom2.scaleMin.Value;
-                //gribSnowVegetationConfig.ScaleMax = PluginConfig.mushroom2.scaleMax.Value;
                 gribSnowVegetationConfig.ScaleMin = 1f;
                 gribSnowVegetationConfig.ScaleMax = 1.5f;
                 gribSnowVegetationConfig.InForest = false;
@@ -193,8 +203,6 @@ namespace ModularMagic_Food
                 bogMushroomVegetationConfig.GroupRadius = 4;
                 bogMushroomVegetationConfig.GroupSizeMin = PluginConfig.mushroom3.groupMin.Value;
                 bogMushroomVegetationConfig.GroupSizeMax = PluginConfig.mushroom3.groupMax.Value;
-                //bogMushroomVegetationConfig.ScaleMin = PluginConfig.mushroom3.scaleMin.Value;
-                //bogMushroomVegetationConfig.ScaleMax = PluginConfig.mushroom3.scaleMax.Value;
                 bogMushroomVegetationConfig.ScaleMin = 1f;
                 bogMushroomVegetationConfig.ScaleMax = 1f;
                 bogMushroomVegetationConfig.InForest = false;
@@ -223,9 +231,7 @@ namespace ModularMagic_Food
                 pircedMushroomVegetationConfig.BlockCheck = true;
                 pircedMushroomVegetationConfig.GroupRadius = 4;
                 pircedMushroomVegetationConfig.GroupSizeMin = PluginConfig.mushroom4.groupMin.Value;
-                pircedMushroomVegetationConfig.GroupSizeMax = PluginConfig.mushroom4.groupMax.Value;
-                //pircedMushroomVegetationConfig.ScaleMin = PluginConfig.mushroom4.scaleMin.Value;
-                //pircedMushroomVegetationConfig.ScaleMax = PluginConfig.mushroom4.scaleMax.Value;                
+                pircedMushroomVegetationConfig.GroupSizeMax = PluginConfig.mushroom4.groupMax.Value;            
                 pircedMushroomVegetationConfig.ScaleMin = 0.8f;
                 pircedMushroomVegetationConfig.ScaleMax = 1f;
                 pircedMushroomVegetationConfig.InForest = false;
@@ -255,8 +261,6 @@ namespace ModularMagic_Food
                 cloudMushroomVegetationConfig.GroupRadius = 4;
                 cloudMushroomVegetationConfig.GroupSizeMin = PluginConfig.mushroom5.groupMin.Value;
                 cloudMushroomVegetationConfig.GroupSizeMax = PluginConfig.mushroom5.groupMax.Value;
-                //cloudMushroomVegetationConfig.ScaleMin = PluginConfig.mushroom5.scaleMin.Value;
-                //cloudMushroomVegetationConfig.ScaleMax = PluginConfig.mushroom5.scaleMax.Value;
                 cloudMushroomVegetationConfig.ScaleMin = 0.7f;
                 cloudMushroomVegetationConfig.ScaleMax = 1f;
                 cloudMushroomVegetationConfig.InForest = false;
