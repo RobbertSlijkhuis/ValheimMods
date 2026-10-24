@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using WizshBoneTwitchIntegration.Types;
-using WizshBoneTwitchIntegration.GuiOld;
 using System.Reflection;
 using System;
 using System.Collections;
@@ -9,72 +8,49 @@ namespace WizshBoneTwitchIntegration.Models
 {
     internal class RedeemData : CloneableData
     {
-        [EditorLabel("Title")]
-        [EditorTooltip("The title of the redeem shown in Twitch.")]
-        [InputPrefix("WBTI")]
         public string title = "";
 
         // The redeem's permanent identity. The title can change (rename, prefix), this never does, so whatever
         // is linked to a redeem (its reward on Twitch) survives a rename. Assigned when the profile is loaded
         // (RedeemIdHelper.EnsureIds), saved with the profile, and new for every new or copied redeem.
-        [EditorHidden] public string id = "";
+        public string id = "";
 
-        [EditorLabel("Description")]
-        [EditorTooltip("The description of the redeem shown when selected in Twitch.")]
         public string description = "";
 
-        [EditorLabel("Point cost")]
-        [EditorTooltip("The number of points required to redeem this.")]
         public int points = 0;
 
-        [EditorLabel("Background color")]
-        [EditorTooltip("The background color of the redeem shown in Twitch.")]
-        [ColorPicker]
         public string backgroundColor = "#a970ff";
 
-        [EditorLabel("Cooldown")]
-        [EditorTooltip("Cooldown of the redeem in seconds.")] 
         public int cooldown = 0;
 
         // Display-only: which unit (see CooldownHelper) the wizard shows `cooldown` in. `cooldown`
-        // itself is always stored in seconds. Hidden from GUI_OLD (see EditorHidden below) since
-        // its reflection-driven editor has no CooldownHelper conversion and would let this get out
-        // of sync with `cooldown`.
-        [EditorHidden] public string cooldownUnit = "seconds";
+        // itself is always stored in seconds. Only the wizard writes it, together with `cooldown`,
+        // since only it does the CooldownHelper conversion that keeps the two in sync.
+        public string cooldownUnit = "seconds";
 
-        [EditorHidden] public int maxPerStream = 0;
-        [EditorHidden] public int maxPerUserPerStream = 0;
+        public int maxPerStream = 0;
+        public int maxPerUserPerStream = 0;
 
-        [EditorLabel("Add condition")]
-        [EditorTooltip("The global key that will enable this redeem.")]
-        [GlobalKeyDropdown]
         public string globalKeyAdd = "";
 
-        [EditorLabel("Remove condition")]
-        [EditorTooltip("The global key that will disable this redeem.")]
-        [GlobalKeyDropdown]
         public string globalKeyRemove = "";
 
-        [EditorLabel("Ignore safezone")]
-        [EditorTooltip("Whether to ignore the safezone for this redeem.")]
         public bool ignoreWard = false;
 
-        [EditorLabel("User input")]
-        [EditorTooltip("Whether this redeem requires input.")] 
         public bool userInput = false;
 
-        [EditorHidden] public string type    = RedeemType.Undefined;
-        [EditorHidden] public bool   enabled = true;
-        [EditorHidden] public SurpriseChestData chestData = new SurpriseChestData();
-        [EditorHidden] public SpawnCreatureData creatureData = new SpawnCreatureData();
-        [EditorHidden] public DetonateData detonateData = new DetonateData();
-        [EditorHidden] public FlashBangData flashbangData = new FlashBangData();
-        [EditorHidden] public MistData mistData = new MistData();
-        [EditorHidden] public TerrainEditData terrainEditData = new TerrainEditData();
-        [EditorHidden] public SpawnAbilityData spawnAbilityData = new SpawnAbilityData();
-        [EditorHidden] public StatusEffectData statusEffectData = new StatusEffectData();
-        [EditorHidden] public TimeStopData timeStopData = new TimeStopData();
-        [EditorHidden] public WeatherData weatherData = new WeatherData();
+        public string type    = RedeemType.Undefined;
+        public bool   enabled = true;
+        public SurpriseChestData chestData = new SurpriseChestData();
+        public SpawnCreatureData creatureData = new SpawnCreatureData();
+        public DetonateData detonateData = new DetonateData();
+        public FlashBangData flashbangData = new FlashBangData();
+        public MistData mistData = new MistData();
+        public TerrainEditData terrainEditData = new TerrainEditData();
+        public SpawnAbilityData spawnAbilityData = new SpawnAbilityData();
+        public StatusEffectData statusEffectData = new StatusEffectData();
+        public TimeStopData timeStopData = new TimeStopData();
+        public WeatherData weatherData = new WeatherData();
         // Maps each RedeemType to the one sub-data field that should be serialized for it.
         private static readonly Dictionary<string, string> TypeToDataField = new Dictionary<string, string>
         {

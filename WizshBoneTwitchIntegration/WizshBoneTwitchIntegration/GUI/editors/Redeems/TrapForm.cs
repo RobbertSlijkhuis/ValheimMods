@@ -6,8 +6,7 @@ using WizshBoneTwitchIntegration.Models;
 namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
-    /// Step-2 form for Trap - field set ported from <c>models/views/TrapView.cs</c>'s curation, all
-    /// 4 fields kept. Implements <see cref="IForcesValuesOnSave"/> since the prefab is always
+    /// Step-2 form for Trap - all 4 fields kept. Implements <see cref="IForcesValuesOnSave"/> since the prefab is always
     /// "fuling_trap". Duration/Allow drops/Break on destroy/Ground offset/Snap to terrain and the
     /// Damage tab are hidden (no tabs at all) and only ever set by <see cref="ApplyDefaults"/> -
     /// none of the class-level defaults match what a trap field needs.
@@ -84,7 +83,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         public void ApplyForcedValues(RedeemData working)
         {
-            // No other vanilla prefab fits "trap field" - matches TrapView's own constructor-forced value.
+            // No other vanilla prefab fits "trap field" - same value as SpawnAbilityNormalizer.Trap.
             working.spawnAbilityData.spawns = new List<string> { "fuling_trap" };
         }
     }

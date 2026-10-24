@@ -11,10 +11,6 @@ namespace WizshBoneTwitchIntegration.Gui
     /// per-redeem "Copy" action. Like <see cref="InputDialog"/>, the dialog stays open and shows
     /// an inline error when <c>onConfirm</c> reports a validation failure (e.g. a name collision),
     /// instead of always closing.
-    ///
-    /// Copy-adapted from GUI_OLD/dialogs/CopyRedeemDialog.cs (new namespace, uses this folder's
-    /// own <see cref="SearchableDropdown"/>/<see cref="GuiFieldBuilder"/>) rather than referenced
-    /// directly, per the new UI's isolation-from-GUI_OLD constraint.
     /// </summary>
     internal class CopyRedeemDialog
     {

@@ -14,13 +14,12 @@ namespace WizshBoneTwitchIntegration.Gui
     /// The redeem create/edit wizard - built against RedesignUI.dc.html's 3-step flow (choose
     /// effect -> configure parameters -> Twitch reward setup). Create runs all 3 steps; Edit
     /// starts at step 2 since the effect type can't change once a redeem exists (mirrors the
-    /// mockup's <c>wizardSteps</c>/<c>isEdit</c> logic and GUI_OLD/tabs/RedeemsTab.cs's
-    /// <c>ShowEditView</c> locking its type dropdown).
+    /// mockup's <c>wizardSteps</c>/<c>isEdit</c> logic).
     ///
-    /// Step 2 (per-type parameters) is a placeholder for every type this round - real per-type
-    /// fields are future rounds' scope, one type at a time. Step 1 and step 3 are fully wired to
-    /// the real backend: <see cref="RedeemManager"/> already validates/persists/pushes to Twitch,
-    /// this class just calls into it exactly like GUI_OLD's create view did.
+    /// Step 2 (per-type parameters) is filled in by the per-type forms in <c>Redeems/</c>; a type
+    /// without a form (the raw SpawnAbility type) shows a placeholder. Step 1 and step 3 are fully
+    /// wired to the real backend: <see cref="RedeemManager"/> validates/persists/pushes to Twitch,
+    /// this class just calls into it.
     ///
     /// Owned by <see cref="Tabs.RedeemsTab"/> the same way <see cref="ConfirmDialog"/>/
     /// <see cref="InputDialog"/> are owned by other tabs, except this is an inline content swap
@@ -347,7 +346,7 @@ namespace WizshBoneTwitchIntegration.Gui
             m_isEdit = true;
             m_floorStep = 2;
 
-            // Normalize now, not just on display: a redeem created via GUI_OLD (or before this
+            // Normalize now, not just on display: a redeem created by an older version (or before this
             // wizard stopped baking the prefix in) still has it baked into m_working.title at this
             // point. Without this, saving without ever touching the title field would silently
             // keep the old baked-in value instead of moving it to the prefix-free storage this
@@ -761,10 +760,9 @@ namespace WizshBoneTwitchIntegration.Gui
 
             float conditionRowY = -(BoxPadding + ConditionDescriptionHeight + ConditionDescriptionGap);
 
-            // Add / remove condition - dropdowns over Valheim's global keys, matching GUI_OLD's
-            // FieldUIBuilder.BuildStringDropdownField wiring: OnValueChanged writes straight into
-            // m_working, and PopulateStep3Fields re-syncs the displayed value/options every time
-            // step 3 is (re-)entered.
+            // Add / remove condition - dropdowns over Valheim's global keys: OnValueChanged writes
+            // straight into m_working, and PopulateStep3Fields re-syncs the displayed value/options
+            // every time step 3 is (re-)entered.
             CreateRowLabel(conditionCard, "Add condition", conditionRowY, halfWidth, leftHalfX);
             CreateRowLabel(conditionCard, "Remove condition", conditionRowY, halfWidth, rightHalfX);
             m_addConditionDropdown = new SearchableDropdown();
@@ -866,8 +864,7 @@ namespace WizshBoneTwitchIntegration.Gui
         /// <summary>
         /// Value = the global key string ZoneSystem stores (what gets saved), Label = a readable
         /// name matching vanilla boss naming. A small fixed list, not a runtime scan, so no
-        /// caching is needed. Ported from GUI_OLD/editors/FieldUIBuilder.cs's method of the same
-        /// name - includes a leading "" -> "None" entry, deliberately excludes
+        /// caching is needed. Includes a leading "" -> "None" entry, deliberately excludes
         /// <see cref="GlobalKeyType.DefeatedNothing"/>/<see cref="GlobalKeyType.DefeatedNoBoss"/>
         /// (sentinels never read by ZoneSystem, not real global keys).
         /// </summary>
@@ -883,10 +880,9 @@ namespace WizshBoneTwitchIntegration.Gui
 
         /// <summary>
         /// Returns <paramref name="options"/> with <paramref name="currentValue"/> added in
-        /// (sorted) if it's missing - so a saved value set outside this curated list (e.g. via
-        /// GUI_OLD or a hand-edited profile.yaml) still displays correctly instead of silently
-        /// reverting to "None". Ported from GUI_OLD/editors/FieldUIBuilder.cs's method of the same
-        /// name.
+        /// (sorted) if it's missing - so a saved value set outside this curated list (e.g. via a
+        /// hand-edited profile.yaml) still displays correctly instead of silently reverting to
+        /// "None".
         /// </summary>
         private static List<DropdownOption> EnsureIncludesCurrentValue(List<DropdownOption> options, string currentValue)
         {
@@ -911,9 +907,9 @@ namespace WizshBoneTwitchIntegration.Gui
         /// Strips the current profile's redeem title prefix from <paramref name="title"/> if it's
         /// already there, otherwise returns it unchanged. Used both live (<see cref="OnTitleInputChanged"/>)
         /// and once up front when opening an existing redeem for edit (<see cref="OpenEdit"/>) -
-        /// the latter matters because a redeem created via GUI_OLD (which always bakes the prefix
-        /// into the stored title) or one saved before this wizard stopped doing the same still has
-        /// it baked into <see cref="m_working"/>'s title until normalized.
+        /// the latter matters because a redeem saved by an older version (which baked the prefix
+        /// into the stored title) still has it baked into <see cref="m_working"/>'s title until
+        /// normalized.
         /// </summary>
         private static string StripKnownPrefix(string title)
         {
@@ -1053,8 +1049,8 @@ namespace WizshBoneTwitchIntegration.Gui
             // Windmill/Smite/Trap's locked prefab, TerrainEdit's always-on raise) - apply them now
             // so the saved data (and anything that inspects it, like the redeem list or a
             // hand-exported profile.yaml) reflects the true values immediately. Redundant with, but
-            // not a replacement for, SpawnAbilityHelper.Normalizers' own redemption-time
-            // re-enforcement of the same values for hand-edited YAML.
+            // not a replacement for, SpawnAbilityHelper.Normalizers' (SpawnAbilityNormalizer) own
+            // redemption-time re-enforcement of the same values for hand-edited YAML.
             if (m_step2Forms.TryGetValue(m_working.type, out IRedeemStep2Form activeForm) && activeForm is IForcesValuesOnSave forcing)
                 forcing.ApplyForcedValues(m_working);
 

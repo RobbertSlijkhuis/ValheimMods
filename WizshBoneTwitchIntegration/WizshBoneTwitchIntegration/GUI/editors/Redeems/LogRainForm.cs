@@ -7,11 +7,10 @@ using WizshBoneTwitchIntegration.Models;
 namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
-    /// Step-2 form for LogRain - field set ported from <c>models/views/LogRainView.cs</c>'s
-    /// curation, including its "Biome specific" sentinel behavior (adapted from a single-select
-    /// dropdown to the SearchableChecklist multi-select widget: checking the sentinel replaces the
-    /// whole selection with the 8 default per-biome logs and sets <c>isBiomeList</c>, matching
-    /// <c>LogRainView.OnBiomeSpecificSelected</c>'s exact effect). Log prefab(s) is hidden until
+    /// Step-2 form for LogRain, including its "Biome specific" sentinel behavior (on the
+    /// SearchableChecklist multi-select widget: checking the sentinel replaces the
+    /// whole selection with the 8 default per-biome logs and sets <c>isBiomeList</c>).
+    /// Log prefab(s) is hidden until
     /// it's finished (<see cref="ShowLogPicker"/>) - a fresh selection is forced onto the 8 default
     /// per-biome logs via <see cref="ApplyDefaults"/> meanwhile. Accuracy/Ground offset/Drop
     /// velocity and the Damage tab are hidden too - their values only ever come from

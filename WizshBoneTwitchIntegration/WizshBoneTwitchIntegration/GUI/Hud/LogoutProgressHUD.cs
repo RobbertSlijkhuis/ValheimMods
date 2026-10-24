@@ -6,9 +6,7 @@ using UnityEngine.UI;
 namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
-    /// Copy-adapted from GUI_OLD/LogoutProgressPanel.cs (new namespace) rather than referenced
-    /// directly, per the new UI's isolation constraint - see GUI/dialogs/ConfirmDialog.cs's
-    /// identical rationale. Shows a "please wait" message (with animated dots) while
+    /// Shows a "please wait" message (with animated dots) while
     /// TwitchAuth.LogoutBackToMainMenu/LogoutQuitApplication clear redeems from Twitch before the
     /// vanilla logout/quit actually proceeds.
     /// </summary>

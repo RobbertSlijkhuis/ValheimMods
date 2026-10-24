@@ -7,8 +7,7 @@ namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
     /// Step-2 form for Door ("Doors of Doom") - one of the 9 SpawnAbilityFamily sub-types, all
-    /// sharing <see cref="SpawnAbilityData"/>. Field set/order ported from
-    /// <c>models/views/DoorView.cs</c>'s curation. No Damage tab (doors don't damage). Ground offset
+    /// sharing <see cref="SpawnAbilityData"/>. No Damage tab (doors don't damage). Ground offset
     /// and Snap to terrain are hidden and forced on save (snap = true, offset = per-prefab, default 0), as is Allow
     /// drops: <see cref="SpawnAbilityData.allowDrops"/> defaults to <c>true</c> at the class level
     /// while the intended behavior here is always <c>false</c> - these need an explicit

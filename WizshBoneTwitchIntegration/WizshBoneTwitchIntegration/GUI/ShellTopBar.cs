@@ -8,10 +8,8 @@ namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
     /// Top bar: Twitch login status dot+label, login/logout button, and "Created by DeathWizsh"
-    /// + the plugin version on the far right. Login state text/logic ported verbatim from
-    /// GUI_OLD/tabs/HomeTab.cs (GetLoginButtonText/GetLoginStatusMessage/Login), including the
-    /// unresolved-redeems logout guard's Cancel button routing to <see cref="RedeemHistorySection"/>
-    /// via <see cref="OnOpenHistoryRequested"/> (GUI_OLD's <c>onCancel: () => m_onOpenHistory?.Invoke()</c>).
+    /// + the plugin version on the far right. Includes the unresolved-redeems logout guard, whose
+    /// Cancel button routes to <see cref="RedeemHistorySection"/> via <see cref="OnOpenHistoryRequested"/>.
     /// </summary>
     internal class ShellTopBar
     {

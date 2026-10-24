@@ -33,11 +33,8 @@ namespace WizshBoneTwitchIntegration.Gui
     /// (and is never clipped by) any ScrollRect/Mask the toggle button itself lives inside,
     /// mirroring how Unity's built-in <see cref="Dropdown"/> escapes its own template masking.
     ///
-    /// Copy-adapted from GUI_OLD/editors/SearchableDropdown.cs (new namespace, per the new UI's
-    /// isolation-from-GUI_OLD constraint) - its option-list scrolling now uses
-    /// <see cref="ScrollableList"/> instead of GUI_OLD's ListEditor.CreateScrollableList, and it
-    /// reads sizing/placeholder styling from <see cref="GuiFieldBuilder"/> instead of
-    /// GUI_OLD/editors/FieldUIBuilder.cs.
+    /// Its option-list scrolling uses <see cref="ScrollableList"/>, and it reads sizing/placeholder
+    /// styling from <see cref="GuiFieldBuilder"/>.
     /// </summary>
     internal class SearchableDropdown
     {
@@ -446,12 +443,6 @@ namespace WizshBoneTwitchIntegration.Gui
     {
         internal Button ToggleButton;
         internal Action OnOwnerDeactivated;
-
-        internal void SetInteractable(bool interactable)
-        {
-            if (ToggleButton != null)
-                ToggleButton.interactable = interactable;
-        }
 
         private void OnDisable() => OnOwnerDeactivated?.Invoke();
         private void OnDestroy() => OnOwnerDeactivated?.Invoke();

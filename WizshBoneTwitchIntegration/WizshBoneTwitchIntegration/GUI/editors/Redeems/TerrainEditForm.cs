@@ -10,7 +10,7 @@ namespace WizshBoneTwitchIntegration.Gui
     /// stays locked to "Circle", `positionOffset` stays zero/on-player). Implements
     /// <see cref="IForcesValuesOnSave"/> to force `raise = true` on save, since this form never
     /// shows a toggle for it - level/smooth/paint/shape/positionOffset are deliberately NOT
-    /// force-reset here, so a redeem previously configured via GUI_OLD's fuller editor doesn't
+    /// force-reset here, so a redeem previously configured with those values (an older editor, or a hand-edited profile.yaml) doesn't
     /// silently lose that configuration just from being opened in this narrower form.
     /// </summary>
     internal class TerrainEditForm : IRedeemStep2Form, IForcesValuesOnSave, IAppliesDefaultsOnSelect

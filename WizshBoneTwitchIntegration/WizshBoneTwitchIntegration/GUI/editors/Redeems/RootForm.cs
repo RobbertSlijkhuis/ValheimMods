@@ -6,10 +6,9 @@ using WizshBoneTwitchIntegration.Models;
 namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
-    /// Step-2 form for Root ("Roots on the line") - field set ported from
-    /// <c>models/views/RootView.cs</c>'s curation. Implements <see cref="IForcesValuesOnSave"/>
-    /// since the prefab is always "TentaRoot" (matches <c>RootView</c>'s own constructor-forced
-    /// value - previously neither forced it, so an unset <c>spawns</c> silently fell back to
+    /// Step-2 form for Root ("Roots on the line"). Implements <see cref="IForcesValuesOnSave"/>
+    /// since the prefab is always "TentaRoot" (the same value <c>SpawnAbilityNormalizer.Root</c>
+    /// forces at redemption time - without either, an unset <c>spawns</c> silently fell back to
     /// <c>SpawnAbilityHelper</c>'s fish-rain default instead of spawning roots). Only Announcement +
     /// Min/Max + Spawn delay/radius are shown. Batch size/Duration/Ground offset/Snap to terrain
     /// and the Damage tab (no tabs at all) are hidden and only ever set by
@@ -85,7 +84,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         public void ApplyForcedValues(RedeemData working)
         {
-            // No other vanilla prefab fits "roots on the line" - matches RootView's own constructor-forced value.
+            // No other vanilla prefab fits "roots on the line" - same value as SpawnAbilityNormalizer.Root.
             working.spawnAbilityData.spawns = new List<string> { "TentaRoot" };
         }
     }

@@ -6,10 +6,7 @@ namespace WizshBoneTwitchIntegration.Gui
     /// <summary>
     /// Factory for creating a vertical-only scroll view with an always-visible scrollbar.
     /// Returns the <c>Content</c> <see cref="GameObject"/> that children should be parented into.
-    ///
-    /// Copy-adapted from GUI_OLD/components/ScrollableView.cs (new namespace, per the new UI's
-    /// isolation-from-GUI_OLD constraint) - the Unity UI plumbing itself is unchanged, it was
-    /// already fully generic.
+    /// Fully generic Unity UI plumbing.
     /// </summary>
     internal static class ScrollableList
     {

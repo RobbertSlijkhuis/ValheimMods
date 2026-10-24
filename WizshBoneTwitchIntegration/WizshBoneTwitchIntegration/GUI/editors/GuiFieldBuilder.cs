@@ -9,15 +9,11 @@ namespace WizshBoneTwitchIntegration.Gui
     /// <summary>
     /// The class that decides how individual input fields are rendered in the new UI - text,
     /// number, toggle, and color fields, each as a small value+callback factory method rather
-    /// than reflecting over a bound object's <see cref="System.Reflection.FieldInfo"/> like
-    /// <c>GUI_OLD/editors/FieldUIBuilder.cs</c>'s dispatcher does.
+    /// than reflecting over a bound object's <see cref="System.Reflection.FieldInfo"/>.
     ///
-    /// This is a deliberately narrower port: <c>FieldUIBuilder</c> is two layers - a reflection/
-    /// attribute dispatcher bound to RedeemData/CreatureData/etc. (out of scope until a round
-    /// actually edits one of those data-model objects), and this generic per-type widget factory
-    /// underneath it, which doesn't know about any data model at all. Only the second layer is
-    /// ported here, copy-adapted per the new UI's isolation-from-GUI_OLD constraint, so every
-    /// future text/number/color/dropdown field in the new UI renders through one place.
+    /// It is a generic per-type widget factory that doesn't know about any data model, so every
+    /// text/number/color/dropdown field in the new UI renders through one place. The forms bind
+    /// their fields to the data models by hand.
     /// </summary>
     internal static class GuiFieldBuilder
     {
@@ -36,8 +32,8 @@ namespace WizshBoneTwitchIntegration.Gui
 
         /// <summary>
         /// Creates a plain text <see cref="InputField"/> centered at <paramref name="position"/>.
-        /// Wraps Jötunn's own <see cref="GUIManager.CreateInputField"/> - a genuine Jötunn API,
-        /// not a GUI_OLD-only wrapper - with this mod's default styling applied.
+        /// Wraps Jötunn's own <see cref="GUIManager.CreateInputField"/> with this mod's default
+        /// styling applied.
         /// </summary>
         public static InputField CreateInputField(GameObject parent, Vector2 position, float width, string initialValue = "", string placeholderText = "", int maxLength = 0)
         {

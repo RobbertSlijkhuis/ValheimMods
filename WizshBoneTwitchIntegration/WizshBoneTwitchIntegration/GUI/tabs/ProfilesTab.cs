@@ -14,8 +14,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
     /// <summary>
     /// Profiles tab content - list/switch/create/copy/rename/delete/export/import/sync, built
     /// directly against RedesignUI.dc.html's structure (search+New+Import toolbar, sortable
-    /// Name/Redeems/Actions columns, hover-revealed row actions) rather than a port of
-    /// GUI_OLD/tabs/ProfilesTab.cs's anchored-button layout - see the round-2 plan.
+    /// Name/Redeems/Actions columns, hover-revealed row actions).
     /// Backend calls (ProfileManager/ProfileSyncHelper/ExtraConfigHelper) are reused unchanged.
     /// </summary>
     internal class ProfilesTab : IShellTabView
@@ -82,10 +81,9 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private static readonly Color BuiltInNameColor = new Color(0.56f, 0.7f, 0.79f, 1f);
 
         // Row action buttons chain left-to-right within the Actions column: Copy, Export, Sync,
-        // Rename, then Reload/Delete share the rightmost slot - same order/sizing as
-        // GUI_OLD/tabs/ProfilesTab.cs's button cluster (minus its per-row Import, dropped per
-        // user feedback - only the toolbar's Import remains), recalculated against this tab's
-        // own Actions column bounds.
+        // Rename, then Reload/Delete share the rightmost slot, sized against this tab's own Actions
+        // column bounds. There is no per-row Import (dropped per user feedback - only the
+        // toolbar's Import remains).
         private const float CopyBtnWidth   = 70f;
         private const float ExportBtnWidth = 80f;
         private const float SyncBtnWidth   = 80f;
@@ -385,7 +383,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             revealOnHover.Add(renameResetBtn);
 
             // The Reload/Delete slot stays permanently visible (not added to revealOnHover) so a
-            // row isn't empty-looking until hovered - matching GUI_OLD. A built-in profile gets no
+            // row isn't empty-looking until hovered. A built-in profile gets no
             // Delete button; its slot stays empty unless it is the active row (Reload).
             if (isActive)
             {

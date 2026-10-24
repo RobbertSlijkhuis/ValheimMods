@@ -8,9 +8,7 @@ namespace WizshBoneTwitchIntegration.Gui
     /// <summary>
     /// Darkens a row's background <see cref="Image"/> and reveals a set of otherwise-hidden
     /// <see cref="GameObject"/>s (e.g. action buttons) while the pointer hovers over the row.
-    ///
-    /// Copy-adapted from GUI_OLD/components/RowHoverReveal.cs (new namespace, per the new UI's
-    /// isolation-from-GUI_OLD constraint) - unchanged otherwise, it was already fully generic.
+    /// Fully generic: it knows nothing about the row's content.
     /// </summary>
     internal class RowHoverReveal : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {

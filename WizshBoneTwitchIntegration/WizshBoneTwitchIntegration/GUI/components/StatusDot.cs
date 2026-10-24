@@ -5,8 +5,7 @@ namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
     /// Small procedurally-generated colored circle indicator (e.g. Twitch login status) - no
-    /// texture import needed. Extracted from the private CreateCircle/CreateCircleSprite methods
-    /// on GUI_OLD/panels/WizshBoneHUD.cs and made reusable, since they weren't exposed there.
+    /// texture import needed.
     /// </summary>
     internal static class StatusDot
     {

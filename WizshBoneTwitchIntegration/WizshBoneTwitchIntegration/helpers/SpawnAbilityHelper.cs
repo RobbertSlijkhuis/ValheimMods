@@ -6,7 +6,6 @@ using UnityEngine;
 using WizshBoneTwitchIntegration.Exceptions;
 using WizshBoneTwitchIntegration.Extensions;
 using WizshBoneTwitchIntegration.Models;
-using WizshBoneTwitchIntegration.Models.Views;
 using WizshBoneTwitchIntegration.TwitchIntegration;
 using WizshBoneTwitchIntegration.Types;
 using static SpawnAbility;
@@ -17,21 +16,20 @@ namespace WizshBoneTwitchIntegration.Helpers
     {
         public static bool debug;
 
-        // Each narrowed View is the single source of truth for its redeem type's hardcoded
-        // prefab/forced defaults - constructing (and discarding) one here applies that
-        // normalization at redemption time too, not just when the in-game editor is open.
-        // RedeemType.SpawnAbility (the raw/generic type) has no narrowed View, so no entry.
+        // Each redeem type's hardcoded prefab/forced defaults (see SpawnAbilityNormalizer) are applied here at
+        // redemption time too, not just when the redeem is saved through the editor.
+        // Door has nothing to normalize and RedeemType.SpawnAbility (the raw/generic type) has no fixed shape,
+        // so neither has an entry.
         private static readonly Dictionary<string, Action<SpawnAbilityData>> Normalizers = new Dictionary<string, Action<SpawnAbilityData>>
         {
-            { RedeemType.Door,     data => new DoorView(data) },
-            { RedeemType.Windmill, data => new WindmillView(data) },
-            { RedeemType.Smite,    data => new SmiteView(data) },
-            { RedeemType.Rain,     data => new RainView(data) },
-            { RedeemType.LogRain,  data => new LogRainView(data) },
-            { RedeemType.BoatRain, data => new RainView(data) },
-            { RedeemType.Meteor,   data => new MeteorView(data) },
-            { RedeemType.Trap,     data => new TrapView(data) },
-            { RedeemType.Root,     data => new RootView(data) },
+            { RedeemType.Windmill, SpawnAbilityNormalizer.Windmill },
+            { RedeemType.Smite,    SpawnAbilityNormalizer.Smite },
+            { RedeemType.Rain,     SpawnAbilityNormalizer.Damage },
+            { RedeemType.LogRain,  SpawnAbilityNormalizer.LogRain },
+            { RedeemType.BoatRain, SpawnAbilityNormalizer.Damage },
+            { RedeemType.Meteor,   SpawnAbilityNormalizer.Damage },
+            { RedeemType.Trap,     SpawnAbilityNormalizer.Trap },
+            { RedeemType.Root,     SpawnAbilityNormalizer.Root },
         };
 
         public static void SpawnAbility(string type, SpawnAbilityData spawnAbilityData, CustomRewardEvent customRewardEvent, TwitchChat m_chat)

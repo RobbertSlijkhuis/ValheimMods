@@ -29,8 +29,9 @@ namespace WizshBoneTwitchIntegration.Gui
     /// from <see cref="RedeemWizard.Finish"/> right before persisting, so the saved data (and
     /// anything that inspects it, like the redeem list or a hand-exported profile.yaml) reflects
     /// the true forced values immediately - redundant with, but not a replacement for, the
-    /// redemption-time normalizer path in <c>helpers/SpawnAbilityHelper.cs</c>'s Normalizers,
-    /// which independently re-enforces the same values for hand-edited YAML.
+    /// redemption-time normalizer path (<c>SpawnAbilityHelper.Normalizers</c>, implemented in
+    /// <c>helpers/SpawnAbilityNormalizer.cs</c>), which independently re-enforces the same values
+    /// for hand-edited YAML and for redeems saved before these forms existed.
     /// </summary>
     internal interface IForcesValuesOnSave
     {

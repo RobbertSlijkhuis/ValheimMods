@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using WizshBoneTwitchIntegration.GuiOld;
 using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.Models
@@ -35,13 +34,9 @@ namespace WizshBoneTwitchIntegration.Models
         public float? velocity;
         public float? velocityMax;
 
-        [EditorHidden]
         public bool? randomDirection;
-        [EditorHidden]
         public float? randomAngleMax;
-        [EditorHidden]
         public float? randomAngleMin;
-        [EditorHidden]
         public bool? randomYRotation;
 
         public SpawnAbilityData() { }

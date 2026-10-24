@@ -11,8 +11,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
     /// Help tab content (formerly "Debug") - a single under-title orientation line (same
     /// TitleY/DescriptionY convention as SettingsTab/RedeemsTab), above the same card grid
     /// matching <see cref="HomeTab"/>'s card style (RedesignUI.dc.html only mocks up the first
-    /// card; the "Clear Toasts" card is a safety net for stuck toasts, and the "Debug mode" toggle is carried over from GUI_OLD/tabs/DebugTab.cs,
-    /// which the mockup didn't include), followed by a clickable topic list explaining
+    /// card; the "Clear Toasts" card is a safety net for stuck toasts, and the "Debug mode" toggle
+    /// isn't in the mockup), followed by a clickable topic list explaining
     /// Login/Profiles/Redeems/Viewers/Settings/Safezones/Commands. Purely client-local: nothing here touches
     /// ZDOs or the network.
     /// </summary>
@@ -162,7 +162,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         public void Refresh()
         {
             // Re-sync in case the value changed elsewhere (e.g. an external config-manager mod)
-            // while this tab wasn't visible - matches GUI_OLD/tabs/DebugTab.cs's Refresh().
+            // while this tab wasn't visible.
             if (m_safeZoneDebugToggle != null)
                 m_safeZoneDebugToggle.isOn = PluginConfig.configShowSafeZoneDebug.Value;
         }

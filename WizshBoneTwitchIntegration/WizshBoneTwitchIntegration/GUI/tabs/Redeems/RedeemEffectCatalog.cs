@@ -27,11 +27,12 @@ namespace WizshBoneTwitchIntegration.Gui
     /// Single source of truth for the 18 selectable redeem effect types' display labels and
     /// descriptions - shared by <see cref="RedeemWizard"/>'s step-1 effect picker and
     /// <see cref="Tabs.RedeemsTab"/>'s list-row type-hover tooltip, rather than duplicating this
-    /// text in both places. <see cref="All"/> is sorted alphabetically by label. Membership matches
-    /// GUI_OLD/tabs/RedeemsTab.cs's RedeemTypes array minus RedeemType.Undefined (that one has no redeem-facing meaning, so it's never a
-    /// choosable effect) and minus RedeemType.SpawnAbility (the raw/generic type - only its 8
-    /// curated sub-types, e.g. Smite/Door/Windmill, are choosable here; SpawnAbility itself stays
-    /// editable only via GUI_OLD/F4 for existing redeems).
+    /// text in both places. <see cref="All"/> is sorted alphabetically by label. Membership is every
+    /// redeem type minus RedeemType.Undefined (that one has no redeem-facing meaning, so it's never a
+    /// choosable effect) and minus RedeemType.SpawnAbility (the raw/generic type - only its
+    /// curated sub-types, e.g. Smite/Door/Windmill, are choosable here; a raw SpawnAbility redeem
+    /// still works at redemption time but cannot be edited in the UI yet, the wizard shows a
+    /// placeholder for it).
     /// </summary>
     internal static class RedeemEffectCatalog
     {

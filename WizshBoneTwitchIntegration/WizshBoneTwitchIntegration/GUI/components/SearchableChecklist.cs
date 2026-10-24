@@ -11,9 +11,7 @@ namespace WizshBoneTwitchIntegration.Gui
     /// Multi-select sibling of <see cref="SearchableDropdown"/>: same toggle-button + floating
     /// search panel shell, but every row carries a checkbox instead of selecting-and-closing, and
     /// the toggle button shows a "N selected" summary instead of one value's label. Copy-adapted
-    /// from <see cref="SearchableDropdown"/> rather than subclassing it (its fields are private,
-    /// and this mirrors how <see cref="SearchableDropdown"/> itself was copy-adapted from
-    /// GUI_OLD/editors/SearchableDropdown.cs instead of reusing it directly). Reuses
+    /// from <see cref="SearchableDropdown"/> rather than subclassing it (its fields are private). Reuses
     /// <see cref="SearchableDropdownHandle"/> for the same "close the floating panel if the owning
     /// toggle is disabled/destroyed out from under it" lifecycle guard.
     /// </summary>

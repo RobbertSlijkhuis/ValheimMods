@@ -8,9 +8,7 @@ using UnityEngine.UI;
 namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
-    /// Copy-adapted from GUI_OLD/panels/SafeZoneHUDPanel.cs (new namespace, moved out of GUI_OLD
-    /// per the new UI's isolation constraint - see GUI/dialogs/ConfirmDialog.cs's identical
-    /// rationale). A plain class rather than a MonoBehaviour - it's owned by <see cref="WizshBoneGUI"/> the
+    /// A plain class rather than a MonoBehaviour - it's owned by <see cref="WizshBoneGUI"/> the
     /// same way that class already owns <see cref="WizshBoneHUD"/>/<see cref="ConfirmDialog"/> - inited on
     /// <c>GUIManager.OnCustomGUIAvailable</c>, no Unity lifecycle callbacks needed.
     ///

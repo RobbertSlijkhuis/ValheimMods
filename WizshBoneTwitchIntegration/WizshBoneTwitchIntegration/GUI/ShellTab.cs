@@ -1,10 +1,8 @@
 namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
-    /// Sidebar tabs for the new UI shell. Labels mirror GUI_OLD's 7 tab names for continuity
-    /// into later rounds; only this shell's tab-switching mechanics exist so far - each tab's
-    /// real content (Home cards, Profiles list, etc.) is future rounds' scope, and shows a stub
-    /// label for now (see <see cref="WizshBoneShellGUI"/>).
+    /// Sidebar tabs for the new UI shell. Each tab's content lives in its own
+    /// <see cref="IShellTabView"/> under GUI/tabs/ (see <see cref="WizshBoneShellGUI"/>).
     /// </summary>
     internal enum ShellTab
     {

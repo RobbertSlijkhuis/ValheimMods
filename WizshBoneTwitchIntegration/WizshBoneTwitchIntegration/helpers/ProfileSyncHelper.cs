@@ -34,11 +34,6 @@ namespace WizshBoneTwitchIntegration.Helpers
             );
         }
 
-        public static void SendActiveProfileToAll()
-        {
-            SendProfileToAll(ProfileManager.ActiveProfile);
-        }
-
         /// <summary>
         /// Sends the named profile to every connected peer. It doesn't have to be the active one:
         /// the receiver keys everything off the name in the package, not off the sender's profile.

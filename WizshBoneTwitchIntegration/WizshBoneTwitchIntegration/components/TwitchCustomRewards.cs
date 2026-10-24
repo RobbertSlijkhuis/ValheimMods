@@ -202,13 +202,6 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         public bool IsLoggedIn => m_auth != null && m_auth.m_loggedIn;
 
-        /// <summary>By title only, for the legacy GUI_OLD, which has no redeem to ask about.</summary>
-        public bool HasUnresolvedRedeemsFor(string redeemTitle)
-        {
-            return m_enabled
-                && m_redeemHistory.Exists(item => item.CustomRewardTitle == redeemTitle && IsWaiting(item));
-        }
-
         /// <summary>
         /// Whether redemptions of <paramref name="redeem"/> are still waiting to be completed or refunded. Found by the
         /// redeem's reward, so redemptions made under an earlier title (before a rename) count too. Only a redeem

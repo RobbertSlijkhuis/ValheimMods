@@ -6,8 +6,7 @@ using WizshBoneTwitchIntegration.Models;
 namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
-    /// Step-2 form for Smite - field set ported from <c>models/views/SmiteView.cs</c>'s curation,
-    /// all 5 fields kept. Everything else is locked to make the lightningAOE prefab behave
+    /// Step-2 form for Smite - all 5 fields kept. Everything else is locked to make the lightningAOE prefab behave
     /// correctly - confirmed via the effect-helper survey that these are genuinely the only fields
     /// with real effect on this type. Implements <see cref="IForcesValuesOnSave"/> for the locked
     /// prefab/physics flags. Damage tab hidden for now (no tabs at all), so the damage block only
@@ -78,7 +77,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         public void ApplyForcedValues(RedeemData working)
         {
-            // Matches SmiteView's own constructor-forced values verbatim: lightningAOE needs to
+            // Same values as SpawnAbilityNormalizer.Smite: lightningAOE needs to
             // strike the ground to look/behave right and always hit its target.
             SpawnAbilityData data = working.spawnAbilityData;
             if (data.accuracy == null) data.accuracy = 1f;

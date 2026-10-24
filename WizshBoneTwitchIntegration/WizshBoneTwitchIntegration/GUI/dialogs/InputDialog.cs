@@ -6,11 +6,9 @@ using UnityEngine.UI;
 namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
-    /// A reusable modal panel prompting for a single line of text - the generic version of
-    /// GUI_OLD/dialogs/ProfileNameDialog.cs, decoupled from its baked-in
-    /// <c>ProfileNameDialogMode</c> enum: callers pass title/description/confirm-button text
-    /// directly instead, the same way <see cref="ConfirmDialog"/> already does. This makes it
-    /// reusable by any future tab needing a single text-input prompt, not just profile names.
+    /// A reusable modal panel prompting for a single line of text: callers pass
+    /// title/description/confirm-button text directly, the same way <see cref="ConfirmDialog"/>
+    /// does. Usable by any tab needing a single text-input prompt, not just profile names.
     ///
     /// Shown via <see cref="Show"/>; Cancel always dismisses it, Confirm dismisses it only if the
     /// caller's validation succeeds - otherwise the panel stays open and shows the error inline.

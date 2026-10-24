@@ -8,10 +8,8 @@ using WizshBoneTwitchIntegration.TwitchIntegration;
 namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
-    /// Copy-adapted from GUI_OLD/panels/WizshBoneHUD.cs (new namespace) rather than referenced
-    /// directly, per the new UI's isolation constraint - see GUI/dialogs/ConfirmDialog.cs's
-    /// identical rationale. The always-visible corner status HUD (login dot + redeems on/off),
-    /// shown regardless of whether F3/F4 is ever opened.
+    /// The always-visible corner status HUD (login dot + redeems on/off),
+    /// shown regardless of whether the WizshBone window (F3 by default) is ever opened.
     /// </summary>
     internal class WizshBoneHUD
     {

@@ -10,10 +10,7 @@ namespace WizshBoneTwitchIntegration.Gui
     /// Attach to any UI <see cref="GameObject"/> to show a small floating tooltip while it is
     /// hovered, with the tooltip's bottom-left corner tracking the mouse cursor.
     ///
-    /// Copy-adapted from GUI_OLD/components/TooltipTrigger.cs (new namespace, uses this folder's
-    /// own <see cref="GuiFieldBuilder.FieldFontSize"/>) per the new UI's isolation-from-GUI_OLD
-    /// constraint - unwired for now, added as shared infra ahead of the Redeems tab round, which
-    /// will attach it to the test-redeem button the same way GUI_OLD does.
+    /// Uses this folder's own <see cref="GuiFieldBuilder.FieldFontSize"/>.
     /// </summary>
     internal class TooltipTrigger : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {

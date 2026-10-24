@@ -12,9 +12,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
     /// Home tab content - built directly against RedesignUI.dc.html's structure: originally a 3x2
     /// grid of stat/quick-setting cards (Active profile, Redeem status, Chatting feature, Auto
     /// resolve, Enable on login, Redemption log), now with a 7th "Redeem discount" card on its own
-    /// row underneath, plus a "Create a new redeem" button. No login/logout controls here - unlike
-    /// GUI_OLD/tabs/HomeTab.cs, that's already handled by <see cref="ShellTopBar"/> (round 2),
-    /// matching the mockup's Home tab having none either.
+    /// row underneath, plus a "Create a new redeem" button. No login/logout controls here - that's
+    /// handled by <see cref="ShellTopBar"/>, matching the mockup's Home tab having none either.
     ///
     /// Looks up TwitchAuth/TwitchCustomRewards/TwitchChatting itself via Game.instance.gameObject
     /// rather than having them threaded through <see cref="Create"/> - same "own its dependencies"

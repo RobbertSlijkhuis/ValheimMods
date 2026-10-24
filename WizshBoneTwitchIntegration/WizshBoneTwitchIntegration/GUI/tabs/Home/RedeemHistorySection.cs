@@ -13,10 +13,8 @@ namespace WizshBoneTwitchIntegration.Gui
     /// <summary>
     /// Redeem history section - an inline swap-in view within <see cref="Tabs.HomeTab"/>, built
     /// the same way <see cref="Tabs.RedeemsTab"/> swaps its list view out for
-    /// <see cref="RedeemWizard"/>: no floating card or dimmed scrim of its own (unlike this
-    /// class's predecessor, <c>RedeemHistoryPanel</c>, or GUI_OLD/WizshBoneRedeemHistoryGUI.cs's
-    /// separate wood panel) - just built directly into whatever <see cref="GameObject"/>
-    /// <see cref="Create"/> is given.
+    /// <see cref="RedeemWizard"/>: no floating card or dimmed scrim of its own, just built
+    /// directly into whatever <see cref="GameObject"/> <see cref="Create"/> is given.
     ///
     /// <see cref="Show"/> activates this section's own root and resets to page 1, mirroring
     /// <see cref="RedeemWizard.OpenCreate"/>/<see cref="RedeemWizard.OpenEdit"/>. Backing out fires
@@ -24,12 +22,10 @@ namespace WizshBoneTwitchIntegration.Gui
     /// show in its place (<see cref="Tabs.HomeTab"/>'s own overview grid) - the exact same shape as
     /// <see cref="RedeemWizard.OnFinished"/>.
     ///
-    /// Data/pagination/bulk-resolve logic is ported near-verbatim from
-    /// GUI_OLD/WizshBoneRedeemHistoryGUI.cs (same <see cref="TwitchCustomRewards.m_redeemHistory"/>/
-    /// <see cref="BulkRedeemResolveHelper"/> backend, same 30-per-page/newest-first pagination) -
-    /// only the visual layout differs, to the mockup's 4-column (Viewer/Redeem/Cost/Actions) grid
-    /// built with <see cref="ScrollableList"/>/<see cref="ListRow"/> instead of GUI_OLD's single
-    /// combined-text row.
+    /// Data/pagination/bulk-resolve logic: <see cref="TwitchCustomRewards.m_redeemHistory"/> and
+    /// <see cref="BulkRedeemResolveHelper"/> as backend, 30 per page, newest first, shown in the
+    /// mockup's 4-column (Viewer/Redeem/Cost/Actions) grid built with
+    /// <see cref="ScrollableList"/>/<see cref="ListRow"/>.
     ///
     /// Looks up <see cref="TwitchCustomRewards"/> fresh via <c>Game.instance.gameObject</c> on
     /// every refresh rather than caching it, matching every other new-UI tab's "own its
@@ -475,8 +471,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         private void OnBulkResolveProgress()
         {
-            // Cheap label-only update, matching GUI_OLD/WizshBoneRedeemHistoryGUI.cs - do NOT call
-            // the full RefreshPage() here, it tears down and rebuilds every row several times a
+            // Cheap label-only update - do NOT call the full RefreshPage() here, it tears down and rebuilds every row several times a
             // second for no reason. Per-row state catches up once, in OnBulkResolveFinished.
             if (!IsVisible || m_pageLabel == null)
                 return;
@@ -573,7 +568,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         /// <summary>
         /// The subset of <paramref name="filtered"/> actually rendered on <paramref name="page"/>,
-        /// newest-first - mirrors GUI_OLD/WizshBoneRedeemHistoryGUI.cs's GetVisiblePageHistory.
+        /// newest-first.
         /// "Complete All"/"Refund All" operate on the full filtered list instead (see
         /// <see cref="StartBulkResolve"/>), not just this page's slice.
         /// </summary>

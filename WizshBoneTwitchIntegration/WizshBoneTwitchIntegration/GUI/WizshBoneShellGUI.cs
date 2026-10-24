@@ -15,10 +15,8 @@ namespace WizshBoneTwitchIntegration.Gui
     /// by its own <see cref="IShellTabView"/> under GUI/tabs/ (currently just a stub label each -
     /// real per-tab content is future rounds' scope).
     ///
-    /// Panel lifecycle (lazy-build-once, SetActive to show/hide, InputBlockGate push/pop) and the
-    /// "keep all tab roots alive, SetActive to switch" idea are ported from
-    /// GUI_OLD/WizshBoneSettingsGUI.cs, restructured to loop over <see cref="ShellTab"/> instead of
-    /// one hand-duplicated block per tab.
+    /// Panel lifecycle: lazy-build-once, SetActive to show/hide, InputBlockGate push/pop; all tab
+    /// roots are kept alive and SetActive switches between them (looping over <see cref="ShellTab"/>).
     /// </summary>
     internal class WizshBoneShellGUI
     {

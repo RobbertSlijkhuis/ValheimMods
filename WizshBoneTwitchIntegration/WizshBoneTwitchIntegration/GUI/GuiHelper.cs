@@ -13,8 +13,7 @@ using UnityEngine.UI;
 namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
-    /// Shared UI utility methods for the new shell - a trimmed copy of GUI_OLD/tabs/TabUIHelper.cs
-    /// keeping only what this round needs, plus <see cref="CreateRegion"/>/<see cref="AddBackground"/>
+    /// Shared UI utility methods for the new shell, plus <see cref="CreateRegion"/>/<see cref="AddBackground"/>
     /// for laying out the sidebar/topbar/content regions inside one wood panel.
     /// </summary>
     internal static class GuiHelper
@@ -568,9 +567,8 @@ namespace WizshBoneTwitchIntegration.Gui
 
         /// <summary>
         /// Adds a thin colored outline around a button's background image, matching its label
-        /// color - copy-adapted from GUI_OLD/tabs/TabUIHelper.cs's AddBorder (same technique:
-        /// GUIManager.Instance.CreateButton's root GameObject carries both the Button and its
-        /// Image directly, so an Outline applied there reads as a border around the button).
+        /// color (GUIManager.Instance.CreateButton's root GameObject carries both the Button and
+        /// its Image directly, so an Outline applied there reads as a border around the button).
         /// </summary>
         public static void AddBorder(GameObject buttonObj, Color color, float width = 2f)
         {
@@ -628,7 +626,7 @@ namespace WizshBoneTwitchIntegration.Gui
         /// <summary>
         /// Gives a toggle the same click sound a button gets - GUIManager.ApplyToogleStyle (run
         /// internally by CreateToggle) never attaches a ButtonSfx at all, so toggles are silent by
-        /// default in both this UI and GUI_OLD (confirmed by decompiling Jotunn.dll). ButtonSfx's
+        /// default (confirmed by decompiling Jotunn.dll). ButtonSfx's
         /// m_sfxPrefab only ever fires from Button.onClick - a Toggle isn't a Button, so that path
         /// never fires - but m_selectSfxPrefab fires from ISelectHandler.OnSelect, which every
         /// Selectable (including Toggle) raises on click. So the toggle's one sound is wired through

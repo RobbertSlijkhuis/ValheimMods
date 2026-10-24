@@ -1,34 +1,20 @@
 ﻿using System.Collections.Generic;
-using WizshBoneTwitchIntegration.GuiOld;
 using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.Models
 {
     internal class DetonateData : CloneableData
     {
-        [EditorLabel("Announce message")]
-        [EditorTooltip("A custom message to announce that a detonation is about to occur. {{user}} will be replaced with the player's name.")]
         public string announceMessage;
 
-        [EditorLabel("Radius")]
-        [EditorTooltip("The radius around the player it will search for objects to detonate, in meters.")]
         public float radius = 20f;
 
-        [EditorLabel("Type")]
-        [EditorTooltip("The type of objects to detonate.")]
-        [DropdownOptions(nameof(DetonateType.Creature), nameof(DetonateType.CreatureSpawned), nameof(DetonateType.Fish), nameof(DetonateType.Piece))]
         public string type = DetonateType.Fish;
 
-        [EditorLabel("Values")]
-        [EditorTooltip("The object to detonate must contain this value in its name, if contains \"Fish\" then (Fish1, Fish2, Fish13) will detonate.")]
         public List<string> values = new List<string>() { "Fish" };
 
-        [EditorLabel("Damage settings")]
-        [EditorTooltip("Custom damage setting for the explosion.")]
         public DamageData damageData = new DamageData() { basedOnMaxHealthAndArmor = true, blunt = 70f, chop = 160f, fire = 30f, pickaxe = 160f };
 
-        [EditorLabel("Damage terrain")]
-        [EditorTooltip("Whether the explosion is allowed to dig/scorch terrain. Disabling this avoids the heightmap edit, which helps performance on large detonations.")]
         public bool damageTerrain = true;
 
         public DetonateData() { }

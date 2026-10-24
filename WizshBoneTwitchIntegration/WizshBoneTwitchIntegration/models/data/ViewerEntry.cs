@@ -2,32 +2,24 @@
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
-using WizshBoneTwitchIntegration.GuiOld;
 
 namespace WizshBoneTwitchIntegration.Models
 {
     internal class ViewerEntry : CloneableData
     {
-        [EditorLabel("Viewer Name (lower case only)")]
         public string name;
 
-        [EditorLabel("Creature color")]
-        [EditorTooltip("The color of the creature's main texture in hex format (e.g. #ffffff for white).")]
-        [ColorPicker]
         public string color = "#ffffff";
 
-        [EditorLabel("Creature emission color")]
-        [EditorTooltip("The color of the creature's glow in hex format. Leave empty to use the creature color.")]
-        [ColorPicker]
         public string emissionColor = "";
 
-        [EditorHidden] public List<string> effects = new List<string>();
-        [EditorHidden] public Color parsedColor;
-        [EditorHidden] public Color parsedEmissionColor;
+        public List<string> effects = new List<string>();
+        public Color parsedColor;
+        public Color parsedEmissionColor;
 
         // Read-only legacy key: viewers.yaml used to store the creature color as "color1". It is only
         // ever deserialized (never written back) so MigrateLegacyFields can carry it over to color.
-        [EditorHidden] public string color1;
+        public string color1;
 
         private static readonly HashSet<string> SkippedFields = new HashSet<string>
         {

@@ -6,8 +6,7 @@ using WizshBoneTwitchIntegration.Models;
 namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
-    /// Step-2 form for Windmill ("Windmills of Death") - field set ported from
-    /// <c>models/views/WindmillView.cs</c>'s curation, all 7 fields kept. Implements
+    /// Step-2 form for Windmill ("Windmills of Death") - all 7 fields kept. Implements
     /// <see cref="IForcesValuesOnSave"/> since the prefab is always the dedicated "Windmill_WBTI"
     /// clone, never user-editable. Allow drops/Break on destroy/Ground offset/Snap to terrain and
     /// the Damage tab are hidden (no tabs at all) and only ever set by <see cref="ApplyDefaults"/> -
@@ -98,8 +97,8 @@ namespace WizshBoneTwitchIntegration.Gui
         public void ApplyForcedValues(RedeemData working)
         {
             // Windmill is its own dedicated redeem type, not a name configured through the
-            // generic spawns list - always spawn the lean "Windmill_WBTI" clone, matching
-            // WindmillView's own constructor-forced value.
+            // generic spawns list - always spawn the lean "Windmill_WBTI" clone, same value as
+            // SpawnAbilityNormalizer.Windmill.
             working.spawnAbilityData.spawns = new List<string> { "Windmill_WBTI" };
         }
     }

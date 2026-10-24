@@ -43,8 +43,8 @@ namespace WizshBoneTwitchIntegration.Helpers
         /// reading <see cref="RedeemData.title"/> directly.
         ///
         /// Idempotent against a title that already happens to start with the current prefix (e.g.
-        /// a redeem saved before this method existed, or one created via GUI_OLD, which always
-        /// bakes the prefix into the stored title) - it's stripped first, then re-added exactly
+        /// a redeem saved before this method existed, by an older version that baked the prefix
+        /// into the stored title) - it's stripped first, then re-added exactly
         /// once, so calling this repeatedly or on already-prefixed data never doubles it up.
         /// </summary>
         public static string GetFullTitle(RedeemData redeem)

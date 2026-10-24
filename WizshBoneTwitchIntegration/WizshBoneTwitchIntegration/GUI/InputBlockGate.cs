@@ -10,10 +10,6 @@ namespace WizshBoneTwitchIntegration.Gui
     /// without counting, closing the top one calls BlockInput(false) and unblocks game input even
     /// though the panel underneath is still up. Callers <see cref="Push"/> on show and <see cref="Pop"/>
     /// on hide - input only unblocks once every opener has closed.
-    ///
-    /// This is a separate copy from GUI_OLD/InputBlockGate.cs (its own independent counter) rather
-    /// than a shared one, per the new UI's isolation-from-GUI_OLD constraint - see the round 2 plan
-    /// for the accepted edge case this implies if both GUIs are ever open at once.
     /// </summary>
     internal static class InputBlockGate
     {

@@ -8,7 +8,8 @@ All work is within `WizshBoneTwitchIntegration/` (the C# plugin). The sibling `G
 
 ## Key files and structure
 
-`GUI_OLD/` is legacy (in-game UI panels, opened with F4) and being replaced from scratch — don't add new features there.
+- `GUI/` — the in-game UI (opened with F3 by default).
+- `TwitchApi/` — everything that talks to Twitch: Helix, EventSub, OAuth login, session.
 
 ## How redemptions work
 
@@ -75,7 +76,6 @@ Every finding must be checked against the real source before it is reported, nev
 - Say what was checked and what it showed. If something could not be verified, say so plainly and mark it as unverified; do not present a guess as a defect.
 - Drop a finding if the code shows it cannot happen.
 - Drop a finding if the behavior is intentional or was decided earlier (e.g. documented in a code comment or agreed with the user), and do not list dropped findings in the report. Real but minor findings (cosmetic, UX, a missing toast) are still reported.
-- Drop findings that only affect `GUI_OLD/` (the legacy F4 UI): it is not maintained, so they are neither reported nor fixed.
 - Do not report a style point that matches the surrounding code unless it breaks a rule written in a CLAUDE.md.
 
 ## What NOT to do

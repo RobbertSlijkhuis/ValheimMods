@@ -18,8 +18,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
     /// Redeems tab content - list/toggle/test/copy/delete plus a profile quick-switcher (built
     /// directly against RedesignUI.dc.html's structure, mirroring <see cref="ProfilesTab"/>'s
     /// toolbar/column-header/row patterns), and the create/edit wizard
-    /// (<see cref="RedeemWizard"/>) swapped in over the list the same way
-    /// GUI_OLD/tabs/RedeemsTab.cs swaps its list/create views. Backend calls
+    /// (<see cref="RedeemWizard"/>) swapped in over the list. Backend calls
     /// (<see cref="RedeemManager"/>/<see cref="ProfileManager"/>) are reused unchanged.
     /// </summary>
     internal class RedeemsTab : IShellTabView
@@ -45,7 +44,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         /// <summary>
         /// Wired up by <see cref="WizshBoneShellGUI"/> right after construction (same pattern as
         /// <see cref="HomeTab.OnCreateRedeemRequested"/>) so the Test action can close the whole shell
-        /// panel before running the redeem, matching GUI_OLD's <c>OnTestRedeem</c>.
+        /// panel before running the redeem.
         /// </summary>
         public Action OnCloseRequested;
 
@@ -176,8 +175,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         /// <summary>
         /// Re-populates the row list and profile dropdown. Call whenever the shell re-shows this
         /// tab (redeems/profiles on disk may have changed via sync, the Profiles tab, or another
-        /// session). Doesn't force the wizard closed if it's open - matches GUI_OLD's Refresh(),
-        /// which only ever touched the list view regardless of which sub-view was showing.
+        /// session). Doesn't force the wizard closed if it's open: it only touches the list view
+        /// regardless of which sub-view is showing.
         /// </summary>
         public void Refresh()
         {
@@ -752,7 +751,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private void OnTestRedeem(RedeemData redeem)
         {
             // A background row's Test button is still clickable while these dialogs are open (no
-            // full-screen blocker) - close everything first, matching GUI_OLD's OnTestRedeem, so
+            // full-screen blocker) - close everything first, so
             // nothing is left orphaned on screen holding an outstanding InputBlockGate.Push().
             m_confirmDialog.Hide();
             m_copyRedeemDialog.Hide();

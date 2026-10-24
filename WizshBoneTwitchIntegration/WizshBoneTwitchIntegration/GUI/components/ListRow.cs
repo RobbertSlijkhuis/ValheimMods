@@ -11,9 +11,7 @@ namespace WizshBoneTwitchIntegration.Gui
     /// wiring, action-button factory) - extracted from <see cref="Tabs.ProfilesTab"/>'s row code
     /// once <see cref="Tabs.ViewersTab"/> needed the exact same plumbing. Column layout and cell
     /// content stay bespoke per tab (name text vs. a color swatch vs. a status badge differ enough
-    /// per data model that forcing them through one generic row/column spec just adds indirection -
-    /// see GUI_OLD/components/TabListLayout.cs, which only ever generalized the chrome around a
-    /// list, never the rows themselves).
+    /// per data model that forcing them through one generic row/column spec just adds indirection).
     /// </summary>
     internal static class ListRow
     {

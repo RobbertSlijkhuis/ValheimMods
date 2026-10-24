@@ -4,10 +4,7 @@ namespace WizshBoneTwitchIntegration.Gui
     /// Tracks which column a list/table tab is currently sorted by and in which direction.
     /// One instance per tab, held for as long as the tab stays open - clicking a sortable column
     /// header toggles direction if it's already the active column, or switches to that column
-    /// (ascending) otherwise.
-    ///
-    /// Copy-adapted from GUI_OLD/components/ColumnSortState.cs (new namespace, per the new UI's
-    /// isolation-from-GUI_OLD constraint) - unchanged otherwise, it was already fully generic.
+    /// (ascending) otherwise. Fully generic: it knows nothing about the list it sorts.
     /// </summary>
     internal class ColumnSortState
     {

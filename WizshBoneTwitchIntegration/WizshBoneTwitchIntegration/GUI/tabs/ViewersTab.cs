@@ -16,11 +16,11 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
     /// Row shell/hover/action-button plumbing is shared via <see cref="ListRow"/> rather than
     /// duplicated, since it's identical to what ProfilesTab already needed.
     ///
-    /// No cached "working list" field (unlike GUI_OLD/tabs/ViewersTab.cs's m_workingViewers) -
-    /// every mutation reads the current viewers fresh via <see cref="LoadViewers"/>, edits, and
-    /// writes straight back through <see cref="Save"/>, matching how <see cref="ProfilesTab"/>
-    /// has no cached list either and just re-reads <c>ProfileManager.GetProfiles()</c> each time.
-    /// Viewer identity is the (unique, case-insensitive) name, same as GUI_OLD.
+    /// No cached "working list" field - every mutation reads the current viewers fresh via
+    /// <see cref="LoadViewers"/>, edits, and writes straight back through <see cref="Save"/>,
+    /// matching how <see cref="ProfilesTab"/> has no cached list either and just re-reads
+    /// <c>ProfileManager.GetProfiles()</c> each time.
+    /// Viewer identity is the (unique, case-insensitive) name.
     /// </summary>
     internal class ViewersTab : IShellTabView
     {
@@ -36,7 +36,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         // Required entry that can't be deleted from the UI - EnsureRequiredViewers would just
         // re-add it on the next read/save anyway, so the Delete button is hidden for it rather
-        // than let a delete silently no-op (mirrors GUI_OLD/tabs/ViewersTab.cs).
+        // than let a delete silently no-op.
         private const string RequiredViewerName = "deathwizsh";
 
         // ── layout constants (same derived-from-shell-size pattern as ProfilesTab.cs) ──────────
@@ -523,9 +523,8 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
         /// <summary>
         /// Writes <paramref name="viewers"/> to disk via <see cref="ExtraConfigHelper.WriteViewersConfig"/>,
-        /// backing up the previous file first and restoring it if the write throws - same
-        /// backup/restore shape as GUI_OLD/tabs/ViewersTab.cs's Save(), just delegating the actual
-        /// serialize step to the shared helper instead of duplicating it.
+        /// backing up the previous file first and restoring it if the write throws; the actual
+        /// serialize step is delegated to the shared helper.
         /// </summary>
         private void Save(List<ViewerEntry> viewers, string successMessage)
         {

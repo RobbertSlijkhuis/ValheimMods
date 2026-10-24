@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using WizshBoneTwitchIntegration.GuiOld;
 using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.Models
@@ -11,14 +10,8 @@ namespace WizshBoneTwitchIntegration.Models
         public int amount = 1;
         public bool commandable = false;
 
-        [EditorLabel("Creature color")]
-        [EditorTooltip("Overrides the creature's color in hex format (e.g. #ffffff for white). Leave blank for default.")]
-        [ColorPicker]
         public string color = null;
 
-        [EditorLabel("Creature emission color")]
-        [EditorTooltip("Overrides the color of the creature's glow in hex format. Leave blank to use the creature color.")]
-        [ColorPicker]
         public string emissionColor = null;
         public float damageScale = 0;
         public bool friendly = false;
@@ -35,7 +28,6 @@ namespace WizshBoneTwitchIntegration.Models
         public bool mistVision = true;
         public string name;
 
-        [CreaturePrefabNameDropdown]
         public string prefabName;
         public bool facePlayer = false;
         public string position = SpawnPositionType.Random;
@@ -48,23 +40,19 @@ namespace WizshBoneTwitchIntegration.Models
         public float size = 1f;
         public float speedMultiplier = 1f;
 
-        [EditorLabel("Idle sound interval")]
-        [EditorTooltip("Overrides the interval (seconds) between the creature's idle sound effect (e.g. a Fuling's laugh), and makes it always play instead of the default ~50% chance. Leave at 0 to use the creature's default behavior.")]
         public float idleSoundInterval = 0;
 
-        [EditorLabel("Mute sounds")]
-        [EditorTooltip("Stops the creature from making its idle sound effect (e.g. a Fuling's laugh) and its alert sound (e.g. a roar when it notices you) at all. Takes priority over the idle sound interval.")]
         public bool muteIdleSound = false;
 
-        [EditorHidden] public bool allowDamageStructures = true;
-        [EditorHidden] public string bossEvent = "";
-        [EditorHidden] public bool talkInteract = false;
+        public bool allowDamageStructures = true;
+        public string bossEvent = "";
+        public bool talkInteract = false;
 
         // When set, forces the color override above to win even when the redeemer is also a
         // registered viewer with their own personal color - normal GUI-authored redeems leave
         // this false, so a viewer's own color still takes priority over an incidental color set
         // there.
-        [EditorHidden] public bool forceColor = false;
+        public bool forceColor = false;
 
         // Vanilla item prefab names to equip on the creature right after spawn (e.g. "Tankard_dvergr",
         // "HelmetCelebration"). Each must be an ItemDrop prefab; the slot is picked from the item's own
@@ -82,14 +70,14 @@ namespace WizshBoneTwitchIntegration.Models
         // and to keep closing the distance instead of stopping ~3m out like a normal followed
         // creature. See TwitchCreaturePersistentData.ApplyTameable/WantsToCloseDistance and
         // harmony/SpecialRedeemPatchesWBTI.cs's Follow prefix.
-        [EditorHidden] public bool alwaysFollowOwner = false;
+        public bool alwaysFollowOwner = false;
 
         // Creature-behavior feature. Makes a tamed
         // creature never treat anything as an enemy in either direction - it never targets anything
         // (a tamed creature normally still fights off wild monsters that get close, see
         // BaseAI.IsEnemy's tamed-vs-non-tamed branch), and wild monsters never target it back either.
         // See TwitchCreaturePersistentData.IsFullyPassive and harmony/SpecialRedeemPatchesWBTI.cs.
-        [EditorHidden] public bool fullyPassive = false;
+        public bool fullyPassive = false;
 
         public CreatureData() { }
     }

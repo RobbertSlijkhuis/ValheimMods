@@ -8,9 +8,9 @@ namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
     /// Step-2 form for Meteor (covers both "fader" and "Yagluth" meteor flavors). Includes the
-    /// Meteor type dropdown bound to <c>prefabName</c> (<see cref="MeteorView"/> never exposed it,
-    /// so it was always null - which <see cref="Helpers.SpawnAbilityHelper"/> silently falls back to
-    /// a fish-rain shower prefab for, same class of bug <see cref="RootForm"/> had for
+    /// Meteor type dropdown bound to <c>prefabName</c> (an unset one, which an older editor never
+    /// exposed, made <see cref="Helpers.SpawnAbilityHelper"/> silently fall back to
+    /// a fish-rain shower prefab, same class of bug <see cref="RootForm"/> had for
     /// <c>spawns</c>). Only Meteor type/Accuracy/Announcement + Min/Max + Spawn radius are shown.
     /// Spawn delay is hidden (<see cref="ShowSpawnDelay"/>) and never written by
     /// <see cref="ApplyDefaults"/>, so a fresh redeem keeps the meteor prefab's own delay.

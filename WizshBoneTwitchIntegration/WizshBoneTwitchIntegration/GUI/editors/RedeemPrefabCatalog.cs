@@ -10,10 +10,9 @@ namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
     /// Every live-scanned option list the redeem wizard's step-2 forms need, built eagerly once at
-    /// a safe lifecycle moment instead of lazily on first GUI access - GUI_OLD/editors/
-    /// FieldUIBuilder.cs's per-call-site lazy-cache pattern (scan on first access, guarded only by
-    /// a null check) is deliberately not reused here, since opening the GUI before the scene/world
-    /// is fully populated could permanently cache an incomplete or empty result.
+    /// a safe lifecycle moment instead of lazily on first GUI access (a lazy cache guarded only by
+    /// a null check is deliberately not used here, since opening the GUI before the scene/world
+    /// is fully populated could permanently cache an incomplete or empty result).
     ///
     /// Prefab-registry scans (<see cref="CreaturePrefabs"/>/<see cref="DoorPrefabs"/>/
     /// <see cref="PlaceablePieces"/>/<see cref="LogPrefabs"/>/<see cref="StatusEffects"/>) populate
@@ -102,8 +101,7 @@ namespace WizshBoneTwitchIntegration.Gui
         private static bool s_weatherBuilt;
 
         // Log prefabs have no shared identifying component to scan for (unlike Door/Humanoid+
-        // MonsterAI), so this is a curated candidate list - ported as-is from GUI_OLD/editors/
-        // FieldUIBuilder.cs's own LogPrefabCandidates - filtered to prefabs that actually resolve.
+        // MonsterAI), so this is a curated candidate list, filtered to prefabs that actually resolve.
         private static readonly string[] LogPrefabCandidates =
         {
             "beech_log_half", "PineTree_log_half", "SwampTree1_log", "FirTree_log_half",
@@ -112,8 +110,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         /// <summary>
         /// Selected value in a log-prefab checklist meaning "replace the selection with the 8
-        /// default per-biome logs and switch to biome-based selection" - ported from GUI_OLD's
-        /// FieldUIBuilder.BiomeSpecificSentinel, used by LogRainForm.
+        /// default per-biome logs and switch to biome-based selection", used by LogRainForm.
         /// </summary>
         public const string BiomeSpecificSentinel = "Biome specific (sets 8 default per-biome logs)";
 
@@ -277,7 +274,7 @@ namespace WizshBoneTwitchIntegration.Gui
 
         /// <summary>
         /// Every prefab reachable from a build tool's piece list (Hammer, Cultivator, Hoe, artisan
-        /// tables, ...) - ported from GUI_OLD/editors/FieldUIBuilder.cs's GetPlaceablePrefabNames.
+        /// tables, ...).
         /// </summary>
         private static HashSet<string> GetPlaceablePrefabNames()
         {
@@ -412,7 +409,7 @@ namespace WizshBoneTwitchIntegration.Gui
         /// Returns <paramref name="options"/> with <paramref name="currentValue"/> added in
         /// (sorted) if it's missing, so a saved value the live scan doesn't currently produce (a
         /// renamed/removed prefab, or a value from another mod) still displays instead of silently
-        /// disappearing. Ported from GUI_OLD/editors/FieldUIBuilder.cs's method of the same name.
+        /// disappearing.
         /// </summary>
         public static List<DropdownOption> EnsureIncludesCurrentValue(List<DropdownOption> options, string currentValue)
         {

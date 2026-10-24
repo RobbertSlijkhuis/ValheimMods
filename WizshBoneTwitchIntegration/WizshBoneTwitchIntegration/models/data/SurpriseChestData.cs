@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using WizshBoneTwitchIntegration.GuiOld;
 using WizshBoneTwitchIntegration.Types;
 
 namespace WizshBoneTwitchIntegration.Models
@@ -10,11 +9,11 @@ namespace WizshBoneTwitchIntegration.Models
         public string announceMessage;
         public bool facePlayer = true;
         public float force = 200f;
-        [EditorHidden] public bool interact = true;
+        public bool interact = true;
         public List<SurpriseChestSpawnData> items = new List<SurpriseChestSpawnData>();
-        [EditorHidden] public int mimicChance = 0;
-        [EditorHidden] public string position = SpawnPositionType.Random;
-        [EditorHidden] public PositionOffsetData positionOffset = new PositionOffsetData();
+        public int mimicChance = 0;
+        public string position = SpawnPositionType.Random;
+        public PositionOffsetData positionOffset = new PositionOffsetData();
         public bool random = true;
         public string redeemTitle;
         public float spawnDelay = 0.7f;

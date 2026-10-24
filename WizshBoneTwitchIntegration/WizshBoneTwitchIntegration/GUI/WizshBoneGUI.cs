@@ -11,9 +11,8 @@ namespace WizshBoneTwitchIntegration.Gui
     /// <c>Game.instance.gameObject</c> alongside TwitchAuth/TwitchCustomRewards/etc. (see
     /// harmony/LoginPatchesWBTI.cs), toggled by F3 (see WizshBoneTwitchIntegration.cs).
     ///
-    /// Deliberately does not add a callback field on <see cref="TwitchAuth"/> (unlike GUI_OLD's
-    /// TwitchAuth.m_settingsGUI) - looks up its own dependencies via GetComponent and polls auth
-    /// state each visible frame instead, so components/TwitchAuth.cs stays untouched by this round.
+    /// Deliberately does not add a callback field on <see cref="TwitchAuth"/> - looks up its own
+    /// dependencies via GetComponent and polls auth state each visible frame instead.
     ///
     /// For the same "GUI pulls from TwitchAuth rather than TwitchAuth pushing into GUI" reason,
     /// this also owns the always-on corner status HUD (<see cref="WizshBoneHUD"/>) and the

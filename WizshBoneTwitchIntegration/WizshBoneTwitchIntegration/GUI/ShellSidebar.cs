@@ -11,9 +11,6 @@ namespace WizshBoneTwitchIntegration.Gui
     /// Left sidebar: the WizshBone logo image, two labeled nav groups (matching RedesignUI.dc.html) -
     /// "General" (Home/Profiles/Viewers/Help) and a dynamic "Profile: {activeProfileName}"
     /// group (Redeems/Settings/Creature groups) - and a Close button pinned to the bottom.
-    /// GUI_OLD/WizshBoneSettingsGUI.cs uses a horizontal tab-button row with no grouping instead
-    /// of a vertical sidebar, so this layout is new; the active/inactive button-color idiom is
-    /// ported from its SetTabButtonColor.
     ///
     /// <see cref="ShellTabExtensions.All"/> stays the canonical tab set/order for tab-root
     /// construction in <see cref="WizshBoneShellGUI"/> - only this sidebar's *rendering*

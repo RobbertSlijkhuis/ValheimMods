@@ -12,15 +12,12 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 {
     /// <summary>
     /// Settings tab content - built directly against RedesignUI.dc.html's structure: a title +
-    /// one scrollable body (mirrors GUI_OLD/tabs/RulesTab.cs's shape) holding 6 sections in a
+    /// one scrollable body holding 6 sections in a
     /// fixed order (Redeems, Chatting, Creatures, Indestructible, Safezones, Status HUD), each a header
     /// followed by 1- or 2-column field cards. Every field writes straight through
     /// ProfileSettingsHelper.Current + <see cref="ProfileSettingsPersistHelper.Persist"/> on
-    /// change, same as GUI_OLD's per-field RulesSettingsViewHelper.Persist() calls - no Save
-    /// button. Hand-wired per field via <see cref="GuiFieldBuilder"/>'s generic widgets rather
-    /// than GUI_OLD/editors/ObjectEditor's reflection dispatcher, which stays deferred to
-    /// whichever round edits RedeemData/CreatureData (see the round-2 "field widget factory"
-    /// decision). Fields the mockup doesn't show (chattingCullingRange, wardPushForce, the
+    /// change - no Save button. Hand-wired per field via <see cref="GuiFieldBuilder"/>'s generic
+    /// widgets (no reflection over the settings object). Fields the mockup doesn't show (chattingCullingRange, wardPushForce, the
     /// allowRedeemsOnBoats) are intentionally omitted, matching the mockup. The Status HUD section
     /// is not in the mockup - it was dropped by mistake and re-added so the HUD position stays
     /// configurable.

@@ -8,10 +8,6 @@ namespace WizshBoneTwitchIntegration.Gui
     /// <summary>
     /// A reusable modal confirmation panel built on top of a Valheim wood panel.
     /// Shown via <see cref="Show"/> and dismissed automatically when either button is pressed.
-    ///
-    /// Copy-adapted from GUI_OLD/dialogs/ConfirmDialog.cs (new namespace, uses this folder's own
-    /// <see cref="InputBlockGate"/>) rather than referenced directly, per the new UI's isolation
-    /// constraint.
     /// </summary>
     internal class ConfirmDialog
     {

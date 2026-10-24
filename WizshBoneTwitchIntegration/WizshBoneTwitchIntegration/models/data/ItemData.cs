@@ -1,4 +1,3 @@
-using WizshBoneTwitchIntegration.GuiOld;
 
 namespace WizshBoneTwitchIntegration.Models
 {
@@ -14,7 +13,7 @@ namespace WizshBoneTwitchIntegration.Models
 
         // Read-only legacy key: "amount" used to be called "stackSize". It is only ever deserialized
         // (null is never written back) so ProfileMigrationHelper can carry it over to amount.
-        [EditorHidden] public int? stackSize;
+        public int? stackSize;
 
         public ItemData() { }
     }

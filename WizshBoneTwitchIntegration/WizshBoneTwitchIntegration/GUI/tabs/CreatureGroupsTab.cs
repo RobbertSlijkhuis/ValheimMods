@@ -3,8 +3,10 @@ using UnityEngine;
 namespace WizshBoneTwitchIntegration.Gui.Tabs
 {
     /// <summary>
-    /// Creature groups tab content. Stub for now - real content (creature group list/editor,
-    /// mirroring GUI_OLD/tabs/CreatureGroupsTab.cs) is future rounds' scope.
+    /// Creature groups tab content. Stub for now - real content (creature group list/editor) is
+    /// future rounds' scope, and until then creature groups cannot be edited in game. The editor of
+    /// the old UI is in git history: look at the last commit that still contains
+    /// GUI_OLD/tabs/CreatureGroupsTab.cs.
     /// </summary>
     internal class CreatureGroupsTab : IShellTabView
     {

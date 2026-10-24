@@ -8,9 +8,8 @@ namespace WizshBoneTwitchIntegration.Gui
 {
     /// <summary>
     /// Bottom-right stack of auto-dismissing feedback messages, matching RedesignUI.dc.html's
-    /// toast pattern. Nothing like this exists in GUI_OLD (its tabs just overwrite a static
-    /// feedback <see cref="Text"/>), so this is new infrastructure, not a port - built as shared
-    /// GUI/ infra since every planned tab's mockup leans on the same pattern, not just Profiles.
+    /// toast pattern. Built as shared GUI/ infra since every tab's mockup leans on the same pattern,
+    /// not just Profiles.
     /// </summary>
     internal enum ToastType
     {
