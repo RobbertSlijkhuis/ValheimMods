@@ -17,5 +17,11 @@
         public RecipeSnapShot EmblaHelmetRecipe;
         public RecipeSnapShot EmblaChestRecipe;
         public RecipeSnapShot EmblaLegsRecipe;
+
+        // The Caller
+        public UpdateItemDropStatsOptions CallerHelmetStats;
+        public UpdateItemDropStatsOptions CallerCapeStats;
+        public UpdateItemDropStatsOptions CallerChestStats;
+        public UpdateItemDropStatsOptions CallerLegsStats;
     }
 }

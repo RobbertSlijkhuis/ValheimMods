@@ -9,6 +9,9 @@ namespace ModularMagic_Armors.Models
         public string sectionName;
         public string recipeName;
 
+        // False for vanilla items whose recipe must stay as the game has it: no recipe, station or enable entries are generated then
+        public bool manageRecipe = true;
+
         public bool enable = true;
         public string name;
         public string? description;
@@ -42,6 +45,11 @@ namespace ModularMagic_Armors.Models
             this.recipeUpgrade = recipeUpgrade;
             magicStatusEffectName = $"{prefab.name}MagicStatusEffect";
             cooldownStatusEffectName = $"{prefab.name}CooldownStatusEffect";
+        }
+
+        public ArmorConfigOptions(GameObject prefab, string name) : this(prefab, name, "", "")
+        {
+            manageRecipe = false;
         }
     }
 }

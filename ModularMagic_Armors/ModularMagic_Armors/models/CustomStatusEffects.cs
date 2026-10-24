@@ -8,5 +8,6 @@
         public StatusEffect DarkWizardArmorSetSE;
         public StatusEffect EitrWeaveArmorSetSE;
         public StatusEffect EmblaArmorSetSE;
+        public StatusEffect CallerArmorSetSE;
     }
 }

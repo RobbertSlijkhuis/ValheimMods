@@ -125,6 +125,19 @@ namespace ModularMagic_Armors.Configs
         public static string armor6LegsRecipeUpgrade = "LinenThread:10, Eitr:5";
         public static ArmorConfig armor6Legs = new ArmorConfig();
 
+        // The Caller. The stats are the Embla ones for now (the cape has no Embla equivalent), the recipes (made with moulds) are not configurable and stay vanilla
+        public static string armor7HelmetName = "Headdress of the Caller";
+        public static ArmorConfig armor7Helmet = new ArmorConfig();
+
+        public static string armor7CapeName = "Cape of the Caller";
+        public static ArmorConfig armor7Cape = new ArmorConfig();
+
+        public static string armor7ChestName = "Robes of the Caller";
+        public static ArmorConfig armor7Chest = new ArmorConfig();
+
+        public static string armor7LegsName = "Trousers of the Caller";
+        public static ArmorConfig armor7Legs = new ArmorConfig();
+
         // Spell books. The recipes of the upgrade chain are made in InitSpellbookConfig, because they use the prefab names
         public static string spellbook1Name = "Spellbook of the Hearth";
         public static string spellbook1Recipe = "Bronze:4, TrollHide:6, Resin:8, Coal:10";
@@ -155,6 +168,7 @@ namespace ModularMagic_Armors.Configs
         public static string generalSectionname = "General";
         public static ConfigEntry<bool> adjustEitrWeave;
         public static ConfigEntry<bool> adjustEmbla;
+        public static ConfigEntry<bool> adjustCaller;
         public static ConfigEntry<bool> darkWizardFootsteps;
         public static ConfigEntry<KeyboardShortcut> lanternKey;
 
@@ -231,6 +245,39 @@ namespace ModularMagic_Armors.Configs
                     armor6Helmet.ShowConfig(adjustEmbla.Value);
                     armor6Chest.ShowConfig(adjustEmbla.Value);
                     armor6Legs.ShowConfig(adjustEmbla.Value, true);
+                };
+
+                adjustCaller = ModularMagic_Armors.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "Adjust The Caller set"), true,
+                  new ConfigDescription("Adjust The Caller set (Deep North mage armor) to be in line with the rest. Will apply the set bonus effect and config settings. If disabled the set will be as vanilla.", null,
+                  new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 5 }));
+                adjustCaller.SettingChanged += (obj, attr) =>
+                {
+                    if (adjustCaller.Value)
+                    {
+                        ArmorSetOptions armorSetOptions = new ArmorSetOptions()
+                        {
+                            name = "CallerSet_MMA",
+                            size = 4,
+                            statusEffect = ModularMagic_Armors.Instance.effects.CallerArmorSetSE,
+                        };
+
+                        ItemHelper.Adjust(ModularMagic_Armors.Instance.prefabs.CallerHelmetPrefab, armor7Helmet, armorSetOptions);
+                        ItemHelper.Adjust(ModularMagic_Armors.Instance.prefabs.CallerCapePrefab, armor7Cape, armorSetOptions);
+                        ItemHelper.Adjust(ModularMagic_Armors.Instance.prefabs.CallerChestPrefab, armor7Chest, armorSetOptions);
+                        ItemHelper.Adjust(ModularMagic_Armors.Instance.prefabs.CallerLegsPrefab, armor7Legs, armorSetOptions);
+                    }
+                    else
+                    {
+                        ItemHelper.ResetToVanilla(ModularMagic_Armors.Instance.prefabs.CallerHelmetPrefab, ModularMagic_Armors.Instance.itemSnapShots.CallerHelmetStats, null);
+                        ItemHelper.ResetToVanilla(ModularMagic_Armors.Instance.prefabs.CallerCapePrefab, ModularMagic_Armors.Instance.itemSnapShots.CallerCapeStats, null);
+                        ItemHelper.ResetToVanilla(ModularMagic_Armors.Instance.prefabs.CallerChestPrefab, ModularMagic_Armors.Instance.itemSnapShots.CallerChestStats, null);
+                        ItemHelper.ResetToVanilla(ModularMagic_Armors.Instance.prefabs.CallerLegsPrefab, ModularMagic_Armors.Instance.itemSnapShots.CallerLegsStats, null);
+                    }
+
+                    armor7Helmet.ShowConfig(adjustCaller.Value);
+                    armor7Cape.ShowConfig(adjustCaller.Value);
+                    armor7Chest.ShowConfig(adjustCaller.Value);
+                    armor7Legs.ShowConfig(adjustCaller.Value, true);
                 };
 
                 darkWizardFootsteps = ModularMagic_Armors.Instance.Config.Bind(new ConfigDefinition(generalSectionname, "DarkWizard footstep flames"), true,
@@ -580,6 +627,65 @@ namespace ModularMagic_Armors.Configs
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not initialise " + armor6HelmetName + " config: " + e);
+            }
+        }
+
+        // The descriptions are the vanilla ones, so the pieces keep their own texts until the setting is changed
+        public static void InitArmor7Config(bool browsable = true)
+        {
+            try
+            {
+                ItemSnapShots snapShots = ModularMagic_Armors.Instance.itemSnapShots;
+
+                ArmorConfigOptions optionsHelmet = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.CallerHelmetPrefab, armor7HelmetName)
+                {
+                    description = snapShots.CallerHelmetStats?.description ?? "",
+                    armor = 22,
+                    eitr = 15f,
+                    eitrRegen = 0.4f,
+                };
+                armor7Helmet = new ArmorConfig(browsable);
+                armor7Helmet.GenerateConfig(optionsHelmet);
+
+                ArmorConfigOptions optionsCape = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.CallerCapePrefab, armor7CapeName)
+                {
+                    description = snapShots.CallerCapeStats?.description ?? "",
+                    armor = 12,
+                    maxDurability = 1200f,
+                    weight = 4f,
+                    eitr = 15f,
+                    eitrRegen = 0.2f,
+                };
+                armor7Cape = new ArmorConfig(browsable);
+                armor7Cape.GenerateConfig(optionsCape);
+
+                ArmorConfigOptions optionsChest = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.CallerChestPrefab, armor7ChestName)
+                {
+                    description = snapShots.CallerChestStats?.description ?? "",
+                    armor = 22,
+                    weight = 5f,
+                    movementSpeed = -0.02f,
+                    eitr = 15f,
+                    eitrRegen = 0.6f,
+                };
+                armor7Chest = new ArmorConfig(browsable);
+                armor7Chest.GenerateConfig(optionsChest);
+
+                ArmorConfigOptions optionsLegs = new ArmorConfigOptions(ModularMagic_Armors.Instance.prefabs.CallerLegsPrefab, armor7LegsName)
+                {
+                    description = snapShots.CallerLegsStats?.description ?? "",
+                    armor = 22,
+                    weight = 5f,
+                    movementSpeed = -0.02f,
+                    eitr = 15f,
+                    eitrRegen = 0.6f,
+                };
+                armor7Legs = new ArmorConfig(browsable);
+                armor7Legs.GenerateConfig(optionsLegs);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + armor7HelmetName + " config: " + e);
             }
         }
 

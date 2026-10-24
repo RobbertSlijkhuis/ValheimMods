@@ -76,6 +76,10 @@ namespace ModularMagic_Armors.Helpers
                 eitrRegen = config.eitrRegen.Value,
             });
 
+            // No recipe entries means the recipe of the item is left alone
+            if (config.recipe == null)
+                return;
+
             RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
             {
                 prefab = prefab,
@@ -106,6 +110,9 @@ namespace ModularMagic_Armors.Helpers
                 movementSpeed = options.movementSpeed,
                 eitrRegen = options.eitrRegen,
             });
+
+            if (recipe == null)
+                return;
 
             RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
             {

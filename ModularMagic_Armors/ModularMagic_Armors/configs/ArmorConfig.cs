@@ -85,20 +85,23 @@ namespace ModularMagic_Armors.Configs
             cooldownStatusEffectName = options.cooldownStatusEffectName;
             magicStatusEffectName = options.magicStatusEffectName;
 
-            enable = Config.Bind(new ConfigDefinition(options.sectionName, "Enable"), options.enable,
-                new ConfigDescription("Wether the recipe for this item is enabled", null,
-                enableAttributes));
-            enable.SettingChanged += (obj, attr) =>
+            if (options.manageRecipe)
             {
-                Jotunn.Logger.LogInfo(options.recipeName);
-                RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
+                enable = Config.Bind(new ConfigDefinition(options.sectionName, "Enable"), options.enable,
+                    new ConfigDescription("Wether the recipe for this item is enabled", null,
+                    enableAttributes));
+                enable.SettingChanged += (obj, attr) =>
                 {
-                    prefab = options.prefab,
-                    name = options.recipeName,
-                    updateType = RecipeUpdateType.ENABLE,
-                    enable = enable.Value,
-                });
-            };
+                    Jotunn.Logger.LogInfo(options.recipeName);
+                    RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
+                    {
+                        prefab = options.prefab,
+                        name = options.recipeName,
+                        updateType = RecipeUpdateType.ENABLE,
+                        enable = enable.Value,
+                    });
+                };
+            }
 
             name = Config.Bind(new ConfigDefinition(options.sectionName, "Name"), options.name,
                 new ConfigDescription("The name of the item", null,
@@ -122,80 +125,83 @@ namespace ModularMagic_Armors.Configs
                 });
             }; ;
 
-            craftingStation = Config.Bind(new ConfigDefinition(options.sectionName, "Crafting station"), options.craftingStation,
-                new ConfigDescription("The crafting station the item can be crafted in",
-                new AcceptableValueList<string>(craftingStationOptions),
-                craftingStationAttributes));
-            craftingStation.SettingChanged += (obj, attr) =>
+            if (options.manageRecipe)
             {
-                RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
+                craftingStation = Config.Bind(new ConfigDefinition(options.sectionName, "Crafting station"), options.craftingStation,
+                    new ConfigDescription("The crafting station the item can be crafted in",
+                    new AcceptableValueList<string>(craftingStationOptions),
+                    craftingStationAttributes));
+                craftingStation.SettingChanged += (obj, attr) =>
                 {
-                    prefab = options.prefab,
-                    name = options.recipeName,
-                    updateType = RecipeUpdateType.CRAFTINGSTATION,
-                    craftingStation = craftingStation.Value,
-                });
-            };
+                    RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
+                    {
+                        prefab = options.prefab,
+                        name = options.recipeName,
+                        updateType = RecipeUpdateType.CRAFTINGSTATION,
+                        craftingStation = craftingStation.Value,
+                    });
+                };
 
-            minStationLevel = Config.Bind(new ConfigDefinition(options.sectionName, "Required station level"), options.minStationLevel,
-                new ConfigDescription("The required station level to craft this item", null,
-                minStationLevelAttributes));
-            minStationLevel.SettingChanged += (obj, attr) =>
-            {
-                RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
+                minStationLevel = Config.Bind(new ConfigDefinition(options.sectionName, "Required station level"), options.minStationLevel,
+                    new ConfigDescription("The required station level to craft this item", null,
+                    minStationLevelAttributes));
+                minStationLevel.SettingChanged += (obj, attr) =>
                 {
-                    prefab = options.prefab,
-                    name = options.recipeName,
-                    updateType = RecipeUpdateType.MINREQUIREDSTATIONLEVEL,
-                    requiredStationLevel = minStationLevel.Value,
-                });
-            };
+                    RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
+                    {
+                        prefab = options.prefab,
+                        name = options.recipeName,
+                        updateType = RecipeUpdateType.MINREQUIREDSTATIONLEVEL,
+                        requiredStationLevel = minStationLevel.Value,
+                    });
+                };
 
-            recipe = Config.Bind(new ConfigDefinition(options.sectionName, "Recipe"), options.recipe,
-                new ConfigDescription("The items required to craft this item", null,
-                recipeAttributes));
-            recipe.SettingChanged += (obj, attr) =>
-            {
-                RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
+                recipe = Config.Bind(new ConfigDefinition(options.sectionName, "Recipe"), options.recipe,
+                    new ConfigDescription("The items required to craft this item", null,
+                    recipeAttributes));
+                recipe.SettingChanged += (obj, attr) =>
                 {
-                    prefab = options.prefab,
-                    name = options.recipeName,
-                    updateType = RecipeUpdateType.RECIPE,
-                    requirements = recipe.Value,
-                });
-            };
+                    RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
+                    {
+                        prefab = options.prefab,
+                        name = options.recipeName,
+                        updateType = RecipeUpdateType.RECIPE,
+                        requirements = recipe.Value,
+                    });
+                };
 
-            recipeUpgrade = Config.Bind(new ConfigDefinition(options.sectionName, "Upgrade recipe"), options.recipeUpgrade,
-                new ConfigDescription("The items required to upgrade this item", null,
-                recipeUpgradeAttributes));
-            recipeUpgrade.SettingChanged += (obj, attr) =>
-            {
-                RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
+                recipeUpgrade = Config.Bind(new ConfigDefinition(options.sectionName, "Upgrade recipe"), options.recipeUpgrade,
+                    new ConfigDescription("The items required to upgrade this item", null,
+                    recipeUpgradeAttributes));
+                recipeUpgrade.SettingChanged += (obj, attr) =>
                 {
-                    prefab = options.prefab,
-                    name = options.recipeName,
-                    updateType = RecipeUpdateType.RECIPE,
-                    requirements = recipe.Value,
-                    upgradeRequirements = recipeUpgrade.Value,
-                    upgradeMultiplier = recipeMultiplier.Value,
-                });
-            };
+                    RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
+                    {
+                        prefab = options.prefab,
+                        name = options.recipeName,
+                        updateType = RecipeUpdateType.RECIPE,
+                        requirements = recipe.Value,
+                        upgradeRequirements = recipeUpgrade.Value,
+                        upgradeMultiplier = recipeMultiplier.Value,
+                    });
+                };
 
-            recipeMultiplier = Config.Bind(new ConfigDefinition(options.sectionName, "Upgrade recipe multiplier"), options.recipeMultiplier,
-                new ConfigDescription("The multiplier applied to the upgrade costs", null,
-                recipeMultiplierAttributes));
-            recipeMultiplier.SettingChanged += (obj, attr) =>
-            {
-                RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
+                recipeMultiplier = Config.Bind(new ConfigDefinition(options.sectionName, "Upgrade recipe multiplier"), options.recipeMultiplier,
+                    new ConfigDescription("The multiplier applied to the upgrade costs", null,
+                    recipeMultiplierAttributes));
+                recipeMultiplier.SettingChanged += (obj, attr) =>
                 {
-                    prefab = options.prefab,
-                    name = options.recipeName,
-                    updateType = RecipeUpdateType.RECIPE,
-                    requirements = recipe.Value,
-                    upgradeRequirements = recipeUpgrade.Value,
-                    upgradeMultiplier = recipeMultiplier.Value,
-                });
-            };
+                    RecipeHelper.UpdateRecipe(new UpdateRecipeOptions()
+                    {
+                        prefab = options.prefab,
+                        name = options.recipeName,
+                        updateType = RecipeUpdateType.RECIPE,
+                        requirements = recipe.Value,
+                        upgradeRequirements = recipeUpgrade.Value,
+                        upgradeMultiplier = recipeMultiplier.Value,
+                    });
+                };
+            }
 
             armor = Config.Bind(new ConfigDefinition(options.sectionName, "Armor"), options.armor,
                 new ConfigDescription("The armor of the item", null,

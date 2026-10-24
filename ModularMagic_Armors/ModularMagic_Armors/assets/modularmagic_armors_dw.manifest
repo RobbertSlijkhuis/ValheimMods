@@ -1,16 +1,16 @@
 ManifestFileVersion: 0
 UnityVersion: 6000.0.75f1
-CRC: 1223214828
+CRC: 1656928512
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 06105637772aea88a514ebc572995cdf
+    Hash: 19268f8400bc61582afd92e6fabc4533
   TypeTreeHash:
     serializedVersion: 2
     Hash: 6a2e3aab6861d01bc900a9f14e751445
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 8561d2755f6ed2554e0a014dbc53efa8
+    Hash: 2a5b85986ed10bfd075bb37f66c7ff45
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -205,6 +205,7 @@ Assets:
 - Assets/Custom/PrefabInstance/Armor/FrostWolf/MMA_FrostWolfHelmet.prefab
 - Assets/Custom/Material/Lanterns/MythicalLanternMat_Off_MMA.mat
 - Assets/Custom/MonoBehaviour/Armor/SetEffect_DarkWizardArmor_MMA.asset
+- Assets/Custom/MonoBehaviour/Armor/SetEffect_CallerArmor_MMA.asset
 - Assets/Custom/PrefabInstance/Armor/Wraith/MMA_WraithLegs.prefab
 - Assets/Custom/PrefabInstance/Armor/DarkWizard/MMA_DarkWizardCape.prefab
 - Assets/Custom/PrefabInstance/Armor/FrostWolf/MMA_FrostWolfCape.prefab

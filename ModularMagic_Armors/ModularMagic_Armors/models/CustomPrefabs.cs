@@ -40,6 +40,12 @@ namespace ModularMagic_Armors.Models
         public GameObject EmblaLegsPrefab;
         public GameObject EmblaEffects;
 
+        // The Caller (Deep North mage set)
+        public GameObject CallerHelmetPrefab;
+        public GameObject CallerCapePrefab;
+        public GameObject CallerChestPrefab;
+        public GameObject CallerLegsPrefab;
+
         // Spell books
         public GameObject SpellbookHearthPrefab;
         public GameObject SpellbookStormPrefab;

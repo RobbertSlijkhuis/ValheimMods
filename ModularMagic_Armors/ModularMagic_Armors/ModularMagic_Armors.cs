@@ -1,5 +1,4 @@
 using BepInEx;
-using Jotunn;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
@@ -7,7 +6,6 @@ using ModularMagic_Armors.Configs;
 using ModularMagic_Armors.Helpers;
 using ModularMagic_Armors.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -20,8 +18,6 @@ namespace ModularMagic_Armors
     [NetworkCompatibility(CompatibilityLevel.ClientMustHaveMod, VersionStrictness.Minor)]
     internal class ModularMagic_Armors : BaseUnityPlugin
     {
-        // ADD FROST RESITANCE TO DARKWIZARD CLOAK, OR FREEZE TO DEATH IN MOUNTAINS
-
         public const string PluginGUID = "DeathWizsh.ModularMagic_Armors";
         public const string PluginName = "ModularMagic_Armors";
         public const string PluginVersion = "0.0.1";
@@ -63,9 +59,10 @@ namespace ModularMagic_Armors
             PrefabManager.OnVanillaPrefabsAvailable += AddFrostWolfArmor;
             PrefabManager.OnVanillaPrefabsAvailable += AddDarkWizardArmor;
             PrefabManager.OnVanillaPrefabsAvailable += ApplyEffectsEmblaArmor;
+            PrefabManager.OnVanillaPrefabsAvailable += FindCallerArmor;
             ItemManager.OnItemsRegistered += AdjustEitrWeaveArmor;
             ItemManager.OnItemsRegistered += AdjustEmblaArmor;
-            // ItemManager.OnItemsRegistered += LogRecipes;
+            ItemManager.OnItemsRegistered += AdjustCallerArmor;
         }
 
         // Polled here and not in a Player.Update patch: Jotunn buttons are read from the plugin's own Update
@@ -85,17 +82,6 @@ namespace ModularMagic_Armors
         {
             configManager?.GetType().GetMethod("BuildSettingList")!.Invoke(configManager, Array.Empty<object>());
         }
-
-        //private void LogRecipes()
-        //{
-        //    ObjectDB.instance.m_recipes.ForEach(r =>
-        //    {
-        //        if (r.name.Contains("MMA"))
-        //            Jotunn.Logger.LogInfo(r.name);
-        //    });
-
-        //    ItemManager.OnItemsRegistered -= LogRecipes;
-        //}
 
         private void AddShamanArmor()
         {
@@ -269,6 +255,53 @@ namespace ModularMagic_Armors
             EmblaHelper.InjectEffects(prefabs);
         }
 
+        private void FindCallerArmor()
+        {
+            PrefabManager.OnVanillaPrefabsAvailable -= FindCallerArmor;
+
+            prefabs.CallerHelmetPrefab = PrefabManager.Instance.GetPrefab("HelmetDNMage");
+            prefabs.CallerCapePrefab = PrefabManager.Instance.GetPrefab("CapeDeepNorthMage");
+            prefabs.CallerChestPrefab = PrefabManager.Instance.GetPrefab("ArmorDeepNorthMageChest");
+            prefabs.CallerLegsPrefab = PrefabManager.Instance.GetPrefab("ArmorDeepNorthMagelegs");
+        }
+
+        private void AdjustCallerArmor()
+        {
+            ItemManager.OnItemsRegistered -= AdjustCallerArmor;
+
+            if (prefabs.CallerHelmetPrefab == null || prefabs.CallerCapePrefab == null || prefabs.CallerChestPrefab == null || prefabs.CallerLegsPrefab == null)
+            {
+                Jotunn.Logger.LogWarning("[Caller] A prefab of the set was not found, the set is left as vanilla");
+                return;
+            }
+
+            // The recipes (made with moulds) stay vanilla, so only the stats are snapshotted. Vanilla prefab edits persist for the whole session, so a snapshot must never be taken from an already adjusted prefab
+            if (itemSnapShots.CallerHelmetStats == null)
+            {
+                itemSnapShots.CallerHelmetStats = UpdateHelper.TakeSnapShot(prefabs.CallerHelmetPrefab);
+                itemSnapShots.CallerCapeStats = UpdateHelper.TakeSnapShot(prefabs.CallerCapePrefab);
+                itemSnapShots.CallerChestStats = UpdateHelper.TakeSnapShot(prefabs.CallerChestPrefab);
+                itemSnapShots.CallerLegsStats = UpdateHelper.TakeSnapShot(prefabs.CallerLegsPrefab);
+            }
+
+            PluginConfig.InitArmor7Config(PluginConfig.adjustCaller.Value);
+
+            if (!PluginConfig.adjustCaller.Value)
+                return;
+
+            ArmorSetOptions armorSetOptions = new ArmorSetOptions()
+            {
+                name = "CallerSet_MMA",
+                size = 4,
+                statusEffect = effects.CallerArmorSetSE,
+            };
+
+            ItemHelper.Adjust(prefabs.CallerHelmetPrefab, PluginConfig.armor7Helmet, armorSetOptions);
+            ItemHelper.Adjust(prefabs.CallerCapePrefab, PluginConfig.armor7Cape, armorSetOptions);
+            ItemHelper.Adjust(prefabs.CallerChestPrefab, PluginConfig.armor7Chest, armorSetOptions);
+            ItemHelper.Adjust(prefabs.CallerLegsPrefab, PluginConfig.armor7Legs, armorSetOptions);
+        }
+
         private void InitStatusEffects()
         {
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.ShamanArmorSetSE, true));
@@ -278,6 +311,7 @@ namespace ModularMagic_Armors
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.EitrWeaveArmorSetSE, true));
             effects.EmblaArmorSetSE.m_icon = sprites.EmblaHood;
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.EmblaArmorSetSE, true));
+            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.CallerArmorSetSE, true));
         }
 
         /**
@@ -337,6 +371,9 @@ namespace ModularMagic_Armors
             prefabs.EmblaEffects = assetBundle.LoadAsset<GameObject>("EmblaHood_Effects_MMA");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.EmblaEffects, true));
             effects.EmblaArmorSetSE = assetBundle.LoadAsset<StatusEffect>("SetEffect_EmblaArmor_MMA");
+
+            // The Caller armor
+            effects.CallerArmorSetSE = assetBundle.LoadAsset<StatusEffect>("SetEffect_CallerArmor_MMA");
 
             // Spell books
             prefabs.SpellbookHearthPrefab = assetBundle.LoadAsset<GameObject>("MMA_SpellbookOfTheHearth");
