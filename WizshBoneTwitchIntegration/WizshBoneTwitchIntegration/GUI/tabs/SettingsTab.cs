@@ -119,7 +119,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             BuildIndestructibleSection();
             BuildSafezonesSection();
             BuildHudSection();
-            BuildDeathCounterSection();
+            BuildDeathsSection();
 
             ScrollableList.SetContentHeight(m_scrollContent, Mathf.Abs(m_cursorY));
         }
@@ -210,11 +210,11 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                     Defaults.hudOffsetY));
         }
 
-        private void BuildDeathCounterSection()
+        private void BuildDeathsSection()
         {
-            SectionHeader("Death counter");
+            SectionHeader("Deaths");
 
-            // Like the HUD, a purely local display preference - editable on a synced or locked profile.
+            // Like the HUD, purely local display and audio preferences - editable on a synced or locked profile.
             m_lockNewRows = false;
 
             BoolFieldRow(
@@ -228,10 +228,54 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
                     Defaults.showTopDeathCausers));
 
             BoolFieldRow(
-                ("Show total death count", "On shows all deaths of this character, in every world. Off shows only the deaths in the current world (for worlds played before this option was added, counting starts from the deaths viewers caused).",
+                ("Show total death count", "On counts this character's deaths in every world. Off counts only the current world.",
                     () => ProfileSettingsHelper.Current.showTotalDeathCount,
                     v => ProfileSettingsHelper.Current.showTotalDeathCount = v,
-                    Defaults.showTotalDeathCount));
+                    Defaults.showTotalDeathCount),
+                ("Enable death sounds", "Plays a random sound from the deathsounds folder when you die.",
+                    () => ProfileSettingsHelper.Current.deathSoundsEnabled,
+                    v => ProfileSettingsHelper.Current.deathSoundsEnabled = v,
+                    Defaults.deathSoundsEnabled));
+
+            GameObject soundRow = CreateRow();
+            ForEachCell(2, (x, width, i) =>
+            {
+                if (i == 0)
+                    BuildFloatCell(soundRow, x, width,
+                        ("Death sound volume", "From 0.0 (silent) to 1.0. Applied on top of Valheim's master and sound effect volume.",
+                            () => ProfileSettingsHelper.Current.deathSoundVolume,
+                            v => ProfileSettingsHelper.Current.deathSoundVolume = Mathf.Clamp01(v),
+                            Defaults.deathSoundVolume));
+                else
+                    BuildReloadDeathSoundsCell(soundRow, x, width);
+            });
+        }
+
+        private static void BuildReloadDeathSoundsCell(GameObject row, float x, float width)
+        {
+            GameObject cell = CreateCell(row, x, width);
+            GuiHelper.CreateCardTitle(cell, "Reload death sounds", width - 24f);
+            GuiHelper.CreateCardButton(cell, "Reload", width, DeathSoundHelper.Reload);
+            Text status = GuiHelper.CreateCardDescription(cell, DeathSoundStatusText(), width - 24f, height: 38f);
+
+            // The label belongs to this Rebuild's cells; once they are destroyed the handler drops itself.
+            Action onReloaded = null;
+            onReloaded = () =>
+            {
+                if (status == null)
+                {
+                    DeathSoundHelper.OnReloaded -= onReloaded;
+                    return;
+                }
+
+                status.text = DeathSoundStatusText();
+            };
+            DeathSoundHelper.OnReloaded += onReloaded;
+        }
+
+        private static string DeathSoundStatusText()
+        {
+            return $"{DeathSoundHelper.LoadedCount} sound(s) loaded (.wav, .ogg, .mp3), played for at most {DeathSoundHelper.MaxPlaySeconds:0} seconds.";
         }
 
         private static string HudPositionLabel(HudPosition position)
@@ -479,16 +523,17 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private void FloatFieldRow(params (string Title, string Description, Func<float> Get, Action<float> Set, float Default)[] fields)
         {
             GameObject row = CreateRow();
-            ForEachCell(fields.Length, (x, width, i) =>
-            {
-                var f = fields[i];
-                GameObject cell = CreateCell(row, x, width);
-                GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
-                (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(width);
-                InputField input = GuiFieldBuilder.CreateFloatField(cell, new Vector2(fieldCenterX, -58f), fieldWidth, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
-                GuiHelper.CreateResetButton(cell, resetCenterX, -58f, () => input.text = f.Default.ToString("G"));
-                GuiHelper.CreateCardDescription(cell, f.Description, width - 24f);
-            });
+            ForEachCell(fields.Length, (x, width, i) => BuildFloatCell(row, x, width, fields[i]));
+        }
+
+        private static void BuildFloatCell(GameObject row, float x, float width, (string Title, string Description, Func<float> Get, Action<float> Set, float Default) f, bool locked = false)
+        {
+            GameObject cell = CreateCell(row, x, width, locked);
+            GuiHelper.CreateCardTitle(cell, f.Title, width - 24f);
+            (float fieldWidth, float fieldCenterX, float resetCenterX) = GuiHelper.FieldAndResetLayout(width);
+            InputField input = GuiFieldBuilder.CreateFloatField(cell, new Vector2(fieldCenterX, -58f), fieldWidth, f.Get(), v => { f.Set(v); ProfileSettingsPersistHelper.Persist(); });
+            GuiHelper.CreateResetButton(cell, resetCenterX, -58f, () => input.text = f.Default.ToString("G"));
+            GuiHelper.CreateCardDescription(cell, f.Description, width - 24f);
         }
 
         private void EnumFieldRow(string title, string description, List<DropdownOption> options, Func<string> get, Action<string> set, string defaultValue)

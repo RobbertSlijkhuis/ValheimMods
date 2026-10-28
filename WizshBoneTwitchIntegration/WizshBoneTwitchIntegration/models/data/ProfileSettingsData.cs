@@ -69,6 +69,10 @@ namespace WizshBoneTwitchIntegration.Models
         public bool showTotalDeathCount = true; // false = only the current world's deaths
         public bool showSafeZoneMessage = true;
 
+        // Death sounds (audio files in the deathsounds folder, see DeathSoundHelper)
+        public bool deathSoundsEnabled = true;
+        public float deathSoundVolume = 1f; // 0..1, on top of Valheim's master/SFX volume
+
         /// <summary>
         /// Copies the personal preferences - the settings a read-only (synced or locked built-in)
         /// profile still lets its user change: everything under Chatting and HUD, plus enable
@@ -98,6 +102,9 @@ namespace WizshBoneTwitchIntegration.Models
             showTopDeathCausers = source.showTopDeathCausers;
             showTotalDeathCount = source.showTotalDeathCount;
             showSafeZoneMessage = source.showSafeZoneMessage;
+
+            deathSoundsEnabled = source.deathSoundsEnabled;
+            deathSoundVolume = source.deathSoundVolume;
         }
     }
 }

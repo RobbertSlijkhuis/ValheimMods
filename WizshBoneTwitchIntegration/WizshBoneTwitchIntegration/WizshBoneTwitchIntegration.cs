@@ -348,6 +348,8 @@ namespace WizshBoneTwitchIntegration
             ExtraConfigHelper.InitExtraConfigs();
             ExtraConfigHelper.ReadRedeemsConfig();
             ProfileSettingsHelper.Reload();
+            DeathSoundHelper.EnsureFolderExists();
+            DeathSoundHelper.Reload();
         }
 
         private void InitStatusEffects()

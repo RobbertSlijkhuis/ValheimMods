@@ -124,6 +124,8 @@ namespace WizshBoneTwitchIntegration.Commands
                 showTopDeathCausers = true,
                 showTotalDeathCount = false,
                 showSafeZoneMessage = false,
+                deathSoundsEnabled = false,
+                deathSoundVolume = 0.35f,
                 wardMaxCount = 7,
             };
 
@@ -217,6 +219,8 @@ namespace WizshBoneTwitchIntegration.Commands
                 && a.showTopDeathCausers == b.showTopDeathCausers
                 && a.showTotalDeathCount == b.showTotalDeathCount
                 && a.showSafeZoneMessage == b.showSafeZoneMessage
+                && a.deathSoundsEnabled == b.deathSoundsEnabled
+                && a.deathSoundVolume == b.deathSoundVolume
                 && a.wardMaxCount == b.wardMaxCount;
         }
 
