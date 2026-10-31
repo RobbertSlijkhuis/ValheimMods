@@ -83,7 +83,8 @@ namespace ModularMagic_Core.Harmony
 
         /// <summary>
         /// Runs on every client when the stand shows or removes its item (and every few seconds when it refreshes),
-        /// so every client builds the rune table from what is really on the stand.
+        /// so every client attaches or removes the rune table to match the staff that is really on the stand.
+        /// The runes follow the data of the stand in RuneTable.Update.
         /// </summary>
         [HarmonyPostfix]
         [HarmonyPatch(typeof(ItemStand), "SetVisualItem")]

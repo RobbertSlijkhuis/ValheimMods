@@ -47,19 +47,7 @@ namespace ModularMagic_EarthStaffs
 
             PrefabManager.OnVanillaPrefabsAvailable += AddEarthStaffs;
             PrefabManager.OnPrefabsRegistered += FixAndLogAudioMixers;
-            // ItemManager.OnItemsRegistered += LogRecipes;
         }
-
-        //private void LogRecipes()
-        //{
-        //    ObjectDB.instance.m_recipes.ForEach(r =>
-        //    {
-        //        if (r.name.Contains("MMES"))
-        //            Jotunn.Logger.LogInfo(r.name);
-        //    });
-
-        //    ItemManager.OnItemsRegistered -= LogRecipes;
-        //}
 
         private void AddEarthStaffs()
         {

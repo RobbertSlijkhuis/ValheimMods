@@ -26,6 +26,12 @@ namespace ModularMagic_Core.components
         public Imbuement m_imbuement;
         public int m_index;
         public bool m_locked = false;
+        // Flying out, it only waits to be destroyed
+        public bool m_removing = false;
+        // A state that arrived while an animation was running, shown when it is done (players that only watch)
+        private bool m_hasPending = false;
+        private Imbuement m_pendingImbuement;
+        private Imbuement m_pendingReplaced;
         // The saved rune (id and level) that was removed or replaced, it drops when the changes are saved
         public Imbuement m_oldRune;
         public Color m_emission;
@@ -299,10 +305,24 @@ namespace ModularMagic_Core.components
 
         public void Reset()
         {
+            // The slot is empty, or it holds a new rune that is kicked out first
+            Imbuement kicked = m_imbuement.type != ImbuementType.None ? m_imbuement.CopyRune() : null;
+
+            // The old rune is back from the start, so the other players are told right away and see the animation at the same time
+            m_imbuement.SetRune(m_oldRune.rune, m_oldRune.level);
+            m_imbuement.saved = true;
+
+            m_imbuementTable.m_onRuneActivation.Invoke();
+
+            PlayReset(kicked, true);
+        }
+
+        // drop is false for the players that only watch: the editor drops the kicked rune and the dropped item is networked
+        private void PlayReset(Imbuement kicked, bool drop)
+        {
             m_locked = true;
 
-            // The slot is empty, or it holds a new rune that is kicked out first
-            if (m_imbuement.type == ImbuementType.None)
+            if (kicked == null)
             {
                 m_animatorOld.SetTrigger("Reset");
                 StartCoroutine(CompleteReset());
@@ -310,19 +330,22 @@ namespace ModularMagic_Core.components
             else
             {
                 m_animatorOld.SetTrigger("ResetWithKick");
-                StartCoroutine(KickNewRune());
+                StartCoroutine(KickNewRune(kicked, drop));
             }
         }
 
-        public IEnumerator KickNewRune()
+        public IEnumerator KickNewRune(Imbuement kickedRune, bool drop)
         {
             yield return new WaitForSeconds(0.4f);
 
-            ItemDrop kicked = ImbuementHelper.DropRune(m_imbuement.rune, m_imbuement.level, m_transformNew.position, m_transformNew.rotation);
-            Rigidbody rigidbody = kicked.GetComponent<Rigidbody>();
-            rigidbody.AddForce(kicked.transform.forward * 300);
+            if (drop && kickedRune.rune != null)
+            {
+                ItemDrop kicked = ImbuementHelper.DropRune(kickedRune.rune, kickedRune.level, m_transformNew.position, m_transformNew.rotation);
+                Rigidbody rigidbody = kicked.GetComponent<Rigidbody>();
+                rigidbody.AddForce(kicked.transform.forward * 300);
+            }
 
-            Destroy(m_transformNew.Find("attach(Clone)").gameObject);
+            RemoveAttached(m_transformNew);
             StartCoroutine(CompleteReset());
         }
 
@@ -338,16 +361,12 @@ namespace ModularMagic_Core.components
             m_animatorOld.Update(0f);
             m_particleSystem.Play();
 
-            m_imbuement.SetRune(m_oldRune.rune, m_oldRune.level);
-            m_imbuement.saved = true;
-
-            m_imbuementTable.m_onRuneActivation.Invoke();
-
             Destroy(m_resetInteract);
             m_oldRune = null;
             meshRenderer.enabled = false;
 
             m_locked = false;
+            ApplyPending();
         }
 
         public void MarkForRemoval()
@@ -378,6 +397,7 @@ namespace ModularMagic_Core.components
             m_transformNew.localPosition = new Vector3(0f, 0f, 0f);
 
             m_locked = false;
+            ApplyPending();
         }
 
         public void OnSave()
@@ -409,8 +429,118 @@ namespace ModularMagic_Core.components
             m_animatorRune.SetTrigger($"FlyIn{m_index}");
         }
 
+        // Shows a slot to a player that only watches: the same animations as the editor sees, but no drops.
+        // The editor's client drops the runes and dropped items are networked
+        public void ShowState(Imbuement imbuement, Imbuement replacedRune)
+        {
+            // The animations run one at a time, the latest state is shown when the running one is done
+            if (m_locked)
+            {
+                SetPending(imbuement, replacedRune);
+                return;
+            }
+
+            Imbuement previous = m_imbuement;
+            bool hasRune = imbuement.rune != null;
+            bool sameReplaced = m_oldRune == null ? replacedRune == null : replacedRune != null && m_oldRune.HasSameRune(replacedRune);
+
+            if (previous.HasSameRune(imbuement) && previous.saved == imbuement.saved && sameReplaced)
+            {
+                m_imbuement = imbuement;
+                return;
+            }
+
+            // The saved rune that was marked for removal is back or gone
+            if (m_oldRune != null && !sameReplaced)
+            {
+                if (replacedRune == null && hasRune && imbuement.HasSameRune(m_oldRune))
+                {
+                    // Reset, a rune that was slotted in its place is kicked out
+                    m_imbuement = imbuement;
+                    PlayReset(previous.type != ImbuementType.None ? previous.CopyRune() : null, false);
+                    return;
+                }
+
+                // Saved
+                RemoveAttached(m_transformOld);
+                m_oldRune = null;
+                m_resetInteract = null;
+            }
+
+            // A saved rune is removed or replaced
+            if (replacedRune != null && m_oldRune == null)
+            {
+                if (previous.rune != null && previous.HasSameRune(replacedRune))
+                {
+                    m_oldRune = replacedRune;
+
+                    if (hasRune)
+                        SetPending(imbuement, replacedRune);
+                    else
+                        m_imbuement = imbuement;
+
+                    MarkForRemoval();
+                    m_meshRenderer.enabled = true;
+                    return;
+                }
+
+                RestoreReplacedRune(replacedRune);
+            }
+
+            m_imbuement = imbuement;
+
+            // A rune is slotted in or taken out, the editor drops an unsaved rune that is taken out
+            if (!previous.HasSameRune(imbuement))
+            {
+                RemoveAttached(m_transformNew);
+
+                if (hasRune)
+                    UpdateRune(imbuement.rune.gameObject);
+                else
+                    m_meshRenderer.enabled = true;
+            }
+
+            // The sparkles show that a rune is saved
+            if (imbuement.type == ImbuementType.None || !imbuement.saved)
+                m_particleSystem.Stop();
+            else
+                m_particleSystem.Play();
+        }
+
+        private void SetPending(Imbuement imbuement, Imbuement replacedRune)
+        {
+            m_hasPending = true;
+            m_pendingImbuement = imbuement;
+            m_pendingReplaced = replacedRune;
+        }
+
+        private void ApplyPending()
+        {
+            if (!m_hasPending)
+                return;
+
+            m_hasPending = false;
+            ShowState(m_pendingImbuement, m_pendingReplaced);
+        }
+
+        // Detached first, Destroy only happens at the end of the frame and the clone is looked up by name
+        private void RemoveAttached(Transform parent)
+        {
+            for (int i = parent.childCount - 1; i >= 0; i--)
+            {
+                Transform child = parent.GetChild(i);
+
+                if (child.name != "attach(Clone)")
+                    continue;
+
+                child.SetParent(null);
+                Destroy(child.gameObject);
+            }
+        }
+
         public void StartMoveOut()
         {
+            m_removing = true;
             m_particleSystem.Stop();
             m_animatorRune.SetTrigger($"FlyOut{m_index}");
             Destroy(gameObject, m_animatorRune.GetCurrentAnimatorClipInfo(0).Length * 2);

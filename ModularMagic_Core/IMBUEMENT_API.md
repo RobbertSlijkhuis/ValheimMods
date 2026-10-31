@@ -170,9 +170,9 @@ At startup Core sets the maximum quality of the item to the number of models, re
 
 ## How the table works with more than one player
 
-- Every client builds the table from what is on the stand, through a postfix on `ItemStand.SetVisualItem`. A player who arrives later sees the runes within a few seconds.
-- Only the editor can change anything. Everyone else sees the same runes read-only with a lock message, including the editor's unsaved changes (the draft). To release a staff, take it off the stand and place it again.
-- Saving and the draft are sent to the owner of the stand, which checks the editor and writes the data.
+- Every client attaches the table when the stand shows a staff (a postfix on `ItemStand.SetVisualItem`). From then on the table follows the ZDO of the stand: `RuneTable.Update` compares `DataRevision` and updates the runes when it changes. Changes reach other players in about 150 ms (66 to 144 ms measured), and a player who arrives later reads the current state right away.
+- Only the editor can change anything. The editor claims the ownership of the stand and writes the draft and the saved runes into the ZDO itself, there are no RPCs. Everyone else sees the same runes read-only with a lock message, including the editor's unsaved changes (the draft). To release a staff, take it off the stand and place it again.
+- Other players see what the editor sees: the runes stay in their slots, and a change plays the same animation (mark for removal, reset, reset with kick) without the runes flying out and in. The editor's client drops the runes, and the dropped items are networked.
 - Unsaved runes are kept in the draft. A rune that is taken out of a slot, or that is still unsaved when the staff leaves the stand, drops from its slot.
 
-This has been tested in single player and with two players. The quality-based runes (levels as item quality) are written but not tested yet.
+This has been tested in single player and with two players on a dedicated server, including the quality-based runes.

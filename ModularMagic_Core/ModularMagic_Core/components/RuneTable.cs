@@ -16,11 +16,6 @@ namespace ModularMagic_Core.Components
 {
     internal class RuneTable : MonoBehaviour
     {
-        private const string DraftRpcName = "RPC_MMC_SaveDraft";
-        private const string SaveRpcName = "RPC_MMC_SaveImbuements";
-        // How many times a request may be passed on when the owner of the stand changed while it was on its way
-        private const int MaxForwardHops = 3;
-
         private ZNetView netView;
         // The working copy of the editor, this includes the runes that are not saved yet
         public List<Imbuement> m_imbuements = new List<Imbuement>();
@@ -78,13 +73,7 @@ namespace ModularMagic_Core.Components
 
             saveEffects.m_effectPrefabs = saveEffectsList.ToArray();
 
-            // Saving is done by the owner of the stand, the editor asks for it with this RPC
-            if (netView != null)
-            {
-                netView.Register<string, long, int>(SaveRpcName, RPC_SaveImbuements);
-                netView.Register<string, long, int>(DraftRpcName, RPC_SaveDraft);
-            }
-            else
+            if (netView == null)
                 Jotunn.Logger.LogWarning("[Imbuements] The rune table stand has no ZNetView, saving imbuements will not work");
 
             // Every change of the editor is remembered on the stand
@@ -98,6 +87,25 @@ namespace ModularMagic_Core.Components
                 return null;
 
             return stand.transform.parent.GetComponent<RuneTable>();
+        }
+
+        // The data revision of the stand the last time it was synced
+        private uint m_syncedRevision;
+
+        // The ZDO of the stand is the source of truth, the table follows it as soon as its data changes
+        private void Update()
+        {
+            ZDO zdo = netView != null ? netView.GetZDO() : null;
+
+            if (zdo == null || zdo.DataRevision == m_syncedRevision)
+                return;
+
+            // The editor can only be told once the local player is there, try again next frame
+            if (Player.m_localPlayer == null || Player.m_localPlayer.GetPlayerID() == 0)
+                return;
+
+            m_syncedRevision = zdo.DataRevision;
+            SyncFromStand();
         }
 
         public bool IsLocalEditor()
@@ -114,8 +122,8 @@ namespace ModularMagic_Core.Components
         }
 
         /// <summary>
-        /// Makes the table match what is on the stand. Called on every client whenever the stand updates its visual,
-        /// so players that did not place the staff, or arrive later, see the same runes.
+        /// Makes the table match what is on the stand. Called on every client whenever the data of the stand changes
+        /// and whenever the stand updates its visual, so players that did not place the staff, or arrive later, see the same runes.
         /// </summary>
         public void SyncFromStand()
         {
@@ -170,8 +178,6 @@ namespace ModularMagic_Core.Components
             if (slots == null)
                 return;
 
-            RemoveRunes();
-
             List<Imbuement> savedImbuements = ImbuementHelper.Deserialize(imbuementsString, slots);
             string draft = ImbuementHelper.GetDraft(itemData);
 
@@ -179,9 +185,44 @@ namespace ModularMagic_Core.Components
             m_imbuements = draft != null ? ApplyDraft(draft, savedImbuements, slots) : savedImbuements;
             m_itemData = itemData;
             m_imbuementsString = ImbuementHelper.Serialize(savedImbuements);
-            CreateRunes();
+
+            List<RuneTableRuneInteract> shownRunes = GetShownRunes();
+
+            if (shownRunes.Count == m_imbuements.Count)
+            {
+                // The runes stay in their slot and play what the editor sees, without flying out and in
+                for (int i = 0; i < shownRunes.Count; i++)
+                {
+                    shownRunes[i].ShowState(m_imbuements[i], GetReplacedRune(i));
+                }
+            }
+            else
+            {
+                RemoveRunes();
+                CreateRunes();
+            }
 
             m_onRuneActivation.Invoke();
+        }
+
+        // The runes in slot order, without the ones that are flying out
+        private List<RuneTableRuneInteract> GetShownRunes()
+        {
+            List<RuneTableRuneInteract> shownRunes = new List<RuneTableRuneInteract>();
+            Transform runesTransform = transform.Find("runes");
+
+            if (runesTransform == null)
+                return shownRunes;
+
+            foreach (Transform child in runesTransform)
+            {
+                RuneTableRuneInteract runeInteract = child.GetComponent<RuneTableRuneInteract>();
+
+                if (runeInteract != null && !runeInteract.m_removing)
+                    shownRunes.Add(runeInteract);
+            }
+
+            return shownRunes.OrderBy(runeInteract => runeInteract.m_index).ToList();
         }
 
         public void StaffAttach(string imbuementsString, ItemData itemData)
@@ -344,6 +385,20 @@ namespace ModularMagic_Core.Components
                 if (CanSave() != CanImbueType.Yes)
                     return false;
 
+                string imbuementsString = ImbuementHelper.Serialize(m_imbuements);
+
+                bool written = WriteToStand((standItem, slots) =>
+                {
+                    // Only accept slots and runes that exist
+                    standItem.m_customData[ImbuementHelper.DataKey] = ImbuementHelper.Serialize(ImbuementHelper.Deserialize(imbuementsString, slots));
+                    // Everything is saved now, so there are no unsaved changes anymore
+                    ImbuementHelper.SetDraft(standItem, null);
+                });
+
+                // Nothing changes when the write failed, otherwise the old runes would drop without being replaced
+                if (!written)
+                    return false;
+
                 foreach (Imbuement imbuement in m_imbuements)
                 {
                     if (imbuement.type == ImbuementType.None)
@@ -351,11 +406,6 @@ namespace ModularMagic_Core.Components
 
                     imbuement.saved = true;
                 }
-
-                string imbuementsString = ImbuementHelper.Serialize(m_imbuements);
-
-                // The owner of the stand writes the data, only the owner can change it reliably
-                netView.InvokeRPC(SaveRpcName, imbuementsString, m_editorId, 0);
 
                 m_itemData.m_customData[ImbuementHelper.DataKey] = imbuementsString;
                 m_imbuementsString = imbuementsString;
@@ -372,112 +422,55 @@ namespace ModularMagic_Core.Components
             }
         }
 
-        // Runs on the owner of the stand
-        private void RPC_SaveImbuements(long sender, string imbuementsString, long editorId, int hops)
+        /// <summary>
+        /// The editor owns the stand while editing, so the data is a plain write to the ZDO of the stand and reaches
+        /// everybody through the ZDO sync. Returns false when nothing was written, for example when the staff of this
+        /// editor is not on the stand anymore.
+        /// </summary>
+        private bool WriteToStand(Action<ItemData, ImbuementSlots> change)
         {
-            try
+            if (netView == null || !netView.IsValid())
+                return false;
+
+            // The stand can have moved to another owner while the editor was away, only the owner's writes reach the others
+            netView.ClaimOwnership();
+
+            ZDO zdo = netView.GetZDO();
+            ItemData standItem = ImbuementHelper.LoadItemFromZDO(zdo);
+            ImbuementSlots slots = standItem != null ? ImbuementHelper.GetSlots(standItem) : null;
+
+            if (slots == null || m_editorId == 0 || m_editorId != ImbuementHelper.GetEditor(standItem))
             {
-                if (!netView.IsOwner())
-                {
-                    ForwardToOwner(SaveRpcName, imbuementsString, editorId, hops);
-                    return;
-                }
-
-                ZDO zdo = netView.GetZDO();
-                ItemData standItem = ImbuementHelper.LoadItemFromZDO(zdo);
-                ImbuementSlots slots = ImbuementHelper.GetSlots(standItem);
-
-                if (slots == null)
-                {
-                    Jotunn.Logger.LogWarning("[Imbuements] Rejected a save, there is no imbuable staff on the stand");
-                    return;
-                }
-
-                // The owner can not look up the player id of the sender, so the editor sends it along
-                if (editorId == 0 || editorId != ImbuementHelper.GetEditor(standItem))
-                {
-                    Jotunn.Logger.LogWarning($"[Imbuements] Rejected a save from {sender}, player {editorId} is not the editor of this staff");
-                    return;
-                }
-
-                // Only accept slots and runes that exist
-                standItem.m_customData[ImbuementHelper.DataKey] = ImbuementHelper.Serialize(ImbuementHelper.Deserialize(imbuementsString, slots));
-                // Everything is saved now, so there are no unsaved changes anymore
-                ImbuementHelper.SetDraft(standItem, null);
-                SaveToZDO(standItem, zdo);
-                netView.InvokeRPC(ZNetView.Everybody, "RPC_UpdateVisual");
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Could not save imbuements to the stand: " + e);
-            }
-        }
-
-        // The owner of the stand can change while a request is on its way. Pass it on to the new owner,
-        // otherwise the runes that were used for the request are lost
-        private void ForwardToOwner(string rpcName, string data, long editorId, int hops)
-        {
-            long owner = netView.GetZDO().GetOwner();
-
-            if (owner == 0 || hops >= MaxForwardHops)
-            {
-                Jotunn.Logger.LogWarning($"[Imbuements] Could not pass on {rpcName}, the stand has no owner or the request was passed on too often");
-                return;
+                Jotunn.Logger.LogWarning("[Imbuements] Could not write to the stand, the staff of this editor is not on it");
+                return false;
             }
 
-            netView.InvokeRPC(owner, rpcName, data, editorId, hops + 1);
+            change(standItem, slots);
+            SaveToZDO(standItem, zdo);
+
+            return true;
         }
 
         private void OnRuneActivation()
         {
             // The viewers also invoke this when they refresh, they have nothing to remember
             if (IsLocalEditor())
-                SendDraft();
+                WriteDraft();
         }
 
         // Remembers the working copy of the editor on the stand, so unsaved runes are not lost when the editor walks away or relogs
-        private void SendDraft()
+        private void WriteDraft()
         {
-            if (netView == null || !netView.IsValid())
-                return;
+            string draft = ImbuementHelper.Serialize(m_imbuements);
 
-            netView.InvokeRPC(DraftRpcName, ImbuementHelper.Serialize(m_imbuements), m_editorId, 0);
-        }
-
-        // Runs on the owner of the stand
-        private void RPC_SaveDraft(long sender, string draft, long editorId, int hops)
-        {
-            try
+            WriteToStand((standItem, slots) =>
             {
-                if (!netView.IsOwner())
-                {
-                    ForwardToOwner(DraftRpcName, draft, editorId, hops);
-                    return;
-                }
-
-                ZDO zdo = netView.GetZDO();
-                ItemData standItem = ImbuementHelper.LoadItemFromZDO(zdo);
-                ImbuementSlots slots = ImbuementHelper.GetSlots(standItem);
-
-                if (slots == null || editorId == 0 || editorId != ImbuementHelper.GetEditor(standItem))
-                {
-                    Jotunn.Logger.LogWarning($"[Imbuements] Rejected unsaved changes from {sender}, player {editorId} is not the editor of this staff");
-                    return;
-                }
-
                 string draftString = ImbuementHelper.Serialize(ImbuementHelper.Deserialize(draft, slots));
                 string savedString = ImbuementHelper.Serialize(ImbuementHelper.Deserialize(standItem.m_customData.GetValueSafe(ImbuementHelper.DataKey), slots));
 
                 // There is nothing to remember when the working copy is the same as what is saved
                 ImbuementHelper.SetDraft(standItem, draftString == savedString ? null : draftString);
-                SaveToZDO(standItem, zdo);
-                // The other players see the unsaved changes too, let every client update its table
-                netView.InvokeRPC(ZNetView.Everybody, "RPC_UpdateVisual");
-            }
-            catch (Exception e)
-            {
-                Jotunn.Logger.LogError("Could not remember the unsaved changes on the stand: " + e);
-            }
+            });
         }
 
         /// <summary>
