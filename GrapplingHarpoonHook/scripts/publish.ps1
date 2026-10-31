@@ -129,7 +129,24 @@ if($Target.Equals("Release")) {
     Get-ChildItem -Path "$PackagePath" -Filter "*.zip" | Remove-Item -Force
 
     $zipName = "${name}_$pluginVersion.zip"
-    Compress-Archive -Path $itemsToPackage -DestinationPath "$PackagePath\$zipName" -CompressionLevel Optimal -Force
+
+    # Not Compress-Archive: in Windows PowerShell 5.1 it stores files in subfolders with a backslash
+    # ("plugins\Mod.dll"), which upload sites reject as an unsafe ZIP entry path. Entry names need forward slashes.
+    Add-Type -AssemblyName System.IO.Compression
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $packageRoot = (Resolve-Path -Path $PackagePath).Path.TrimEnd('\')
+    $zip = [System.IO.Compression.ZipFile]::Open("$PackagePath\$zipName", [System.IO.Compression.ZipArchiveMode]::Create)
+    try {
+        foreach ($item in $itemsToPackage) {
+            foreach ($file in Get-ChildItem -Path $item -Recurse -File) {
+                $entryName = $file.FullName.Substring($packageRoot.Length + 1).Replace('\', '/')
+                [void][System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, $entryName, [System.IO.Compression.CompressionLevel]::Optimal)
+            }
+        }
+    }
+    finally {
+        $zip.Dispose()
+    }
     Write-Host "Created $PackagePath\$zipName"
 }
 
