@@ -23,6 +23,9 @@ namespace WizshBoneTwitchIntegration.Helpers
     {
         public const float MaxPlaySeconds = 10f;
 
+        // Clips are kept decoded in memory, so a long track (only its first MaxPlaySeconds would play) is skipped.
+        public const float MaxClipSeconds = 60f;
+
         private static readonly string[] SupportedExtensions = { ".wav", ".ogg", ".mp3" };
 
         private static List<AudioClip> s_clips = new List<AudioClip>();
@@ -86,6 +89,13 @@ namespace WizshBoneTwitchIntegration.Helpers
                     if (clip == null || clip.length <= 0f)
                     {
                         Jotunn.Logger.LogWarning($"[WBTI] Death sound '{Path.GetFileName(file)}' is empty or unreadable, skipping it.");
+                        continue;
+                    }
+
+                    if (clip.length > MaxClipSeconds)
+                    {
+                        Jotunn.Logger.LogWarning($"[WBTI] Death sound '{Path.GetFileName(file)}' is {clip.length:0} seconds long, skipping it (limit {MaxClipSeconds:0}).");
+                        UnityEngine.Object.Destroy(clip);
                         continue;
                     }
 

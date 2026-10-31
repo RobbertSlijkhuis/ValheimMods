@@ -760,9 +760,7 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
 
             TwitchCustomRewards customRewards = Game.instance.gameObject.GetComponent<TwitchCustomRewards>();
 
-            // The title must match what TwitchCustomRewards.HandleRedeem looks the redeem up by - the
-            // Twitch-facing (prefixed) title, not the raw RedeemData.title.
-            CustomRewardEvent rewardEvent = TestRedeemEventHelper.Create(RedeemManager.GetFullTitle(redeem), redeem.points);
+            CustomRewardEvent rewardEvent = TestRedeemEventHelper.Create(redeem, redeem.points);
 
             FakeRedeemerCommand.Apply(rewardEvent); // debug: only does anything after WBTIFakeRedeemer
 

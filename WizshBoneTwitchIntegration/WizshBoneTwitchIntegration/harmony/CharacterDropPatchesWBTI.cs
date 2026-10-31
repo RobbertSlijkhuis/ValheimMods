@@ -55,7 +55,7 @@ namespace WizshBoneTwitchIntegration.Harmony
         // SpawnAbilityExtension.Spawn2(Character) for the same reason (see CreatureHelper.ApplyInheritedScaling).
         private static void DropItemsWithInheritance(List<KeyValuePair<GameObject, int>> drops, Vector3 centerPos, float dropArea, Character owner)
         {
-            bool hasParentData = CreatureHelper.TryResolveParentCreatureData(owner, out CreatureData parentCreatureData, out string redeemerName, out string redeemTitle, out string lookupPrefabName);
+            bool hasParentData = CreatureHelper.TryResolveParentCreatureData(owner, out CreatureData parentCreatureData, out string redeemerName, out string redeemTitle, out string redeemId, out string lookupPrefabName);
 
             foreach (KeyValuePair<GameObject, int> drop in drops)
             {
@@ -70,7 +70,7 @@ namespace WizshBoneTwitchIntegration.Harmony
                         itemDrop.m_itemData.m_worldLevel = (byte)Game.m_worldLevel;
 
                     if (hasParentData)
-                        CreatureHelper.ApplyInheritedScaling(gameObject, drop.Key, parentCreatureData, redeemerName, redeemTitle, lookupPrefabName);
+                        CreatureHelper.ApplyInheritedScaling(gameObject, drop.Key, parentCreatureData, redeemerName, redeemTitle, redeemId, lookupPrefabName);
 
                     Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
                     if (rigidbody != null)

@@ -105,6 +105,7 @@ namespace WizshBoneTwitchIntegration.Helpers
 
             if (stock.redeems != null && existing.redeems != null)
             {
+                // By title on purpose: both files are read raw here (no EnsureIds), and the stock file has no ids.
                 foreach (RedeemData redeem in stock.redeems)
                 {
                     RedeemData kept = existing.redeems.Find(r => r.title == redeem.title);

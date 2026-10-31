@@ -89,7 +89,7 @@ namespace WizshBoneTwitchIntegration.Extensions
                 if (monsterAI != null && humanoid2 != null)
                 {
                     TwitchCreaturePersistentData creaturePersistentData = gameObject.GetComponent<TwitchCreaturePersistentData>() ?? gameObject.AddComponent<TwitchCreaturePersistentData>();
-                    creaturePersistentData.SetData(customRewardEvent.RedeemerName, creatureData, customRewardEvent.CustomRewardTitle, false);
+                    creaturePersistentData.SetData(customRewardEvent.RedeemerName, creatureData, customRewardEvent.CustomRewardTitle, false, redeemId: customRewardEvent.RedeemId);
 
                     TwitchCreatureClaim creatureClaim = gameObject.GetComponent<TwitchCreatureClaim>() ?? gameObject.AddComponent<TwitchCreatureClaim>();
                     creatureClaim.ReInit(customRewardEvent.RedeemerName, isSpawn: true, creatureData);
@@ -193,7 +193,7 @@ namespace WizshBoneTwitchIntegration.Extensions
         {
             int toSpawn = UnityEngine.Random.Range(spawnAbility.m_minToSpawn, spawnAbility.m_maxToSpawn);
 
-            bool hasParentData = CreatureHelper.TryResolveParentCreatureData(owner, out CreatureData parentCreatureData, out string redeemerName, out string redeemTitle, out string lookupPrefabName);
+            bool hasParentData = CreatureHelper.TryResolveParentCreatureData(owner, out CreatureData parentCreatureData, out string redeemerName, out string redeemTitle, out string redeemId, out string lookupPrefabName);
 
             Func<int, int, GameObject> selectPrefab = (i, spawnCount) => spawnAbility.m_spawnPrefab[UnityEngine.Random.Range(0, spawnAbility.m_spawnPrefab.Length)];
 
@@ -202,7 +202,7 @@ namespace WizshBoneTwitchIntegration.Extensions
                 if (!hasParentData)
                     return;
 
-                CreatureHelper.ApplyInheritedScaling(gameObject, prefab, parentCreatureData, redeemerName, redeemTitle, lookupPrefabName);
+                CreatureHelper.ApplyInheritedScaling(gameObject, prefab, parentCreatureData, redeemerName, redeemTitle, redeemId, lookupPrefabName);
                 RedeemerTagHelper.Copy(owner.gameObject, gameObject); // the child credits its summoner's redeemer
             };
 

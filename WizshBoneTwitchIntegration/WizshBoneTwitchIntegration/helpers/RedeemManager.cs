@@ -154,7 +154,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             {
                 return EditOnDisk(profileName, redeems =>
                 {
-                    int diskIndex = redeems.FindIndex(r => r.title == original.title);
+                    int diskIndex = redeems.FindIndex(r => r.id == original.id);
                     if (diskIndex < 0)
                         return "Redeem not found.";
 
@@ -207,7 +207,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             if (!IsActive(profileName))
             {
                 return EditOnDisk(profileName, redeems =>
-                    redeems.RemoveAll(r => r.title == redeem.title) > 0 ? null : "Redeem not found.", out error);
+                    redeems.RemoveAll(r => r.id == redeem.id) > 0 ? null : "Redeem not found.", out error);
             }
 
             RedeemHelper.redeems.Remove(redeem);
@@ -220,7 +220,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             {
                 bool saved = EditOnDisk(profileName, redeems =>
                 {
-                    RedeemData target = redeems.Find(r => r.title == redeem.title);
+                    RedeemData target = redeems.Find(r => r.id == redeem.id);
                     if (target == null)
                         return "Redeem not found.";
 

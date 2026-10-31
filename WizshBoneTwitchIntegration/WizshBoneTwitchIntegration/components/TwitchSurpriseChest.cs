@@ -73,13 +73,17 @@ namespace WizshBoneTwitchIntegration.Components
                 m_redeemerName = chestRedeemData[0];
                 m_redeemTitle = chestRedeemData[1];
 
-                RedeemData redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
+                TwitchBasePersistentData baseData = gameObject.GetComponent<TwitchBasePersistentData>();
+                RedeemData redeem = RedeemHelper.FindRedeem(baseData?.RedeemId, m_redeemTitle);
 
                 if (redeem == null || redeem.chestData == null)
                 {
-                    Jotunn.Logger.LogError("Could not find redeem by title or chestdata is null!");
+                    Jotunn.Logger.LogError("Could not find redeem or chestdata is null!");
                     return;
                 }
+
+                // A chest saved before ids were stored gets its id written now (by its owner).
+                baseData?.SetRedeemId(redeem.id);
 
                 ApplyChestData(redeem.chestData);
                 m_mapPin = Minimap.instance.AddPin(transform.position, Minimap.PinType.Icon3, "Surprise Chest", false, false);
@@ -98,6 +102,7 @@ namespace WizshBoneTwitchIntegration.Components
             ApplyChestData(chestData);
 
             m_netView.GetZDO().Set(chestDataHash, $"{m_redeemerName}|{m_redeemTitle}");
+            gameObject.GetComponent<TwitchBasePersistentData>()?.SetRedeemId(customRewardEvent.RedeemId);
             RedeemerTagHelper.Apply(gameObject, customRewardEvent);
             m_mapPin = Minimap.instance.AddPin(transform.position, Minimap.PinType.Icon3, "Surprise Chest", false, false);
 
@@ -367,7 +372,7 @@ namespace WizshBoneTwitchIntegration.Components
                             continue;
 
                         if (creature.amount > 0)
-                            CreatureHelper.SpawnCreatures(creature, m_spawnPoint, new CustomRewardEvent() { RedeemerName = m_redeemerName, RedeemerId = chestRedeemerId, CustomRewardTitle = m_redeemTitle }, false, force);
+                            CreatureHelper.SpawnCreatures(creature, m_spawnPoint, new CustomRewardEvent() { RedeemerName = m_redeemerName, RedeemerId = chestRedeemerId, CustomRewardTitle = m_redeemTitle, RedeemId = chestTag?.RedeemId }, false, force);
                     }
                 }
 

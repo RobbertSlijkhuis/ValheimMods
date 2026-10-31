@@ -204,25 +204,20 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
         /// <summary>
         /// Whether redemptions of <paramref name="redeem"/> are still waiting to be completed or refunded. Found by the
-        /// redeem's reward, so redemptions made under an earlier title (before a rename) count too. Only a redeem
-        /// without a known reward is looked up by its title, since a title can be reused by another redeem later.
+        /// redeem's reward, so redemptions made under an earlier title (before a rename) count too. A redeem without
+        /// a known reward has none.
         /// </summary>
         public bool HasUnresolvedRedeemsFor(RedeemData redeem)
         {
-            if (!m_enabled)
+            if (!m_enabled || !m_rewardIds.TryGetValue(redeem.id ?? "", out string rewardId))
                 return false;
 
-            if (m_rewardIds.TryGetValue(redeem.id ?? "", out string rewardId))
-                return m_redeemHistory.Exists(item => IsWaiting(item) && item.CustomRewardId == rewardId);
-
-            string title = RedeemManager.GetFullTitle(redeem);
-
-            return m_redeemHistory.Exists(item => IsWaiting(item) && RedeemManager.SameTitle(item.CustomRewardTitle, title));
+            return m_redeemHistory.Exists(item => IsWaiting(item) && item.CustomRewardId == rewardId);
         }
 
         /// <summary>
         /// The redeem a redemption belongs to: by the id of the reward it was made on, which still works while Twitch
-        /// shows an old title (a rename that is not synced yet), and otherwise by its title.
+        /// shows an old title (a rename that is not synced yet). Null when the reward is not one the last sync knows.
         /// </summary>
         private RedeemData FindRedeemFor(CustomRewardEvent customRewardEvent)
         {
@@ -233,18 +228,14 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                     if (link.Value != customRewardEvent.CustomRewardId)
                         continue;
 
-                    RedeemData byId = GetRedeemList().Find(item => item.id == link.Key);
+                    RedeemData byId = RedeemHelper.GetRedeemById(link.Key);
 
                     if (byId != null)
                         return byId;
                 }
             }
 
-            // customRewardEvent.CustomRewardTitle is whatever was actually pushed to Twitch - the Twitch-facing
-            // (prefixed) title, not the raw RedeemData.title - so match against RedeemManager.GetFullTitle() rather
-            // than item.title directly. Capitals are ignored: the reward may have been retitled in a different case
-            // on twitch.tv since the last sync.
-            return GetRedeemList().Find(item => RedeemManager.SameTitle(RedeemManager.GetFullTitle(item), customRewardEvent.CustomRewardTitle));
+            return null;
         }
 
         public void Update()
@@ -309,12 +300,13 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
                 }
 
 
-                RedeemData redeem = FindRedeemFor(customRewardEvent);
+                // A test redeem already carries the id of its redeem; a redemption from Twitch is matched through its reward.
+                RedeemData redeem = RedeemHelper.GetRedeemById(customRewardEvent.RedeemId) ?? FindRedeemFor(customRewardEvent);
                 if (redeem == null)
                 {
                     // Not refunded or resolved on purpose. We can't tell a redeem that isn't ours from one that is ours
-                    // but no longer in the profile, so it is left unresolved in the history for the streamer to decide,
-                    // and doesn't count as unresolved.
+                    // but no longer in the profile (or whose reward the last sync hasn't reported yet), so it is left
+                    // unresolved in the history for the streamer to decide, and doesn't count as unresolved.
                     customRewardEvent.IsUnknown = true;
                     Jotunn.Logger.LogWarning($"[WBTI] Redeem '{customRewardEvent.CustomRewardTitle}' is not in the active profile, leaving it unresolved in the history.");
 
@@ -323,6 +315,8 @@ namespace WizshBoneTwitchIntegration.TwitchIntegration
 
                     return;
                 }
+
+                customRewardEvent.RedeemId = redeem.id;
 
                 if (m_bannedUsers.Contains(customRewardEvent.RedeemerName.ToLower()))
                     throw new RedeemException($"{customRewardEvent.RedeemerName} is banned", ExceptionType.Warning);

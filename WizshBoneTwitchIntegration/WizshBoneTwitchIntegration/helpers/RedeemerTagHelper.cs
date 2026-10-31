@@ -41,9 +41,8 @@ namespace WizshBoneTwitchIntegration.Helpers
                 || customRewardEvent.RedeemerId == customRewardEvent.BroadcasterId)
                 return false;
 
-            // The event carries the Twitch-facing (possibly prefixed) title; the leaderboard keys on
-            // the raw RedeemData.title.
-            RedeemData redeem = RedeemHelper.GetRedeemByTitle(customRewardEvent.CustomRewardTitle);
+            // The leaderboard keys on the raw RedeemData.title.
+            RedeemData redeem = RedeemHelper.GetRedeemById(customRewardEvent.RedeemId);
             if (redeem == null)
                 return false;
 

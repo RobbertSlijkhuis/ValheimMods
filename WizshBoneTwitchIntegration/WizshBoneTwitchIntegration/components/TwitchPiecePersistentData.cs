@@ -33,13 +33,17 @@ namespace WizshBoneTwitchIntegration.Components
                 m_redeemerName = data[0];
                 m_redeemTitle = data[1];
 
-                RedeemData redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
+                TwitchBasePersistentData baseData = gameObject.GetComponent<TwitchBasePersistentData>();
+                RedeemData redeem = RedeemHelper.FindRedeem(baseData?.RedeemId, m_redeemTitle);
 
                 if (redeem == null || redeem.spawnAbilityData == null)
                 {
-                    Jotunn.Logger.LogError("Could not find redeem by title or spawnAbilityData is null!");
+                    Jotunn.Logger.LogError("Could not find redeem or spawnAbilityData is null!");
                     return;
                 }
+
+                // An object saved before ids were stored gets its id written now (by its owner).
+                baseData?.SetRedeemId(redeem.id);
 
                 m_allowDrops = redeem.spawnAbilityData.allowDrops;
                 ApplyAllowDrops(m_allowDrops);
@@ -60,6 +64,7 @@ namespace WizshBoneTwitchIntegration.Components
 
             TwitchBasePersistentData baseData = gameObject.GetComponent<TwitchBasePersistentData>();
             baseData?.SetFlag(PersistentComponentFlags.Piece, true);
+            baseData?.SetRedeemId(customRewardEvent.RedeemId);
 
             ApplyAllowDrops(spawnAbilityData.allowDrops);
         }

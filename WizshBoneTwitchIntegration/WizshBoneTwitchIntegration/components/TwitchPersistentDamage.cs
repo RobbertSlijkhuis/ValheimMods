@@ -62,13 +62,17 @@ namespace WizshBoneTwitchIntegration.Components
                 m_redeemerName = data[0];
                 m_redeemTitle = data[1];
 
-                RedeemData redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
+                TwitchBasePersistentData baseData = gameObject.GetComponent<TwitchBasePersistentData>();
+                RedeemData redeem = RedeemHelper.FindRedeem(baseData?.RedeemId, m_redeemTitle);
 
                 if (redeem == null)
                 {
                     Jotunn.Logger.LogError($"Could not find redeem '{m_redeemTitle}' in TwitchPersistentDamage, skipping setup.");
                     return;
                 }
+
+                // An object saved before ids were stored gets its id written now (by its owner).
+                baseData?.SetRedeemId(redeem.id);
 
                 DamageData damageData = redeem.GetDamageData();
 
@@ -95,6 +99,7 @@ namespace WizshBoneTwitchIntegration.Components
 
             TwitchBasePersistentData baseData = gameObject.GetComponent<TwitchBasePersistentData>();
             baseData?.SetFlag(PersistentComponentFlags.HazardDamage, true);
+            baseData?.SetRedeemId(customRewardEvent.RedeemId);
 
             ApplyDamageData(damageData);
         }
@@ -113,6 +118,9 @@ namespace WizshBoneTwitchIntegration.Components
 
             TwitchBasePersistentData baseData = fire.gameObject.GetComponent<TwitchBasePersistentData>();
             baseData?.SetFlag(PersistentComponentFlags.HazardDamage, true);
+
+            // Before AddComponent, so the new component's Awake finds the id.
+            baseData?.SetRedeemId(gameObject.GetComponent<TwitchBasePersistentData>()?.RedeemId);
 
             fire.gameObject.AddComponent<TwitchPersistentDamage>();
 

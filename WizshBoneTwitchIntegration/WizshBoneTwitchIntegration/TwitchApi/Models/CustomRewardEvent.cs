@@ -31,6 +31,9 @@ namespace WizshBoneTwitchIntegration.TwitchApi.Models
 
         // What follows is local state kept by TwitchCustomRewards; nothing of it comes from Twitch.
 
+        /// <summary>The id of the <c>RedeemData</c> this redemption runs; set by HandleRedeem, empty on an event built elsewhere.</summary>
+        public string RedeemId;
+
         /// <summary>The redeem is not in the active profile: left unresolved in the history for the streamer to decide.</summary>
         public bool IsUnknown;
 

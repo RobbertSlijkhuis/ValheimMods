@@ -84,6 +84,55 @@ namespace WizshBoneTwitchIntegration.Components
             m_redeemerRawTitle = stored.Substring(separator + 1);
         }
 
+        // The id of the redeem that spawned this object (RedeemData.id), which the persistent components resolve
+        // their config by. Unlike the redeemer tag above it is stored for every redeem, test and streamer ones too.
+        // Absent on objects saved before ids were stored; those resolve by title and get the id written on load.
+        private static readonly int s_redeemIdHash = "WBTI_RedeemId".GetStableHashCode();
+        private string m_redeemId;
+
+        public string RedeemId => m_redeemId;
+
+        private const float RedeemIdRetryInterval = 2f;
+
+        // Set once: an object keeps the id it was first given, so one whose redeem was deleted is never rebound to
+        // another redeem. At spawn the spawner owns the object and the id is written at once. An object saved before
+        // ids were stored is migrated by whoever loads it: this client claims it when nobody owns it yet (what ZDOMan
+        // does for the first client in range anyway), and otherwise waits for its owner to write the id.
+        public void SetRedeemId(string id)
+        {
+            if (string.IsNullOrEmpty(id) || !string.IsNullOrEmpty(m_redeemId))
+                return;
+
+            m_redeemId = id;
+
+            if (m_netView == null || !m_netView.IsValid())
+                return;
+
+            if (!m_netView.IsOwner() && !m_netView.HasOwner())
+                m_netView.ClaimOwnership();
+
+            if (m_netView.IsOwner())
+                m_netView.GetZDO().Set(s_redeemIdHash, id);
+            else
+                InvokeRepeating(nameof(WriteRedeemIdWhenOwner), RedeemIdRetryInterval, RedeemIdRetryInterval);
+        }
+
+        // Runs until the id is in the ZDO: written here once this client owns the object, or by its owner meanwhile.
+        private void WriteRedeemIdWhenOwner()
+        {
+            ZDO zdo = m_netView != null && m_netView.IsValid() ? m_netView.GetZDO() : null;
+
+            if (zdo != null && zdo.GetString(s_redeemIdHash, "") == "")
+            {
+                if (!m_netView.IsOwner())
+                    return;
+
+                zdo.Set(s_redeemIdHash, m_redeemId);
+            }
+
+            CancelInvoke(nameof(WriteRedeemIdWhenOwner));
+        }
+
         public void Awake()
         {
             try
@@ -95,6 +144,7 @@ namespace WizshBoneTwitchIntegration.Components
 
                 // Read before the early return below, which skips objects with no active flags.
                 ReadRedeemer();
+                m_redeemId = m_netView.GetZDO().GetString(s_redeemIdHash, "");
 
                 StartClaimWatcher();
 

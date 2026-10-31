@@ -55,11 +55,31 @@ namespace WizshBoneTwitchIntegration.Helpers
                 return null;
             }
 
-            // value comes from a real Twitch redemption event's title (see the various
-            // m_redeemTitle = customRewardEvent.CustomRewardTitle assignments feeding this), i.e.
-            // the Twitch-facing (prefixed) title, not the raw RedeemData.title - match via
-            // RedeemManager.GetFullTitle() the same way TwitchCustomRewards.HandleRedeem does.
+            // Only for objects saved before their redeem's id was stored (see FindRedeem), whose title is all they
+            // hold. value is the Twitch-facing (prefixed) title the redemption had then, not the raw
+            // RedeemData.title - match via RedeemManager.GetFullTitle().
             return redeems.Find(item => RedeemManager.SameTitle(RedeemManager.GetFullTitle(item), value));
+        }
+
+        /// <summary>
+        /// The redeem a saved object was spawned by: by its id. Only an object that has no id (saved before ids were
+        /// stored) is found by the title it holds, so its id can be written; an id that doesn't resolve (the redeem was
+        /// deleted, or this client doesn't have the profile) finds nothing and is never guessed by title.
+        /// </summary>
+        public static RedeemData FindRedeem(string id, string legacyTitle)
+        {
+            if (!string.IsNullOrEmpty(id))
+                return GetRedeemById(id);
+
+            return string.IsNullOrEmpty(legacyTitle) ? null : GetRedeemByTitle(legacyTitle);
+        }
+
+        public static RedeemData GetRedeemById(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+                return null;
+
+            return redeems.Find(item => item.id == id);
         }
 
         //public static void SetPlayerSpeed(float multiplier)

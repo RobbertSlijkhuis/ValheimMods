@@ -41,6 +41,10 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
         private bool m_lockNewRows;
         private Text m_descriptionText;
 
+        // The "sounds loaded" label of the newest rebuild, kept up to date by DeathSoundHelper.OnReloaded.
+        private static Text s_deathSoundStatus;
+        private static bool s_deathSoundSubscribed;
+
         private const string DescriptionNormal = "Settings are specific to each profile.";
         private const string DescriptionSynced = "This profile is synced - settings that affect redeems and gameplay are view only, only the owner can change them.";
         private const string DescriptionLocked = "This is a built-in profile - its settings are view only.";
@@ -256,26 +260,26 @@ namespace WizshBoneTwitchIntegration.Gui.Tabs
             GameObject cell = CreateCell(row, x, width);
             GuiHelper.CreateCardTitle(cell, "Reload death sounds", width - 24f);
             GuiHelper.CreateCardButton(cell, "Reload", width, DeathSoundHelper.Reload);
-            Text status = GuiHelper.CreateCardDescription(cell, DeathSoundStatusText(), width - 24f, height: 38f);
+            s_deathSoundStatus = GuiHelper.CreateCardDescription(cell, DeathSoundStatusText(), width - 24f, height: 38f);
 
-            // The label belongs to this Rebuild's cells; once they are destroyed the handler drops itself.
-            Action onReloaded = null;
-            onReloaded = () =>
+            // One subscription for all rebuilds: it updates the label of the newest one.
+            if (!s_deathSoundSubscribed)
             {
-                if (status == null)
-                {
-                    DeathSoundHelper.OnReloaded -= onReloaded;
-                    return;
-                }
+                DeathSoundHelper.OnReloaded += UpdateDeathSoundStatus;
+                s_deathSoundSubscribed = true;
+            }
+        }
 
-                status.text = DeathSoundStatusText();
-            };
-            DeathSoundHelper.OnReloaded += onReloaded;
+        private static void UpdateDeathSoundStatus()
+        {
+            // The label is destroyed with the cells of the rebuild it belongs to.
+            if (s_deathSoundStatus != null)
+                s_deathSoundStatus.text = DeathSoundStatusText();
         }
 
         private static string DeathSoundStatusText()
         {
-            return $"{DeathSoundHelper.LoadedCount} sound(s) loaded (.wav, .ogg, .mp3), played for at most {DeathSoundHelper.MaxPlaySeconds:0} seconds.";
+            return $"{DeathSoundHelper.LoadedCount} sound(s) loaded (.wav, .ogg, .mp3), played for at most {DeathSoundHelper.MaxPlaySeconds:0} seconds. Files over {DeathSoundHelper.MaxClipSeconds:0} seconds are skipped.";
         }
 
         private static string HudPositionLabel(HudPosition position)

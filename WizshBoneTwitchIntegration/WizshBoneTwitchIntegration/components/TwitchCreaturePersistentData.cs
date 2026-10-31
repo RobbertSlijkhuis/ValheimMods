@@ -71,6 +71,12 @@ namespace WizshBoneTwitchIntegration.Components
 
         public string RedeemerName => m_redeemerName;
         public string RedeemTitle => m_redeemTitle;
+
+        // The id of the redeem that spawned this creature, kept on the base data (shared with the other persistent components).
+        public string RedeemId => gameObject.GetComponent<TwitchBasePersistentData>()?.RedeemId;
+
+        // A claim made by hand (no redeem behind it) has neither a title nor an id.
+        private bool IsManualClaim => m_redeemTitle == "" && string.IsNullOrEmpty(RedeemId);
         public string SavedPrefabName => m_savedPrefabName;
         public string ColorOverride => m_colorOverride;
         public string EmissionColorOverride => m_emissionColorOverride;
@@ -104,7 +110,7 @@ namespace WizshBoneTwitchIntegration.Components
 
                 TwitchCreatureClaim creatureClaim = gameObject.AddComponent<TwitchCreatureClaim>();
 
-                if (m_redeemTitle == "")
+                if (IsManualClaim)
                 {
                     // This is the rehydration path for a manual claim, which can be on an AnimalAI
                     // creature (e.g. Deer) with no Humanoid component. ReInit applies the display name
@@ -116,13 +122,17 @@ namespace WizshBoneTwitchIntegration.Components
                     return;
                 }
 
-                RedeemData redeem = RedeemHelper.GetRedeemByTitle(m_redeemTitle);
+                TwitchBasePersistentData baseData = gameObject.GetComponent<TwitchBasePersistentData>();
+                RedeemData redeem = RedeemHelper.FindRedeem(baseData?.RedeemId, m_redeemTitle);
 
                 if (redeem == null)
                 {
                     Jotunn.Logger.LogError($"Could not find redeem '{m_redeemTitle}' in TwitchCreaturePersistentData, skipping setup.");
                     return;
                 }
+
+                // A creature saved before ids were stored gets its id written now (by its owner).
+                baseData?.SetRedeemId(redeem.id);
 
                 if (m_savedPrefabName == "")
                 {
@@ -181,7 +191,7 @@ namespace WizshBoneTwitchIntegration.Components
         // Gjall's reinforcements). redeemerName/redeemTitle/lookupPrefabName come from the summoning
         // creature's own TwitchCreaturePersistentData; resolvedChildCreatureData is the parent's
         // resolved CreatureData already cloned with prefabName overridden to this child's own prefab.
-        public void SetInherited(string redeemerName, string redeemTitle, string lookupPrefabName, CreatureData resolvedChildCreatureData)
+        public void SetInherited(string redeemerName, string redeemTitle, string redeemId, string lookupPrefabName, CreatureData resolvedChildCreatureData)
         {
             m_redeemerName     = redeemerName;
             m_redeemTitle      = redeemTitle;
@@ -194,6 +204,7 @@ namespace WizshBoneTwitchIntegration.Components
 
             TwitchBasePersistentData baseData = gameObject.GetComponent<TwitchBasePersistentData>();
             baseData?.SetFlag(PersistentComponentFlags.Creature, true);
+            baseData?.SetRedeemId(redeemId);
 
             TwitchCreatureClaim creatureClaim = gameObject.GetComponent<TwitchCreatureClaim>() ?? gameObject.AddComponent<TwitchCreatureClaim>();
             creatureClaim.ReInit(m_redeemerName, isSpawn: true, resolvedChildCreatureData);
@@ -217,7 +228,7 @@ namespace WizshBoneTwitchIntegration.Components
         }
 
         // claimChannel / claimPermanent only apply to a manual claim (no creatureData) - see the fields.
-        public void SetData(string name, CreatureData creatureData = null, string redeemTitle = "", bool ignoreWard = false, string claimChannel = "", bool claimPermanent = false)
+        public void SetData(string name, CreatureData creatureData = null, string redeemTitle = "", bool ignoreWard = false, string claimChannel = "", bool claimPermanent = false, string redeemId = "")
         {
             m_redeemerName    = name;
             m_redeemTitle     = redeemTitle;
@@ -237,6 +248,7 @@ namespace WizshBoneTwitchIntegration.Components
 
             TwitchBasePersistentData baseData = gameObject.GetComponent<TwitchBasePersistentData>();
             baseData?.SetFlag(PersistentComponentFlags.Creature, true);
+            baseData?.SetRedeemId(redeemId);
 
             if (creatureData == null)
                 return;
@@ -299,7 +311,7 @@ namespace WizshBoneTwitchIntegration.Components
         // so this client's own writes land here too and are no-ops because the state already matches.
         public void OnZdoChanged()
         {
-            if (m_redeemTitle != "" || m_netView == null || !m_netView.IsValid())
+            if (!IsManualClaim || m_netView == null || !m_netView.IsValid())
                 return;
 
             string raw = m_netView.GetZDO().GetString(s_creatureDataHash, "");

@@ -285,7 +285,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             creatureClaim.Init(creatureData, customRewardEvent);
 
             TwitchCreaturePersistentData persistentData = creature.AddComponent<TwitchCreaturePersistentData>();
-            persistentData.SetData(customRewardEvent.RedeemerName, creatureData, customRewardEvent.CustomRewardTitle, ignoreWard);
+            persistentData.SetData(customRewardEvent.RedeemerName, creatureData, customRewardEvent.CustomRewardTitle, ignoreWard, redeemId: customRewardEvent.RedeemId);
             RedeemerTagHelper.Apply(creature, customRewardEvent);
 
             if (force > 0f)
@@ -380,19 +380,20 @@ namespace WizshBoneTwitchIntegration.Helpers
         /// summoner isn't itself resolvable to a real redeem entry - e.g. a wild creature only
         /// claim:-renamed via chat, or one spawned via a redeem type this doesn't cover.
         /// </summary>
-        public static bool TryResolveParentCreatureData(Character owner, out CreatureData parentCreatureData, out string redeemerName, out string redeemTitle, out string lookupPrefabName)
+        public static bool TryResolveParentCreatureData(Character owner, out CreatureData parentCreatureData, out string redeemerName, out string redeemTitle, out string redeemId, out string lookupPrefabName)
         {
             parentCreatureData = null;
             redeemerName = null;
             redeemTitle = null;
+            redeemId = null;
             lookupPrefabName = null;
 
             TwitchCreaturePersistentData ownerData = owner?.gameObject.GetComponent<TwitchCreaturePersistentData>();
 
-            if (ownerData == null || string.IsNullOrEmpty(ownerData.RedeemTitle))
+            if (ownerData == null || (string.IsNullOrEmpty(ownerData.RedeemTitle) && string.IsNullOrEmpty(ownerData.RedeemId)))
                 return false;
 
-            RedeemData redeem = RedeemHelper.GetRedeemByTitle(ownerData.RedeemTitle);
+            RedeemData redeem = RedeemHelper.FindRedeem(ownerData.RedeemId, ownerData.RedeemTitle);
 
             if (redeem == null)
                 return false;
@@ -405,6 +406,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             parentCreatureData = found;
             redeemerName = ownerData.RedeemerName;
             redeemTitle = ownerData.RedeemTitle;
+            redeemId = redeem.id;
             lookupPrefabName = ownerData.SavedPrefabName;
             return true;
         }
@@ -428,7 +430,7 @@ namespace WizshBoneTwitchIntegration.Helpers
         /// SpawnAbility) inherit <paramref name="parentCreatureData"/> - clones it, swaps in the
         /// child's own real prefab identity, and applies it the same way a direct redeem spawn would.
         /// </summary>
-        public static void ApplyInheritedScaling(GameObject child, GameObject prefab, CreatureData parentCreatureData, string redeemerName, string redeemTitle, string lookupPrefabName)
+        public static void ApplyInheritedScaling(GameObject child, GameObject prefab, CreatureData parentCreatureData, string redeemerName, string redeemTitle, string redeemId, string lookupPrefabName)
         {
             // SpawnAbility isn't creature-exclusive (e.g. an AOE puddle or projectile) - only
             // inherit onto actual creatures, same gate the redeem-shower Spawn2 overload uses.
@@ -438,7 +440,7 @@ namespace WizshBoneTwitchIntegration.Helpers
             CreatureData childCreatureData = CloneForChild(parentCreatureData, prefab.name);
 
             TwitchCreaturePersistentData childData = child.GetComponent<TwitchCreaturePersistentData>() ?? child.AddComponent<TwitchCreaturePersistentData>();
-            childData.SetInherited(redeemerName, redeemTitle, lookupPrefabName, childCreatureData);
+            childData.SetInherited(redeemerName, redeemTitle, redeemId, lookupPrefabName, childCreatureData);
         }
 
         public static void SetFollowInRadius(bool value)

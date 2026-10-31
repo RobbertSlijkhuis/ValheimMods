@@ -107,6 +107,24 @@ Implications (not yet designed):
 - The 50-limit math: linked redeems must not count (`wanted.Count` only covers pushed redeems, so this should follow from `IsPushedToTwitch`; to confirm during planning).
 - Search in the Redeems tab ("title or type") - whether it should also match the target's name. Not discussed.
 
+## Progress: id instead of title
+
+**Stage 1 is done (2026-10-28, code written, not yet tested in-game):**
+- `CustomRewardEvent.RedeemId`, set by `HandleRedeem`.
+- Test redeems carry their redeem's id: `TestRedeemEventHelper.Create(redeem, cost)` sets `RedeemId` (and the full title the ZDO components still need), and `HandleRedeem` resolves `GetRedeemById(event.RedeemId) ?? FindRedeemFor(event)`. The Trigger button and `WBTIUseRedeem` use it. `WBTIUseRedeem` matches the typed name case-insensitively and a mistyped name now logs a warning instead of making an "unknown" history entry.
+- `RedeemManager` disk-profile `UpdateRedeem` / `DeleteRedeem` / `SetEnabled` find redeems by `id`. `ExtraConfigHelper.RestoreLockedProfile` stays on titles on purpose: it reads raw files with no ids.
+- `FindRedeemFor` matches by reward id only (title fallback removed); `HasUnresolvedRedeemsFor` has no title branch. A redemption on a reward the id map doesn't know yet (e.g. during the first sync) is left unresolved in the history.
+- `RedeemHelper.GetRedeemById`; `RedeemerTagHelper.TryResolve` uses `RedeemId`, with a title fallback only for the title-only event built by `TwitchSurpriseChest` (~l.370).
+
+**Stage 2 is done (2026-10-28, code written, not yet tested in-game):** objects a redeem spawns now store the redeem id.
+- One shared ZDO key `WBTI_RedeemId` on `TwitchBasePersistentData` (`RedeemId`, `SetRedeemId`: in memory first, ZDO write only by the owner). Written at spawn from `event.RedeemId` by `TwitchPersistentDamage`, `TwitchPiecePersistentData`, `TwitchSurpriseChest` and `TwitchCreaturePersistentData` (`SetData(..., redeemId:)`, `SetInherited`), and copied to a propagated fire.
+- Each component's `Awake` resolves with `RedeemHelper.FindRedeem(id, legacyTitle)`: by id when the object has one (an id that doesn't resolve finds nothing, never a title guess); the title is used only for an object with no id, to migrate it by writing the id.
+- `SetRedeemId` is set-once. It writes at once when this client owns the object, claims ownership first when nobody owns it (`HasOwner()` false; ownership at `Awake` is usually unassigned, `ZDOMan.ReleaseNearbyZDOS` hands it out later), and otherwise retries every 2 s until the id is in the ZDO (the owner wrote it, or this client became owner). It never takes an object from another peer.
+- The old pipe-delimited strings are unchanged and still hold the title, so an older mod version in the same world keeps working.
+- The creature-inheritance chain (`TryResolveParentCreatureData` / `ApplyInheritedScaling` / `SetInherited`) passes the id along. "Manual claim" = no title and no id.
+- `RedeemerTagHelper.TryResolve` is id-only; the chest's loot creatures get `RedeemId` from the chest.
+- Still title-based on purpose: leaderboard and death-credit keys. Removable later: the title fallback in `FindRedeem`, `GetRedeemByTitle`, and the title written into the strings, once old worlds are migrated and older versions are gone.
+
 ## Blocker
 
-The user wants to fix other problems first - most likely the title-as-identity problem above - before continuing. Resume with: read this file, then continue with the Step 3 UI and the identity design, and only then write a plan. The user wants to be told explicitly before a plan is written ("I'll tell you when").
+The user wanted to fix the title-as-identity problem first (stage 2 above) before continuing. Resume with: read this file, then continue with the Step 3 UI and the identity design, and only then write a plan. The user wants to be told explicitly before a plan is written ("I'll tell you when").

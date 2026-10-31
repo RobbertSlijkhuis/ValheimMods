@@ -1,4 +1,5 @@
 using System;
+using WizshBoneTwitchIntegration.Models;
 using WizshBoneTwitchIntegration.TwitchApi.Models;
 
 namespace WizshBoneTwitchIntegration.Helpers
@@ -14,7 +15,11 @@ namespace WizshBoneTwitchIntegration.Helpers
             return entry.RedemptionId == Guid.Empty.ToString();
         }
 
-        public static CustomRewardEvent Create(string title, long cost)
+        /// <summary>
+        /// The event carries the redeem's id, which HandleRedeem finds the redeem by, and its Twitch-facing (prefixed)
+        /// title, which what the redeem spawns looks the redeem up by again later.
+        /// </summary>
+        public static CustomRewardEvent Create(RedeemData redeem, long cost)
         {
             return new CustomRewardEvent
             {
@@ -26,7 +31,8 @@ namespace WizshBoneTwitchIntegration.Helpers
                 UserInput         = "",
                 Status            = CustomRewardRedemptionState.Unfulfilled,
                 CustomRewardId    = "",
-                CustomRewardTitle = title,
+                CustomRewardTitle = RedeemManager.GetFullTitle(redeem),
+                RedeemId          = redeem.id,
                 CustomRewardCost  = cost,
                 CustomRewardPrompt = "",
                 RedeemedAt        = DateTime.Now.ToShortDateString()

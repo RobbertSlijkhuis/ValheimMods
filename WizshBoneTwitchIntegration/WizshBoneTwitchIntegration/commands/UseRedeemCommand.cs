@@ -54,17 +54,21 @@ namespace WizshBoneTwitchIntegration.Commands
 
                 // Matched against the raw (prefix-free) RedeemData.title so console usage can
                 // stay short (e.g. "WBTIUseRedeem Timestop" rather than the full "WBTI Timestop").
-                RedeemData redeem = customRewards.GetRedeemList().Find(item => item.title == title);
-                if (redeem != null && !redeem.enabled)
+                RedeemData redeem = customRewards.GetRedeemList().Find(item => RedeemManager.SameTitle(item.title, title));
+
+                if (redeem == null)
+                {
+                    Jotunn.Logger.LogWarning($"[WBTI] Redeem \"{title}\" was not found, skipping test invocation.");
+                    return;
+                }
+
+                if (!redeem.enabled)
                 {
                     Jotunn.Logger.LogWarning($"[WBTI] Redeem \"{title}\" is disabled, skipping test invocation.");
                     return;
                 }
 
-                // HandleRedeem looks the redeem up by its Twitch-facing (prefixed) title - fall
-                // back to the raw typed title verbatim if no redeem was found, so the "could not
-                // find redeem" error downstream still echoes back what was actually typed.
-                CustomRewardEvent currentRewardEvent = TestRedeemEventHelper.Create(redeem != null ? RedeemManager.GetFullTitle(redeem) : title, 100);
+                CustomRewardEvent currentRewardEvent = TestRedeemEventHelper.Create(redeem, 100);
                 FakeRedeemerCommand.Apply(currentRewardEvent); // debug: only does anything after WBTIFakeRedeemer
                 WizshBoneTwitchIntegration.useRedeemCommand = true;
 
