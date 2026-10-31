@@ -223,4 +223,14 @@ copy-pasting the script wholesale:
   `DeathWizsh` Thunderstore author segment is **assumed** from the plugin GUID prefix — confirm it
   against the real Thunderstore team name, and keep the version in step with the published Core
   release. No csproj references to Core's DLL were added.
+- ✅ `ModularMagic_IceStaffs` and `ModularMagic_EarthStaffs` — aligned with the updated
+  `JotunnModStub` layout. `publish.ps1`, `publish.sh`, `rename.sh` and `RenameSolution.ps1` now live in
+  `<mod>\scripts\` (copied from the stub); the root `publish.ps1`, `publish_debug.sh` and
+  `publish_release.sh` are gone, which closes the Unix `publish_release.sh` follow-up for these two
+  mods. Both csprojs call `scripts/publish.ps1`, gained the stub's Unix post-build target, use
+  `$(BEPINEX_PATH)` in `CopyToUnity`, and copy the `.dll.mdb` only if it exists. JotunnLib is
+  2.30.1 in the csproj and `packages.config` of both mods and of the stub (stub `manifest.json`
+  dependency too). **Left as-is, by explicit user choice**: the Unity projects (still 2022.3 and
+  `<Mod>_Unity`, so `UNITY_FOLDER` still points at a non-existent `<Mod>Unity`), `DoPrebuild.props`,
+  the root `README.MD`, and per-mod `.gitignore`/`.gitattributes`.
 - ⬜ All other mods in this monorepo — not started.

@@ -4,6 +4,7 @@ using ModularMagic_Core.Configs;
 using ModularMagic_Core.Helpers;
 using ModularMagic_Core.Models;
 using ModularMagic_Core.Types;
+using System;
 using System.Collections;
 using UnityEngine;
 using static ItemDrop;
@@ -269,13 +270,23 @@ namespace ModularMagic_Core.components
                 return false;
             }
 
-            if (!Player.m_localPlayer.GetInventory().RemoveOneItem(item))
+            m_imbuement.SetRune(imbuementRune, level);
+
+            // The change is remembered on the stand before the rune leaves the inventory, so a rune is never lost for nothing
+            if (!m_imbuementTable.WriteDraft())
             {
-                Jotunn.Logger.LogError("Coudl not remove rune from inventory");
+                m_imbuement.Clear();
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Could not place the rune, the staff is not on the table anymore");
                 return false;
             }
 
-            m_imbuement.SetRune(imbuementRune, level);
+            if (!Player.m_localPlayer.GetInventory().RemoveOneItem(item))
+            {
+                Jotunn.Logger.LogError("Coudl not remove rune from inventory");
+                m_imbuement.Clear();
+                m_imbuementTable.WriteDraft();
+                return false;
+            }
 
             m_imbuementTable.m_onRuneActivation.Invoke();
 
@@ -289,12 +300,23 @@ namespace ModularMagic_Core.components
             if (alt || !hold || m_imbuement.type == ImbuementType.None || m_locked || !m_imbuementTable.IsLocalEditor())
                 return false;
 
-            if (m_imbuement.saved)
-                m_oldRune = m_imbuement.CopyRune();
-            else
-                DropRune(m_imbuement);
+            Imbuement removed = m_imbuement.CopyRune();
 
             m_imbuement.Clear();
+
+            // The change is remembered on the stand first, an unsaved rune only drops when that worked
+            if (!m_imbuementTable.WriteDraft())
+            {
+                m_imbuement.SetRune(removed.rune, removed.level);
+                m_imbuement.saved = removed.saved;
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Could not remove the rune, the staff is not on the table anymore");
+                return false;
+            }
+
+            if (removed.saved)
+                m_oldRune = removed;
+            else
+                DropRune(removed);
 
             m_imbuementTable.m_onRuneActivation.Invoke();
 
@@ -311,6 +333,21 @@ namespace ModularMagic_Core.components
             // The old rune is back from the start, so the other players are told right away and see the animation at the same time
             m_imbuement.SetRune(m_oldRune.rune, m_oldRune.level);
             m_imbuement.saved = true;
+
+            if (!m_imbuementTable.WriteDraft())
+            {
+                // Nothing is kicked out or restored
+                if (kicked != null)
+                {
+                    m_imbuement.SetRune(kicked.rune, kicked.level);
+                    m_imbuement.saved = kicked.saved;
+                }
+                else
+                    m_imbuement.Clear();
+
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Could not reset the rune, the staff is not on the table anymore");
+                return;
+            }
 
             m_imbuementTable.m_onRuneActivation.Invoke();
 
@@ -338,14 +375,23 @@ namespace ModularMagic_Core.components
         {
             yield return new WaitForSeconds(0.4f);
 
-            if (drop && kickedRune.rune != null)
+            try
             {
-                ItemDrop kicked = ImbuementHelper.DropRune(kickedRune.rune, kickedRune.level, m_transformNew.position, m_transformNew.rotation);
-                Rigidbody rigidbody = kicked.GetComponent<Rigidbody>();
-                rigidbody.AddForce(kicked.transform.forward * 300);
+                if (drop && kickedRune.rune != null)
+                {
+                    ItemDrop kicked = ImbuementHelper.DropRune(kickedRune.rune, kickedRune.level, m_transformNew.position, m_transformNew.rotation);
+                    Rigidbody rigidbody = kicked.GetComponent<Rigidbody>();
+                    rigidbody.AddForce(kicked.transform.forward * 300);
+                }
+
+                RemoveAttached(m_transformNew);
+            }
+            catch (Exception e)
+            {
+                // The reset still has to finish, otherwise the slot stays locked
+                Jotunn.Logger.LogError("Could not kick the rune out of the slot: " + e);
             }
 
-            RemoveAttached(m_transformNew);
             StartCoroutine(CompleteReset());
         }
 
@@ -353,31 +399,39 @@ namespace ModularMagic_Core.components
         {
             yield return new WaitForSeconds(0.6f);
 
-            Transform attachTransform = m_transformOld.Find("attach(Clone)");
-            MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
+            try
+            {
+                Transform attachTransform = m_transformOld.Find("attach(Clone)");
+                MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
 
-            attachTransform.SetParent(m_transformNew);
-            m_animatorOld.Rebind();
-            m_animatorOld.Update(0f);
-            m_particleSystem.Play();
+                attachTransform.SetParent(m_transformNew);
+                m_animatorOld.Rebind();
+                m_animatorOld.Update(0f);
+                m_particleSystem.Play();
 
-            Destroy(m_resetInteract);
-            m_oldRune = null;
-            meshRenderer.enabled = false;
+                Destroy(m_resetInteract);
+                m_oldRune = null;
+                meshRenderer.enabled = false;
+            }
+            finally
+            {
+                // Always unlock, an error above would otherwise lock the slot for good
+                m_locked = false;
+            }
 
-            m_locked = false;
             ApplyPending();
         }
 
         public void MarkForRemoval()
         {
-            m_locked = true;
-
             Transform attachTransform = m_transformNew.Find("attach(Clone)");
 
             m_resetInteract = attachTransform.gameObject.AddComponent<RuneTableRuneResetInteract>();
             m_particleSystem.Stop();
             m_animatorNew.SetTrigger("MarkForRemoval");
+
+            // Locked after the steps above, so an error in them can not leave the slot locked
+            m_locked = true;
 
             StartCoroutine(CompleteMarkForRemoval());
         }
@@ -386,17 +440,24 @@ namespace ModularMagic_Core.components
         {
             yield return new WaitForSeconds(0.6f);
 
-            Transform attachTransform = m_transformNew.Find("attach(Clone)");
+            try
+            {
+                Transform attachTransform = m_transformNew.Find("attach(Clone)");
 
-            attachTransform.SetParent(m_transformOld);
-            m_animatorNew.Rebind();
-            m_animatorNew.Update(0f);
+                attachTransform.SetParent(m_transformOld);
+                m_animatorNew.Rebind();
+                m_animatorNew.Update(0f);
 
-            attachTransform.localRotation = TransformHelper.GenerateRotation(new Vector3(0, 0, 0));
-            attachTransform.localPosition = new Vector3(0, 0, -40);
-            m_transformNew.localPosition = new Vector3(0f, 0f, 0f);
+                attachTransform.localRotation = TransformHelper.GenerateRotation(new Vector3(0, 0, 0));
+                attachTransform.localPosition = new Vector3(0, 0, -40);
+                m_transformNew.localPosition = new Vector3(0f, 0f, 0f);
+            }
+            finally
+            {
+                // Always unlock, an error above would otherwise lock the slot for good
+                m_locked = false;
+            }
 
-            m_locked = false;
             ApplyPending();
         }
 
@@ -470,7 +531,7 @@ namespace ModularMagic_Core.components
             // A saved rune is removed or replaced
             if (replacedRune != null && m_oldRune == null)
             {
-                if (previous.rune != null && previous.HasSameRune(replacedRune))
+                if (previous.rune != null && previous.HasSameRune(replacedRune) && m_transformNew.Find("attach(Clone)") != null)
                 {
                     m_oldRune = replacedRune;
 

@@ -31,6 +31,8 @@ namespace ModularMagic_Core.Components
         private string m_standDataString;
         // The unsaved changes (draft) of the stand the last time it was synced, null when there are none
         private string m_standDraftString;
+        // The data revision of the stand the last time it was synced
+        private uint m_syncedRevision;
 
         public UnityEvent m_onItemAttach = new UnityEvent();
         public UnityEvent m_onItemRemove = new UnityEvent();
@@ -75,9 +77,6 @@ namespace ModularMagic_Core.Components
 
             if (netView == null)
                 Jotunn.Logger.LogWarning("[Imbuements] The rune table stand has no ZNetView, saving imbuements will not work");
-
-            // Every change of the editor is remembered on the stand
-            m_onRuneActivation.AddListener(OnRuneActivation);
         }
 
         // The rune table the given item stand belongs to, or null for any other item stand
@@ -89,9 +88,6 @@ namespace ModularMagic_Core.Components
             return stand.transform.parent.GetComponent<RuneTable>();
         }
 
-        // The data revision of the stand the last time it was synced
-        private uint m_syncedRevision;
-
         // The ZDO of the stand is the source of truth, the table follows it as soon as its data changes
         private void Update()
         {
@@ -100,12 +96,9 @@ namespace ModularMagic_Core.Components
             if (zdo == null || zdo.DataRevision == m_syncedRevision)
                 return;
 
-            // The editor can only be told once the local player is there, try again next frame
-            if (Player.m_localPlayer == null || Player.m_localPlayer.GetPlayerID() == 0)
-                return;
-
-            m_syncedRevision = zdo.DataRevision;
-            SyncFromStand();
+            // A revision only counts as synced when the stand could be read, otherwise try again next frame
+            if (SyncFromStand())
+                m_syncedRevision = zdo.DataRevision;
         }
 
         public bool IsLocalEditor()
@@ -124,14 +117,16 @@ namespace ModularMagic_Core.Components
         /// <summary>
         /// Makes the table match what is on the stand. Called on every client whenever the data of the stand changes
         /// and whenever the stand updates its visual, so players that did not place the staff, or arrive later, see the same runes.
+        /// Returns false when the stand could not be read yet, so the caller has to try again.
         /// </summary>
-        public void SyncFromStand()
+        public bool SyncFromStand()
         {
             ZDO zdo = netView != null ? netView.GetZDO() : null;
 
-            // Who is the editor can only be told once the local player is there, for example not right when a world loads
-            if (zdo == null || Player.m_localPlayer == null || Player.m_localPlayer.GetPlayerID() == 0)
-                return;
+            // Who is the editor can only be told once the local player is there, for example not right when a world loads.
+            // The item of the stand is looked up in the ObjectDB
+            if (zdo == null || Player.m_localPlayer == null || Player.m_localPlayer.GetPlayerID() == 0 || ObjectDB.instance == null)
+                return false;
 
             ItemData standItem = ImbuementHelper.LoadItemFromZDO(zdo);
 
@@ -140,7 +135,7 @@ namespace ModularMagic_Core.Components
                 if (m_itemData != null)
                     StaffRemove();
 
-                return;
+                return true;
             }
 
             string dataString = standItem.m_customData.GetValueSafe(ImbuementHelper.DataKey);
@@ -153,14 +148,14 @@ namespace ModularMagic_Core.Components
             if (m_itemData == null)
             {
                 StaffAttach(dataString, standItem);
-                return;
+                return true;
             }
 
             string draftString = ImbuementHelper.GetDraft(standItem);
 
             // Neither the saved runes nor the unsaved changes changed
             if (dataString == m_standDataString && draftString == m_standDraftString)
-                return;
+                return true;
 
             m_standDataString = dataString;
             m_standDraftString = draftString;
@@ -168,6 +163,8 @@ namespace ModularMagic_Core.Components
             // The editor keeps their own working copy
             if (!IsLocalEditor())
                 StaffRefresh(dataString, standItem);
+
+            return true;
         }
 
         // Shows the saved runes and the unsaved changes of the editor to a player that is not editing
@@ -432,18 +429,19 @@ namespace ModularMagic_Core.Components
             if (netView == null || !netView.IsValid())
                 return false;
 
-            // The stand can have moved to another owner while the editor was away, only the owner's writes reach the others
-            netView.ClaimOwnership();
-
             ZDO zdo = netView.GetZDO();
             ItemData standItem = ImbuementHelper.LoadItemFromZDO(zdo);
             ImbuementSlots slots = standItem != null ? ImbuementHelper.GetSlots(standItem) : null;
 
+            // Only the editor of the staff on the stand writes, and only then the ownership is taken
             if (slots == null || m_editorId == 0 || m_editorId != ImbuementHelper.GetEditor(standItem))
             {
                 Jotunn.Logger.LogWarning("[Imbuements] Could not write to the stand, the staff of this editor is not on it");
                 return false;
             }
+
+            // The stand can have moved to another owner while the editor was away, only the owner's writes reach the others
+            netView.ClaimOwnership();
 
             change(standItem, slots);
             SaveToZDO(standItem, zdo);
@@ -451,19 +449,13 @@ namespace ModularMagic_Core.Components
             return true;
         }
 
-        private void OnRuneActivation()
-        {
-            // The viewers also invoke this when they refresh, they have nothing to remember
-            if (IsLocalEditor())
-                WriteDraft();
-        }
-
-        // Remembers the working copy of the editor on the stand, so unsaved runes are not lost when the editor walks away or relogs
-        private void WriteDraft()
+        // Remembers the working copy of the editor on the stand, so unsaved runes are not lost when the editor walks away or relogs.
+        // Called by the editor before a change is final, returns false when it could not be remembered
+        public bool WriteDraft()
         {
             string draft = ImbuementHelper.Serialize(m_imbuements);
 
-            WriteToStand((standItem, slots) =>
+            return WriteToStand((standItem, slots) =>
             {
                 string draftString = ImbuementHelper.Serialize(ImbuementHelper.Deserialize(draft, slots));
                 string savedString = ImbuementHelper.Serialize(ImbuementHelper.Deserialize(standItem.m_customData.GetValueSafe(ImbuementHelper.DataKey), slots));
