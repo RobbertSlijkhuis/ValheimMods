@@ -20,6 +20,7 @@ Write-Host "3. Create the Environment.props file."
 
 
 $modstubpath = Get-Location
+$modstubpath = Split-Path $modstubpath -Parent
 $modstubfoldername = Split-Path -Path $modstubpath -leaf
 Write-Host ""
 
@@ -46,9 +47,9 @@ if ($cmdarg -eq "-nocopy") {
 		Write-Host ""
 
 		#Copy modstub folder
-		Copy-Item ..\$modstubfoldername -Destination "..\$Name" -Recurse 
-		Set-Location ..\$Name
-		Write-Host "Current location set to: (Get-Location)"
+		Copy-Item "..\..\$modstubfoldername" -Destination "..\..\$Name" -Recurse -Exclude @(".vs",".idea",".git")
+		Set-Location "..\..\$Name"
+		Write-Host "Current location set to: $(Get-Location)"
 	}
 }
 
@@ -60,7 +61,7 @@ if ($Name -ne "")
 Write-Host "     . . . Renaming files and folders to '$Name' . . ."
 Move-Item -Path ..\$Name\JotunnModStub -Destination ..\$Name\$Name
 $unity = $Name + "Unity"
-Move-Item -Path ..\$Name\JotunnModUnity -Destination ..\$Name\$unity
+Move-Item -Path ..\$Name\JotunnModStubUnity -Destination ..\$Name\$unity
 Get-ChildItem -Path ..\$Name\ -File -Recurse | % -Process{if($_.Name -ne "JotunnModStub.zip") {Rename-Item -Path $_.PSPath -NewName $_.Name.replace("JotunnModStub", $Name)}}
 }
 else{
@@ -77,7 +78,7 @@ Write-Host $msg
 $landed = $Name + " has landed"
 ((Get-Content -path ..\$Name\$Name\$Name.cs -Raw) -replace 'ModStub has landed',$landed) | Set-Content -Path ..\$Name\$Name\$Name.cs 
 ((Get-Content -path ..\$Name\$Name\$Name.csproj -Raw) -replace 'JotunnModStub',$Name) | Set-Content -Path ..\$Name\$Name\$Name.csproj
-((Get-Content -path ..\$Name\$Name\$Name.csproj -Raw) -replace 'JotunnModUnity',$unity) | Set-Content -Path ..\$Name\$Name\$Name.csproj
+((Get-Content -path ..\$Name\$Name\$Name.csproj -Raw) -replace 'JotunnModStubUnity',$unity) | Set-Content -Path ..\$Name\$Name\$Name.csproj
 ((Get-Content -path ..\$Name\$Name\Properties\AssemblyInfo.cs -Raw) -replace 'JotunnModStub',$Name) | Set-Content -Path ..\$Name\$Name\Properties\AssemblyInfo.cs
 
 

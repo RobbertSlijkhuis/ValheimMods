@@ -32,6 +32,8 @@ namespace ModularMagic_IceStaffs.Helpers
                 aoe = config.aoe.Value,
                 damageFrost = config.damageFrost.Value,
                 damagePierce = config.damagePierce.Value,
+                damageChop = config.damageChop.Value,
+                damagePickaxe = config.damagePickaxe.Value,
                 attackForce = config.attackForce.Value,
             });
 

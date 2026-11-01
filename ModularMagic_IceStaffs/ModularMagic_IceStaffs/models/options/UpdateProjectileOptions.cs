@@ -7,6 +7,8 @@ namespace ModularMagic_IceStaffs.Models
         public float? aoe = null;
         public float? damageFrost = null;
         public float? damagePierce = null;
+        public float? damageChop = null;
+        public float? damagePickaxe = null;
         public float? attackForce = null;
     }
 }

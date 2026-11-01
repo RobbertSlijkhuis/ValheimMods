@@ -1,6 +1,7 @@
 ﻿using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
+using ModularMagic_FireStaffs.Configs;
 using ModularMagic_FireStaffs.Models;
 using UnityEngine;
 
@@ -33,6 +34,8 @@ namespace ModularMagic_FireStaffs.Helpers
                 damageBlunt = config.damageBlunt.Value,
                 damageFire = config.damageFire.Value,
                 attackEitr = config.useEitr.Value,
+                projectileVelocity = config.projectileVelocity?.Value,
+                projectileAccuracy = config.projectileAccuracy?.Value,
             });
 
             ItemManager.Instance.AddItem(new CustomItem(prefab, true, itemConfig));

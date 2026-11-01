@@ -1,9 +1,10 @@
 ﻿using ModularMagic_FireStaffs.Models;
+using ModularMagic_FireStaffs.Types;
 using System;
 
 namespace ModularMagic_FireStaffs.Configs
 {
-    internal static class ConfigStaffs
+    internal static class PluginConfig
     {
         public static string staff1Name = "Staff of Sparks";
         public static string staff1Recipe = "Bronze:6, RoundLog:20, Coal:10, SurtlingCore:6";
@@ -20,13 +21,84 @@ namespace ModularMagic_FireStaffs.Configs
         public static string staff3UpgradeRecipe = "YggdrasilWood:5, Sap:2, Eitr:8";
         public static StaffConfig staffFire3 = new StaffConfig();
 
+        public static string secondaryAttackNovaName = "Secondary attack Nova";
+        public static SecondaryAttackConfig secondaryAttackNova = new SecondaryAttackConfig();
+
+        public static string secondaryAttackRainName = "Secondary attack Meteors";
+        public static SecondaryAttackConfig secondaryAttackRain = new SecondaryAttackConfig();
+
+        public static ImbuementConfig imbuementConfig = new ImbuementConfig();
+
         private static int sectionIndex = 1;
 
         public static void Init()
         {
+            imbuementConfig.GenerateConfig();
             InitStaffFire1Config();
             InitStaffFire2Config();
             InitStaffFire3Config();
+            InitSecondaryAttackNovaConfig();
+            InitSecondaryAttackRainConfig();
+        }
+
+        private static void InitSecondaryAttackRainConfig()
+        {
+            try
+            {
+                SecondaryAttackConfigOptions options = new SecondaryAttackConfigOptions(
+                    ModularMagic_FireStaffs.Instance.prefabs.secondaryAttackRain,
+                    ModularMagic_FireStaffs.Instance.prefabs.projectileMeteor,
+                    SecondaryAttackType.Projectile,
+                    secondaryAttackRainName
+                )
+                {
+                    useEitr = 100,
+                    cooldown = 30f,
+                    aoe = 3f,
+                    damageFire = 50f,
+                    damageBlunt = 40f,
+                    damageChop = 20f,
+                    damagePickaxe = 20f,
+                    attackForce = 100f,
+                    launchAngle = -25f,
+                    projectileVelocity = 20f,
+                    projectileAccuracy = 1f,
+                    spawnAbilityPrefab = ModularMagic_FireStaffs.Instance.prefabs.scriptMeteors,
+                    minToSpawn = 15,
+                    maxToSpawn = 15,
+                    spawnRadius = 20f,
+                };
+                secondaryAttackRain.GenerateConfig(options);
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + secondaryAttackRainName + " config: " + error);
+            }
+        }
+
+        private static void InitSecondaryAttackNovaConfig()
+        {
+            try
+            {
+                SecondaryAttackConfigOptions options = new SecondaryAttackConfigOptions(
+                    ModularMagic_FireStaffs.Instance.prefabs.secondaryAttackNova,
+                    ModularMagic_FireStaffs.Instance.prefabs.attackNova,
+                    SecondaryAttackType.AOE,
+                    secondaryAttackNovaName
+                )
+                {
+                    useEitr = 100,
+                    cooldown = 30f,
+                    aoe = 6f,
+                    damageFire = 75f,
+                    attackForce = 40f,
+                };
+                secondaryAttackNova.GenerateConfig(options);
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + secondaryAttackNovaName + " config: " + error);
+            }
         }
 
         private static void InitStaffFire1Config()
@@ -47,6 +119,8 @@ namespace ModularMagic_FireStaffs.Configs
                     deflectionForce = 20,
                     attackForce = 20,
                     useEitr = 20,
+                    projectileVelocity = 15f,
+                    projectileAccuracy = 2f,
                 };
                 staffFire1.GenerateConfig(options);
             }
@@ -74,6 +148,8 @@ namespace ModularMagic_FireStaffs.Configs
                     deflectionForce = 20,
                     attackForce = 20,
                     useEitr = 27,
+                    projectileVelocity = 17.5f,
+                    projectileAccuracy = 1.5f,
                 };
                 staffFire2.GenerateConfig(options);
             }
@@ -101,6 +177,8 @@ namespace ModularMagic_FireStaffs.Configs
                     deflectionForce = 20,
                     attackForce = 35,
                     useEitr = 35,
+                    projectileVelocity = 20f,
+                    projectileAccuracy = 1f,
                 };
                 staffFire3.GenerateConfig(options);
             }

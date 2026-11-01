@@ -90,6 +90,8 @@ namespace ModularMagic_IceStaffs.Configs
                     aoe = 1.5f,
                     damageFrost = 50f,
                     damagePierce = 40f,
+                    damageChop = 20f,
+                    damagePickaxe = 20f,
                     attackForce = 100f,
                     launchAngle = -25f,
                     projectileVelocity = 20f,

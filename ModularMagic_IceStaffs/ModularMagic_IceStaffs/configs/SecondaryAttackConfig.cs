@@ -15,6 +15,8 @@ namespace ModularMagic_IceStaffs.configs
         public ConfigEntry<float> aoe;
         public ConfigEntry<float> damageFrost;
         public ConfigEntry<float> damagePierce;
+        public ConfigEntry<float> damageChop;
+        public ConfigEntry<float> damagePickaxe;
         public ConfigEntry<float> attackForce;
         public ConfigEntry<float> cooldown;
         public ConfigEntry<float> launchAngle;
@@ -55,7 +57,20 @@ namespace ModularMagic_IceStaffs.configs
                 value => UpdateTarget(options, damageFrost: value));
             damagePierce = BindFloat(config, options, "Pierce damage", options.damagePierce, "The pierce damage of the attack (not visible ingame)",
                 value => UpdateTarget(options, damagePierce: value));
-            attackForce = BindFloat(config, options, "Attack force", options.attackForce, "The attack force of the attack applied to targets hit",
+
+            if (options.damageChop != null)
+            {
+                damageChop = BindFloat(config, options, "Chop damage", (float)options.damageChop, "The chop damage of the attack (not visible ingame, effects wood cutting damage)",
+                    value => UpdateTarget(options, damageChop: value));
+            }
+
+            if (options.damagePickaxe != null)
+            {
+                damagePickaxe = BindFloat(config, options, "Pickaxe damage", (float)options.damagePickaxe, "The pickaxe damage of the attack (not visible ingame, effects mining damage)",
+                    value => UpdateTarget(options, damagePickaxe: value));
+            }
+
+            attackForce =BindFloat(config, options, "Attack force", options.attackForce, "The attack force of the attack applied to targets hit",
                 value => UpdateTarget(options, attackForce: value));
 
             if (options.launchAngle != null)
@@ -119,7 +134,8 @@ namespace ModularMagic_IceStaffs.configs
         }
 
         // The AOE or the projectile that carries the damage of the attack
-        private static void UpdateTarget(SecondaryAttackConfigOptions options, float? aoe = null, float? damageFrost = null, float? damagePierce = null, float? attackForce = null)
+        private static void UpdateTarget(SecondaryAttackConfigOptions options, float? aoe = null, float? damageFrost = null, float? damagePierce = null,
+            float? damageChop = null, float? damagePickaxe = null, float? attackForce = null)
         {
             if (options.type == SecondaryAttackType.Projectile)
             {
@@ -128,6 +144,8 @@ namespace ModularMagic_IceStaffs.configs
                     aoe = aoe,
                     damageFrost = damageFrost,
                     damagePierce = damagePierce,
+                    damageChop = damageChop,
+                    damagePickaxe = damagePickaxe,
                     attackForce = attackForce,
                 });
             }
@@ -138,6 +156,8 @@ namespace ModularMagic_IceStaffs.configs
                     aoe = aoe,
                     damageFrost = damageFrost,
                     damagePierce = damagePierce,
+                    damageChop = damageChop,
+                    damagePickaxe = damagePickaxe,
                     attackForce = attackForce,
                 });
             }

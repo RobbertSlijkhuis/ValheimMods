@@ -50,6 +50,8 @@ namespace ModularMagic_IceStaffs.Helpers
             if (options.aoe != null) { projectile.m_aoe = (float)options.aoe; }
             if (options.damageFrost != null) { projectile.m_damage.m_frost = (float)options.damageFrost; }
             if (options.damagePierce != null) { projectile.m_damage.m_pierce = (float)options.damagePierce; }
+            if (options.damageChop != null) { projectile.m_damage.m_chop = (float)options.damageChop; }
+            if (options.damagePickaxe != null) { projectile.m_damage.m_pickaxe = (float)options.damagePickaxe; }
             if (options.attackForce != null) { projectile.m_attackForce = (float)options.attackForce; }
         }
 
@@ -82,6 +84,8 @@ namespace ModularMagic_IceStaffs.Helpers
             if (options.aoe != null) { aoe.m_radius = (float)options.aoe; }
             if (options.damageFrost != null) { aoe.m_damage.m_frost = (float)options.damageFrost; }
             if (options.damagePierce != null) { aoe.m_damage.m_pierce = (float)options.damagePierce; }
+            if (options.damageChop != null) { aoe.m_damage.m_chop = (float)options.damageChop; }
+            if (options.damagePickaxe != null) { aoe.m_damage.m_pickaxe = (float)options.damagePickaxe; }
             if (options.attackForce != null) { aoe.m_attackForce = (float)options.attackForce; }
         }
         public static void UpdateItemDropStats(GameObject prefab, UpdateItemDropStatsOptions options)

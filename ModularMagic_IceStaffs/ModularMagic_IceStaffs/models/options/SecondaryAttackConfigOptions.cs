@@ -20,6 +20,10 @@ namespace ModularMagic_IceStaffs.Models
         public float damagePierce = 0f;
         public float attackForce = 0f;
 
+        // Only for attacks that deal this type of damage
+        public float? damageChop;
+        public float? damagePickaxe;
+
         // Only for attacks with a cooldown
         public float? cooldown;
 
