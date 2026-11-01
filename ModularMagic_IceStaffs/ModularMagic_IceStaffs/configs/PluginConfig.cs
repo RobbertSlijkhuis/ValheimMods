@@ -13,13 +13,13 @@ namespace ModularMagic_IceStaffs.Configs
         public static StaffConfig staffIce1 = new StaffConfig();
 
         public static string staff2Name = "Staff of Permafrost";
-        public static string staff2Recipe = $"FineWood:20, FreezeGland:10, Crystal:10, {MaterialType.EitrFine}:12";
-        public static string staff2UpgradeRecipe = $"FineWood:5, FreezeGland:5, {MaterialType.EitrCrude}:4";
+        public static string staff2Recipe = $"Silver:10, FineWood:20, FreezeGland:10, {MaterialType.EitrFine}:12";
+        public static string staff2UpgradeRecipe = $"Silver:2, FreezeGland:5, {MaterialType.EitrCrude}:4";
         public static StaffConfig staffIce2 = new StaffConfig();
 
         public static string staff3Name = "Hrímkald, touch of Niflheim";
-        public static string staff3Recipe = $"YggdrasilWood:20, Sap:10, FreezeGland:20, Eitr:12";
-        public static string staff3UpgradeRecipe = "YggdrasilWood:10, Sap:3, Eitr:4";
+        public static string staff3Recipe = $"Silver:20, YggdrasilWood:20, FreezeGland:20, Eitr:12";
+        public static string staff3UpgradeRecipe = "Silver:2, FreezeGland:5, Eitr:4";
         public static StaffConfig staffIce3 = new StaffConfig();
 
         public static string staff4Name = "Skull of Frost";
