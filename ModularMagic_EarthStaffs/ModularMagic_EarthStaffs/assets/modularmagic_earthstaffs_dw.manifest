@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 159798452
+CRC: 33953552
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 037f84469800c0bbec3d2455e0191132
+    Hash: d7150f0eb7aa61d82f0bcf35bb1e7fb4
   TypeTreeHash:
     serializedVersion: 2
     Hash: 1acba3acefb0396735abf8fc818b7ab5
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 037f84469800c0bbec3d2455e0191132
+    Hash: d7150f0eb7aa61d82f0bcf35bb1e7fb4
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -134,7 +134,6 @@ Assets:
 - Assets/Custom/PrefabInstance/Earth/MMES_StaffEarth1.prefab
 - Assets/Custom/PrefabInstance/Earth/fx/fx_staff_earth_spores_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/fx/fx_mushroom_projectile_hit_MMES.prefab
-- Assets/Custom/Sprite/Earth/StaffEarth3Sprite_MMES.png
 - Assets/Custom/PrefabInstance/Earth/fx/fx_staff_earth_spikes_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/projectiles/projectile_spawn_boulder_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/fx/fx_sledge_demolisher_hit_large_MMES.prefab
@@ -146,5 +145,4 @@ Assets:
 - Assets/Custom/PrefabInstance/Earth/attacks/secondary_root_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/attacks/secondary_nova_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/attacks/main_cone_attack_MMES.prefab
-- Assets/Custom/Sprite/Earth/StaffEarth2Sprite_MMES.png
 Dependencies: []

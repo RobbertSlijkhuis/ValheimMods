@@ -1,10 +1,41 @@
 ﻿using HarmonyLib;
+using ModularMagic_IceStaffs.Helpers;
+using System;
+using static ItemDrop;
+using CoreImbuementHelper = ModularMagic_Core.Helpers.ImbuementHelper;
 
 namespace ModularMagic_IceStaffs.Harmony
 {
     [HarmonyPatch]
     public class Patches
     {
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Game), "Start")]
+        public static void GameStart_Postfix()
+        {
+            IceImbuementHelper.GameIsReady = true;
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Humanoid), "EquipItem")]
+        public static void EquipItem_Postfix(Humanoid __instance, ItemData item)
+        {
+            try
+            {
+                if (__instance == null || !__instance.IsPlayer() || item == null || !IceImbuementHelper.GameIsReady)
+                    return;
+
+                if (!CoreImbuementHelper.HasImbuements(item) || !IceImbuementHelper.IsIceStaff(item))
+                    return;
+
+                IceImbuementHelper.ApplyImbuements(item);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not update item/set effects in EquipItem_Postfix: " + e);
+            }
+        }
+
         [HarmonyPatch(typeof(Attack), "Start")]
         [HarmonyPrefix]
         public static bool AttackStart_Prefix(Humanoid character, Attack __instance)

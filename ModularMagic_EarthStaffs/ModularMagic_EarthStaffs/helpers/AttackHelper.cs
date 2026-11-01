@@ -7,27 +7,6 @@ namespace ModularMagic_EarthStaffs.Helpers
 {
     internal class AttackHelper
     {
-        // The secondary attacks of the staffs are marked with this value (m_drawStaminaDrain in Unity)
-        public const int SecondaryAttackMarker = 8901;
-
-        public static bool IsSecondaryAttack(Attack attack)
-        {
-            return attack != null && attack.m_drawStaminaDrain == SecondaryAttackMarker;
-        }
-
-        /// <summary>
-        /// The game takes the eitr cost from the main attack of the weapon, also when the secondary attack is used.
-        /// The secondary attacks of the staffs have their own cost (with the same skill discount the game applies).
-        /// </summary>
-        public static float GetSecondaryAttackEitr(Attack attack, Character character, ItemData weapon)
-        {
-            if (attack.m_attackEitr <= 0f)
-                return 0f;
-
-            float skillFactor = character.GetSkillFactor(weapon.m_shared.m_skillType);
-            return attack.m_attackEitr - attack.m_attackEitr * 0.33f * skillFactor;
-        }
-
         public static void UpdateCone(GameObject aoePrefab, SecondaryAttackConfig config)
         {
             UpdateHelper.UpdateAoe(aoePrefab, new UpdateAoeOptions()
@@ -62,7 +41,7 @@ namespace ModularMagic_EarthStaffs.Helpers
         {
             UpdateHelper.UpdateItemData(attackPrefab, new UpdateItemDataOptions()
             {
-                secondaryLaunchAngle = config.launchAngle.Value,
+                launchAngle = config.launchAngle.Value,
                 projectileVelocity = config.projectileVelocity.Value,
                 projectileAccuracy = config.projectileAccuracy.Value,
             });

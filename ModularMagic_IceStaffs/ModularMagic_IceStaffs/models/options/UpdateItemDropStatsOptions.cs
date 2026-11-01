@@ -17,6 +17,10 @@ namespace ModularMagic_IceStaffs.Models
         public float? damageMultiplier = null;
         public float? damageFrost = null;
         public float? damagePierce = null;
+        public float? damagePiercePerLevel = null;
+        public float? projectileVelocity = null;
+        public float? projectileAccuracy = null;
+        public float? projectileBurst = null;
         public float? eitrRegen = null;
     }
 }

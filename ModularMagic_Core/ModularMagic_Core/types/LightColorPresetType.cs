@@ -1,6 +1,6 @@
 ﻿namespace ModularMagic_Core.Types
 {
-    internal class LightColorPresetType
+    public class LightColorPresetType
     {
         public static string None => "None";
         public static string Red => "Red";
@@ -9,6 +9,7 @@
         public static string LemonGreen => "LemonGreen";
         public static string Green => "Green";
         public static string LightBlue => "LightBlue";
+        public static string IceBlue => "IceBlue";
         public static string Blue => "Blue";
         public static string Purple => "Purple";
         public static string Pink => "Pink";

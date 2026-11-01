@@ -27,6 +27,10 @@ namespace ModularMagic_IceStaffs.Models
         public float? damageLightning;
         public float? damagePickaxe;
         public float? damagePierce;
+        public float? damagePiercePerLevel;
+        public float? projectileVelocity;
+        public float? projectileAccuracy;
+        public float? projectileBurst;
         public float? damageSlash;
         public float? damageSpirit;
         public int? blockArmor;

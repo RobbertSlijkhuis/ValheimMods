@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using CoreSecondaryAttackHelper = ModularMagic_Core.Helpers.SecondaryAttackHelper;
 
 namespace ModularMagic_EarthStaffs
 {
@@ -31,10 +32,7 @@ namespace ModularMagic_EarthStaffs
         private AssetBundle assetBundle;
         public static CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();
         public static CustomPrefabs prefabs = new CustomPrefabs();
-        public static CustomStatusEffects effects = new CustomStatusEffects();
-        public static CustomSprites sprites = new CustomSprites();
         public static ItemDataSnapshots snapshots = new ItemDataSnapshots();
-        public static bool gameIsReady = false;
 
         public void Awake()
         {
@@ -42,11 +40,13 @@ namespace ModularMagic_EarthStaffs
             LocaleEnglish.Init();
             InitAssetBundle();
             PluginConfig.Init();
-            InitStatusEffects();
+            // Every entry forwards its change to its own handler from this event in the order they were created,
+            // so this runs after the handlers that update the prefabs, and the staff in the hand gets the new values with its runes
+            Config.SettingChanged += (sender, args) => EarthImbuementHelper.ReapplyOnHeldStaff();
+            RegisterSecondaryAttacks();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             PrefabManager.OnVanillaPrefabsAvailable += AddEarthStaffs;
-            PrefabManager.OnPrefabsRegistered += FixAndLogAudioMixers;
         }
 
         private void AddEarthStaffs()
@@ -85,14 +85,6 @@ namespace ModularMagic_EarthStaffs
             }
         }
 
-        private void FixAndLogAudioMixers()
-        {
-            GameObject[] bundlePrefabs = assetBundle.LoadAllAssets<GameObject>();
-            AudioMixerHelper.FixMockedGroups(bundlePrefabs, "MMES");
-            AudioMixerDiagnostics.Log(bundlePrefabs, "MMES");
-            PrefabManager.OnPrefabsRegistered -= FixAndLogAudioMixers;
-        }
-
         private void AddImbuementSlots(GameObject prefab, int slots, int tier)
         {
             ImbuementSlots imbuementSlots = prefab.AddComponent<ImbuementSlots>();
@@ -100,25 +92,19 @@ namespace ModularMagic_EarthStaffs
             imbuementSlots.m_tier = tier;
             imbuementSlots.m_weaponType = WeaponType.MMES;
             imbuementSlots.m_allowedRunes = new List<string>(EarthImbuementHelper.AllowedRunes);
+            imbuementSlots.m_colorPreset = LightColorPresetType.Green;
         }
 
-        private void InitStatusEffects()
+        // Core gives a registered secondary attack its own eitr cost and the cooldown, the attack is recognised by the projectile it spawns.
+        // The config is bound before this is called
+        private void RegisterSecondaryAttacks()
         {
-            effects.BoulderCooldown = ScriptableObject.CreateInstance<StatusEffect>();
-            effects.BoulderCooldown.name = PluginConfig.secondaryAttackRain.cooldownStatusEffectName;
-            effects.BoulderCooldown.m_name = "Boulder cooldown";
-            effects.BoulderCooldown.m_icon = sprites.BoulderCooldown;
-            effects.BoulderCooldown.m_tooltip = "Be patient!";
-            effects.BoulderCooldown.m_ttl = PluginConfig.secondaryAttackRain.cooldown.Value;
-            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.BoulderCooldown, fixReference: false));
-
-            effects.RootsCooldown = ScriptableObject.CreateInstance<StatusEffect>();
-            effects.RootsCooldown.name = PluginConfig.secondaryAttackSummon.cooldownStatusEffectName;
-            effects.RootsCooldown.m_name = "Summon roots cooldown";
-            effects.RootsCooldown.m_icon = sprites.RootsCooldown;
-            effects.RootsCooldown.m_tooltip = "Be patient!";
-            effects.RootsCooldown.m_ttl = PluginConfig.secondaryAttackSummon.cooldown.Value;
-            ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(effects.RootsCooldown, fixReference: false));
+            CoreSecondaryAttackHelper.Register("attack_nova_MMES", PluginConfig.secondaryAttackNova.cooldownStatusEffectName, "Nova cooldown",
+                () => PluginConfig.secondaryAttackNova.cooldown.Value);
+            CoreSecondaryAttackHelper.Register("projectile_spawn_boulder_MMES", PluginConfig.secondaryAttackRain.cooldownStatusEffectName, "Boulder cooldown",
+                () => PluginConfig.secondaryAttackRain.cooldown.Value);
+            CoreSecondaryAttackHelper.Register("script_roots_MMES", PluginConfig.secondaryAttackSummon.cooldownStatusEffectName, "Summon roots cooldown",
+                () => PluginConfig.secondaryAttackSummon.cooldown.Value);
 
             //    StatusEffect exhaustAndFhoulMagicEffect = ScriptableObject.CreateInstance<StatusEffect>();
             //    exhaustAndFhoulMagicEffect.name = "ExhaustAndFoulMagicEffect_DW";
@@ -185,9 +171,6 @@ namespace ModularMagic_EarthStaffs
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_earth_spores_MMES"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_earth_spikes_MMES"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_earth_windup_MMES"), true));
-
-            sprites.BoulderCooldown = assetBundle.LoadAsset<Sprite>("StaffEarth2Sprite_MMES");
-            sprites.RootsCooldown = assetBundle.LoadAsset<Sprite>("StaffEarth3Sprite_MMES");
         }
     }
 }

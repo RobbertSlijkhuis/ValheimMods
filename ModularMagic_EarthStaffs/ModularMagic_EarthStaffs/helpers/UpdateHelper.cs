@@ -51,6 +51,7 @@ namespace ModularMagic_EarthStaffs.Helpers
             if (options.projectileVelocity != null) { itemData.m_shared.m_attack.m_projectileVel = (float)options.projectileVelocity; }
             if (options.projectileAccuracy != null) { itemData.m_shared.m_attack.m_projectileAccuracy = (float)options.projectileAccuracy; }
             if (options.projectileBurst != null) { itemData.m_shared.m_attack.m_burstInterval = (float)options.projectileBurst; }
+            if (options.launchAngle != null) { itemData.m_shared.m_attack.m_launchAngle = (float)options.launchAngle; }
             if (options.weight != null) { itemData.m_shared.m_weight = (float)options.weight; }
             if (options.maxDurability != null) { itemData.m_shared.m_maxDurability = (float)options.maxDurability; }
             if (options.movementModifier != null) { itemData.m_shared.m_movementModifier = (float)options.movementModifier; }

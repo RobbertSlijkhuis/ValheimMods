@@ -44,6 +44,11 @@ namespace ModularMagic_Core.Helpers
                     emissionColor = new Color(1.26792896f, 1.7979852f, 1.96205056f, 1f);
                     lightColor = new Color(0.8349056f, 0.9467509f, 1f, 1f); // #D5F1FF
                     break;
+                case nameof(LightColorPresetType.IceBlue):
+                    flareColor = new Color(0f, 0.9490196f, 1.4980f, 0.09803922f); // #94DBFF19
+                    emissionColor = new Color(0, 1.8980f, 2.9960f, 1f);
+                    lightColor = new Color(0f, 0.6335f, 1f, 1f); // #00A2FF
+                    break;
                 case nameof(LightColorPresetType.Blue):
                     flareColor = new Color(0f, 0.7254902f, 1f, 0.09803922f); // #00B9FF19
                     emissionColor = new Color(0f, 0.9814469f, 2.3f, 1f);
@@ -78,6 +83,18 @@ namespace ModularMagic_Core.Helpers
                 emissionColor = emissionColor,
                 lightColor = lightColor,
             };
+        }
+
+        // The emission colour is HDR, a particle colour is not. Scaling it to a brightest channel of 1 keeps its hue
+        public static Color GetParticleColor(string value)
+        {
+            Color emission = GetColors(value).emissionColor;
+            float max = Mathf.Max(emission.r, emission.g, emission.b);
+
+            if (max <= 0f)
+                return Color.white;
+
+            return new Color(emission.r / max, emission.g / max, emission.b / max, 1f);
         }
 
         public static Color ApplyMultiplierToColor(Color color, float multiplier)

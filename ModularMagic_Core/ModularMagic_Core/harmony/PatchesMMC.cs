@@ -102,5 +102,61 @@ namespace ModularMagic_Core.Harmony
                 Jotunn.Logger.LogError("Something went wrong in SetVisualItem_Postfix: " + e);
             }
         }
+
+        /// <summary>
+        /// The game uses the eitr cost of the main attack of the weapon for every attack, also the secondary one.
+        /// The secondary attacks that staff mods registered use their own cost, so the eitr saving of the runes works.
+        /// </summary>
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Attack), nameof(Attack.GetAttackEitr), new[] { typeof(Character), typeof(ItemData) })]
+        public static void GetAttackEitr_Postfix(Attack __instance, Character character, ItemData weapon, ref float __result)
+        {
+            try
+            {
+                if (SecondaryAttackHelper.TryGetEitr(__instance, character, weapon, out float eitr))
+                    __result = eitr;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in GetAttackEitr_Postfix: " + e);
+            }
+        }
+
+        /// <summary>
+        /// The registered secondary attacks with a cooldown can not start while the staff is recharging.
+        /// </summary>
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Attack), "Start")]
+        public static bool AttackStart_Prefix(Attack __instance, Humanoid character)
+        {
+            try
+            {
+                return SecondaryAttackHelper.CheckCooldown(character, __instance);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in AttackStart_Prefix: " + e);
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// The cooldown starts when the attack really started. The game can still refuse it after the prefix
+        /// (not enough eitr or stamina, a dungeon, ...), and then the staff must not start recharging.
+        /// </summary>
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Attack), "Start")]
+        public static void AttackStart_Postfix(Attack __instance, Humanoid character, bool __result)
+        {
+            try
+            {
+                if (__result)
+                    SecondaryAttackHelper.StartCooldown(character, __instance);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in AttackStart_Postfix: " + e);
+            }
+        }
     }
 }

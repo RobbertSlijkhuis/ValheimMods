@@ -45,7 +45,10 @@ Core owns the rune table, the runes and the data that says which runes are on a 
    slots.m_tier = 1;                      // slot tier
    slots.m_weaponType = WeaponType.MMFS;  // the suffix of your rune texts
    slots.m_allowedRunes = new List<string> { RuneId.EitrCost, RuneId.Cone, RuneId.Nova };  // the runes this weapon supports
+   slots.m_colorPreset = LightColorPresetType.Blue;  // the colour of the rune table while this weapon is on it
    ```
+
+   `m_colorPreset` is required: it colours the table glow, the runes in the slots and their particles. Use a `LightColorPresetType` (`Red`, `Orange`, `Yellow`, `LemonGreen`, `Green`, `LightBlue`, `Blue`, `Pink`, `Purple`, `White`). When it is missing or not a known name the table is white. The button of the table keeps its own state colours (green, yellow, red).
 
    A weapon is imbuable when its drop prefab has this component. Nothing has to be seeded into the item. `m_allowedRunes` is empty by default, so a forgotten list shows up as runes that can not be slotted. The weapon also decides how high it goes: a rune level can only be slotted when the slot tier (`m_tier`) is at least the tier that level needs (set per rune in Core, see `m_tiers`), so a low tier weapon can not take high level runes, and some runes not at all.
 
@@ -117,6 +120,22 @@ ImbuementHelper.GetDescriptionKey(RuneId.Nova, WeaponType.MMES)   item_rune_nova
 
 Add the texts in your mod with Jotunn (`CustomLocalization.AddTranslation`), using these two methods for the keys. See `localization/LocaleEnglish.cs` in EarthStaffs. When a weapon has no text for a rune, the rune shows its default English name and description from Core (`ImbuementRune.m_defaultName` and `m_defaultDescription`), so the runes are readable before a staff mod has its own texts.
 
+## Secondary attacks (nova, rain, summon, ...)
+
+A secondary attack is a wrapper prefab whose attack is copied to the staff on equip (see `ModularMagic_IceStaffs`/`ModularMagic_EarthStaffs`). Two things need Core's help, so register each secondary attack once in `Awake`, after the config is bound:
+
+```csharp
+SecondaryAttackHelper.Register(
+    "attack_nova_MMIS",                 // the name of the projectile prefab the attack spawns, unique for this attack
+    "secondary_nova_MMISCooldownStatusEffect", // the unique name of the cooldown status effect (null: no cooldown)
+    "Frost nova cooldown",              // what the player sees
+    () => PluginConfig.secondaryAttackNova.cooldown.Value); // the cooldown in seconds, read every time it starts
+```
+
+- **Eitr cost:** the game charges every secondary attack the eitr cost of the main attack. For a registered attack Core uses the cost of the attack itself (with the skill discount). One `Attack.GetAttackEitr` postfix in Core does this for all staff mods.
+- **Cooldown:** when a cooldown is given, a registered attack can not start while the status effect is active ("The staff is still recharging!"). The cooldown starts when the attack can really start (not without enough eitr), lasts the number of seconds from the callback, and shows the icon of the staff that cast it. The same cooldown is used by every staff that has the attack.
+- **Recognised by the projectile name**, not by a number in Unity. An attack that is not registered is left alone. A cooldown effect is created by `Register`, a mod does not have to create status effects.
+
 ## Rules for effects that work in multiplayer
 
 - **Apply on top of base stats, and be repeatable.** The effects are applied every time the staff is equipped. Start from the base stats, not from the item's current values, and read those base stats from the config on every equip (do not copy them at startup). EarthStaffs' `ItemDataSnapShot` is a config-backed example. Values a server syncs after the game started are then used too.
@@ -129,7 +148,7 @@ Add the texts in your mod with Jotunn (`CustomLocalization.AddTranslation`), usi
 
 Everything in the namespaces `ModularMagic_Core.Components`, `.Helpers`, `.Models` and `.Types` that is listed here is public. The rest of Core is internal.
 
-- **`ImbuementSlots`** (component): `m_slots`, `m_tier`, `m_weaponType`, `m_allowedRunes`, `IsRuneAllowed(runeId)`.
+- **`ImbuementSlots`** (component): `m_slots`, `m_tier`, `m_weaponType`, `m_allowedRunes`, `m_colorPreset`, `IsRuneAllowed(runeId)`.
 - **`ImbuementHelper`** (static):
   - `HasImbuements(ItemData)`: the weapon has an `ImbuementSlots` component.
   - `Read(ItemData)`: the runes of the weapon, one `Imbuement` per slot.
@@ -144,6 +163,8 @@ Everything in the namespaces `ModularMagic_Core.Components`, `.Helpers`, `.Model
 - **`Imbuement`** (one slot): `type`, `value`, `name`, `description`, `prefab`, `level`, `runeId`, `tier`, `weaponType`, `rune`. `name` and `description` are localized when read.
 - **`ImbuementRune`** (component on every rune prefab): `m_id`, `m_type`, `m_value`, `m_maxLevel`, `m_tiers`, `m_defaultName`, `m_defaultDescription`, `GetRequiredTier(level)`, `IsValidLevel(level)`, `GetName(weaponType)`, `GetDescription(weaponType)`.
 - **`ImbuementType`**, **`WeaponType`**, **`RuneId`**: `const string`s, so they work in `case` labels.
+- **`LightColorPresetType`**: the names for `m_colorPreset`.
+- **`SecondaryAttackHelper`** (static): `Register(projectileName, cooldownEffectName, cooldownDisplayName, cooldownSeconds)`, see [Secondary attacks](#secondary-attacks-nova-rain-summon-).
 
 ## Saved data
 

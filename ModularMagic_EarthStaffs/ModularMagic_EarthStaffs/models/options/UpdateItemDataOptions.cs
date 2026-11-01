@@ -32,6 +32,8 @@ namespace ModularMagic_EarthStaffs.Models
         public float? projectileVelocity = null;
         public float? projectileAccuracy = null;
         public float? projectileBurst = null;
+        // The launch angle of the main attack of the item (the secondary one is secondaryLaunchAngle)
+        public float? launchAngle = null;
         public float? secondaryLaunchAngle = null;
         public float? secondaryProjectileVelocity = null;
         public float? secondaryProjectileAccuracy = null;

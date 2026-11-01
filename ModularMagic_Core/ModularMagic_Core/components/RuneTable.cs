@@ -41,7 +41,9 @@ namespace ModularMagic_Core.Components
 
         private Transform m_altarTransform;
         private Transform m_staffTransform;
+        private ParticleSystem m_particles;
         private Material m_tableMat;
+        private string m_colorPreset;
         private Color m_emissionHigh;
         private Color m_emissionLow;
         private float m_emissionMultiplier = 0.3f;
@@ -58,12 +60,14 @@ namespace ModularMagic_Core.Components
             m_staffTransform = transform.Find("itemstand/attach_other");
             m_altarTransform = transform.Find("new/altar");
 
+            Transform particlesTransform = transform.Find("effects/particles");
+            m_particles = particlesTransform != null ? particlesTransform.GetComponent<ParticleSystem>() : null;
+
+            if (m_particles == null)
+                Jotunn.Logger.LogWarning("[Imbuements] The rune table has no effects/particles, the particles of the table will not show");
+
             MeshRenderer meshComp = m_altarTransform.gameObject.GetComponent<MeshRenderer>();
             m_tableMat = meshComp.materials[0];
-
-            // TODO: Move this to staff attach when specific weapon colors are introduced
-            m_emissionHigh = LightColorPresetHelper.GetColors(LightColorPresetType.Green).emissionColor;
-            m_emissionLow = new Color(m_emissionHigh.r * m_emissionMultiplier, m_emissionHigh.g * m_emissionMultiplier, m_emissionHigh.b * m_emissionMultiplier, m_emissionHigh.a);
 
             EffectList.EffectData saveEffectData = new EffectList.EffectData();
             saveEffectData.m_enabled = true;
@@ -141,8 +145,8 @@ namespace ModularMagic_Core.Components
             string dataString = standItem.m_customData.GetValueSafe(ImbuementHelper.DataKey);
             long editorId = ImbuementHelper.GetEditor(standItem);
 
-            // A different placement of a staff, for example removed and placed again by someone else
-            if (m_itemData != null && editorId != m_editorId)
+            // A different placement of a staff, for example removed and placed again by someone else, or another staff in its place
+            if (m_itemData != null && (editorId != m_editorId || standItem.m_dropPrefab != m_itemData.m_dropPrefab))
                 StaffRemove();
 
             if (m_itemData == null)
@@ -232,6 +236,16 @@ namespace ModularMagic_Core.Components
                 return;
             }
 
+            // The weapon decides the colour, before the runes are created so they start in it
+            ApplyColor(slots.m_colorPreset);
+
+            if (m_particles != null)
+            {
+                ParticleSystem.MainModule particlesMain = m_particles.main;
+                particlesMain.startColor = LightColorPresetHelper.GetParticleColor(slots.m_colorPreset);
+                m_particles.Play();
+            }
+
             List<Imbuement> savedImbuements = ImbuementHelper.Deserialize(imbuementsString, slots);
 
             m_itemData = itemData;
@@ -264,6 +278,10 @@ namespace ModularMagic_Core.Components
             CancelInvoke(nameof(EmissionStart));
             CancelInvoke(nameof(EmissionIdle));
             Invoke(nameof(EmissionStop), 0f);
+
+            // Stops emitting, the particles that are alive fade out
+            if (m_particles != null)
+                m_particles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
 
             m_imbuements = new List<Imbuement>();
             m_savedImbuements = new List<Imbuement>();
@@ -409,13 +427,27 @@ namespace ModularMagic_Core.Components
                 m_standDataString = imbuementsString;
                 m_savedImbuements = m_imbuements.Select(imbuement => imbuement.CopyRune()).ToList();
                 m_onSave.Invoke();
-                // saveEffects.Create(m_staffTransform.position, m_staffTransform.rotation);
+                PlaySaveEffect();
                 return true;
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not save imbuements to item: " + e);
                 return false;
+            }
+        }
+
+        // The effect is only cosmetic, so a failing effect must never turn a saved staff into a failed save
+        private void PlaySaveEffect()
+        {
+            try
+            {
+                foreach (GameObject effect in saveEffects.Create(m_staffTransform.position, m_staffTransform.rotation))
+                    SaveFXColor.SetPreset(effect, m_colorPreset);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not play the save effect: " + e);
             }
         }
 
@@ -518,6 +550,14 @@ namespace ModularMagic_Core.Components
             Transform dropPoint = transform.Find("itemstand").GetComponent<ItemStand>().m_dropSpawnPoint;
             position = dropPoint.position;
             rotation = dropPoint.rotation;
+        }
+
+        // Sets the colour of the table glow, the runes and their particles. A missing or unknown preset gives white
+        private void ApplyColor(string preset)
+        {
+            m_colorPreset = preset;
+            m_emissionHigh = LightColorPresetHelper.GetColors(preset).emissionColor;
+            m_emissionLow = new Color(m_emissionHigh.r * m_emissionMultiplier, m_emissionHigh.g * m_emissionMultiplier, m_emissionHigh.b * m_emissionMultiplier, m_emissionHigh.a);
         }
 
         public void EmissionStart()

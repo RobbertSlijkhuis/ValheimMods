@@ -22,6 +22,10 @@ namespace ModularMagic_IceStaffs.configs
         public ConfigEntry<float> movementSpeed;
         public ConfigEntry<float> damageFrost;
         public ConfigEntry<float> damagePierce;
+        public ConfigEntry<float> damagePiercePerLevel;
+        public ConfigEntry<float> projectileVelocity;
+        public ConfigEntry<float> projectileAccuracy;
+        public ConfigEntry<float> projectileBurst;
         public ConfigEntry<int> blockArmor;
         public ConfigEntry<int> deflectionForce;
         public ConfigEntry<int> attackForce;
@@ -184,6 +188,20 @@ namespace ModularMagic_IceStaffs.configs
                 });
             };
 
+            if (options.damagePiercePerLevel != null)
+            {
+                damagePiercePerLevel = Config.Bind(new ConfigDefinition(options.sectionName, "Attack damage pierce per level"), (float)options.damagePiercePerLevel,
+                    new ConfigDescription("Pierce damage the item gains per quality level", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                damagePiercePerLevel.SettingChanged += (obj, attr) =>
+                {
+                    UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
+                    {
+                        damagePiercePerLevel = damagePiercePerLevel.Value,
+                    });
+                };
+            }
+
             blockArmor = Config.Bind(new ConfigDefinition(options.sectionName, "Block armor"), (int)options.blockArmor,
                 new ConfigDescription("The block armor on the item", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true }));
@@ -227,6 +245,48 @@ namespace ModularMagic_IceStaffs.configs
                     attackEitr = useEitr.Value,
                 });
             };
+
+            if (options.projectileVelocity != null)
+            {
+                projectileVelocity = Config.Bind(new ConfigDefinition(options.sectionName, "Projectile velocity"), (float)options.projectileVelocity,
+                    new ConfigDescription("The velocity of the projectile of the normal attack", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                projectileVelocity.SettingChanged += (obj, attr) =>
+                {
+                    UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
+                    {
+                        projectileVelocity = projectileVelocity.Value,
+                    });
+                };
+            }
+
+            if (options.projectileAccuracy != null)
+            {
+                projectileAccuracy = Config.Bind(new ConfigDefinition(options.sectionName, "Projectile accuracy"), (float)options.projectileAccuracy,
+                    new ConfigDescription("The accuracy (spread) of the projectile of the normal attack", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                projectileAccuracy.SettingChanged += (obj, attr) =>
+                {
+                    UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
+                    {
+                        projectileAccuracy = projectileAccuracy.Value,
+                    });
+                };
+            }
+
+            if (options.projectileBurst != null)
+            {
+                projectileBurst = Config.Bind(new ConfigDefinition(options.sectionName, "Projectile burst"), (float)options.projectileBurst,
+                    new ConfigDescription("The time in seconds between the shots of the normal attack", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                projectileBurst.SettingChanged += (obj, attr) =>
+                {
+                    UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
+                    {
+                        projectileBurst = projectileBurst.Value,
+                    });
+                };
+            }
 
             if (options.useEitrSecondary > -1)
             {

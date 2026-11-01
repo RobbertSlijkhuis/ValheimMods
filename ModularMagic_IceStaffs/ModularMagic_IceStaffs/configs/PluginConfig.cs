@@ -26,14 +26,84 @@ namespace ModularMagic_IceStaffs.Configs
         public static string staff4UpgradeRecipe = "YggdrasilWood:10, Sap:2, Eitr:8";
         public static StaffConfig staffIce4 = new StaffConfig();
 
+        public static string secondaryAttackNovaName = "Secondary attack Nova";
+        public static SecondaryAttackConfig secondaryAttackNova = new SecondaryAttackConfig();
+
+        public static string secondaryAttackRainName = "Secondary attack Ice shards";
+        public static SecondaryAttackConfig secondaryAttackRain = new SecondaryAttackConfig();
+
+        public static ImbuementConfig imbuementConfig = new ImbuementConfig();
+
         private static int sectionIndex = 1;
 
         public static void Init()
         {
+            imbuementConfig.GenerateConfig();
             InitStaffIce1Config();
             InitStaffIce2Config();
             InitStaffIce3Config();
             InitStaffIceAOEConfig();
+            InitSecondaryAttackNovaConfig();
+            InitSecondaryAttackRainConfig();
+        }
+
+        private static void InitSecondaryAttackNovaConfig()
+        {
+            try
+            {
+                SecondaryAttackConfigOptions options = new SecondaryAttackConfigOptions(
+                    ModularMagic_IceStaffs.Instance.prefabs.SecondaryAttackNova,
+                    ModularMagic_IceStaffs.Instance.prefabs.AttackNova,
+                    SecondaryAttackType.AOE,
+                    secondaryAttackNovaName
+                )
+                {
+                    useEitr = 100,
+                    cooldown = 30f,
+                    aoe = 6f,
+                    damageFrost = 75f,
+                    damagePierce = 0f,
+                    attackForce = 40f,
+                };
+                secondaryAttackNova.GenerateConfig(options);
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + secondaryAttackNovaName + " config: " + error);
+            }
+        }
+
+        private static void InitSecondaryAttackRainConfig()
+        {
+            try
+            {
+                SecondaryAttackConfigOptions options = new SecondaryAttackConfigOptions(
+                    ModularMagic_IceStaffs.Instance.prefabs.SecondaryAttackRain,
+                    ModularMagic_IceStaffs.Instance.prefabs.ProjectileIceShard,
+                    SecondaryAttackType.Projectile,
+                    secondaryAttackRainName
+                )
+                {
+                    useEitr = 100,
+                    cooldown = 30f,
+                    aoe = 1.5f,
+                    damageFrost = 50f,
+                    damagePierce = 40f,
+                    attackForce = 100f,
+                    launchAngle = -25f,
+                    projectileVelocity = 20f,
+                    projectileAccuracy = 1f,
+                    spawnAbilityPrefab = ModularMagic_IceStaffs.Instance.prefabs.ScriptIceShards,
+                    minToSpawn = 15,
+                    maxToSpawn = 15,
+                    spawnRadius = 20f,
+                };
+                secondaryAttackRain.GenerateConfig(options);
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + secondaryAttackRainName + " config: " + error);
+            }
         }
 
         private static void InitStaffIce1Config()
@@ -50,6 +120,10 @@ namespace ModularMagic_IceStaffs.Configs
                     movementSpeed = -0.05f,
                     damageFrost = 12f,
                     damagePierce = 4f,
+                    damagePiercePerLevel = 1f,
+                    projectileVelocity = 20f,
+                    projectileAccuracy = 5f,
+                    projectileBurst = 0.35f,
                     blockArmor = 12,
                     deflectionForce = 20,
                     attackForce = 10,
@@ -77,6 +151,10 @@ namespace ModularMagic_IceStaffs.Configs
                     movementSpeed = -0.05f,
                     damageFrost = 17f,
                     damagePierce = 6f,
+                    damagePiercePerLevel = 1f,
+                    projectileVelocity = 25f,
+                    projectileAccuracy = 4f,
+                    projectileBurst = 0.3f,
                     blockArmor = 30,
                     deflectionForce = 20,
                     attackForce = 10,
@@ -104,6 +182,10 @@ namespace ModularMagic_IceStaffs.Configs
                     movementSpeed = -0.05f,
                     damageFrost = 23f,
                     damagePierce = 7f,
+                    damagePiercePerLevel = 2f,
+                    projectileVelocity = 30f,
+                    projectileAccuracy = 3f,
+                    projectileBurst = 0.25f,
                     blockArmor = 48,
                     deflectionForce = 20,
                     attackForce = 10,

@@ -132,6 +132,7 @@ namespace ModularMagic_Core
             prefabs.RuneTable = assetBundle.LoadAsset<GameObject>("MMC_RuneTable");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneTable, true));
             prefabs.SaveFX = assetBundle.LoadAsset<GameObject>("fx_save_MMC");
+            prefabs.SaveFX.AddComponent<SaveFXColor>();
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.SaveFX, true));
 
             prefabs.RuneDamageBlunt = AddRunePrefab("MMC_Rune_DamageBlunt");

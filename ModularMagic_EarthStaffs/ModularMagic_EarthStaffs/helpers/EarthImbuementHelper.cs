@@ -23,10 +23,36 @@ namespace ModularMagic_EarthStaffs.Helpers
             RuneId.ProjectileSpeed, RuneId.Cone, RuneId.Creatures, RuneId.Nova, RuneId.Rain,
         };
 
+        // Set when the game has started, the equip patch also runs while the player is being loaded
+        public static bool GameIsReady = false;
+
         // Other staff mods share the imbuement API, so only handle the staffs of this mod
         public static bool IsEarthStaff(ItemData itemData)
         {
             return itemData != null && itemData.m_dropPrefab != null && GetItemDataSnapshot(itemData.m_dropPrefab.name) != null;
+        }
+
+        // Applies the runes again on the staff in the hand, so a changed config value reaches it together with the runes
+        public static void ReapplyOnHeldStaff()
+        {
+            try
+            {
+                Player player = Player.m_localPlayer;
+
+                if (player == null || !GameIsReady)
+                    return;
+
+                ItemData weapon = player.GetCurrentWeapon();
+
+                if (weapon == null || !CoreImbuementHelper.HasImbuements(weapon) || !IsEarthStaff(weapon))
+                    return;
+
+                ApplyImbuements(weapon);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not apply the imbuements to the staff in the hand: " + e);
+            }
         }
 
         public static void ApplyImbuements(ItemData itemData)
@@ -118,20 +144,16 @@ namespace ModularMagic_EarthStaffs.Helpers
                 }
             }
 
+            // A rune can not make the eitr cost, the spread or the burst interval negative
+            options.attackEitr = Mathf.Max(0f, options.attackEitr.Value);
+            options.projectileAccuracy = Mathf.Max(0f, options.projectileAccuracy.Value);
+            options.projectileBurst = Mathf.Max(0f, options.projectileBurst.Value);
+
             // The cone main attack has its own projectile, so the damage type projectile only replaces the default one
             if (damageProjectile != null && options.mainAttack == snapshot.mainAttack)
                 options.attackProjectile = damageProjectile;
 
-            Jotunn.Logger.LogWarning("Damage (B, P, S): " + options.damageBlunt + ", " + options.damagePierce + ", " + options.damageSlash);
-            Jotunn.Logger.LogWarning("Eitr cost: " + options.attackEitr);
-            //Jotunn.Logger.LogWarning("ParryBonus: " + options.timedBlockBonus);
-            Jotunn.Logger.LogWarning("Accuracy: " + options.projectileAccuracy);
-            Jotunn.Logger.LogWarning("Burst: " + options.projectileBurst);
-            Jotunn.Logger.LogWarning("Speed: " + options.projectileVelocity);
-            Jotunn.Logger.LogWarning("Projectile: " + (options.attackProjectile != null ? options.attackProjectile.name : "default"));
-            Jotunn.Logger.LogWarning("Main: " + (options.mainAttack == null ? "null" : options.mainAttack.m_shared?.m_attack?.m_attackProjectile?.name));
-            Jotunn.Logger.LogWarning("Secondary: " + (options.secondaryAttack == null ? "null" : options.secondaryAttack.m_shared?.m_attack?.m_attackProjectile?.name));
-            Jotunn.Logger.LogWarning("Secondary eitr cost: " + (options.secondaryAttackEitr == null ? "default" : options.secondaryAttackEitr.ToString()));
+            Jotunn.Logger.LogWarning($"[Imbuements] {itemData.m_dropPrefab.name}: damage (B, P, S) {options.damageBlunt}, {options.damagePierce}, {options.damageSlash}, eitr {options.attackEitr}, accuracy {options.projectileAccuracy}, burst {options.projectileBurst}, speed {options.projectileVelocity}, projectile {(options.attackProjectile != null ? options.attackProjectile.name : "default")}, main {(options.mainAttack == null ? "null" : options.mainAttack.m_shared?.m_attack?.m_attackProjectile?.name)}, secondary {(options.secondaryAttack == null ? "null" : options.secondaryAttack.m_shared?.m_attack?.m_attackProjectile?.name)}, secondary eitr {(options.secondaryAttackEitr == null ? "default" : options.secondaryAttackEitr.ToString())}");
 
             StatusEffect ImbuementEffect = ScriptableObject.CreateInstance<StatusEffect>();
             List<string> tooltipLines = new List<string>();
@@ -149,7 +171,21 @@ namespace ModularMagic_EarthStaffs.Helpers
             ImbuementEffect.m_name = "Imbuements";
             options.equipStatusEffect = ImbuementEffect;
 
+            StatusEffect previousEquipEffect = itemData.m_shared.m_equipStatusEffect;
+
             UpdateHelper.UpdateItemData(itemData, options);
+
+            DestroyReplacedEquipStatusEffect(previousEquipEffect, itemData);
+        }
+
+        // Every apply makes a new effect for the tooltip, so the one of the previous apply is destroyed. Only an effect of this mod is destroyed.
+        // The player keeps a copy of the effect it runs, and the game only reads the name hash of the old one, which it cached when the effect was added
+        private static void DestroyReplacedEquipStatusEffect(StatusEffect previous, ItemData itemData)
+        {
+            if (previous == null || previous.name != "Imbuements_MMES" || ReferenceEquals(previous, itemData.m_shared.m_equipStatusEffect))
+                return;
+
+            UnityEngine.Object.Destroy(previous);
         }
 
         private static ItemDataSnapShot GetItemDataSnapshot(string name)

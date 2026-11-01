@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 4057493490
+CRC: 1840702425
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 8fef1aa2a5b5469c21c5e83c74950f4f
+    Hash: 78725592023fd6f881a46df4a427179f
   TypeTreeHash:
     serializedVersion: 2
-    Hash: a4d0970724d0d8e4900823f6779471b5
+    Hash: b3bb64f501d0f1018f634a7c7d443845
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 8fef1aa2a5b5469c21c5e83c74950f4f
+    Hash: 78725592023fd6f881a46df4a427179f
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -67,8 +67,6 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 2094620348, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 1345532120, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
   Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 895252998, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
@@ -110,7 +108,6 @@ SerializeReferenceClassIdentifiers:
 Assets:
 - Assets/Custom/Material/Runes/Marble/Rune_Marble_A_MMC.mat
 - Assets/Custom/Material/Runes/Marble/Rune_Marble_C_MMC.mat
-- Assets/Custom/PrefabInstance/HealStaff/Staff_healing_MMC.asset
 - Assets/Custom/PrefabInstance/Runes/MMC_Rune_ProjectileAccuracy.prefab
 - Assets/Custom/Material/Runes/Stone/Rune_Stone_E_MMC.mat
 - Assets/Custom/Material/Runes/Wood/Rune_Wood_A_MMC.mat
@@ -147,7 +144,6 @@ Assets:
 - Assets/Custom/Material/Runes/Stone/Rune_Stone_F_MMC.mat
 - Assets/Custom/Material/Runes/Grausten/Rune_Grausten_E_MMC.mat
 - Assets/Custom/PrefabInstance/Runes/MMC_Rune_Cone.prefab
-- Assets/Custom/PrefabInstance/Table/fx_save_MMC.prefab
 - Assets/Custom/Material/Table/Spellbook2_1_1_off_MMC.mat
 - Assets/Custom/Material/Table/Spellbook2_1_1_MMC.mat
 - Assets/Custom/PrefabInstance/Eitr/MMC_EitrCrude.prefab
@@ -155,9 +151,9 @@ Assets:
 - Assets/Custom/PrefabInstance/Runes/MMC_Rune_Rain.prefab
 - Assets/Custom/Material/Runes/Wood/Rune_WoodOff_E_MMC.mat
 - Assets/Custom/Material/Runes/Stone/Rune_Stone_D_MMC.mat
-- Assets/Custom/PrefabInstance/HealStaff/MMC_StaffHealing.prefab
 - Assets/Custom/PrefabInstance/Runes/MMC_Rune_ProjectileSpeed.prefab
 - Assets/Custom/Material/Runes/Marble/Rune_Marble_F_MMC.mat
+- Assets/Custom/PrefabInstance/Table/fx_save_MMC.prefab
 - Assets/Custom/PrefabInstance/Table/MMC_RuneTable.prefab
 - Assets/Custom/PrefabInstance/Runes/MMC_Rune_DamageSlash.prefab
 - Assets/Custom/Material/Runes/Marble/Rune_Marble_B_MMC.mat

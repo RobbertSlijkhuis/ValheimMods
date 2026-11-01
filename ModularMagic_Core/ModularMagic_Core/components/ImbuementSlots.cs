@@ -17,6 +17,9 @@ namespace ModularMagic_Core.Components
         public string m_weaponType = WeaponType.None;
         // The ids of the runes this weapon supports (see RuneId). Empty by default, so a forgotten list shows up as runes that can not be slotted
         public List<string> m_allowedRunes = new List<string>();
+        // The colour of the rune table (glow, runes and rune particles) while this weapon is on it, the name of a LightColorPresetType.
+        // A staff mod has to set it. When it is missing or not a known name the table is white
+        public string m_colorPreset = LightColorPresetType.None;
 
         public bool IsRuneAllowed(string runeId)
         {

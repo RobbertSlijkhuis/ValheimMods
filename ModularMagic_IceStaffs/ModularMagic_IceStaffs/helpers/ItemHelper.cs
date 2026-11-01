@@ -33,6 +33,10 @@ namespace ModularMagic_IceStaffs.Helpers
                 attackForce = config.attackForce.Value,
                 damageFrost = config.damageFrost.Value,
                 damagePierce = config.damagePierce.Value,
+                damagePiercePerLevel = config.damagePiercePerLevel?.Value,
+                projectileVelocity = config.projectileVelocity?.Value,
+                projectileAccuracy = config.projectileAccuracy?.Value,
+                projectileBurst = config.projectileBurst?.Value,
                 attackEitr = config.useEitr.Value,
             });
 
