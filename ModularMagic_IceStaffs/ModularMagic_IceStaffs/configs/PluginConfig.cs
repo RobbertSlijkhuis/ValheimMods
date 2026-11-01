@@ -1,4 +1,5 @@
-﻿using ModularMagic_IceStaffs.configs;
+﻿using ModularMagic_Core.Types;
+using ModularMagic_IceStaffs.configs;
 using ModularMagic_IceStaffs.Models;
 using System;
 
@@ -7,23 +8,23 @@ namespace ModularMagic_IceStaffs.Configs
     internal static class PluginConfig
     {
         public static string staff1Name = "Staff of Frost";
-        public static string staff1Recipe = "Bronze:6, RoundLog:20, Blueberries:10, GreydwarfEye:20";
-        public static string staff1UpgradeRecipe = "Bronze:1, RoundLog:5, Blueberries:2, GreydwarfEye:4";
+        public static string staff1Recipe = $"Bronze:6, RoundLog:20, GreydwarfEye:10, {MaterialType.EitrCrude}:12";
+        public static string staff1UpgradeRecipe = $"Bronze:2, RoundLog:5, {MaterialType.EitrCrude}:4";
         public static StaffConfig staffIce1 = new StaffConfig();
 
         public static string staff2Name = "Staff of Permafrost";
-        public static string staff2Recipe = $"{ModularMagic_IceStaffs.Instance.prefabs.StaffIce1Prefab.name}:1, FineWood:20, FreezeGland:10, Crystal:10";
-        public static string staff2UpgradeRecipe = "FineWood:5, FreezeGland:4, Crystal:4";
+        public static string staff2Recipe = $"FineWood:20, FreezeGland:10, Crystal:10, {MaterialType.EitrFine}:12";
+        public static string staff2UpgradeRecipe = $"FineWood:5, FreezeGland:5, {MaterialType.EitrCrude}:4";
         public static StaffConfig staffIce2 = new StaffConfig();
 
         public static string staff3Name = "Hrímkald, touch of Niflheim";
-        public static string staff3Recipe = $"{ModularMagic_IceStaffs.Instance.prefabs.StaffIce2Prefab.name}:1, YggdrasilWood:20, Sap:10, Eitr:16";
-        public static string staff3UpgradeRecipe = "YggdrasilWood:10, Sap:2, Eitr:8";
+        public static string staff3Recipe = $"YggdrasilWood:20, Sap:10, FreezeGland:20, Eitr:12";
+        public static string staff3UpgradeRecipe = "YggdrasilWood:10, Sap:3, Eitr:4";
         public static StaffConfig staffIce3 = new StaffConfig();
 
         public static string staff4Name = "Skull of Frost";
-        public static string staff4Recipe = "YggdrasilWood:20, Sap:10, Eitr:16";
-        public static string staff4UpgradeRecipe = "YggdrasilWood:10, Sap:2, Eitr:8";
+        public static string staff4Recipe = "YggdrasilWood:20, Sap:10, FreezeGland:20, Eitr:12";
+        public static string staff4UpgradeRecipe = "YggdrasilWood:10, Sap:3, Eitr:4";
         public static StaffConfig staffIce4 = new StaffConfig();
 
         public static string secondaryAttackNovaName = "Secondary attack Nova";

@@ -2,6 +2,7 @@
 using ModularMagic_Armors.Helpers;
 using ModularMagic_Armors.Models;
 using ModularMagic_Armors.Types;
+using ModularMagic_Core.Types;
 using System;
 using UnityEngine;
 
@@ -11,86 +12,86 @@ namespace ModularMagic_Armors.Configs
     {
         // Shaman
         public static string armor1HelmetName = "Shaman Hood";
-        public static string armor1HelmetRecipe = "TrollHide:5, BoneFragments:3, Resin:5, TrophyGreydwarfShaman:1";
-        public static string armor1HelmetRecipeUpgrade = "TrollHide:2, BoneFragments:1, Resin:1";
+        public static string armor1HelmetRecipe = $"TrollHide:5, Resin:5, TrophyGreydwarfShaman:1, {MaterialType.EitrCrude}:6";
+        public static string armor1HelmetRecipeUpgrade = $"TrollHide:2, Resin:2, {MaterialType.EitrCrude}:3";
         public static ArmorConfig armor1Helmet = new ArmorConfig();
 
         public static string armor1CapeName = "Shaman Cape";
-        public static string armor1CapeRecipe = "TrollHide:10, BoneFragments:10, Resin:5, AncientSeed:2";
-        public static string armor1CapeRecipeUpgrade = "TrollHide:2, BoneFragments:1, Resin:1";
+        public static string armor1CapeRecipe = $"TrollHide:10, Resin:5, AncientSeed:1, {MaterialType.EitrCrude}:6";
+        public static string armor1CapeRecipeUpgrade = $"TrollHide:2, Resin:2, {MaterialType.EitrCrude}:3";
         public static ArmorConfig armor1Cape = new ArmorConfig();
 
         public static string armor1ChestName = "Shaman Chest";
-        public static string armor1ChestRecipe = "TrollHide:5, RoundLog:2, Resin:5, AncientSeed:1";
-        public static string armor1ChestRecipeUpgrade = "TrollHide:2, RoundLog:1, BoneFragments:1, Resin:1";
+        public static string armor1ChestRecipe = $"TrollHide:5, Resin:5, AncientSeed:2, {MaterialType.EitrCrude}:6";
+        public static string armor1ChestRecipeUpgrade = $"TrollHide:2, Resin:2, {MaterialType.EitrCrude}:3";
         public static ArmorConfig armor1Chest = new ArmorConfig();
 
         public static string armor1LegsName = "Shaman Legs";
-        public static string armor1LegsRecipe = "TrollHide:5, RoundLog:2, Resin:5, AncientSeed:1";
-        public static string armor1LegsRecipeUpgrade = "TrollHide:2, RoundLog:1, BoneFragments:1, Resin:1";
+        public static string armor1LegsRecipe = $"TrollHide:5, Resin:5, AncientSeed:2, {MaterialType.EitrCrude}:6";
+        public static string armor1LegsRecipeUpgrade = $"TrollHide:2, Resin:2, {MaterialType.EitrCrude}:3";
         public static ArmorConfig armor1Legs = new ArmorConfig();
 
         // Wraith
         public static string armor2HelmetName = "Wraith Hood";
-        public static string armor2HelmetRecipe = "Iron:10, DeerHide:6, Guck:4, Coal:4";
-        public static string armor2HelmetRecipeUpgrade = "Iron:2, DeerHide:2, Guck:1, Coal:1";
+        public static string armor2HelmetRecipe = $"Iron:10, Guck:4, Coal:4, {MaterialType.EitrCrude}:6";
+        public static string armor2HelmetRecipeUpgrade = $"Iron:2, Guck:2, Coal:2, {MaterialType.EitrCrude}:3";
         public static ArmorConfig armor2Helmet = new ArmorConfig();
 
         public static string armor2CapeName = "Wraith Cape";
-        public static string armor2CapeRecipe = "Iron:4, DeerHide:10, Guck:2, Coal:8";
-        public static string armor2CapeRecipeUpgrade = "Iron:1, DeerHide:2, Guck:1, Coal:1";
+        public static string armor2CapeRecipe = $"Iron:4, Guck:2, Coal:8, {MaterialType.EitrCrude}:10";
+        public static string armor2CapeRecipeUpgrade = $"Iron:1, Guck:2, Coal:2, {MaterialType.EitrCrude}:3";
         public static ArmorConfig armor2Cape = new ArmorConfig();
 
         public static string armor2ChestName = "Wraith Chest";
-        public static string armor2ChestRecipe = "Iron:10, DeerHide:6, Guck:4, Coal:4";
-        public static string armor2ChestRecipeUpgrade = "Iron:2, DeerHide:2, Guck:1, Coal:1";
+        public static string armor2ChestRecipe = $"Iron:10, Guck:4, Coal:4, {MaterialType.EitrCrude}:6";
+        public static string armor2ChestRecipeUpgrade = $"Iron:2, Guck:2, Coal:2, {MaterialType.EitrCrude}:3";
         public static ArmorConfig armor2Chest = new ArmorConfig();
 
         public static string armor2LegsName = "Wraith Legs";
-        public static string armor2LegsRecipe = "Iron:10, DeerHide:6, Guck:4, Coal:4";
-        public static string armor2LegsRecipeUpgrade = "Iron:2, DeerHide:2, Guck:1, Coal:1";
+        public static string armor2LegsRecipe = $"Iron:10, Guck:4, Coal:4, {MaterialType.EitrCrude}:6";
+        public static string armor2LegsRecipeUpgrade = $"Iron:2, Guck:2, Coal:2, {MaterialType.EitrCrude}:3";
         public static ArmorConfig armor2Legs = new ArmorConfig();
 
         // Wolf
         public static string armor3HelmetName = "Frostwolf Hood";
-        public static string armor3HelmetRecipe = "Silver:10, WolfPelt:6, Obsidian:4, Crystal:4";
-        public static string armor3HelmetRecipeUpgrade = "Silver:2, WolfPelt:2, Obsidian:2, Crystal:2";
+        public static string armor3HelmetRecipe = $"Silver:10, WolfPelt:6, Crystal:4, {MaterialType.EitrFine}:6";
+        public static string armor3HelmetRecipeUpgrade = $"Silver:2, WolfPelt:2, Crystal:2, {MaterialType.EitrFine}:3";
         public static ArmorConfig armor3Helmet = new ArmorConfig();
 
         public static string armor3CapeName = "Frostwolf Cape";
-        public static string armor3CapeRecipe = "Silver:4, WolfPelt:6, TrophyWolf:1, Obsidian: 4";
-        public static string armor3CapeRecipeUpgrade = "Silver:2, WolfPelt:4, Obsidian: 2";
+        public static string armor3CapeRecipe = $"Silver:4, WolfPelt:6, TrophyWolf:1, {MaterialType.EitrFine}:6";
+        public static string armor3CapeRecipeUpgrade = $"Silver:2, WolfPelt:4, {MaterialType.EitrFine}:3";
         public static ArmorConfig armor3Cape = new ArmorConfig();
 
         public static string armor3ChestName = "Frostwolf Chest";
-        public static string armor3ChestRecipe = "Silver:10, WolfPelt:6, Obsidian:4, Crystal:6";
-        public static string armor3ChestRecipeUpgrade = "WolfPelt:2, Silver:1, Obsidian:2, Crystal:2";
+        public static string armor3ChestRecipe = $"Silver:10, WolfPelt:6, Crystal:6, {MaterialType.EitrFine}:6";
+        public static string armor3ChestRecipeUpgrade = $"WolfPelt:2, Silver:1, Crystal:2, {MaterialType.EitrFine}:3";
         public static ArmorConfig armor3Chest = new ArmorConfig();
 
         public static string armor3LegsName = "Frostwolf Legs";
-        public static string armor3LegsRecipe = "Silver:10, WolfPelt:6, Obsidian:4, Crystal:6";
-        public static string armor3LegsRecipeUpgrade = "WolfPelt:2, Silver:1, Obsidian:2, Crystal:2";
+        public static string armor3LegsRecipe = $"Silver:10, WolfPelt:6, Crystal:6, {MaterialType.EitrFine}:6";
+        public static string armor3LegsRecipeUpgrade = $"WolfPelt:2, Silver:1, Crystal:2, {MaterialType.EitrFine}:3";
         public static ArmorConfig armor3Legs = new ArmorConfig();
 
         // Dark Wizard
         public static string armor4HelmetName = "Dark Wizard Hood";
-        public static string armor4HelmetRecipe = "BlackMetal:6, LinenThread:8, LoxPelt:4, Tar:4";
-        public static string armor4HelmetRecipeUpgrade = "BlackMetal:2, LinenThread:2, LoxPelt:2, Tar:2";
+        public static string armor4HelmetRecipe = $"BlackMetal:6, LinenThread:8, Tar:4, {MaterialType.EitrFine}:6";
+        public static string armor4HelmetRecipeUpgrade = $"BlackMetal:2, LinenThread:2, Tar:2, {MaterialType.EitrFine}:3";
         public static ArmorConfig armor4Helmet = new ArmorConfig();
 
         public static string armor4CapeName = "Dark Wizard Cape";
-        public static string armor4CapeRecipe = "LinenThread:12, LoxPelt:6, Tar:8, GoblinTotem:1";
-        public static string armor4CapeRecipeUpgrade = "LinenThread:2, LoxPelt:2, Tar:2";
+        public static string armor4CapeRecipe = $"LinenThread:12, Tar:8, GoblinTotem:1, {MaterialType.EitrFine}:6";
+        public static string armor4CapeRecipeUpgrade = $"LinenThread:2, Tar:2, {MaterialType.EitrFine}:3";
         public static ArmorConfig armor4Cape = new ArmorConfig();
 
         public static string armor4ChestName = "Dark Wizard Chest";
-        public static string armor4ChestRecipe = "BlackMetal:6, LinenThread:8, LoxPelt:6, Tar:4";
-        public static string armor4ChestRecipeUpgrade = "BlackMetal:2, LinenThread:2, LoxPelt:2, Tar:2";
+        public static string armor4ChestRecipe = $"BlackMetal:6, LinenThread:8, Tar:4, {MaterialType.EitrFine}:6";
+        public static string armor4ChestRecipeUpgrade = $"BlackMetal:2, LinenThread:2, Tar:2, {MaterialType.EitrFine}:3";
         public static ArmorConfig armor4Chest = new ArmorConfig();
 
         public static string armor4LegsName = "Dark Wizard Legs";
-        public static string armor4LegsRecipe = "BlackMetal:6, LinenThread:8, LoxPelt:6, Tar:4";
-        public static string armor4LegsRecipeUpgrade = "BlackMetal:2, LinenThread:2, LoxPelt:2, Tar:2";
+        public static string armor4LegsRecipe = $"BlackMetal:6, LinenThread:8, Tar:4, {MaterialType.EitrFine}:6";
+        public static string armor4LegsRecipeUpgrade = $"BlackMetal:2, LinenThread:2, Tar:2, {MaterialType.EitrFine}:3";
         public static ArmorConfig armor4Legs = new ArmorConfig();
 
         // Eitr-weave
@@ -127,28 +128,28 @@ namespace ModularMagic_Armors.Configs
 
         // Spell books. The recipes of the upgrade chain are made in InitSpellbookConfig, because they use the prefab names
         public static string spellbook1Name = "Spellbook of the Hearth";
-        public static string spellbook1Recipe = "Bronze:4, TrollHide:6, Resin:8, Coal:10";
+        public static string spellbook1Recipe = $"Bronze:4, TrollHide:6, Resin:8, {MaterialType.EitrCrude}:6";
         public static ArmorConfig spellbook1 = new ArmorConfig();
 
         public static string spellbook2Name = "Grimoire of the Storm";
-        public static string spellbook2Recipe = "{0}:1, Silver:4, Thunderstone:2, Chitin:10";
+        public static string spellbook2Recipe = $"Silver:4, Thunderstone:2, BoneFragment:10, {MaterialType.EitrFine}:6";
         public static ArmorConfig spellbook2 = new ArmorConfig();
 
         public static string spellbook3Name = "Codex of the Asgardian Sorcerer";
-        public static string spellbook3Recipe = "{0}:1, BlackCore:1, Sap:10, Eitr:8";
+        public static string spellbook3Recipe = "BlackCore:1, Sap:10, Mandible:2, Eitr:6";
         public static ArmorConfig spellbook3 = new ArmorConfig();
 
         // Lanterns, same thing for the recipes of the upgrade chain
         public static string lantern1Name = "Mythical Lantern";
-        public static string lantern1Recipe = "Bronze:4, RoundLog:10, Resin:8, SurtlingCore:2";
+        public static string lantern1Recipe = $"Bronze:4, SurtlingCore:2, Resin:8, {MaterialType.EitrCrude}:6";
         public static ArmorConfig lantern1 = new ArmorConfig();
 
         public static string lantern2Name = "Everwinter Lantern";
-        public static string lantern2Recipe = "{0}:1, Silver:4, DragonEgg:1, Crystal:10";
+        public static string lantern2Recipe = $"Silver:4, YmirRemains:2, Crystal:10, {MaterialType.EitrFine}:6";
         public static ArmorConfig lantern2 = new ArmorConfig();
 
         public static string lantern3Name = "Mistcaller Lantern";
-        public static string lantern3Recipe = "{0}:1, BlackCore:1, BlackMarble:12, Eitr:6";
+        public static string lantern3Recipe = "BlackCore:1, Sap:10, BlackMarble:12, Eitr:6";
         public static ArmorConfig lantern3 = new ArmorConfig();
 
         // Other
@@ -592,7 +593,7 @@ namespace ModularMagic_Armors.Configs
                 spellbook1.GenerateConfig(CreateUtilityOptions(prefabs.SpellbookHearthPrefab, spellbook1Name, spellbook1Recipe,
                     "A spellbook of hearthside lore, increasing your knowledge of magic.", CraftingStationType.Workbench, 3, 35f, 0.10f, 4f));
 
-                spellbook2.GenerateConfig(CreateUtilityOptions(prefabs.SpellbookStormPrefab, spellbook2Name, string.Format(spellbook2Recipe, prefabs.SpellbookHearthPrefab.name),
+                spellbook2.GenerateConfig(CreateUtilityOptions(prefabs.SpellbookStormPrefab, spellbook2Name, spellbook2Recipe,
                     "A grimoire of storm magic, charged with crackling power that sharpens your mastery of the elements.", CraftingStationType.Workbench, 5, 50f, 0.15f, 8f));
 
                 spellbook3.GenerateConfig(CreateUtilityOptions(prefabs.SpellbookCodexPrefab, spellbook3Name, string.Format(spellbook3Recipe, prefabs.SpellbookStormPrefab.name),
@@ -613,10 +614,10 @@ namespace ModularMagic_Armors.Configs
                 lantern1.GenerateConfig(CreateUtilityOptions(prefabs.LanternMythicalPrefab, lantern1Name, lantern1Recipe,
                     "A lantern to light your way on your travels, glowing with a warm mythical light.", CraftingStationType.Forge, 1, 30f, 0.15f, 3f));
 
-                lantern2.GenerateConfig(CreateUtilityOptions(prefabs.LanternEverwinterPrefab, lantern2Name, string.Format(lantern2Recipe, prefabs.LanternMythicalPrefab.name),
+                lantern2.GenerateConfig(CreateUtilityOptions(prefabs.LanternEverwinterPrefab, lantern2Name, lantern2Recipe,
                     "A lantern that burns with the pale blue light of the everlasting winter.", CraftingStationType.Forge, 5, 45f, 0.20f, 6f));
 
-                lantern3.GenerateConfig(CreateUtilityOptions(prefabs.LanternMistcallerPrefab, lantern3Name, string.Format(lantern3Recipe, prefabs.LanternEverwinterPrefab.name),
+                lantern3.GenerateConfig(CreateUtilityOptions(prefabs.LanternMistcallerPrefab, lantern3Name, lantern3Recipe,
                     "A lantern that calls the mist to heel and drives it back, lit by a rosy glow.", CraftingStationType.BlackForge, 1, 60f, 0.25f, 9f));
             }
             catch (Exception e)

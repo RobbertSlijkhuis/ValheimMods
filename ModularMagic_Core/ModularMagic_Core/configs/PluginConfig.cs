@@ -7,15 +7,15 @@ namespace ModularMagic_Core.Configs
     internal static class PluginConfig
     {
         public static string material1Name = "Crude Eitr";
-        public static string material1Recipe = "GreydwarfEye:3, Resin:3";
+        public static string material1Recipe = "GreydwarfEye:2, Resin:2";
         public static ItemConfig crudeEitr = new ItemConfig();
 
         public static string material2Name = "Fine Eitr";
-        public static string material2Recipe = "Crystal:3, Coal:3";
+        public static string material2Recipe = "Crystal:2, Coal:2";
         public static ItemConfig fineEitr = new ItemConfig();
 
         private static string piece1Name = "Rune Imbuement Table";
-        private static string piece1Recipe = "Stone:20";
+        private static string piece1Recipe = $"Stone:20, Copper:6, Tin:4, {MaterialType.EitrCrude}:12";
         public static BuildPieceConfig piece1 = new BuildPieceConfig();
 
         public static void Init()

@@ -1,4 +1,5 @@
-﻿using ModularMagic_EarthStaffs.configs;
+﻿using ModularMagic_Core.Types;
+using ModularMagic_EarthStaffs.configs;
 using ModularMagic_EarthStaffs.Models;
 using ModularMagic_EarthStaffs.Types;
 using System;
@@ -8,23 +9,23 @@ namespace ModularMagic_EarthStaffs.Configs
     internal static class PluginConfig
     {
         public static string staff0Name = "The Forest Flinger";
-        public static string staff0Recipe = "Wood:10, Stone:10, Resin:10, LeatherScraps:6";
+        public static string staff0Recipe = "Wood:20, Stone:10, Resin:10, LeatherScraps:6";
         public static string staff0UpgradeRecipe = "Wood:5, Stone:5, LeatherScraps:2";
         public static StaffConfig staffEarth0 = new StaffConfig();
 
         public static string staff1Name = "Staff of Rocks";
-        public static string staff1Recipe = $"{ModularMagic_EarthStaffs.prefabs.StaffEarth0.name}:1, RoundLog:10, Stone:10, Thistle:10";
-        public static string staff1UpgradeRecipe = "RoundLog:5, Stone:5, Thistle:3";
+        public static string staff1Recipe = $"RoundLog:20, Stone:10, Thistle:10, {MaterialType.EitrCrude}:12";
+        public static string staff1UpgradeRecipe = $"RoundLog:5, Stone:5, {MaterialType.EitrCrude}:4";
         public static StaffConfig staffEarth1 = new StaffConfig();
 
         public static string staff2Name = "Staff of the Avalanche";
-        public static string staff2Recipe = $"{ModularMagic_EarthStaffs.prefabs.StaffEarth1.name}:1, FineWood:10, Root:10, Crystal:10";
-        public static string staff2UpgradeRecipe = "FineWood:5, Root:3, Crystal:3";
+        public static string staff2Recipe = $"FineWood:20, Root:10, Crystal:10, {MaterialType.EitrFine}:12";
+        public static string staff2UpgradeRecipe = $"FineWood:5, Root:3, {MaterialType.EitrFine}:4";
         public static StaffConfig staffEarth2 = new StaffConfig();
 
         public static string staff3Name = "Oakrend the Earthcaller";
-        public static string staff3Recipe = $"{ModularMagic_EarthStaffs.prefabs.StaffEarth2.name}:1, YggdrasilWood:20, Sap:10, Eitr:16";
-        public static string staff3UpgradeRecipe = "YggdrasilWood:5, Sap:2, Eitr:8";
+        public static string staff3Recipe = $"YggdrasilWood:20, Sap:10, MushroomMagecap:10, Eitr:12";
+        public static string staff3UpgradeRecipe = "YggdrasilWood:5, Sap:3, Eitr:4";
         public static StaffConfig staffEarth3 = new StaffConfig();
 
         public static string mainAttackConeName = "Main attack Cone";

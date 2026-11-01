@@ -3,6 +3,7 @@ using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using ModularMagic_Core.Configs;
+using ModularMagic_Core.Types;
 using System;
 using UnityEngine;
 
@@ -22,9 +23,9 @@ namespace ModularMagic_Core.Helpers
                 pieceConfig.PieceTable = PieceTables.Hammer;
                 pieceConfig.Category = PieceCategories.Crafting;
                 pieceConfig.AddRequirement("Stone", 20);
-                pieceConfig.AddRequirement("MMC_EitrCrude", 12);
-                pieceConfig.AddRequirement("Copper", 8);
-                pieceConfig.AddRequirement("Tin", 2);
+                pieceConfig.AddRequirement("Copper", 6);
+                pieceConfig.AddRequirement("Tin", 4);
+                pieceConfig.AddRequirement(MaterialType.EitrCrude, 12);
 
                 if (renderIcon)
                 {
