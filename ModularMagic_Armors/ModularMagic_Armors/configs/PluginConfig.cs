@@ -132,7 +132,7 @@ namespace ModularMagic_Armors.Configs
         public static ArmorConfig spellbook1 = new ArmorConfig();
 
         public static string spellbook2Name = "Grimoire of the Storm";
-        public static string spellbook2Recipe = $"Silver:4, Thunderstone:2, BoneFragment:10, {MaterialType.EitrFine}:6";
+        public static string spellbook2Recipe = $"Silver:4, Thunderstone:2, BoneFragments:10, {MaterialType.EitrFine}:6";
         public static ArmorConfig spellbook2 = new ArmorConfig();
 
         public static string spellbook3Name = "Codex of the Asgardian Sorcerer";

@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 4220314245
+CRC: 3419975439
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 53da7224eb03bfbf72d7e2fd9292a521
+    Hash: 1599f60a845d20620dbcbaa99fca10f8
   TypeTreeHash:
     serializedVersion: 2
-    Hash: aca99addaa7c2859a771c4890a80647e
+    Hash: 73f880353c937245d14bf730277c4a11
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 53da7224eb03bfbf72d7e2fd9292a521
+    Hash: 1599f60a845d20620dbcbaa99fca10f8
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -59,6 +59,8 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 69470131, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: -179248876, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 313648218, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
@@ -92,14 +94,22 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: ItemDrop/ItemData/SharedData
 Assets:
-- Assets/Custom/PrefabInstance/Lightning/staff_lightning_nova_AOE_MMLS.prefab
-- Assets/Custom/PrefabInstance/Lightning/MMLS_staffLightning3_WITH_SECONDARY_ATTACK.prefab
+- Assets/Custom/PrefabInstance/Lightning/attack/secondary_nova_MMLS.prefab
+- Assets/Custom/PrefabInstance/Lightning/fx/fx_staff_lightning_nova_MMLS.prefab
 - Assets/Custom/PrefabInstance/Lightning/fx/cinder_MMLS.prefab
 - Assets/Custom/PrefabInstance/Lightning/MMLS_staffLightning3.prefab
+- Assets/Custom/PrefabInstance/Lightning/attack/secondary_rain_MMLS.prefab
+- Assets/Custom/PrefabInstance/Lightning/fx/fx_staff_lightning_windupcone_MMLS.prefab
+- Assets/Custom/PrefabInstance/Lightning/projectiles/projectile_bolt_MMLS.prefab
+- Assets/Custom/PrefabInstance/Lightning/fx/fx_staff_lightning_cone_MMLS.prefab
+- Assets/Custom/PrefabInstance/Lightning/attack/main_cone_attack_MMLS.prefab
 - Assets/Custom/PrefabInstance/Lightning/MMLS_staffLightning1.prefab
-- Assets/Custom/PrefabInstance/Lightning/MMLS_staffLightning2_WITH_SECONDARY_ATTACK.prefab
 - Assets/Custom/PrefabInstance/Lightning/fx/fx_staff_lightning_windup_MMLS.prefab
-- Assets/Custom/PrefabInstance/Lightning/staff_lightning_projectile_MMLS.prefab
+- Assets/Custom/PrefabInstance/Lightning/projectiles/staff_lightning_projectile_MMLS.prefab
 - Assets/Custom/PrefabInstance/Lightning/fx/fx_staff_lightning_AOE_MMLS.prefab
+- Assets/Custom/PrefabInstance/Lightning/attack/attack_nova_MMLS.prefab
+- Assets/Custom/PrefabInstance/Lightning/scripts/staff_lightning_script_bolts_MMLS.prefab
 - Assets/Custom/PrefabInstance/Lightning/MMLS_staffLightning2.prefab
+- Assets/Custom/PrefabInstance/Lightning/projectiles/projectile_spawn_rain_MMLS.prefab
+- Assets/Custom/PrefabInstance/Lightning/attack/attack_cone_MMLS.prefab
 Dependencies: []

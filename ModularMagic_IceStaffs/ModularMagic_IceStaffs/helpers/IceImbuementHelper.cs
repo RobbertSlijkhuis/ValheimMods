@@ -21,7 +21,7 @@ namespace ModularMagic_IceStaffs.Helpers
         {
             RuneId.DamageBlunt, RuneId.DamageSlash, RuneId.EitrCost,
             RuneId.ProjectileAccuracy, RuneId.ProjectileBurst, RuneId.ProjectileSpeed,
-            RuneId.Nova, RuneId.Rain,
+            RuneId.Nova, RuneId.Rain, RuneId.Cone,
         };
 
         // Set when the game has started, the equip patch also runs while the player is being loaded
@@ -76,10 +76,15 @@ namespace ModularMagic_IceStaffs.Helpers
                 return;
             }
 
+            // The cone rune replaces the main attack of the staff. The cone has its own eitr cost and burst interval and fires an AOE, so the
+            // eitr, accuracy and speed of the staff do not apply to it (the Eitr Cost and Attack Speed runes still apply to the cone)
+            bool cone = imbuements.Exists(i => i.type == ImbuementType.MainAttack && i.value == "Cone");
+            ItemData mainAttack = cone ? ModularMagic_IceStaffs.Instance.prefabs.MainAttackCone.GetComponent<ItemDrop>().m_itemData : baseData;
+
             // The base stats come from the config, which also holds the values a server syncs, so the runes are always applied on top of the current base stats
-            float eitr = snapshot.attackEitr;
+            float eitr = cone ? PluginConfig.mainAttackCone.useEitr.Value : snapshot.attackEitr;
             float accuracy = snapshot.projectileAccuracy;
-            float burst = snapshot.projectileBurst;
+            float burst = cone ? PluginConfig.mainAttackCone.burstInterval.Value : snapshot.projectileBurst;
             float velocity = snapshot.projectileVelocity;
 
             // The runes change the type of the physical damage, the frost damage is never touched
@@ -130,11 +135,11 @@ namespace ModularMagic_IceStaffs.Helpers
 
             UpdateItemDataOptions options = new UpdateItemDataOptions()
             {
-                mainAttack = baseData,
+                mainAttack = mainAttack,
                 attackEitr = Mathf.Max(0f, eitr),
-                projectileAccuracy = Mathf.Max(0f, accuracy),
+                projectileAccuracy = cone ? (float?)null : Mathf.Max(0f, accuracy),
                 projectileBurst = Mathf.Max(0f, burst),
-                projectileVelocity = velocity,
+                projectileVelocity = cone ? (float?)null : velocity,
                 damagePierce = physicalType == "Pierce" ? physical : 0f,
                 damagePiercePerLevel = physicalType == "Pierce" ? physicalPerLevel : 0f,
                 damageBlunt = physicalType == "Blunt" ? physical : 0f,
@@ -146,7 +151,7 @@ namespace ModularMagic_IceStaffs.Helpers
                 equipStatusEffect = CreateEquipStatusEffect(imbuements),
             };
 
-            Jotunn.Logger.LogWarning($"[Imbuements] {itemData.m_dropPrefab.name}: {physicalType} {physical}, eitr {options.attackEitr}, accuracy {options.projectileAccuracy}, burst {options.projectileBurst}, speed {options.projectileVelocity}, secondary eitr {(options.secondaryAttackEitr == null ? "none" : options.secondaryAttackEitr.ToString())}");
+            Jotunn.Logger.LogWarning($"[Imbuements] {itemData.m_dropPrefab.name}: main {(cone ? "cone" : "default")}, {physicalType} {physical}, eitr {options.attackEitr}, accuracy {options.projectileAccuracy}, burst {options.projectileBurst}, speed {options.projectileVelocity}, secondary eitr {(options.secondaryAttackEitr == null ? "none" : options.secondaryAttackEitr.ToString())}");
 
             StatusEffect previousEquipEffect = itemData.m_shared.m_equipStatusEffect;
 

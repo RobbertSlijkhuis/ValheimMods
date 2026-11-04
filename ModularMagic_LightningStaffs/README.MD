@@ -9,7 +9,7 @@ Please see [Jötunn Docs](https://valheim-modding.github.io/Jotunn/guides/overvi
 
 ### Post Build automations
 
-Included in this repo is a PowerShell script `publish.ps1`.
+Included in this repo is a PowerShell script `scripts/publish.ps1` (and `scripts/publish.sh` for Unix).
 The script is referenced in the project file as a post-build event.
 Depending on the chosen configuration in Visual Studio the script executes the following actions.
 

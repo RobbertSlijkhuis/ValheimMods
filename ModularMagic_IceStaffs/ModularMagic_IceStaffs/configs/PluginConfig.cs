@@ -30,6 +30,9 @@ namespace ModularMagic_IceStaffs.Configs
         public static string secondaryAttackNovaName = "Secondary attack Nova";
         public static SecondaryAttackConfig secondaryAttackNova = new SecondaryAttackConfig();
 
+        public static string mainAttackConeName = "Main attack Cone";
+        public static MainAttackConfig mainAttackCone = new MainAttackConfig();
+
         public static string secondaryAttackRainName = "Secondary attack Ice shards";
         public static SecondaryAttackConfig secondaryAttackRain = new SecondaryAttackConfig();
 
@@ -46,6 +49,30 @@ namespace ModularMagic_IceStaffs.Configs
             InitStaffIceAOEConfig();
             InitSecondaryAttackNovaConfig();
             InitSecondaryAttackRainConfig();
+            InitMainAttackConeConfig();
+        }
+
+        private static void InitMainAttackConeConfig()
+        {
+            try
+            {
+                MainAttackConfigOptions options = new MainAttackConfigOptions(
+                    ModularMagic_IceStaffs.Instance.prefabs.MainAttackCone,
+                    ModularMagic_IceStaffs.Instance.prefabs.AttackCone,
+                    mainAttackConeName
+                )
+                {
+                    useEitr = 5,
+                    burstInterval = 0.2f,
+                    damageFrost = 5f,
+                    attackForce = 0f,
+                };
+                mainAttackCone.GenerateConfig(options);
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + mainAttackConeName + " config: " + error);
+            }
         }
 
         private static void InitSecondaryAttackNovaConfig()

@@ -86,6 +86,7 @@ namespace ModularMagic_IceStaffs
                 // After the staffs are registered, so a failing attack update can not take the staffs with it
                 AttackHelper.UpdateNova(prefabs.AttackNova, PluginConfig.secondaryAttackNova);
                 AttackHelper.UpdateRain(prefabs.SecondaryAttackRain, prefabs.ProjectileIceShard, prefabs.ScriptIceShards, PluginConfig.secondaryAttackRain);
+                AttackHelper.UpdateCone(prefabs.AttackCone, PluginConfig.mainAttackCone);
             }
             catch (System.Exception e)
             {
@@ -146,6 +147,14 @@ namespace ModularMagic_IceStaffs
             prefabs.AttackNova = _assetBundle.LoadAsset<GameObject>("attack_nova_MMIS");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.AttackNova, true));
             prefabs.SecondaryAttackNova = _assetBundle.LoadAsset<GameObject>("secondary_nova_MMIS");
+
+            // The cone rune: the AOE has its own damage and is spawned in the world, so it is registered. The visuals are a separate
+            // effect (the burst effect of the wrapper), so they outlive the AOE, and it is registered too. The wrapper holds the main
+            // attack that replaces the main attack of the staff and is not registered
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("fx_staff_ice_cone_MMIS"), true));
+            prefabs.AttackCone = _assetBundle.LoadAsset<GameObject>("attack_cone_MMIS");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.AttackCone, true));
+            prefabs.MainAttackCone = _assetBundle.LoadAsset<GameObject>("main_cone_attack_MMIS");
 
             // The rain rune (ice shards): the spawn projectile, its script and the shard are spawned in the world, so they are registered.
             // The wrapper holds the secondary attack that is copied to the staff and is not registered

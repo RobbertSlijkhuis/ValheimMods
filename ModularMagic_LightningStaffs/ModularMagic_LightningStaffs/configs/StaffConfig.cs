@@ -1,7 +1,8 @@
 ﻿using BepInEx.Configuration;
 using ModularMagic_LightningStaffs.Helpers;
+using ModularMagic_LightningStaffs.Models;
 
-namespace ModularMagic_LightningStaffs.Models
+namespace ModularMagic_LightningStaffs.Configs
 {
     internal class StaffConfig
     {
@@ -32,6 +33,8 @@ namespace ModularMagic_LightningStaffs.Models
         public ConfigEntry<int> deflectionForce;
         public ConfigEntry<int> attackForce;
         public ConfigEntry<int> useEitr;
+        public ConfigEntry<float> projectileVelocity;
+        public ConfigEntry<float> projectileAccuracy;
         public ConfigEntry<int> useEitrSecondary;
         public ConfigEntry<float> secondaryCooldown;
 
@@ -341,6 +344,34 @@ namespace ModularMagic_LightningStaffs.Models
                     {
                         statusEffect.m_ttl = secondaryCooldown.Value;
                     }
+                };
+            }
+
+            if (options.projectileVelocity != null)
+            {
+                projectileVelocity = Config.Bind(new ConfigDefinition(options.sectionName, "Projectile velocity"), (float)options.projectileVelocity,
+                    new ConfigDescription("The velocity of the projectile of the normal attack", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                projectileVelocity.SettingChanged += (obj, attr) =>
+                {
+                    UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
+                    {
+                        projectileVelocity = projectileVelocity.Value,
+                    });
+                };
+            }
+
+            if (options.projectileAccuracy != null)
+            {
+                projectileAccuracy = Config.Bind(new ConfigDefinition(options.sectionName, "Projectile accuracy"), (float)options.projectileAccuracy,
+                    new ConfigDescription("The accuracy (spread) of the projectile of the normal attack", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+                projectileAccuracy.SettingChanged += (obj, attr) =>
+                {
+                    UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
+                    {
+                        projectileAccuracy = projectileAccuracy.Value,
+                    });
                 };
             }
         }

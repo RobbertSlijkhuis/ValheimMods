@@ -1,6 +1,7 @@
 ﻿using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
+using ModularMagic_LightningStaffs.Configs;
 using ModularMagic_LightningStaffs.Models;
 using UnityEngine;
 
@@ -33,6 +34,8 @@ namespace ModularMagic_LightningStaffs.Helpers
                 damageLightning = config.damageLightning.Value,
                 damagePickaxe = config.damagePickaxe.Value,
                 attackEitr = config.useEitr.Value,
+                projectileVelocity = config.projectileVelocity?.Value,
+                projectileAccuracy = config.projectileAccuracy?.Value,
             });
 
             ItemManager.Instance.AddItem(new CustomItem(prefab, true, itemConfig));

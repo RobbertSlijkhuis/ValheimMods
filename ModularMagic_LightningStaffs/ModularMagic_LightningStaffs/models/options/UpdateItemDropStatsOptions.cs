@@ -14,6 +14,8 @@ namespace ModularMagic_LightningStaffs.Models
         public float? backstabBonus = null;
         public float? attackEitr = null;
         public float? secondaryAttackEitr = null;
+        public float? projectileVelocity = null;
+        public float? projectileAccuracy = null;
         public float? damageMultiplier = null;
         public float? damageBlunt = null;
         public float? damageChop = null;

@@ -33,6 +33,8 @@ namespace ModularMagic_LightningStaffs.Models
         public int? deflectionForce;
         public int? attackForce;
         public int? useEitr;
+        public float? projectileVelocity;
+        public float? projectileAccuracy;
         public int? useEitrSecondary;
         public float? secondaryCooldown;
 

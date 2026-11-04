@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 2745768347
+CRC: 910688357
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: c5b88baf989a1800742d1fa647144f4f
+    Hash: 632986cf64a461a8003b367fe7dd0491
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 8f4913880de8838b7bbc4f19faa10acc
+    Hash: 141f1d48631bd6dd84148018d071b0da
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: c5b88baf989a1800742d1fa647144f4f
+    Hash: 632986cf64a461a8003b367fe7dd0491
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -47,6 +47,8 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: 469224316, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: -347224168, guid: 769b302de6984ec428bc5821d566a447, type: 3}
@@ -60,8 +62,6 @@ ClassTypes:
   Script: {fileID: -347224168, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 1541706127, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -110,6 +110,7 @@ Assets:
 - Assets/Custom/PrefabInstance/Frost/MMIS_StaffIceAOE.prefab
 - Assets/Custom/PrefabInstance/Frost/projectiles/projectile_spawn_rain_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/MMIS_staffIce1.prefab
+- Assets/Custom/PrefabInstance/Frost/fx/fx_staff_ice_cone_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/attacks/secondary_nova_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/fx/fx_IceSheetSpawn_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/projectiles/staff_ice_projectile_MMIS.prefab
@@ -122,9 +123,11 @@ Assets:
 - Assets/Custom/PrefabInstance/Frost/attacks/secondary_rain_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/fx/fx_iceshard_launch_smoke_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/fx/fx_staff_ice_spikes_MMIS.prefab
-- Assets/Custom/PrefabInstance/Frost/attacks/attack_nova_SKULL_MMIS.prefab
+- Assets/Custom/PrefabInstance/Frost/attacks/attack_cone_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/projectiles/staff_ice_blocker_MMIS.prefab
+- Assets/Custom/PrefabInstance/Frost/attacks/attack_nova_SKULL_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/fx/fx_iceshard_launch_MMIS.prefab
+- Assets/Custom/PrefabInstance/Frost/attacks/main_cone_attack_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/fx/fx_staff_ice_windup_MMIS.prefab
 - Assets/Custom/PrefabInstance/Frost/projectiles/staff_ice_projectile_spawn_MMIS.prefab
 Dependencies: []

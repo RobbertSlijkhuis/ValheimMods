@@ -1,9 +1,10 @@
 ﻿using ModularMagic_LightningStaffs.Models;
+using ModularMagic_LightningStaffs.Types;
 using System;
 
 namespace ModularMagic_LightningStaffs.Configs
 {
-    internal static class ConfigStaffs
+    internal static class PluginConfig
     {
         public static string staff1Name = "Staff of Lightning";
         public static string staff1Recipe = "Bronze:6, BoneFragments:20, HardAntler:4, GreydwarfEye:20";
@@ -20,13 +21,110 @@ namespace ModularMagic_LightningStaffs.Configs
         public static string staff3UpgradeRecipe = "YggdrasilWood:10, Sap:2, Eitr:8";
         public static StaffConfig staffLightning3 = new StaffConfig();
 
+        public static string secondaryAttackNovaName = "Secondary attack Nova";
+        public static SecondaryAttackConfig secondaryAttackNova = new SecondaryAttackConfig();
+
+        public static string mainAttackConeName = "Main attack Cone";
+        public static MainAttackConfig mainAttackCone = new MainAttackConfig();
+
+        public static string secondaryAttackRainName = "Secondary attack Lightning bolts";
+        public static SecondaryAttackConfig secondaryAttackRain = new SecondaryAttackConfig();
+
+        public static ImbuementConfig imbuementConfig = new ImbuementConfig();
+
         private static int sectionIndex = 1;
 
         public static void Init()
         {
+            imbuementConfig.GenerateConfig();
             InitStaffLightning1Config();
             InitStaffLightning2Config();
             InitStaffLightning3Config();
+            InitSecondaryAttackNovaConfig();
+            InitSecondaryAttackRainConfig();
+            InitMainAttackConeConfig();
+        }
+
+        private static void InitMainAttackConeConfig()
+        {
+            try
+            {
+                MainAttackConfigOptions options = new MainAttackConfigOptions(
+                    ModularMagic_LightningStaffs.Instance.prefabs.mainAttackCone,
+                    ModularMagic_LightningStaffs.Instance.prefabs.attackCone,
+                    mainAttackConeName
+                )
+                {
+                    useEitr = 5,
+                    burstInterval = 0.4f,
+                    damageLightning = 10f,
+                    attackForce = 0f,
+                };
+                mainAttackCone.GenerateConfig(options);
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + mainAttackConeName + " config: " + error);
+            }
+        }
+
+        private static void InitSecondaryAttackRainConfig()
+        {
+            try
+            {
+                SecondaryAttackConfigOptions options = new SecondaryAttackConfigOptions(
+                    ModularMagic_LightningStaffs.Instance.prefabs.secondaryAttackRain,
+                    ModularMagic_LightningStaffs.Instance.prefabs.projectileBolt,
+                    SecondaryAttackType.Projectile,
+                    secondaryAttackRainName
+                )
+                {
+                    useEitr = 100,
+                    cooldown = 30f,
+                    aoe = 3f,
+                    damageLightning = 70f,
+                    damageChop = 20f,
+                    damagePickaxe = 20f,
+                    attackForce = 30f,
+                    launchAngle = -25f,
+                    projectileVelocity = 20f,
+                    projectileAccuracy = 1f,
+                    spawnAbilityPrefab = ModularMagic_LightningStaffs.Instance.prefabs.scriptBolts,
+                    minToSpawn = 15,
+                    maxToSpawn = 15,
+                    spawnRadius = 20f,
+                };
+                secondaryAttackRain.GenerateConfig(options);
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + secondaryAttackRainName + " config: " + error);
+            }
+        }
+
+        private static void InitSecondaryAttackNovaConfig()
+        {
+            try
+            {
+                SecondaryAttackConfigOptions options = new SecondaryAttackConfigOptions(
+                    ModularMagic_LightningStaffs.Instance.prefabs.secondaryAttackNova,
+                    ModularMagic_LightningStaffs.Instance.prefabs.attackNova,
+                    SecondaryAttackType.AOE,
+                    secondaryAttackNovaName
+                )
+                {
+                    useEitr = 100,
+                    cooldown = 30f,
+                    aoe = 6f,
+                    damageLightning = 75f,
+                    attackForce = 40f,
+                };
+                secondaryAttackNova.GenerateConfig(options);
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + secondaryAttackNovaName + " config: " + error);
+            }
         }
 
         private static void InitStaffLightning1Config()
@@ -47,6 +145,8 @@ namespace ModularMagic_LightningStaffs.Configs
                     deflectionForce = 20,
                     attackForce = 25,
                     useEitr = 20,
+                    projectileVelocity = 15f,
+                    projectileAccuracy = 2f,
                 };
                 staffLightning1.GenerateConfig(options);
             }
@@ -74,6 +174,8 @@ namespace ModularMagic_LightningStaffs.Configs
                     deflectionForce = 20,
                     attackForce = 30,
                     useEitr = 27,
+                    projectileVelocity = 17.5f,
+                    projectileAccuracy = 1.5f,
                 };
                 staffLightning2.GenerateConfig(options);
             }
@@ -101,6 +203,8 @@ namespace ModularMagic_LightningStaffs.Configs
                     deflectionForce = 20,
                     attackForce = 35,
                     useEitr = 35,
+                    projectileVelocity = 20f,
+                    projectileAccuracy = 1f,
                 };
                 staffLightning3.GenerateConfig(options);
             }

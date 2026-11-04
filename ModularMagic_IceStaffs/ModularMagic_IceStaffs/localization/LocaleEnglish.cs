@@ -21,6 +21,7 @@ namespace ModularMagic_IceStaffs.Locale
             AddRune(texts, RuneId.ProjectileBurst, "Rune: Attack Speed", "Improve the attack speed of the weapon's main attack");
             AddRune(texts, RuneId.ProjectileSpeed, "Rune: Projectile Speed", "Improve the projectile speed of the weapon's main attack");
             AddRune(texts, RuneId.Nova, "Rune: Frost Nova", "Release a nova of frost around you!");
+            AddRune(texts, RuneId.Cone, "Rune: Frost Cone", "Change your main attack into a cone of frost!");
             AddRune(texts, RuneId.Rain, "Rune: Ice Shards", "Call down a rain of ice shards on your enemies!");
 
             ModularMagic_IceStaffs.Localization.AddTranslation("English", texts);

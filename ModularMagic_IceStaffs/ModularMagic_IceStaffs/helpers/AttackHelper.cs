@@ -18,6 +18,16 @@ namespace ModularMagic_IceStaffs.Helpers
             });
         }
 
+        // The shape of the cone comes from the collider of the prefab, so only the damage and the force are applied
+        public static void UpdateCone(GameObject aoePrefab, MainAttackConfig config)
+        {
+            UpdateHelper.UpdateAoe(aoePrefab, new UpdateAoeOptions()
+            {
+                damageFrost = config.damageFrost.Value,
+                attackForce = config.attackForce.Value,
+            });
+        }
+
         public static void UpdateRain(GameObject attackPrefab, GameObject shardPrefab, GameObject spawnAbilityPrefab, SecondaryAttackConfig config)
         {
             UpdateHelper.UpdateItemData(attackPrefab.GetComponent<ItemDrop>().m_itemData, new UpdateItemDataOptions()
