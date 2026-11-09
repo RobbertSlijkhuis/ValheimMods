@@ -7,7 +7,7 @@ namespace ModularMagic_EarthStaffs.configs
         public string sectionName = "Imbuement";
         public ConfigEntry<float> EitrCost;
         public ConfigEntry<float> ProjectileAccuracy;
-        public ConfigEntry<float> ProjectileBurst;
+        public ConfigEntry<float> AttackSpeed;
         public ConfigEntry<float> ProjectileSpeed;
         public ConfigEntry<float> SecondaryAttackEitr;
 
@@ -25,7 +25,7 @@ namespace ModularMagic_EarthStaffs.configs
                 new ConfigDescription("The amount of accuracy improvement per level of the Accuracy rune", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
 
-            ProjectileBurst = Config.Bind(new ConfigDefinition(sectionName, "Attack Speed Rune"), 0.0125f,
+            AttackSpeed = Config.Bind(new ConfigDefinition(sectionName, "Attack Speed Rune"), 0.0125f,
                 new ConfigDescription("The amount of attack speed improvement per level of the Attack Speed rune", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
 

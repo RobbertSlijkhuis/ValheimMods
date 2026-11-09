@@ -9,6 +9,10 @@ namespace ModularMagic_FireStaffs.Models
         public GameObject staffFire2Prefab;
         public GameObject staffFire3Prefab;
 
+        // The cone rune: the AOE has its own damage, the wrapper holds the main attack that replaces the main attack of the staff
+        public GameObject mainAttackCone;
+        public GameObject attackCone;
+
         // The nova rune: the AOE has its own damage, the wrapper holds the secondary attack that is copied to the staff
         public GameObject attackNova;
         public GameObject secondaryAttackNova;

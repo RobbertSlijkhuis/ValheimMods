@@ -13,6 +13,13 @@ namespace ModularMagic_EarthStaffs.Models
 
         public int useEitr = 100;
         public float cooldown = 30f;
+
+        // Only for attacks whose eitr cost is a multiplier of the eitr cost of the staff's attack, instead of the fixed useEitr
+        public float? eitrMultiplier;
+        // Only for attacks that use the damage and the attack force of the staff (the nova and the boulders): the multipliers of those.
+        // These attacks have no damage or attack force of their own, apart from the chop and pickaxe damage of the boulders
+        public float? damageMultiplier;
+        public float? forceMultiplier;
         public float? health;
         public int? minToSpawn;
         public int? maxToSpawn;

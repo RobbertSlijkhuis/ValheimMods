@@ -17,14 +17,14 @@ namespace ModularMagic_Armors
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
     [BepInDependency("DeathWizsh.ModularMagic_Core")]
-    [NetworkCompatibility(CompatibilityLevel.ClientMustHaveMod, VersionStrictness.Minor)]
+    [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     internal class ModularMagic_Armors : BaseUnityPlugin
     {
         // ADD FROST RESITANCE TO DARKWIZARD CLOAK, OR FREEZE TO DEATH IN MOUNTAINS
 
         public const string PluginGUID = "DeathWizsh.ModularMagic_Armors";
         public const string PluginName = "ModularMagic_Armors";
-        public const string PluginVersion = "0.0.1";
+        public const string PluginVersion = "0.0.3";
         public static ModularMagic_Armors Instance;
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
         public object configManager;

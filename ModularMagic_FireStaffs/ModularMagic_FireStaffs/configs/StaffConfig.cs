@@ -35,8 +35,6 @@ namespace ModularMagic_FireStaffs.Configs
         public ConfigEntry<int> useEitr;
         public ConfigEntry<float> projectileVelocity;
         public ConfigEntry<float> projectileAccuracy;
-        public ConfigEntry<int> useEitrSecondary;
-        public ConfigEntry<float> secondaryCooldown;
 
         public void GenerateConfig(StaffConfigOptions options)
         {
@@ -342,36 +340,6 @@ namespace ModularMagic_FireStaffs.Configs
                     {
                         projectileAccuracy = projectileAccuracy.Value,
                     });
-                };
-            }
-
-            if (options.useEitrSecondary > -1)
-            {
-                useEitrSecondary = Config.Bind(new ConfigDefinition(options.sectionName, "Secondary ability eitr cost"), (int)options.useEitrSecondary,
-                    new ConfigDescription("The secondary attack eitr cost", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                useEitrSecondary.SettingChanged += (obj, attr) =>
-                {
-                    UpdateHelper.UpdateItemDropStats(options.prefab, new UpdateItemDropStatsOptions()
-                    {
-                        secondaryAttackEitr = useEitrSecondary.Value,
-                    });
-                };
-            }
-
-            if (options.secondaryCooldown > -1 && options.cooldownStatusEffectName != "")
-            {
-                secondaryCooldown = Config.Bind(new ConfigDefinition(options.sectionName, "Secondary cooldown"), (float)options.secondaryCooldown,
-                    new ConfigDescription("Cooldown duration of the secondary ability", null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-                secondaryCooldown.SettingChanged += (obj, attr) =>
-                {
-                    StatusEffect statusEffect = ObjectDB.instance.GetStatusEffect(StringExtensionMethods.GetStableHashCode(options.cooldownStatusEffectName));
-
-                    if (statusEffect != null)
-                    {
-                        statusEffect.m_ttl = secondaryCooldown.Value;
-                    }
                 };
             }
         }

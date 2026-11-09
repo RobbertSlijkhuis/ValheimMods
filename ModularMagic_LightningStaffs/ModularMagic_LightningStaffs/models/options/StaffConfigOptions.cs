@@ -8,7 +8,6 @@ namespace ModularMagic_LightningStaffs.Models
         public GameObject prefab;
         public string sectionName;
         public string recipeName;
-        public string? cooldownStatusEffectName;
 
         public bool enable = true;
         public string name;
@@ -35,8 +34,6 @@ namespace ModularMagic_LightningStaffs.Models
         public int? useEitr;
         public float? projectileVelocity;
         public float? projectileAccuracy;
-        public int? useEitrSecondary;
-        public float? secondaryCooldown;
 
         public StaffConfigOptions(GameObject prefab, string name, string recipe, string upgradeRecipe, int sectionIndex)
         {
@@ -46,7 +43,6 @@ namespace ModularMagic_LightningStaffs.Models
             this.recipe = recipe;
             this.recipeName = $"Recipe_{prefab.name}";
             this.recipeUpgrade = upgradeRecipe;
-            this.cooldownStatusEffectName = $"{prefab.name}CooldownStatusEffect";
         }
     }
 }

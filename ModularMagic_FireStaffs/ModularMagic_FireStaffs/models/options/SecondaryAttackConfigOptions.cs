@@ -20,6 +20,16 @@ namespace ModularMagic_FireStaffs.Models
         public float attackForce = 0f;
         public float cooldown = 30f;
 
+        // Only for attacks whose eitr cost is a multiplier of the eitr cost of the staff's attack, instead of the fixed useEitr
+        public float? eitrMultiplier;
+
+        // Only for attacks whose area hit uses the damage of the staff (see MMAoe): the multiplier of that damage. These attacks
+        // have no damage or attack force of their own, so those values are not bound for them
+        public float? damageMultiplier;
+
+        // Only for attacks whose projectiles get their attack force from the staff: the multiplier of the attack force of the staff
+        public float? forceMultiplier;
+
         // Only for attacks that deal this type of damage
         public float? damageBlunt;
         public float? damageChop;
@@ -35,6 +45,10 @@ namespace ModularMagic_FireStaffs.Models
         public int? minToSpawn;
         public int? maxToSpawn;
         public float? spawnRadius;
+        // The spread of the spawned projectiles in degrees
+        public float? spawnAccuracy;
+        // The time in seconds between two spawned projectiles
+        public float? spawnDelay;
 
         public SecondaryAttackConfigOptions(GameObject prefab, GameObject secondPrefab, string type, string name)
         {

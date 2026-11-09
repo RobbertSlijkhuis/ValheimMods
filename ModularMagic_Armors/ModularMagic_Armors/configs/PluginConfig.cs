@@ -54,7 +54,7 @@ namespace ModularMagic_Armors.Configs
 
         // Wolf
         public static string armor3HelmetName = "Frostwolf Hood";
-        public static string armor3HelmetRecipe = $"Silver:10, WolfPelt:6, Crystal:4, {MaterialType.EitrFine}:6";
+        public static string armor3HelmetRecipe = $"Silver:10, WolfPelt:6, Crystal:6, {MaterialType.EitrFine}:6";
         public static string armor3HelmetRecipeUpgrade = $"Silver:2, WolfPelt:2, Crystal:2, {MaterialType.EitrFine}:3";
         public static ArmorConfig armor3Helmet = new ArmorConfig();
 
@@ -75,22 +75,22 @@ namespace ModularMagic_Armors.Configs
 
         // Dark Wizard
         public static string armor4HelmetName = "Dark Wizard Hood";
-        public static string armor4HelmetRecipe = $"BlackMetal:6, LinenThread:8, Tar:4, {MaterialType.EitrFine}:6";
+        public static string armor4HelmetRecipe = $"BlackMetal:6, LinenThread:12, Tar:4, {MaterialType.EitrFine}:6";
         public static string armor4HelmetRecipeUpgrade = $"BlackMetal:2, LinenThread:2, Tar:2, {MaterialType.EitrFine}:3";
         public static ArmorConfig armor4Helmet = new ArmorConfig();
 
         public static string armor4CapeName = "Dark Wizard Cape";
-        public static string armor4CapeRecipe = $"LinenThread:12, Tar:8, GoblinTotem:1, {MaterialType.EitrFine}:6";
+        public static string armor4CapeRecipe = $"LinenThread:20, Tar:8, GoblinTotem:1, {MaterialType.EitrFine}:6";
         public static string armor4CapeRecipeUpgrade = $"LinenThread:2, Tar:2, {MaterialType.EitrFine}:3";
         public static ArmorConfig armor4Cape = new ArmorConfig();
 
         public static string armor4ChestName = "Dark Wizard Chest";
-        public static string armor4ChestRecipe = $"BlackMetal:6, LinenThread:8, Tar:4, {MaterialType.EitrFine}:6";
+        public static string armor4ChestRecipe = $"BlackMetal:6, LinenThread:12, Tar:4, {MaterialType.EitrFine}:6";
         public static string armor4ChestRecipeUpgrade = $"BlackMetal:2, LinenThread:2, Tar:2, {MaterialType.EitrFine}:3";
         public static ArmorConfig armor4Chest = new ArmorConfig();
 
         public static string armor4LegsName = "Dark Wizard Legs";
-        public static string armor4LegsRecipe = $"BlackMetal:6, LinenThread:8, Tar:4, {MaterialType.EitrFine}:6";
+        public static string armor4LegsRecipe = $"BlackMetal:6, LinenThread:12, Tar:4, {MaterialType.EitrFine}:6";
         public static string armor4LegsRecipeUpgrade = $"BlackMetal:2, LinenThread:2, Tar:2, {MaterialType.EitrFine}:3";
         public static ArmorConfig armor4Legs = new ArmorConfig();
 

@@ -84,7 +84,7 @@ namespace ModularMagic_LightningStaffs.Helpers
 
             foreach (Imbuement imbuement in CoreImbuementHelper.Read(weapon))
             {
-                if (imbuement.type == ImbuementType.ProjectileBurst)
+                if (imbuement.type == ImbuementType.AttackSpeed)
                     levels += imbuement.level;
             }
 

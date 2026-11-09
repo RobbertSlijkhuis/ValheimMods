@@ -7,54 +7,23 @@ namespace ModularMagic_EarthStaffs.Helpers
 {
     internal class AttackHelper
     {
-        public static void UpdateCone(GameObject aoePrefab, SecondaryAttackConfig config)
-        {
-            UpdateHelper.UpdateAoe(aoePrefab, new UpdateAoeOptions()
-            {
-                damageBlunt = config.damageBlunt.Value,
-                damageChop = config.damageChop.Value,
-                damageGeneral = config.damageGeneral.Value,
-                damagePickaxe = config.damagePickaxe.Value,
-                damagePierce = config.damagePierce.Value,
-                damagePoison = config.damagePoison.Value,
-                damageSpirit = config.damageSpirit.Value,
-            });
-        }
-
+        // The damage and the attack force of the nova come from the staff (see the multipliers of the config), so only the radius is applied
         public static void UpdateNova(GameObject aoePrefab, SecondaryAttackConfig config)
         {
             UpdateHelper.UpdateAoe(aoePrefab, new UpdateAoeOptions()
             {
                 aoe = config.aoe.Value,
-                damageBlunt = config.damageBlunt.Value,
-                damageChop = config.damageChop.Value,
-                damageGeneral = config.damageGeneral.Value,
-                damagePickaxe = config.damagePickaxe.Value,
-                damagePierce = config.damagePierce.Value,
-                damagePoison = config.damagePoison.Value,
-                damageSpirit = config.damageSpirit.Value,
-                attackForce = config.attackForce.Value,
             });
         }
 
-        public static void UpdateRain(GameObject attackPrefab, GameObject projectilePrefab, SecondaryAttackConfig config)
+        // The damage (apart from chop and pickaxe) and the attack force of the boulders come from the staff, see EarthImbuementHelper
+        public static void UpdateRain(GameObject projectilePrefab, SecondaryAttackConfig config)
         {
-            UpdateHelper.UpdateItemData(attackPrefab, new UpdateItemDataOptions()
-            {
-                launchAngle = config.launchAngle.Value,
-                projectileVelocity = config.projectileVelocity.Value,
-                projectileAccuracy = config.projectileAccuracy.Value,
-            });
-
             UpdateHelper.UpdateProjectile(projectilePrefab, new UpdateProjectileOptions()
             {
                 aoe = config.aoe.Value,
-                damageBlunt = config.damageBlunt.Value,
                 damageChop = config.damageChop.Value,
                 damagePickaxe = config.damagePickaxe.Value,
-                damagePoison = config.damagePoison.Value,
-                damageSpirit = config.damageSpirit.Value,
-                attackForce = config.attackForce.Value,
             });
         }
 
@@ -85,4 +54,3 @@ namespace ModularMagic_EarthStaffs.Helpers
         }
     }
 }
-

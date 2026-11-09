@@ -4,11 +4,7 @@ namespace ModularMagic_IceStaffs.Models
 {
     internal class UpdateAoeOptions
     {
+        // The radius of the area, the damage comes from the staff
         public float? aoe = null;
-        public float? damageFrost = null;
-        public float? damagePierce = null;
-        public float? damageChop = null;
-        public float? damagePickaxe = null;
-        public float? attackForce = null;
     }
 }

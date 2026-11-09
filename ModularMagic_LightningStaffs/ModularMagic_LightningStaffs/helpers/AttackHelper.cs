@@ -6,42 +6,23 @@ namespace ModularMagic_LightningStaffs.Helpers
 {
     internal class AttackHelper
     {
+        // The damage and the attack force of the nova come from the staff (see the multipliers of the config), so only the radius is applied
         public static void UpdateNova(GameObject aoePrefab, SecondaryAttackConfig config)
         {
             UpdateHelper.UpdateAoe(aoePrefab, new UpdateAoeOptions()
             {
                 aoe = config.aoe.Value,
-                damageLightning = config.damageLightning.Value,
-                attackForce = config.attackForce.Value,
             });
         }
 
-        // The shape of the cone comes from the collider of the prefab, so only the damage and the force are applied
-        public static void UpdateCone(GameObject aoePrefab, MainAttackConfig config)
+        // The lightning damage and the attack force of the bolts come from the staff, see LightningImbuementHelper
+        public static void UpdateRain(GameObject boltPrefab, GameObject spawnAbilityPrefab, SecondaryAttackConfig config)
         {
-            UpdateHelper.UpdateAoe(aoePrefab, new UpdateAoeOptions()
-            {
-                damageLightning = config.damageLightning.Value,
-                attackForce = config.attackForce.Value,
-            });
-        }
-
-        public static void UpdateRain(GameObject attackPrefab, GameObject boltPrefab, GameObject spawnAbilityPrefab, SecondaryAttackConfig config)
-        {
-            UpdateHelper.UpdateItemData(attackPrefab.GetComponent<ItemDrop>().m_itemData, new UpdateItemDataOptions()
-            {
-                launchAngle = config.launchAngle.Value,
-                projectileVelocity = config.projectileVelocity.Value,
-                projectileAccuracy = config.projectileAccuracy.Value,
-            });
-
             UpdateHelper.UpdateProjectile(boltPrefab, new UpdateProjectileOptions()
             {
                 aoe = config.aoe.Value,
-                damageLightning = config.damageLightning.Value,
                 damageChop = config.damageChop.Value,
                 damagePickaxe = config.damagePickaxe.Value,
-                attackForce = config.attackForce.Value,
             });
 
             UpdateHelper.UpdateSpawnAbility(spawnAbilityPrefab, new UpdateSpawnAbilityOptions()
@@ -49,6 +30,8 @@ namespace ModularMagic_LightningStaffs.Helpers
                 minToSpawn = config.minToSpawn.Value,
                 maxToSpawn = config.maxToSpawn.Value,
                 spawnRadius = config.spawnRadius.Value,
+                projectileAccuracy = config.spawnAccuracy.Value,
+                spawnDelay = config.spawnDelay.Value,
             });
         }
     }

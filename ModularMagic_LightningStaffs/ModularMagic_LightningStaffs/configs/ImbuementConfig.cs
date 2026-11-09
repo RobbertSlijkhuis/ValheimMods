@@ -7,7 +7,6 @@ namespace ModularMagic_LightningStaffs.Configs
         public string sectionName = "Imbuement";
         public ConfigEntry<float> EitrCost;
         public ConfigEntry<float> ProjectileAccuracy;
-        public ConfigEntry<float> ProjectileBurst;
         public ConfigEntry<float> AttackSpeedAnimation;
         public ConfigEntry<float> ProjectileSpeed;
         public ConfigEntry<float> SecondaryAttackEitr;
@@ -24,10 +23,6 @@ namespace ModularMagic_LightningStaffs.Configs
 
             ProjectileAccuracy = Config.Bind(new ConfigDefinition(sectionName, "Accuracy Rune"), 0.125f,
                 new ConfigDescription("The amount of accuracy improvement per level of the Accuracy rune", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
-
-            ProjectileBurst = Config.Bind(new ConfigDefinition(sectionName, "Attack Speed Rune"), 0.0125f,
-                new ConfigDescription("The amount of seconds the time between two bursts of the cone is reduced per level of the Attack Speed rune", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
 
             AttackSpeedAnimation = Config.Bind(new ConfigDefinition(sectionName, "Attack Speed Rune Animation Speed"), 0.05f,

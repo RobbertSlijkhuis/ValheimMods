@@ -18,7 +18,7 @@ namespace ModularMagic_EarthStaffs.Locale
             AddRune(texts, RuneId.DamageSlash, "Rune: Damage Slash", "Change physical damage on the weapon to Slash!");
             AddRune(texts, RuneId.EitrCost, "Rune: Eitr Cost", "Reduce the eitr cost of the weapon's main attack");
             AddRune(texts, RuneId.ProjectileAccuracy, "Rune: Accuracy", "Improve the accuracy of the weapon's main attack");
-            AddRune(texts, RuneId.ProjectileBurst, "Rune: Attack Speed", "Improve the attack speed of the weapon's main attack");
+            AddRune(texts, RuneId.AttackSpeed, "Rune: Attack Speed", "Improve the attack speed of the weapon's main attack");
             AddRune(texts, RuneId.ProjectileSpeed, "Rune: Projectile Speed", "Improve the projectile speed of the weapon's main attack");
             AddRune(texts, RuneId.Nova, "Rune: Nova", "Cast an area of effect spell around you!");
             AddRune(texts, RuneId.Rain, "Rune: Giant f*cking Boulder", "Summon a giant boulder from the sky to crush your enemies!");

@@ -16,7 +16,7 @@ namespace ModularMagic_LightningStaffs.Locale
 
             AddRune(texts, RuneId.EitrCost, "Rune: Eitr Cost", "Reduce the eitr cost of the weapon's main attack");
             AddRune(texts, RuneId.ProjectileAccuracy, "Rune: Accuracy", "Improve the accuracy of the weapon's main attack");
-            AddRune(texts, RuneId.ProjectileBurst, "Rune: Attack Speed", "Improve the attack speed of the weapon's main attack");
+            AddRune(texts, RuneId.AttackSpeed, "Rune: Attack Speed", "Improve the attack speed of the weapon's main attack");
             AddRune(texts, RuneId.ProjectileSpeed,"Rune: Projectile Speed", "Improve the projectile speed of the weapon's main attack");
             AddRune(texts, RuneId.Nova, "Rune: Lightning Nova", "Release a nova of lightning around you!");
             AddRune(texts, RuneId.Cone, "Rune: Lightning Cone", "Change your main attack into a cone of lightning!");

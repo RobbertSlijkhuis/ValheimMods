@@ -13,7 +13,6 @@ namespace ModularMagic_FireStaffs.Models
         public float? attackForce = null;
         public float? backstabBonus = null;
         public float? attackEitr = null;
-        public float? secondaryAttackEitr = null;
         public float? projectileVelocity = null;
         public float? projectileAccuracy = null;
         public float? damageMultiplier = null;

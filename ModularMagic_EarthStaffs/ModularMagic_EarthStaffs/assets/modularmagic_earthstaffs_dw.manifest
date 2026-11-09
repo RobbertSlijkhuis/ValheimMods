@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 33953552
+CRC: 3189905046
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: d7150f0eb7aa61d82f0bcf35bb1e7fb4
+    Hash: 47050a3a2b863cfb96b0d0678bb9752b
   TypeTreeHash:
     serializedVersion: 2
     Hash: 1acba3acefb0396735abf8fc818b7ab5
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: d7150f0eb7aa61d82f0bcf35bb1e7fb4
+    Hash: 47050a3a2b863cfb96b0d0678bb9752b
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -121,12 +121,14 @@ SerializeReferenceClassIdentifiers:
   ClassName: TerrainOp/Settings
 Assets:
 - Assets/Custom/PrefabInstance/Earth/scripts/script_roots_MMES.prefab
+- Assets/Custom/PrefabInstance/Earth/attacks/main_dundr_attack_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/projectiles/projectile_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/scripts/script_boulder_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/scripts/script_levelTerrain_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/MMES_StaffEarth3.prefab
 - Assets/Custom/PrefabInstance/Earth/attacks/attack_root_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/attacks/attack_nova_MMES.prefab
+- Assets/Custom/PrefabInstance/Earth/fx/fx_staff_earth_nova_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/MMES_StaffEarth2.prefab
 - Assets/Custom/PrefabInstance/Earth/projectiles/projectile_boulder_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/fx/fx_staff_earth_windup_MMES.prefab
@@ -136,7 +138,7 @@ Assets:
 - Assets/Custom/PrefabInstance/Earth/fx/fx_mushroom_projectile_hit_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/fx/fx_staff_earth_spikes_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/projectiles/projectile_spawn_boulder_MMES.prefab
-- Assets/Custom/PrefabInstance/Earth/fx/fx_sledge_demolisher_hit_large_MMES.prefab
+- Assets/Custom/PrefabInstance/Earth/fx/fx_staff_earth_cone_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/Root_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/attacks/secondary_boulder_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/projectiles/projectile_mushroom_MMES.prefab
@@ -145,4 +147,5 @@ Assets:
 - Assets/Custom/PrefabInstance/Earth/attacks/secondary_root_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/attacks/secondary_nova_MMES.prefab
 - Assets/Custom/PrefabInstance/Earth/attacks/main_cone_attack_MMES.prefab
+- Assets/Custom/PrefabInstance/Earth/fx/fx_sledge_demolisher_hit_large_MMES.prefab
 Dependencies: []

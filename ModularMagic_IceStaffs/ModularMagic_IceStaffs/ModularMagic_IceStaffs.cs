@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using CoreSecondaryAttackHelper = ModularMagic_Core.Helpers.SecondaryAttackHelper;
+using MMAoeHelper = ModularMagic_Core.Helpers.MMAoeHelper;
 
 namespace ModularMagic_IceStaffs
 {
@@ -23,7 +24,7 @@ namespace ModularMagic_IceStaffs
     {
         public const string PluginGUID = "DeathWizsh.ModularMagic_IceStaffs";
         public const string PluginName = "ModularMagic_IceStaffs";
-        public const string PluginVersion = "0.0.1";
+        public const string PluginVersion = "0.0.3";
         public static ModularMagic_IceStaffs Instance;
         private static readonly HarmonyLib.Harmony _harmony = new HarmonyLib.Harmony(PluginGUID);
 
@@ -51,6 +52,13 @@ namespace ModularMagic_IceStaffs
 
             PrefabManager.OnVanillaPrefabsAvailable += _AddIceStaffs;
             ItemManager.OnItemsRegistered += _LogRecipes;
+            // Not unsubscribed: the recipe is set again each time the items are registered, which is harmless
+            ItemManager.OnItemsRegistered += _ApplyVanillaStaffRecipe;
+        }
+
+        private void _ApplyVanillaStaffRecipe()
+        {
+            VanillaStaffHelper.SetRecipeEnabled(PluginConfig.enableVanillaStaff.Value);
         }
 
         private void _LogRecipes()
@@ -76,7 +84,8 @@ namespace ModularMagic_IceStaffs
                 ItemHelper.CreateStaff(prefabs.StaffIce1Prefab, PluginConfig.staffIce1);
                 ItemHelper.CreateStaff(prefabs.StaffIce2Prefab, PluginConfig.staffIce2);
                 ItemHelper.CreateStaff(prefabs.StaffIce3Prefab, PluginConfig.staffIce3);
-                ItemHelper.CreateStaff(prefabs.StaffIceAOEPrefab, PluginConfig.staffIce4);
+                // Skull of Frost disabled for now
+                // ItemHelper.CreateStaff(prefabs.StaffIceAOEPrefab, PluginConfig.staffIce4);
 
                 // The config is bound in Awake, so it is ready here
                 snapshots.staffIce1 = new ItemDataSnapShot(prefabs.StaffIce1Prefab.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffIce1);
@@ -85,8 +94,7 @@ namespace ModularMagic_IceStaffs
 
                 // After the staffs are registered, so a failing attack update can not take the staffs with it
                 AttackHelper.UpdateNova(prefabs.AttackNova, PluginConfig.secondaryAttackNova);
-                AttackHelper.UpdateRain(prefabs.SecondaryAttackRain, prefabs.ProjectileIceShard, prefabs.ScriptIceShards, PluginConfig.secondaryAttackRain);
-                AttackHelper.UpdateCone(prefabs.AttackCone, PluginConfig.mainAttackCone);
+                AttackHelper.UpdateRain(prefabs.ProjectileIceShard, prefabs.ScriptIceShards, PluginConfig.secondaryAttackRain);
             }
             catch (System.Exception e)
             {
@@ -143,17 +151,18 @@ namespace ModularMagic_IceStaffs
             PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("fx_IceSheetSpawn_MMIS"), true));
             // The nova AOE of the Skull of Frost, it takes its damage from the staff
             PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("attack_nova_SKULL_MMIS"), true));
-            // The nova rune: the AOE has its own damage, the wrapper holds the secondary attack that is copied to the staff and is not registered
+            // The nova rune: the hit is a local object of the shooter (see MMAoe), so it is not registered. The wrapper holds the
+            // secondary attack that is copied to the staff and is not registered
             prefabs.AttackNova = _assetBundle.LoadAsset<GameObject>("attack_nova_MMIS");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.AttackNova, true));
+            MMAoeHelper.PrepareSphere(prefabs.AttackNova, hitProps: false);
             prefabs.SecondaryAttackNova = _assetBundle.LoadAsset<GameObject>("secondary_nova_MMIS");
 
-            // The cone rune: the AOE has its own damage and is spawned in the world, so it is registered. The visuals are a separate
-            // effect (the burst effect of the wrapper), so they outlive the AOE, and it is registered too. The wrapper holds the main
-            // attack that replaces the main attack of the staff and is not registered
+            // The cone rune: the hit of a burst is a local object of the shooter (see MMAoe), so it is not registered. The visuals are a separate
+            // effect (the burst effect of the wrapper) and it is registered. The wrapper holds the main attack that replaces the main attack
+            // of the staff and is not registered
             PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("fx_staff_ice_cone_MMIS"), true));
             prefabs.AttackCone = _assetBundle.LoadAsset<GameObject>("attack_cone_MMIS");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.AttackCone, true));
+            MMAoeHelper.PrepareBox(prefabs.AttackCone, hitProps: true);
             prefabs.MainAttackCone = _assetBundle.LoadAsset<GameObject>("main_cone_attack_MMIS");
 
             // The rain rune (ice shards): the spawn projectile, its script and the shard are spawned in the world, so they are registered.

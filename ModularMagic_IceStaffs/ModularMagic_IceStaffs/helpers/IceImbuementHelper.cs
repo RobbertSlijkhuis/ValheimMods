@@ -1,4 +1,5 @@
 ﻿using ModularMagic_Core.Types;
+using ModularMagic_IceStaffs.configs;
 using ModularMagic_IceStaffs.Configs;
 using ModularMagic_IceStaffs.Models;
 using System;
@@ -20,7 +21,7 @@ namespace ModularMagic_IceStaffs.Helpers
         public static readonly string[] AllowedRunes =
         {
             RuneId.DamageBlunt, RuneId.DamageSlash, RuneId.EitrCost,
-            RuneId.ProjectileAccuracy, RuneId.ProjectileBurst, RuneId.ProjectileSpeed,
+            RuneId.ProjectileAccuracy, RuneId.AttackSpeed, RuneId.ProjectileSpeed,
             RuneId.Nova, RuneId.Rain, RuneId.Cone,
         };
 
@@ -76,13 +77,14 @@ namespace ModularMagic_IceStaffs.Helpers
                 return;
             }
 
-            // The cone rune replaces the main attack of the staff. The cone has its own eitr cost and burst interval and fires an AOE, so the
-            // eitr, accuracy and speed of the staff do not apply to it (the Eitr Cost and Attack Speed runes still apply to the cone)
+            // The cone rune replaces the main attack of the staff. The cone costs a part of the eitr of the staff per burst, has its own burst interval
+            // and fires an AOE, so the accuracy and speed of the staff do not apply to it (the Eitr Cost rune still lowers the eitr of the cone,
+            // the Attack Speed rune is ignored)
             bool cone = imbuements.Exists(i => i.type == ImbuementType.MainAttack && i.value == "Cone");
             ItemData mainAttack = cone ? ModularMagic_IceStaffs.Instance.prefabs.MainAttackCone.GetComponent<ItemDrop>().m_itemData : baseData;
 
             // The base stats come from the config, which also holds the values a server syncs, so the runes are always applied on top of the current base stats
-            float eitr = cone ? PluginConfig.mainAttackCone.useEitr.Value : snapshot.attackEitr;
+            float eitr = cone ? snapshot.attackEitr * PluginConfig.mainAttackCone.eitrMultiplier.Value : snapshot.attackEitr;
             float accuracy = snapshot.projectileAccuracy;
             float burst = cone ? PluginConfig.mainAttackCone.burstInterval.Value : snapshot.projectileBurst;
             float velocity = snapshot.projectileVelocity;
@@ -95,6 +97,7 @@ namespace ModularMagic_IceStaffs.Helpers
             // The secondary attack (nova), only when the staff has the rune
             ItemData secondaryAttack = null;
             float? secondaryEitr = null;
+            bool rain = false;
 
             foreach (Imbuement imbuement in imbuements)
             {
@@ -110,8 +113,10 @@ namespace ModularMagic_IceStaffs.Helpers
                     case ImbuementType.ProjectileAccuracy:
                         accuracy -= PluginConfig.imbuementConfig.ProjectileAccuracy.Value * imbuement.level;
                         break;
-                    case ImbuementType.ProjectileBurst:
-                        burst -= PluginConfig.imbuementConfig.ProjectileBurst.Value * imbuement.level;
+                    case ImbuementType.AttackSpeed:
+                        // The cone is timed by its own burst interval, so the rune only applies to the normal attack
+                        if (!cone)
+                            burst -= PluginConfig.imbuementConfig.AttackSpeed.Value * imbuement.level;
                         break;
                     case ImbuementType.ProjectileVelocity:
                         velocity += PluginConfig.imbuementConfig.ProjectileSpeed.Value * imbuement.level;
@@ -122,12 +127,14 @@ namespace ModularMagic_IceStaffs.Helpers
                         else if (imbuement.value == "Rain")
                             secondaryAttack = ModularMagic_IceStaffs.Instance.prefabs.SecondaryAttackRain.GetComponent<ItemDrop>().m_itemData;
 
-                        // Every level above 1 saves a part of the eitr cost. The base cost is the one of the attack itself,
-                        // which is read again on every equip, so a changed or synced config value is used
+                        // Every level above 1 saves a part of the eitr cost. The base cost is a multiplier of the eitr of the staff,
+                        // read again on every equip, so a changed or synced config value is used
                         if (secondaryAttack != null)
                         {
+                            SecondaryAttackConfig secondaryConfig = imbuement.value == "Nova" ? PluginConfig.secondaryAttackNova : PluginConfig.secondaryAttackRain;
                             float saved = Mathf.Clamp01(PluginConfig.imbuementConfig.SecondaryAttackEitr.Value * (imbuement.level - 1));
-                            secondaryEitr = secondaryAttack.m_shared.m_attack.m_attackEitr * (1f - saved);
+                            secondaryEitr = snapshot.attackEitr * secondaryConfig.eitrMultiplier.Value * (1f - saved);
+                            rain = imbuement.value == "Rain";
                         }
                         break;
                 }
@@ -157,7 +164,28 @@ namespace ModularMagic_IceStaffs.Helpers
 
             UpdateHelper.UpdateItemData(itemData, options);
 
+            // After the staff is updated, so the damage types of the damage type rune are used
+            if (rain)
+                ApplyShardDamage(itemData);
+
             DestroyReplacedEquipStatusEffect(previousEquipEffect, itemData);
+        }
+
+        // The script that spawns the shards does not pass the damage of the staff on, so the frost and physical damage of the shard prefab is set from the staff
+        // (quality included) times the damage multiplier, and the attack force from the attack force of the staff times the force multiplier.
+        // The shards are hit by the client of the shooter, and the chop and pickaxe damage stay config values
+        private static void ApplyShardDamage(ItemData staff)
+        {
+            HitData.DamageTypes damage = staff.GetDamage();
+            SecondaryAttackConfig rain = PluginConfig.secondaryAttackRain;
+            Projectile shard = ModularMagic_IceStaffs.Instance.prefabs.ProjectileIceShard.GetComponent<Projectile>();
+            float multiplier = rain.damageMultiplier.Value;
+
+            shard.m_damage.m_frost = damage.m_frost * multiplier;
+            shard.m_damage.m_pierce = damage.m_pierce * multiplier;
+            shard.m_damage.m_blunt = damage.m_blunt * multiplier;
+            shard.m_damage.m_slash = damage.m_slash * multiplier;
+            shard.m_attackForce = staff.m_shared.m_attackForce * rain.forceMultiplier.Value;
         }
 
         // Every apply makes a new effect for the tooltip, so the one of the previous apply is destroyed. Only an effect of this mod is destroyed.
@@ -191,11 +219,19 @@ namespace ModularMagic_IceStaffs.Helpers
         private static StatusEffect CreateEquipStatusEffect(List<Imbuement> imbuements)
         {
             List<string> tooltipLines = new List<string>();
+            bool cone = imbuements.Exists(i => i.type == ImbuementType.MainAttack && i.value == "Cone");
 
             foreach (Imbuement imbuement in imbuements)
             {
                 if (imbuement.type == ImbuementType.None)
                     continue;
+
+                // The cone is timed by its own burst interval, so the Attack Speed rune does nothing while it is slotted
+                if (cone && imbuement.type == ImbuementType.AttackSpeed)
+                {
+                    tooltipLines.Add($"<color=red>{imbuement.name} {(imbuement.level > 0 ? imbuement.level : "")} (no effect with the Cone rune)</color>");
+                    continue;
+                }
 
                 tooltipLines.Add($"<color=green>{imbuement.name} {(imbuement.level > 0 ? imbuement.level : "")} </color>");
             }

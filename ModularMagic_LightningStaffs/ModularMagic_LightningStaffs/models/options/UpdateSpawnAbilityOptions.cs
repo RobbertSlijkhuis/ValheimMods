@@ -7,5 +7,7 @@ namespace ModularMagic_LightningStaffs.Models
         public int? minToSpawn = null;
         public int? maxToSpawn = null;
         public float? spawnRadius = null;
+        public float? projectileAccuracy = null;
+        public float? spawnDelay = null;
     }
 }

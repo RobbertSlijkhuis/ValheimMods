@@ -8,7 +8,6 @@ namespace ModularMagic_IceStaffs.Models
         public GameObject prefab;
         public string sectionName;
         public string recipeName;
-        public string? cooldownStatusEffectName;
 
         public bool enable = true;
         public string name;
@@ -37,8 +36,6 @@ namespace ModularMagic_IceStaffs.Models
         public int? deflectionForce;
         public int? attackForce;
         public int? useEitr;
-        public int? useEitrSecondary;
-        public float? secondaryCooldown;
 
         public StaffConfigOptions(GameObject prefab, string name, string recipe, string upgradeRecipe)
         {
@@ -48,7 +45,6 @@ namespace ModularMagic_IceStaffs.Models
             this.recipe = recipe;
             recipeName = $"Recipe_{prefab.name}";
             recipeUpgrade = upgradeRecipe;
-            cooldownStatusEffectName = $"{prefab.name}CooldownStatusEffect";
         }
     }
 }

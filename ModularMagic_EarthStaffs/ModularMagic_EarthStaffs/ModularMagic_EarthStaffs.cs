@@ -14,18 +14,20 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using CoreSecondaryAttackHelper = ModularMagic_Core.Helpers.SecondaryAttackHelper;
+using MMAoeHelper = ModularMagic_Core.Helpers.MMAoeHelper;
 
 namespace ModularMagic_EarthStaffs
 {
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
     [BepInDependency("DeathWizsh.ModularMagic_Core")]
+    [BepInDependency(OptionalModHelper.FoodGuid, BepInDependency.DependencyFlags.SoftDependency)]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     internal class ModularMagic_EarthStaffs : BaseUnityPlugin
     {
         public const string PluginGUID = "DeathWizsh.ModularMagic_EarthStaffs";
         public const string PluginName = "ModularMagic_EarthStaffs";
-        public const string PluginVersion = "0.0.1";
+        public const string PluginVersion = "0.0.3";
         public static ModularMagic_EarthStaffs Instance;
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
 
@@ -63,12 +65,9 @@ namespace ModularMagic_EarthStaffs
                 ItemHelper.CreateStaff(prefabs.StaffEarth2, PluginConfig.staffEarth2);
                 ItemHelper.CreateStaff(prefabs.StaffEarth3, PluginConfig.staffEarth3);
 
-                AttackHelper.UpdateCone(prefabs.Cone, PluginConfig.mainAttackCone);
                 AttackHelper.UpdateNova(prefabs.Nova, PluginConfig.secondaryAttackNova);
-                AttackHelper.UpdateRain(prefabs.SecondaryAttackBoulder, prefabs.ProjectileBoulder, PluginConfig.secondaryAttackRain);
+                AttackHelper.UpdateRain(prefabs.ProjectileBoulder, PluginConfig.secondaryAttackRain);
                 AttackHelper.UpdateSummon(prefabs.SecondaryAttackRoots, prefabs.Root, PluginConfig.secondaryAttackSummon);
-
-                prefabs.Nova.AddComponent<NovaTerrainEdit>();
 
                 // The config is bound in Awake, so it is ready here
                 snapshots.staffEarth0 = new ItemDataSnapShot(prefabs.StaffEarth0.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffEarth0);
@@ -144,13 +143,24 @@ namespace ModularMagic_EarthStaffs
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ProjectileMushroom, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_mushroom_projectile_hit_MMES"), true));
 
+            // The effect of the cone wrapper. It is registered so its mocked references are resolved, the wrapper itself is not registered
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_earth_cone_MMES"), true));
             prefabs.mainAttackCone = assetBundle.LoadAsset<GameObject>("main_cone_attack_MMES");
+            // The hit of a burst is a local object of the shooter (see MMAoe), so it is not registered
             prefabs.Cone = assetBundle.LoadAsset<GameObject>("attack_cone_MMES");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.Cone, true));
+            MMAoeHelper.PrepareBox(prefabs.Cone, hitProps: true);
+            prefabs.Cone.AddComponent<ConeDamage>();
 
             prefabs.SecondaryAttackNova = assetBundle.LoadAsset<GameObject>("secondary_nova_MMES");
+            // The visuals of the nova (the spikes) are an effect of the wrapper attack, so they are registered. The effect plays on every client,
+            // so the terrain edit of the nova is on it: the terrain modifier it creates is local to each client
+            GameObject fxNova = assetBundle.LoadAsset<GameObject>("fx_staff_earth_nova_MMES");
+            fxNova.AddComponent<NovaTerrainEdit>();
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(fxNova, true));
+            // The hit is a local object of the shooter (see MMAoe), so it is not registered. The main damage of the nova is always pierce
             prefabs.Nova = assetBundle.LoadAsset<GameObject>("attack_nova_MMES");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.Nova, true));
+            MMAoeHelper.PrepareSphere(prefabs.Nova, hitProps: true);
+            prefabs.Nova.AddComponent<NovaDamage>();
             prefabs.LevelTerrain = assetBundle.LoadAsset<GameObject>("script_levelTerrain_MMES");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.LevelTerrain, false));
 

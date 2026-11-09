@@ -1,5 +1,7 @@
-﻿using ModularMagic_Core.Types;
+﻿using BepInEx.Configuration;
+using ModularMagic_Core.Types;
 using ModularMagic_IceStaffs.configs;
+using ModularMagic_IceStaffs.Helpers;
 using ModularMagic_IceStaffs.Models;
 using System;
 
@@ -7,9 +9,9 @@ namespace ModularMagic_IceStaffs.Configs
 {
     internal static class PluginConfig
     {
-        public static string staff1Name = "Staff of Frost";
+        public static string staff1Name = "Staff of Ice";
         public static string staff1Recipe = $"Bronze:6, RoundLog:20, GreydwarfEye:10, {MaterialType.EitrCrude}:12";
-        public static string staff1UpgradeRecipe = $"Bronze:2, RoundLog:5, {MaterialType.EitrCrude}:4";
+        public static string staff1UpgradeRecipe = $"Bronze:2, GreydwarfEye:5, {MaterialType.EitrCrude}:4";
         public static StaffConfig staffIce1 = new StaffConfig();
 
         public static string staff2Name = "Staff of Permafrost";
@@ -38,18 +40,29 @@ namespace ModularMagic_IceStaffs.Configs
 
         public static ImbuementConfig imbuementConfig = new ImbuementConfig();
 
-        private static int sectionIndex = 1;
+        public static ConfigEntry<bool> enableVanillaStaff;
 
         public static void Init()
         {
             imbuementConfig.GenerateConfig();
+            InitVanillaStaffConfig();
             InitStaffIce1Config();
             InitStaffIce2Config();
             InitStaffIce3Config();
-            InitStaffIceAOEConfig();
+            // Skull of Frost disabled for now
+            // InitStaffIceAOEConfig();
             InitSecondaryAttackNovaConfig();
             InitSecondaryAttackRainConfig();
             InitMainAttackConeConfig();
+        }
+
+        // The vanilla Ice staff (StaffIceShards) can have its recipe switched off
+        private static void InitVanillaStaffConfig()
+        {
+            enableVanillaStaff = ModularMagic_IceStaffs.Instance.Config.Bind(new ConfigDefinition("Vanilla staff", "Enable Staff of Frost"), true,
+                new ConfigDescription("Whether the vanilla Staff of Frost (StaffIceShards) can be crafted. Staffs that already exist keep working",
+                null, new ConfigurationManagerAttributes { IsAdminOnly = true }));
+            enableVanillaStaff.SettingChanged += (obj, attr) => VanillaStaffHelper.SetRecipeEnabled(enableVanillaStaff.Value);
         }
 
         private static void InitMainAttackConeConfig()
@@ -62,10 +75,9 @@ namespace ModularMagic_IceStaffs.Configs
                     mainAttackConeName
                 )
                 {
-                    useEitr = 5,
-                    burstInterval = 0.2f,
-                    damageFrost = 5f,
-                    attackForce = 0f,
+                    eitrMultiplier = 0.5f,
+                    burstInterval = 0.1f,
+                    damageMultiplier = 0.2f,
                 };
                 mainAttackCone.GenerateConfig(options);
             }
@@ -86,12 +98,11 @@ namespace ModularMagic_IceStaffs.Configs
                     secondaryAttackNovaName
                 )
                 {
-                    useEitr = 100,
+                    eitrMultiplier = 12f,
                     cooldown = 30f,
                     aoe = 6f,
-                    damageFrost = 75f,
-                    damagePierce = 0f,
-                    attackForce = 40f,
+                    damageMultiplier = 2.5f,
+                    forceMultiplier = 1f,
                 };
                 secondaryAttackNova.GenerateConfig(options);
             }
@@ -112,21 +123,19 @@ namespace ModularMagic_IceStaffs.Configs
                     secondaryAttackRainName
                 )
                 {
-                    useEitr = 100,
+                    eitrMultiplier = 12f,
                     cooldown = 30f,
                     aoe = 1.5f,
-                    damageFrost = 50f,
-                    damagePierce = 40f,
+                    damageMultiplier = 3f,
                     damageChop = 20f,
                     damagePickaxe = 20f,
-                    attackForce = 100f,
-                    launchAngle = -25f,
-                    projectileVelocity = 20f,
-                    projectileAccuracy = 1f,
+                    forceMultiplier = 10f,
                     spawnAbilityPrefab = ModularMagic_IceStaffs.Instance.prefabs.ScriptIceShards,
                     minToSpawn = 15,
                     maxToSpawn = 15,
                     spawnRadius = 20f,
+                    spawnAccuracy = 4f,
+                    spawnDelay = 0.05f,
                 };
                 secondaryAttackRain.GenerateConfig(options);
             }

@@ -105,7 +105,7 @@ The approved plan is in `C:\Users\robbe\.claude\plans\lets-gather-information-fi
     - The duplicated model, types, serializer and `Imbuements` component are deleted.
     - `helpers/EarthImbuementHelper.cs` replaces `ImbuementHelper`.
     - Reference to Core's built DLL (`HintPath` to `ModularMagic_Core\bin\$(Configuration)\net48`, `Private=false`). A `ProjectReference` was tried first but failed in Visual Studio with a NuGet restore error (NU1105: the Core project is not part of the EarthStaffs solution). **Build Core first whenever its public API changes.**
-  - **Rune ids:** DamageBlunt, DamagePierce, DamageSlash, EitrCost, ProjectileAccuracy, ProjectileBurst, ProjectileSpeed, Cone, Creatures, Nova, Rain.
+  - **Rune ids:** DamageBlunt, DamagePierce, DamageSlash, EitrCost, ProjectileAccuracy, AttackSpeed, ProjectileSpeed, Cone, Creatures, Nova, Rain.
   - **Build order:** build Core first (the `bin\Debug\net48\ModularMagic_Core.dll` that exists now predates the public API), then EarthStaffs.
 - **Phase 2 (multiplayer table): done. Built and tested with two players (2026-09-20).** Core only.
   - `PatchesMMC`: a postfix on the private `ItemStand.SetVisualItem` calls `RuneTable.SyncFromStand()` on every client (it also runs from the stand's own 4 s refresh, so late joiners and reloaded zones attach too). The old attach and remove postfixes are gone. `UseItem_Postfix` only stamps the editor on the queued item.

@@ -1,4 +1,5 @@
-﻿using ModularMagic_LightningStaffs.Models;
+﻿using ModularMagic_Core.Types;
+using ModularMagic_LightningStaffs.Models;
 using ModularMagic_LightningStaffs.Types;
 using System;
 
@@ -7,18 +8,18 @@ namespace ModularMagic_LightningStaffs.Configs
     internal static class PluginConfig
     {
         public static string staff1Name = "Staff of Lightning";
-        public static string staff1Recipe = "Bronze:6, BoneFragments:20, HardAntler:4, GreydwarfEye:20";
-        public static string staff1UpgradeRecipe = "Bronze:1, BoneFragments:4, HardAntler:1, GreydwarfEye:4";
+        public static string staff1Recipe = "BoneFragments:12, LeatherScraps:6, Resin:12, HardAntler:2";
+        public static string staff1UpgradeRecipe = "BoneFragments:4, Resin:4, HardAntler:1";
         public static StaffConfig staffLightning1 = new StaffConfig();
 
         public static string staff2Name = "Staff of Thunder";
-        public static string staff2Recipe = $"{ModularMagic_LightningStaffs.Instance.prefabs.staffLightning1Prefab.name}:1, FineWood:20, Thunderstone:4, Crystal:10";
-        public static string staff2UpgradeRecipe = "FineWood:5, Thunderstone:1, Crystal:4";
+        public static string staff2Recipe = $"WitheredBone:10, Crystal:10, Thunderstone:4, {MaterialType.EitrFine}:12";
+        public static string staff2UpgradeRecipe = $"WitheredBone:2, Thunderstone:1, {MaterialType.EitrFine}:4";
         public static StaffConfig staffLightning2 = new StaffConfig();
 
         public static string staff3Name = "Staff of Storms";
-        public static string staff3Recipe = $"{ModularMagic_LightningStaffs.Instance.prefabs.staffLightning2Prefab.name}:1, YggdrasilWood:20, Sap:10, Eitr:16";
-        public static string staff3UpgradeRecipe = "YggdrasilWood:10, Sap:2, Eitr:8";
+        public static string staff3Recipe = $"WitheredBone:20, Sap:10, Thunderstone:10,  Eitr:12";
+        public static string staff3UpgradeRecipe = "WitheredBone:3, Thunderstone:2, Eitr:4";
         public static StaffConfig staffLightning3 = new StaffConfig();
 
         public static string secondaryAttackNovaName = "Secondary attack Nova";
@@ -55,10 +56,9 @@ namespace ModularMagic_LightningStaffs.Configs
                     mainAttackConeName
                 )
                 {
-                    useEitr = 5,
-                    burstInterval = 0.4f,
-                    damageLightning = 10f,
-                    attackForce = 0f,
+                    eitrMultiplier = 0.1f,
+                    burstInterval = 0.2f,
+                    damageMultiplier = 0.1f,
                 };
                 mainAttackCone.GenerateConfig(options);
             }
@@ -79,20 +79,19 @@ namespace ModularMagic_LightningStaffs.Configs
                     secondaryAttackRainName
                 )
                 {
-                    useEitr = 100,
+                    eitrMultiplier = 3.4f,
                     cooldown = 30f,
                     aoe = 3f,
-                    damageLightning = 70f,
+                    damageMultiplier = 0.5f,
                     damageChop = 20f,
                     damagePickaxe = 20f,
-                    attackForce = 30f,
-                    launchAngle = -25f,
-                    projectileVelocity = 20f,
-                    projectileAccuracy = 1f,
+                    forceMultiplier = 1f,
                     spawnAbilityPrefab = ModularMagic_LightningStaffs.Instance.prefabs.scriptBolts,
                     minToSpawn = 15,
                     maxToSpawn = 15,
                     spawnRadius = 20f,
+                    spawnAccuracy = 4f,
+                    spawnDelay = 0.05f,
                 };
                 secondaryAttackRain.GenerateConfig(options);
             }
@@ -113,11 +112,11 @@ namespace ModularMagic_LightningStaffs.Configs
                     secondaryAttackNovaName
                 )
                 {
-                    useEitr = 100,
+                    eitrMultiplier = 3.4f,
                     cooldown = 30f,
                     aoe = 6f,
-                    damageLightning = 75f,
-                    attackForce = 40f,
+                    damageMultiplier = 1f,
+                    forceMultiplier = 1f,
                 };
                 secondaryAttackNova.GenerateConfig(options);
             }

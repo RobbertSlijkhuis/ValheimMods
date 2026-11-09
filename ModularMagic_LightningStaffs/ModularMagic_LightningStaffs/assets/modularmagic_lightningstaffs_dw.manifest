@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 3419975439
+CRC: 2086846160
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 1599f60a845d20620dbcbaa99fca10f8
+    Hash: 7f2ac1a4193069de9a7b965ae3dba3ce
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 73f880353c937245d14bf730277c4a11
+    Hash: 346216922ab3428559b9fbc0fd3bbe52
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 1599f60a845d20620dbcbaa99fca10f8
+    Hash: 7f2ac1a4193069de9a7b965ae3dba3ce
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -39,9 +39,11 @@ ClassTypes:
 - Class: 108
   Script: {instanceID: 0}
 - Class: 114
+  Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -52,8 +54,6 @@ ClassTypes:
   Script: {fileID: 897279685, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 1999586283, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -103,6 +103,7 @@ Assets:
 - Assets/Custom/PrefabInstance/Lightning/projectiles/projectile_bolt_MMLS.prefab
 - Assets/Custom/PrefabInstance/Lightning/fx/fx_staff_lightning_cone_MMLS.prefab
 - Assets/Custom/PrefabInstance/Lightning/attack/main_cone_attack_MMLS.prefab
+- Assets/Custom/PrefabInstance/Lightning/fx/fx_staff_lightning_spores_MMLS.prefab
 - Assets/Custom/PrefabInstance/Lightning/MMLS_staffLightning1.prefab
 - Assets/Custom/PrefabInstance/Lightning/fx/fx_staff_lightning_windup_MMLS.prefab
 - Assets/Custom/PrefabInstance/Lightning/projectiles/staff_lightning_projectile_MMLS.prefab
@@ -111,5 +112,6 @@ Assets:
 - Assets/Custom/PrefabInstance/Lightning/scripts/staff_lightning_script_bolts_MMLS.prefab
 - Assets/Custom/PrefabInstance/Lightning/MMLS_staffLightning2.prefab
 - Assets/Custom/PrefabInstance/Lightning/projectiles/projectile_spawn_rain_MMLS.prefab
+- Assets/Custom/PrefabInstance/Lightning/fx/fx_staff_lightning_spikes_MMLS.prefab
 - Assets/Custom/PrefabInstance/Lightning/attack/attack_cone_MMLS.prefab
 Dependencies: []

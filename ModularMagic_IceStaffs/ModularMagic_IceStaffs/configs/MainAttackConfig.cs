@@ -5,15 +5,15 @@ using ModularMagic_IceStaffs.Models;
 namespace ModularMagic_IceStaffs.configs
 {
     /// <summary>
-    /// The config of the cone main attack. The attack of the wrapper prefab replaces the main attack of the staff on equip,
-    /// and the spawned AOE has its own damage, so these values do not depend on the stats of the staff.
+    /// The config of the cone main attack. The attack of the wrapper prefab replaces the main attack of the staff on equip.
+    /// The hit of a burst uses the damage of the staff, scaled by the damage multiplier of the attack (see MMAoe). The attack force
+    /// of the cone is 0, set by the force multiplier of the wrapper attack.
     /// </summary>
     internal class MainAttackConfig
     {
-        public ConfigEntry<int> useEitr;
+        public ConfigEntry<float> eitrMultiplier;
         public ConfigEntry<float> burstInterval;
-        public ConfigEntry<float> damageFrost;
-        public ConfigEntry<float> attackForce;
+        public ConfigEntry<float> damageMultiplier;
 
         private int entryCount = 100;
 
@@ -22,8 +22,8 @@ namespace ModularMagic_IceStaffs.configs
             ConfigFile config = ModularMagic_IceStaffs.Instance.Config;
 
             // Read when the runes are applied to the staff, the held staff is updated by the SettingChanged hook of the plugin
-            useEitr = config.Bind(new ConfigDefinition(options.sectionName, "Main attack eitr cost per burst"), options.useEitr,
-                new ConfigDescription("The eitr cost of every burst of the cone. This replaces the eitr cost of the staff while the cone rune is on it", null,
+            eitrMultiplier = config.Bind(new ConfigDefinition(options.sectionName, "Eitr cost multiplier"), options.eitrMultiplier,
+                new ConfigDescription("The eitr cost of every burst of the cone as a multiplier of the eitr cost of the staff's attack. This replaces the eitr cost of the staff while the cone rune is on it (0.5 is half, so a staff of 6 eitr costs 3 per burst)", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
 
             // Read when the runes are applied to the staff, so the Attack Speed rune is taken off this value
@@ -31,15 +31,21 @@ namespace ModularMagic_IceStaffs.configs
                 new ConfigDescription("The time in seconds between two bursts of the cone while the attack is held", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
 
-            damageFrost = config.Bind(new ConfigDefinition(options.sectionName, "Frost damage"), options.damageFrost,
-                new ConfigDescription("The frost damage of the cone (not visible ingame)", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
-            damageFrost.SettingChanged += (obj, attr) => UpdateHelper.UpdateAoe(options.aoePrefab, new UpdateAoeOptions() { damageFrost = damageFrost.Value });
+            damageMultiplier = config.Bind(new ConfigDefinition(options.sectionName, "Damage multiplier"), options.damageMultiplier,
+                new ConfigDescription("The damage of every burst of the cone as a multiplier of the damage of the staff (including quality). 1 is the damage of the staff, 0.2 is a fifth",
+                null, new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+            damageMultiplier.SettingChanged += (obj, attr) => UpdateAttack(options);
 
-            attackForce = config.Bind(new ConfigDefinition(options.sectionName, "Attack force"), options.attackForce,
-                new ConfigDescription("The attack force of the cone applied to targets hit", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
-            attackForce.SettingChanged += (obj, attr) => UpdateHelper.UpdateAoe(options.aoePrefab, new UpdateAoeOptions() { attackForce = attackForce.Value });
+            UpdateAttack(options);
+        }
+
+        // The attack of the wrapper prefab is copied to the staff on equip, so this is the base damage multiplier of the cone
+        private void UpdateAttack(MainAttackConfigOptions options)
+        {
+            UpdateHelper.UpdateItemData(options.prefab.GetComponent<ItemDrop>().m_itemData, new UpdateItemDataOptions()
+            {
+                damageMultiplier = damageMultiplier.Value,
+            });
         }
 
         private int HandleOrder()

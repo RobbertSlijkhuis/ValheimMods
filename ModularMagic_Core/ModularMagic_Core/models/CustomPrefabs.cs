@@ -8,7 +8,9 @@ namespace ModularMagic_Core.Models
         public GameObject EitrFine;
 
         public GameObject RuneTable;
-        public GameObject SaveFX;
+        public GameObject SaveTableFX;
+        public GameObject SaveRuneFX;
+        public GameObject SaveRemoveFX;
 
         // One prefab per rune, the level of a rune is the quality of the item
         public GameObject RuneDamageBlunt;
@@ -16,7 +18,7 @@ namespace ModularMagic_Core.Models
         public GameObject RuneDamageSlash;
         public GameObject RuneEitrCost;
         public GameObject RuneProjectileAccuracy;
-        public GameObject RuneProjectileBurst;
+        public GameObject RuneAttackSpeed;
         public GameObject RuneProjectileSpeed;
         public GameObject RuneCone;
         public GameObject RuneCreatures;

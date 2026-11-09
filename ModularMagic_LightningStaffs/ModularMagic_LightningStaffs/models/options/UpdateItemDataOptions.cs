@@ -19,6 +19,8 @@ namespace ModularMagic_LightningStaffs.Models
         public float? projectileAccuracy = null;
         public float? launchAngle = null;
         public float? burstInterval = null;
+        public float? damageMultiplier = null;
+        public float? forceMultiplier = null;
         public float? secondaryAttackEitr = null;
     }
 }

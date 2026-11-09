@@ -1,7 +1,7 @@
 {
   "name": "ModularMagicCore",
   "description": "Test version of my magic mod",
-  "version_number": "0.0.2",
+  "version_number": "0.0.3",
   "website_url": "",
   "dependencies": ["ValheimModding-Jotunn-2.30.1"]
 }

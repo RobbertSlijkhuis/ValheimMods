@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using CoreSecondaryAttackHelper = ModularMagic_Core.Helpers.SecondaryAttackHelper;
+using MMAoeHelper = ModularMagic_Core.Helpers.MMAoeHelper;
 
 namespace ModularMagic_FireStaffs
 {
@@ -23,7 +24,7 @@ namespace ModularMagic_FireStaffs
     {
         public const string PluginGUID = "DeathWizsh.ModularMagic_FireStaffs";
         public const string PluginName = "ModularMagic_FireStaffs";
-        public const string PluginVersion = "0.0.1";
+        public const string PluginVersion = "0.0.3";
         public static ModularMagic_FireStaffs Instance;
         private static readonly HarmonyLib.Harmony _harmony = new HarmonyLib.Harmony(PluginGUID);
 
@@ -50,6 +51,13 @@ namespace ModularMagic_FireStaffs
             PrefabManager.OnVanillaPrefabsAvailable += AddFireStaffs;
             Jotunn.Logger.LogInfo("ModularMagic_FireStaffs has been initialised");
             ItemManager.OnItemsRegistered += LogRecipes;
+            // Not unsubscribed: the recipe is set again each time the items are registered, which is harmless
+            ItemManager.OnItemsRegistered += ApplyVanillaStaffRecipe;
+        }
+
+        private void ApplyVanillaStaffRecipe()
+        {
+            VanillaStaffHelper.SetRecipeEnabled(PluginConfig.enableVanillaStaff.Value);
         }
 
         private void LogRecipes()
@@ -136,9 +144,17 @@ namespace ModularMagic_FireStaffs
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_fire_nova_NEW_MMFS"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_fire_spores_MMFS"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_fire_spikes_MMFS"), true));
-            // The nova rune: the AOE has its own damage, the wrapper holds the secondary attack that is copied to the staff and is not registered
+            // The cone rune: the hit of a burst is a local object of the shooter (see MMAoe), so it is not registered. The wrapper holds the
+            // main attack that replaces the main attack of the staff and is not registered. The effects of the cone are registered
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_fire_cone_MMFS"), true));
+            prefabs.attackCone = assetBundle.LoadAsset<GameObject>("attack_cone_MMFS");
+            MMAoeHelper.PrepareBox(prefabs.attackCone, hitProps: true);
+            prefabs.mainAttackCone = assetBundle.LoadAsset<GameObject>("main_cone_attack_MMFS");
+
+            // The nova rune: the hit is a local object of the shooter (see MMAoe), so it is not registered. The wrapper holds the
+            // secondary attack that is copied to the staff and is not registered
             prefabs.attackNova = assetBundle.LoadAsset<GameObject>("attack_nova_MMFS");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.attackNova, true));
+            MMAoeHelper.PrepareSphere(prefabs.attackNova, hitProps: false);
             prefabs.secondaryAttackNova = assetBundle.LoadAsset<GameObject>("secondary_nova_MMFS");
 
             // The rain rune (meteors): the spawn projectile, its script and the meteor are spawned in the world, so they are registered.

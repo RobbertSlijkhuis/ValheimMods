@@ -10,7 +10,7 @@ namespace ModularMagic_Core.Types
         public const string DamageSlash = "DamageSlash";
         public const string EitrCost = "EitrCost";
         public const string ProjectileAccuracy = "ProjectileAccuracy";
-        public const string ProjectileBurst = "ProjectileBurst";
+        public const string AttackSpeed = "AttackSpeed";
         public const string ProjectileSpeed = "ProjectileSpeed";
         public const string Cone = "Cone";
         public const string Creatures = "Creatures";

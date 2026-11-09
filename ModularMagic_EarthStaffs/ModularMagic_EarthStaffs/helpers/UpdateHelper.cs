@@ -2,6 +2,7 @@
 using System;
 using UnityEngine;
 using static ItemDrop;
+using MMAoe = ModularMagic_Core.Components.MMAoe;
 
 namespace ModularMagic_EarthStaffs.Helpers
 {
@@ -52,6 +53,8 @@ namespace ModularMagic_EarthStaffs.Helpers
             if (options.projectileAccuracy != null) { itemData.m_shared.m_attack.m_projectileAccuracy = (float)options.projectileAccuracy; }
             if (options.projectileBurst != null) { itemData.m_shared.m_attack.m_burstInterval = (float)options.projectileBurst; }
             if (options.launchAngle != null) { itemData.m_shared.m_attack.m_launchAngle = (float)options.launchAngle; }
+            if (options.damageMultiplier != null) { itemData.m_shared.m_attack.m_damageMultiplier = (float)options.damageMultiplier; }
+            if (options.forceMultiplier != null) { itemData.m_shared.m_attack.m_forceMultiplier = (float)options.forceMultiplier; }
             if (options.weight != null) { itemData.m_shared.m_weight = (float)options.weight; }
             if (options.maxDurability != null) { itemData.m_shared.m_maxDurability = (float)options.maxDurability; }
             if (options.movementModifier != null) { itemData.m_shared.m_movementModifier = (float)options.movementModifier; }
@@ -167,24 +170,18 @@ namespace ModularMagic_EarthStaffs.Helpers
 
         }
 
+        // The area hit of an attack (see MMAoe). Its damage and attack force come from the staff, so only the radius can be set
         public static void UpdateAoe(GameObject prefab, UpdateAoeOptions options)
         {
             if (prefab == null)
                 throw new Exception("Prefab is null");
 
-            Aoe aoe = prefab.GetComponent<Aoe>();
+            MMAoe aoe = prefab.GetComponent<MMAoe>();
 
             if (aoe == null)
-                throw new Exception("Aoe is null");
+                throw new Exception("MMAoe is null");
 
-            if (options.aoe != null) { aoe.m_radius = (float)options.aoe; }
-            if (options.damageBlunt != null) { aoe.m_damage.m_blunt = (float)options.damageBlunt; }
-            if (options.damageChop != null) { aoe.m_damage.m_chop = (float)options.damageChop; }
-            if (options.damagePickaxe != null) { aoe.m_damage.m_pickaxe = (float)options.damagePickaxe; }
-            if (options.damagePierce != null) { aoe.m_damage.m_pierce = (float)options.damagePierce; }
-            if (options.damagePoison != null) { aoe.m_damage.m_poison = (float)options.damagePoison; }
-            if (options.damageSpirit != null) { aoe.m_damage.m_spirit = (float)options.damageSpirit; }
-            if (options.attackForce != null) { aoe.m_attackForce = (float)options.attackForce; }
+            if (options.aoe != null) { aoe.radius = (float)options.aoe; }
         }
     }
 }

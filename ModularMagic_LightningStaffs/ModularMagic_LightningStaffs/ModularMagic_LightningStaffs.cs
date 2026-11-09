@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using CoreSecondaryAttackHelper = ModularMagic_Core.Helpers.SecondaryAttackHelper;
+using MMAoeHelper = ModularMagic_Core.Helpers.MMAoeHelper;
 
 namespace ModularMagic_LightningStaffs
 {
@@ -23,7 +24,7 @@ namespace ModularMagic_LightningStaffs
     {
         public const string PluginGUID = "DeathWizsh.ModularMagic_LightningStaffs";
         public const string PluginName = "ModularMagic_LightningStaffs";
-        public const string PluginVersion = "0.0.1";
+        public const string PluginVersion = "0.0.3";
         public static ModularMagic_LightningStaffs Instance;
         private static readonly HarmonyLib.Harmony _harmony = new HarmonyLib.Harmony(PluginGUID);
 
@@ -83,8 +84,7 @@ namespace ModularMagic_LightningStaffs
 
                 // After the staffs are registered, so a failing attack update can not take the staffs with it
                 AttackHelper.UpdateNova(prefabs.attackNova, PluginConfig.secondaryAttackNova);
-                AttackHelper.UpdateRain(prefabs.secondaryAttackRain, prefabs.projectileBolt, prefabs.scriptBolts, PluginConfig.secondaryAttackRain);
-                AttackHelper.UpdateCone(prefabs.attackCone, PluginConfig.mainAttackCone);
+                AttackHelper.UpdateRain(prefabs.projectileBolt, prefabs.scriptBolts, PluginConfig.secondaryAttackRain);
             }
             catch (System.Exception e)
             {
@@ -131,16 +131,19 @@ namespace ModularMagic_LightningStaffs
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_lightning_windup_MMLS"), true));
             // The effect of the nova. Only registered prefabs get their mocked references (like the mock mixer group) resolved
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_lightning_nova_MMLS"), true));
-            // The nova rune: the AOE has its own damage, the wrapper holds the secondary attack that is copied to the staff and is not registered
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_lightning_spores_MMLS"), true));
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_lightning_spikes_MMLS"), true));
+            // The nova rune: the hit is a local object of the shooter (see MMAoe), so it is not registered. The wrapper holds the
+            // secondary attack that is copied to the staff and is not registered
             prefabs.attackNova = assetBundle.LoadAsset<GameObject>("attack_nova_MMLS");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.attackNova, true));
+            MMAoeHelper.PrepareSphere(prefabs.attackNova, hitProps: false);
             prefabs.secondaryAttackNova = assetBundle.LoadAsset<GameObject>("secondary_nova_MMLS");
 
-            // The cone rune: the AOE has its own damage and is spawned in the world, so it is registered. The wrapper holds the
-            // main attack that replaces the main attack of the staff and is not registered. The effects of the cone are registered too
+            // The cone rune: the hit of a burst is a local object of the shooter (see MMAoe), so it is not registered. The wrapper holds the
+            // main attack that replaces the main attack of the staff and is not registered. The effects of the cone are registered
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_lightning_cone_MMLS"), true));
             prefabs.attackCone = assetBundle.LoadAsset<GameObject>("attack_cone_MMLS");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.attackCone, true));
+            MMAoeHelper.PrepareBox(prefabs.attackCone, hitProps: true);
             prefabs.mainAttackCone = assetBundle.LoadAsset<GameObject>("main_cone_attack_MMLS");
 
             // The rain rune (lightning bolts): the spawn projectile, its script and the bolt are spawned in the world, so they are registered.

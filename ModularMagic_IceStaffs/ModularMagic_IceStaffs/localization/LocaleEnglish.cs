@@ -18,7 +18,7 @@ namespace ModularMagic_IceStaffs.Locale
             AddRune(texts, RuneId.DamageSlash, "Rune: Damage Slash", "Change the physical damage of the weapon to Slash! The frost damage stays");
             AddRune(texts, RuneId.EitrCost, "Rune: Eitr Cost", "Reduce the eitr cost of the weapon's main attack");
             AddRune(texts, RuneId.ProjectileAccuracy, "Rune: Accuracy", "Improve the accuracy of the weapon's main attack");
-            AddRune(texts, RuneId.ProjectileBurst, "Rune: Attack Speed", "Improve the attack speed of the weapon's main attack");
+            AddRune(texts, RuneId.AttackSpeed, "Rune: Attack Speed", "Improve the attack speed of the weapon's main attack");
             AddRune(texts, RuneId.ProjectileSpeed, "Rune: Projectile Speed", "Improve the projectile speed of the weapon's main attack");
             AddRune(texts, RuneId.Nova, "Rune: Frost Nova", "Release a nova of frost around you!");
             AddRune(texts, RuneId.Cone, "Rune: Frost Cone", "Change your main attack into a cone of frost!");

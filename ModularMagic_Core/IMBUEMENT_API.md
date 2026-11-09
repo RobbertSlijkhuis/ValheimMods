@@ -96,7 +96,7 @@ Core owns the rune table, the runes and the data that says which runes are on a 
 | `DamageSlash` | `DamageType` | `Slash` | 1-4 | MMES, MMIS |
 | `EitrCost` | `EitrCost` | `0.25` | 1-4 | all four |
 | `ProjectileAccuracy` | `ProjectileAccuracy` | `0.125` | 1-4 | MMES, MMIS |
-| `ProjectileBurst` | `ProjectileBurst` | `0.0125` | 1-4 | MMES, MMIS |
+| `AttackSpeed` | `AttackSpeed` | `0.0125` | 1-4 | MMES, MMIS |
 | `ProjectileSpeed` | `ProjectileVelocity` | `1` | 1-4 | MMES, MMIS |
 | `Cone` | `MainAttack` | `Cone` | 1-4 | all four |
 | `Creatures` | `SecondaryAttack` | `Summon` | 1-3 | all four |

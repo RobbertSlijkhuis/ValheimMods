@@ -23,6 +23,9 @@ namespace ModularMagic_EarthStaffs.Configs
         public ConfigEntry<float> damageSpirit;
         public ConfigEntry<float> attackForce;
         public ConfigEntry<int> useEitr;
+        public ConfigEntry<float> eitrMultiplier;
+        public ConfigEntry<float> damageMultiplier;
+        public ConfigEntry<float> forceMultiplier;
         public ConfigEntry<float> cooldown;
         public ConfigEntry<float> launchAngle;
         public ConfigEntry<float> projectileVelocity;
@@ -48,20 +51,31 @@ namespace ModularMagic_EarthStaffs.Configs
             if (options.type == SecondaryAttackType.Humanoid)
                 entityDesc = "summoned creatures(s)";
 
-            useEitr = Config.Bind(new ConfigDefinition(options.sectionName, "Secondary attack eitr cost"), options.useEitr,
-                new ConfigDescription("The secondary attack eitr cost", null,
-                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
-            // The attack of this prefab is copied to the staff on equip, so this is the base eitr cost of the secondary attack
-            UpdateAttackEitr(options);
-            useEitr.SettingChanged += (obj, attr) =>
+            if (options.eitrMultiplier != null)
             {
+                // The base eitr cost depends on the staff, so it is worked out when the runes are applied to the staff.
+                // The held staff is updated by the SettingChanged hook of the plugin
+                eitrMultiplier = Config.Bind(new ConfigDefinition(options.sectionName, "Eitr cost multiplier"), (float)options.eitrMultiplier,
+                    new ConfigDescription("The eitr cost of the secondary attack as a multiplier of the eitr cost of the staff's attack (12 is twelve times, so a staff of 5 eitr costs 60)", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+            }
+            else
+            {
+                useEitr = Config.Bind(new ConfigDefinition(options.sectionName, "Secondary attack eitr cost"), options.useEitr,
+                    new ConfigDescription("The secondary attack eitr cost", null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+                // The attack of this prefab is copied to the staff on equip, so this is the base eitr cost of the secondary attack
                 UpdateAttackEitr(options);
-
-                UpdateHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
+                useEitr.SettingChanged += (obj, attr) =>
                 {
-                    secondaryAttackEitr = useEitr.Value,
-                });
-            };
+                    UpdateAttackEitr(options);
+
+                    UpdateHelper.UpdateItemData(options.prefab, new UpdateItemDataOptions()
+                    {
+                        secondaryAttackEitr = useEitr.Value,
+                    });
+                };
+            }
 
             // Core reads the value every time the cooldown starts, so a changed value is used without a handler
             cooldown = Config.Bind(new ConfigDefinition(options.sectionName, "Secondary attack cooldown"), options.cooldown,
@@ -78,6 +92,33 @@ namespace ModularMagic_EarthStaffs.Configs
             {
                 aoe = BindFloat(Config, options, "AOE radius", (float)options.aoe, "The damage radius of the projectile",
                     value => UpdateTarget(options, aoe: value));
+            }
+
+            if (options.damageMultiplier != null)
+            {
+                bool projectile = options.type == SecondaryAttackType.Projectile;
+
+                // The wrapper attack is copied to the staff on equip, so for the nova this is the base multiplier of the attack.
+                // The boulders are spawned by a script that does not get the damage of the staff, so their damage is set on the
+                // boulder prefab when the runes are applied to the staff (see EarthImbuementHelper)
+                damageMultiplier = BindFloat(Config, options, "Damage multiplier", (float)options.damageMultiplier,
+                    "The damage of the attack as a multiplier of the damage of the staff (including quality). 1 is the damage of the staff, 0.5 is half",
+                    value => { if (!projectile) UpdateAttack(options, damageMultiplier: value); });
+
+                if (!projectile)
+                    UpdateAttack(options, damageMultiplier: damageMultiplier.Value);
+            }
+
+            if (options.forceMultiplier != null)
+            {
+                bool projectile = options.type == SecondaryAttackType.Projectile;
+
+                forceMultiplier = BindFloat(Config, options, "Force multiplier", (float)options.forceMultiplier,
+                    "The attack force of the attack as a multiplier of the attack force of the staff. 1 is the attack force of the staff, 0 is no knockback",
+                    value => { if (!projectile) UpdateAttack(options, forceMultiplier: value); });
+
+                if (!projectile)
+                    UpdateAttack(options, forceMultiplier: forceMultiplier.Value);
             }
 
             if (options.damageBlunt != null)
@@ -220,14 +261,6 @@ namespace ModularMagic_EarthStaffs.Configs
                 UpdateHelper.UpdateAoe(options.secondPrefab, new UpdateAoeOptions()
                 {
                     aoe = aoe,
-                    damageBlunt = damageBlunt,
-                    damageChop = damageChop,
-                    damageGeneral = damageGeneral,
-                    damagePickaxe = damagePickaxe,
-                    damagePierce = damagePierce,
-                    damagePoison = damagePoison,
-                    damageSpirit = damageSpirit,
-                    attackForce = attackForce,
                 });
             }
             else if (options.type == SecondaryAttackType.Projectile)
@@ -259,6 +292,16 @@ namespace ModularMagic_EarthStaffs.Configs
                     attackForce = attackForce,
                 });
             }
+        }
+
+        // Sets the multipliers on the attack of the prefab itself. Only the prefab data is updated, the staff in the hand is updated by the SettingChanged hook of the plugin
+        private static void UpdateAttack(SecondaryAttackConfigOptions options, float? damageMultiplier = null, float? forceMultiplier = null)
+        {
+            UpdateHelper.UpdateItemData(options.prefab.GetComponent<ItemDrop>().m_itemData, new UpdateItemDataOptions()
+            {
+                damageMultiplier = damageMultiplier,
+                forceMultiplier = forceMultiplier,
+            });
         }
 
         // Sets the eitr cost on the attack of the prefab itself. Only the prefab data is updated, not the staff in the hand

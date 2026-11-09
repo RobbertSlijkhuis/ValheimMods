@@ -6,33 +6,24 @@ namespace ModularMagic_FireStaffs.Helpers
 {
     internal class AttackHelper
     {
+        // The damage and the attack force of the nova come from the staff (see damageMultiplier of the config), so only the radius is applied
         public static void UpdateNova(GameObject aoePrefab, SecondaryAttackConfig config)
         {
             UpdateHelper.UpdateAoe(aoePrefab, new UpdateAoeOptions()
             {
                 aoe = config.aoe.Value,
-                damageFire = config.damageFire.Value,
-                attackForce = config.attackForce.Value,
             });
         }
 
         public static void UpdateRain(GameObject attackPrefab, GameObject meteorPrefab, GameObject spawnAbilityPrefab, SecondaryAttackConfig config)
         {
-            UpdateHelper.UpdateItemData(attackPrefab.GetComponent<ItemDrop>().m_itemData, new UpdateItemDataOptions()
-            {
-                launchAngle = config.launchAngle.Value,
-                projectileVelocity = config.projectileVelocity.Value,
-                projectileAccuracy = config.projectileAccuracy.Value,
-            });
-
+            // The launch angle, velocity and accuracy of the projectile that is fired from the staff are those of the attack prefab
             UpdateHelper.UpdateProjectile(meteorPrefab, new UpdateProjectileOptions()
             {
                 aoe = config.aoe.Value,
-                damageFire = config.damageFire.Value,
-                damageBlunt = config.damageBlunt.Value,
+                // The fire and blunt damage of the meteors come from the staff, see FireImbuementHelper
                 damageChop = config.damageChop.Value,
                 damagePickaxe = config.damagePickaxe.Value,
-                attackForce = config.attackForce.Value,
             });
 
             UpdateHelper.UpdateSpawnAbility(spawnAbilityPrefab, new UpdateSpawnAbilityOptions()
@@ -40,6 +31,8 @@ namespace ModularMagic_FireStaffs.Helpers
                 minToSpawn = config.minToSpawn.Value,
                 maxToSpawn = config.maxToSpawn.Value,
                 spawnRadius = config.spawnRadius.Value,
+                projectileAccuracy = config.spawnAccuracy.Value,
+                spawnDelay = config.spawnDelay.Value,
             });
         }
     }

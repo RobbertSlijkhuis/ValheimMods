@@ -13,7 +13,6 @@ namespace ModularMagic_IceStaffs.Models
         public float? attackForce = null;
         public float? backstabBonus = null;
         public float? attackEitr = null;
-        public float? secondaryAttackEitr = null;
         public float? damageMultiplier = null;
         public float? damageFrost = null;
         public float? damagePierce = null;

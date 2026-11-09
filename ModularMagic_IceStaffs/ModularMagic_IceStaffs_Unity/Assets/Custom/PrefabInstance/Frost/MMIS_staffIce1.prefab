@@ -355,18 +355,6 @@ MonoBehaviour:
             m_randomRotation: 0
             m_scale: 0
             m_childTransform: 
-          - m_prefab: {fileID: 1870307680131704, guid: b793e652d3c42214b82206939b65f404,
-              type: 3}
-            m_enabled: 0
-            m_variant: -1
-            m_attach: 0
-            m_follow: 0
-            m_inheritParentRotation: 0
-            m_inheritParentScale: 0
-            m_multiplyParentVisualScale: 0
-            m_randomRotation: 0
-            m_scale: 0
-            m_childTransform: 
           - m_prefab: {fileID: 9010705504000869803, guid: f33ba765e2b2b7b4e80e59d2043508c3,
               type: 3}
             m_enabled: 1

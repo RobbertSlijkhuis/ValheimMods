@@ -1,6 +1,7 @@
 ﻿using ModularMagic_LightningStaffs.Models;
 using System;
 using UnityEngine;
+using MMAoe = ModularMagic_Core.Components.MMAoe;
 
 namespace ModularMagic_LightningStaffs.Helpers
 {
@@ -24,6 +25,8 @@ namespace ModularMagic_LightningStaffs.Helpers
             if (options.projectileAccuracy != null) { itemData.m_shared.m_attack.m_projectileAccuracy = (float)options.projectileAccuracy; }
             if (options.launchAngle != null) { itemData.m_shared.m_attack.m_launchAngle = (float)options.launchAngle; }
             if (options.burstInterval != null) { itemData.m_shared.m_attack.m_burstInterval = (float)options.burstInterval; }
+            if (options.damageMultiplier != null) { itemData.m_shared.m_attack.m_damageMultiplier = (float)options.damageMultiplier; }
+            if (options.forceMultiplier != null) { itemData.m_shared.m_attack.m_forceMultiplier = (float)options.forceMultiplier; }
 
             // Assign the attack first, the eitr below is then set on the copy instead of being replaced by it
             if (options.secondaryAttack != null) { itemData.m_shared.m_secondaryAttack = options.secondaryAttack.m_shared.m_attack.Clone(); }
@@ -61,21 +64,22 @@ namespace ModularMagic_LightningStaffs.Helpers
             if (options.minToSpawn != null) { spawnAbility.m_minToSpawn = (int)options.minToSpawn; }
             if (options.maxToSpawn != null) { spawnAbility.m_maxToSpawn = (int)options.maxToSpawn; }
             if (options.spawnRadius != null) { spawnAbility.m_spawnRadius = (float)options.spawnRadius; }
+            if (options.projectileAccuracy != null) { spawnAbility.m_projectileAccuracy = (float)options.projectileAccuracy; }
+            if (options.spawnDelay != null) { spawnAbility.m_spawnDelay = (float)options.spawnDelay; }
         }
 
+        // The area hit of an attack (see MMAoe). Its damage and attack force come from the staff, so only the radius can be set
         public static void UpdateAoe(GameObject prefab, UpdateAoeOptions options)
         {
             if (prefab == null)
                 throw new Exception("Prefab is null");
 
-            Aoe aoe = prefab.GetComponent<Aoe>();
+            MMAoe aoe = prefab.GetComponent<MMAoe>();
 
             if (aoe == null)
-                throw new Exception("Aoe is null");
+                throw new Exception("MMAoe is null");
 
-            if (options.aoe != null) { aoe.m_radius = (float)options.aoe; }
-            if (options.damageLightning != null) { aoe.m_damage.m_lightning = (float)options.damageLightning; }
-            if (options.attackForce != null) { aoe.m_attackForce = (float)options.attackForce; }
+            if (options.aoe != null) { aoe.radius = (float)options.aoe; }
         }
 
         public static void UpdateItemDropStats(GameObject prefab, UpdateItemDropStatsOptions options)
@@ -101,7 +105,6 @@ namespace ModularMagic_LightningStaffs.Helpers
                 if (options.backstabBonus != null) { itemDrop.m_itemData.m_shared.m_backstabBonus = (float)options.backstabBonus; }
 
                 if (options.attackEitr != null) { itemDrop.m_itemData.m_shared.m_attack.m_attackEitr = (float)options.attackEitr; }
-                if (options.secondaryAttackEitr != null) { itemDrop.m_itemData.m_shared.m_secondaryAttack.m_attackEitr = (float)options.secondaryAttackEitr; }
                 if (options.projectileVelocity != null) { itemDrop.m_itemData.m_shared.m_attack.m_projectileVel = (float)options.projectileVelocity; }
                 if (options.projectileAccuracy != null) { itemDrop.m_itemData.m_shared.m_attack.m_projectileAccuracy = (float)options.projectileAccuracy; }
                 if (options.damageBlunt != null) { itemDrop.m_itemData.m_shared.m_damages.m_blunt = (float)options.damageBlunt; }

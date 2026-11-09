@@ -19,7 +19,7 @@ namespace ModularMagic_EarthStaffs.Helpers
         // The runes the Earth staffs support. The weapon decides this, the rune only says what it is
         public static readonly string[] AllowedRunes =
         {
-            RuneId.DamagePierce, RuneId.DamageSlash, RuneId.EitrCost, RuneId.ProjectileAccuracy, RuneId.ProjectileBurst,
+            RuneId.DamagePierce, RuneId.DamageSlash, RuneId.EitrCost, RuneId.ProjectileAccuracy, RuneId.AttackSpeed,
             RuneId.ProjectileSpeed, RuneId.Cone, RuneId.Creatures, RuneId.Nova, RuneId.Rain,
         };
 
@@ -75,15 +75,22 @@ namespace ModularMagic_EarthStaffs.Helpers
             options.damageBluntPerLevel = snapshot.damageBluntPerlevel;
             options.damageSlashPerLevel = 0;
             options.damagePiercePerLevel = 0;
-            options.attackEitr = snapshot.attackEitr;
+            // The cone rune replaces the main attack of the staff. The cone costs a part of the eitr of the staff per burst, has its own burst interval
+            // and fires an AOE, so the accuracy and speed of the staff do not apply to it (the Eitr Cost rune still lowers the eitr of the cone,
+            // the Attack Speed rune is ignored)
+            bool cone = imbuements.Exists(i => i.type == ImbuementType.MainAttack && i.value == "Cone");
+
+            // The base stats come from the config, which also holds the values a server syncs, so the runes are always applied on top of the current base stats
+            options.attackEitr = cone ? snapshot.attackEitr * PluginConfig.mainAttackCone.eitrMultiplier.Value : snapshot.attackEitr;
             // options.timedBlockBonus = snapshot.timedBlockBonus;
             options.projectileAccuracy = snapshot.projectileAccuracy;
-            options.projectileBurst = snapshot.projectileBurst;
+            options.projectileBurst = cone ? PluginConfig.mainAttackCone.burstInterval.Value : snapshot.projectileBurst;
             options.projectileVelocity = snapshot.projectileVelocity;
             options.mainAttack = snapshot.mainAttack;
 
             // The projectile that shows the damage type. Every damage type has its own prefab, so all clients spawn the same visual
             GameObject damageProjectile = null;
+            bool rain = false;
 
             foreach (Imbuement imbuement in imbuements)
             {
@@ -115,8 +122,10 @@ namespace ModularMagic_EarthStaffs.Helpers
                     case ImbuementType.ProjectileAccuracy:
                         options.projectileAccuracy -= PluginConfig.imbuementConfig.ProjectileAccuracy.Value * imbuement.level;
                         break;
-                    case ImbuementType.ProjectileBurst:
-                        options.projectileBurst -= PluginConfig.imbuementConfig.ProjectileBurst.Value * imbuement.level;
+                    case ImbuementType.AttackSpeed:
+                        // The cone is timed by its own burst interval, so the rune only applies to the normal attack
+                        if (!cone)
+                            options.projectileBurst -= PluginConfig.imbuementConfig.AttackSpeed.Value * imbuement.level;
                         break;
                     case ImbuementType.ProjectileVelocity:
                         options.projectileVelocity += PluginConfig.imbuementConfig.ProjectileSpeed.Value * imbuement.level;
@@ -133,12 +142,20 @@ namespace ModularMagic_EarthStaffs.Helpers
                         else if (imbuement.value == "Summon")
                             options.secondaryAttack = ModularMagic_EarthStaffs.prefabs.SecondaryAttackRoots.GetComponent<ItemDrop>().m_itemData;
 
-                        // Every level above 1 saves a part of the eitr cost. The base cost is the one of the attack itself,
-                        // which is read again on every equip, so a changed or synced config value is used
+                        // Every level above 1 saves a part of the eitr cost. The base cost of the nova and the boulders is a multiplier of the eitr of the staff,
+                        // the base cost of the summon is the one of the attack itself. Both are read again on every equip, so a changed or synced config value is used
                         if (options.secondaryAttack != null)
                         {
                             float saved = Mathf.Clamp01(PluginConfig.imbuementConfig.SecondaryAttackEitr.Value * (imbuement.level - 1));
-                            options.secondaryAttackEitr = options.secondaryAttack.m_shared.m_attack.m_attackEitr * (1f - saved);
+                            float baseEitr = options.secondaryAttack.m_shared.m_attack.m_attackEitr;
+
+                            if (imbuement.value == "Nova")
+                                baseEitr = (float)snapshot.attackEitr * PluginConfig.secondaryAttackNova.eitrMultiplier.Value;
+                            else if (imbuement.value == "Rain")
+                                baseEitr = (float)snapshot.attackEitr * PluginConfig.secondaryAttackRain.eitrMultiplier.Value;
+
+                            options.secondaryAttackEitr = baseEitr * (1f - saved);
+                            rain = imbuement.value == "Rain";
                         }
                         break;
                 }
@@ -148,6 +165,13 @@ namespace ModularMagic_EarthStaffs.Helpers
             options.attackEitr = Mathf.Max(0f, options.attackEitr.Value);
             options.projectileAccuracy = Mathf.Max(0f, options.projectileAccuracy.Value);
             options.projectileBurst = Mathf.Max(0f, options.projectileBurst.Value);
+
+            // The cone is not a projectile, so the accuracy and the velocity of the cone attack stay as they are
+            if (cone)
+            {
+                options.projectileAccuracy = null;
+                options.projectileVelocity = null;
+            }
 
             // The cone main attack has its own projectile, so the damage type projectile only replaces the default one
             if (damageProjectile != null && options.mainAttack == snapshot.mainAttack)
@@ -163,6 +187,13 @@ namespace ModularMagic_EarthStaffs.Helpers
                 if (imbuement.type == ImbuementType.None)
                     continue;
 
+                // The cone is timed by its own burst interval, so the Attack Speed rune does nothing while it is slotted
+                if (cone && imbuement.type == ImbuementType.AttackSpeed)
+                {
+                    tooltipLines.Add($"<color=red>{imbuement.name} {(imbuement.level > 0 ? imbuement.level : "")} (no effect with the Cone rune)</color>");
+                    continue;
+                }
+
                 tooltipLines.Add($"<color=green>{imbuement.name} {(imbuement.level > 0 ? imbuement.level : "")} </color>");
             }
 
@@ -175,7 +206,33 @@ namespace ModularMagic_EarthStaffs.Helpers
 
             UpdateHelper.UpdateItemData(itemData, options);
 
+            // After the staff is updated, so the damage types of the damage type rune are used
+            if (rain)
+                ApplyBoulderDamage(itemData);
+
             DestroyReplacedEquipStatusEffect(previousEquipEffect, itemData);
+        }
+
+        // The script that spawns the boulders does not pass the damage of the staff on, so the damage of the boulder prefab (apart from chop and pickaxe) is set from the staff
+        // (quality included) times the damage multiplier, and the attack force from the attack force of the staff times the force multiplier.
+        // The boulders are hit by the client of the shooter, and the chop and pickaxe damage stay config values
+        private static void ApplyBoulderDamage(ItemData staff)
+        {
+            HitData.DamageTypes damage = staff.GetDamage();
+            SecondaryAttackConfig rain = PluginConfig.secondaryAttackRain;
+            Projectile boulder = ModularMagic_EarthStaffs.prefabs.ProjectileBoulder.GetComponent<Projectile>();
+            float multiplier = rain.damageMultiplier.Value;
+
+            // A boulder is blunt, whatever the damage type rune of the staff is. Only one of blunt, pierce and slash is set on the staff,
+            // they are never added up, the one that is set is the main damage
+            float main = Mathf.Max(damage.m_blunt, Mathf.Max(damage.m_pierce, damage.m_slash));
+
+            boulder.m_damage.m_blunt = main * multiplier;
+            boulder.m_damage.m_slash = 0f;
+            boulder.m_damage.m_pierce = 0f;
+            boulder.m_damage.m_spirit = damage.m_spirit * multiplier;
+            boulder.m_damage.m_poison = damage.m_poison * multiplier;
+            boulder.m_attackForce = staff.m_shared.m_attackForce * rain.forceMultiplier.Value;
         }
 
         // Every apply makes a new effect for the tooltip, so the one of the previous apply is destroyed. Only an effect of this mod is destroyed.

@@ -21,17 +21,17 @@ namespace ModularMagic_Core.Data
             accuracyOptions.value = "0.125";
             list.Add(new RuneEntry(accuracyOptions));
 
-            RuneEntryOptions burstOptions = new RuneEntryOptions();
-            burstOptions.description = "Improve the attack speed of your weapon!";
-            burstOptions.id = RuneId.ProjectileBurst;
-            burstOptions.name = "Rune: Attack Speed";
-            burstOptions.prefab = ModularMagic_Core.prefabs.RuneProjectileBurst;
-            burstOptions.recipe = $"RoundLog:3, KnifeCopper:1, {ModularMagic_Core.prefabs.EitrCrude.name}:3";
-            burstOptions.recipeUpgrade = burstOptions.recipe;
-            burstOptions.tiers = new int[] { 0, 2, 3, 4 };
-            burstOptions.type = ImbuementType.ProjectileBurst;
-            burstOptions.value = "0.0125";
-            list.Add(new RuneEntry(burstOptions));
+            RuneEntryOptions attackSpeedOptions = new RuneEntryOptions();
+            attackSpeedOptions.description = "Improve the attack speed of your weapon!";
+            attackSpeedOptions.id = RuneId.AttackSpeed;
+            attackSpeedOptions.name = "Rune: Attack Speed";
+            attackSpeedOptions.prefab = ModularMagic_Core.prefabs.RuneAttackSpeed;
+            attackSpeedOptions.recipe = $"RoundLog:3, KnifeCopper:1, {ModularMagic_Core.prefabs.EitrCrude.name}:3";
+            attackSpeedOptions.recipeUpgrade = attackSpeedOptions.recipe;
+            attackSpeedOptions.tiers = new int[] { 0, 2, 3, 4 };
+            attackSpeedOptions.type = ImbuementType.AttackSpeed;
+            attackSpeedOptions.value = "0.0125";
+            list.Add(new RuneEntry(attackSpeedOptions));
 
             RuneEntryOptions speedOptions = new RuneEntryOptions();
             speedOptions.description = "Improve the projectile speed of your weapon!";

@@ -52,7 +52,11 @@ namespace ModularMagic_Core.Components
         private bool m_emissiveIdleIsStarting = true;
         private IEnumerator m_emission;
 
-        public EffectList saveEffects = new EffectList();
+        // Played at the table and at every rune that is new to a save. The effects are networked,
+        // so only the player that saves creates them and everyone nearby sees them
+        public EffectList saveTableEffects = new EffectList();
+        public EffectList saveRuneEffects = new EffectList();
+        public EffectList saveRemoveEffects = new EffectList();
 
         public void Awake()
         {
@@ -69,18 +73,22 @@ namespace ModularMagic_Core.Components
             MeshRenderer meshComp = m_altarTransform.gameObject.GetComponent<MeshRenderer>();
             m_tableMat = meshComp.materials[0];
 
-            EffectList.EffectData saveEffectData = new EffectList.EffectData();
-            saveEffectData.m_enabled = true;
-            saveEffectData.m_prefab = ModularMagic_Core.prefabs.SaveFX;
-            saveEffectData.m_variant = -1;
-
-            List<EffectList.EffectData> saveEffectsList = new List<EffectList.EffectData>();
-            saveEffectsList.Add(saveEffectData);
-
-            saveEffects.m_effectPrefabs = saveEffectsList.ToArray();
+            saveTableEffects.m_effectPrefabs = CreateEffectData(ModularMagic_Core.prefabs.SaveTableFX);
+            saveRuneEffects.m_effectPrefabs = CreateEffectData(ModularMagic_Core.prefabs.SaveRuneFX);
+            saveRemoveEffects.m_effectPrefabs = CreateEffectData(ModularMagic_Core.prefabs.SaveRemoveFX);
 
             if (netView == null)
                 Jotunn.Logger.LogWarning("[Imbuements] The rune table stand has no ZNetView, saving imbuements will not work");
+        }
+
+        private static EffectList.EffectData[] CreateEffectData(GameObject prefab)
+        {
+            EffectList.EffectData effectData = new EffectList.EffectData();
+            effectData.m_enabled = true;
+            effectData.m_prefab = prefab;
+            effectData.m_variant = -1;
+
+            return new[] { effectData };
         }
 
         // The rune table the given item stand belongs to, or null for any other item stand
@@ -414,12 +422,27 @@ namespace ModularMagic_Core.Components
                 if (!written)
                     return false;
 
-                foreach (Imbuement imbuement in m_imbuements)
+                // The runes that are not saved yet are the ones that are new to this save
+                List<int> newSlots = new List<int>();
+
+                for (int i = 0; i < m_imbuements.Count; i++)
                 {
-                    if (imbuement.type == ImbuementType.None)
+                    if (m_imbuements[i].type == ImbuementType.None)
                         continue;
 
-                    imbuement.saved = true;
+                    if (!m_imbuements[i].saved)
+                        newSlots.Add(i);
+
+                    m_imbuements[i].saved = true;
+                }
+
+                // A saved rune that is gone or replaced is removed by this save
+                bool runeRemoved = false;
+
+                for (int i = 0; i < m_savedImbuements.Count && i < m_imbuements.Count; i++)
+                {
+                    if (m_savedImbuements[i].rune != null && !m_imbuements[i].HasSameRune(m_savedImbuements[i]))
+                        runeRemoved = true;
                 }
 
                 m_itemData.m_customData[ImbuementHelper.DataKey] = imbuementsString;
@@ -427,7 +450,7 @@ namespace ModularMagic_Core.Components
                 m_standDataString = imbuementsString;
                 m_savedImbuements = m_imbuements.Select(imbuement => imbuement.CopyRune()).ToList();
                 m_onSave.Invoke();
-                PlaySaveEffect();
+                PlaySaveEffects(newSlots, runeRemoved);
                 return true;
             }
             catch (Exception e)
@@ -437,13 +460,32 @@ namespace ModularMagic_Core.Components
             }
         }
 
-        // The effect is only cosmetic, so a failing effect must never turn a saved staff into a failed save
-        private void PlaySaveEffect()
+        // When a rune is added, the table effect plays at the staff and the rune effect at every new rune.
+        // When a rune is removed, the remove effect plays once at the staff. A save that only removes runes plays only the remove effect.
+        // The effects are only cosmetic, so a failing effect must never turn a saved staff into a failed save
+        private void PlaySaveEffects(List<int> newSlots, bool runeRemoved)
         {
             try
             {
-                foreach (GameObject effect in saveEffects.Create(m_staffTransform.position, m_staffTransform.rotation))
-                    SaveFXColor.SetPreset(effect, m_colorPreset);
+                if (runeRemoved)
+                {
+                    foreach (GameObject effect in saveRemoveEffects.Create(m_staffTransform.position, m_staffTransform.rotation))
+                        SaveFXColor.SetPreset(effect, m_colorPreset);
+                }
+
+                if (newSlots.Count > 0)
+                {
+                    foreach (GameObject effect in saveTableEffects.Create(m_staffTransform.position, m_staffTransform.rotation))
+                        SaveFXColor.SetPreset(effect, m_colorPreset);
+                }
+
+                foreach (int slot in newSlots)
+                {
+                    GetRuneDropPoint(slot, out Vector3 position, out Quaternion rotation);
+
+                    foreach (GameObject effect in saveRuneEffects.Create(position, rotation))
+                        SaveFXColor.SetPreset(effect, m_colorPreset);
+                }
             }
             catch (Exception e)
             {

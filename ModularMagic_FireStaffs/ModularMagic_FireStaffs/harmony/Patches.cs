@@ -16,6 +16,22 @@ namespace ModularMagic_FireStaffs.Harmony
             FireImbuementHelper.GameIsReady = true;
         }
 
+        // The Attack Speed rune speeds up the animation of the normal attack, see AttackSpeedHelper
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Humanoid), "StartAttack")]
+        public static void StartAttack_Postfix(Humanoid __instance, bool secondaryAttack, bool __result)
+        {
+            if (__result)
+                AttackSpeedHelper.OnAttackStarted(__instance, secondaryAttack);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Humanoid), "UpdateAttack")]
+        public static void UpdateAttack_Postfix(Humanoid __instance)
+        {
+            AttackSpeedHelper.OnAttackUpdated(__instance);
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Humanoid), "EquipItem")]
         public static void EquipItem_Postfix(Humanoid __instance, ItemData item)

@@ -20,7 +20,7 @@ namespace ModularMagic_Core
     {
         public const string PluginGUID = "DeathWizsh.ModularMagic_Core";
         public const string PluginName = "ModularMagic_Core";
-        public const string PluginVersion = "0.0.2";
+        public const string PluginVersion = "0.0.3";
         public static ModularMagic_Core Instance;
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
 
@@ -131,16 +131,22 @@ namespace ModularMagic_Core
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.EitrFine, true));
             prefabs.RuneTable = assetBundle.LoadAsset<GameObject>("MMC_RuneTable");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.RuneTable, true));
-            prefabs.SaveFX = assetBundle.LoadAsset<GameObject>("fx_save_MMC");
-            prefabs.SaveFX.AddComponent<SaveFXColor>();
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.SaveFX, true));
+            prefabs.SaveTableFX = assetBundle.LoadAsset<GameObject>("fx_save_table_MMC");
+            prefabs.SaveTableFX.AddComponent<SaveFXColor>();
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.SaveTableFX, true));
+            prefabs.SaveRuneFX = assetBundle.LoadAsset<GameObject>("fx_save_rune_MMC");
+            prefabs.SaveRuneFX.AddComponent<SaveFXColor>();
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.SaveRuneFX, true));
+            prefabs.SaveRemoveFX = assetBundle.LoadAsset<GameObject>("fx_save_table_remove_MMC");
+            prefabs.SaveRemoveFX.AddComponent<SaveFXColor>();
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.SaveRemoveFX, true));
 
             prefabs.RuneDamageBlunt = AddRunePrefab("MMC_Rune_DamageBlunt");
             prefabs.RuneDamagePierce = AddRunePrefab("MMC_Rune_DamagePierce");
             prefabs.RuneDamageSlash = AddRunePrefab("MMC_Rune_DamageSlash");
             prefabs.RuneEitrCost = AddRunePrefab("MMC_Rune_EitrCost");
             prefabs.RuneProjectileAccuracy = AddRunePrefab("MMC_Rune_ProjectileAccuracy");
-            prefabs.RuneProjectileBurst = AddRunePrefab("MMC_Rune_ProjectileBurst");
+            prefabs.RuneAttackSpeed = AddRunePrefab("MMC_Rune_AttackSpeed");
             prefabs.RuneProjectileSpeed = AddRunePrefab("MMC_Rune_ProjectileSpeed");
             prefabs.RuneCone = AddRunePrefab("MMC_Rune_Cone");
             prefabs.RuneCreatures = AddRunePrefab("MMC_Rune_Creatures");

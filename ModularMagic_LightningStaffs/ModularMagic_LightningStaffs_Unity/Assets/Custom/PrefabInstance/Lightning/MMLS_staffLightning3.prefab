@@ -324,11 +324,59 @@ MonoBehaviour:
         m_hitTerrainEffect:
           m_effectPrefabs: []
         m_startEffect:
-          m_effectPrefabs: []
+          m_effectPrefabs:
+          - m_prefab: {fileID: 2141223044725772510, guid: 4522c3c8843f9294c9b5590f39490664,
+              type: 3}
+            m_enabled: 1
+            m_variant: -1
+            m_attach: 0
+            m_follow: 0
+            m_inheritParentRotation: 0
+            m_inheritParentScale: 0
+            m_multiplyParentVisualScale: 0
+            m_randomRotation: 0
+            m_scale: 0
+            m_childTransform: 
         m_triggerEffect:
-          m_effectPrefabs: []
+          m_effectPrefabs:
+          - m_prefab: {fileID: 9010705504000869803, guid: 1c3c0cc2c6cb8b141b2eabbc415b3319,
+              type: 3}
+            m_enabled: 1
+            m_variant: 0
+            m_attach: 0
+            m_follow: 0
+            m_inheritParentRotation: 0
+            m_inheritParentScale: 0
+            m_multiplyParentVisualScale: 0
+            m_randomRotation: 0
+            m_scale: 0
+            m_childTransform: 
+          - m_prefab: {fileID: 3622263877137668723, guid: dd3deeb07f33347479282f4d1c5b3014,
+              type: 3}
+            m_enabled: 1
+            m_variant: 0
+            m_attach: 0
+            m_follow: 0
+            m_inheritParentRotation: 0
+            m_inheritParentScale: 0
+            m_multiplyParentVisualScale: 0
+            m_randomRotation: 0
+            m_scale: 0
+            m_childTransform: 
         m_trailStartEffect:
-          m_effectPrefabs: []
+          m_effectPrefabs:
+          - m_prefab: {fileID: 7551501131836803338, guid: 220e67212368e2f47a0a8250e8d9ea9d,
+              type: 3}
+            m_enabled: 1
+            m_variant: -1
+            m_attach: 0
+            m_follow: 0
+            m_inheritParentRotation: 0
+            m_inheritParentScale: 0
+            m_multiplyParentVisualScale: 0
+            m_randomRotation: 0
+            m_scale: 0
+            m_childTransform: 
         m_burstEffect:
           m_effectPrefabs: []
       m_secondaryAttack:
@@ -513,19 +561,7 @@ MonoBehaviour:
           m_scale: 0
           m_childTransform: 
       m_startEffect:
-        m_effectPrefabs:
-        - m_prefab: {fileID: 2141223044725772510, guid: 4522c3c8843f9294c9b5590f39490664,
-            type: 3}
-          m_enabled: 1
-          m_variant: -1
-          m_attach: 0
-          m_follow: 0
-          m_inheritParentRotation: 0
-          m_inheritParentScale: 0
-          m_multiplyParentVisualScale: 0
-          m_randomRotation: 0
-          m_scale: 0
-          m_childTransform: 
+        m_effectPrefabs: []
       m_holdStartEffect:
         m_effectPrefabs: []
       m_equipEffect:
@@ -535,19 +571,7 @@ MonoBehaviour:
       m_triggerEffect:
         m_effectPrefabs: []
       m_trailStartEffect:
-        m_effectPrefabs:
-        - m_prefab: {fileID: 7551501131836803338, guid: 220e67212368e2f47a0a8250e8d9ea9d,
-            type: 3}
-          m_enabled: 1
-          m_variant: -1
-          m_attach: 0
-          m_follow: 0
-          m_inheritParentRotation: 0
-          m_inheritParentScale: 0
-          m_multiplyParentVisualScale: 0
-          m_randomRotation: 0
-          m_scale: 0
-          m_childTransform: 
+        m_effectPrefabs: []
       m_consumeStatusEffect: {fileID: 0}
 --- !u!199 &199388768378798581
 ParticleSystemRenderer:

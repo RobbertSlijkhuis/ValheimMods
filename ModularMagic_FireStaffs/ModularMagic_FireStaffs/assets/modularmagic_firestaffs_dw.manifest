@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 2347013405
+CRC: 3664783266
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 7dfbe5192a6ecc450102e9892f9aa293
+    Hash: 27fec04adf90178a7a510893549d0550
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 0fad8e6799669598f1fddc64cbf445da
+    Hash: 2ffb2c12830b95615469032d900db106
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 7dfbe5192a6ecc450102e9892f9aa293
+    Hash: 27fec04adf90178a7a510893549d0550
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -39,11 +39,13 @@ ClassTypes:
 - Class: 108
   Script: {instanceID: 0}
 - Class: 114
-  Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
   Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 2140874873, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -54,8 +56,6 @@ ClassTypes:
   Script: {fileID: 1999586283, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 927819712, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
-  Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -97,6 +97,7 @@ SerializeReferenceClassIdentifiers:
   ClassName: ItemDrop/ItemData/SharedData
 Assets:
 - Assets/Custom/PrefabInstance/Fire/fx/fx_fireball_staff_explosion_MMFS.prefab
+- Assets/Custom/PrefabInstance/Fire/attacks/attack_cone_MMFS.prefab
 - Assets/Custom/PrefabInstance/Fire/MMFS_StaffFire1.prefab
 - Assets/Custom/PrefabInstance/Fire/projectiles/staff_fire_projectile_aoe_MMFS.prefab
 - Assets/Custom/PrefabInstance/Fire/projectiles/projectile_meteor_MMFS.prefab
@@ -104,7 +105,9 @@ Assets:
 - Assets/Custom/PrefabInstance/Fire/cinder_MMFS.prefab
 - Assets/Custom/PrefabInstance/Fire/projectiles/staff_fire_projectile_MMFS.prefab
 - Assets/Custom/PrefabInstance/Fire/attacks/secondary_nova_MMFS.prefab
+- Assets/Custom/PrefabInstance/Fire/attacks/main_cone_attack_MMFS.prefab
 - Assets/Custom/PrefabInstance/Fire/fx/fx_fireball_staff_explosion_small_MMFS.prefab
+- Assets/Custom/PrefabInstance/Fire/fx/fx_staff_fire_cone_MMFS.prefab
 - Assets/Custom/PrefabInstance/Fire/attacks/attack_nova_MMFS.prefab
 - Assets/Custom/PrefabInstance/Fire/projectiles/projectile_spawn_rain_MMFS.prefab
 - Assets/Custom/PrefabInstance/Fire/fx/fx_staff_fire_windup_MMFS.prefab

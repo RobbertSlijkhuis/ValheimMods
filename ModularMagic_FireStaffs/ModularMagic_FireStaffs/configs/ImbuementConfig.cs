@@ -7,6 +7,7 @@ namespace ModularMagic_FireStaffs.Configs
         public string sectionName = "Imbuement";
         public ConfigEntry<float> EitrCost;
         public ConfigEntry<float> ProjectileAccuracy;
+        public ConfigEntry<float> AttackSpeedAnimation;
         public ConfigEntry<float> ProjectileSpeed;
         public ConfigEntry<float> SecondaryAttackEitr;
 
@@ -22,6 +23,11 @@ namespace ModularMagic_FireStaffs.Configs
 
             ProjectileAccuracy = Config.Bind(new ConfigDefinition(sectionName, "Accuracy Rune"), 0.125f,
                 new ConfigDescription("The amount of accuracy improvement per level of the Accuracy rune", null,
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+
+            AttackSpeedAnimation = Config.Bind(new ConfigDefinition(sectionName, "Attack Speed Rune Animation Speed"), 0.05f,
+                new ConfigDescription("The part the attack animation of the normal attack is faster per level of the Attack Speed rune (0.05 is 5%, so level 4 is 20% faster). Only used when the staff does not have the Cone rune",
+                new AcceptableValueRange<float>(0f, 0.25f),
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
 
             ProjectileSpeed = Config.Bind(new ConfigDefinition(sectionName, "Projectile Speed Rune"), 1f,

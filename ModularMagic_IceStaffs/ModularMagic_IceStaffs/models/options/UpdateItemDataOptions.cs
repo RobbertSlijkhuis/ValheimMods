@@ -26,6 +26,8 @@ namespace ModularMagic_IceStaffs.Models
         public float? projectileAccuracy = null;
         public float? projectileBurst = null;
         public float? launchAngle = null;
+        public float? damageMultiplier = null;
+        public float? forceMultiplier = null;
         public float? secondaryAttackEitr = null;
     }
 }

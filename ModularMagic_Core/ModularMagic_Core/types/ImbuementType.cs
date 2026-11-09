@@ -12,7 +12,7 @@ namespace ModularMagic_Core.Types
         public const string MainAttack = "MainAttack";
         public const string ParryBonus = "ParryBonus";
         public const string ProjectileAccuracy = "ProjectileAccuracy";
-        public const string ProjectileBurst = "ProjectileBurst";
+        public const string AttackSpeed = "AttackSpeed";
         public const string ProjectileVelocity = "ProjectileVelocity";
         public const string SecondaryAttack = "SecondaryAttack";
     }
