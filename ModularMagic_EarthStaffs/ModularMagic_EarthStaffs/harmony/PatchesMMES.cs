@@ -23,6 +23,22 @@ namespace ModularMagic_EarthStaffs.Harmony
             }
         }
 
+        // The terrain op of the nova must be in the table of every ObjectDB, see TerrainOpHelper
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(ObjectDB), "UpdateRegisters")]
+        public static void ObjectDBUpdateRegisters_Postfix(ObjectDB __instance)
+        {
+            TerrainOpHelper.Register(__instance);
+        }
+
+        // The boulders of the Rain rune are spawned without hit data, so they get the damage of the staff here, see EarthImbuementHelper
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(SpawnAbility), "SetupProjectile")]
+        public static void SetupProjectile_Postfix(Projectile projectile, ItemData ___m_weapon)
+        {
+            EarthImbuementHelper.OnProjectileSpawned(projectile, ___m_weapon);
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Humanoid), "EquipItem")]
         public static void EquipItem_Postfix(ref Humanoid __instance, ItemData item)

@@ -90,7 +90,6 @@ namespace ModularMagic_EarthStaffs.Helpers
 
             // The projectile that shows the damage type. Every damage type has its own prefab, so all clients spawn the same visual
             GameObject damageProjectile = null;
-            bool rain = false;
 
             foreach (Imbuement imbuement in imbuements)
             {
@@ -155,7 +154,6 @@ namespace ModularMagic_EarthStaffs.Helpers
                                 baseEitr = (float)snapshot.attackEitr * PluginConfig.secondaryAttackRain.eitrMultiplier.Value;
 
                             options.secondaryAttackEitr = baseEitr * (1f - saved);
-                            rain = imbuement.value == "Rain";
                         }
                         break;
                 }
@@ -206,33 +204,40 @@ namespace ModularMagic_EarthStaffs.Helpers
 
             UpdateHelper.UpdateItemData(itemData, options);
 
-            // After the staff is updated, so the damage types of the damage type rune are used
-            if (rain)
-                ApplyBoulderDamage(itemData);
-
             DestroyReplacedEquipStatusEffect(previousEquipEffect, itemData);
         }
 
-        // The script that spawns the boulders does not pass the damage of the staff on, so the damage of the boulder prefab (apart from chop and pickaxe) is set from the staff
-        // (quality included) times the damage multiplier, and the attack force from the attack force of the staff times the force multiplier.
+        // The script that spawns the boulders (SpawnAbility) does not pass the damage of the staff on, so every boulder it spawns gets the damage of the
+        // staff that cast the rain (apart from chop and pickaxe) from the staff (quality and damage type rune included) times the damage multiplier,
+        // and the attack force from the attack force of the staff times the force multiplier. It is set on the spawned boulder, not on the prefab,
+        // so it never holds the damage of another staff. Called for every projectile a SpawnAbility spawns, see PatchesMMES.
         // The boulders are hit by the client of the shooter, and the chop and pickaxe damage stay config values
-        private static void ApplyBoulderDamage(ItemData staff)
+        public static void OnProjectileSpawned(Projectile projectile, ItemData staff)
         {
-            HitData.DamageTypes damage = staff.GetDamage();
-            SecondaryAttackConfig rain = PluginConfig.secondaryAttackRain;
-            Projectile boulder = ModularMagic_EarthStaffs.prefabs.ProjectileBoulder.GetComponent<Projectile>();
-            float multiplier = rain.damageMultiplier.Value;
+            try
+            {
+                if (projectile == null || !IsEarthStaff(staff) || projectile.name.Replace("(Clone)", "") != ModularMagic_EarthStaffs.prefabs.ProjectileBoulder.name)
+                    return;
 
-            // A boulder is blunt, whatever the damage type rune of the staff is. Only one of blunt, pierce and slash is set on the staff,
-            // they are never added up, the one that is set is the main damage
-            float main = Mathf.Max(damage.m_blunt, Mathf.Max(damage.m_pierce, damage.m_slash));
+                HitData.DamageTypes damage = staff.GetDamage();
+                SecondaryAttackConfig rain = PluginConfig.secondaryAttackRain;
+                float multiplier = rain.damageMultiplier.Value;
 
-            boulder.m_damage.m_blunt = main * multiplier;
-            boulder.m_damage.m_slash = 0f;
-            boulder.m_damage.m_pierce = 0f;
-            boulder.m_damage.m_spirit = damage.m_spirit * multiplier;
-            boulder.m_damage.m_poison = damage.m_poison * multiplier;
-            boulder.m_attackForce = staff.m_shared.m_attackForce * rain.forceMultiplier.Value;
+                // A boulder is blunt, whatever the damage type rune of the staff is. Only one of blunt, pierce and slash is set on the staff,
+                // they are never added up, the one that is set is the main damage
+                float main = Mathf.Max(damage.m_blunt, Mathf.Max(damage.m_pierce, damage.m_slash));
+
+                projectile.m_damage.m_blunt = main * multiplier;
+                projectile.m_damage.m_slash = 0f;
+                projectile.m_damage.m_pierce = 0f;
+                projectile.m_damage.m_spirit = damage.m_spirit * multiplier;
+                projectile.m_damage.m_poison = damage.m_poison * multiplier;
+                projectile.m_attackForce = staff.m_shared.m_attackForce * rain.forceMultiplier.Value;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not set the damage of the boulder: " + e);
+            }
         }
 
         // Every apply makes a new effect for the tooltip, so the one of the previous apply is destroyed. Only an effect of this mod is destroyed.
