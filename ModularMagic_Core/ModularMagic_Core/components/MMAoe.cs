@@ -111,17 +111,31 @@ namespace ModularMagic_Core.Components
                 owner.RaiseSkill(hitData.m_skill, hitData.m_skillRaiseAmount);
         }
 
-        // Only enemies are hit: not the shooter, not the same kind of creature, not friends and not a target that is dodging
+        // Only enemies are hit: not the shooter, not the same kind of creature, not friends and not a target that is dodging.
+        // Another player is hit when the shooter has PvP enabled, like the Projectile component does (BaseAI.IsEnemy is false between
+        // players, as they share a faction). The target player ignores the hit itself when it does not have PvP enabled (Character.RPC_Damage)
         private static bool CanHit(Character owner, Character character, HitData hitData)
         {
-            if (character == owner || character.m_name == owner.m_name)
+            if (character == owner)
                 return false;
 
-            bool enemy = BaseAI.IsEnemy(owner, character)
-                || (character.GetBaseAI() != null && character.GetBaseAI().IsAggravatable() && owner.IsPlayer());
+            if (owner.IsPlayer() && character.IsPlayer())
+            {
+                if (!owner.IsPVPEnabled())
+                    return false;
+            }
+            else
+            {
+                // Players all share the name of their character, so the name is only compared for creatures
+                if (character.m_name == owner.m_name)
+                    return false;
 
-            if (!enemy)
-                return false;
+                bool enemy = BaseAI.IsEnemy(owner, character)
+                    || (character.GetBaseAI() != null && character.GetBaseAI().IsAggravatable() && owner.IsPlayer());
+
+                if (!enemy)
+                    return false;
+            }
 
             return !(hitData.m_dodgeable && character.IsDodgeInvincible());
         }
