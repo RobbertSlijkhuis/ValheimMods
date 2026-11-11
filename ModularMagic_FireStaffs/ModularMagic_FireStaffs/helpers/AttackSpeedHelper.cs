@@ -1,6 +1,7 @@
 using ModularMagic_Core.Types;
 using ModularMagic_FireStaffs.Configs;
 using System;
+using UnityEngine;
 using static ItemDrop;
 using CoreImbuementHelper = ModularMagic_Core.Helpers.ImbuementHelper;
 using Imbuement = ModularMagic_Core.Models.Imbuement;
@@ -16,6 +17,14 @@ namespace ModularMagic_FireStaffs.Helpers
     {
         // True while the animation speed of the local player was set here, so it is put back to normal when the attack is over
         private static bool applied;
+
+        // The staff the speed was set for, and whether the attack animation was seen yet: the animation starts a moment after the attack
+        private static ItemData appliedWeapon;
+        private static bool animationSeen;
+        private static float appliedTime;
+
+        // How long the attack animation may take to start before the speed is put back
+        private const float AnimationStartTimeout = 1f;
 
         // Called when the local player has started an attack, the speed is set for the whole attack. Only the normal attack is sped up
         public static void OnAttackStarted(Humanoid humanoid, bool secondaryAttack)
@@ -45,6 +54,9 @@ namespace ModularMagic_FireStaffs.Helpers
 
                 humanoid.m_zanim.SetSpeed(factor);
                 applied = true;
+                appliedWeapon = weapon;
+                animationSeen = false;
+                appliedTime = Time.time;
             }
             catch (Exception e)
             {
@@ -58,8 +70,19 @@ namespace ModularMagic_FireStaffs.Helpers
             if (!applied || humanoid == null || humanoid != Player.m_localPlayer)
                 return;
 
-            // The attack object stays after it is done, it is only gone when the weapon was unequipped
-            if (humanoid.m_currentAttack == null || humanoid.m_currentAttack.IsDone())
+            // The attack object stays after it is done, it is only gone when the weapon was unequipped. The attack object is not
+            // updated for a weapon that is no longer held, so the held weapon is checked too
+            if (humanoid.m_currentAttack == null || humanoid.m_currentAttack.IsDone() || humanoid.IsDead() || humanoid.GetCurrentWeapon() != appliedWeapon)
+            {
+                Reset(humanoid);
+                return;
+            }
+
+            // The animator leaves the attack state when the attack animation is over (this is also how the game ends an attack),
+            // so the speed is put back then even when the attack object did not notice it
+            if (humanoid.InAttack())
+                animationSeen = true;
+            else if (animationSeen || Time.time - appliedTime > AnimationStartTimeout)
                 Reset(humanoid);
         }
 
@@ -69,6 +92,7 @@ namespace ModularMagic_FireStaffs.Helpers
                 return;
 
             applied = false;
+            appliedWeapon = null;
 
             if (humanoid.m_zanim != null)
                 humanoid.m_zanim.SetSpeed(1f);
