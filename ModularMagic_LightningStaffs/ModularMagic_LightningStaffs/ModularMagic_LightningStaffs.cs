@@ -12,7 +12,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using CoreSecondaryAttackHelper = ModularMagic_Core.Helpers.SecondaryAttackHelper;
+using ImbuedStaffHelper = ModularMagic_Core.Helpers.ImbuedStaffHelper;
 using MMAoeHelper = ModularMagic_Core.Helpers.MMAoeHelper;
+using SpawnedProjectileHelper = ModularMagic_Core.Helpers.SpawnedProjectileHelper;
 
 namespace ModularMagic_LightningStaffs
 {
@@ -24,13 +26,14 @@ namespace ModularMagic_LightningStaffs
     {
         public const string PluginGUID = "DeathWizsh.ModularMagic_LightningStaffs";
         public const string PluginName = "ModularMagic_LightningStaffs";
-        public const string PluginVersion = "0.0.3";
+        public const string PluginVersion = "0.0.4";
         public static ModularMagic_LightningStaffs Instance;
         private static readonly HarmonyLib.Harmony _harmony = new HarmonyLib.Harmony(PluginGUID);
 
         private AssetBundle assetBundle;
         public CustomPrefabs prefabs = new CustomPrefabs();
-        public ItemDataSnapshots snapshots = new ItemDataSnapshots();
+        // What Core needs to know about the staffs of this mod, see RegisterStaffHooks
+        public StaffDefinition definition;
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -44,13 +47,36 @@ namespace ModularMagic_LightningStaffs
             PluginConfig.Init();
             // Every entry forwards its change to its own handler from this event in the order they were created,
             // so this runs after the handlers that update the prefabs, and the staff in the hand gets the new values with its runes
-            Config.SettingChanged += (sender, args) => LightningImbuementHelper.ReapplyOnHeldStaff();
+            Config.SettingChanged += (sender, args) => ImbuedStaffHelper.ReapplyOnHeldStaff();
+            RegisterStaffHooks();
             RegisterSecondaryAttacks();
             _harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             PrefabManager.OnVanillaPrefabsAvailable += AddLightningStaffs;
             Jotunn.Logger.LogInfo("ModularMagic_LightningStaffs has been initialised");
             ItemManager.OnItemsRegistered += LogRecipes;
+        }
+
+        // Core gives the staffs their rune slots, applies the runes when a staff is equipped and speeds up the attack animation for the Attack Speed
+        // rune. It only needs to know what belongs to this mod. The bolts of the Rain rune get the damage of the staff from this mod
+        private void RegisterStaffHooks()
+        {
+            definition = new StaffDefinition()
+            {
+                effectName = "Imbuements_MMLS",
+                weaponType = WeaponType.MMLS,
+                colorPreset = LightColorPresetType.LightBlue,
+                allowedRunes = LightningImbuementHelper.AllowedRunes,
+                imbuementConfig = PluginConfig.imbuementConfig,
+                attackSpeedAnimation = true,
+                coneAttack = prefabs.mainAttackCone,
+                coneConfig = PluginConfig.mainAttackCone,
+            };
+            definition.AddSecondaryAttack("Nova", prefabs.secondaryAttackNova, PluginConfig.secondaryAttackNova);
+            definition.AddSecondaryAttack("Rain", prefabs.secondaryAttackRain, PluginConfig.secondaryAttackRain);
+
+            StaffImbuementHelper.Register(definition);
+            SpawnedProjectileHelper.Register(prefabs.projectileBolt.name, LightningImbuementHelper.OnProjectileSpawned);
         }
 
         private void LogRecipes()
@@ -68,19 +94,10 @@ namespace ModularMagic_LightningStaffs
         {
             try
             {
-                // The slots follow the Fire staffs: more slots and a higher tier (higher rune levels) per staff
-                AddImbuementSlots(prefabs.staffLightning1Prefab, 2, 1);
-                AddImbuementSlots(prefabs.staffLightning2Prefab, 3, 2);
-                AddImbuementSlots(prefabs.staffLightning3Prefab, 4, 4);
-
-                ItemHelper.CreateStaff(prefabs.staffLightning1Prefab, PluginConfig.staffLightning1);
-                ItemHelper.CreateStaff(prefabs.staffLightning2Prefab, PluginConfig.staffLightning2);
-                ItemHelper.CreateStaff(prefabs.staffLightning3Prefab, PluginConfig.staffLightning3);
-
-                // The config is bound in Awake, so it is ready here
-                snapshots.staffLightning1 = new ItemDataSnapShot(prefabs.staffLightning1Prefab.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffLightning1);
-                snapshots.staffLightning2 = new ItemDataSnapShot(prefabs.staffLightning2Prefab.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffLightning2);
-                snapshots.staffLightning3 = new ItemDataSnapShot(prefabs.staffLightning3Prefab.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffLightning3);
+                // The slots follow the Fire staffs: more slots and a higher tier (higher rune levels) per staff. The config is bound in Awake, so it is ready here
+                definition.AddStaff(prefabs.staffLightning1Prefab, PluginConfig.staffLightning1, 2, 1);
+                definition.AddStaff(prefabs.staffLightning2Prefab, PluginConfig.staffLightning2, 3, 2);
+                definition.AddStaff(prefabs.staffLightning3Prefab, PluginConfig.staffLightning3, 4, 4);
 
                 // After the staffs are registered, so a failing attack update can not take the staffs with it
                 AttackHelper.UpdateNova(prefabs.attackNova, PluginConfig.secondaryAttackNova);
@@ -92,16 +109,6 @@ namespace ModularMagic_LightningStaffs
             }
 
             PrefabManager.OnVanillaPrefabsAvailable -= AddLightningStaffs;
-        }
-
-        private void AddImbuementSlots(GameObject prefab, int slots, int tier)
-        {
-            ImbuementSlots imbuementSlots = prefab.AddComponent<ImbuementSlots>();
-            imbuementSlots.m_slots = slots;
-            imbuementSlots.m_tier = tier;
-            imbuementSlots.m_weaponType = WeaponType.MMLS;
-            imbuementSlots.m_allowedRunes = new List<string>(LightningImbuementHelper.AllowedRunes);
-            imbuementSlots.m_colorPreset = LightColorPresetType.LightBlue;
         }
 
         // Core gives a registered secondary attack its own eitr cost and the cooldown, the attack is recognised by the projectile it spawns.

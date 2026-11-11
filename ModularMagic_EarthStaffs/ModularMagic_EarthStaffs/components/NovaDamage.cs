@@ -1,4 +1,5 @@
 using ModularMagic_Core.Components;
+using ModularMagic_Core.Helpers;
 using UnityEngine;
 
 namespace ModularMagic_EarthStaffs.Components
@@ -15,7 +16,7 @@ namespace ModularMagic_EarthStaffs.Components
 
             // Only one of the three is set: a staff can have just one damage type rune, which moves the main damage from blunt to pierce or slash.
             // They are never added up, the one that is set is the main damage
-            float main = Mathf.Max(damage.m_blunt, Mathf.Max(damage.m_pierce, damage.m_slash));
+            float main = DamageHelper.GetMainPhysical(damage);
 
             damage.m_blunt = 0f;
             damage.m_slash = 0f;

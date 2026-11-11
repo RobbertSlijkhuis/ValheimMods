@@ -1,6 +1,9 @@
 ﻿using BepInEx.Configuration;
 using ModularMagic_Food.Helpers;
 using ModularMagic_Food.Models;
+using RecipeHelper = ModularMagic_Core.Helpers.RecipeHelper;
+using RecipeUpdateType = ModularMagic_Core.Types.RecipeUpdateType;
+using UpdateRecipeOptions = ModularMagic_Core.Models.UpdateRecipeOptions;
 
 namespace ModularMagic_Food.Configs
 {

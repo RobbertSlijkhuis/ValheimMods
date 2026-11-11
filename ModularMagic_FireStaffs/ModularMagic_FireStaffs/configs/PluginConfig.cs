@@ -2,7 +2,6 @@
 using ModularMagic_Core.Types;
 using ModularMagic_FireStaffs.Helpers;
 using ModularMagic_FireStaffs.Models;
-using ModularMagic_FireStaffs.Types;
 using System;
 
 namespace ModularMagic_FireStaffs.Configs
@@ -39,9 +38,11 @@ namespace ModularMagic_FireStaffs.Configs
 
         private static int sectionIndex = 1;
 
+        private static ConfigFile Config => ModularMagic_FireStaffs.Instance.Config;
+
         public static void Init()
         {
-            imbuementConfig.GenerateConfig();
+            imbuementConfig.GenerateConfig(Config, new ImbuementConfigOptions() { attackSpeedAnimation = true });
             InitVanillaStaffConfig();
             InitStaffFire1Config();
             InitStaffFire2Config();
@@ -74,7 +75,7 @@ namespace ModularMagic_FireStaffs.Configs
                     burstInterval = 0.1f,
                     damageMultiplier = 0.1f,
                 };
-                mainAttackCone.GenerateConfig(options);
+                mainAttackCone.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -107,7 +108,7 @@ namespace ModularMagic_FireStaffs.Configs
                     spawnAccuracy = 20f,
                     spawnDelay = 0.05f,
                 };
-                secondaryAttackRain.GenerateConfig(options);
+                secondaryAttackRain.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -132,7 +133,7 @@ namespace ModularMagic_FireStaffs.Configs
                     damageMultiplier = 1f,
                     forceMultiplier = 1f,
                 };
-                secondaryAttackNova.GenerateConfig(options);
+                secondaryAttackNova.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -161,7 +162,7 @@ namespace ModularMagic_FireStaffs.Configs
                     projectileVelocity = 15f,
                     projectileAccuracy = 2f,
                 };
-                staffFire1.GenerateConfig(options);
+                staffFire1.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -190,7 +191,7 @@ namespace ModularMagic_FireStaffs.Configs
                     projectileVelocity = 17.5f,
                     projectileAccuracy = 1.5f,
                 };
-                staffFire2.GenerateConfig(options);
+                staffFire2.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -219,7 +220,7 @@ namespace ModularMagic_FireStaffs.Configs
                     projectileVelocity = 20f,
                     projectileAccuracy = 1f,
                 };
-                staffFire3.GenerateConfig(options);
+                staffFire3.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {

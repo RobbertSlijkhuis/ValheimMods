@@ -21,7 +21,7 @@ namespace ModularMagic_Food
     {
         public const string PluginGUID = "DeathWizsh.ModularMagic_Food";
         public const string PluginName = "ModularMagic_Food";
-        public const string PluginVersion = "0.0.3";
+        public const string PluginVersion = "0.0.4";
         public static ModularMagic_Food Instance;
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
 

@@ -1,4 +1,6 @@
-﻿namespace ModularMagic_Armors.Models
+﻿using RecipeSnapShot = ModularMagic_Core.Models.RecipeSnapShot;
+
+namespace ModularMagic_Armors.Models
 {
     class ItemSnapShots
     {

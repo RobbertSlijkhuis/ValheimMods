@@ -1,8 +1,7 @@
-﻿using ModularMagic_Core.Types;
-using ModularMagic_EarthStaffs.configs;
+﻿using BepInEx.Configuration;
+using ModularMagic_Core.Types;
 using ModularMagic_EarthStaffs.Helpers;
 using ModularMagic_EarthStaffs.Models;
-using ModularMagic_EarthStaffs.Types;
 using System;
 
 namespace ModularMagic_EarthStaffs.Configs
@@ -58,6 +57,8 @@ namespace ModularMagic_EarthStaffs.Configs
 
         public static ImbuementConfig imbuementConfig = new ImbuementConfig();
 
+        private static ConfigFile Config => ModularMagic_EarthStaffs.Instance.Config;
+
         public static void Init()
         {
             InitStaffEarth0Config();
@@ -70,14 +71,14 @@ namespace ModularMagic_EarthStaffs.Configs
             InitSecondaryAttackRainConfig();
             InitSecondaryAttackSummonConfig();
 
-            imbuementConfig.GenerateConfig();
+            imbuementConfig.GenerateConfig(Config, new ImbuementConfigOptions() { secondaryAttackRunes = "Nova, Rain and Summon" });
         }
 
         private static void InitStaffEarth0Config()
         {
             try
             {
-                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_EarthStaffs.prefabs.StaffEarth0, staff0Name, staff0Recipe, staff0UpgradeRecipe)
+                StaffConfigOptions options = new EarthStaffConfigOptions(ModularMagic_EarthStaffs.prefabs.StaffEarth0, staff0Name, staff0Recipe, staff0UpgradeRecipe)
                 {
                     description = "Held together by nothing but wishful thinking, this staff hurls whatever the forest has lying around. Mushrooms? Sure. Berrie bushes? Why not!",
                     craftingStation = "Workbench",
@@ -93,7 +94,7 @@ namespace ModularMagic_EarthStaffs.Configs
                     attackForce = 20,
                     useEitr = 10,
                 };
-                staffEarth0.GenerateConfig(options);
+                staffEarth0.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -105,7 +106,7 @@ namespace ModularMagic_EarthStaffs.Configs
         {
             try
             {
-                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_EarthStaffs.prefabs.StaffEarth1, staff1Name, staff1Recipe, staff1UpgradeRecipe)
+                StaffConfigOptions options = new EarthStaffConfigOptions(ModularMagic_EarthStaffs.prefabs.StaffEarth1, staff1Name, staff1Recipe, staff1UpgradeRecipe)
                 {
                     description = "The staff equivalent of shouting ‘rock!’ and hoping for the best! Chance for broken limbs: optimal",
                     craftingStation = "Workbench",
@@ -126,7 +127,7 @@ namespace ModularMagic_EarthStaffs.Configs
                     attackForce = 20,
                     useEitr = 3,
                 };
-                staffEarth1.GenerateConfig(options);
+                staffEarth1.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -139,7 +140,7 @@ namespace ModularMagic_EarthStaffs.Configs
             try
             {
                 
-                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_EarthStaffs.prefabs.StaffEarth2, staff2Name, staff2Recipe, staff2UpgradeRecipe)
+                StaffConfigOptions options = new EarthStaffConfigOptions(ModularMagic_EarthStaffs.prefabs.StaffEarth2, staff2Name, staff2Recipe, staff2UpgradeRecipe)
                 {
                     description = "This staff flings boulders with all the subtlety of an avalanche. Not great for diplomacy. Excellent for everything else!",
                     craftingStation = "Workbench",
@@ -160,7 +161,7 @@ namespace ModularMagic_EarthStaffs.Configs
                     attackForce = 20,
                     useEitr = 5,
                 };
-                staffEarth2.GenerateConfig(options);
+                staffEarth2.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -172,7 +173,7 @@ namespace ModularMagic_EarthStaffs.Configs
         {
             try
             {
-                StaffConfigOptions options = new StaffConfigOptions(ModularMagic_EarthStaffs.prefabs.StaffEarth3, staff3Name, staff3Recipe, staff3UpgradeRecipe)
+                StaffConfigOptions options = new EarthStaffConfigOptions(ModularMagic_EarthStaffs.prefabs.StaffEarth3, staff3Name, staff3Recipe, staff3UpgradeRecipe)
                 {
                     description = "Side effects may include dizziness, confusion, and being buried under several metric tons of stone. Nature just doesn’t negotiate. It bends, breaks, and buries!",
                     craftingStation = "GaldrTable",
@@ -193,7 +194,7 @@ namespace ModularMagic_EarthStaffs.Configs
                     attackForce = 35,
                     useEitr = 7,
                 };
-                staffEarth3.GenerateConfig(options);
+                staffEarth3.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -214,8 +215,9 @@ namespace ModularMagic_EarthStaffs.Configs
                     eitrMultiplier = 0.5f,
                     burstInterval = 0.1f,
                     damageMultiplier = 0.2f,
+                    damageDescription = "The poison damage and the spirit damage of every burst of the cone, each as a multiplier of the main damage of the staff (blunt, or pierce or slash when a rune changed it, including quality). 1 is the main damage of the staff, 0.2 is a fifth",
                 };
-                mainAttackCone.GenerateConfig(options);
+                mainAttackCone.GenerateConfig(Config, options);
             }
             catch (Exception e)
             {
@@ -239,7 +241,7 @@ namespace ModularMagic_EarthStaffs.Configs
                     damageMultiplier = 2f,
                     forceMultiplier = 5f,
                 };
-                secondaryAttackNova.GenerateConfig(options);
+                secondaryAttackNova.GenerateConfig(Config, options);
             }
             catch (Exception e)
             {
@@ -265,7 +267,7 @@ namespace ModularMagic_EarthStaffs.Configs
                     damagePickaxe = 30f,
                     forceMultiplier = 5f,
                 };
-                secondaryAttackRain.GenerateConfig(options);
+                secondaryAttackRain.GenerateConfig(Config, options);
             }
             catch (Exception e)
             {
@@ -289,15 +291,12 @@ namespace ModularMagic_EarthStaffs.Configs
                     maxToSpawn = 7,
                     maxSpawns = 7,
                     spawnRadius = 15f,
-                    damageBlunt = 70f,
-                    damageChop = 20f,
-                    damageGeneral = 0f,
-                    damagePickaxe = 20f,
-                    damagePoison = 0f,
-                    damageSpirit = 20f,
+                    // The damage of a summoned creature is the damage of its weapon (set in the prefab), scaled so its main damage is the main damage
+                    // of the staff that summoned it times this multiplier, see StaffImbuementHelper
+                    damageMultiplier = 3f,
                     attackForce = 40f,
                 };
-                secondaryAttackSummon.GenerateConfig(options);
+                secondaryAttackSummon.GenerateConfig(Config, options);
             }
             catch (Exception e)
             {

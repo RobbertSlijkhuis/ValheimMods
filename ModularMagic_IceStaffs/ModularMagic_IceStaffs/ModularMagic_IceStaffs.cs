@@ -12,7 +12,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using CoreSecondaryAttackHelper = ModularMagic_Core.Helpers.SecondaryAttackHelper;
+using ImbuedStaffHelper = ModularMagic_Core.Helpers.ImbuedStaffHelper;
 using MMAoeHelper = ModularMagic_Core.Helpers.MMAoeHelper;
+using SpawnedProjectileHelper = ModularMagic_Core.Helpers.SpawnedProjectileHelper;
 
 namespace ModularMagic_IceStaffs
 {
@@ -24,14 +26,15 @@ namespace ModularMagic_IceStaffs
     {
         public const string PluginGUID = "DeathWizsh.ModularMagic_IceStaffs";
         public const string PluginName = "ModularMagic_IceStaffs";
-        public const string PluginVersion = "0.0.3";
+        public const string PluginVersion = "0.0.4";
         public static ModularMagic_IceStaffs Instance;
         private static readonly HarmonyLib.Harmony _harmony = new HarmonyLib.Harmony(PluginGUID);
 
         private AssetBundle _assetBundle;
         public CustomPrefabs prefabs = new CustomPrefabs();
         public CustomStatusEffects effects = new CustomStatusEffects();
-        public ItemDataSnapshots snapshots = new ItemDataSnapshots();
+        // What Core needs to know about the staffs of this mod, see _RegisterStaffHooks
+        public StaffDefinition definition;
 
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -46,7 +49,8 @@ namespace ModularMagic_IceStaffs
             PluginConfig.Init();
             // Every entry forwards its change to its own handler from this event in the order they were created,
             // so this runs after the handlers that update the prefabs, and the staff in the hand gets the new values with its runes
-            Config.SettingChanged += (sender, args) => IceImbuementHelper.ReapplyOnHeldStaff();
+            Config.SettingChanged += (sender, args) => ImbuedStaffHelper.ReapplyOnHeldStaff();
+            _RegisterStaffHooks();
             _RegisterSecondaryAttacks();
             _harmony.PatchAll(Assembly.GetExecutingAssembly());
 
@@ -54,6 +58,30 @@ namespace ModularMagic_IceStaffs
             ItemManager.OnItemsRegistered += _LogRecipes;
             // Not unsubscribed: the recipe is set again each time the items are registered, which is harmless
             ItemManager.OnItemsRegistered += _ApplyVanillaStaffRecipe;
+        }
+
+        // Core gives the staffs their rune slots and applies the runes when a staff is equipped. It only needs to know what belongs to this mod.
+        // The Ice staffs are burst-timed, so the Attack Speed rune lowers their burst interval. The shards of the Rain rune get the damage of the
+        // staff from this mod
+        private void _RegisterStaffHooks()
+        {
+            definition = new StaffDefinition()
+            {
+                effectName = "Imbuements_MMIS",
+                weaponType = WeaponType.MMIS,
+                colorPreset = LightColorPresetType.IceBlue,
+                allowedRunes = IceImbuementHelper.AllowedRunes,
+                imbuementConfig = PluginConfig.imbuementConfig,
+                attackSpeedAnimation = false,
+                coneAttack = prefabs.MainAttackCone,
+                coneConfig = PluginConfig.mainAttackCone,
+                physicalDamageType = "Pierce",
+            };
+            definition.AddSecondaryAttack("Nova", prefabs.SecondaryAttackNova, PluginConfig.secondaryAttackNova);
+            definition.AddSecondaryAttack("Rain", prefabs.SecondaryAttackRain, PluginConfig.secondaryAttackRain);
+
+            StaffImbuementHelper.Register(definition);
+            SpawnedProjectileHelper.Register(prefabs.ProjectileIceShard.name, IceImbuementHelper.OnProjectileSpawned);
         }
 
         private void _ApplyVanillaStaffRecipe()
@@ -76,21 +104,12 @@ namespace ModularMagic_IceStaffs
         {
             try
             {
-                // The slots follow the Earth staffs: more slots and a higher tier (higher rune levels) per staff
-                _AddImbuementSlots(prefabs.StaffIce1Prefab, 2, 1);
-                _AddImbuementSlots(prefabs.StaffIce2Prefab, 3, 2);
-                _AddImbuementSlots(prefabs.StaffIce3Prefab, 4, 4);
-
-                ItemHelper.CreateStaff(prefabs.StaffIce1Prefab, PluginConfig.staffIce1);
-                ItemHelper.CreateStaff(prefabs.StaffIce2Prefab, PluginConfig.staffIce2);
-                ItemHelper.CreateStaff(prefabs.StaffIce3Prefab, PluginConfig.staffIce3);
+                // The slots follow the Earth staffs: more slots and a higher tier (higher rune levels) per staff. The config is bound in Awake, so it is ready here
+                definition.AddStaff(prefabs.StaffIce1Prefab, PluginConfig.staffIce1, 2, 1);
+                definition.AddStaff(prefabs.StaffIce2Prefab, PluginConfig.staffIce2, 3, 2);
+                definition.AddStaff(prefabs.StaffIce3Prefab, PluginConfig.staffIce3, 4, 4);
                 // Skull of Frost disabled for now
-                // ItemHelper.CreateStaff(prefabs.StaffIceAOEPrefab, PluginConfig.staffIce4);
-
-                // The config is bound in Awake, so it is ready here
-                snapshots.staffIce1 = new ItemDataSnapShot(prefabs.StaffIce1Prefab.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffIce1);
-                snapshots.staffIce2 = new ItemDataSnapShot(prefabs.StaffIce2Prefab.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffIce2);
-                snapshots.staffIce3 = new ItemDataSnapShot(prefabs.StaffIce3Prefab.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffIce3);
+                // StaffHelper.CreateStaff(prefabs.StaffIceAOEPrefab, PluginConfig.staffIce4);
 
                 // After the staffs are registered, so a failing attack update can not take the staffs with it
                 AttackHelper.UpdateNova(prefabs.AttackNova, PluginConfig.secondaryAttackNova);
@@ -102,16 +121,6 @@ namespace ModularMagic_IceStaffs
             }
 
             PrefabManager.OnVanillaPrefabsAvailable -= _AddIceStaffs;
-        }
-
-        private void _AddImbuementSlots(GameObject prefab, int slots, int tier)
-        {
-            ImbuementSlots imbuementSlots = prefab.AddComponent<ImbuementSlots>();
-            imbuementSlots.m_slots = slots;
-            imbuementSlots.m_tier = tier;
-            imbuementSlots.m_weaponType = WeaponType.MMIS;
-            imbuementSlots.m_allowedRunes = new List<string>(IceImbuementHelper.AllowedRunes);
-            imbuementSlots.m_colorPreset = LightColorPresetType.IceBlue;
         }
 
         // Core gives a registered secondary attack its own eitr cost and the cooldown, the attack is recognised by the projectile it spawns.

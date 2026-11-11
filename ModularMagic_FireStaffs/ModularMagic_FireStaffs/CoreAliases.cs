@@ -1,0 +1,19 @@
+// Types that live in ModularMagic_Core, under the names this mod used when it had its own copies
+global using ImbuementConfig = ModularMagic_Core.Configs.ImbuementConfig;
+global using ImbuementConfigOptions = ModularMagic_Core.Models.ImbuementConfigOptions;
+global using ItemDataSnapShot = ModularMagic_Core.Models.ItemDataSnapShot;
+global using MainAttackConfig = ModularMagic_Core.Configs.MainAttackConfig;
+global using MainAttackConfigOptions = ModularMagic_Core.Models.MainAttackConfigOptions;
+global using SecondaryAttackConfig = ModularMagic_Core.Configs.SecondaryAttackConfig;
+global using SecondaryAttackConfigOptions = ModularMagic_Core.Models.SecondaryAttackConfigOptions;
+global using SecondaryAttackType = ModularMagic_Core.Types.SecondaryAttackType;
+global using StaffConfig = ModularMagic_Core.Configs.StaffConfig;
+global using StaffConfigOptions = ModularMagic_Core.Models.StaffConfigOptions;
+global using StaffHelper = ModularMagic_Core.Helpers.StaffHelper;
+global using UpdateAoeOptions = ModularMagic_Core.Models.UpdateAoeOptions;
+global using UpdateHelper = ModularMagic_Core.Helpers.UpdateHelper;
+global using UpdateItemDataOptions = ModularMagic_Core.Models.UpdateItemDataOptions;
+global using UpdateProjectileOptions = ModularMagic_Core.Models.UpdateProjectileOptions;
+global using UpdateSpawnAbilityOptions = ModularMagic_Core.Models.UpdateSpawnAbilityOptions;
+global using StaffDefinition = ModularMagic_Core.Models.StaffDefinition;
+global using StaffImbuementHelper = ModularMagic_Core.Helpers.StaffImbuementHelper;

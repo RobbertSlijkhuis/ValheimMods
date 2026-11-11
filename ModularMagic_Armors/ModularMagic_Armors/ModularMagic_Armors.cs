@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using RecipeHelper = ModularMagic_Core.Helpers.RecipeHelper;
 
 namespace ModularMagic_Armors
 {
@@ -24,7 +25,7 @@ namespace ModularMagic_Armors
 
         public const string PluginGUID = "DeathWizsh.ModularMagic_Armors";
         public const string PluginName = "ModularMagic_Armors";
-        public const string PluginVersion = "0.0.3";
+        public const string PluginVersion = "0.0.4";
         public static ModularMagic_Armors Instance;
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
         public object configManager;

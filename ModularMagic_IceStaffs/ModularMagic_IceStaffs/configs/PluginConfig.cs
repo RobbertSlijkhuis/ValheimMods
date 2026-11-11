@@ -1,6 +1,6 @@
 ﻿using BepInEx.Configuration;
 using ModularMagic_Core.Types;
-using ModularMagic_IceStaffs.configs;
+
 using ModularMagic_IceStaffs.Helpers;
 using ModularMagic_IceStaffs.Models;
 using System;
@@ -40,11 +40,13 @@ namespace ModularMagic_IceStaffs.Configs
 
         public static ImbuementConfig imbuementConfig = new ImbuementConfig();
 
+        private static ConfigFile Config => ModularMagic_IceStaffs.Instance.Config;
+
         public static ConfigEntry<bool> enableVanillaStaff;
 
         public static void Init()
         {
-            imbuementConfig.GenerateConfig();
+            imbuementConfig.GenerateConfig(Config, new ImbuementConfigOptions());
             InitVanillaStaffConfig();
             InitStaffIce1Config();
             InitStaffIce2Config();
@@ -79,7 +81,7 @@ namespace ModularMagic_IceStaffs.Configs
                     burstInterval = 0.1f,
                     damageMultiplier = 0.2f,
                 };
-                mainAttackCone.GenerateConfig(options);
+                mainAttackCone.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -104,7 +106,7 @@ namespace ModularMagic_IceStaffs.Configs
                     damageMultiplier = 2.5f,
                     forceMultiplier = 1f,
                 };
-                secondaryAttackNova.GenerateConfig(options);
+                secondaryAttackNova.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -137,7 +139,7 @@ namespace ModularMagic_IceStaffs.Configs
                     spawnAccuracy = 4f,
                     spawnDelay = 0.05f,
                 };
-                secondaryAttackRain.GenerateConfig(options);
+                secondaryAttackRain.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -168,7 +170,7 @@ namespace ModularMagic_IceStaffs.Configs
                     attackForce = 10,
                     useEitr = 3,
                 };
-                staffIce1.GenerateConfig(options);
+                staffIce1.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -199,7 +201,7 @@ namespace ModularMagic_IceStaffs.Configs
                     attackForce = 10,
                     useEitr = 5,
                 };
-                staffIce2.GenerateConfig(options);
+                staffIce2.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -230,7 +232,7 @@ namespace ModularMagic_IceStaffs.Configs
                     attackForce = 10,
                     useEitr = 7,
                 };
-                staffIce3.GenerateConfig(options);
+                staffIce3.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -258,7 +260,7 @@ namespace ModularMagic_IceStaffs.Configs
                     attackForce = 35,
                     useEitr = 10,
                 };
-                staffIce4.GenerateConfig(options);
+                staffIce4.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {

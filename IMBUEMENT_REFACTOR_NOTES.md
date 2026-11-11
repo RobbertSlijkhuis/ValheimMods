@@ -1,5 +1,7 @@
 # Imbuement system: refactor notes
 
+> **Status (0.0.4):** the problems below were found before the refactor. The duplication between the staff mods is gone: the config classes, update helpers, recipe helper, the apply logic for the runes and the multiplayer hooks now live in `ModularMagic_Core` (see `ModularMagic_Core/IMBUEMENT_API.md`, "The staff framework"). The rest of this file is kept as the history of what was found.
+
 Findings from reading the imbuement code in `ModularMagic_Core` and `ModularMagic_EarthStaffs`. This is an information-gathering pass only. No plan has been made and no code has been changed.
 
 ## How it works today

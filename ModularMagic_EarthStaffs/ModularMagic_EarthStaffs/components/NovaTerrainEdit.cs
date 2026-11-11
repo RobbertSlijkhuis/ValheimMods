@@ -1,5 +1,4 @@
 ﻿using Jotunn.Managers;
-using ModularMagic_EarthStaffs.Helpers;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,8 +14,6 @@ namespace ModularMagic_EarthStaffs.Components
 
         public void Awake()
         {
-            TerrainOpHelper.LogRegistration("nova cast");
-
             EffectList.EffectData hoeEffect = new EffectList.EffectData();
             hoeEffect.m_enabled = true;
             hoeEffect.m_prefab = PrefabManager.Instance.GetPrefab("vfx_Place_mud_road");

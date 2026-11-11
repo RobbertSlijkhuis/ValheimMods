@@ -13,7 +13,12 @@ using UnityEngine;
 
 namespace ModularMagic_Core.Helpers
 {
-    internal class RecipeHelper
+    /// <summary>
+    /// Recipes from the config: parsing "Item:Amount, ..." strings and updating a recipe when its config changes. Shared by all
+    /// ModularMagic mods. A recipe is found as a Jotunn custom recipe by name, otherwise (when a prefab is given) as the
+    /// recipe of that prefab in the ObjectDB.
+    /// </summary>
+    public class RecipeHelper
     {
         private static readonly Regex nukeWhiteSpaceRegex = new Regex(@"\s+");
         private static readonly Regex recipeEntryRegex = new Regex(@"^([a-zA-Z0-9_]+:[0-9]+)$");
@@ -177,66 +182,179 @@ namespace ModularMagic_Core.Helpers
         {
             try
             {
-                CustomRecipe recipe = ItemManager.Instance.GetRecipe(options.name); ;
+                CustomRecipe customRecipe = ItemManager.Instance.GetRecipe(options.name);
 
-                if (recipe == null)
-                    throw new Exception("Could not find recipe: "+ options.name);
-
-                switch (options.updateType)
+                if (customRecipe != null)
                 {
-                    case RecipeUpdateType.ENABLE:
-                        if (options.enable == null)
-                            throw new Exception("Enable is null");
-
-                        recipe.Recipe.m_enabled = (bool)options.enable;
-                        break;
-                    case RecipeUpdateType.RECIPE:
-                        if (options.requirements == null)
-                            throw new Exception("Requirements is null");
-
-                        Piece.Requirement[]? requirements = GetAsPieceRequirementArray(options.requirements, options.upgradeRequirements, options.upgradeMultiplier);
-
-                        if (requirements == null)
-                        {
-                            // throw new Exception("Requirements is null");
-                            Jotunn.Logger.LogWarning("Cannot update recipe, requirements is null");
-                            return;
-                        }
-
-                        recipe.Recipe.m_resources = requirements;
-                        break;
-                    case RecipeUpdateType.CRAFTINGSTATION:
-                        if (options.craftingStation == null || options.craftingStation == "")
-                            throw new Exception("Craftingstation is null or empty string");
-
-                        if (options.craftingStation == "None")
-                        {
-                            recipe.Recipe.m_craftingStation = null;
-                            recipe.Recipe.m_enabled = true;
-                        }
-                        else if (options.craftingStation == "Disabled")
-                        {
-                            recipe.Recipe.m_craftingStation = null;
-                            recipe.Recipe.m_enabled = false;
-                        }
-                        else
-                        {
-                            string pieceName = CraftingStations.GetInternalName(options.craftingStation);
-                            recipe.Recipe.m_enabled = true;
-                            recipe.Recipe.m_craftingStation = PrefabManager.Instance.GetPrefab(pieceName).GetComponent<CraftingStation>();
-                        }
-                        break;
-                    case RecipeUpdateType.MINREQUIREDSTATIONLEVEL:
-                        if (options.requiredStationLevel == null || options.requiredStationLevel < 1)
-                            throw new Exception("Required station level is null or lower then 1");
-
-                        recipe.Recipe.m_minStationLevel = (int)options.requiredStationLevel;
-                        break;
+                    _UpdateRecipe(customRecipe.Recipe, options);
+                    return;
                 }
+
+                if (options.prefab == null)
+                    throw new Exception("Could not find recipe of: " + options.name + ", prefab is null");
+
+                Recipe? recipeObjectDB = GetRecipeFromObjectDB(options.prefab);
+
+                if (recipeObjectDB != null)
+                    _UpdateRecipe(recipeObjectDB, options);
             }
             catch (Exception error)
             {
                 Jotunn.Logger.LogError("Could not update recipe: " + error);
+            }
+        }
+
+        private static void _UpdateRecipe(Recipe recipe, UpdateRecipeOptions options)
+        {
+            switch (options.updateType)
+            {
+                case RecipeUpdateType.ALL:
+                    if (options.requirements == null)
+                        throw new Exception("Requirements is null");
+
+                    Piece.Requirement[]? requirementsAll = GetAsPieceRequirementArray(options.requirements, options.upgradeRequirements, options.upgradeMultiplier);
+
+                    if (requirementsAll == null)
+                    {
+                        Jotunn.Logger.LogWarning("Cannot update recipe, requirements is null");
+                        return;
+                    }
+
+                    recipe.m_resources = requirementsAll;
+
+                    SetCraftingStation(recipe, options.craftingStation);
+
+                    if (options.requiredStationLevel == null || options.requiredStationLevel < 1)
+                        throw new Exception("Required station level is null or lower then 1");
+
+                    recipe.m_minStationLevel = (int)options.requiredStationLevel;
+
+                    if (options.enable == null)
+                        throw new Exception("Enable is null");
+
+                    recipe.m_enabled = (bool)options.enable;
+                    break;
+                case RecipeUpdateType.ENABLE:
+                    if (options.enable == null)
+                        throw new Exception("Enable is null");
+
+                    recipe.m_enabled = (bool)options.enable;
+                    break;
+                case RecipeUpdateType.AMOUNT:
+                    if (options.amount == null)
+                        throw new Exception("Amount is null");
+
+                    recipe.m_amount = (int)options.amount;
+                    break;
+                case RecipeUpdateType.RECIPE:
+                    if (options.requirements == null)
+                        throw new Exception("Requirements is null");
+
+                    Piece.Requirement[]? requirements = GetAsPieceRequirementArray(options.requirements, options.upgradeRequirements, options.upgradeMultiplier);
+
+                    if (requirements == null)
+                    {
+                        Jotunn.Logger.LogWarning("Cannot update recipe, requirements is null");
+                        return;
+                    }
+
+                    recipe.m_resources = requirements;
+                    break;
+                case RecipeUpdateType.CRAFTINGSTATION:
+                    SetCraftingStation(recipe, options.craftingStation);
+                    break;
+                case RecipeUpdateType.MINREQUIREDSTATIONLEVEL:
+                    if (options.requiredStationLevel == null || options.requiredStationLevel < 1)
+                        throw new Exception("Required station level is null or lower then 1");
+
+                    recipe.m_minStationLevel = (int)options.requiredStationLevel;
+                    break;
+                case RecipeUpdateType.FROM_RECIPE:
+                    if (options.fromRecipe == null)
+                        throw new Exception("Field fromRecipe is null");
+
+                    recipe.m_enabled = options.fromRecipe.enabled;
+                    recipe.m_craftingStation = options.fromRecipe.craftingStation;
+                    recipe.m_resources = options.fromRecipe.resources;
+                    recipe.m_minStationLevel = options.fromRecipe.minStationLevel;
+                    break;
+            }
+        }
+
+        // "None" gives the recipe no station, "Disabled" disables it, anything else is the name of a crafting station
+        private static void SetCraftingStation(Recipe recipe, string? craftingStation)
+        {
+            if (craftingStation == null || craftingStation == "")
+                throw new Exception("Craftingstation is null or empty string");
+
+            if (craftingStation == "None")
+            {
+                recipe.m_craftingStation = null;
+                recipe.m_enabled = true;
+            }
+            else if (craftingStation == "Disabled")
+            {
+                recipe.m_craftingStation = null;
+                recipe.m_enabled = false;
+            }
+            else
+            {
+                string pieceName = CraftingStations.GetInternalName(craftingStation);
+                recipe.m_enabled = true;
+                recipe.m_craftingStation = PrefabManager.Instance.GetPrefab(pieceName).GetComponent<CraftingStation>();
+            }
+        }
+
+        public static Recipe? GetRecipeFromObjectDB(GameObject prefab)
+        {
+            try
+            {
+                if (prefab == null)
+                    throw new Exception("Could not find recipe, prefab is null");
+
+                ItemDrop itemDrop = prefab.GetComponent<ItemDrop>();
+
+                if (itemDrop == null)
+                    throw new Exception("Could not find recipe of: " + prefab.name + ", itemDrop is null");
+
+                Recipe recipe = ObjectDB.instance.GetRecipe(itemDrop.m_itemData);
+
+                if (recipe == null)
+                    throw new Exception("Could not find any recipe of: " + prefab.name);
+
+                return recipe;
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could retrieve recipe from ObjectDB: " + error);
+                return null;
+            }
+        }
+
+        public static RecipeSnapShot? TakeSnapShot(GameObject prefab)
+        {
+            try
+            {
+                if (prefab == null)
+                    throw new Exception("Could not find recipe, prefab is null");
+
+                Recipe? recipe = GetRecipeFromObjectDB(prefab);
+
+                if (recipe == null)
+                    throw new Exception("Could not find any recipe of: " + prefab.name);
+
+                RecipeSnapShot newRecipe = new RecipeSnapShot();
+                newRecipe.enabled = recipe.m_enabled;
+                newRecipe.resources = recipe.m_resources;
+                newRecipe.craftingStation = recipe.m_craftingStation;
+                newRecipe.minStationLevel = recipe.m_minStationLevel;
+
+                return newRecipe;
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could create snapshot of recipe: " + error);
+                return null;
             }
         }
     }

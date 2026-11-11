@@ -1,4 +1,4 @@
-﻿using ModularMagic_IceStaffs.configs;
+
 using ModularMagic_IceStaffs.Models;
 using UnityEngine;
 

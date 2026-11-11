@@ -1,6 +1,6 @@
 ﻿namespace ModularMagic_Core.Types
 {
-    internal class CraftingStationType
+    public class CraftingStationType
     {
         public static string ArtisanTable => "ArtisanTable";
         public static string BlackForge => "BlackForge";

@@ -6,6 +6,7 @@ using ModularMagic_BloodMagic.Models;
 using System;
 using UnityEngine;
 using static ItemDrop;
+using RecipeHelper = ModularMagic_Core.Helpers.RecipeHelper;
 
 namespace ModularMagic_BloodMagic.Helpers
 {

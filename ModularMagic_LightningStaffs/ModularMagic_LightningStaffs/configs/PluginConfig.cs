@@ -1,6 +1,6 @@
 ﻿using ModularMagic_Core.Types;
+using BepInEx.Configuration;
 using ModularMagic_LightningStaffs.Models;
-using ModularMagic_LightningStaffs.Types;
 using System;
 
 namespace ModularMagic_LightningStaffs.Configs
@@ -35,9 +35,11 @@ namespace ModularMagic_LightningStaffs.Configs
 
         private static int sectionIndex = 1;
 
+        private static ConfigFile Config => ModularMagic_LightningStaffs.Instance.Config;
+
         public static void Init()
         {
-            imbuementConfig.GenerateConfig();
+            imbuementConfig.GenerateConfig(Config, new ImbuementConfigOptions() { attackSpeedAnimation = true });
             InitStaffLightning1Config();
             InitStaffLightning2Config();
             InitStaffLightning3Config();
@@ -60,7 +62,7 @@ namespace ModularMagic_LightningStaffs.Configs
                     burstInterval = 0.2f,
                     damageMultiplier = 0.1f,
                 };
-                mainAttackCone.GenerateConfig(options);
+                mainAttackCone.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -93,7 +95,7 @@ namespace ModularMagic_LightningStaffs.Configs
                     spawnAccuracy = 4f,
                     spawnDelay = 0.05f,
                 };
-                secondaryAttackRain.GenerateConfig(options);
+                secondaryAttackRain.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -118,7 +120,7 @@ namespace ModularMagic_LightningStaffs.Configs
                     damageMultiplier = 1f,
                     forceMultiplier = 1f,
                 };
-                secondaryAttackNova.GenerateConfig(options);
+                secondaryAttackNova.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -147,7 +149,7 @@ namespace ModularMagic_LightningStaffs.Configs
                     projectileVelocity = 15f,
                     projectileAccuracy = 2f,
                 };
-                staffLightning1.GenerateConfig(options);
+                staffLightning1.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -176,7 +178,7 @@ namespace ModularMagic_LightningStaffs.Configs
                     projectileVelocity = 17.5f,
                     projectileAccuracy = 1.5f,
                 };
-                staffLightning2.GenerateConfig(options);
+                staffLightning2.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {
@@ -205,7 +207,7 @@ namespace ModularMagic_LightningStaffs.Configs
                     projectileVelocity = 20f,
                     projectileAccuracy = 1f,
                 };
-                staffLightning3.GenerateConfig(options);
+                staffLightning3.GenerateConfig(Config, options);
             }
             catch (Exception error)
             {

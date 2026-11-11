@@ -34,17 +34,13 @@ namespace ModularMagic_EarthStaffs.Helpers
                 health = config.health.Value,
             });
 
+            // The damage of the creatures comes from the weapon in their prefab and the staff that summoned them, see StaffImbuementHelper
             UpdateHelper.UpdateHumanoidAttackItemData(rootPrefab, new UpdateItemDataOptions()
             {
-                damageBlunt = config.damageBlunt.Value,
-                damageChop = config.damageChop.Value,
-                damagePickaxe = config.damagePickaxe.Value,
-                damagePoison = config.damagePoison.Value,
-                damageSpirit = config.damageSpirit.Value,
                 attackForce = config.attackForce.Value,
             });
 
-            UpdateHelper.UpdateSpawnAbility(attackPrefab, new UpdateSpawnAbilityOptions()
+            UpdateHelper.UpdateSpawnAbility(UpdateHelper.GetAttackProjectile(attackPrefab), new UpdateSpawnAbilityOptions()
             {
                 minToSpawn = config.minToSpawn.Value,
                 maxToSpawn = config.maxToSpawn.Value,

@@ -1,11 +1,17 @@
 ﻿namespace ModularMagic_Core.Types
 {
-    enum RecipeUpdateType
+    /// <summary>
+    /// Which part of a recipe an update changes, see RecipeHelper.UpdateRecipe.
+    /// </summary>
+    public enum RecipeUpdateType
     {
-        ENABLE = 0,
-        RECIPE = 1,
-        CRAFTINGSTATION = 2,
-        MINREQUIREDSTATIONLEVEL = 3,
-        MINREQUIREDREPAIRLEVEL = 4,
+        ALL = 0,
+        ENABLE = 1,
+        AMOUNT = 2,
+        RECIPE = 3,
+        CRAFTINGSTATION = 4,
+        MINREQUIREDSTATIONLEVEL = 5,
+        MINREQUIREDREPAIRLEVEL = 6,
+        FROM_RECIPE = 7,
     }
 }

@@ -4,6 +4,7 @@ using Jotunn.Managers;
 using ModularMagic_Food.Configs;
 using ModularMagic_Food.Models;
 using UnityEngine;
+using RecipeHelper = ModularMagic_Core.Helpers.RecipeHelper;
 
 namespace ModularMagic_Food.Helpers
 {

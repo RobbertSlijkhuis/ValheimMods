@@ -14,7 +14,10 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using CoreSecondaryAttackHelper = ModularMagic_Core.Helpers.SecondaryAttackHelper;
+using ImbuedStaffHelper = ModularMagic_Core.Helpers.ImbuedStaffHelper;
 using MMAoeHelper = ModularMagic_Core.Helpers.MMAoeHelper;
+using SpawnedProjectileHelper = ModularMagic_Core.Helpers.SpawnedProjectileHelper;
+using TerrainOpRegistry = ModularMagic_Core.Helpers.TerrainOpRegistry;
 
 namespace ModularMagic_EarthStaffs
 {
@@ -27,14 +30,15 @@ namespace ModularMagic_EarthStaffs
     {
         public const string PluginGUID = "DeathWizsh.ModularMagic_EarthStaffs";
         public const string PluginName = "ModularMagic_EarthStaffs";
-        public const string PluginVersion = "0.0.3";
+        public const string PluginVersion = "0.0.4";
         public static ModularMagic_EarthStaffs Instance;
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
 
         private AssetBundle assetBundle;
         public static CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();
         public static CustomPrefabs prefabs = new CustomPrefabs();
-        public static ItemDataSnapshots snapshots = new ItemDataSnapshots();
+        // What Core needs to know about the staffs of this mod, see RegisterStaffHooks
+        public static StaffDefinition definition;
 
         public void Awake()
         {
@@ -44,36 +48,56 @@ namespace ModularMagic_EarthStaffs
             PluginConfig.Init();
             // Every entry forwards its change to its own handler from this event in the order they were created,
             // so this runs after the handlers that update the prefabs, and the staff in the hand gets the new values with its runes
-            Config.SettingChanged += (sender, args) => EarthImbuementHelper.ReapplyOnHeldStaff();
+            Config.SettingChanged += (sender, args) => ImbuedStaffHelper.ReapplyOnHeldStaff();
+            RegisterStaffHooks();
             RegisterSecondaryAttacks();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             PrefabManager.OnVanillaPrefabsAvailable += AddEarthStaffs;
         }
 
+        // Core gives the staffs their rune slots, applies the runes when a staff is equipped, scales the summoned creatures with the staff and puts
+        // the terrain op of the nova in the ObjectDB. It only needs to know what belongs to this mod. The Earth staffs are burst-timed, so the
+        // Attack Speed rune lowers their burst interval. The boulders of the Rain rune get the damage of the staff from this mod
+        private void RegisterStaffHooks()
+        {
+            definition = new StaffDefinition()
+            {
+                effectName = "Imbuements_MMES",
+                weaponType = WeaponType.MMES,
+                colorPreset = LightColorPresetType.Green,
+                allowedRunes = EarthImbuementHelper.AllowedRunes,
+                imbuementConfig = PluginConfig.imbuementConfig,
+                attackSpeedAnimation = false,
+                coneAttack = prefabs.mainAttackCone,
+                coneConfig = PluginConfig.mainAttackCone,
+                physicalDamageType = "Blunt",
+            };
+            // A damage type rune changes the projectile of the staff, every damage type has its own prefab (blunt is the default projectile)
+            definition.damageProjectiles["Slash"] = prefabs.ProjectileSlash;
+            definition.damageProjectiles["Pierce"] = prefabs.ProjectilePierce;
+            definition.AddSecondaryAttack("Nova", prefabs.SecondaryAttackNova, PluginConfig.secondaryAttackNova);
+            definition.AddSecondaryAttack("Rain", prefabs.SecondaryAttackBoulder, PluginConfig.secondaryAttackRain);
+            definition.AddSecondaryAttack("Summon", prefabs.SecondaryAttackRoots, PluginConfig.secondaryAttackSummon, prefabs.Root);
+
+            StaffImbuementHelper.Register(definition);
+            SpawnedProjectileHelper.Register(prefabs.ProjectileBoulder.name, EarthImbuementHelper.OnProjectileSpawned);
+            TerrainOpRegistry.Register(prefabs.LevelTerrain);
+        }
+
         private void AddEarthStaffs()
         {
             try
             {
-                AddImbuementSlots(prefabs.StaffEarth0, 1, 0);
-                AddImbuementSlots(prefabs.StaffEarth1, 2, 1);
-                AddImbuementSlots(prefabs.StaffEarth2, 3, 2);
-                AddImbuementSlots(prefabs.StaffEarth3, 4, 4);
-
-                ItemHelper.CreateStaff(prefabs.StaffEarth0, PluginConfig.staffEarth0);
-                ItemHelper.CreateStaff(prefabs.StaffEarth1, PluginConfig.staffEarth1);
-                ItemHelper.CreateStaff(prefabs.StaffEarth2, PluginConfig.staffEarth2);
-                ItemHelper.CreateStaff(prefabs.StaffEarth3, PluginConfig.staffEarth3);
+                // The config is bound in Awake, so it is ready here
+                definition.AddStaff(prefabs.StaffEarth0, PluginConfig.staffEarth0, 1, 0);
+                definition.AddStaff(prefabs.StaffEarth1, PluginConfig.staffEarth1, 2, 1);
+                definition.AddStaff(prefabs.StaffEarth2, PluginConfig.staffEarth2, 3, 2);
+                definition.AddStaff(prefabs.StaffEarth3, PluginConfig.staffEarth3, 4, 4);
 
                 AttackHelper.UpdateNova(prefabs.Nova, PluginConfig.secondaryAttackNova);
                 AttackHelper.UpdateRain(prefabs.ProjectileBoulder, PluginConfig.secondaryAttackRain);
                 AttackHelper.UpdateSummon(prefabs.SecondaryAttackRoots, prefabs.Root, PluginConfig.secondaryAttackSummon);
-
-                // The config is bound in Awake, so it is ready here
-                snapshots.staffEarth0 = new ItemDataSnapShot(prefabs.StaffEarth0.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffEarth0);
-                snapshots.staffEarth1 = new ItemDataSnapShot(prefabs.StaffEarth1.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffEarth1);
-                snapshots.staffEarth2 = new ItemDataSnapShot(prefabs.StaffEarth2.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffEarth2);
-                snapshots.staffEarth3 = new ItemDataSnapShot(prefabs.StaffEarth3.GetComponent<ItemDrop>().m_itemData, PluginConfig.staffEarth3);
 
                 PrefabManager.OnVanillaPrefabsAvailable -= AddEarthStaffs;
             }
@@ -82,16 +106,6 @@ namespace ModularMagic_EarthStaffs
                 Jotunn.Logger.LogError("Something went wrong in adding the earth staffs: " + e);
                 PrefabManager.OnVanillaPrefabsAvailable -= AddEarthStaffs;
             }
-        }
-
-        private void AddImbuementSlots(GameObject prefab, int slots, int tier)
-        {
-            ImbuementSlots imbuementSlots = prefab.AddComponent<ImbuementSlots>();
-            imbuementSlots.m_slots = slots;
-            imbuementSlots.m_tier = tier;
-            imbuementSlots.m_weaponType = WeaponType.MMES;
-            imbuementSlots.m_allowedRunes = new List<string>(EarthImbuementHelper.AllowedRunes);
-            imbuementSlots.m_colorPreset = LightColorPresetType.Green;
         }
 
         // Core gives a registered secondary attack its own eitr cost and the cooldown, the attack is recognised by the projectile it spawns.

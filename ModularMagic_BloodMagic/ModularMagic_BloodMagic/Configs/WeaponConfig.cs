@@ -3,6 +3,10 @@ using ModularMagic_BloodMagic.Helpers;
 using ModularMagic_BloodMagic.Models;
 using ModularMagic_BloodMagic.Types;
 using System.Security.Permissions;
+using RecipeHelper = ModularMagic_Core.Helpers.RecipeHelper;
+using RecipeUpdateType = ModularMagic_Core.Types.RecipeUpdateType;
+using UpdateRecipeOptions = ModularMagic_Core.Models.UpdateRecipeOptions;
+using CraftingStationType = ModularMagic_Core.Types.CraftingStationType;
 
 namespace ModularMagic_BloodMagic.Configs
 {

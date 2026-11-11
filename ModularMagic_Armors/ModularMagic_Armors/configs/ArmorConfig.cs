@@ -3,6 +3,10 @@ using ModularMagic_Armors.Helpers;
 using ModularMagic_Armors.Models;
 using ModularMagic_Armors.StatusEffects;
 using ModularMagic_Armors.Types;
+using RecipeHelper = ModularMagic_Core.Helpers.RecipeHelper;
+using RecipeUpdateType = ModularMagic_Core.Types.RecipeUpdateType;
+using UpdateRecipeOptions = ModularMagic_Core.Models.UpdateRecipeOptions;
+using CraftingStationType = ModularMagic_Core.Types.CraftingStationType;
 
 namespace ModularMagic_Armors.Configs
 {
