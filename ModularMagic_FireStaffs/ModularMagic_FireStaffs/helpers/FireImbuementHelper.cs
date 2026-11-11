@@ -122,9 +122,6 @@ namespace ModularMagic_FireStaffs.Helpers
                             SecondaryAttackConfig secondaryConfig = imbuement.value == "Nova" ? PluginConfig.secondaryAttackNova : PluginConfig.secondaryAttackRain;
                             float saved = Mathf.Clamp01(PluginConfig.imbuementConfig.SecondaryAttackEitr.Value * (imbuement.level - 1));
                             secondaryEitr = snapshot.attackEitr * secondaryConfig.eitrMultiplier.Value * (1f - saved);
-
-                            if (imbuement.value == "Rain")
-                                ApplyMeteorDamage(itemData);
                         }
                         break;
                 }
@@ -151,18 +148,29 @@ namespace ModularMagic_FireStaffs.Helpers
             DestroyReplacedEquipStatusEffect(previousEquipEffect, itemData);
         }
 
-        // The script that spawns the meteors does not pass the damage of the staff on, so the fire and blunt damage of the meteor prefab is set from the staff
-        // (quality included) times the damage multiplier, and the attack force from the attack force of the staff times the force multiplier.
-        // The meteors are hit by the client of the shooter, and the chop and pickaxe damage stay config values
-        private static void ApplyMeteorDamage(ItemData staff)
+        // The script that spawns the meteors (SpawnAbility) does not pass the damage of the staff on, so every meteor it spawns gets the fire and blunt
+        // damage of the staff that cast the rain (quality included) times the damage multiplier, and the attack force from the attack force of the
+        // staff times the force multiplier. It is set on the spawned meteor, not on the prefab, so it never holds the damage of another staff.
+        // Called for every projectile a SpawnAbility spawns, see Patches. The meteors are hit by the client of the shooter, and the chop and
+        // pickaxe damage stay config values
+        public static void OnProjectileSpawned(Projectile projectile, ItemData staff)
         {
-            HitData.DamageTypes damage = staff.GetDamage();
-            float multiplier = PluginConfig.secondaryAttackRain.damageMultiplier.Value;
-            Projectile meteor = ModularMagic_FireStaffs.Instance.prefabs.projectileMeteor.GetComponent<Projectile>();
+            try
+            {
+                if (projectile == null || !IsFireStaff(staff) || projectile.name.Replace("(Clone)", "") != ModularMagic_FireStaffs.Instance.prefabs.projectileMeteor.name)
+                    return;
 
-            meteor.m_damage.m_fire = damage.m_fire * multiplier;
-            meteor.m_damage.m_blunt = damage.m_blunt * multiplier;
-            meteor.m_attackForce = staff.m_shared.m_attackForce * PluginConfig.secondaryAttackRain.forceMultiplier.Value;
+                HitData.DamageTypes damage = staff.GetDamage();
+                float multiplier = PluginConfig.secondaryAttackRain.damageMultiplier.Value;
+
+                projectile.m_damage.m_fire = damage.m_fire * multiplier;
+                projectile.m_damage.m_blunt = damage.m_blunt * multiplier;
+                projectile.m_attackForce = staff.m_shared.m_attackForce * PluginConfig.secondaryAttackRain.forceMultiplier.Value;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not set the damage of the meteor: " + e);
+            }
         }
 
         // Every apply makes a new effect for the tooltip, so the one of the previous apply is destroyed. Only an effect of this mod is destroyed.

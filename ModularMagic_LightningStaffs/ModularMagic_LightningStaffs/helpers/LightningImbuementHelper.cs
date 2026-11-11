@@ -119,9 +119,6 @@ namespace ModularMagic_LightningStaffs.Helpers
                             SecondaryAttackConfig secondaryConfig = imbuement.value == "Nova" ? PluginConfig.secondaryAttackNova : PluginConfig.secondaryAttackRain;
                             float saved = Mathf.Clamp01(PluginConfig.imbuementConfig.SecondaryAttackEitr.Value * (imbuement.level - 1));
                             secondaryEitr = snapshot.attackEitr * secondaryConfig.eitrMultiplier.Value * (1f - saved);
-
-                            if (imbuement.value == "Rain")
-                                ApplyBoltDamage(itemData);
                         }
                         break;
                 }
@@ -148,17 +145,28 @@ namespace ModularMagic_LightningStaffs.Helpers
             DestroyReplacedEquipStatusEffect(previousEquipEffect, itemData);
         }
 
-        // The script that spawns the bolts does not pass the damage of the staff on, so the lightning damage of the bolt prefab is set from the staff
-        // (quality included) times the damage multiplier, and the attack force from the attack force of the staff times the force multiplier.
-        // The bolts are hit by the client of the shooter, and the chop and pickaxe damage stay config values
-        private static void ApplyBoltDamage(ItemData staff)
+        // The script that spawns the bolts (SpawnAbility) does not pass the damage of the staff on, so every bolt it spawns gets the lightning damage of
+        // the staff that cast the rain (quality included) times the damage multiplier, and the attack force from the attack force of the staff times
+        // the force multiplier. It is set on the spawned bolt, not on the prefab, so it never holds the damage of another staff.
+        // Called for every projectile a SpawnAbility spawns, see Patches. The bolts are hit by the client of the shooter, and the chop and
+        // pickaxe damage stay config values
+        public static void OnProjectileSpawned(Projectile projectile, ItemData staff)
         {
-            HitData.DamageTypes damage = staff.GetDamage();
-            SecondaryAttackConfig rain = PluginConfig.secondaryAttackRain;
-            Projectile bolt = ModularMagic_LightningStaffs.Instance.prefabs.projectileBolt.GetComponent<Projectile>();
+            try
+            {
+                if (projectile == null || !IsLightningStaff(staff) || projectile.name.Replace("(Clone)", "") != ModularMagic_LightningStaffs.Instance.prefabs.projectileBolt.name)
+                    return;
 
-            bolt.m_damage.m_lightning = damage.m_lightning * rain.damageMultiplier.Value;
-            bolt.m_attackForce = staff.m_shared.m_attackForce * rain.forceMultiplier.Value;
+                HitData.DamageTypes damage = staff.GetDamage();
+                SecondaryAttackConfig rain = PluginConfig.secondaryAttackRain;
+
+                projectile.m_damage.m_lightning = damage.m_lightning * rain.damageMultiplier.Value;
+                projectile.m_attackForce = staff.m_shared.m_attackForce * rain.forceMultiplier.Value;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not set the damage of the bolt: " + e);
+            }
         }
 
         // Every apply makes a new effect for the tooltip, so the one of the previous apply is destroyed. Only an effect of this mod is destroyed.

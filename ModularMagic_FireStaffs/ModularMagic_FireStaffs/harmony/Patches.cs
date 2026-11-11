@@ -32,6 +32,14 @@ namespace ModularMagic_FireStaffs.Harmony
             AttackSpeedHelper.OnAttackUpdated(__instance);
         }
 
+        // The meteors of the Rain rune are spawned without hit data, so they get the damage of the staff here, see FireImbuementHelper
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(SpawnAbility), "SetupProjectile")]
+        public static void SetupProjectile_Postfix(Projectile projectile, ItemData ___m_weapon)
+        {
+            FireImbuementHelper.OnProjectileSpawned(projectile, ___m_weapon);
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Humanoid), "EquipItem")]
         public static void EquipItem_Postfix(Humanoid __instance, ItemData item)

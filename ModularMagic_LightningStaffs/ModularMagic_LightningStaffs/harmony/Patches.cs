@@ -32,6 +32,14 @@ namespace ModularMagic_LightningStaffs.Harmony
             AttackSpeedHelper.OnAttackUpdated(__instance);
         }
 
+        // The bolts of the Rain rune are spawned without hit data, so they get the damage of the staff here, see LightningImbuementHelper
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(SpawnAbility), "SetupProjectile")]
+        public static void SetupProjectile_Postfix(Projectile projectile, ItemData ___m_weapon)
+        {
+            LightningImbuementHelper.OnProjectileSpawned(projectile, ___m_weapon);
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Humanoid), "EquipItem")]
         public static void EquipItem_Postfix(Humanoid __instance, ItemData item)
