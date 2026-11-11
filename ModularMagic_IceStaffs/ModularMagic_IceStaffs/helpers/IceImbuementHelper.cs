@@ -97,7 +97,6 @@ namespace ModularMagic_IceStaffs.Helpers
             // The secondary attack (nova), only when the staff has the rune
             ItemData secondaryAttack = null;
             float? secondaryEitr = null;
-            bool rain = false;
 
             foreach (Imbuement imbuement in imbuements)
             {
@@ -134,7 +133,6 @@ namespace ModularMagic_IceStaffs.Helpers
                             SecondaryAttackConfig secondaryConfig = imbuement.value == "Nova" ? PluginConfig.secondaryAttackNova : PluginConfig.secondaryAttackRain;
                             float saved = Mathf.Clamp01(PluginConfig.imbuementConfig.SecondaryAttackEitr.Value * (imbuement.level - 1));
                             secondaryEitr = snapshot.attackEitr * secondaryConfig.eitrMultiplier.Value * (1f - saved);
-                            rain = imbuement.value == "Rain";
                         }
                         break;
                 }
@@ -164,28 +162,35 @@ namespace ModularMagic_IceStaffs.Helpers
 
             UpdateHelper.UpdateItemData(itemData, options);
 
-            // After the staff is updated, so the damage types of the damage type rune are used
-            if (rain)
-                ApplyShardDamage(itemData);
-
             DestroyReplacedEquipStatusEffect(previousEquipEffect, itemData);
         }
 
-        // The script that spawns the shards does not pass the damage of the staff on, so the frost and physical damage of the shard prefab is set from the staff
-        // (quality included) times the damage multiplier, and the attack force from the attack force of the staff times the force multiplier.
-        // The shards are hit by the client of the shooter, and the chop and pickaxe damage stay config values
-        private static void ApplyShardDamage(ItemData staff)
+        // The script that spawns the shards (SpawnAbility) does not pass the damage of the staff on, so every shard it spawns gets the frost and physical
+        // damage of the staff that cast the rain (quality and damage type rune included) times the damage multiplier, and the attack force from the
+        // attack force of the staff times the force multiplier. It is set on the spawned shard, not on the prefab, so it never holds the damage of
+        // another staff. Called for every projectile a SpawnAbility spawns, see Patches. The shards are hit by the client of the shooter, and
+        // the chop and pickaxe damage stay config values
+        public static void OnProjectileSpawned(Projectile projectile, ItemData staff)
         {
-            HitData.DamageTypes damage = staff.GetDamage();
-            SecondaryAttackConfig rain = PluginConfig.secondaryAttackRain;
-            Projectile shard = ModularMagic_IceStaffs.Instance.prefabs.ProjectileIceShard.GetComponent<Projectile>();
-            float multiplier = rain.damageMultiplier.Value;
+            try
+            {
+                if (projectile == null || !IsIceStaff(staff) || projectile.name.Replace("(Clone)", "") != ModularMagic_IceStaffs.Instance.prefabs.ProjectileIceShard.name)
+                    return;
 
-            shard.m_damage.m_frost = damage.m_frost * multiplier;
-            shard.m_damage.m_pierce = damage.m_pierce * multiplier;
-            shard.m_damage.m_blunt = damage.m_blunt * multiplier;
-            shard.m_damage.m_slash = damage.m_slash * multiplier;
-            shard.m_attackForce = staff.m_shared.m_attackForce * rain.forceMultiplier.Value;
+                HitData.DamageTypes damage = staff.GetDamage();
+                SecondaryAttackConfig rain = PluginConfig.secondaryAttackRain;
+                float multiplier = rain.damageMultiplier.Value;
+
+                projectile.m_damage.m_frost = damage.m_frost * multiplier;
+                projectile.m_damage.m_pierce = damage.m_pierce * multiplier;
+                projectile.m_damage.m_blunt = damage.m_blunt * multiplier;
+                projectile.m_damage.m_slash = damage.m_slash * multiplier;
+                projectile.m_attackForce = staff.m_shared.m_attackForce * rain.forceMultiplier.Value;
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Could not set the damage of the shard: " + e);
+            }
         }
 
         // Every apply makes a new effect for the tooltip, so the one of the previous apply is destroyed. Only an effect of this mod is destroyed.
