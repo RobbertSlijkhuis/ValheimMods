@@ -2,7 +2,7 @@ using BepInEx;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
-using ModularMagic_Core.Components;
+using ModularMagic_Core.Models;
 using ModularMagic_Core.Types;
 using ModularMagic_IceStaffs.Configs;
 using ModularMagic_IceStaffs.Helpers;
@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using CoreSecondaryAttackHelper = ModularMagic_Core.Helpers.SecondaryAttackHelper;
+using DamageConversionHelper = ModularMagic_Core.Helpers.DamageConversionHelper;
 using ImbuedStaffHelper = ModularMagic_Core.Helpers.ImbuedStaffHelper;
 using MMAoeHelper = ModularMagic_Core.Helpers.MMAoeHelper;
 using SpawnedProjectileHelper = ModularMagic_Core.Helpers.SpawnedProjectileHelper;
@@ -172,6 +173,9 @@ namespace ModularMagic_IceStaffs
             PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("fx_staff_ice_cone_MMIS"), true));
             prefabs.AttackCone = _assetBundle.LoadAsset<GameObject>("attack_cone_MMIS");
             MMAoeHelper.PrepareBox(prefabs.AttackCone, hitProps: true);
+            // The cone is pure frost: it deals the frost damage of the staff as it is and no physical damage. Without keeping the other damage,
+            // only the target of a rule is dealt, so the frost to frost rule keeps the frost and everything else of the staff is dropped
+            DamageConversionHelper.SetDamageConversion(prefabs.AttackCone, false, new DamageConversionRule(DamageKind.Frost, DamageKind.Frost));
             prefabs.MainAttackCone = _assetBundle.LoadAsset<GameObject>("main_cone_attack_MMIS");
 
             // The rain rune (ice shards): the spawn projectile, its script and the shard are spawned in the world, so they are registered.

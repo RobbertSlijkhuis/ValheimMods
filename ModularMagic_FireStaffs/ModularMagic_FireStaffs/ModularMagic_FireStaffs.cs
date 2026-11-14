@@ -2,7 +2,7 @@ using BepInEx;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
-using ModularMagic_Core.Components;
+using ModularMagic_Core.Models;
 using ModularMagic_Core.Types;
 using ModularMagic_FireStaffs.Configs;
 using ModularMagic_FireStaffs.Helpers;
@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using CoreSecondaryAttackHelper = ModularMagic_Core.Helpers.SecondaryAttackHelper;
+using DamageConversionHelper = ModularMagic_Core.Helpers.DamageConversionHelper;
 using ImbuedStaffHelper = ModularMagic_Core.Helpers.ImbuedStaffHelper;
 using MMAoeHelper = ModularMagic_Core.Helpers.MMAoeHelper;
 using SpawnedProjectileHelper = ModularMagic_Core.Helpers.SpawnedProjectileHelper;
@@ -156,6 +157,9 @@ namespace ModularMagic_FireStaffs
             PrefabManager.Instance.AddPrefab(new CustomPrefab(assetBundle.LoadAsset<GameObject>("fx_staff_fire_cone_MMFS"), true));
             prefabs.attackCone = assetBundle.LoadAsset<GameObject>("attack_cone_MMFS");
             MMAoeHelper.PrepareBox(prefabs.attackCone, hitProps: true);
+            // The cone is pure fire: it deals the fire damage of the staff as it is and no physical damage. Without keeping the other damage,
+            // only the target of a rule is dealt, so the fire to fire rule keeps the fire and everything else of the staff is dropped
+            DamageConversionHelper.SetDamageConversion(prefabs.attackCone, false, new DamageConversionRule(DamageKind.Fire, DamageKind.Fire));
             prefabs.mainAttackCone = assetBundle.LoadAsset<GameObject>("main_cone_attack_MMFS");
 
             // The nova rune: the hit is a local object of the shooter (see MMAoe), so it is not registered. The wrapper holds the
