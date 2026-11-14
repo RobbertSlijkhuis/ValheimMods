@@ -1,4 +1,5 @@
 using ModularMagic_Core.Helpers;
+using ModularMagic_Core.Models;
 using ModularMagic_Core.Types;
 using ModularMagic_EarthStaffs.Configs;
 using System;
@@ -19,6 +20,12 @@ namespace ModularMagic_EarthStaffs.Helpers
             RuneId.ProjectileSpeed, RuneId.Cone, RuneId.Creatures, RuneId.Nova, RuneId.Rain,
         };
 
+        // A boulder is blunt, whatever the damage type rune of the staff is
+        private static readonly DamageConversionRule[] BoulderConversion =
+        {
+            new DamageConversionRule(DamageKind.MainPhysical, DamageKind.Blunt),
+        };
+
         // The script that spawns the boulders (SpawnAbility) does not pass the damage of the staff on, so every boulder it spawns gets the damage of the
         // staff that cast the rain (apart from chop and pickaxe) from the staff (quality and damage type rune included) times the damage multiplier,
         // and the attack force from the attack force of the staff times the force multiplier. It is set on the spawned boulder, not on the prefab,
@@ -35,12 +42,13 @@ namespace ModularMagic_EarthStaffs.Helpers
                 SecondaryAttackConfig rain = PluginConfig.secondaryAttackRain;
                 float multiplier = rain.damageMultiplier.Value;
 
-                // A boulder is blunt, whatever the damage type rune of the staff is
-                projectile.m_damage.m_blunt = DamageHelper.GetMainPhysical(damage) * multiplier;
-                projectile.m_damage.m_slash = 0f;
-                projectile.m_damage.m_pierce = 0f;
-                projectile.m_damage.m_spirit = damage.m_spirit * multiplier;
-                projectile.m_damage.m_poison = damage.m_poison * multiplier;
+                HitData.DamageTypes converted = DamageHelper.Convert(damage, BoulderConversion);
+
+                projectile.m_damage.m_blunt = converted.m_blunt * multiplier;
+                projectile.m_damage.m_slash = converted.m_slash * multiplier;
+                projectile.m_damage.m_pierce = converted.m_pierce * multiplier;
+                projectile.m_damage.m_spirit = converted.m_spirit * multiplier;
+                projectile.m_damage.m_poison = converted.m_poison * multiplier;
                 projectile.m_attackForce = staff.m_shared.m_attackForce * rain.forceMultiplier.Value;
             }
             catch (Exception e)

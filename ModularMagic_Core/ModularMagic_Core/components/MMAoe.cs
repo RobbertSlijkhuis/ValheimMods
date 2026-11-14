@@ -1,3 +1,5 @@
+using ModularMagic_Core.Helpers;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -26,7 +28,6 @@ namespace ModularMagic_Core.Components
 
         private static readonly Collider[] colliders = new Collider[128];
         private static readonly HashSet<GameObject> targets = new HashSet<GameObject>();
-        private static readonly List<IMMAoeHitModifier> modifiers = new List<IMMAoeHitModifier>();
         private static int layerMaskCharacters = -1;
         private static int layerMaskProps = -1;
 
@@ -36,15 +37,16 @@ namespace ModularMagic_Core.Components
             {
                 if (owner != null && hitData != null)
                 {
-                    // A modifier on the prefab can change the damage of the hit, the hit data of the attack itself is left as it is
+                    // The damage conversion of the prefab (if it has one) changes the damage of the hit, the hit data of the attack itself is left as it is
                     HitData modified = hitData.Clone();
-                    GetComponents(modifiers);
-
-                    foreach (IMMAoeHitModifier modifier in modifiers)
-                        modifier.Modify(modified);
+                    modified.m_damage = DamageConversionHelper.ConvertDamage(gameObject, modified.m_damage);
 
                     Hit(owner, modified);
                 }
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogWarning($"[MMAoe] The hit of {name} failed: {e}");
             }
             finally
             {

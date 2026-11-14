@@ -2,7 +2,7 @@ using BepInEx;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using Jotunn.Utils;
-using ModularMagic_Core.Components;
+using ModularMagic_Core.Models;
 using ModularMagic_Core.Types;
 using ModularMagic_EarthStaffs.Components;
 using ModularMagic_EarthStaffs.Configs;
@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using CoreSecondaryAttackHelper = ModularMagic_Core.Helpers.SecondaryAttackHelper;
+using DamageConversionHelper = ModularMagic_Core.Helpers.DamageConversionHelper;
 using ImbuedStaffHelper = ModularMagic_Core.Helpers.ImbuedStaffHelper;
 using MMAoeHelper = ModularMagic_Core.Helpers.MMAoeHelper;
 using SpawnedProjectileHelper = ModularMagic_Core.Helpers.SpawnedProjectileHelper;
@@ -163,7 +164,10 @@ namespace ModularMagic_EarthStaffs
             // The hit of a burst is a local object of the shooter (see MMAoe), so it is not registered
             prefabs.Cone = assetBundle.LoadAsset<GameObject>("attack_cone_MMES");
             MMAoeHelper.PrepareBox(prefabs.Cone, hitProps: true);
-            prefabs.Cone.AddComponent<ConeDamage>();
+            // The cone deals poison and spirit damage, each as much as the main damage of the staff. The other damage of the staff is not part of the cone
+            DamageConversionHelper.SetDamageConversion(prefabs.Cone, false,
+                new DamageConversionRule(DamageKind.MainPhysical, DamageKind.Poison),
+                new DamageConversionRule(DamageKind.MainPhysical, DamageKind.Spirit));
 
             prefabs.SecondaryAttackNova = assetBundle.LoadAsset<GameObject>("secondary_nova_MMES");
             // The visuals of the nova (the spikes) are an effect of the wrapper attack, so they are registered. The effect plays on every client,
@@ -174,7 +178,8 @@ namespace ModularMagic_EarthStaffs
             // The hit is a local object of the shooter (see MMAoe), so it is not registered. The main damage of the nova is always pierce
             prefabs.Nova = assetBundle.LoadAsset<GameObject>("attack_nova_MMES");
             MMAoeHelper.PrepareSphere(prefabs.Nova, hitProps: true);
-            prefabs.Nova.AddComponent<NovaDamage>();
+            // The rest of the damage of the staff (spirit, chop, pickaxe) is left as it is
+            DamageConversionHelper.SetDamageConversion(prefabs.Nova, true, new DamageConversionRule(DamageKind.MainPhysical, DamageKind.Pierce));
             prefabs.LevelTerrain = assetBundle.LoadAsset<GameObject>("script_levelTerrain_MMES");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.LevelTerrain, false));
 
