@@ -1,4 +1,4 @@
-using BepInEx;
+ï»¿using BepInEx;
 using Jotunn;
 using Jotunn.Entities;
 using Jotunn.Managers;
@@ -10,6 +10,13 @@ using ModularMagic_BloodMagic.Models;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using WeaponType = ModularMagic_Core.Types.WeaponType;
+using ImbuedStaffHelper = ModularMagic_Core.Helpers.ImbuedStaffHelper;
+using LightColorPresetType = ModularMagic_Core.Types.LightColorPresetType;
+using LocaleEnglish = ModularMagic_BloodMagic.Locale.LocaleEnglish;
+using RuneId = ModularMagic_Core.Types.RuneId;
+using StaffDefinition = ModularMagic_Core.Models.StaffDefinition;
+using StaffImbuementHelper = ModularMagic_Core.Helpers.StaffImbuementHelper;
 
 namespace ModularMagic_BloodMagic
 {
@@ -21,23 +28,56 @@ namespace ModularMagic_BloodMagic
     {
         public const string PluginGUID    = "DeathWizsh.ModularMagic_BloodMagic";
         public const string PluginName    = "ModularMagic_BloodMagic";
-        public const string PluginVersion = "0.0.2";
+        public const string PluginVersion = "0.0.3";
         public static ModularMagic_BloodMagic Instance;
         private static readonly HarmonyLib.Harmony harmony = new HarmonyLib.Harmony(PluginGUID);
 
         private AssetBundle assetBundle;
         public CustomPrefabs prefabs = new CustomPrefabs();
         public CustomMaterials materials = new CustomMaterials();
+        // What Core needs to know about the scythes, see RegisterStaffHooks
+        public StaffDefinition definition;
+        // The texts of the runes on the scythes, see LocaleEnglish
+        public static CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();
 
         private void Awake()
         {
             Instance = this;
             InitAssetBundle();
+            LocaleEnglish.Init();
             PluginConfig.Init();
+            // Every entry forwards its change to its own handler from this event in the order they were created,
+            // so this runs after the handlers that update the prefabs, and the scythe in the hand gets the new values with its runes
+            Config.SettingChanged += (sender, args) => ImbuedStaffHelper.ReapplyOnHeldStaff();
+            RegisterStaffHooks();
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             PrefabManager.OnVanillaPrefabsAvailable += SetupPrefabs;
             PrefabManager.OnVanillaPrefabsAvailable += AddItems;
+        }
+
+        // The map markers of the husks of the local player, see HuskMarkerHelper
+        private void Update()
+        {
+            HuskMarkerHelper.Update();
+        }
+
+        // Core gives the scythes their rune slots and applies the runes when a scythe is equipped. It only needs to know what belongs to this mod.
+        // Core speeds up the swing for the Attack Speed rune. The Eitr Cost rune lowers the eitr of a charging hit, which this mod does
+        // itself (SoulReaperHelper.GetChargeEitr): a swing of a scythe costs no eitr, so there is nothing for Core to lower
+        private void RegisterStaffHooks()
+        {
+            definition = new StaffDefinition()
+            {
+                effectName = "Imbuements_MMBM",
+                weaponType = WeaponType.MMBM,
+                colorPreset = LightColorPresetType.Purple,
+                allowedRunes = new string[] { RuneId.AttackSpeed, RuneId.EitrCost },
+                imbuementConfig = PluginConfig.imbuementConfig,
+                attackSpeedAnimation = true,
+            };
+
+            StaffImbuementHelper.Register(definition);
         }
 
         private void SetupPrefabs()
@@ -60,9 +100,11 @@ namespace ModularMagic_BloodMagic
                 if (prefab.GetComponent<ApparitionController>() == null)
                     prefab.AddComponent<ApparitionController>();
 
-                // Added to vanilla prefab — high taming time prevents natural taming
+                // Added to vanilla prefab â€” high taming time prevents natural taming
                 // MMBM apparitions bypass this via MakeTame() in ApparitionController
                 Tameable tameable                       = prefab.AddComponent<Tameable>();
+                // The config "Despawn when away" can turn both off for apparitions, see ApparitionHelper.CanUnsummon. Its description
+                // names these values, so change it with them
                 tameable.m_unsummonDistance             = 150f;
                 tameable.m_unsummonOnOwnerLogoutSeconds = 120f;
                 tameable.m_levelUpOwnerSkill            = Skills.SkillType.BloodMagic;
@@ -83,18 +125,27 @@ namespace ModularMagic_BloodMagic
             prefabs.SpawnAbilityScythe1.GetComponent<SpawnAbility>().m_spawnPrefab = new GameObject[2] { melee, twitcher };
             prefabs.SpawnAbilityScythe2.GetComponent<SpawnAbility>().m_spawnPrefab = new GameObject[3] { melee, twitcher, archer };
             prefabs.SpawnAbilityScythe3.GetComponent<SpawnAbility>().m_spawnPrefab = new GameObject[3] { melee, twitcher, archer };
-            prefabs.SpawnAbilityScythe4.GetComponent<SpawnAbility>().m_spawnPrefab = new GameObject[1] { twitcher };
 
-            Jotunn.Logger.LogInfo("SetupPrefabs complete — apparition prefabs assigned to all scythes.");
+            // The spawn abilities spawn the apparitions, ApparitionHelper sets them up from the scythe
+            ApparitionHelper.Setup();
+
+            Jotunn.Logger.LogInfo("SetupPrefabs complete â€” apparition prefabs assigned to all scythes.");
             PrefabManager.OnVanillaPrefabsAvailable -= SetupPrefabs;
         }
 
         private void AddItems()
         {
-            ItemHelper.Create(prefabs.Scythe1, PluginConfig.scythe1);
-            ItemHelper.Create(prefabs.Scythe2, PluginConfig.scythe2);
-            ItemHelper.Create(prefabs.Scythe3, PluginConfig.scythe3);
-            ItemHelper.Create(prefabs.Scythe4, PluginConfig.scythe4);
+            try
+            {
+                // The slots and tiers follow the other staff mods. The config is bound in Awake, so it is ready here
+                definition.AddStaff(prefabs.Scythe1, PluginConfig.scythe1, 2, 1);
+                definition.AddStaff(prefabs.Scythe2, PluginConfig.scythe2, 3, 2);
+                definition.AddStaff(prefabs.Scythe3, PluginConfig.scythe3, 4, 4);
+            }
+            catch (System.Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in adding the scythes: " + e);
+            }
 
             PrefabManager.OnVanillaPrefabsAvailable -= AddItems;
         }
@@ -117,10 +168,6 @@ namespace ModularMagic_BloodMagic
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.SporeEffect, true));
             prefabs.SpikeEffect = assetBundle.LoadAsset<GameObject>("fx_spikes_blood_MMBM");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.SpikeEffect, true));
-
-            prefabs.Scythe4             = assetBundle.LoadAsset<GameObject>("MMBM_Scythe4");
-            prefabs.SpawnAbilityScythe4 = assetBundle.LoadAsset<GameObject>("spawn_scythe4_MMBM");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.SpawnAbilityScythe4, true));
         }
     }
 }

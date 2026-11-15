@@ -1,8 +1,13 @@
 ﻿using Jotunn.Managers;
 using ModularMagic_BloodMagic.Components;
+using ModularMagic_BloodMagic.Configs;
+using ModularMagic_BloodMagic.Models;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Imbuement = ModularMagic_Core.Models.Imbuement;
+using ImbuementHelper = ModularMagic_Core.Helpers.ImbuementHelper;
+using ImbuementType = ModularMagic_Core.Types.ImbuementType;
 
 namespace ModularMagic_BloodMagic.Helpers
 {
@@ -14,6 +19,146 @@ namespace ModularMagic_BloodMagic.Helpers
         // Keyed by player ZDOID — stores all scythe attach clones for each player
         private static readonly Dictionary<ZDOID, List<GameObject>> _playerAttachCache
             = new Dictionary<ZDOID, List<GameObject>>();
+
+        // One SoulReaper per scythe, keyed by the prefab name of the scythe
+        private static readonly Dictionary<string, SoulReaper> _reapers
+            = new Dictionary<string, SoulReaper>();
+
+        /// <summary>
+        /// Creates the SoulReaper of every scythe. Called when the game starts (Game.Awake), the reapers live on the game object.
+        /// </summary>
+        public static void RegisterReapers()
+        {
+            CustomPrefabs prefabs = ModularMagic_BloodMagic.Instance.prefabs;
+
+            // A scythe is identified by its prefab name, the display name can be changed in the config
+            RegisterReaper(prefabs.Scythe1.name, "SoulReaperCharge_1", prefabs.SpawnAbilityScythe1, new Color(0f, 2.666667f, 2.996078f));
+            RegisterReaper(prefabs.Scythe2.name, "SoulReaperCharge_2", prefabs.SpawnAbilityScythe2, new Color(2.839216f, 0f, 4f));
+            RegisterReaper(prefabs.Scythe3.name, "SoulReaperCharge_3", prefabs.SpawnAbilityScythe3, new Color(4f, 0.03725543f, 0f));
+        }
+
+        private static void RegisterReaper(string weaponName, string zdoKeyName, GameObject apparitionPrefab, Color emissionColor)
+        {
+            SoulReaper reaper = Game.instance.gameObject.AddComponent<SoulReaper>();
+            reaper.Init(zdoKeyName);
+            reaper.m_apparitionPrefab = apparitionPrefab;
+            reaper.m_emissionColor = emissionColor;
+            _reapers[weaponName] = reaper;
+        }
+
+        /// <summary>
+        /// Called for every hit the local player deals. A hit with a drawn scythe charges it, and a full scythe summons an apparition
+        /// behind the target when the player has a free slot. Without a free slot the scythe stays full until one opens.
+        /// </summary>
+        public static void OnLocalPlayerHit(Character target, HitData hit)
+        {
+            Player player = Player.m_localPlayer;
+
+            if (player == null || target == null || hit == null)
+                return;
+
+            Character attacker = hit.GetAttacker();
+            if (attacker == null || attacker != player)
+                return;
+
+            // Only an enemy charges the scythe, not your own apparitions or a tame (they can be hit with PvP on)
+            if (target.IsTamed())
+                return;
+
+            SoulReaper? reaper = GetDrawnReaper(out _);
+            ItemDrop.ItemData? scythe = player.GetCurrentWeapon();
+
+            if (reaper == null || scythe == null)
+                return;
+
+            int slots = ApparitionHelper.CountLocalPlayerSlots();
+
+            if (reaper.CanDischarge())
+            {
+                int max = ApparitionHelper.GetMaxApparitions(scythe);
+
+                if (slots >= max)
+                {
+                    Jotunn.Logger.LogWarning($"[SoulReaper] Full, but all {max} apparition slots are taken ({slots})");
+                    return;
+                }
+
+                reaper.ResetCharge();
+                Jotunn.Logger.LogWarning($"[SoulReaper] Discharged, summoning apparition {slots + 1} of {max}");
+                SpawnApparition(target, reaper.m_apparitionPrefab, scythe);
+                return;
+            }
+
+            // Full, in the moment before it can discharge: there is nothing to add, so the hit costs no eitr
+            if (reaper.m_charge >= reaper.m_maxCharge)
+                return;
+
+            float eitr = GetChargeEitr(scythe);
+
+            if (!player.HaveEitr(eitr))
+            {
+                Jotunn.Logger.LogWarning($"[SoulReaper] Cannot charge, the hit needs {eitr:F2} eitr");
+                return;
+            }
+
+            float charge = GetChargePerHit(slots);
+
+            player.UseEitr(eitr);
+            reaper.Charge(charge);
+            Jotunn.Logger.LogWarning($"[SoulReaper] Charged {charge:P1} for {eitr:F2} eitr with {slots} apparitions, now {reaper.m_charge:P1}");
+            SpawnChargeEffects(hit.m_point, hit.m_dir);
+        }
+
+        /// <summary>
+        /// The part of a full charge a hit adds. A scythe charges faster while the player has few apparitions: without any it is the
+        /// config multiplier, and the bonus gets smaller with every apparition until it is gone at the config number of apparitions.
+        /// </summary>
+        private static float GetChargePerHit(int apparitions)
+        {
+            float normalAt = Mathf.Max(1, PluginConfig.apparitionsForNormalCharge.Value);
+            float free = Mathf.Clamp01((normalAt - apparitions) / normalAt);
+
+            return PluginConfig.chargePerHit.Value * (1f + (PluginConfig.chargeMultiplierWithoutApparitions.Value - 1f) * free);
+        }
+
+        /// <summary>
+        /// The eitr a hit needs and uses to charge the scythe: the config value, lowered by the Eitr Cost rune of the scythe.
+        /// </summary>
+        private static float GetChargeEitr(ItemDrop.ItemData scythe)
+        {
+            float eitr = PluginConfig.chargeEitr.Value;
+
+            foreach (Imbuement imbuement in ImbuementHelper.Read(scythe))
+            {
+                if (imbuement.type == ImbuementType.EitrCost)
+                    eitr -= PluginConfig.imbuementConfig.EitrCost.Value * imbuement.level;
+            }
+
+            return Mathf.Max(0f, eitr);
+        }
+
+        /// <summary>
+        /// Shows the charge of the scythe a player has equipped on the scythe, read from the ZDO of the player so every client sees it.
+        /// </summary>
+        public static void UpdateChargeVisuals(Player player)
+        {
+            if (player == null || player.m_nview == null || !player.m_nview.IsValid())
+                return;
+
+            foreach (KeyValuePair<string, SoulReaper> pair in _reapers)
+            {
+                bool hasWeapon = player == Player.m_localPlayer
+                    ? IsWeaponEquipped(player, pair.Key)
+                    : HasCachedAttach(player);
+
+                if (!hasWeapon)
+                    continue;
+
+                float charge = player.m_nview.GetZDO().GetFloat(pair.Value.ZDOKey, 0f);
+                ApplyChargeVisualsForPlayer(player, charge, pair.Value.m_maxCharge, pair.Value.m_emissionColor);
+                break; // Only one scythe can be equipped at a time
+            }
+        }
 
         /// <summary>
         /// Called from VisEquipmentAttachItem_Postfix — caches the direct attach clone
@@ -92,7 +237,11 @@ namespace ModularMagic_BloodMagic.Helpers
             }
         }
 
-        public static void SpawnApparition(Character target, GameObject prefab, string weaponName)
+        /// <summary>
+        /// Spawns an apparition behind the target with the SpawnAbility of the scythe, like the game does for a summon. The game handles the
+        /// spawn, then ApparitionHelper sets up the apparition from the scythe.
+        /// </summary>
+        public static void SpawnApparition(Character target, GameObject prefab, ItemDrop.ItemData scythe)
         {
             if (prefab == null)
             {
@@ -100,10 +249,9 @@ namespace ModularMagic_BloodMagic.Helpers
                 return;
             }
 
-            SpawnAbility? spawnAbility = prefab.GetComponent<SpawnAbility>();
-            if (spawnAbility == null || spawnAbility.m_spawnPrefab == null || spawnAbility.m_spawnPrefab.Length == 0)
+            if (prefab.GetComponent<SpawnAbility>() == null)
             {
-                Jotunn.Logger.LogError($"Apparition prefab '{prefab.name}' is missing SpawnAbility or spawn prefabs.");
+                Jotunn.Logger.LogError($"Apparition prefab '{prefab.name}' is missing SpawnAbility.");
                 return;
             }
 
@@ -111,55 +259,21 @@ namespace ModularMagic_BloodMagic.Helpers
                 - target.transform.forward * 1.5f
                 + Vector3.up * 0.5f;
 
-            Game.instance.StartCoroutine(SpawnApparitionCoroutine(spawnAbility, spawnPos, weaponName));
-        }
+            // The same as an Attack does with the prefab of a spawn ability: the spawn ability starts when it gets its owner and weapon
+            GameObject spawnAbility = Object.Instantiate(prefab, spawnPos, Quaternion.identity);
+            SpawnAbility ability = spawnAbility.GetComponent<SpawnAbility>();
 
-        private static IEnumerator SpawnApparitionCoroutine(SpawnAbility spawnAbility, Vector3 spawnPos, string weaponName)
-        {
-            if (spawnAbility.m_initialSpawnDelay > 0f)
-                yield return new WaitForSeconds(spawnAbility.m_initialSpawnDelay);
-
-            spawnAbility.m_preSpawnEffects.Create(spawnPos, Quaternion.identity);
-
-            if (spawnAbility.m_preSpawnDelay > 0f)
-                yield return new WaitForSeconds(spawnAbility.m_preSpawnDelay);
-
-            Vector3 finalPos = spawnPos;
-            if (spawnAbility.m_snapToTerrain)
-            {
-                ZoneSystem.instance.GetSolidHeight(spawnPos, out float height, spawnAbility.m_getSolidHeightMargin);
-                finalPos.y = height + spawnAbility.m_spawnGroundOffset;
-            }
-
-            GameObject creaturePrefab = spawnAbility.m_spawnPrefab[Random.Range(0, spawnAbility.m_spawnPrefab.Length)];
-
-            if (spawnAbility.m_maxSpawned > 0 && SpawnSystem.GetNrOfInstances(creaturePrefab, finalPos, 0f) >= spawnAbility.m_maxSpawned)
-            {
-                Player.m_localPlayer?.Message(MessageHud.MessageType.Center, spawnAbility.m_maxSummonReached);
-                yield break;
-            }
-
-            GameObject creature = Object.Instantiate(
-                creaturePrefab,
-                finalPos,
-                Quaternion.Euler(0f, Random.Range(0f, 360f), 0f));
-
-            // Delegate all per-weapon setup — including follower and drops — to ApparitionController
-            creature.GetComponent<ApparitionController>()?.SetData(weaponName);
-
-            spawnAbility.m_spawnEffects.Create(finalPos, Quaternion.identity);
-
-            if (spawnAbility.m_wakeUpAnimation)
-                creature.GetComponent<ZSyncAnimation>()?.SetBool("wakeup", value: true);
-
-            Jotunn.Logger.LogInfo($"SpawnApparitionCoroutine complete — spawned '{creaturePrefab.name}' at {finalPos}");
+            // The game spawns the apparition after a delay. Until then the summon takes a slot, so a second summon can not go over the
+            // maximum. It is added before the spawn ability starts, a spawn ability without a delay spawns right away
+            ApparitionHelper.AddPendingSummon(ability);
+            ability.Setup(Player.m_localPlayer, Vector3.zero, 0f, null, scythe, null);
         }
 
         /// <summary>
         /// Returns the SoulReaper for the scythe the local player currently has drawn,
         /// or null if no scythe is actively drawn. Also outputs the weapon name.
         /// </summary>
-        public static SoulReaper? GetDrawnReaper(Dictionary<string, SoulReaper> reapers, out string? weaponName)
+        public static SoulReaper? GetDrawnReaper(out string? weaponName)
         {
             weaponName = null;
 
@@ -170,9 +284,9 @@ namespace ModularMagic_BloodMagic.Helpers
             if (drawnWeapon == null)
                 return null;
 
-            foreach (KeyValuePair<string, SoulReaper> pair in reapers)
+            foreach (KeyValuePair<string, SoulReaper> pair in _reapers)
             {
-                if (drawnWeapon.m_shared.m_name == pair.Key)
+                if (GetPrefabName(drawnWeapon) == pair.Key)
                 {
                     weaponName = pair.Key;
                     return pair.Value;
@@ -183,19 +297,27 @@ namespace ModularMagic_BloodMagic.Helpers
         }
 
         /// <summary>
-        /// Returns true if the given weapon is equipped by the player,
+        /// The prefab name of a scythe. A scythe is identified by it and not by its display name, which can be changed in the config.
+        /// </summary>
+        private static string? GetPrefabName(ItemDrop.ItemData? item)
+        {
+            return item?.m_dropPrefab != null ? item.m_dropPrefab.name : null;
+        }
+
+        /// <summary>
+        /// Returns true if the weapon with the given prefab name is equipped by the player,
         /// whether drawn or sheathed.
         /// </summary>
         public static bool IsWeaponEquipped(Player player, string weaponName)
         {
             if (player.GetInventory().GetEquippedItems()
-                .Exists(item => item.m_shared.m_name == weaponName))
+                .Exists(item => GetPrefabName(item) == weaponName))
                 return true;
 
-            if (player.m_hiddenRightItem?.m_shared.m_name == weaponName)
+            if (GetPrefabName(player.m_hiddenRightItem) == weaponName)
                 return true;
 
-            if (player.m_hiddenLeftItem?.m_shared.m_name == weaponName)
+            if (GetPrefabName(player.m_hiddenLeftItem) == weaponName)
                 return true;
 
             return false;

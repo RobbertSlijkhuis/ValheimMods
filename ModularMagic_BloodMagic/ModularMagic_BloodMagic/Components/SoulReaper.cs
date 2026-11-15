@@ -39,6 +39,12 @@ namespace ModularMagic_BloodMagic.Components
         {
             bool  wasCharged = m_charge >= m_maxCharge;
             float newCharge  = Mathf.Min(m_charge + amount, m_maxCharge);
+
+            // The charge of a hit is a fraction (a sixth with two apparitions), so the hits that should fill the scythe can add up to just
+            // under full
+            if (newCharge > m_maxCharge - 0.001f)
+                newCharge = m_maxCharge;
+
             m_charge = newCharge;
 
             if (!wasCharged && newCharge >= m_maxCharge)
