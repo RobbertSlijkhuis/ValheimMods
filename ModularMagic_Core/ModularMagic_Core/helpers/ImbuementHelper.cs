@@ -187,6 +187,24 @@ namespace ModularMagic_Core.Helpers
             return Deserialize(itemData.m_customData.GetValueSafe(DataKey), slots);
         }
 
+        /// <summary>
+        /// The level of the rune of this imbuement type on the weapon, 0 when it has none. A weapon holds one rune of a type (the rune table
+        /// does not allow a second), so this is the level of that rune.
+        /// </summary>
+        public static int GetLevel(ItemData itemData, string imbuementType)
+        {
+            if (itemData == null)
+                return 0;
+
+            foreach (Imbuement imbuement in Read(itemData))
+            {
+                if (imbuement.type == imbuementType)
+                    return imbuement.level;
+            }
+
+            return 0;
+        }
+
         public static string Serialize(List<Imbuement> imbuements)
         {
             List<string> entries = new List<string>();

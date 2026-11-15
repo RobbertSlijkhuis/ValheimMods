@@ -16,7 +16,7 @@ namespace ModularMagic_IceStaffs.Helpers
         {
             RuneId.DamageBlunt, RuneId.DamageSlash, RuneId.EitrCost,
             RuneId.ProjectileAccuracy, RuneId.AttackSpeed, RuneId.ProjectileSpeed,
-            RuneId.Nova, RuneId.Rain, RuneId.Cone,
+            RuneId.Nova, RuneId.Rain, RuneId.Cone, RuneId.Utility,
         };
 
         // The script that spawns the shards (SpawnAbility) does not pass the damage of the staff on, so every shard it spawns gets the frost and physical

@@ -123,7 +123,8 @@ namespace ModularMagic_Core.Harmony
         }
 
         /// <summary>
-        /// The registered secondary attacks with a cooldown can not start while the staff is recharging.
+        /// The registered secondary attacks with a cooldown can not start while the staff is recharging, and the mod that registered an
+        /// attack can block it or set its costs (see SecondaryAttackHelper.Register).
         /// </summary>
         [HarmonyPrefix]
         [HarmonyPatch(typeof(Attack), "Start")]
@@ -131,7 +132,7 @@ namespace ModularMagic_Core.Harmony
         {
             try
             {
-                return SecondaryAttackHelper.CheckCooldown(character, __instance);
+                return SecondaryAttackHelper.CanStart(character, __instance);
             }
             catch (Exception e)
             {
@@ -156,6 +157,65 @@ namespace ModularMagic_Core.Harmony
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Something went wrong in AttackStart_Postfix: " + e);
+            }
+        }
+
+        // The burst stops the attack (Attack.Stop sets m_attackDone) without paying or firing when a cost is missing, so a burst that did
+        // not stop the attack has fired. See SecondaryAttackHelper.StartCooldownAfterBurst
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Attack), "FireProjectileBurst")]
+        public static void FireProjectileBurst_Prefix(Attack __instance, out bool __state)
+        {
+            __state = __instance.m_attackDone;
+        }
+
+        /// <summary>
+        /// The cooldown of a registered secondary attack that pays per burst starts when the burst fired.
+        /// </summary>
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Attack), "FireProjectileBurst")]
+        public static void FireProjectileBurst_Postfix(Attack __instance, bool __state)
+        {
+            try
+            {
+                if (!__state && !__instance.m_attackDone)
+                    SecondaryAttackHelper.StartCooldownAfterBurst(__instance.m_character, __instance);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in FireProjectileBurst_Postfix: " + e);
+            }
+        }
+
+        // An upgrade replaces the item with a new one, see ItemUpgradeHelper
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(InventoryGui), "DoCrafting")]
+        public static void DoCrafting_Prefix(ItemData ___m_craftUpgradeItem)
+        {
+            ItemUpgradeHelper.Begin(___m_craftUpgradeItem);
+        }
+
+        [HarmonyFinalizer]
+        [HarmonyPatch(typeof(InventoryGui), "DoCrafting")]
+        public static void DoCrafting_Finalizer()
+        {
+            ItemUpgradeHelper.End();
+        }
+
+        /// <summary>
+        /// DoCrafting adds the upgraded item with this overload.
+        /// </summary>
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Inventory), nameof(Inventory.AddItem), new[] { typeof(string), typeof(int), typeof(int), typeof(int), typeof(long), typeof(string), typeof(Vector2i), typeof(bool), typeof(bool), typeof(bool) })]
+        public static void AddItem_Postfix(ItemData __result)
+        {
+            try
+            {
+                ItemUpgradeHelper.OnItemAdded(__result);
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError("Something went wrong in AddItem_Postfix: " + e);
             }
         }
     }

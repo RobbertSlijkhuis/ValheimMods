@@ -24,5 +24,10 @@ namespace ModularMagic_Core.Models
         public GameObject RuneCreatures;
         public GameObject RuneNova;
         public GameObject RuneRain;
+        public GameObject RuneBloodTap;
+        public GameObject RuneRange;
+        public GameObject RuneLegion;
+        public GameObject RuneGreatsword;
+        public GameObject RuneUtility;
     }
 }

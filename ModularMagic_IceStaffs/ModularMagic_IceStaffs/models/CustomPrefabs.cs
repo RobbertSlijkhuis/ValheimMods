@@ -10,6 +10,11 @@ namespace ModularMagic_IceStaffs.Models
         public GameObject StaffIce3Prefab;
         public GameObject StaffIceAOEPrefab;
 
+        // The frost shot of the main attack and the ice sheet the Utility rune lets it leave on water
+        public GameObject ProjectileIce;
+        public GameObject IceSheet;
+        public GameObject IceSheetSplash;
+
         // The nova secondary attack: the wrapper holds the attack, the AOE is what it spawns
         public GameObject SecondaryAttackNova;
         public GameObject AttackNova;

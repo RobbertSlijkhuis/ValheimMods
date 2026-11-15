@@ -23,6 +23,7 @@ namespace ModularMagic_IceStaffs.Locale
             AddRune(texts, RuneId.Nova, "Rune: Frost Nova", "Release a nova of frost around you!");
             AddRune(texts, RuneId.Cone, "Rune: Frost Cone", "Change your main attack into a cone of frost!");
             AddRune(texts, RuneId.Rain, "Rune: Ice Shards", "Call down a rain of ice shards on your enemies!");
+            AddRune(texts, RuneId.Utility, "Rune: Ice Sheets", "Your frost shots freeze the water they hit into a sheet of ice! Not inside dungeons");
 
             ModularMagic_IceStaffs.Localization.AddTranslation("English", texts);
         }

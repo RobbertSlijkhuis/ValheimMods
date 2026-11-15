@@ -152,13 +152,19 @@ namespace ModularMagic_IceStaffs
             prefabs.StaffIce3Prefab = _assetBundle.LoadAsset<GameObject>("MMIS_staffIce3");
             prefabs.StaffIceAOEPrefab = _assetBundle.LoadAsset<GameObject>("MMIS_StaffIceAOE");
             effects.WalkFastSE = _assetBundle.LoadAsset<StatusEffect>("FasterWalk_MMIS");
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("staff_ice_projectile_MMIS"), true));
+            prefabs.ProjectileIce = _assetBundle.LoadAsset<GameObject>("staff_ice_projectile_MMIS");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.ProjectileIce, true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("fx_staff_ice_spores_MMIS"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("fx_staff_ice_spikes_MMIS"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("fx_iceshard_launch_MMIS"), true));
             PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("fx_iceshard_launch_smoke_MMIS"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("IceSheet_MMIS"), true));
-            PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("fx_IceSheetSpawn_MMIS"), true));
+            // The sheet and its splash are only made on the water by a staff with the Utility rune (see IceSheetHelper), so they are no longer
+            // water hit effects of the projectile
+            prefabs.IceSheet = _assetBundle.LoadAsset<GameObject>("IceSheet_MMIS");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.IceSheet, true));
+            prefabs.IceSheetSplash = _assetBundle.LoadAsset<GameObject>("fx_IceSheetSpawn_MMIS");
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.IceSheetSplash, true));
+            IceSheetHelper.Init(prefabs.ProjectileIce, prefabs.IceSheet, prefabs.IceSheetSplash);
             // The nova AOE of the Skull of Frost, it takes its damage from the staff
             PrefabManager.Instance.AddPrefab(new CustomPrefab(_assetBundle.LoadAsset<GameObject>("attack_nova_SKULL_MMIS"), true));
             // The nova rune: the hit is a local object of the shooter (see MMAoe), so it is not registered. The wrapper holds the

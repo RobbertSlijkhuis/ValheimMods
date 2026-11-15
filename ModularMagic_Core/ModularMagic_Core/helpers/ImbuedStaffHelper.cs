@@ -53,7 +53,7 @@ namespace ModularMagic_Core.Helpers
                 if (player == null || !GameIsReady)
                     return;
 
-                ApplyIfStaff(player.GetCurrentWeapon());
+                ApplyAndRefreshPose(player, player.GetCurrentWeapon());
             }
             catch (Exception e)
             {
@@ -68,12 +68,28 @@ namespace ModularMagic_Core.Helpers
                 if (humanoid == null || !humanoid.IsPlayer() || item == null || !GameIsReady)
                     return;
 
-                ApplyIfStaff(item);
+                ApplyAndRefreshPose(humanoid, item);
             }
             catch (Exception e)
             {
                 Jotunn.Logger.LogError("Could not update item/set effects in EquipItem: " + e);
             }
+        }
+
+        // The game sets how the character holds its weapon (the animation state of the item) when the weapon is equipped, before the runes
+        // are applied in the postfix of EquipItem. A rune that changes how the weapon is held (Greatsword) would only show the next time the
+        // equipment is set up, so it is set again here when the runes changed it. The state is synced to the other clients by the animator
+        private static void ApplyAndRefreshPose(Humanoid humanoid, ItemData item)
+        {
+            if (item == null)
+                return;
+
+            ItemData.AnimationState before = item.m_shared.m_animationState;
+
+            ApplyIfStaff(item);
+
+            if (item.m_shared.m_animationState != before && (humanoid.m_rightItem == item || humanoid.m_leftItem == item))
+                humanoid.SetupAnimationState();
         }
 
         private static void ApplyIfStaff(ItemData item)

@@ -4,7 +4,7 @@
 - A scythe charges faster while you have few apparitions: 3 times as fast without any, back to the normal rate at 3. The charge per hit, the multiplier and the eitr per charging hit (10) are config entries in the new "Soul Reaper" section
 - The number of apparitions is now counted per player: 3 with a scythe of quality 1 and one more for every quality level. Wild Charred and the apparitions of other players no longer count. A full scythe stays full until you have a free slot
 - An apparition can no longer be killed. Without health it is banished: it stays where it is as a husk, does nothing and makes no sound, until its summoner uses it and pays health (20% of the maximum health by default) to reanimate it
-- A banished apparition can only be reanimated while your active apparitions (banished ones not counted) stay within the maximum of the scythe that summoned it
+- A banished apparition can only be reanimated while your active apparitions (banished ones not counted) stay within the maximum of the last scythe you equipped, so it also works without a scythe in your hand
 - Reanimating a banished apparition plays an effect, and it returns 1.7 seconds later with a red glow that turns back to its own colour
 - Only the summoner can hit a husk, and a hit kills it, so you can clear your apparitions and free their slots. Like any tamed creature, this needs PvP on or the Butcher knife
 - An apparition that is banished makes a sound as it falls still
@@ -25,6 +25,12 @@
 - New config entry "Despawn when away" (Soul Reaper): turn it off and apparitions are no longer removed when you go far away or log out
 - The Blood Magic skill now raises the damage of the apparitions (the spawn ability of the scythe already had the factor, but it was never applied)
 - The apparitions are now spawned by the game's own SpawnAbility instead of a copy of it
+- New rune Nova (levels 1-3): the secondary attack makes all your active apparitions explode, dealing the damage of the scythe times "Explosion damage multiplier" in "Explosion radius". Banished apparitions stay. Without an active apparition the attack does not start
+- New rune Blood Tap (levels 1-3): the secondary attack pays health (25% of your maximum health by default) and eitr to fully charge the scythe. Without the health for it, or on a full scythe, it does nothing and starts no cooldown
+- New rune Range (levels 1-4): the normal swing reaches 1 m further per level while the scythe is fully charged, and for 5 seconds ("Range rune linger") after the charge is used
+- New rune Legion (levels 1-4): one more apparition per level. The limit comes from the last scythe you equipped and is remembered after a relog. Upgrading that scythe raises the limit right away, without equipping it again
+- New rune Greatsword (levels 1-4): the scythe is held and swung like a greatsword, with the damage, reach and costs of the scythe
+- The slots of Death's Embrace and Reaper of Souls are a tier higher (2 and 3), as the scythes start a biome later than the staffs
 
 ### 0.0.2
 - The recipe helper is now shared through ModularMagic_Core

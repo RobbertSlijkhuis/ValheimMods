@@ -80,10 +80,17 @@ namespace ModularMagic_Core.Helpers
             ItemData secondaryAttack = null;
             float? secondaryEitr = null;
 
+            // A main attack rune that only changes the animations (Greatsword), null without one
+            MainAttackAnimationEntry attackAnimation = null;
+
             foreach (Imbuement imbuement in imbuements)
             {
                 switch (imbuement.type)
                 {
+                    case ImbuementType.MainAttack:
+                        if (!cone && definition.mainAttackAnimations.TryGetValue(imbuement.value, out MainAttackAnimationEntry animationEntry))
+                            attackAnimation = animationEntry;
+                        break;
                     case ImbuementType.DamageType:
                         if (physicalType != null && (imbuement.value == "Blunt" || imbuement.value == "Pierce" || imbuement.value == "Slash"))
                             physicalType = imbuement.value;
@@ -132,6 +139,11 @@ namespace ModularMagic_Core.Helpers
                 secondaryAttack = secondaryAttack,
                 secondaryAttackEitr = secondaryEitr,
                 equipStatusEffect = CreateEquipStatusEffect(definition, imbuements, cone),
+                // The main attack is copied from the prefab above, so without the rune it has the animations of the prefab again. How the staff is
+                // held is not part of the attack, so it is always set: to the one of the rune, or back to the one of the prefab
+                attackAnimation = attackAnimation?.attackAnimation,
+                attackChainLevels = attackAnimation?.chainLevels,
+                animationState = attackAnimation != null ? attackAnimation.animationState : baseData.m_shared.m_animationState,
             };
 
             if (physicalType != null)

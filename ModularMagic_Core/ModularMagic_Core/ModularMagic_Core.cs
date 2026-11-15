@@ -112,6 +112,14 @@ namespace ModularMagic_Core
         private GameObject AddRunePrefab(string name)
         {
             GameObject prefab = assetBundle.LoadAsset<GameObject>(name);
+
+            // A rune that is not in the asset bundle is left out (see RuneData.Add), the other runes still work
+            if (prefab == null)
+            {
+                Jotunn.Logger.LogError($"[Imbuements] The rune prefab '{name}' is not in the asset bundle, the rune is left out");
+                return null;
+            }
+
             prefab.AddComponent<RuneItemModel>();
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefab, true));
             return prefab;
@@ -151,6 +159,11 @@ namespace ModularMagic_Core
             prefabs.RuneCreatures = AddRunePrefab("MMC_Rune_Creatures");
             prefabs.RuneNova = AddRunePrefab("MMC_Rune_Nova");
             prefabs.RuneRain = AddRunePrefab("MMC_Rune_Rain");
+            prefabs.RuneBloodTap = AddRunePrefab("MMC_Rune_BloodTap");
+            prefabs.RuneRange = AddRunePrefab("MMC_Rune_Range");
+            prefabs.RuneLegion = AddRunePrefab("MMC_Rune_Legion");
+            prefabs.RuneGreatsword = AddRunePrefab("MMC_Rune_Greatsword");
+            prefabs.RuneUtility = AddRunePrefab("MMC_Rune_Utility");
 
             materials.ImbuementTable = assetBundle.LoadAsset<Material>("Altar_MMC");
             materials.SpellBook = assetBundle.LoadAsset<Material>("Spellbook2_1_1_MMC");

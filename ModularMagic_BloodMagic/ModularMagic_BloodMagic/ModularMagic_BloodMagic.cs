@@ -12,9 +12,11 @@ using System.Reflection;
 using UnityEngine;
 using WeaponType = ModularMagic_Core.Types.WeaponType;
 using ImbuedStaffHelper = ModularMagic_Core.Helpers.ImbuedStaffHelper;
+using ItemUpgradeHelper = ModularMagic_Core.Helpers.ItemUpgradeHelper;
 using LightColorPresetType = ModularMagic_Core.Types.LightColorPresetType;
 using LocaleEnglish = ModularMagic_BloodMagic.Locale.LocaleEnglish;
 using RuneId = ModularMagic_Core.Types.RuneId;
+using SecondaryAttackHelper = ModularMagic_Core.Helpers.SecondaryAttackHelper;
 using StaffDefinition = ModularMagic_Core.Models.StaffDefinition;
 using StaffImbuementHelper = ModularMagic_Core.Helpers.StaffImbuementHelper;
 
@@ -63,21 +65,56 @@ namespace ModularMagic_BloodMagic
         }
 
         // Core gives the scythes their rune slots and applies the runes when a scythe is equipped. It only needs to know what belongs to this mod.
-        // Core speeds up the swing for the Attack Speed rune. The Eitr Cost rune lowers the eitr of a charging hit, which this mod does
-        // itself (SoulReaperHelper.GetChargeEitr): a swing of a scythe costs no eitr, so there is nothing for Core to lower
+        // Core speeds up the swing for the Attack Speed rune and swaps the animations for the Greatsword rune. The Eitr Cost rune lowers the eitr
+        // of a charging hit, which this mod does itself (SoulReaperHelper.GetChargeEitr): a swing of a scythe costs no eitr, so there is nothing
+        // for Core to lower. The Range and Legion runes are read by this mod too (ScytheRangeHelper, ApparitionHelper.GetMaxApparitions)
         private void RegisterStaffHooks()
         {
+            List<string> runes = new List<string>() { RuneId.AttackSpeed, RuneId.EitrCost, RuneId.Range, RuneId.Legion, RuneId.Greatsword };
+
+            // A secondary attack whose prefabs are not in the asset bundle has no config (see PluginConfig), its rune is then left out
+            bool nova = PluginConfig.secondaryAttackNova != null;
+            bool bloodTap = PluginConfig.secondaryAttackBloodTap != null;
+
+            if (nova)
+                runes.Add(RuneId.Nova);
+
+            if (bloodTap)
+                runes.Add(RuneId.BloodTap);
+
             definition = new StaffDefinition()
             {
                 effectName = "Imbuements_MMBM",
                 weaponType = WeaponType.MMBM,
-                colorPreset = LightColorPresetType.Purple,
-                allowedRunes = new string[] { RuneId.AttackSpeed, RuneId.EitrCost },
+                colorPreset = LightColorPresetType.Blood,
+                allowedRunes = runes.ToArray(),
                 imbuementConfig = PluginConfig.imbuementConfig,
                 attackSpeedAnimation = true,
             };
 
+            // The swing of a greatsword also has a chain of three hits, like the swing of the scythe
+            definition.AddMainAttackAnimation("Greatsword", "greatsword", 3, ItemDrop.ItemData.AnimationState.Greatsword);
+
+            // Core gives a registered secondary attack its own eitr cost and the cooldown, the attack is recognised by the object it spawns.
+            // Both pay per burst, so the cooldown starts when the burst fired (a Blood Tap without the health for it starts no cooldown)
+            if (nova)
+            {
+                definition.AddSecondaryAttack("Nova", prefabs.SecondaryAttackNova, PluginConfig.secondaryAttackNova);
+                SecondaryAttackHelper.Register(prefabs.AttackNova.name, PluginConfig.secondaryAttackNova.cooldownStatusEffectName, "Nova cooldown",
+                    () => PluginConfig.secondaryAttackNova.cooldown.Value, NovaHelper.PrepareStart);
+            }
+
+            if (bloodTap)
+            {
+                definition.AddSecondaryAttack("BloodTap", prefabs.SecondaryAttackBloodTap, PluginConfig.secondaryAttackBloodTap);
+                SecondaryAttackHelper.Register(prefabs.AttackBloodTap.name, PluginConfig.secondaryAttackBloodTap.cooldownStatusEffectName, "Blood Tap cooldown",
+                    () => PluginConfig.secondaryAttackBloodTap.cooldown.Value, BloodTapHelper.PrepareStart);
+            }
+
             StaffImbuementHelper.Register(definition);
+
+            // An upgraded scythe is a new item, its id moves along so the limit of apparitions follows the upgrade
+            ItemUpgradeHelper.OnUpgraded += ApparitionHelper.OnScytheUpgraded;
         }
 
         private void SetupPrefabs()
@@ -137,9 +174,10 @@ namespace ModularMagic_BloodMagic
         {
             try
             {
-                // The slots and tiers follow the other staff mods. The config is bound in Awake, so it is ready here
-                definition.AddStaff(prefabs.Scythe1, PluginConfig.scythe1, 2, 1);
-                definition.AddStaff(prefabs.Scythe2, PluginConfig.scythe2, 3, 2);
+                // The slots follow the other staff mods. The scythes start a biome later than the staffs (swamp, plains and ashlands), so the
+                // first two have a tier more; 4 is the highest tier. The config is bound in Awake, so it is ready here
+                definition.AddStaff(prefabs.Scythe1, PluginConfig.scythe1, 2, 2);
+                definition.AddStaff(prefabs.Scythe2, PluginConfig.scythe2, 3, 3);
                 definition.AddStaff(prefabs.Scythe3, PluginConfig.scythe3, 4, 4);
             }
             catch (System.Exception e)
@@ -168,6 +206,68 @@ namespace ModularMagic_BloodMagic
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.SporeEffect, true));
             prefabs.SpikeEffect = assetBundle.LoadAsset<GameObject>("fx_spikes_blood_MMBM");
             PrefabManager.Instance.AddPrefab(new CustomPrefab(prefabs.SpikeEffect, true));
+
+            // The secondary attacks of the Nova and Blood Tap runes. The wrapper holds the attack that is copied onto the scythe, the attack
+            // spawns the trigger locally on the client of the caster when it fires. Neither is registered, the trigger has no ZNetView
+            prefabs.SecondaryAttackNova = LoadSecondaryAttack("secondary_nova_MMBM", "attack_nova_MMBM", out prefabs.AttackNova);
+            prefabs.SecondaryAttackBloodTap = LoadSecondaryAttack("secondary_bloodtap_MMBM", "attack_bloodtap_MMBM", out prefabs.AttackBloodTap);
+
+            if (prefabs.AttackNova != null)
+                prefabs.AttackNova.AddComponent<NovaTrigger>();
+
+            if (prefabs.AttackBloodTap != null)
+                prefabs.AttackBloodTap.AddComponent<BloodTapTrigger>();
+
+            // The start effects of the attacks above. Registered so Jotunn fixes their references to vanilla assets (the mocks)
+            prefabs.NovaEffect = AddEffect("fx_nova_MMBM");
+            prefabs.BloodTapEffect = AddEffect("fx_bloodtap_MMBM");
+        }
+
+        // Loads an effect and registers it with its references fixed. Null and logged when it is not in the asset bundle
+        private GameObject? AddEffect(string name)
+        {
+            GameObject? effect = assetBundle.LoadAsset<GameObject>(name);
+
+            if (effect == null)
+            {
+                Jotunn.Logger.LogError($"'{name}' is not in the asset bundle");
+                return null;
+            }
+
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(effect, true));
+            return effect;
+        }
+
+        // Loads the wrapper and the trigger of a secondary attack. Both are null when one of them is not in the asset bundle, the rune of the
+        // attack is then left out (see RegisterStaffHooks)
+        private GameObject? LoadSecondaryAttack(string wrapperName, string triggerName, out GameObject? trigger)
+        {
+            GameObject? wrapper = assetBundle.LoadAsset<GameObject>(wrapperName);
+            trigger = assetBundle.LoadAsset<GameObject>(triggerName);
+
+            if (wrapper == null || trigger == null)
+            {
+                Jotunn.Logger.LogError($"'{wrapperName}' or '{triggerName}' is not in the asset bundle, its rune is left out");
+                trigger = null;
+                return null;
+            }
+
+            if (trigger.GetComponent<ZNetView>() != null)
+                Jotunn.Logger.LogError($"'{triggerName}' has a ZNetView, it is only spawned by the caster and must not have one");
+
+            // The attack spawns the trigger and pays its costs when it fires, not when it starts. The game then checks the health of Blood Tap
+            // before it pays (without enough it stops the attack), and Core starts the cooldown only when it fired. Set here, so the prefab
+            // can not get it wrong. Core copies this attack onto the scythe on equip
+            Attack attack = wrapper.GetComponent<ItemDrop>().m_itemData.m_shared.m_attack;
+
+            if (attack.m_attackType != Attack.AttackType.Projectile)
+                Jotunn.Logger.LogError($"The attack of '{wrapperName}' must be of the type Projectile, or it does not spawn '{triggerName}'");
+
+            attack.m_attackProjectile = trigger;
+            attack.m_perBurstResourceUsage = true;
+            attack.m_attackHealthLowBlockUse = true;
+
+            return wrapper;
         }
     }
 }

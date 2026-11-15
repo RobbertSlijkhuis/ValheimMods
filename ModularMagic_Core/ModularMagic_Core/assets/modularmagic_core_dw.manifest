@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 3167489939
+CRC: 1886436226
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 910b26d3662f6c87978b19da008c15c5
+    Hash: fd2e17208c81d5e46acfe9fdec35145b
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 6d87bc0d65ea5340c83eb3dfbca0c8ee
+    Hash: b3bb64f501d0f1018f634a7c7d443845
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 910b26d3662f6c87978b19da008c15c5
+    Hash: fd2e17208c81d5e46acfe9fdec35145b
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -49,8 +49,6 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 1109157524, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
-  Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
-- Class: 114
   Script: {fileID: 1521249158, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: -1044604064, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
@@ -62,6 +60,8 @@ ClassTypes:
   Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 463273065, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 2053127972, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -108,10 +108,12 @@ SerializeReferenceClassIdentifiers:
 Assets:
 - Assets/Custom/Material/Runes/Marble/Rune_Marble_A_MMC.mat
 - Assets/Custom/Material/Runes/Marble/Rune_Marble_C_MMC.mat
+- Assets/Custom/PrefabInstance/Runes/MMC_Rune_Range.prefab
 - Assets/Custom/PrefabInstance/Runes/MMC_Rune_ProjectileAccuracy.prefab
 - Assets/Custom/Material/Runes/Stone/Rune_Stone_E_MMC.mat
 - Assets/Custom/Material/Runes/Wood/Rune_Wood_A_MMC.mat
 - Assets/Custom/Material/Table/Altar_MMC.mat
+- Assets/Custom/PrefabInstance/Runes/MMC_Rune_Legion.prefab
 - Assets/Custom/PrefabInstance/Table/fx_save_table_remove_MMC.prefab
 - Assets/Custom/Material/Runes/Stone/Rune_Stone_C_MMC.mat
 - Assets/Custom/Material/Runes/Grausten/Rune_Grausten_D_MMC.mat
@@ -121,12 +123,14 @@ Assets:
 - Assets/Custom/PrefabInstance/Runes/MMC_Rune_Creatures.prefab
 - Assets/Custom/Material/Runes/Grausten/Rune_Grausten_C_MMC.mat
 - Assets/Custom/Material/Runes/Rune_Ghost_MMC.mat
+- Assets/Custom/PrefabInstance/Runes/MMC_Rune_Greatsword.prefab
 - Assets/Custom/Material/Runes/Wood/Rune_Wood_D_MMC.mat
 - Assets/Custom/Material/Runes/Marble/Rune_Marble_MMC.mat
 - Assets/Custom/PrefabInstance/Table/fx_save_rune_MMC.prefab
 - Assets/Custom/Material/Runes/Grausten/Rune_Grausten_F_MMC.mat
 - Assets/Custom/Material/Runes/Grausten/Rune_Grausten_B_MMC.mat
 - Assets/Custom/PrefabInstance/Runes/MMC_Rune_DamageBlunt.prefab
+- Assets/Custom/PrefabInstance/Runes/MMC_Rune_Utility.prefab
 - Assets/Custom/Material/Runes/Wood/Rune_WoodOff_F_MMC.mat
 - Assets/Custom/Material/Runes/Wood/Rune_WoodOff_B_MMC.mat
 - Assets/Custom/Material/Runes/Wood/Rune_Wood_F_MMC.mat
@@ -146,6 +150,7 @@ Assets:
 - Assets/Custom/Material/Runes/Stone/Rune_Stone_F_MMC.mat
 - Assets/Custom/Material/Runes/Grausten/Rune_Grausten_E_MMC.mat
 - Assets/Custom/PrefabInstance/Runes/MMC_Rune_Cone.prefab
+- Assets/Custom/PrefabInstance/Runes/MMC_Rune_BloodTap.prefab
 - Assets/Custom/Material/Table/Spellbook2_1_1_off_MMC.mat
 - Assets/Custom/Material/Table/Spellbook2_1_1_MMC.mat
 - Assets/Custom/PrefabInstance/Eitr/MMC_EitrCrude.prefab

@@ -22,7 +22,6 @@ namespace ModularMagic_BloodMagic.Components
         private static readonly int ReanimationsKey = "MMBM_Reanimations".GetStableHashCode();
         private static readonly int HuskAnimKey     = "MMBM_HuskAnim".GetStableHashCode();
         private static readonly int HuskAnimTimeKey = "MMBM_HuskAnimTime".GetStableHashCode();
-        private static readonly int ScytheQualityKey = "MMBM_ScytheQuality".GetStableHashCode();
         private static readonly int ReanimateNumberKey = "MMBM_ReanimateNumber".GetStableHashCode();
         private static readonly int ReanimateStartKey = "MMBM_ReanimateStart".GetStableHashCode();
         private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
@@ -99,6 +98,9 @@ namespace ModularMagic_BloodMagic.Components
         // The key of the reanimation of this apparition in the ZDO of its summoner, 0 when it is not made yet
         private int m_reanimateKey;
 
+        // The key of the nova explosion of this apparition in the ZDO of its summoner, 0 when it is not made yet
+        private int m_novaKey;
+
         // The scale of the prefab, before ApplyVisuals gives the apparition the size of its scythe
         private float m_nativeScale = 1f;
 
@@ -120,19 +122,6 @@ namespace ModularMagic_BloodMagic.Components
             {
                 float scale = transform.localScale.x;
                 return scale > 0f && m_nativeScale > 0f ? scale / m_nativeScale : 1f;
-            }
-        }
-
-        /// <summary>
-        /// The quality of the scythe that summoned the apparition, which sets the maximum of apparitions for its reanimation. Written once
-        /// when it is summoned. An apparition from before it was stored has quality 1.
-        /// </summary>
-        public int ScytheQuality
-        {
-            get
-            {
-                ZDO? zdo = GetZDO();
-                return zdo != null ? Mathf.Max(1, zdo.GetInt(ScytheQualityKey, 1)) : 1;
             }
         }
 
@@ -162,6 +151,25 @@ namespace ModularMagic_BloodMagic.Components
                 }
 
                 return m_reanimateKey;
+            }
+        }
+
+        /// <summary>
+        /// The key in the ZDO of the summoner that holds the explosion its Nova gave this apparition, see NovaHelper.
+        /// </summary>
+        public int NovaKey
+        {
+            get
+            {
+                if (m_novaKey == 0)
+                {
+                    ZDO? zdo = GetZDO();
+
+                    if (zdo != null)
+                        m_novaKey = NovaHelper.GetKey(zdo.m_uid);
+                }
+
+                return m_novaKey;
             }
         }
 
@@ -225,9 +233,9 @@ namespace ModularMagic_BloodMagic.Components
 
         /// <summary>
         /// Called by ApparitionHelper right after the game has spawned the apparition, on the client that spawned it (the owner of the ZDO).
-        /// Writes the scythe, its quality and the summoner to the ZDO and applies all options.
+        /// Writes the scythe and the summoner to the ZDO and applies all options.
         /// </summary>
-        public void SetData(string weaponName, int scytheQuality, long summoner)
+        public void SetData(string weaponName, long summoner)
         {
             m_weaponName = weaponName;
             m_summoner   = summoner;
@@ -247,7 +255,6 @@ namespace ModularMagic_BloodMagic.Components
             }
 
             zdo.Set(WeaponKey, weaponName);
-            zdo.Set(ScytheQualityKey, Mathf.Max(1, scytheQuality));
             zdo.Set(SummonerKey, summoner);
 
             ApparitionOptions? options = GetOptions();
@@ -277,6 +284,11 @@ namespace ModularMagic_BloodMagic.Components
 
             bool husk  = IsHusk;
             bool owner = m_netView.IsOwner();
+
+            // The Nova of its summoner marked it: the owner explodes it, and its death removes it for every client. One that became a husk
+            // after it was marked still explodes
+            if (owner && TryExplode())
+                return;
 
             if (m_appliedHusk != husk)
             {
@@ -398,6 +410,27 @@ namespace ModularMagic_BloodMagic.Components
 
             if (GetSecondsSince(zdo.GetLong(ReanimateStartKey, now), now) < ReanimateDelay)
                 ApparitionHelper.SpawnReanimateEffect(transform.position);
+        }
+
+        /// <summary>
+        /// The owner explodes the apparition when its summoner has marked it with a Nova (NovaHelper.Release). The mark is in the ZDO of the
+        /// summoner and stays there, so it is also found by a client that becomes the owner later, and the death removes the apparition, so it
+        /// explodes once. Returns true when it exploded.
+        /// </summary>
+        private bool TryExplode()
+        {
+            if (m_character == null || m_character.IsDead())
+                return false;
+
+            Player summoner = Player.GetPlayer(m_summoner);
+
+            if (summoner == null || !NovaHelper.TryGetExplosion(summoner, NovaKey, out HitData.DamageTypes damage))
+                return false;
+
+            Jotunn.Logger.LogWarning($"[Apparition] '{name}' explodes (Nova of its summoner)");
+            NovaHelper.Explode(m_character, damage);
+            Kill();
+            return true;
         }
 
         private static double GetSecondsSince(long ticks, long now)

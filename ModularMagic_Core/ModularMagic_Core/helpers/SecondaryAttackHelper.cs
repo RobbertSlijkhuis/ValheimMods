@@ -19,6 +19,7 @@ namespace ModularMagic_Core.Helpers
         {
             public StatusEffect cooldown;
             public Func<float> cooldownSeconds;
+            public Func<Humanoid, Attack, bool> prepareStart;
         }
 
         private static readonly Dictionary<string, Definition> registered = new Dictionary<string, Definition>();
@@ -30,7 +31,13 @@ namespace ModularMagic_Core.Helpers
         /// <param name="cooldownEffectName">The unique name of the cooldown status effect, null for an attack without a cooldown.</param>
         /// <param name="cooldownDisplayName">The name of the cooldown status effect as the player sees it.</param>
         /// <param name="cooldownSeconds">The duration of the cooldown. It is read every time the cooldown starts, so a changed config value is used.</param>
-        public static void Register(string projectileName, string cooldownEffectName = null, string cooldownDisplayName = null, Func<float> cooldownSeconds = null)
+        /// <param name="prepareStart">
+        /// Called when the attack is about to start and is not recharging, with the character and the attack. The attack is the copy the
+        /// character uses for this one attack (Humanoid.StartAttack clones it), so a cost set on it only counts for this attack. Return false
+        /// to block the attack (show the reason yourself): it then costs nothing and does not start the cooldown.
+        /// </param>
+        public static void Register(string projectileName, string cooldownEffectName = null, string cooldownDisplayName = null, Func<float> cooldownSeconds = null,
+            Func<Humanoid, Attack, bool> prepareStart = null)
         {
             if (string.IsNullOrEmpty(projectileName))
             {
@@ -45,6 +52,7 @@ namespace ModularMagic_Core.Helpers
             }
 
             Definition definition = new Definition();
+            definition.prepareStart = prepareStart;
 
             if (!string.IsNullOrEmpty(cooldownEffectName) && cooldownSeconds != null)
             {
@@ -95,32 +103,61 @@ namespace ModularMagic_Core.Helpers
         }
 
         /// <summary>
-        /// Returns false when the attack must not start because the staff is still recharging.
-        /// A cooldown of 0 (or less) means there is no cooldown.
+        /// Returns false when the attack must not start: the staff is still recharging, or the mod that registered the attack blocks it
+        /// (see the prepareStart of Register). A cooldown of 0 (or less) means there is no cooldown.
         /// </summary>
-        internal static bool CheckCooldown(Humanoid character, Attack attack)
+        internal static bool CanStart(Humanoid character, Attack attack)
         {
-            if (character == null || !TryGetDefinition(attack, out Definition definition) || definition.cooldown == null)
-                return true;
-
-            if (definition.cooldownSeconds() <= 0f)
+            if (character == null || !TryGetDefinition(attack, out Definition definition))
                 return true;
 
             // The game keeps status effects by the stable hash of their name
-            if (character.GetSEMan().HaveStatusEffect(definition.cooldown.NameHash()))
+            if (definition.cooldown != null && definition.cooldownSeconds() > 0f && character.GetSEMan().HaveStatusEffect(definition.cooldown.NameHash()))
             {
                 character.Message(MessageHud.MessageType.Center, "The staff is still recharging!");
                 return false;
             }
 
-            return true;
+            return definition.prepareStart == null || definition.prepareStart(character, attack);
         }
 
         /// <summary>
         /// Starts the cooldown of an attack that really started. The game can still refuse an attack after
-        /// CheckCooldown (not enough eitr or stamina, a dungeon, ...), so the cooldown only starts when Attack.Start succeeded.
+        /// CanStart (not enough eitr or stamina, a dungeon, ...), so the cooldown only starts when Attack.Start succeeded.
+        /// An attack that pays per burst starts it when the burst fired instead, see StartCooldownAfterBurst.
         /// </summary>
         internal static void StartCooldown(Humanoid character, Attack attack)
+        {
+            if (PaysPerBurst(attack))
+                return;
+
+            StartCooldownNow(character, attack);
+        }
+
+        /// <summary>
+        /// Starts the cooldown of an attack that pays per burst, once a burst got past its costs. The game checks the costs of such an attack
+        /// (stamina, eitr and health) when the burst fires, not when the attack starts, and stops the attack without paying or firing when one
+        /// is missing (Attack.FireProjectileBurst). A burst that was stopped like that starts no cooldown.
+        /// </summary>
+        internal static void StartCooldownAfterBurst(Humanoid character, Attack attack)
+        {
+            if (!PaysPerBurst(attack) || character == null || !TryGetDefinition(attack, out Definition definition) || definition.cooldown == null)
+                return;
+
+            // A later burst of the same attack does not start it again
+            if (character.GetSEMan().HaveStatusEffect(definition.cooldown.NameHash()))
+                return;
+
+            StartCooldownNow(character, attack);
+        }
+
+        // The game only pays the costs per burst for a projectile attack (Attack.Update and Attack.FireProjectileBurst)
+        private static bool PaysPerBurst(Attack attack)
+        {
+            return attack != null && attack.m_perBurstResourceUsage && attack.m_attackType == Attack.AttackType.Projectile;
+        }
+
+        private static void StartCooldownNow(Humanoid character, Attack attack)
         {
             if (character == null || !TryGetDefinition(attack, out Definition definition) || definition.cooldown == null)
                 return;

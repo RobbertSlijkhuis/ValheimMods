@@ -38,6 +38,9 @@ namespace ModularMagic_Core.Helpers
 
             // Copy the attack, otherwise the item shares the attack object with the prefab (or the cone item) and the changes below leak into other staffs
             if (options.mainAttack != null) { itemData.m_shared.m_attack = options.mainAttack.m_shared.m_attack.Clone(); }
+            if (options.attackAnimation != null) { itemData.m_shared.m_attack.m_attackAnimation = options.attackAnimation; }
+            if (options.attackChainLevels != null) { itemData.m_shared.m_attack.m_attackChainLevels = (int)options.attackChainLevels; }
+            if (options.animationState != null) { itemData.m_shared.m_animationState = (ItemData.AnimationState)options.animationState; }
 
             if (options.name != null) { itemData.m_shared.m_name = options.name; }
             if (options.description != null) { itemData.m_shared.m_description = options.description; }

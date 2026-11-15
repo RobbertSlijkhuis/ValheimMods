@@ -44,6 +44,18 @@ namespace ModularMagic_Core.Data
             rainOptions.type = ImbuementType.SecondaryAttack;
             rainOptions.value = "Rain";
             list.Add(new RuneEntry(rainOptions));
+
+            RuneEntryOptions bloodTapOptions = new RuneEntryOptions();
+            bloodTapOptions.description = "Add a secondary ability to your weapon that pays with your own health! This ability is different depending on the type of the weapon!";
+            bloodTapOptions.id = RuneId.BloodTap;
+            bloodTapOptions.name = "Rune: Blood Tap";
+            bloodTapOptions.prefab = ModularMagic_Core.prefabs.RuneBloodTap;
+            bloodTapOptions.recipe = $"Stone:3, Bloodbag:5, {ModularMagic_Core.prefabs.EitrFine.name}:6";
+            bloodTapOptions.recipeUpgrade = bloodTapOptions.recipe;
+            bloodTapOptions.tiers = new int[] { 2, 3, 4 };
+            bloodTapOptions.type = ImbuementType.SecondaryAttack;
+            bloodTapOptions.value = "BloodTap";
+            RuneData.Add(list, bloodTapOptions);
         }
     }
 }

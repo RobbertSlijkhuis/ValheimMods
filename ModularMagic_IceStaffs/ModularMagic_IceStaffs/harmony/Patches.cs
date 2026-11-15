@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using ModularMagic_IceStaffs.Helpers;
 using System;
+using UnityEngine;
 using static ItemDrop;
 using CoreImbuementHelper = ModularMagic_Core.Helpers.ImbuementHelper;
 
@@ -28,6 +29,14 @@ namespace ModularMagic_IceStaffs.Harmony
             }
 
             return true;
+        }
+
+        // The ice sheet on the water a frost shot hits, see IceSheetHelper
+        [HarmonyPatch(typeof(Projectile), nameof(Projectile.OnHit))]
+        [HarmonyPostfix]
+        public static void ProjectileOnHit_Postfix(Projectile __instance, Vector3 hitPoint, bool water, ItemData ___m_weapon)
+        {
+            IceSheetHelper.OnProjectileHit(__instance, ___m_weapon, hitPoint, water);
         }
     }
 }

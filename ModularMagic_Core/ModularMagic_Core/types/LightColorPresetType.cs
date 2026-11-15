@@ -4,6 +4,7 @@
     {
         public static string None => "None";
         public static string Red => "Red";
+        public static string Blood => "Blood";
         public static string Orange => "Orange";
         public static string Yellow => "Yellow";
         public static string LemonGreen => "LemonGreen";

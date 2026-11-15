@@ -1,7 +1,11 @@
 ﻿using BepInEx.Configuration;
+using ModularMagic_BloodMagic.Models;
 using System;
 using ImbuementConfig = ModularMagic_Core.Configs.ImbuementConfig;
 using ImbuementConfigOptions = ModularMagic_Core.Models.ImbuementConfigOptions;
+using SecondaryAttackConfig = ModularMagic_Core.Configs.SecondaryAttackConfig;
+using SecondaryAttackConfigOptions = ModularMagic_Core.Models.SecondaryAttackConfigOptions;
+using SecondaryAttackType = ModularMagic_Core.Types.SecondaryAttackType;
 using StaffConfig = ModularMagic_Core.Configs.StaffConfig;
 using StaffConfigOptions = ModularMagic_Core.Models.StaffConfigOptions;
 
@@ -26,6 +30,19 @@ namespace ModularMagic_BloodMagic.Configs
 
         // The values of the runes of the scythes, see StaffDefinition
         public static ImbuementConfig imbuementConfig = new ImbuementConfig();
+
+        // The secondary attacks of the Nova and Blood Tap runes, null when their prefabs are not in the asset bundle
+        public static string secondaryAttackNovaName     = "Secondary attack Nova";
+        public static SecondaryAttackConfig? secondaryAttackNova;
+        public static ConfigEntry<float> novaDamageMultiplier;
+        public static ConfigEntry<float> novaRadius;
+
+        public static string secondaryAttackBloodTapName = "Secondary attack Blood Tap";
+        public static SecondaryAttackConfig? secondaryAttackBloodTap;
+        public static ConfigEntry<float> bloodTapHealthCost;
+
+        // How long the Range rune keeps its reach after the charge of the scythe is used
+        public static ConfigEntry<float> rangeLinger;
 
         // Apparition configs
         public static ConfigEntry<int>   scythe1ApparitionHealth;
@@ -57,14 +74,94 @@ namespace ModularMagic_BloodMagic.Configs
             InitApparitionConfigs();
             InitSoulReaperConfigs();
             InitImbuementConfig();
+            InitSecondaryAttackNovaConfig();
+            InitSecondaryAttackBloodTapConfig();
         }
 
         private static void InitImbuementConfig()
         {
             // The Attack Speed rune speeds up the swing animation of a scythe, like it does for the fire and lightning staffs. The Eitr Cost
             // rune lowers the eitr of a charging hit (see SoulReaperHelper.GetChargeEitr), which costs more than an attack of a staff, so
-            // a level saves more: 0.75 per level is 3 eitr at level 4
-            imbuementConfig.GenerateConfig(ModularMagic_BloodMagic.Instance.Config, new ImbuementConfigOptions() { attackSpeedAnimation = true, eitrCost = 0.75f });
+            // a level saves more: 0.75 per level is 3 eitr at level 4. The Range rune adds reach while the scythe is charged (ScytheRangeHelper),
+            // the Legion rune adds apparitions (ApparitionHelper.GetMaxApparitions)
+            imbuementConfig.GenerateConfig(ModularMagic_BloodMagic.Instance.Config, new ImbuementConfigOptions()
+            {
+                attackSpeedAnimation = true,
+                eitrCost = 0.75f,
+                secondaryAttackRunes = "Nova and Blood Tap",
+                attackRange = 1f,
+                summonLimit = 1,
+            });
+        }
+
+        // The scythes have no eitr cost of their own (their swing is free, the charging hit costs eitr), so the secondary attacks have a fixed
+        // eitr cost and not a multiplier of the attack of the scythe. Core lowers it per level above 1 ("Secondary Attack Rune Eitr Reduction").
+        // The type is Script: Core does not change what the attack spawns, the trigger does the work (NovaTrigger, BloodTapTrigger)
+        private static void InitSecondaryAttackNovaConfig()
+        {
+            CustomPrefabs prefabs = ModularMagic_BloodMagic.Instance.prefabs;
+
+            if (prefabs.SecondaryAttackNova == null || prefabs.AttackNova == null)
+                return;
+
+            try
+            {
+                ConfigFile Config = ModularMagic_BloodMagic.Instance.Config;
+                SecondaryAttackConfigOptions options = new SecondaryAttackConfigOptions(prefabs.SecondaryAttackNova, prefabs.AttackNova, SecondaryAttackType.Script, secondaryAttackNovaName)
+                {
+                    useEitr = 50,
+                    cooldown = 30f,
+                };
+                SecondaryAttackConfig config = new SecondaryAttackConfig();
+                config.GenerateConfig(Config, options);
+
+                novaDamageMultiplier = Config.Bind(new ConfigDefinition(options.sectionName, "Explosion damage multiplier"), 1f,
+                    new ConfigDescription("The damage every apparition deals when it explodes, as a multiplier of the damage of the scythe (quality and skill included). 1 is the damage of the scythe.",
+                    new AcceptableValueRange<float>(0f, 10f),
+                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 0 }));
+
+                novaRadius = Config.Bind(new ConfigDefinition(options.sectionName, "Explosion radius"), 4f,
+                    new ConfigDescription("The radius in metres in which an exploding apparition hits its enemies.",
+                    new AcceptableValueRange<float>(0.5f, 15f),
+                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 0 }));
+
+                secondaryAttackNova = config;
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + secondaryAttackNovaName + " config: " + error);
+            }
+        }
+
+        private static void InitSecondaryAttackBloodTapConfig()
+        {
+            CustomPrefabs prefabs = ModularMagic_BloodMagic.Instance.prefabs;
+
+            if (prefabs.SecondaryAttackBloodTap == null || prefabs.AttackBloodTap == null)
+                return;
+
+            try
+            {
+                ConfigFile Config = ModularMagic_BloodMagic.Instance.Config;
+                SecondaryAttackConfigOptions options = new SecondaryAttackConfigOptions(prefabs.SecondaryAttackBloodTap, prefabs.AttackBloodTap, SecondaryAttackType.Script, secondaryAttackBloodTapName)
+                {
+                    useEitr = 30,
+                    cooldown = 20f,
+                };
+                SecondaryAttackConfig config = new SecondaryAttackConfig();
+                config.GenerateConfig(Config, options);
+
+                bloodTapHealthCost = Config.Bind(new ConfigDefinition(options.sectionName, "Health cost"), 0.25f,
+                    new ConfigDescription("The part of your maximum health Blood Tap costs (0.25 is 25%). The Blood Magic skill lowers it, like the health cost of every attack. Without the health for it the attack does nothing.",
+                    new AcceptableValueRange<float>(0.01f, 0.95f),
+                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 0 }));
+
+                secondaryAttackBloodTap = config;
+            }
+            catch (Exception error)
+            {
+                Jotunn.Logger.LogError("Could not initialise " + secondaryAttackBloodTapName + " config: " + error);
+            }
         }
 
         private static void InitSoulReaperConfigs()
@@ -121,6 +218,11 @@ namespace ModularMagic_BloodMagic.Configs
                 new ConfigDescription("Apparitions are removed when their summoner is more than 150 m away, or has been gone (offline or too far away) for 2 minutes. Turn this off to keep them until they are killed.",
                 null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = 0 }));
+
+            rangeLinger = Config.Bind(new ConfigDefinition(section, "Range rune linger"), 5f,
+                new ConfigDescription("The seconds the Range rune keeps its reach after the charge of the scythe is used to summon an apparition. After that the scythe needs a new full charge.",
+                new AcceptableValueRange<float>(0f, 30f),
+                new ConfigurationManagerAttributes { IsAdminOnly = true, Order = -1 }));
         }
 
         private static void InitApparitionConfigs()

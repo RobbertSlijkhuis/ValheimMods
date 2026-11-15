@@ -17,5 +17,11 @@ namespace ModularMagic_Core.Models
 
         // The runes that give a secondary attack, for the description of the eitr reduction entry (for example "Nova and Rain")
         public string secondaryAttackRunes = "Nova and Rain";
+
+        // The default of the metres of reach the Range rune adds per level, null for a mod without the Range rune (no entry is bound)
+        public float? attackRange = null;
+
+        // The default of the creatures the Legion rune adds to the summon limit per level, null for a mod without the Legion rune
+        public int? summonLimit = null;
     }
 }

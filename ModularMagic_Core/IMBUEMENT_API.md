@@ -25,6 +25,7 @@ definition = new StaffDefinition()
 definition.AddSecondaryAttack("Nova", prefabs.secondaryAttackNova, PluginConfig.secondaryAttackNova);
 definition.AddSecondaryAttack("Rain", prefabs.secondaryAttackRain, PluginConfig.secondaryAttackRain);
 // definition.AddSecondaryAttack("Summon", wrapperPrefab, config, creaturePrefab);   // a summoned creature
+// definition.AddMainAttackAnimation("Greatsword", "greatsword", 3, ItemDrop.ItemData.AnimationState.Greatsword); // swing it like a greatsword
 // definition.damageProjectiles["Slash"] = slashProjectilePrefab;                    // a projectile per damage type
 
 StaffImbuementHelper.Register(definition);
@@ -36,7 +37,11 @@ definition.AddStaff(prefabs.staffFire1Prefab, PluginConfig.staffFire1, slots: 2,
 
 The config classes are in Core too (`StaffConfig`, `SecondaryAttackConfig`, `MainAttackConfig`, `ImbuementConfig` with their `*Options`), as well as `UpdateHelper`, `RecipeHelper` and `StaffHelper.CreateStaff`. The mod binds them with its own `ConfigFile` (`staffConfig.GenerateConfig(Config, options)`), so each mod keeps its own config file. A stat or attack entry is only bound when its option has a value, so a staff only has the entries its mod gives a value for. `ImbuementConfigOptions.eitrCost` is the default of the "Eitr Cost Rune" entry (0.25 for a staff, the scythes use 0.75 for their charging hit). A mod reloads the config on the held staff with `Config.SettingChanged += (s, a) => ImbuedStaffHelper.ReapplyOnHeldStaff();`.
 
-What Core does with the definition when a staff is equipped (`StaffImbuementHelper.Apply`): the base stats come from the config snapshot of the staff (`ItemDataSnapShot`, read from the config every time, so synced values are used), and then each rune is applied on top: Eitr Cost, Accuracy, Projectile Speed, Attack Speed, the damage type (moves the main damage between blunt, pierce and slash, and swaps the projectile), the Cone (replaces the main attack) and the secondary attacks (with the eitr savings per level). A mod only writes code for what is special about its staffs.
+What Core does with the definition when a staff is equipped (`StaffImbuementHelper.Apply`): the base stats come from the config snapshot of the staff (`ItemDataSnapShot`, read from the config every time, so synced values are used), and then each rune is applied on top: Eitr Cost, Accuracy, Projectile Speed, Attack Speed, the damage type (moves the main damage between blunt, pierce and slash, and swaps the projectile), the Cone (replaces the main attack), a main attack animation rune such as Greatsword (keeps the attack, changes its animation, the hits of its chain and how the staff is held) and the secondary attacks (with the eitr savings per level). A mod only writes code for what is special about its staffs.
+
+How a staff is held (`m_animationState`) is read by the game when the staff is equipped, before Core applies the runes in the `EquipItem` postfix. When the runes change it, Core sets the pose of the character again (`ImbuedStaffHelper`), so the Greatsword rune shows on the first equip and after a relog.
+
+The Range (`AttackRange`) and Legion (`SummonLimit`) runes are not applied by Core: the mod reads their level with `ImbuementHelper.GetLevel(item, type)` and the value per level from its `ImbuementConfig` (`AttackRange`, `SummonLimit`). Those entries are only bound when the mod sets `ImbuementConfigOptions.attackRange` / `summonLimit`.
 
 ### Hooks for the parts of an attack
 
@@ -149,6 +154,11 @@ The steps below are what the framework does for a staff. They are still the way 
 | `Creatures` | `SecondaryAttack` | `Summon` | 1-3 | all four |
 | `Nova` | `SecondaryAttack` | `Nova` | 1-3 | all four |
 | `Rain` | `SecondaryAttack` | `Rain` | 1-3 | MMES, MMFS, MMIS |
+| `BloodTap` | `SecondaryAttack` | `BloodTap` | 1-3 | MMBM |
+| `Greatsword` | `MainAttack` | `Greatsword` | 1-4 | MMBM |
+| `Range` | `AttackRange` | `1` | 1-4 | MMBM |
+| `Legion` | `SummonLimit` | `1` | 1-4 | MMBM |
+| `Utility` | `Utility` | `1` | 1-4 | MMIS (the ice sheets) |
 
 The numeric `value`s are hints. EarthStaffs ignores them and uses its config. The tiers of the levels are in `data/Rune*Data.cs`. Which runes a weapon supports is set by the weapon: the Earth staffs list everything above except `DamageBlunt` (`EarthImbuementHelper.AllowedRunes`). The last column is what Core used to allow per weapon type, so a new staff mod can start from it.
 
@@ -176,11 +186,14 @@ SecondaryAttackHelper.Register(
     "attack_nova_MMIS",                 // the name of the projectile prefab the attack spawns, unique for this attack
     "secondary_nova_MMISCooldownStatusEffect", // the unique name of the cooldown status effect (null: no cooldown)
     "Frost nova cooldown",              // what the player sees
-    () => PluginConfig.secondaryAttackNova.cooldown.Value); // the cooldown in seconds, read every time it starts
+    () => PluginConfig.secondaryAttackNova.cooldown.Value, // the cooldown in seconds, read every time it starts
+    (character, attack) => true);       // optional: block the attack (return false) or set costs on this attack
 ```
 
 - **Eitr cost:** the game charges every secondary attack the eitr cost of the main attack. For a registered attack Core uses the cost of the attack itself (with the skill discount). One `Attack.GetAttackEitr` postfix in Core does this for all staff mods.
 - **Cooldown:** when a cooldown is given, a registered attack can not start while the status effect is active ("The staff is still recharging!"). The cooldown starts when the attack can really start (not without enough eitr), lasts the number of seconds from the callback, and shows the icon of the staff that cast it. The same cooldown is used by every staff that has the attack.
+- **Pays per burst:** for a Projectile attack with `m_perBurstResourceUsage` the game checks and pays the stamina, eitr and health when the burst fires, and stops the attack without paying or firing when one is missing (a health cost then never takes the last health). Core starts the cooldown of such an attack when the burst fired, so a stopped attack starts no cooldown.
+- **`prepareStart`:** called before the attack starts, after the cooldown check, with the copy of the attack the character uses for this one attack (`Humanoid.StartAttack` clones it). Return false to block it (show the reason yourself, it costs nothing and starts no cooldown), or set a cost on it, for example `m_attackHealth` from the maximum health (the game's `m_attackHealthPercentage` is a part of the current health).
 - **Recognised by the projectile name**, not by a number in Unity. An attack that is not registered is left alone. A cooldown effect is created by `Register`, a mod does not have to create status effects.
 
 ## Rules for effects that work in multiplayer
@@ -199,6 +212,7 @@ Everything in the namespaces `ModularMagic_Core.Components`, `.Helpers`, `.Model
 - **`ImbuementHelper`** (static):
   - `HasImbuements(ItemData)`: the weapon has an `ImbuementSlots` component.
   - `Read(ItemData)`: the runes of the weapon, one `Imbuement` per slot.
+  - `GetLevel(ItemData, type)`: the level of the rune of that imbuement type on the weapon, 0 without one.
   - `GetSlots(ItemData)`: the `ImbuementSlots` of the weapon, or null.
   - `Serialize` / `Deserialize`: the saved string, see below.
   - `FindRune(id)` / `RegisterRune(rune)`: the rune registry (by id), Core fills it at startup.
@@ -209,10 +223,11 @@ Everything in the namespaces `ModularMagic_Core.Components`, `.Helpers`, `.Model
   - `GetEditor`, `GetDraft`, `SetEditor`, `SetDraft`, `GetUnsavedRunes`, `LoadItemFromZDO`: used by the table, most staff mods do not need them.
 - **`Imbuement`** (one slot): `type`, `value`, `name`, `description`, `prefab`, `level`, `runeId`, `tier`, `weaponType`, `rune`. `name` and `description` are localized when read.
 - **`ImbuementRune`** (component on every rune prefab): `m_id`, `m_type`, `m_value`, `m_maxLevel`, `m_tiers`, `m_defaultName`, `m_defaultDescription`, `GetRequiredTier(level)`, `IsValidLevel(level)`, `GetName(weaponType)`, `GetDescription(weaponType)`.
+- **`ItemUpgradeHelper`** (static): the event `OnUpgraded(from, to)`, called after an item was upgraded at a crafting station, see [Saved data](#saved-data).
 - **`ImbuementType`**, **`WeaponType`**, **`RuneId`**: `const string`s, so they work in `case` labels.
 - **`LightColorPresetType`**: the names for `m_colorPreset`.
-- **`SecondaryAttackHelper`** (static): `Register(projectileName, cooldownEffectName, cooldownDisplayName, cooldownSeconds)`, see [Secondary attacks](#secondary-attacks-nova-rain-summon-).
-- **The staff framework**: `StaffDefinition` and `SecondaryAttackEntry` (models), `StaffImbuementHelper` (`Register`, `Apply`), `ImbuedStaffHelper`, `AttackSpeedHelper`, `SpawnedProjectileHelper`, `SpawnedCreatureHelper`, `TerrainOpRegistry`, `DamageHelper.GetMainPhysical`, `StaffHelper.CreateStaff`, `UpdateHelper` and `RecipeHelper`, see [The staff framework](#the-staff-framework-the-way-to-add-a-staff-mod).
+- **`SecondaryAttackHelper`** (static): `Register(projectileName, cooldownEffectName, cooldownDisplayName, cooldownSeconds, prepareStart)`, see [Secondary attacks](#secondary-attacks-nova-rain-summon-).
+- **The staff framework**: `StaffDefinition` (with `AddSecondaryAttack` and `AddMainAttackAnimation`), `SecondaryAttackEntry` and `MainAttackAnimationEntry` (models), `StaffImbuementHelper` (`Register`, `Apply`), `ImbuedStaffHelper`, `AttackSpeedHelper`, `SpawnedProjectileHelper`, `SpawnedCreatureHelper`, `TerrainOpRegistry`, `DamageHelper.GetMainPhysical`, `StaffHelper.CreateStaff`, `UpdateHelper` and `RecipeHelper`, see [The staff framework](#the-staff-framework-the-way-to-add-a-staff-mod).
 - **The shared config classes** (`ModularMagic_Core.Configs`): `StaffConfig`, `SecondaryAttackConfig`, `MainAttackConfig` and `ImbuementConfig`, with their options in `Models` (`StaffConfigOptions`, `SecondaryAttackConfigOptions`, `MainAttackConfigOptions`, `ImbuementConfigOptions`, `UpdateItemDataOptions`, ...) and `SecondaryAttackType` in `Types`.
 
 ## Saved data
@@ -228,10 +243,11 @@ The version, a colon, and one entry per slot separated by commas. An entry is `r
 - An unknown version, or the old `|` format, loads as empty slots and logs a warning.
 - An entry for a rune that does not exist, or with a level the rune does not have, is skipped and logged.
 - Other keys on the same item: `MMC_Editor` (the player id of the editor) and `MMC_Draft` (the unsaved changes, same format).
+- An upgrade at a crafting station replaces the item with a new one without its custom data (`InventoryGui.DoCrafting`). Core copies `Imbuements_MMC` onto the new item; the editor and draft only exist on the rune table, so they are not copied. A mod that keeps its own data on an item copies it in `ItemUpgradeHelper.OnUpgraded(from, to)`, which runs after the runes are copied.
 
 ## Adding a rune (in Core)
 
-1. Add one rune prefab to the asset bundle. It has an `attach` child with one model per level (`rune_1`, `rune_2`, ...), the number of models is the number of levels. Register it in `ModularMagic_Core.InitAssetBundle` with `AddRunePrefab("<prefab name>")` and add a field for it to `CustomPrefabs`. The name must be fixed and the same on every client.
+1. Add one rune prefab to the asset bundle. It has an `attach` child with one model per level (`rune_1`, `rune_2`, ...), the number of models is the number of levels. Register it in `ModularMagic_Core.InitAssetBundle` with `AddRunePrefab("<prefab name>")` and add a field for it to `CustomPrefabs`. The name must be fixed and the same on every client. A prefab that is not in the asset bundle is logged and its rune is left out (add the entry with `RuneData.Add`), so the other runes still load.
 2. Add the id to `RuneId` and a `RuneEntryOptions` block in the matching `data/Rune*Data.cs` with the `id` (no `:`, `,` or `@`, and unique), `type`, `value`, the English `name` and `description` (also the default text of the rune), the crafting `recipe`, the `recipeUpgrade` (the items of an upgrade, multiplied per level) and `tiers` (the slot tier a level needs, one entry per level).
 3. Add the id to `m_allowedRunes` of every weapon that should support it, and add its name and description in that staff mod's texts.
 4. Handle the new `type` or `value` in every staff mod that should support it.

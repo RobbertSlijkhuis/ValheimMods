@@ -74,6 +74,32 @@ namespace ModularMagic_BloodMagic.Harmony
             SoulReaperHelper.RegisterAttachForPlayer(player, __result);
         }
 
+        // The Range rune adds reach to the normal swing of a charged scythe, see ScytheRangeHelper. The reach is put back in the finalizer,
+        // which also runs when the game throws
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Attack), "DoMeleeAttack")]
+        public static void AttackDoMeleeAttack_Prefix(Attack __instance, out float? __state)
+        {
+            __state = ScytheRangeHelper.ExtendReach(__instance);
+        }
+
+        [HarmonyFinalizer]
+        [HarmonyPatch(typeof(Attack), "DoMeleeAttack")]
+        public static void AttackDoMeleeAttack_Finalizer(Attack __instance, float? __state)
+        {
+            if (__state != null)
+                __instance.m_attackRange = (float)__state;
+        }
+
+        // The limit of apparitions comes from the last scythe the local player equipped, see ApparitionHelper.RememberScythe
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Humanoid), "EquipItem")]
+        public static void HumanoidEquipItem_Postfix(Humanoid __instance, ItemData item, bool __result)
+        {
+            if (__result)
+                ApparitionHelper.RememberScythe(__instance, item);
+        }
+
         /// <summary>
         /// Cleans up cached attach references when a player is destroyed (logout/disconnect).
         /// </summary>

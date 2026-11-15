@@ -16,5 +16,10 @@ namespace ModularMagic_Core.Types
         public const string Creatures = "Creatures";
         public const string Nova = "Nova";
         public const string Rain = "Rain";
+        public const string BloodTap = "BloodTap";
+        public const string Range = "Range";
+        public const string Legion = "Legion";
+        public const string Utility = "Utility";
+        public const string Greatsword = "Greatsword";
     }
 }

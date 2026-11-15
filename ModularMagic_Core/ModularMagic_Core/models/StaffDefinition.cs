@@ -23,6 +23,21 @@ namespace ModularMagic_Core.Models
     }
 
     /// <summary>
+    /// A main attack rune that keeps the attack of the staff (its damage, reach, angle and costs) and only changes how it is swung: the
+    /// animation of the attack, the number of hits of its chain and how the weapon is held.
+    /// </summary>
+    public class MainAttackAnimationEntry
+    {
+        // The value of the rune ("Greatsword")
+        public string runeValue;
+        // The trigger of the attack animation (the game adds the number of the hit in the chain, "greatsword" plays "greatsword0" and on)
+        public string attackAnimation;
+        public int chainLevels;
+        // How the character holds the weapon while the rune is slotted
+        public ItemData.AnimationState animationState;
+    }
+
+    /// <summary>
     /// What a staff mod tells Core about its staffs, see StaffImbuementHelper.Register. Core then handles the staffs: it gives them their
     /// rune slots, applies the runes when a staff is equipped, speeds up the attack animation and scales summoned creatures. The mod only
     /// loads its prefabs and fills in this definition.
@@ -54,6 +69,7 @@ namespace ModularMagic_Core.Models
         public Dictionary<string, GameObject> damageProjectiles = new Dictionary<string, GameObject>();
 
         internal readonly Dictionary<string, SecondaryAttackEntry> secondaryAttacks = new Dictionary<string, SecondaryAttackEntry>();
+        internal readonly Dictionary<string, MainAttackAnimationEntry> mainAttackAnimations = new Dictionary<string, MainAttackAnimationEntry>();
         private readonly Dictionary<string, ItemDataSnapShot> snapshots = new Dictionary<string, ItemDataSnapShot>();
 
         /// <summary>
@@ -62,6 +78,22 @@ namespace ModularMagic_Core.Models
         public void AddSecondaryAttack(string runeValue, GameObject attack, SecondaryAttackConfig config, GameObject creature = null)
         {
             secondaryAttacks[runeValue] = new SecondaryAttackEntry() { runeValue = runeValue, attack = attack, config = config, creature = creature };
+        }
+
+        /// <summary>
+        /// Adds a main attack rune that swings the staff with other animations (for example the Greatsword rune). The attack of the staff
+        /// stays the same, only the animation, the number of hits of the chain and how the staff is held change. The rune has the type
+        /// MainAttack, so it can not be slotted together with the Cone rune.
+        /// </summary>
+        public void AddMainAttackAnimation(string runeValue, string attackAnimation, int chainLevels, ItemData.AnimationState animationState)
+        {
+            mainAttackAnimations[runeValue] = new MainAttackAnimationEntry()
+            {
+                runeValue = runeValue,
+                attackAnimation = attackAnimation,
+                chainLevels = chainLevels,
+                animationState = animationState,
+            };
         }
 
         /// <summary>

@@ -75,7 +75,7 @@ namespace ModularMagic_BloodMagic.Helpers
 
             if (reaper.CanDischarge())
             {
-                int max = ApparitionHelper.GetMaxApparitions(scythe);
+                int max = ApparitionHelper.GetMaxApparitions();
 
                 if (slots >= max)
                 {
@@ -107,6 +107,17 @@ namespace ModularMagic_BloodMagic.Helpers
             reaper.Charge(charge);
             Jotunn.Logger.LogWarning($"[SoulReaper] Charged {charge:P1} for {eitr:F2} eitr with {slots} apparitions, now {reaper.m_charge:P1}");
             SpawnChargeEffects(hit.m_point, hit.m_dir);
+        }
+
+        /// <summary>
+        /// Fills the scythe at once, for the Blood Tap rune (BloodTapHelper.Tap). Like a full scythe from hits, the next hit summons an
+        /// apparition when there is a free slot.
+        /// </summary>
+        public static void FillCharge(SoulReaper reaper, Vector3 point, Vector3 dir)
+        {
+            reaper.Charge(reaper.m_maxCharge);
+            Jotunn.Logger.LogWarning($"[SoulReaper] Filled by Blood Tap, now {reaper.m_charge:P1}");
+            SpawnChargeEffects(point, dir);
         }
 
         /// <summary>

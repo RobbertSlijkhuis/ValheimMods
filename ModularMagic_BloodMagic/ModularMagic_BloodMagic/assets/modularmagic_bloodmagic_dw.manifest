@@ -1,16 +1,16 @@
 ManifestFileVersion: 0
 UnityVersion: 6000.0.61f1
-CRC: 579728015
+CRC: 4116144372
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 9ed2080b855161a267c74a3b21643d12
+    Hash: 50ef2e3533d165348494d4ffb185c1a7
   TypeTreeHash:
     serializedVersion: 2
-    Hash: c2f2744b7a7104e74e4603843b745885
+    Hash: e0bca9276bab1dfeefbb1fd601215783
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: c32069931a2496819514e09f3e121668
+    Hash: 006d9415296926ba6d40024f0bc9f483
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -33,12 +33,22 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 65
   Script: {instanceID: 0}
+- Class: 82
+  Script: {instanceID: 0}
+- Class: 83
+  Script: {instanceID: 0}
 - Class: 108
   Script: {instanceID: 0}
 - Class: 114
   Script: {fileID: -179248876, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
+  Script: {fileID: -1044604064, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 1404409730, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
   Script: {fileID: -585565762, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
+- Class: 114
+  Script: {fileID: 313648218, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
   Script: {fileID: 825357479, guid: c1b78fa918b030faf1c1f6f6164daeb2, type: 3}
 - Class: 114
@@ -57,6 +67,12 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 213
   Script: {instanceID: 0}
+- Class: 241
+  Script: {instanceID: 0}
+- Class: 243
+  Script: {instanceID: 0}
+- Class: 245
+  Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: Attack
@@ -74,14 +90,20 @@ SerializeReferenceClassIdentifiers:
   ClassName: ItemStand/OrientationSettings
 Assets:
 - Assets/Custom/Scythe/MMBM_Scythe2.prefab
+- Assets/Custom/Scythe/Attack/secondary_bloodtap_MMBM.prefab
 - Assets/Custom/Scythe/MMBM_Scythe3.prefab
 - Assets/Custom/Scythe/fx_spikes_blood_MMBM.prefab
 - Assets/Custom/Scythe/fx_spikes_MMBM.prefab
 - Assets/Custom/Scythe/fx_spores_MMBM.prefab
 - Assets/Custom/Scythe/fx_spores_blood_MMBM.prefab
+- Assets/Custom/Scythe/fx/fx_nova_MMBM.prefab
+- Assets/Custom/Scythe/Attack/attack_bloodtap_MMBM.prefab
+- Assets/Custom/Scythe/Attack/attack_nova_MMBM.prefab
 - Assets/Custom/Scythe/spawn_scythe1_MMBM.prefab
 - Assets/Custom/Scythe/MMBM_Scythe1.prefab
 - Assets/Custom/Scythe/Charred_Melee/Charred_mat_MMBM.mat
+- Assets/Custom/Scythe/fx/fx_bloodtap_MMBM.prefab
 - Assets/Custom/Scythe/spawn_scythe3_MMBM.prefab
 - Assets/Custom/Scythe/spawn_scythe2_MMBM.prefab
+- Assets/Custom/Scythe/Attack/secondary_nova_MMBM.prefab
 Dependencies: []

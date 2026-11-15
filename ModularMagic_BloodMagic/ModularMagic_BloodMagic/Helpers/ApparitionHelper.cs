@@ -2,8 +2,11 @@ using ModularMagic_BloodMagic.Components;
 using ModularMagic_BloodMagic.Configs;
 using ModularMagic_BloodMagic.Models;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 using DamageHelper = ModularMagic_Core.Helpers.DamageHelper;
+using ImbuementHelper = ModularMagic_Core.Helpers.ImbuementHelper;
+using ImbuementType = ModularMagic_Core.Types.ImbuementType;
 using SpawnedCreatureHelper = ModularMagic_Core.Helpers.SpawnedCreatureHelper;
 
 namespace ModularMagic_BloodMagic.Helpers
@@ -123,18 +126,85 @@ namespace ModularMagic_BloodMagic.Helpers
             return Count(Player.m_localPlayer.GetPlayerID(), out _) + CountPendingSummons();
         }
 
+        // The quality and the Legion level of the last scythe the player equipped, as "quality,level". It is saved with the character, so the
+        // limit is known after a relog and while no scythe is in the hand (to reanimate a husk)
+        private const string LastScytheKey = "MMBM_LastScythe";
+
+        // An id in the data of a scythe, so an upgraded scythe (a new item, see OnScytheUpgraded) is known to be the last equipped one
+        private const string ScytheIdKey = "MMBM_ScytheId";
+
         /// <summary>
-        /// The number of apparitions a player can have with this scythe. Every quality level above 1 adds to the maximum.
+        /// Called when a character equipped an item. For a scythe of the local player, its quality and the level of its Legion rune are
+        /// remembered for the limit of apparitions (GetMaxApparitions), as "quality,legion,id". The runes of a scythe can only change on
+        /// the rune table, so the scythe is equipped again after a change. An upgrade is handled by OnScytheUpgraded.
         /// </summary>
-        public static int GetMaxApparitions(ItemDrop.ItemData scythe)
+        public static void RememberScythe(Humanoid humanoid, ItemDrop.ItemData item)
         {
-            return GetMaxApparitions(scythe != null ? scythe.m_quality : 1);
+            if (humanoid == null || humanoid != Player.m_localPlayer || item == null || ModularMagic_BloodMagic.Instance.definition == null)
+                return;
+
+            if (!ModularMagic_BloodMagic.Instance.definition.IsStaff(item))
+                return;
+
+            if (!item.m_customData.TryGetValue(ScytheIdKey, out string id) || string.IsNullOrEmpty(id))
+            {
+                id = System.Guid.NewGuid().ToString("N");
+                item.m_customData[ScytheIdKey] = id;
+            }
+
+            int level = ImbuementHelper.GetLevel(item, ImbuementType.SummonLimit);
+            Player.m_localPlayer.m_customData[LastScytheKey] = $"{Mathf.Max(1, item.m_quality)},{level},{id}";
         }
 
-        /// <summary>The number of apparitions a player can have with a scythe of this quality.</summary>
-        public static int GetMaxApparitions(int quality)
+        /// <summary>
+        /// Called by Core when an item was upgraded. The game replaces the item with a new one, Core has already moved the runes onto it.
+        /// The id of the scythe moves along, and when it is the last equipped scythe the limit takes its new quality right away.
+        /// </summary>
+        public static void OnScytheUpgraded(ItemDrop.ItemData from, ItemDrop.ItemData to)
         {
-            return PluginConfig.maxApparitions.Value + PluginConfig.maxApparitionsPerQuality.Value * (Mathf.Max(1, quality) - 1);
+            if (from == null || to == null || ModularMagic_BloodMagic.Instance.definition == null || !ModularMagic_BloodMagic.Instance.definition.IsStaff(to))
+                return;
+
+            if (!from.m_customData.TryGetValue(ScytheIdKey, out string id) || string.IsNullOrEmpty(id))
+                return;
+
+            to.m_customData[ScytheIdKey] = id;
+
+            Player player = Player.m_localPlayer;
+            if (player == null || !player.m_customData.TryGetValue(LastScytheKey, out string value) || string.IsNullOrEmpty(value))
+                return;
+
+            string[] parts = value.Split(',');
+            if (parts.Length == 3 && parts[2] == id)
+                RememberScythe(player, to);
+        }
+
+        /// <summary>
+        /// The number of apparitions the local player can have: the config base, one more for every quality level of the last equipped scythe
+        /// above 1, and the Legion rune of that scythe. It is worked out with the current config, so a changed value counts right away.
+        /// </summary>
+        public static int GetMaxApparitions()
+        {
+            int quality = 1;
+            int legion = 0;
+            Player player = Player.m_localPlayer;
+
+            if (player != null && player.m_customData.TryGetValue(LastScytheKey, out string value) && !string.IsNullOrEmpty(value))
+            {
+                string[] parts = value.Split(',');
+
+                if (parts.Length >= 2)
+                {
+                    int.TryParse(parts[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out quality);
+                    int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out legion);
+                }
+            }
+
+            int perLegionLevel = PluginConfig.imbuementConfig.SummonLimit != null ? PluginConfig.imbuementConfig.SummonLimit.Value : 0;
+
+            return PluginConfig.maxApparitions.Value
+                + PluginConfig.maxApparitionsPerQuality.Value * (Mathf.Max(1, quality) - 1)
+                + perLegionLevel * Mathf.Max(0, legion);
         }
 
         /// <summary>The summons of the local player that the game has not spawned yet.</summary>
@@ -299,12 +369,12 @@ namespace ModularMagic_BloodMagic.Helpers
                 return true;
             }
 
-            // The maximum of the scythe that summoned it, for the active apparitions (husks do not count) and the summons on their way. This
+            // The maximum of the last equipped scythe, for the active apparitions (husks do not count) and the summons on their way. This
             // is checked here, on the client of the summoner and before it pays, like the maximum of a summon. A husk that is not loaded is
             // not counted when a new apparition is summoned, so without this the player could go over the maximum
             Count(player.GetPlayerID(), out int active);
             active += CountPendingSummons() + CountReturningHusks(player);
-            int max = GetMaxApparitions(apparition.ScytheQuality);
+            int max = GetMaxApparitions();
 
             if (active + 1 > max)
             {
@@ -461,7 +531,7 @@ namespace ModularMagic_BloodMagic.Helpers
                 return;
             }
 
-            controller.SetData(weaponName, staff.m_quality, Player.m_localPlayer.GetPlayerID());
+            controller.SetData(weaponName, Player.m_localPlayer.GetPlayerID());
 
             float baseline = GetBaselineDamage();
             if (baseline <= 0f)

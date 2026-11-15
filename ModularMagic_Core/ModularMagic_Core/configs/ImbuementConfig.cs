@@ -18,6 +18,10 @@ namespace ModularMagic_Core.Configs
         public ConfigEntry<float> AttackSpeed;
         public ConfigEntry<float> ProjectileSpeed;
         public ConfigEntry<float> SecondaryAttackEitr;
+        // Only bound for a mod with the Range rune (ImbuementConfigOptions.attackRange)
+        public ConfigEntry<float> AttackRange;
+        // Only bound for a mod with the Legion rune (ImbuementConfigOptions.summonLimit)
+        public ConfigEntry<int> SummonLimit;
 
         private int entryCount = 100;
 
@@ -55,6 +59,20 @@ namespace ModularMagic_Core.Configs
                 new ConfigDescription($"The part of the secondary attack eitr cost that is saved per level above 1 with the {options.secondaryAttackRunes} runes (0.125 is 12.5%, so level 3 costs 75%)",
                 new AcceptableValueRange<float>(0f, 0.5f),
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+
+            if (options.attackRange != null)
+            {
+                AttackRange = config.Bind(new ConfigDefinition(sectionName, "Range Rune"), (float)options.attackRange,
+                    new ConfigDescription("The metres of reach the Range rune adds to the attack per level", new AcceptableValueRange<float>(0f, 5f),
+                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+            }
+
+            if (options.summonLimit != null)
+            {
+                SummonLimit = config.Bind(new ConfigDefinition(sectionName, "Legion Rune"), (int)options.summonLimit,
+                    new ConfigDescription("The number of creatures the Legion rune adds to the summon limit per level", new AcceptableValueRange<int>(0, 5),
+                    new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
+            }
         }
 
         private int HandleOrder()

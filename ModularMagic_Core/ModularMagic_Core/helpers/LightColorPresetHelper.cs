@@ -19,6 +19,11 @@ namespace ModularMagic_Core.Helpers
                     emissionColor = new Color(2.4f, 0.150596f, 0.1345381f, 1f);
                     lightColor = new Color(1f, 0.3001108f, 0.2862746f, 1f); // #FF4D49
                     break;
+                case nameof(LightColorPresetType.Blood):
+                    flareColor = new Color(1f, 0f, 0.343132f, 0.09803922f); // FF0057
+                    emissionColor = new Color(2.639016f, 0f, 0.17f, 1f); 
+                    lightColor = new Color(1f, 0f, 0.343132f, 1f); // FF0057
+                    break;
                 case nameof(LightColorPresetType.Orange):
                     flareColor = new Color(1f, 0.5899594f, 0.1132353f, 0.09803922f); // #FF7D3619
                     emissionColor = new Color(2.2f, 0.5504988f, 0.1382199f, 1f);

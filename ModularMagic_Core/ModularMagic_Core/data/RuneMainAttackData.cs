@@ -19,6 +19,19 @@ namespace ModularMagic_Core.Data
             coneOptions.type = ImbuementType.MainAttack;
             coneOptions.value = "Cone";
             list.Add(new RuneEntry(coneOptions));
+
+            // Swings the weapon with the attack animations of a two handed sword, see StaffDefinition.AddMainAttackAnimation
+            RuneEntryOptions greatswordOptions = new RuneEntryOptions();
+            greatswordOptions.description = "Swing your weapon like a greatsword!";
+            greatswordOptions.id = RuneId.Greatsword;
+            greatswordOptions.name = "Rune: Greatsword";
+            greatswordOptions.prefab = ModularMagic_Core.prefabs.RuneGreatsword;
+            greatswordOptions.recipe = $"RoundLog:3, SwordIron:1, {ModularMagic_Core.prefabs.EitrCrude.name}:3";
+            greatswordOptions.recipeUpgrade = greatswordOptions.recipe;
+            greatswordOptions.tiers = new int[] { 1, 2, 3, 4 };
+            greatswordOptions.type = ImbuementType.MainAttack;
+            greatswordOptions.value = "Greatsword";
+            RuneData.Add(list, greatswordOptions);
         }
     }
 }

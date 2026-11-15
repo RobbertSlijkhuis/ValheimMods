@@ -16,6 +16,11 @@ namespace ModularMagic_BloodMagic.Locale
 
             AddRune(texts, RuneId.EitrCost, "Rune: Eitr Cost", "Reduce the eitr of every hit that charges the scythe");
             AddRune(texts, RuneId.AttackSpeed, "Rune: Attack Speed", "Swing the scythe faster");
+            AddRune(texts, RuneId.Nova, "Rune: Nova", "Your secondary attack makes all your active apparitions explode");
+            AddRune(texts, RuneId.BloodTap, "Rune: Blood Tap", "Your secondary attack pays health and eitr to fully charge the scythe");
+            AddRune(texts, RuneId.Range, "Rune: Range", "The scythe reaches further while it is charged, and for a few seconds after the charge is used");
+            AddRune(texts, RuneId.Legion, "Rune: Legion", "Have one more apparition per level");
+            AddRune(texts, RuneId.Greatsword, "Rune: Greatsword", "Swing the scythe like a greatsword");
 
             ModularMagic_BloodMagic.Localization.AddTranslation("English", texts);
         }

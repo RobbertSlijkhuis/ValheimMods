@@ -44,6 +44,12 @@ namespace ModularMagic_Core.Models
         public float? damageSlashPerLevel = null;
         public float? damageSpiritPerLevel = null;
 
+        // The animation of the main attack and the number of hits of its chain, set on the attack after mainAttack is copied
+        public string? attackAnimation = null;
+        public int? attackChainLevels = null;
+        // How the item is held (the animation state of the character while it is equipped)
+        public ItemData.AnimationState? animationState = null;
+
         public float? attackEitr = null;
         public float? attackStamina = null;
         public GameObject? attackProjectile = null;

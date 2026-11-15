@@ -15,6 +15,9 @@ namespace ModularMagic_BloodMagic.Components
 
         private float _chargeFullTime = -1f;
 
+        // When the charge was last used (Time.time), -1 before it was used. Only the local player attacks with its scythe, so this is local
+        private float _dischargeTime = -1f;
+
         public void Init(string zdoKeyName)
         {
             ZDOKey = zdoKeyName.GetStableHashCode();
@@ -69,7 +72,19 @@ namespace ModularMagic_BloodMagic.Components
         {
             m_charge        = 0f;
             _chargeFullTime = -1f;
+            _dischargeTime  = Time.time;
             RemoveChargeStatusEffect();
+        }
+
+        /// <summary>
+        /// True while the scythe is full, and for 'linger' seconds after the charge was used. The Range rune gives its reach in that time.
+        /// </summary>
+        public bool IsChargedOrJustDischarged(float linger)
+        {
+            if (m_charge >= m_maxCharge)
+                return true;
+
+            return _dischargeTime >= 0f && Time.time - _dischargeTime <= linger;
         }
 
         private void UpdateChargeStatusEffect()
