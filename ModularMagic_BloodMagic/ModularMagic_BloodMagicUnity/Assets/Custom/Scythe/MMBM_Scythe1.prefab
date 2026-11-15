@@ -282,7 +282,7 @@ MonoBehaviour:
       m_dlc: 
       m_itemType: 14
       m_icons:
-      - {fileID: 21300000, guid: 288a02350b4385148a7e71cc407d9ef3, type: 2}
+      - {fileID: 21300000, guid: 2798923b6679c314d805a2e7313892a7, type: 3}
       m_attachOverride: 0
       m_description: $item_battleaxe_crystal_description
       m_maxStackSize: 1

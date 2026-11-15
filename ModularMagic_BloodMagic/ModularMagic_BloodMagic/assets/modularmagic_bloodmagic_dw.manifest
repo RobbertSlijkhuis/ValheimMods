@@ -1,16 +1,16 @@
 ManifestFileVersion: 0
 UnityVersion: 6000.0.61f1
-CRC: 3121073672
+CRC: 579728015
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 8942204f2b7fae5ef693346cc155e37d
+    Hash: 9ed2080b855161a267c74a3b21643d12
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 0b1b132de7ca341493ea15437f52f2f0
+    Hash: c2f2744b7a7104e74e4603843b745885
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: db6ae6458f90e87b8bc25d711864f163
+    Hash: c32069931a2496819514e09f3e121668
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -55,6 +55,8 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 199
   Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers:
 - AssemblyName: assembly_valheim
   ClassName: Attack
@@ -72,7 +74,6 @@ SerializeReferenceClassIdentifiers:
   ClassName: ItemStand/OrientationSettings
 Assets:
 - Assets/Custom/Scythe/MMBM_Scythe2.prefab
-- Assets/Custom/Scythe/spawn_scythe4_MMBM.prefab
 - Assets/Custom/Scythe/MMBM_Scythe3.prefab
 - Assets/Custom/Scythe/fx_spikes_blood_MMBM.prefab
 - Assets/Custom/Scythe/fx_spikes_MMBM.prefab
@@ -81,7 +82,6 @@ Assets:
 - Assets/Custom/Scythe/spawn_scythe1_MMBM.prefab
 - Assets/Custom/Scythe/MMBM_Scythe1.prefab
 - Assets/Custom/Scythe/Charred_Melee/Charred_mat_MMBM.mat
-- Assets/Custom/Scythe/MMBM_Scythe4.prefab
 - Assets/Custom/Scythe/spawn_scythe3_MMBM.prefab
 - Assets/Custom/Scythe/spawn_scythe2_MMBM.prefab
 Dependencies: []
