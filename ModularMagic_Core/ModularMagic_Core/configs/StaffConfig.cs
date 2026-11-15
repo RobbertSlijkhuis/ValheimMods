@@ -43,12 +43,15 @@ namespace ModularMagic_Core.Configs
         public ConfigEntry<float> damagePoison;
         public ConfigEntry<float> damagePoisonPerLevel;
         public ConfigEntry<float> damageSlash;
+        public ConfigEntry<float> damageSlashPerLevel;
         public ConfigEntry<float> damageSpirit;
         public ConfigEntry<float> damageSpiritPerLevel;
         public ConfigEntry<int> blockArmor;
         public ConfigEntry<int> deflectionForce;
         public ConfigEntry<int> attackForce;
+        public ConfigEntry<float> backStab;
         public ConfigEntry<int> useEitr;
+        public ConfigEntry<int> attackStamina;
         public ConfigEntry<float> projectileVelocity;
         public ConfigEntry<float> projectileAccuracy;
         public ConfigEntry<float> projectileBurst;
@@ -133,6 +136,9 @@ namespace ModularMagic_Core.Configs
             if (options.damageSlash != null)
                 damageSlash = Bind(config, options, "Attack damage slash", (float)options.damageSlash, "Slash damage on the item", () => Update(options, new UpdateItemDataOptions() { damageSlash = damageSlash.Value }));
 
+            if (options.damageSlashPerLevel != null)
+                damageSlashPerLevel = Bind(config, options, "Attack damage slash per level", (float)options.damageSlashPerLevel, "Slash damage per upgrade level on the item", () => Update(options, new UpdateItemDataOptions() { damageSlashPerLevel = damageSlashPerLevel.Value }));
+
             if (options.damageSpirit != null)
                 damageSpirit = Bind(config, options, "Attack damage spirit", (float)options.damageSpirit, "Spirit damage on the item", () => Update(options, new UpdateItemDataOptions() { damageSpirit = damageSpirit.Value }));
 
@@ -148,8 +154,14 @@ namespace ModularMagic_Core.Configs
             if (options.attackForce != null)
                 attackForce = Bind(config, options, "Knockback", (int)options.attackForce, "The knockback on the item", () => Update(options, new UpdateItemDataOptions() { attackForce = attackForce.Value }));
 
+            if (options.backStab != null)
+                backStab = Bind(config, options, "Backstab", (float)options.backStab, "The backstab on the item", () => Update(options, new UpdateItemDataOptions() { backstabBonus = backStab.Value }));
+
             if (options.useEitr != null)
                 useEitr = Bind(config, options, "Attack eitr cost", (int)options.useEitr, "Normal attack eitr cost", () => Update(options, new UpdateItemDataOptions() { attackEitr = useEitr.Value }));
+
+            if (options.attackStamina != null)
+                attackStamina = Bind(config, options, "Attack stamina cost", (int)options.attackStamina, "Normal attack stamina cost", () => Update(options, new UpdateItemDataOptions() { attackStamina = attackStamina.Value }));
 
             if (options.projectileVelocity != null)
                 projectileVelocity = Bind(config, options, "Projectile velocity", (float)options.projectileVelocity, "The velocity of the projectile of the normal attack", () => Update(options, new UpdateItemDataOptions() { projectileVelocity = projectileVelocity.Value }));

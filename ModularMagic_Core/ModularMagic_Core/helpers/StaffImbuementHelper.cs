@@ -14,9 +14,6 @@ namespace ModularMagic_Core.Helpers
     /// </summary>
     public static class StaffImbuementHelper
     {
-        // The ZDO value the game multiplies into every attack of a creature (Character.GetRandomSkillFactor), it is synced to the other clients
-        private static readonly int skillFactorKey = ZDOVars.s_randomSkillFactor;
-
         /// <summary>
         /// Registers the staffs of a mod. Call it once at startup (in Awake), after the config is bound and the prefabs are loaded.
         /// </summary>
@@ -229,11 +226,6 @@ namespace ModularMagic_Core.Helpers
             if (staff == null || !definition.IsStaff(staff) || summon.config.damageMultiplier == null)
                 return;
 
-            ZNetView nview = creature.GetComponent<ZNetView>();
-
-            if (nview == null || !nview.IsValid())
-                return;
-
             Humanoid humanoid = summon.creature.GetComponent<Humanoid>();
 
             if (humanoid == null || humanoid.m_randomWeapon == null || humanoid.m_randomWeapon.Length == 0 || humanoid.m_randomWeapon[0] == null)
@@ -252,7 +244,7 @@ namespace ModularMagic_Core.Helpers
 
             float staffDamage = DamageHelper.GetMainPhysical(staff.GetDamage());
 
-            nview.GetZDO().Set(skillFactorKey, staffDamage * summon.config.damageMultiplier.Value / templateDamage);
+            SpawnedCreatureHelper.SetDamage(creature, staffDamage * summon.config.damageMultiplier.Value, templateDamage);
         }
     }
 }

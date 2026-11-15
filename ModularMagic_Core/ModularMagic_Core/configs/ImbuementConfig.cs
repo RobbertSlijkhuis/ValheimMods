@@ -25,7 +25,7 @@ namespace ModularMagic_Core.Configs
         {
             sectionName = options.sectionName;
 
-            EitrCost = config.Bind(new ConfigDefinition(sectionName, "Eitr Cost Rune"), 0.25f,
+            EitrCost = config.Bind(new ConfigDefinition(sectionName, "Eitr Cost Rune"), options.eitrCost,
                 new ConfigDescription("The amount of eitr that is reduced per level with the Eitr Cost rune", null,
                 new ConfigurationManagerAttributes { IsAdminOnly = true, Order = HandleOrder() }));
 

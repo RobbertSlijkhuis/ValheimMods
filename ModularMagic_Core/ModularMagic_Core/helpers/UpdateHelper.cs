@@ -56,7 +56,10 @@ namespace ModularMagic_Core.Helpers
             if (options.damageSpirit != null) { itemData.m_shared.m_damages.m_spirit = (float)options.damageSpirit; }
             if (options.damageBluntPerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_blunt = (float)options.damageBluntPerLevel; }
             if (options.damageChopPerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_chop = (float)options.damageChopPerLevel; }
+            if (options.damageFirePerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_fire = (float)options.damageFirePerLevel; }
+            if (options.damageFrostPerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_frost = (float)options.damageFrostPerLevel; }
             if (options.damageGeneralPerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_damage = (float)options.damageGeneralPerLevel; }
+            if (options.damageLightningPerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_lightning = (float)options.damageLightningPerLevel; }
             if (options.damagePickaxePerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_pickaxe = (float)options.damagePickaxePerLevel; }
             if (options.damagePiercePerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_pierce = (float)options.damagePiercePerLevel; }
             if (options.damagePoisonPerLevel != null) { itemData.m_shared.m_damagesPerLevel.m_poison = (float)options.damagePoisonPerLevel; }
@@ -66,6 +69,7 @@ namespace ModularMagic_Core.Helpers
             if (options.equipStatusEffect != null) { itemData.m_shared.m_equipStatusEffect = options.equipStatusEffect; }
 
             if (options.attackEitr != null) { itemData.m_shared.m_attack.m_attackEitr = (float)options.attackEitr; }
+            if (options.attackStamina != null) { itemData.m_shared.m_attack.m_attackStamina = (float)options.attackStamina; }
             if (options.attackProjectile != null) { itemData.m_shared.m_attack.m_attackProjectile = options.attackProjectile; }
             if (options.projectileVelocity != null) { itemData.m_shared.m_attack.m_projectileVel = (float)options.projectileVelocity; }
             if (options.projectileAccuracy != null) { itemData.m_shared.m_attack.m_projectileAccuracy = (float)options.projectileAccuracy; }

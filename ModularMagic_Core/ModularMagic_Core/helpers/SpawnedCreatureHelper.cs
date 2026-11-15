@@ -13,6 +13,40 @@ namespace ModularMagic_Core.Helpers
     {
         private static readonly Dictionary<string, Action<Character, ItemData>> registered = new Dictionary<string, Action<Character, ItemData>>();
 
+        // The ZDO value the game multiplies into every attack of a creature (Character.GetRandomSkillFactor), it is synced to the other clients
+        private static readonly int damageFactorKey = ZDOVars.s_randomSkillFactor;
+
+        /// <summary>
+        /// Sets the damage of a summoned creature with one factor that the game multiplies into every attack of the creature: an attack that
+        /// deals 'baselineDamage' with the factor at 1 deals 'damage' now, and every other attack deals the same fraction of its own damage,
+        /// so the attacks keep their strength compared to each other. The factor is stored in the ZDO of the creature, so it is the same on
+        /// every client, also when another client becomes the owner of the creature. Call it on the client that spawned the creature.
+        /// </summary>
+        /// <param name="creature">The spawned creature.</param>
+        /// <param name="damage">The damage the baseline attack must deal.</param>
+        /// <param name="baselineDamage">The damage the baseline attack deals with the factor at 1 (the attack that is scaled to 'damage').</param>
+        /// <param name="multiplyExisting">
+        /// True: multiply the factor into the one that is already on the creature, for example the one a SpawnAbility sets from the skill of the
+        /// caster (m_copySkill), so both count. False: replace it.
+        /// </param>
+        public static void SetDamage(Character creature, float damage, float baselineDamage, bool multiplyExisting = false)
+        {
+            if (creature == null || baselineDamage <= 0f)
+                return;
+
+            ZNetView nview = creature.GetComponent<ZNetView>();
+
+            if (nview == null || !nview.IsValid())
+                return;
+
+            float factor = damage / baselineDamage;
+
+            if (multiplyExisting)
+                factor *= nview.GetZDO().GetFloat(damageFactorKey, 1f);
+
+            nview.GetZDO().Set(damageFactorKey, factor);
+        }
+
         /// <summary>
         /// Registers a creature. Call it once at startup (in Awake, after the prefabs are loaded).
         /// </summary>

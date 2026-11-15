@@ -34,7 +34,10 @@ namespace ModularMagic_Core.Models
         public float? damageSpirit = null;
         public float? damageBluntPerLevel = null;
         public float? damageChopPerLevel = null;
+        public float? damageFirePerLevel = null;
+        public float? damageFrostPerLevel = null;
         public float? damageGeneralPerLevel = null;
+        public float? damageLightningPerLevel = null;
         public float? damagePickaxePerLevel = null;
         public float? damagePiercePerLevel = null;
         public float? damagePoisonPerLevel = null;
@@ -42,6 +45,7 @@ namespace ModularMagic_Core.Models
         public float? damageSpiritPerLevel = null;
 
         public float? attackEitr = null;
+        public float? attackStamina = null;
         public GameObject? attackProjectile = null;
         public float? projectileVelocity = null;
         public float? projectileAccuracy = null;

@@ -42,13 +42,16 @@ namespace ModularMagic_Core.Models
         public float? damagePoison;
         public float? damagePoisonPerLevel;
         public float? damageSlash;
+        public float? damageSlashPerLevel;
         public float? damageSpirit;
         public float? damageSpiritPerLevel;
 
         public int? blockArmor;
         public int? deflectionForce;
         public int? attackForce;
+        public float? backStab;
         public int? useEitr;
+        public int? attackStamina;
         public float? projectileVelocity;
         public float? projectileAccuracy;
         public float? projectileBurst;
